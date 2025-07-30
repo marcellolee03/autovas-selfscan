@@ -1,0 +1,4 @@
+#!/bin/bash
+systemctl stop rexec
+systemctl disable rexec
+ufw deny 512/tcp

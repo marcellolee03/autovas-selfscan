@@ -1,0 +1,21 @@
+#!/bin/bash
+TWIKI_DIR="/path/to/twiki"
+BACKUP_DIR="/path/to/backup"
+TWIKI_VERSION="4.2.4"
+
+if [ ! -d "$BACKUP_DIR" ]; then
+    mkdir -p "$BACKUP_DIR"
+fi
+
+tar -czf "$BACKUP_DIR/twiki_backup_$(date +%F).tar.gz" "$TWIKI_DIR"
+
+wget "http://twiki.org/p/pub/Codev/DownloadTWiki/twiki-$TWIKI_VERSION.tar.gz" -P /tmp
+tar -xzf "/tmp/twiki-$TWIKI_VERSION.tar.gz" -C /tmp
+rm -rf "$TWIKI_DIR"
+mv "/tmp/twiki-$TWIKI_VERSION" "$TWIKI_DIR"
+
+chown -R www-data:www-data "$TWIKI_DIR"
+find "$TWIKI_DIR" -type d -exec chmod 755 {} \;
+find "$TWIKI_DIR" -type f -exec chmod 644 {} \;
+
+systemctl restart apache2

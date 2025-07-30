@@ -1,0 +1,29 @@
+#!/bin/bash
+# Corrigir Vulnerabilidade 1
+sed -i 's/listen 80;/listen 80;\n    return 301 https:\/\/$host$request_uri;/' /etc/nginx/sites-available/default
+nginx -t && systemctl reload nginx
+
+# Corrigir Vulnerabilidade 2
+sed -i 's/recursion yes;/recursion no;/' /etc/bind/named.conf.options
+systemctl restart bind9
+
+# Corrigir Vulnerabilidade 3
+echo "net.ipv4.icmp_echo_ignore_all = 1" >> /etc/sysctl.conf
+sysctl -p
+
+# Corrigir Vulnerabilidade 4
+sed -i 's/TLSv1.1/TLSv1.2/' /etc/nginx/nginx.conf
+sed -i 's/TLSv1.0/TLSv1.2/' /etc/nginx/nginx.conf
+nginx -t && systemctl reload nginx
+
+# Corrigir Vulnerabilidade 5
+sed -i 's/ssl_renegotiation on;/ssl_renegotiation off;/' /etc/nginx/nginx.conf
+nginx -t && systemctl reload nginx
+
+# Corrigir Vulnerabilidade 6
+sed -i 's/ssl_ciphers HIGH:!aNULL:!MD5;/ssl_ciphers HIGH:!aNULL:!MD5:!DSS:!3DES:!RC4:!AES128:!CAMELLIA128:!SEED:!IDEA:!DES:!SSLv2:!SSLv3:!TLSv1:!TLSv1.1;/' /etc/nginx/nginx.conf
+nginx -t && systemctl reload nginx
+
+# Corrigir Vulnerabilidade 7
+echo "net.ipv4.tcp_timestamps = 0" >> /etc/sysctl.conf
+sysctl -p

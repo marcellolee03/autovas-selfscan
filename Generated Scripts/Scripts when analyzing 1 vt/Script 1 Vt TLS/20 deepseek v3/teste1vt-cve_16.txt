@@ -1,0 +1,13 @@
+#!/bin/bash
+CONFIG_FILE="/etc/ssl/openssl.cnf"
+BACKUP_FILE="$CONFIG_FILE.bak"
+
+if [ -f "$CONFIG_FILE" ]; then
+    cp "$CONFIG_FILE" "$BACKUP_FILE"
+    sed -i '/^MinProtocol = TLSv1.0$/d' "$CONFIG_FILE"
+    sed -i '/^MaxProtocol = TLSv1.1$/d' "$CONFIG_FILE"
+    echo "MinProtocol = TLSv1.2" >> "$CONFIG_FILE"
+    echo "MaxProtocol = TLSv1.3" >> "$CONFIG_FILE"
+    systemctl restart apache2
+    systemctl restart postgresql
+fi

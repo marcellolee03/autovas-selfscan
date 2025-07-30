@@ -1,0 +1,54 @@
+```bash
+#!/bin/bash
+
+# Descrição: Este script configura o redirecionamento de HTTP para HTTPS no Apache para mitigar a vulnerabilidade de transmissão de informações sensíveis em texto não criptografado.
+
+# Variáveis
+APACHE_CONFIG_FILE="/etc/apache2/sites-available/000-default.conf"
+APACHE_DEFAULT_SSL_FILE="/etc/apache2/sites-available/default-ssl.conf"
+APACHE_SSL_ENABLED="/etc/apache2/mods-enabled/ssl.load"
+APACHE_REWRITE_ENABLED="/etc/apache2/mods-enabled/rewrite.load"
+
+# Funções
+
+enable_ssl() {
+  if [ ! -f "$APACHE_SSL_ENABLED" ]; then
+    sudo a2enmod ssl
+  fi
+}
+
+enable_rewrite() {
+  if [ ! -f "$APACHE_REWRITE_ENABLED" ]; then
+    sudo a2enmod rewrite
+  fi
+}
+
+configure_http_redirect() {
+
+  # Check if the redirect already exists.  Avoids duplicates.
+  if grep -q "RewriteEngine On" "$APACHE_CONFIG_FILE"; then
+    echo "Redirecionamento HTTP para HTTPS já configurado."
+    return
+  fi
+
+  # Backup the original configuration file
+  sudo cp "$APACHE_CONFIG_FILE" "$APACHE_CONFIG_FILE.bak"
+
+  # Add the rewrite rules to redirect HTTP to HTTPS
+  sudo sed -i "s/<VirtualHost \*:80>/<VirtualHost *:80>\n\tRewriteEngine On\n\tRewriteCond %{HTTPS} !=on\n\tRewriteRule ^ https:\/\/%{HTTP_HOST}%{REQUEST_URI} [L,R=301]/g" "$APACHE_CONFIG_FILE"
+
+  echo "Redirecionamento HTTP para HTTPS configurado em $APACHE_CONFIG_FILE"
+}
+
+
+# Main script
+enable_ssl
+enable_rewrite
+configure_http_redirect
+
+# Restart Apache to apply changes
+sudo systemctl restart apache2
+
+echo "Apache reiniciado para aplicar as configurações."
+echo "Verifique a configuração acessando seu site via HTTP. Ele deve ser automaticamente redirecionado para HTTPS."
+```

@@ -1,0 +1,19 @@
+#!/bin/bash
+SERVER_CONFIG="/etc/apache2/sites-available/000-default.conf"
+SSL_CONFIG="/etc/apache2/sites-available/default-ssl.conf"
+
+# Ensure SSL module is enabled
+a2enmod ssl
+
+# Ensure SSL site is enabled
+a2ensite default-ssl
+
+# Redirect all HTTP traffic to HTTPS
+if grep -q "RewriteEngine On" $SERVER_CONFIG; then
+    sed -i '/RewriteEngine On/a RewriteCond %{HTTPS} off\nRewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [R=301,L]' $SERVER_CONFIG
+else
+    echo -e "RewriteEngine On\nRewriteCond %{HTTPS} off\nRewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [R=301,L]" >> $SERVER_CONFIG
+fi
+
+# Restart Apache to apply changes
+systemctl restart apache2

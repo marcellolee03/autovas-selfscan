@@ -1,0 +1,103 @@
+#!/bin/bash
+
+# Define a versão alvo do TWiki
+TARGET_VERSION="4.2.4"
+
+# Define o diretório de instalação do TWiki (pode precisar ser ajustado)
+TWIKI_INSTALL_DIR="/var/www/twiki"  # Ajuste conforme necessário. Uma alternativa é /opt/twiki
+
+# Define um diretório temporário para download e extração
+TEMP_DIR="/tmp/twiki_update"
+
+# Função para verificar se um comando está disponível
+command_exists() {
+  command -v "$1" >/dev/null 2>&1
+}
+
+# Função para exibir mensagem de erro e sair
+error_exit() {
+  echo "Erro: $1" >&2
+  exit 1
+}
+
+# Verifica se o diretório de instalação existe
+if [ ! -d "$TWIKI_INSTALL_DIR" ]; then
+  error_exit "Diretório de instalação do TWiki não encontrado: $TWIKI_INSTALL_DIR.  Por favor, ajuste a variável TWIKI_INSTALL_DIR."
+fi
+
+# Verifica se o wget está instalado
+if ! command_exists wget; then
+  echo "wget não está instalado. Tentando instalar..."
+  if command_exists apt-get; then
+    sudo apt-get update
+    sudo apt-get install -y wget
+  elif command_exists yum; then
+    sudo yum install -y wget
+  elif command_exists pacman; then
+    sudo pacman -S --noconfirm wget
+  else
+    error_exit "wget não está instalado e não foi possível detectar um gerenciador de pacotes."
+  fi
+
+  # Verifica novamente se wget está instalado
+  if ! command_exists wget; then
+    error_exit "wget não pôde ser instalado. Instale-o manualmente e tente novamente."
+  fi
+fi
+
+
+# Cria o diretório temporário
+mkdir -p "$TEMP_DIR"
+
+# Entra no diretório temporário
+cd "$TEMP_DIR" || error_exit "Não foi possível entrar no diretório temporário $TEMP_DIR."
+
+# Faz o download do TWiki 4.2.4 (substitua por um link direto se necessário)
+# O link abaixo é apenas um exemplo e pode estar desatualizado. Consulte o site oficial do TWiki para obter o link correto.
+TWIKI_DOWNLOAD_URL="https://sourceforge.net/projects/twiki/files/TWiki%204.2.x/TWiki-4.2.4.zip/download" # ***ATENÇÃO: VERIFICAR URL ATUALIZADO***
+
+echo "Downloading TWiki $TARGET_VERSION..."
+wget -O twiki.zip "$TWIKI_DOWNLOAD_URL" || error_exit "Falha ao baixar o TWiki."
+
+# Verifica se o unzip está instalado
+if ! command_exists unzip; then
+  echo "unzip não está instalado. Tentando instalar..."
+  if command_exists apt-get; then
+    sudo apt-get install -y unzip
+  elif command_exists yum; then
+    sudo yum install -y unzip
+  elif command_exists pacman; then
+    sudo pacman -S --noconfirm unzip
+  else
+    error_exit "unzip não está instalado e não foi possível detectar um gerenciador de pacotes."
+  fi
+
+  # Verifica novamente se unzip está instalado
+  if ! command_exists unzip; then
+    error_exit "unzip não pôde ser instalado. Instale-o manualmente e tente novamente."
+  fi
+fi
+
+# Descompacta o arquivo
+echo "Descompactando o arquivo..."
+unzip twiki.zip || error_exit "Falha ao descompactar o arquivo."
+
+# Move o conteúdo descompactado para o diretório de instalação (requer privilégios de administrador)
+echo "Copiando arquivos para o diretório de instalação..."
+sudo cp -r TWiki-*/* "$TWIKI_INSTALL_DIR/" || error_exit "Falha ao copiar os arquivos."
+sudo cp -r TWiki-*/.htaccess "$TWIKI_INSTALL_DIR/" 2>/dev/null || true # Copia .htaccess se existir, ignora erros
+
+# Define as permissões apropriadas (ajuste conforme necessário)
+echo "Definindo as permissões..."
+sudo chown -R www-data:www-data "$TWIKI_INSTALL_DIR"  # Substitua www-data:www-data pelo usuário e grupo do seu servidor web
+sudo chmod -R 755 "$TWIKI_INSTALL_DIR/bin"
+sudo chmod -R 777 "$TWIKI_INSTALL_DIR/data"
+sudo chmod -R 777 "$TWIKI_INSTALL_DIR/templates"
+
+# Limpa o diretório temporário
+echo "Limpando o diretório temporário..."
+cd /tmp
+sudo rm -rf "$TEMP_DIR"
+
+echo "TWiki atualizado para a versão $TARGET_VERSION.  Por favor, verifique a instalação no seu navegador."
+exit 0

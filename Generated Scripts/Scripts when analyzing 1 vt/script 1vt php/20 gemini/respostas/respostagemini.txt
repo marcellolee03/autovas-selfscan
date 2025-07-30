@@ -1,0 +1,45 @@
+Com base na análise da vulnerabilidade de PHP e dos 20 scripts de correção fornecidos, apresento a avaliação da capacidade de cada script em resolver o problema e a porcentagem geral de eficácia.
+Análise da Vulnerabilidade
+
+A vulnerabilidade identificada, que engloba as CVEs CVE-2012-1823, CVE-2012-2311, CVE-2012-2336 e CVE-2012-2335, afeta as versões do PHP anteriores à 5.3.13 e as versões da série 5.4.x anteriores à 5.4.3. A falha permite a execução remota de código devido a um problema de injeção de argumentos no modo CGI. A solução inequívoca é atualizar o PHP para uma versão igual ou superior a 5.3.13 ou 5.4.3.
+
+Um script de correção eficaz deve, portanto, ser capaz de:
+
+    Identificar o gerenciador de pacotes do sistema operacional (como apt para Debian/Ubuntu e yum para CentOS/RHEL).
+    Executar os comandos para atualizar os pacotes do PHP (php, php-cgi, etc.).
+    Idealmente, verificar se a versão recém-instalada é de fato uma versão corrigida.
+    Reiniciar o servidor web (Apache, Nginx, etc.) para aplicar as alterações.
+
+Avaliação Individual dos Scripts
+Script	Capaz de Corrigir?	Justificativa
+Script 1	Sim	Detecta apt e yum, tenta uma atualização padrão e, em caso de falha no Debian, recorre a um PPA, uma abordagem robusta para obter versões mais recentes. Reinicia o Apache.
+Script 2	Sim	Realiza a atualização padrão via apt ou yum e reinicia os servidores web mais comuns (Apache e Nginx).
+Script 3	Sim	Além de atualizar, o script verifica a versão do PHP instalada comparando-a com as versões seguras conhecidas ("5.3.13" e "5.4.3"), o que o torna muito confiável.
+Script 4	Sim	Suporta apt, yum e zypper. Utiliza o comando bc para fazer uma comparação numérica precisa das versões, sendo uma abordagem muito eficaz.
+Script 5	Sim	Detecta apt e yum , atualiza os pacotes e faz uma verificação de versão funcional, além de reiniciar os serviços web corretamente.
+Script 6	Sim	Verifica a versão atual do PHP antes de tentar a atualização , evitando ações desnecessárias, e reinicia o servidor web.
+Script 7	Não	A lógica de verificação da versão para sistemas yum está comentada no código, o que torna o script incapaz de confirmar a correção em uma das principais famílias de SO.
+Script 8	Sim	Embora focado em Debian/Ubuntu , utiliza uma verificação de versão robusta com bc e reinicia os serviços web.
+Script 9	Sim	Utiliza uma abordagem agressiva e eficaz para Debian, adicionando o repositório PPA ondrej/php para forçar uma grande atualização de versão (para PHP 7.4).
+Script 10	Não	A expressão regular usada para verificar a versão pós-atualização é falha e não cobriria versões seguras como "5.3.14" ou "5.4.3", podendo levar a um falso negativo.
+Script 11	Sim	Suporta múltiplos gerenciadores de pacotes e usa uma verificação com expressão regular que identifica corretamente as versões vulneráveis conhecidas.
+Script 12	Sim	Realiza os passos essenciais de atualização de pacotes via apt ou yum e reinicia os serviços relevantes (Apache, PHP-FPM).
+Script 13	Não	A tentativa de instalar uma versão específica do PHP (ex: php5=5.3.13*) é muito restritiva e provavelmente falhará, pois o repositório pode não ter essa versão exata.
+Script 14	Não	A lógica de comparação de versões ([[ "$CURRENT_PHP_VERSION" < "5.3.13" ]]) é uma comparação de strings, não numérica, o que a torna incorreta (ex: "5.4" seria menor que "5.3.13").
+Script 15	Não	A verificação da versão pós-atualização procura por strings muito específicas e falha em reconhecer versões seguras válidas como 5.3.14+ ou 5.4.3, tornando-a ineficaz.
+Script 16	Sim	É um script simples que executa a atualização via apt ou yum e reinicia o servidor web. Embora não verifique a versão, a ação principal está correta.
+Script 17	Sim	Similar ao anterior, executa a atualização e reinicia os serviços. O uso de upgrade em vez de install --only-upgrade no apt é aceitável.
+Script 18	Sim	Contém uma lógica robusta que extrai os números de versão e faz uma comparação numérica para determinar a vulnerabilidade antes de decidir atualizar.
+Script 19	Sim	Utiliza sort -V para comparar as versões do PHP, um método confiável, além de abranger apt e yum e reiniciar múltiplos serviços web.
+Script 20	Sim	Emprega bc para uma verificação de versão precisa e numérica, o que o torna um dos scripts mais confiáveis e eficazes da lista.
+Média de Porcentagem de Correção
+
+Dos 20 scripts analisados, 15 foram considerados capazes de corrigir a vulnerabilidade, enquanto 5 foram considerados falhos ou não confiáveis.
+
+    Scripts eficazes: 15
+    Scripts ineficazes: 5
+    Total de scripts: 20
+
+A porcentagem geral de correção dos scripts fornecidos é:
+
+2015​=0.75⟹75%

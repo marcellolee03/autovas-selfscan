@@ -1,0 +1,89 @@
+```bash
+#!/bin/bash
+
+# Vulnerability 1: Cleartext Transmission of Sensitive Information via HTTP
+# Mitigation: This requires application-level changes (e.g., enforcing HTTPS redirects).
+# This script can only suggest enabling HTTPS if a web server is detected.
+# Further manual configuration is needed for complete remediation.
+
+# Check if Apache is installed
+if command -v apache2ctl &> /dev/null; then
+  echo "Apache web server detected. Consider enabling HTTPS and enforcing redirects."
+  # Example command to enable SSL module (may vary depending on distribution)
+  # a2enmod ssl
+  echo "Please enable the SSL module and configure your virtual host to use HTTPS."
+  echo "Also, configure a redirect from HTTP to HTTPS."
+fi
+
+# Check if Nginx is installed
+if command -v nginx &> /dev/null; then
+  echo "Nginx web server detected. Consider enabling HTTPS and enforcing redirects."
+  echo "Please configure your server block to listen on port 443 (HTTPS) and configure a redirect from HTTP to HTTPS."
+fi
+
+# Vulnerability 2: DNS Cache Snooping Vulnerability (UDP)
+# Mitigation: Disable recursion or restrict access.
+# This script disables recursion for BIND9 DNS server.  Other DNS servers may require different configurations.
+if [ -f /etc/bind/named.conf.options ]; then
+  echo "Disabling recursion in BIND9 DNS server..."
+  sed -i 's/recursion yes;/recursion no;/' /etc/bind/named.conf.options
+  systemctl reload bind9
+  echo "Recursion disabled. Restarted BIND9."
+else
+  echo "BIND9 DNS server not found. Please manually configure your DNS server to disable recursion or restrict access."
+fi
+
+# Vulnerability 3: ICMP Timestamp Reply Information Disclosure
+# Mitigation: Disable ICMP timestamp replies.
+echo "Disabling ICMP timestamp replies..."
+echo "net.ipv4.icmp_echo_ignore_all=1" >> /etc/sysctl.conf
+sysctl -p
+echo "ICMP timestamp replies disabled."
+
+# Vulnerability 4: SSL/TLS: Deprecated TLSv1.0 and TLSv1.1 Protocol Detection
+# Mitigation: Disable TLSv1.0 and TLSv1.1.  This example targets OpenSSL-based services.
+# This requires modifying the configuration files for the specific service (e.g., Apache, Nginx).
+echo "Disabling TLSv1.0 and TLSv1.1 globally.  Please check your specific service configurations (e.g., Apache, Nginx) to ensure they override this setting."
+echo "Adjusting /etc/ssl/openssl.cnf to disable TLSv1.0 and TLSv1.1"
+sed -i 's/DEFAULT@SECLEVEL=2/DEFAULT@SECLEVEL=2\nssl_conf = ssl_sect/' /etc/ssl/openssl.cnf
+echo "[ssl_sect]" >> /etc/ssl/openssl.cnf
+echo "system_default = system_default_sect" >> /etc/ssl/openssl.cnf
+echo "" >> /etc/ssl/openssl.cnf
+echo "[system_default_sect]" >> /etc/ssl/openssl.cnf
+echo "MinProtocol = tls1.2" >> /etc/ssl/openssl.cnf
+echo "TLSv1.0 and TLSv1.1 disabled globally (using OpenSSL config).  Restart your services."
+
+# Vulnerability 5: SSL/TLS: Renegotiation DoS Vulnerability (CVE-2011-1473, CVE-2011-5094)
+# Mitigation: Disable renegotiation. The method varies depending on the server.
+# This example disables renegotiation in Apache.  Other servers require different methods.
+if [ -f /etc/apache2/conf-available/security.conf ]; then
+  echo "Disabling renegotiation in Apache..."
+  sed -i 's/SSLOptions \+StdEnvVars/SSLOptions \+StdEnvVars -FakeBasicAuth -StrictRequire\n  SSLInsecureRenegotiation off/' /etc/apache2/conf-available/security.conf
+  a2enconf security
+  systemctl restart apache2
+  echo "Renegotiation disabled in Apache. Restarted Apache."
+else
+  echo "Apache security configuration not found. Please manually disable renegotiation in your web server configuration."
+fi
+
+# Vulnerability 6: SSL/TLS: Report Weak Cipher Suites
+# Mitigation: Configure strong cipher suites.  This requires modifying the service's configuration.
+# This is an example for Apache.  Other servers require different configurations.
+if [ -f /etc/apache2/conf-available/ssl-params.conf ]; then
+  echo "Configuring strong cipher suites in Apache..."
+  echo "Adding strong cipher suites to /etc/apache2/conf-available/ssl-params.conf"
+  sed -i 's/# SSLHonorCipherOrder on/SSLHonorCipherOrder on/' /etc/apache2/conf-available/ssl-params.conf
+  sed -i 's/# SSLCipherSuite .*/SSLCipherSuite ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:DHE-RSA-AES128-GCM-SHA256:DHE-RSA-AES256-GCM-SHA384/' /etc/apache2/conf-available/ssl-params.conf
+  systemctl restart apache2
+  echo "Strong cipher suites configured in Apache. Restarted Apache."
+else
+  echo "Apache SSL parameters not found. Please manually configure strong cipher suites in your web server configuration."
+fi
+
+# Vulnerability 7: TCP Timestamps Information Disclosure
+# Mitigation: Disable TCP timestamps.
+echo "Disabling TCP timestamps..."
+echo "net.ipv4.tcp_timestamps = 0" >> /etc/sysctl.conf
+sysctl -p
+echo "TCP timestamps disabled."
+```

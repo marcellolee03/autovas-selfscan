@@ -1,0 +1,130 @@
+```bash
+#!/bin/bash
+
+# Vulnerability 1: Proxmox VE EOL
+# Solution: Update Proxmox VE to a supported version. This script only reminds the user.
+echo "################################################################################"
+echo "Proxmox VE 7.3-3 is End of Life and should be updated."
+echo "Please upgrade to a supported version. This script cannot perform the upgrade automatically."
+echo "Refer to the Proxmox documentation for upgrade instructions."
+echo "################################################################################"
+
+# Vulnerabilities 2-6: jQuery < 1.9.0 XSS Vulnerability (CVE-2012-6708)
+# Solution: Replace vulnerable jQuery files with version 1.9.0 or later.
+# Assuming a Debian/Ubuntu based system and using wget and mv.
+NEW_JQUERY_VERSION="1.9.0"
+JQUERY_URL="https://code.jquery.com/jquery-${NEW_JQUERY_VERSION}.min.js"
+
+jquery_files=(
+    "/var/www/html/js/jquery-1.8.3.min.js"
+    "/var/www/html/opscenter/webcommon/framework/js/jquery-1.8.3.min.js"
+    "/var/www/html/framesets/js/jquery-1.8.3.min.js"
+    "/var/www/html/frameset/js/jquery-1.8.3.min.js"
+    "/var/www/html/console/framework/js/jquery-1.8.3.min.js"
+)
+
+for file in "${jquery_files[@]}"; do
+  if [ -f "$file" ]; then
+    echo "Updating $file"
+    # Create a backup
+    cp "$file" "${file}.bak"
+    # Download the new version
+    wget -q "$JQUERY_URL" -O "${file}.new"
+    if [ $? -eq 0 ]; then
+      # Replace the old version
+      mv "${file}.new" "$file"
+      echo "Successfully updated $file to jQuery ${NEW_JQUERY_VERSION}"
+    else
+      echo "Failed to download jQuery ${NEW_JQUERY_VERSION}.  Reverting to backup."
+      mv "${file}.bak" "$file" #Revert to the backup
+    fi
+  else
+    echo "File $file not found. Skipping."
+  fi
+done
+
+# Vulnerabilities 7-9, 13-16, 19, 21-22: Weak SSH Algorithms
+# Solution: Disable weak SSH algorithms.
+# Edit /etc/ssh/sshd_config to remove weak algorithms and restart sshd.
+# This script will backup the original config and modify it.
+SSH_CONFIG="/etc/ssh/sshd_config"
+SSH_CONFIG_BACKUP="${SSH_CONFIG}.bak"
+
+# Create backup
+cp "$SSH_CONFIG" "$SSH_CONFIG_BACKUP"
+
+# Disable weak KEX algorithms, MACs, and Ciphers.  Adding more secure options.
+# Note: This assumes OpenSSH.  May need adjustments for other SSH implementations.
+sed -i "s/^KexAlgorithms .*/KexAlgorithms curve25519-sha256@libssh.org,ecdh-sha2-nistp256,ecdh-sha2-nistp384,ecdh-sha2-nistp521,diffie-hellman-group-exchange-sha256/g" "$SSH_CONFIG"
+sed -i "s/^Ciphers .*/Ciphers chacha20-poly1305@openssh.com,aes256-gcm@openssh.com,aes128-gcm@openssh.com,aes256-ctr,aes128-ctr/g" "$SSH_CONFIG"
+sed -i "s/^MACs .*/MACs hmac-sha2-512-etm@openssh.com,hmac-sha2-256-etm@openssh.com,umac-128-etm@openssh.com,hmac-sha2-512,hmac-sha2-256,umac-128@openssh.com/g" "$SSH_CONFIG"
+
+#Removing legacy MAC algorithms
+sed -i '/umac-64-etm@openssh.com/d' "$SSH_CONFIG"
+sed -i '/umac-64@openssh.com/d' "$SSH_CONFIG"
+sed -i '/hmac-md5/d' "$SSH_CONFIG"
+sed -i '/hmac-sha1-96/d' "$SSH_CONFIG"
+
+#Removing legacy Ciphers
+sed -i '/3des-cbc/d' "$SSH_CONFIG"
+sed -i '/aes128-cbc/d' "$SSH_CONFIG"
+sed -i '/aes256-cbc/d' "$SSH_CONFIG"
+sed -i '/twofish-cbc/d' "$SSH_CONFIG"
+sed -i '/twofish128-cbc/d' "$SSH_CONFIG"
+sed -i '/twofish256-cbc/d' "$SSH_CONFIG"
+
+#Removing legacy KexAlgorithms
+sed -i '/diffie-hellman-group1-sha1/d' "$SSH_CONFIG"
+
+# Disable DSA host key (if present)
+sed -i '/^HostKey \/etc\/ssh\/ssh_host_dsa_key/s/^/#/' "$SSH_CONFIG"
+
+# Restart SSH service
+systemctl restart sshd
+
+echo "SSH configuration updated. Weak algorithms disabled. SSH service restarted."
+
+# Vulnerability 10: DCE/RPC and MSRPC Services Enumeration Reporting
+# Solution: Filter incoming traffic to port 135.  This script assumes a basic firewall setup with ufw.
+# You may need to adapt this to your specific firewall configuration.
+# Enable ufw if it's not enabled
+if ! ufw status | grep -q "Status: active"; then
+  ufw enable
+  echo "UFW enabled."
+fi
+
+# Deny incoming traffic on port 135
+ufw deny 135/tcp
+echo "Incoming traffic to port 135/tcp has been blocked."
+
+#Vulnerability 11: Telnet Unencrypted Cleartext Login
+# Solution: Disable Telnet and suggest using SSH
+echo "Telnet service detected. Disabling Telnet and recommending SSH..."
+systemctl stop telnet.socket
+systemctl disable telnet.socket
+apt remove --purge inetd telnetd -y
+echo "Telnet has been disabled.  Use SSH for secure remote access."
+
+# Vulnerability 12: SSL/TLS: Deprecated TLSv1.0 and TLSv1.1 Protocol Detection
+# Solution: Disable TLS 1.0 and 1.1. This requires identifying the service using TLS.
+# Since the port is 3389, assuming this is RDP (Remote Desktop Protocol) on a Windows system.
+# This script cannot automatically fix this on a Linux system.
+echo "TLS 1.0 and 1.1 are enabled on port 3389.  This is likely RDP."
+echo "Since this is likely a Windows service, please refer to Microsoft documentation on how to disable TLS 1.0 and 1.1 for RDP."
+echo "https://learn.microsoft.com/en-us/windows-server/security/tls/tls-registry-settings"
+
+# Vulnerabilities 17, 18, 20, 23-25: TCP Timestamps Information Disclosure
+# Solution: Disable TCP timestamps.
+echo "Disabling TCP Timestamps..."
+echo "net.ipv4.tcp_timestamps = 0" >> /etc/sysctl.conf
+sysctl -p
+echo "TCP Timestamps disabled.  Reboot may be required for the change to take full effect."
+
+# Vulnerabilities 26-32: ICMP Timestamp Reply Information Disclosure (CVE-1999-0524)
+# Solution: Disable ICMP timestamp replies.  This script disables it at the kernel level.
+echo "Disabling ICMP Timestamp Replies..."
+echo "net.ipv4.icmp_timestamp = 0" >> /etc/sysctl.conf
+echo "net.ipv4.icmp_echo_ignore_all = 1" >> /etc/sysctl.conf
+sysctl -p
+echo "ICMP Timestamp Replies disabled. Reboot may be required for the change to take full effect."
+```

@@ -1,0 +1,88 @@
+```powershell
+$ErrorActionPreference = "Stop"
+
+if (-not ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) {
+    Start-Process powershell.exe "-NoProfile -ExecutionPolicy Bypass -File `"$PSCommandPath`"" -Verb RunAs
+    exit
+}
+
+$updateMap = @{
+    "3.10" = "3.10.16"
+    "3.12" = "3.12.9"
+}
+
+try {
+    Stop-Process -Name python* -Force -ErrorAction SilentlyContinue
+    Start-Sleep -Seconds 2
+
+    $regPaths = @(
+        "HKLM:\SOFTWARE\Python\PythonCore",
+        "HKLM:\SOFTWARE\WOW6432Node\Python\PythonCore"
+    )
+
+    foreach ($regPath in $regPaths) {
+        if (Test-Path $regPath) {
+            $versions = Get-ChildItem -Path $regPath | Where-Object { $_.Name -match '\\3\.(10|12)$' }
+            foreach ($versionKey in $versions) {
+                $versionMinor = $versionKey.PSChildName
+                $targetVersion = $updateMap[$versionMinor]
+                if ($targetVersion -ne $null) {
+                    $installPath = (Get-ItemProperty -Path "$regPath\$versionMinor\InstallPath" -ErrorAction SilentlyContinue).'(default)'
+                    if ($installPath -and (Test-Path $installPath)) {
+                        $exePath = Join-Path $installPath "python.exe"
+                        if (Test-Path $exePath) {
+                            $currentVersion = (Get-Item $exePath).VersionInfo.ProductVersion
+                            if ([System.Version]"$currentVersion" -lt [System.Version]"$targetVersion") {
+                                $is32Bit = $regPath.Contains("WOW6432Node")
+                                $archUrl = if ($is32Bit) { "https://www.python.org/ftp/python/$targetVersion/python-$targetVersion.exe" } else { "https://www.python.org/ftp/python/$targetVersion/python-$targetVersion-amd64.exe" }                                
+                                $installer = "$env:TEMP\python-installer-$targetVersion.exe"
+                                Invoke-WebRequest -Uri $archUrl -OutFile $installer
+                                Start-Process -FilePath $installer -ArgumentList "/quiet", "InstallAllUsers=1", "PrependPath=1" -Wait
+                                Remove-Item $installer -Force -ErrorAction SilentlyContinue
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    $tlsPaths = @(
+        "TLS 1.0\Server",
+        "TLS 1.0\Client",
+        "TLS 1.1\Server",
+        "TLS 1.1\Client"
+    )
+    $basePath = "HKLM:\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Protocols"
+    foreach ($path in $tlsPaths) {
+        $fullPath = "$basePath\$path"
+        if (-not (Test-Path $fullPath)) {
+            New-Item -Path $fullPath -Force | Out-Null
+        }
+        New-ItemProperty -Path $fullPath -Name "Enabled" -Value 0 -PropertyType DWORD -Force | Out-Null
+        New-ItemProperty -Path $fullPath -Name "DisabledByDefault" -Value 1 -PropertyType DWORD -Force | Out-Null
+    }
+
+    $sshdConfig = "$env:ProgramData\ssh\sshd_config"
+    if (Test-Path $sshdConfig) {
+        $configContent = Get-Content $sshdConfig
+        $newConfig = @()
+        $macsSet = $false
+        foreach ($line in $configContent) {
+            if ($line.Trim().StartsWith("MACs")) {
+                $newConfig += "MACs hmac-sha2-256,hmac-sha2-512"
+                $macsSet = $true
+            } else {
+                $newConfig += $line
+            }
+        }
+        if (-not $macsSet) {
+            $newConfig += "MACs hmac-sha2-256,hmac-sha2-512"
+        }
+        Set-Content -Path $sshdConfig -Value $newConfig
+        Restart-Service sshd -Force -ErrorAction SilentlyContinue
+    }
+} catch {
+    exit 1
+}
+```

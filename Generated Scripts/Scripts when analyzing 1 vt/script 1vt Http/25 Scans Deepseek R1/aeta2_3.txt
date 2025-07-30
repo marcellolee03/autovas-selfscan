@@ -1,0 +1,89 @@
+#!/bin/bash
+
+# Determine server type based on configuration directories
+if [ -d "/etc/apache2" ]; then
+  # Debian-based Apache configuration
+  a2enmod ssl headers >/dev/null 2>&1
+  if [ $? -ne 0 ]; then
+    echo "Failed to enable required Apache modules. Ensure the Apache installation is valid." >&2
+    exit 1
+  fi
+
+  backup_dir="/etc/apache2/conf-backup-$(date +%s)"
+  mkdir -p "$backup_dir"
+  
+  if [ -f "/etc/apache2/conf-enabled/security.conf" ]; then
+    cp /etc/apache2/conf-enabled/security.conf "$backup_dir"
+    sed -i 's/^[[:space:]]*\(ServerTokens\)[[:space:]].*/\1 Prod/' /etc/apache2/conf-enabled/security.conf
+    sed -i 's/^[[:space:]]*\(ServerSignature\)[[:space:]].*/\1 Off/' /etc/apache2/conf-enabled/security.conf
+  fi
+
+  if [ -f "/etc/apache2/sites-enabled/000-default.conf" ]; then
+    cp /etc/apache2/sites-enabled/000-default.conf "$backup_dir"
+    echo '<VirtualHost *:80>' > /etc/apache2/sites-enabled/000-default.conf
+    echo '    RewriteEngine On' >> /etc/apache2/sites-enabled/000-default.conf
+    echo '    RewriteCond %{SERVER_PORT} !^443$' >> /etc/apache2/sites-enabled/000-default.conf
+    echo '    RewriteRule ^/?(login|register|account|checkout|payment).* https://%{SERVER_NAME}%{REQUEST_URI} [R=301,L]' >> /etc/apache2/sites-enabled/000-default.conf
+    echo '</VirtualHost>' >> /etc/apache2/sites-enabled/000-default.conf
+  fi
+
+  # Enable HSTS header
+  if [ -f "/etc/apache2/mods-enabled/headers.load" ]; then
+    echo "Header always set Strict-Transport-Security \"max-age=63072000; includeSubDomains; preload\"" > /etc/apache2/conf-available/hsts.conf
+    a2enconf hsts >/dev/null 2>&1
+  fi
+
+  systemctl restart apache2 >/dev/null 2>&1
+
+elif [ -d "/etc/httpd" ]; then
+  # RHEL-based Apache configuration
+  backup_dir="/etc/httpd/conf-backup-$(date +%s)"
+  mkdir -p "$backup_dir"
+  
+  if [ -f "/etc/httpd/conf/httpd.conf" ]; then
+    cp /etc/httpd/conf/httpd.conf "$backup_dir"
+    sed -i 's/^[[:space:]]*\(ServerTokens\)[[:space:]].*/\1 Prod/' /etc/httpd/conf/httpd.conf
+    sed -i 's/^[[:space:]]*\(ServerSignature\)[[:space:]].*/\1 Off/' /etc/httpd/conf/httpd.conf
+    
+    echo '<LocationMatch "^/(login|register|account|checkout|payment)">' >> /etc/httpd/conf/httpd.conf
+    echo '    RewriteEngine On' >> /etc/httpd/conf/httpd.conf
+    echo '    RewriteCond %{HTTPS} off' >> /etc/httpd/conf/httpd.conf
+    echo '    RewriteRule (.*) https://%{HTTP_HOST}%{REQUEST_URI} [R=301,L]' >> /etc/httpd/conf/httpd.conf
+    echo '</LocationMatch>' >> /etc/httpd/conf/httpd.conf
+    
+    echo 'Header set Content-Security-Policy "upgrade-insecure-requests"' >> /etc/httpd/conf/httpd.conf
+    echo 'Header always set Strict-Transport-Security "max-age=63072000; includeSubDomains; preload"' >> /etc/httpd/conf/httpd.conf
+  fi
+
+  systemctl restart httpd >/dev/null 2>&1
+
+elif [ -d "/etc/nginx" ]; then
+  # NGINX configuration
+  backup_dir="/etc/nginx/conf-backup-$(date +%s)"
+  mkdir -p "$backup_dir"
+  
+  if [ -f "/etc/nginx/nginx.conf" ]; then
+    cp /etc/nginx/nginx.conf "$backup_dir"
+    
+    # Configure security headers and HSTS
+    sed -i '/http {/a \    map \$request_uri \$hsts_header {\n        ~*/(login|register|account|checkout|payment) "max-age=63072000; includeSubDomains; preload";\n    }' /etc/nginx/nginx.conf
+    
+    sed -i '/http {/a \    add_header Strict-Transport-Security \$hsts_header always;\n    add_header Content-Security-Policy "upgrade-insecure-requests";' /etc/nginx/nginx.conf
+    
+    # Location-specific SSL enforcement
+    sed -i '/http {/a \    add_header X-Frame-Options DENY;' /etc/nginx/nginx.conf
+    sed -i '/http {/a \    server_tokens off;' /etc/nginx/nginx.conf
+  fi
+
+  # Enable HTTP-to-HTTPS redirect for sensitive paths
+  for conf in $(ls /etc/nginx/conf.d/*.conf); do
+    cp "$conf" "$backup_dir"
+    sed -i '/listen[[:space:]]*80;/,/}/{/server {/a \    if ($request_uri ~ "^\/(login|register|account|checkout|payment)") { return 301 https://$host$request_uri; }\n}' "$conf"
+  done
+
+  nginx -t >/dev/null 2>&1 && nginx -s reload >/dev/null 2>&1
+
+else
+  echo "Unsupported web server configuration. No changes applied." >&2
+  exit 1
+fi

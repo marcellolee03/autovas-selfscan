@@ -1,0 +1,7 @@
+#!/bin/bash
+set -e
+if [ "$(id -u)" -ne 0 ]; then
+  exec sudo "$0" "$@"
+fi
+apt-get update -y
+dpkg -l | awk '/^ii/ && $2 ~ /php/ {print $2}' | xargs -r apt-get --only-upgrade -y install

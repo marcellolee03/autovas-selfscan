@@ -1,0 +1,84 @@
+```bash
+#!/bin/bash
+
+# Variáveis
+PYTHON_VERSION=$(python --version 2>&1 | awk '{print $2}' | cut -d '.' -f1,2)
+PYTHON_MAJOR=$(echo $PYTHON_VERSION | cut -d '.' -f1)
+PYTHON_MINOR=$(echo $PYTHON_VERSION | cut -d '.' -f2)
+REQUIRED_VERSION="3.10.15"
+
+# Função para verificar se o Python está instalado
+check_python() {
+  if ! command -v python &> /dev/null; then
+    echo "Python não está instalado. Instalando..."
+    apt-get update
+    apt-get install -y python3 python3-pip
+  fi
+}
+
+# Função para atualizar o Python
+update_python() {
+  echo "Atualizando Python para a versão $REQUIRED_VERSION..."
+
+  # Atualizar o sistema
+  apt-get update
+  apt-get upgrade -y python3
+
+  # Remover a versão antiga do Python
+  apt-get remove -y python3.10
+
+  # Instalar a versão mais recente do Python 3.10
+  apt-get update
+  apt-get install -y python3.10
+
+  # Verificar a versão instalada
+  INSTALLED_VERSION=$(python3 --version 2>&1 | awk '{print $2}')
+  echo "Versão instalada do Python: $INSTALLED_VERSION"
+
+  # Verificar se a atualização foi bem-sucedida
+  if [[ "$INSTALLED_VERSION" == "3.10.15" ]]; then
+    echo "Python atualizado com sucesso para a versão 3.10.15."
+  else
+    echo "Falha ao atualizar o Python para a versão 3.10.15. Verifique os logs para obter detalhes."
+    exit 1
+  fi
+
+  # Atualizar o pip
+  pip3 install --upgrade pip
+  echo "Pip atualizado."
+}
+
+# Função para verificar se o sistema é Windows
+is_windows() {
+  if [[ "$OSTYPE" == "msys" ]] || [[ "$OSTYPE" == "cygwin" ]]; then
+    return 0
+  else
+    return 1
+  fi
+}
+
+# Função principal
+main() {
+  if is_windows; then
+    echo "Este script não é adequado para sistemas Windows. Por favor, execute o script apropriado para Windows."
+    exit 1
+  fi
+
+  check_python
+
+  # Verificar a versão atual do Python
+  CURRENT_VERSION=$(python3 --version 2>&1 | awk '{print $2}')
+  echo "Versão atual do Python: $CURRENT_VERSION"
+
+  # Comparar as versões
+  if [[ $(printf '%s\n' "$CURRENT_VERSION" "$REQUIRED_VERSION" | sort -V | head -n1) == "$CURRENT_VERSION" ]]; then
+      echo "A versão do Python precisa ser atualizada."
+      update_python
+  else
+      echo "A versão do Python já está atualizada."
+  fi
+}
+
+# Executar a função principal
+main
+```

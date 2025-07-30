@@ -1,0 +1,70 @@
+```bash
+#!/bin/bash
+
+# Verifica qual sistema de pacotes está sendo utilizado (apt ou yum)
+if command -v apt-get &> /dev/null; then
+  package_manager="apt"
+elif command -v yum &> /dev/null; then
+  package_manager="yum"
+else
+  echo "Sistema de gerenciamento de pacotes não detectado. Supondo apt."
+  package_manager="apt"
+fi
+
+# Atualiza o índice de pacotes
+if [ "$package_manager" = "apt" ]; then
+  apt-get update
+elif [ "$package_manager" = "yum" ]; then
+  yum update
+fi
+
+# Tenta atualizar para uma versão mais recente do PHP.
+# Este script assume que as versões 5.3.13 ou 5.4.3 ou superior estão disponíveis nos repositórios.
+
+if [ "$package_manager" = "apt" ]; then
+  apt-get install --only-upgrade php5 php5-cgi php5-cli
+  if [ $? -ne 0 ]; then
+    echo "Falha ao atualizar o PHP usando apt-get. Verifique se os repositórios estão configurados corretamente."
+    exit 1
+  fi
+elif [ "$package_manager" = "yum" ]; then
+  yum update php php-cli php-cgi
+  if [ $? -ne 0 ]; then
+    echo "Falha ao atualizar o PHP usando yum. Verifique se os repositórios estão configurados corretamente."
+    exit 1
+  fi
+fi
+
+#Verifica a versão do PHP
+php_version=$(php -v | head -n 1 | awk '{print $2}')
+
+#Extrai a versão major e minor
+major_version=$(echo $php_version | cut -d'.' -f1)
+minor_version=$(echo $php_version | cut -d'.' -f2)
+
+#Verifica se a versão está acima da versão vulnerável
+if [ "$major_version" -gt "5" ] || ([ "$major_version" -eq "5" ] && [ "$minor_version" -ge "5" ]); then
+    echo "PHP foi atualizado para uma versão segura: $php_version"
+    exit 0
+elif [ "$major_version" -eq "5" ] && [ "$minor_version" -eq "4" ] &&  $(echo "$php_version >= 5.4.3" | bc -l) ; then
+    echo "PHP foi atualizado para uma versão segura: $php_version"
+    exit 0
+elif [ "$major_version" -eq "5" ] && [ "$minor_version" -eq "3" ] &&  $(echo "$php_version >= 5.3.13" | bc -l) ; then
+    echo "PHP foi atualizado para uma versão segura: $php_version"
+    exit 0
+else
+    echo "A atualização do PHP não resultou em uma versão segura. A versão atual é: $php_version"
+    exit 1
+fi
+
+# Reinicia o servidor web para garantir que as mudanças tenham efeito
+if command -v systemctl &> /dev/null; then
+  systemctl restart apache2 2>/dev/null || systemctl restart httpd 2>/dev/null
+elif command -v service &> /dev/null; then
+  service apache2 restart 2>/dev/null || service httpd restart 2>/dev/null
+else
+  echo "Não foi possível detectar o sistema de gerenciamento de serviços. Reinicie o servidor web manualmente."
+fi
+
+exit 0
+```

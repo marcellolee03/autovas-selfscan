@@ -1,0 +1,318 @@
+>analise esse prompt contendo as vulnerabilidades encontradas em um csv do openvas e analise se os scripts que irei enviar em seguida sao capazes de corrigir esses problemas ou nao, me informando uma porcentagem de correcao das vulnerabilidades
+>Vulnerabilidades:
+    # INSTRUÇÕES PARA O MODELO DE IA
+
+    ## PERSONA
+    Você é um especialista em cibersegurança e automação de sistemas, focado em criar scripts de correção (patching). Sua única função é gerar um script que resolva a vulnerabilidade descrita abaixo.
+
+    ## TAREFA
+    Analise o contexto da vulnerabilidade a seguir e gere um script de shell (compatível com o sistema operacional do localhost) que, ao ser executado, corrija permanentemente a vulnerabilidade descrita.
+
+    ## CONTEXTO DA VULNERABILIDADE
+
+# Vulnerabilidade 1
+CVEs: nan
+NVT Name: Weak Host Key Algorithm(s) (SSH)
+Port: 22
+Port Protocol: tcp
+Summary: The remote SSH server is configured to allow / support weak host
+  key algorithm(s).
+Specific Result: The remote SSH server supports the following weak host key algorithm(s):
+
+host key algorithm | Description
+-----------------------------------------------------------------------------------------
+ssh-dss            | Digital Signature Algorithm (DSA) / Digital Signature Standard (DSS)
+
+Vulnerability Detection Method: Checks the supported host key algorithms of the remote SSH
+  server.
+
+  Currently weak host key algorithms are defined as the following:
+
+  - ssh-dss: Digital Signature Algorithm (DSA) / Digital Signature Standard (DSS)
+Details:
+Weak Host Key Algorithm(s) (SSH)
+(OID: 1.3.6.1.4.1.25623.1.0.117687)
+Version used: 2024-06-14T05:05:48Z
+
+Affected Software/OS: nan
+Product Detection Result: Product: cpe:/a:ietf:secure_shell_protocol
+Method: SSH Protocol Algorithms Supported
+(OID: 1.3.6.1.4.1.25623.1.0.105565)
+
+Solution: Disable the reported weak host key algorithm(s).
+
+    ## REGRAS E RESTRIÇÕES DE SAÍDA
+    1.  **APENAS SCRIPT:** A sua resposta deve conter ÚNICA E EXCLUSIVAMENTE o código do script.
+    2.  **SEM EXPLICAÇÕES:** Não adicione nenhum comentário, explicação, introdução, ou despedida.
+    3.  **SEM BLOCOS DE CÓDIGO MARKDOWN:** Não envolva o script em blocos de código como ` ```bash ` ou ` ```sh `. A resposta deve ser o texto puro do script.
+    4.  **AUTOSSUFICIENTE:** O script deve ser completo, autônomo e não deve exigir interação do usuário para ser executado.
+    5.  **COMPATIBILIDADE:** O script deve ser compatível com o sistema operacional especificado em 'localhost OS'. Se o sistema operacional não for especificado, assuma um sistema baseado em Linux (como Ubuntu/Debian).
+
+    # INÍCIO DO SCRIPT DE CORREÇÃO
+
+
+>Scripts de correção:
+{type: uploaded file
+fileName: 1vtweakssh_1.txt
+fullContent:
+#!/bin/bash
+
+BACKUP_TIME=$(date +"%Y%m%d_%H%M%S")
+cp /etc/ssh/sshd_config /etc/ssh/sshd_config.backup.$BACKUP_TIME || exit 1
+sed -i -E 's/^(\s*HostKey\s+\S*dsa\S*)/# \1/' /etc/ssh/sshd_config
+rm -f /etc/ssh/ssh_host_dsa_key /etc/ssh/ssh_host_dsa_key.pub
+
+if command -v systemctl >/dev/null 2>&1; then
+    systemctl reload sshd >/dev/null 2>&1 && exit 0
+    systemctl reload ssh >/dev/null 2>&1 && exit 0
+fi
+
+if command -v service >/dev/null 2>&1; then
+    service sshd reload >/dev/null 2>&1 && exit 0
+    service ssh reload >/dev/null 2>&1 && exit 0
+fi
+
+if [ -x /etc/init.d/ssh ]; then
+    /etc/init.d/ssh reload >/dev/null 2>&1 && exit 0
+fi
+
+if [ -x /etc/init.d/sshd ]; then
+    /etc/init.d/sshd reload >/dev/null 2>&1 && exit 0
+fi
+
+exit 1}
+{type: uploaded file
+fileName: 1vtweakssh_2.txt
+fullContent:
+#!/bin/bash
+BACKUP_FILE="/etc/ssh/sshd_config.bak_$(date +%F_%T)"
+[ -f "/etc/ssh/sshd_config" ] && cp -p /etc/ssh/sshd_config "$BACKUP_FILE"
+sed -i -e '/^HostKey[[:space:]]\+\/.*\bdsa\b/I s/^/#/' /etc/ssh/sshd_config
+sed -i -e '/^[[:space:]]*HostKeyAlgorithms[[:space:]]\+/ { 
+    s/\bssh-dss\b//g
+    s/,,\+/,/g
+    s/\(HostKeyAlgorithms\)[[:space:]]\+,[[:space:]]*/\1 /
+    s/,[[:space:]]*$//
+}' /etc/ssh/sshd_config
+grep -qE '^[[:space:]]*HostKeyAlgorithms' /etc/ssh/sshd_config || \
+    echo -e "\nHostKeyAlgorithms ecdsa-sha2-nistp256-cert-v01@openssh.com,ecdsa-sha2-nistp384-cert-v01@openssh.com,ecdsa-sha2-nistp521-cert-v01@openssh.com,ssh-ed25519-cert-v01@openssh.com,rsa-sha2-512-cert-v01@openssh.com,rsa-sha2-256-cert-v01@openssh.com,ecdsa-sha2-nistp256,ecdsa-sha2-nistp384,ecdsa-sha2-nistp521,ssh-ed25519,rsa-sha2-512,rsa-sha2-256" >> /etc/ssh/sshd_config
+if /usr/sbin/sshd -t; then
+    systemctl restart sshd 2>/dev/null || service ssh restart 2>/dev/null || /etc/init.d/ssh restart 2>/dev/null
+fi}
+{type: uploaded file
+fileName: 1vtweakssh_3.txt
+fullContent:
+#!/bin/bash
+
+set -e
+
+if [ "$(id -u)" -ne 0 ]; then
+    exit 1
+fi
+
+CONFIG_FILE="/etc/ssh/sshd_config"
+BACKUP_FILE="$CONFIG_FILE.bak_$(date +%Y%m%d%H%M%S)"
+NEW_ALGOS="ssh-ed25519,ecdsa-sha2-nistp256,ecdsa-sha2-nistp384,ecdsa-sha2-nistp521,rsa-sha2-256,rsa-sha2-512"
+
+if [ ! -f "$CONFIG_FILE" ]; then
+    exit 1
+fi
+
+cp "$CONFIG_FILE" "$BACKUP_FILE"
+sed -i -e '/^[[:space:]]*HostKeyAlgorithms[[:space:]]/d' "$CONFIG_FILE"
+echo "HostKeyAlgorithms $NEW_ALGOS" >> "$CONFIG_FILE"
+
+if sshd -t -f "$CONFIG_FILE"; then
+    systemctl reload sshd
+else
+    mv -f "$BACKUP_FILE" "$CONFIG_FILE"
+    exit 1
+fi}
+{type: uploaded file
+fileName: 1vtweakssh_4.txt
+fullContent:
+#!/bin/sh
+
+BACKUP_FILE="/etc/ssh/sshd_config.$(date +%Y%m%d%H%M%S).bak"
+if [ ! -f /etc/ssh/sshd_config ]; then
+    echo "Arquivo /etc/ssh/sshd_config não encontrado." >&2
+    exit 1
+fi
+cp /etc/ssh/sshd_config "$BACKUP_FILE"
+
+echo "HostKeyAlgorithms -ssh-dss" >> /etc/ssh/sshd_config
+
+if command -v systemctl >/dev/null 2>&1; then
+    systemctl restart sshd.service >/dev/null 2>&1 || systemctl restart ssh.service >/dev/null 2>&1
+elif command -v service >/dev/null 2>&1; then
+    service ssh restart >/dev/null 2>&1 || service sshd restart >/dev/null 2>&1
+else
+    echo "Não foi possível reiniciar o SSH. Reinicie manualmente." >&2
+    exit 1
+fi
+
+exit 0}
+{type: uploaded file
+fileName: 1vtweakssh_5.txt
+fullContent:
+#!/bin/bash
+
+BACKUP_FILE="/etc/ssh/sshd_config.bak"
+CONFIG_FILE="/etc/ssh/sshd_config"
+TEMP_FILE=$(mktemp)
+
+cp -p "${CONFIG_FILE}" "${BACKUP_FILE}" || exit 1
+
+if grep -qE '^\s*HostKeyAlgorithms\s+' "${CONFIG_FILE}"; then
+    awk '
+    /^\s*HostKeyAlgorithms\s+/ {
+        split($0, parts, /[[:space:]]+/)
+        alg_field = $0
+        sub(/^\s*HostKeyAlgorithms\s+/, "", alg_field)
+        sub(/#.*/, "", alg_field)
+        n = split(alg_field, algs, ",")
+        new_algs = ""
+        for (i=1; i<=n; i++) {
+            if (algs[i] !~ /^ssh-dss$|ssh-dss,|,ssh-dss$/) {
+                if (new_algs != "") new_algs = new_algs ",";
+                new_algs = new_algs algs[i];
+            }
+        }
+        sub(/^,\*/, "", new_algs);
+        if (new_algs == "") {
+            print "#HostKeyAlgorithms REMOVED_ALL (ssh-dss was only option)";
+        } else {
+            print "HostKeyAlgorithms " new_algs;
+        }
+        next;
+    }
+    { print }
+    ' "${CONFIG_FILE}" > "${TEMP_FILE}" || exit 1
+
+    if grep -q '^\s*HostKeyAlgorithms\s' "${TEMP_FILE}"; then
+        mv "${TEMP_FILE}" "${CONFIG_FILE}" || exit 1
+    else
+        exit 1
+    fi
+else
+    echo "HostKeyAlgorithms ecdsa-sha2-nistp256,ecdsa-sha2-nistp384,ecdsa-sha2-nistp521,ssh-rsa,ssh-ed25519" | tee -a "${CONFIG_FILE}" >/dev/null || exit 1
+fi
+
+/usr/sbin/sshd -t || {
+    cp -p "${BACKUP_FILE}" "${CONFIG_FILE}" >/dev/null 2>&1
+    exit 1
+}
+
+if command -v systemctl >/dev/null; then
+    systemctl reload sshd >/dev/null 2>&1
+elif command -v service >/dev/null; then
+    service ssh reload >/dev/null 2>&1
+elif [ -x /etc/init.d/sshd ]; then
+    /etc/init.d/sshd reload >/dev/null 2>&1
+else
+    pkill -HUP -x sshd >/dev/null 2>&1
+fi
+
+rm -f "${TEMP_FILE}" >/dev/null 2>&1
+exit 0}
+{type: uploaded file
+fileName: 1vtweakssh_6.txt
+fullContent:
+#!/bin/bash
+cp /etc/ssh/sshd_config /etc/ssh/sshd_config.bak
+sed -i -E '/^HostKey\s+\/.*\bdsa\b/s/^/#/' /etc/ssh/sshd_config
+sed -i -E '/^HostKeyAlgorithms/ {
+    s/,\?ssh-dss\b//g
+    s/,[[:space:]]*//g
+    s/,{2,}/,/g
+    s/^HostKeyAlgorithms[[:space:]]*,/HostKeyAlgorithms /
+    s/,[[:space:]]*$//
+    /^HostKeyAlgorithms[[:space:]]*$/d
+}' /etc/ssh/sshd_config
+if command -v systemctl >/dev/null 2>&1; then
+    systemctl restart sshd
+else
+    service ssh restart
+fi}
+{type: uploaded file
+fileName: 1vtweakssh_7.txt
+fullContent:
+#!/bin/sh
+set -eux
+cp /etc/ssh/sshd_config /etc/ssh/sshd_config.bak
+rm -f /etc/ssh/ssh_host_dsa_key*
+echo "HostKeyAlgorithms -ssh-dss" >> /etc/ssh/sshd_config
+if command -v systemctl >/dev/null 2>&1; then
+    systemctl restart sshd >/dev/null 2>&1 || systemctl restart ssh >/dev/null 2>&1
+elif command -v service >/dev/null 2>&1; then
+    service sshd restart >/dev/null 2>&1 || service ssh restart >/dev/null 2>&1
+fi}
+{type: uploaded file
+fileName: 1vtweakssh_8.txt
+fullContent:
+#!/bin/sh
+BACKUP_FILE="/etc/ssh/sshd_config.bak_$(date +%Y%m%d%H%M%S)"
+cp /etc/ssh/sshd_config "$BACKUP_FILE"
+sed -i 's/^[#]\?HostKeyAlias/\0#/g' /etc/ssh/sshd_config 2>/dev/null
+sed -i 's/^[#]\?HostKeyAlgorithms/\0#/g' /etc/ssh/sshd_config 2>/dev/null
+echo "HostKeyAlgorithms ecdsa-sha2-nistp256,ecdsa-sha2-nistp384,ecdsa-sha2-nistp521,ssh-ed25519,rsa-sha2-256,rsa-sha2-512" >> /etc/ssh/sshd_config
+if /usr/sbin/sshd -t 2>/dev/null; then
+  if command -v systemctl >/dev/null 2>&1; then
+    systemctl reload sshd 2>/dev/null || systemctl reload ssh 2>/dev/null
+  else
+    service ssh reload 2>/dev/null || service sshd reload 2>/dev/null
+  fi
+  exit 0
+else
+  cp "$BACKUP_FILE" /etc/ssh/sshd_config
+  exit 1
+fi}
+{type: uploaded file
+fileName: 1vtweakssh_9.txt
+fullContent:
+#!/bin/sh
+
+BACKUP_FILE="/etc/ssh/sshd_config.$(date +%Y%m%d%H%M%S).bak"
+SSH_CONFIG="/etc/ssh/sshd_config"
+cp "$SSH_CONFIG" "$BACKUP_FILE"
+{
+    echo "HostKeyAlgorithms *,-ssh-dss"
+    cat "$BACKUP_FILE"
+} > "$SSH_CONFIG.new"
+mv "$SSH_CONFIG.new" "$SSH_CONFIG"
+SSH_PATH=$(command -v sshd || true)
+if [ -z "$SSH_PATH" ]; then
+    SSH_PATH="/usr/sbin/sshd"
+fi
+if [ ! -x "$SSH_PATH" ]; then
+    mv "$BACKUP_FILE" "$SSH_CONFIG"
+    exit 1
+fi
+if ! "$SSH_PATH" -t -f "$SSH_CONFIG"; then
+    mv "$BACKUP_FILE" "$SSH_CONFIG"
+    exit 1
+fi
+if command -v systemctl >/dev/null; then
+    systemctl restart sshd || systemctl restart ssh
+else
+    service sshd restart || service ssh restart
+fi}
+{type: uploaded file
+fileName: 1vtweakssh_10.txt
+fullContent:
+#!/bin/bash
+
+cp /etc/ssh/sshd_config /etc/ssh/sshd_config.bak
+sed -i -e '/^HostKeyAlgorithms\s/ s/\<ssh-dss\>//g' /etc/ssh/sshd_config
+sed -i -e '/^HostKeyAlgorithms\s/ s/,\{2,\}/,/g' /etc/ssh/sshd_config
+sed -i -e '/^HostKeyAlgorithms\s/ s/^\(HostKeyAlgorithms\s*\),/\1/' /etc/ssh/sshd_config
+sed -i -e '/^HostKeyAlgorithms\s/ s/,\s*$//' /etc/ssh/sshd_config
+sed -i -e '/^HostKeyAlgorithms\s/ s/,\s\+/,/g' /etc/ssh/sshd_config
+if ! grep -q '^HostKeyAlgorithms\s.*-ssh-dss' /etc/ssh/sshd_config; then
+    echo "HostKeyAlgorithms -ssh-dss" >> /etc/ssh/sshd_config
+fi
+if command -v systemctl >/dev/null 2>&1; then
+    systemctl restart sshd 2>/dev/null || systemctl restart ssh 2>/dev/null
+else
+    service sshd restart 2>/dev/null || service ssh restart 2>/dev/null
+fi}

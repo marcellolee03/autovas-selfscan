@@ -1,0 +1,115 @@
+```bash
+#!/bin/bash
+
+# Variáveis
+PYTHON_VERSION=$(python3 --version 2>&1 | awk '{print $2}' | cut -d '.' -f 1,2)
+INSTALLED_VERSION=$(python3 --version 2>&1 | awk '{print $2}')
+FIXED_VERSION="3.10.15"
+VENV_PATH="/opt/python_venv" # Ajuste para o caminho onde a instalação do Python pode estar
+PORT=5000
+
+# Função para verificar se um pacote está instalado usando pip
+is_package_installed() {
+  pip3 show "$1" > /dev/null 2>&1
+  return $?
+}
+
+# Função para parar o serviço em execução na porta 5000
+stop_service() {
+  fuser -k "$PORT/tcp"
+  sleep 2
+}
+
+# Função para atualizar o Python
+update_python() {
+  echo "Atualizando o Python..."
+  
+  # Verificar se o Python instalado é gerenciado pelo APT (Ubuntu/Debian)
+  if command -v apt-get &> /dev/null; then
+    echo "Sistema baseado em Debian/Ubuntu detectado. Tentando atualizar via APT."
+    sudo apt-get update
+    sudo apt-get install --only-upgrade python3 -y
+    
+    NEW_INSTALLED_VERSION=$(python3 --version 2>&1 | awk '{print $2}')
+
+    if [[ "$NEW_INSTALLED_VERSION" == "$INSTALLED_VERSION" ]]; then
+        echo "A atualização via APT não alterou a versão. Tentando remover e reinstalar."
+        sudo apt-get remove --purge python3 -y
+        sudo apt-get install python3 python3-pip -y
+        NEW_INSTALLED_VERSION=$(python3 --version 2>&1 | awk '{print $2}')
+
+        if [[ "$NEW_INSTALLED_VERSION" == "$INSTALLED_VERSION" ]]; then
+            echo "A remoção e reinstalação via APT não alterou a versão. Falha na atualização via APT."
+            return 1
+        else
+            echo "Python atualizado com sucesso via APT para a versão: $NEW_INSTALLED_VERSION"
+        fi
+    else
+        echo "Python atualizado com sucesso via APT para a versão: $NEW_INSTALLED_VERSION"
+    fi
+
+  elif command -v yum &> /dev/null; then
+    echo "Sistema baseado em CentOS/RHEL detectado. Tentando atualizar via YUM."
+    sudo yum update python3 -y
+    
+    NEW_INSTALLED_VERSION=$(python3 --version 2>&1 | awk '{print $2}')
+
+    if [[ "$NEW_INSTALLED_VERSION" == "$INSTALLED_VERSION" ]]; then
+        echo "A atualização via YUM não alterou a versão. Tentando remover e reinstalar."
+        sudo yum remove python3 -y
+        sudo yum install python3 python3-pip -y
+        NEW_INSTALLED_VERSION=$(python3 --version 2>&1 | awk '{print $2}')
+
+        if [[ "$NEW_INSTALLED_VERSION" == "$INSTALLED_VERSION" ]]; then
+            echo "A remoção e reinstalação via YUM não alterou a versão. Falha na atualização via YUM."
+            return 1
+        else
+            echo "Python atualizado com sucesso via YUM para a versão: $NEW_INSTALLED_VERSION"
+        fi
+    else
+        echo "Python atualizado com sucesso via YUM para a versão: $NEW_INSTALLED_VERSION"
+    fi
+
+  else
+    echo "Sistema não detectado como Debian/Ubuntu ou CentOS/RHEL. Não é possível atualizar automaticamente."
+    echo "Por favor, atualize o Python manualmente."
+    return 1
+  fi
+}
+
+
+# Função principal
+main() {
+
+  echo "Versão instalada do Python: $INSTALLED_VERSION"
+  echo "Versão fixa do Python: $FIXED_VERSION"
+
+  # Verificar se a versão instalada é vulnerável
+  if [[ $(echo "$INSTALLED_VERSION < $FIXED_VERSION" | bc -l) -eq 1 ]]; then
+    echo "Versão vulnerável detectada."
+
+    # Parar o serviço que está usando a porta 5000
+    stop_service
+
+    # Atualizar o Python
+    if update_python; then
+        NEW_INSTALLED_VERSION=$(python3 --version 2>&1 | awk '{print $2}')
+        if [[ $(echo "$NEW_INSTALLED_VERSION >= $FIXED_VERSION" | bc -l) -eq 1 ]]; then
+          echo "Python atualizado para a versão: $NEW_INSTALLED_VERSION. Vulnerabilidade corrigida."
+        else
+          echo "Falha ao atualizar o Python para uma versão segura."
+          exit 1
+        fi
+    else
+      echo "Falha ao atualizar o Python."
+      exit 1
+    fi
+
+  else
+    echo "A versão do Python já está atualizada. Nenhuma ação necessária."
+  fi
+}
+
+# Executar a função principal
+main
+```

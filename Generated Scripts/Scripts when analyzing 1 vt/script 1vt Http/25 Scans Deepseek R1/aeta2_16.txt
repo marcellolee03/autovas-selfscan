@@ -1,0 +1,45 @@
+```bash
+#!/bin/bash
+
+[ "$UID" -eq 0 ] || exec sudo "$0" "$@"
+
+if [ -d /etc/apache2/sites-enabled ]; then
+    config_file="/etc/apache2/sites-available/000-default.conf"
+    if [ -f "$config_file" ]; then
+        tmp_file=$(mktemp)
+        awk -v RS='' '{
+            if ($0 ~ /<VirtualHost \*:80>/ && !/Redirect permanent/) {
+                sub(/\n?<\/VirtualHost>/, "\n    Redirect permanent \"/\" \"https://%{HTTP_HOST}%{REQUEST_URI}\"\n</VirtualHost>")
+            }
+            print $0 ORS
+        }' "$config_file" > "$tmp_file"
+        config_test=$(apache2ctl -t 2>&1)
+        if apache2ctl -t &> /dev/null && [ -z "$(grep "\\b80\\b" "$tmp_file" | grep -i listen)" ]; then
+            mv "$tmp_file" "$config_file"
+            systemctl reload apache2
+        else
+            rm -f "$tmp_file"
+            exit 1
+        fi
+    fi
+elif [ -d /etc/nginx ]; then
+    config_file="/etc/nginx/sites-available/default"
+    if [ -f "$config_file" ]; then
+        tmp_file=$(mktemp)
+        awk -v RS='' '{
+            if ($0 ~ /listen 80;/) {
+                gsub(/listen 80;/, "listen 80;\n    return 301 https://$host$request_uri;")
+            }
+            print $0 ORS
+        }' "$config_file" > "$tmp_file"
+        config_test=$(nginx -t 2>&1)
+        if nginx -t &> /dev/null && [ -z "$(grep "\\b80\\b" "$tmp_file" | grep -i listen | grep -v return)" ]; then
+            mv "$tmp_file" "$config_file"
+            systemctl reload nginx
+        else
+            rm -f "$tmp_file"
+            exit 1
+        fi
+    fi
+fi
+```

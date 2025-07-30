@@ -1,0 +1,27 @@
+#!/bin/sh
+
+BACKUP_FILE="/etc/ssh/sshd_config.$(date +%Y%m%d%H%M%S).bak"
+SSH_CONFIG="/etc/ssh/sshd_config"
+cp "$SSH_CONFIG" "$BACKUP_FILE"
+{
+    echo "HostKeyAlgorithms *,-ssh-dss"
+    cat "$BACKUP_FILE"
+} > "$SSH_CONFIG.new"
+mv "$SSH_CONFIG.new" "$SSH_CONFIG"
+SSH_PATH=$(command -v sshd || true)
+if [ -z "$SSH_PATH" ]; then
+    SSH_PATH="/usr/sbin/sshd"
+fi
+if [ ! -x "$SSH_PATH" ]; then
+    mv "$BACKUP_FILE" "$SSH_CONFIG"
+    exit 1
+fi
+if ! "$SSH_PATH" -t -f "$SSH_CONFIG"; then
+    mv "$BACKUP_FILE" "$SSH_CONFIG"
+    exit 1
+fi
+if command -v systemctl >/dev/null; then
+    systemctl restart sshd || systemctl restart ssh
+else
+    service sshd restart || service ssh restart
+fi

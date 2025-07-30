@@ -1,0 +1,62 @@
+#!/bin/bash
+# Corrige vulnerabilidades de cibersegurança
+
+# Vulnerabilidade 1: Cleartext Transmission of Sensitive Information via HTTP
+# Configura o servidor para redirecionar HTTP para HTTPS
+if [ -f /etc/apache2/sites-available/000-default.conf ]; then
+    sed -i 's/<VirtualHost \*:80>/<VirtualHost \*:80>\n    Redirect permanent \/ https:\/\/$server_name\//' /etc/apache2/sites-available/000-default.conf
+    systemctl restart apache2
+fi
+
+# Vulnerabilidade 2: DNS Cache Snooping Vulnerability (UDP)
+# Desativa a recursão no DNS
+if [ -f /etc/named.conf ]; then
+    sed -i 's/recursion yes/recursion no/' /etc/named.conf
+    systemctl restart named
+fi
+
+# Vulnerabilidade 3: ICMP Timestamp Reply Information Disclosure
+# Bloqueia pacotes ICMP timestamp
+iptables -A INPUT -p icmp --icmp-type timestamp-request -j DROP
+iptables -A OUTPUT -p icmp --icmp-type timestamp-reply -j DROP
+
+# Vulnerabilidade 4: SSL/TLS: Deprecated TLSv1.0 and TLSv1.1 Protocol Detection
+# Desativa TLSv1.0 e TLSv1.1
+if [ -f /etc/nginx/nginx.conf ]; then
+    sed -i 's/ssl_protocols TLSv1 TLSv1.1 TLSv1.2;/ssl_protocols TLSv1.2 TLSv1.3;/' /etc/nginx/nginx.conf
+    systemctl restart nginx
+fi
+
+if [ -f /etc/apache2/mods-enabled/ssl.conf ]; then
+    sed -i 's/SSLProtocol all -SSLv3/SSLProtocol all -SSLv3 -TLSv1 -TLSv1.1/' /etc/apache2/mods-enabled/ssl.conf
+    systemctl restart apache2
+fi
+
+# Vulnerabilidade 5: SSL/TLS: Renegotiation DoS Vulnerability
+# Desativa a renegociação SSL/TLS
+if [ -f /etc/nginx/nginx.conf ]; then
+    sed -i 's/ssl_session_cache shared:SSL:10m;/ssl_session_cache shared:SSL:10m;\n    ssl_renegotiation off;/' /etc/nginx/nginx.conf
+    systemctl restart nginx
+fi
+
+if [ -f /etc/apache2/mods-enabled/ssl.conf ]; then
+    sed -i 's/SSLInsecureRenegotiation off/SSLInsecureRenegotiation off\n    SSLHonorCipherOrder on/' /etc/apache2/mods-enabled/ssl.conf
+    systemctl restart apache2
+fi
+
+# Vulnerabilidade 6: SSL/TLS: Report Weak Cipher Suites
+# Configura apenas cifras fortes
+if [ -f /etc/nginx/nginx.conf ]; then
+    sed -i 's/ssl_ciphers HIGH:!aNULL:!MD5;/ssl_ciphers ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:DHE-RSA-AES128-GCM-SHA256:DHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:DHE-RSA-CHACHA20-POLY1305:ECDHE-ECDSA-AES128-SHA256:ECDHE-RSA-AES128-SHA256:ECDHE-ECDSA-AES128-SHA:ECDHE-RSA-AES128-SHA:ECDHE-ECDSA-AES256-SHA384:ECDHE-RSA-AES256-SHA384:ECDHE-ECDSA-AES256-SHA:ECDHE-RSA-AES256-SHA:DHE-RSA-AES128-SHA256:DHE-RSA-AES256-SHA256:AES128-GCM-SHA256:AES256-GCM-SHA384:AES128-SHA256:AES256-SHA256:AES128-SHA:AES256-SHA:!DSS;/' /etc/nginx/nginx.conf
+    systemctl restart nginx
+fi
+
+if [ -f /etc/apache2/mods-enabled/ssl.conf ]; then
+    sed -i 's/SSLCipherSuite HIGH:!aNULL:!MD5/SSLCipherSuite ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:DHE-RSA-AES128-GCM-SHA256:DHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:DHE-RSA-CHACHA20-POLY1305:ECDHE-ECDSA-AES128-SHA256:ECDHE-RSA-AES128-SHA256:ECDHE-ECDSA-AES128-SHA:ECDHE-RSA-AES128-SHA:ECDHE-ECDSA-AES256-SHA384:ECDHE-RSA-AES256-SHA384:ECDHE-ECDSA-AES256-SHA:ECDHE-RSA-AES256-SHA:DHE-RSA-AES128-SHA256:DHE-RSA-AES256-SHA256:AES128-GCM-SHA256:AES256-GCM-SHA384:AES128-SHA256:AES256-SHA256:AES128-SHA:AES256-SHA:!DSS/' /etc/apache2/mods-enabled/ssl.conf
+    systemctl restart apache2
+fi
+
+# Vulnerabilidade 7: TCP Timestamps Information Disclosure
+# Desativa timestamps TCP
+echo "net.ipv4.tcp_timestamps = 0" >> /etc/sysctl.conf
+sysctl -p

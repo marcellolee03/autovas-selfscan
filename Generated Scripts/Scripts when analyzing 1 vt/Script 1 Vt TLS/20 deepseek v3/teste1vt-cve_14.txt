@@ -1,0 +1,39 @@
+#!/bin/bash
+CONFIG_FILE="/etc/ssl/openssl.cnf"
+BACKUP_FILE="${CONFIG_FILE}.bak"
+CIPHERS="ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-SHA384:ECDHE-RSA-AES256-SHA384:ECDHE-ECDSA-AES128-SHA256:ECDHE-RSA-AES128-SHA256"
+PROTOCOLS="TLSv1.2 TLSv1.3"
+
+cp $CONFIG_FILE $BACKUP_FILE
+sed -i '/^MinProtocol =/d' $CONFIG_FILE
+sed -i '/^CipherString =/d' $CONFIG_FILE
+echo "MinProtocol = $PROTOCOLS" >> $CONFIG_FILE
+echo "CipherString = $CIPHERS" >> $CONFIG_FILE
+
+systemctl restart apache2
+systemctl restart nginx
+systemctl restart postgresql
+
+HSTS_CONFIG="/etc/apache2/conf-available/hsts.conf"
+if [ -f "$HSTS_CONFIG" ]; then
+    sed -i 's/Header always set Strict-Transport-Security "max-age=31536000"/Header always set Strict-Transport-Security "max-age=63072000; includeSubDomains; preload"/' $HSTS_CONFIG
+    systemctl restart apache2
+fi
+
+NGINX_CONFIG="/etc/nginx/nginx.conf"
+if [ -f "$NGINX_CONFIG" ]; then
+    sed -i '/ssl_protocols /d' $NGINX_CONFIG
+    sed -i '/ssl_ciphers /d' $NGINX_CONFIG
+    echo "ssl_protocols $PROTOCOLS;" >> $NGINX_CONFIG
+    echo "ssl_ciphers $CIPHERS;" >> $NGINX_CONFIG
+    systemctl restart nginx
+fi
+
+POSTGRES_CONFIG="/etc/postgresql/*/main/postgresql.conf"
+if [ -f "$POSTGRES_CONFIG" ]; then
+    sed -i '/ssl_min_protocol_version /d' $POSTGRES_CONFIG
+    sed -i '/ssl_ciphers /d' $POSTGRES_CONFIG
+    echo "ssl_min_protocol_version = 'TLSv1.2'" >> $POSTGRES_CONFIG
+    echo "ssl_ciphers = '$CIPHERS'" >> $POSTGRES_CONFIG
+    systemctl restart postgresql
+fi

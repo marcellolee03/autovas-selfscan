@@ -1,0 +1,67 @@
+```powershell
+# Este script foi projetado para atualizar o Python em um sistema Windows para corrigir as vulnerabilidades CVE-2024-6232, CVE-2024-7592, CVE-2024-8088, CVE-2024-45490, CVE-2024-45491, e CVE-2024-45492.
+# Ele assume que o Python está instalado e acessível através do PATH do sistema.
+
+# Define a versão mínima corrigida
+$fixedVersion = "3.10.15"
+
+# Obtém a versão instalada do Python
+$pythonVersion = python -V 2>&1
+$pythonVersion = $pythonVersion.Split(" ")[1].TrimStart("Python")
+
+# Converte as versões para objetos Version para comparação
+$installedVersionObj = [version]$pythonVersion
+$fixedVersionObj = [version]$fixedVersion
+
+# Verifica se a versão instalada é vulnerável
+if ($installedVersionObj -lt $fixedVersionObj) {
+    Write-Host "Versão vulnerável do Python detectada: $($pythonVersion). Atualizando para $($fixedVersion)..."
+
+    # Define o caminho para o diretório Temp do Windows
+    $tempDir = "$env:TEMP"
+
+    # Define o nome do arquivo do instalador
+    $installerFileName = "python-$fixedVersion-amd64.exe"  # Assumindo arquitetura amd64. Ajuste se necessário.
+    $installerPath = Join-Path $tempDir $installerFileName
+
+    # Define o URL para download do instalador do Python (adaptado para versão amd64)
+    $installerURL = "https://www.python.org/ftp/python/$fixedVersion/python-$fixedVersion-amd64.exe" # Confirme se este link está correto no site oficial do Python
+
+    # Baixa o instalador
+    Write-Host "Baixando o instalador do Python..."
+    try {
+        Invoke-WebRequest -Uri $installerURL -OutFile $installerPath
+        Write-Host "Instalador baixado com sucesso para: $installerPath"
+    }
+    catch {
+        Write-Error "Falha ao baixar o instalador: $($_.Exception.Message)"
+        exit 1
+    }
+
+    # Instala o Python silenciosamente
+    Write-Host "Instalando o Python $($fixedVersion) silenciosamente..."
+    try {
+        Start-Process -FilePath $installerPath -ArgumentList "/quiet InstallAllUsers=1 Include_launcher=1 AddToPath=1" -Wait
+        Write-Host "Python atualizado com sucesso para a versão $($fixedVersion)."
+    }
+    catch {
+        Write-Error "Falha na instalação do Python: $($_.Exception.Message)"
+        exit 1
+    }
+
+    # Remove o instalador baixado
+    Write-Host "Limpando o instalador temporário..."
+    try {
+        Remove-Item $installerPath -Force
+        Write-Host "Instalador temporário removido."
+    }
+    catch {
+        Write-Warning "Falha ao remover o instalador temporário: $($_.Exception.Message)"
+    }
+} else {
+    Write-Host "Python está na versão $($pythonVersion) ou mais recente. Nenhuma atualização necessária."
+}
+
+Write-Host "Script de atualização concluído."
+exit 0
+```

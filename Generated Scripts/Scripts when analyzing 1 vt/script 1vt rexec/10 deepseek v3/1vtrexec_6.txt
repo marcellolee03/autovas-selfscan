@@ -1,0 +1,5 @@
+#!/bin/bash
+systemctl stop rexec.service
+systemctl disable rexec.service
+ufw deny 512/tcp
+ufw reload

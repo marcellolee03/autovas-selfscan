@@ -1,0 +1,30 @@
+#!/bin/bash
+
+# Vulnerabilidade 1: Enforce SSL/TLS
+sed -i 's/^#*\(Listen 80\)/\1\nRewriteEngine On\nRewriteCond %{HTTPS} off\nRewriteRule (.*) https://%{HTTP_HOST}%{REQUEST_URI} [R=301,L]/' /etc/apache2/apache2.conf
+a2enmod ssl rewrite
+systemctl restart apache2
+
+# Vulnerabilidade 2: Disable DNS Recursion
+sed -i 's/^\(recursion\) yes;/\1 no;/' /etc/bind/named.conf.options
+systemctl restart bind9
+
+# Vulnerabilidade 3: Disable ICMP Timestamp
+echo "net.ipv4.tcp_timestamps = 0" >> /etc/sysctl.conf
+sysctl -p
+
+# Vulnerabilidade 4: Disable TLSv1.0 and TLSv1.1
+sed -i 's/^SSLProtocol.*/SSLProtocol -all +TLSv1.2 +TLSv1.3/' /etc/apache2/mods-enabled/ssl.conf
+systemctl restart apache2
+
+# Vulnerabilidade 5: Disable SSL/TLS Renegotiation
+sed -i 's/^SSLProtocol.*/SSLProtocol -all +TLSv1.2 +TLSv1.3\nSSLHonorCipherOrder On\nSSLCompression Off/' /etc/apache2/mods-enabled/ssl.conf
+systemctl restart apache2
+
+# Vulnerabilidade 6: Disable Weak Cipher Suites
+sed -i 's/^SSLCipherSuite.*/SSLCipherSuite HIGH:!aNULL:!MD5:!RC4:!3DES/' /etc/apache2/mods-enabled/ssl.conf
+systemctl restart apache2
+
+# Vulnerabilidade 7: Disable TCP Timestamps
+echo "net.ipv4.tcp_timestamps = 0" >> /etc/sysctl.conf
+sysctl -p

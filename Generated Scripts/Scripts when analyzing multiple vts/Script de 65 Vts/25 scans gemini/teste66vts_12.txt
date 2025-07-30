@@ -1,0 +1,108 @@
+```bash
+#!/bin/bash
+
+# Variáveis para controle de versão e caminhos
+python3_10_version="3.10.12"
+python3_12_version="3.12.0"
+
+# Função para verificar se o Python está instalado
+check_python_installed() {
+  if ! command -v python3 &> /dev/null; then
+    echo "Python 3 não está instalado. Por favor, instale-o e tente novamente."
+    exit 1
+  fi
+}
+
+# Atualizar Python 3.10 se instalado nas portas especificadas
+update_python3_10() {
+  echo "Verificando e atualizando Python 3.10..."
+  if [[ "$python3_10_version" == "3.10.12" ]]; then
+    echo "Atualizando Python 3.10 de 3.10.12 para 3.10.16 (ou mais recente)..."
+    # Usar apt para atualizar, se disponível
+    if command -v apt &> /dev/null; then
+      apt update
+      apt install -y python3.10
+    # Usar yum para atualizar, se disponível
+    elif command -v yum &> /dev/null; then
+      yum update -y python3.10
+    # Caso contrário, tentar instalar a partir do código fonte (mais complexo e demorado)
+    else
+      echo "Nenhum gerenciador de pacotes padrão (apt ou yum) encontrado."
+      echo "Por favor, atualize o Python 3.10 manualmente ou use um gerenciador de pacotes."
+      exit 1
+    fi
+    echo "Python 3.10 atualizado."
+  else
+    echo "Python 3.10 não necessita ser atualizado."
+  fi
+}
+
+# Atualizar Python 3.12 se instalado nas portas especificadas
+update_python3_12() {
+  echo "Verificando e atualizando Python 3.12..."
+  if [[ "$python3_12_version" == "3.12.0" ]]; then
+    echo "Atualizando Python 3.12 de 3.12.0 para 3.12.9 (ou mais recente)..."
+    # Usar apt para atualizar, se disponível
+    if command -v apt &> /dev/null; then
+      apt update
+      apt install -y python3.12
+    # Usar yum para atualizar, se disponível
+    elif command -v yum &> /dev/null; then
+      yum update -y python3.12
+    # Caso contrário, tentar instalar a partir do código fonte (mais complexo e demorado)
+    else
+      echo "Nenhum gerenciador de pacotes padrão (apt ou yum) encontrado."
+      echo "Por favor, atualize o Python 3.12 manualmente ou use um gerenciador de pacotes."
+      exit 1
+    fi
+    echo "Python 3.12 atualizado."
+  else
+    echo "Python 3.12 não necessita ser atualizado."
+  fi
+}
+
+# Desativar TLS 1.0 e 1.1 (Exemplo para OpenSSL)
+disable_tls1_0_1_1() {
+  echo "Desativando TLS 1.0 e 1.1 no OpenSSL..."
+  openssl_config="/etc/ssl/openssl.cnf"
+  if [[ -f "$openssl_config" ]]; then
+    sed -i 's/^\(SSLProtocol = \).*/\1-TLSv1 -TLSv1.1/' "$openssl_config"
+    echo "TLS 1.0 e 1.1 desativados em $openssl_config. Reinicie os serviços afetados."
+  else
+    echo "Arquivo de configuração do OpenSSL não encontrado em $openssl_config.  Por favor, desative TLS 1.0 e 1.1 manualmente na configuração do servidor."
+  fi
+}
+
+# Desativar ICMP Timestamp Replies (requer privilégios de root)
+disable_icmp_timestamp() {
+  echo "Desativando respostas ICMP Timestamp..."
+  # Para sistemas Linux que usam sysctl
+  if command -v sysctl &> /dev/null; then
+    sysctl -w net.ipv4.icmp_timestamp_ignore=1
+    echo "net.ipv4.icmp_timestamp_ignore=1 adicionado.  Para tornar permanente, adicione esta linha a /etc/sysctl.conf"
+  else
+    echo "sysctl não encontrado. Por favor, desative as respostas ICMP Timestamp manualmente usando a ferramenta apropriada para seu sistema."
+  fi
+}
+
+# Função principal para executar as correções
+main() {
+  echo "Iniciando script de correção..."
+
+  # Verificar se o script está sendo executado como root para certas operações
+  if [[ $EUID -ne 0 ]]; then
+    echo "Este script pode precisar ser executado como root para algumas operações (desativar ICMP).  Continue com cuidado."
+  fi
+
+  check_python_installed
+  update_python3_10
+  update_python3_12
+  disable_tls1_0_1_1
+  disable_icmp_timestamp
+
+  echo "Script de correção concluído."
+}
+
+# Executar a função principal
+main
+```

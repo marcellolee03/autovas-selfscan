@@ -1,0 +1,46 @@
+#!/bin/bash
+
+# Atualiza o Proxmox VE para a versão mais recente
+apt-get update
+apt-get install -y pve-manager proxmox-ve
+
+# Atualiza o jQuery para a versão mais recente
+find / -name "jquery-1.8.3.min.js" -exec cp /path/to/jquery-latest.min.js {} \;
+
+# Configurações SSH para desabilitar algoritmos fracos
+SSHD_CONFIG="/etc/ssh/sshd_config"
+sed -i 's/^HostKeyAlgorithms.*/HostKeyAlgorithms ecdsa-sha2-nistp256-cert-v01@openssh.com,ecdsa-sha2-nistp384-cert-v01@openssh.com,ecdsa-sha2-nistp521-cert-v01@openssh.com,ssh-ed25519-cert-v01@openssh.com,rsa-sha2-512-cert-v01@openssh.com,rsa-sha2-256-cert-v01@openssh.com,ssh-ed25519,rsa-sha2-512,rsa-sha2-256/' $SSHD_CONFIG
+sed -i 's/^KexAlgorithms.*/KexAlgorithms curve25519-sha256@libssh.org,ecdh-sha2-nistp256,ecdh-sha2-nistp384,ecdh-sha2-nistp521,diffie-hellman-group-exchange-sha256/' $SSHD_CONFIG
+sed -i 's/^Ciphers.*/Ciphers chacha20-poly1305@openssh.com,aes256-gcm@openssh.com,aes128-gcm@openssh.com,aes256-ctr,aes192-ctr,aes128-ctr/' $SSHD_CONFIG
+sed -i 's/^MACs.*/MACs hmac-sha2-512-etm@openssh.com,hmac-sha2-256-etm@openssh.com,umac-128-etm@openssh.com,hmac-sha2-512,hmac-sha2-256,umac-128@openssh.com/' $SSHD_CONFIG
+systemctl restart sshd
+
+# Desabilita timestamps TCP
+echo "net.ipv4.tcp_timestamps = 0" >> /etc/sysctl.conf
+sysctl -p
+
+# Bloqueia ICMP timestamp replies
+iptables -A INPUT -p icmp --icmp-type timestamp-request -j DROP
+iptables -A OUTPUT -p icmp --icmp-type timestamp-reply -j DROP
+
+# Filtra portas DCE/RPC e MSRPC
+iptables -A INPUT -p tcp --dport 135 -j DROP
+iptables -A INPUT -p tcp --dport 39710 -j DROP
+iptables -A INPUT -p tcp --dport 49664 -j DROP
+iptables -A INPUT -p tcp --dport 49665 -j DROP
+iptables -A INPUT -p tcp --dport 49666 -j DROP
+iptables -A INPUT -p tcp --dport 49667 -j DROP
+iptables -A INPUT -p tcp --dport 49668 -j DROP
+iptables -A INPUT -p tcp --dport 49670 -j DROP
+iptables -A INPUT -p tcp --dport 7832 -j DROP
+
+# Desabilita Telnet e habilita SSH
+systemctl stop telnet
+systemctl disable telnet
+apt-get install -y openssh-server
+systemctl enable ssh
+systemctl start ssh
+
+# Desabilita TLSv1.0 e TLSv1.1
+sed -i 's/^SSLProtocol.*/SSLProtocol all -SSLv2 -SSLv3 -TLSv1 -TLSv1.1/' /etc/apache2/mods-enabled/ssl.conf
+systemctl restart apache2

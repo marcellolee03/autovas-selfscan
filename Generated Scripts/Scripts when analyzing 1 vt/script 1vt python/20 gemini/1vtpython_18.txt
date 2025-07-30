@@ -1,0 +1,113 @@
+```bash
+#!/bin/bash
+
+# Variáveis
+PYTHON_VERSION_INSTALLED="3.10.12"
+PYTHON_VERSION_TARGET="3.10.15"
+PORT="5000"
+
+# Log de ações
+log_file="/tmp/python_patch.log"
+
+# Função para logar mensagens
+log() {
+  echo "$(date) - $1" >> "$log_file"
+  echo "$(date) - $1"
+}
+
+# Verifica se o script está sendo executado como root
+if [[ "$EUID" -ne 0 ]]; then
+  log "Este script precisa ser executado como root. Saindo..."
+  exit 1
+fi
+
+# Para distribuições Debian/Ubuntu
+if command -v apt-get &> /dev/null; then
+  log "Sistema Debian/Ubuntu detectado. Usando apt-get."
+
+  # Atualiza a lista de pacotes
+  log "Atualizando lista de pacotes..."
+  apt-get update > /dev/null 2>&1
+
+  # Tenta instalar a versão alvo do Python (se disponível nos repositórios)
+  log "Tentando instalar Python versão $PYTHON_VERSION_TARGET..."
+  apt-get install -y "python3=$PYTHON_VERSION_TARGET-*" "python3-venv=$PYTHON_VERSION_TARGET-*" "python3-pip=$PYTHON_VERSION_TARGET-*" > /dev/null 2>&1
+
+  # Verifica se a versão foi instalada corretamente
+  if python3 --version | grep -q "$PYTHON_VERSION_TARGET"; then
+    log "Python atualizado para a versão $PYTHON_VERSION_TARGET com sucesso."
+  else
+    log "Falha ao atualizar Python para a versão $PYTHON_VERSION_TARGET via apt-get.  Tentando via pyenv..."
+
+    # Tenta instalar via pyenv (se pyenv estiver instalado)
+    if command -v pyenv &> /dev/null; then
+      log "pyenv detectado. Usando pyenv para instalar Python $PYTHON_VERSION_TARGET."
+      pyenv install "$PYTHON_VERSION_TARGET"
+      pyenv global "$PYTHON_VERSION_TARGET"
+
+      if python3 --version | grep -q "$PYTHON_VERSION_TARGET"; then
+        log "Python atualizado para a versão $PYTHON_VERSION_TARGET com sucesso via pyenv."
+      else
+        log "Falha ao atualizar Python para a versão $PYTHON_VERSION_TARGET via pyenv."
+        log "Atualização do Python falhou. Verifique se os repositórios estão configurados corretamente ou instale o pyenv."
+        exit 1
+      fi
+    else
+      log "pyenv não detectado. Por favor, instale o pyenv para continuar a atualização ou atualize manualmente."
+      exit 1
+    fi
+
+  fi
+
+# Para distribuições Red Hat/CentOS/Fedora
+elif command -v yum &> /dev/null || command -v dnf &> /dev/null; then
+  log "Sistema Red Hat/CentOS/Fedora detectado. Usando yum/dnf."
+
+  # Determina qual gerenciador de pacotes usar
+  if command -v dnf &> /dev/null; then
+    package_manager="dnf"
+  else
+    package_manager="yum"
+  fi
+
+  # Tenta instalar a versão alvo do Python (se disponível nos repositórios)
+  log "Tentando instalar Python versão $PYTHON_VERSION_TARGET..."
+  $package_manager install -y "python3=$PYTHON_VERSION_TARGET" > /dev/null 2>&1
+
+  # Verifica se a versão foi instalada corretamente
+  if python3 --version | grep -q "$PYTHON_VERSION_TARGET"; then
+    log "Python atualizado para a versão $PYTHON_VERSION_TARGET com sucesso."
+  else
+    log "Falha ao atualizar Python para a versão $PYTHON_VERSION_TARGET via yum/dnf."
+    log "Atualização do Python falhou. Verifique se os repositórios estão configurados corretamente ou atualize manualmente."
+    exit 1
+  fi
+
+# Para outros sistemas (genérico) - Tentativa de atualização com pip, mas requer configuração correta do ambiente
+else
+  log "Sistema operacional não detectado automaticamente. Tentando atualizar com pip."
+
+  # Atualiza o pip
+  log "Atualizando o pip..."
+  pip3 install --upgrade pip > /dev/null 2>&1
+
+  # Desinstala a versão antiga
+  log "Desinstalando a versão antiga do Python..."
+  pip3 uninstall -y python==$PYTHON_VERSION_INSTALLED > /dev/null 2>&1
+
+  # Instala a nova versão
+  log "Instalando Python versão $PYTHON_VERSION_TARGET..."
+  pip3 install python==$PYTHON_VERSION_TARGET > /dev/null 2>&1
+
+  #Verifica a versão instalada
+   if python3 --version | grep -q "$PYTHON_VERSION_TARGET"; then
+     log "Python atualizado para a versão $PYTHON_VERSION_TARGET com sucesso via pip."
+   else
+     log "Falha ao atualizar Python para a versão $PYTHON_VERSION_TARGET via pip. A instalação via pip pode requerer configuração adicional."
+     exit 1
+   fi
+fi
+
+log "Script de patching finalizado."
+exit 0
+```

@@ -1,0 +1,229 @@
+>analise esse prompt contendo as vulnerabilidades encontradas em um csv do openvas e analise se os scripts que irei enviar em seguida sao capazes de corrigir esses problemas ou nao, me informando uma porcentagem de correcao das vulnerabilidades
+>Vulnerabilidades:
+    # INSTRUÇÕES PARA O MODELO DE IA
+
+    ## PERSONA
+    Você é um especialista em cibersegurança e automação de sistemas, focado em criar scripts de correção (patching). Sua única função é gerar um script que resolva a vulnerabilidade descrita abaixo.
+
+    ## TAREFA
+    Analise o contexto da vulnerabilidade a seguir e gere um script de shell (compatível com o sistema operacional do localhost) que, ao ser executado, corrija permanentemente a vulnerabilidade descrita.
+
+    ## CONTEXTO DA VULNERABILIDADE
+
+# Vulnerabilidade 1
+CVEs: CVE-2012-6708
+NVT Name: jQuery < 1.9.0 XSS Vulnerability
+Port: 80
+Port Protocol: tcp
+Summary: jQuery is prone to a cross-site scripting (XSS)
+  vulnerability.
+Specific Result: Installed version: 1.8.3
+Fixed version:     1.9.0
+Installation
+path / port:       /console/framework/../js/jquery-1.8.3.min.js
+
+Detection info (see OID: 1.3.6.1.4.1.25623.1.0.150658 for more info):
+- Identified file: http://10.129.4.254/console/framework/../js/jquery-1.8.3.min.js
+- Referenced at:   http://10.129.4.254/console/framework/
+
+Vulnerability Detection Method: Checks if a vulnerable version is present on the target host.
+Details:
+jQuery < 1.9.0 XSS Vulnerability
+(OID: 1.3.6.1.4.1.25623.1.0.141636)
+Version used: 2023-07-14T05:06:08Z
+
+Affected Software/OS: jQuery prior to version 1.9.0.
+Product Detection Result: nan
+Solution: Update to version 1.9.0 or later.
+
+    ## REGRAS E RESTRIÇÕES DE SAÍDA
+    1.  **APENAS SCRIPT:** A sua resposta deve conter ÚNICA E EXCLUSIVAMENTE o código do script.
+    2.  **SEM EXPLICAÇÕES:** Não adicione nenhum comentário, explicação, introdução, ou despedida.
+    3.  **SEM BLOCOS DE CÓDIGO MARKDOWN:** Não envolva o script em blocos de código como ` ```bash ` ou ` ```sh `. A resposta deve ser o texto puro do script.
+    4.  **AUTOSSUFICIENTE:** O script deve ser completo, autônomo e não deve exigir interação do usuário para ser executado.
+    5.  **COMPATIBILIDADE:** O script deve ser compatível com o sistema operacional especificado em 'localhost OS'. Se o sistema operacional não for especificado, assuma um sistema baseado em Linux (como Ubuntu/Debian).
+
+    # INÍCIO DO SCRIPT DE CORREÇÃO
+
+
+>Scripts de correção:
+{type: uploaded file
+fileName: 1vtjquery_1.txt
+fullContent:
+#!/bin/bash
+VULNERABLE_VERSION="1.8.3"
+FIXED_VERSION="1.9.0"
+JQUERY_PATH="/console/framework/../js/jquery-1.8.3.min.js"
+TEMP_PATH="/tmp/jquery-1.9.0.min.js"
+
+wget -q "https://code.jquery.com/jquery-${FIXED_VERSION}.min.js" -O ${TEMP_PATH}
+if [ -f ${TEMP_PATH} ]; then
+    mv ${TEMP_PATH} ${JQUERY_PATH}
+    chown www-data:www-data ${JQUERY_PATH}
+    chmod 644 ${JQUERY_PATH}
+    echo "jQuery updated to version ${FIXED_VERSION}."
+else
+    echo "Failed to download jQuery ${FIXED_VERSION}."
+    exit 1
+fi}
+{type: uploaded file
+fileName: 1vtjquery_2.txt
+fullContent:
+#!/bin/bash
+VULNERABLE_JS="/console/framework/../js/jquery-1.8.3.min.js"
+FIXED_JS_URL="https://code.jquery.com/jquery-1.9.0.min.js"
+TEMP_FILE=$(mktemp)
+
+curl -s "$FIXED_JS_URL" -o "$TEMP_FILE"
+
+if [ $? -eq 0 ]; then
+    mv "$TEMP_FILE" "$VULNERABLE_JS"
+    chmod 644 "$VULNERABLE_JS"
+else
+    rm -f "$TEMP_FILE"
+    exit 1
+fi}
+{type: uploaded file
+fileName: 1vtjquery_3.txt
+fullContent:
+#!/bin/bash
+jquery_path="/console/framework/../js/jquery-1.8.3.min.js"
+jquery_url="https://code.jquery.com/jquery-1.9.0.min.js"
+wget -O "${jquery_path}" "${jquery_url}"}
+{type: uploaded file
+fileName: 1vtjquery_4.txt
+fullContent:
+#!/bin/bash
+VULNERABLE_VERSION="1.8.3"
+FIXED_VERSION="1.9.0"
+JS_PATH="/console/framework/../js/jquery-1.8.3.min.js"
+BACKUP_PATH="${JS_PATH}.bak"
+
+if [ -e "$JS_PATH" ]; then
+    CURRENT_VERSION=$(grep -oP "(?<=jQuery v)\d+\.\d+\.\d+" "$JS_PATH" | head -1)
+    if [ "$CURRENT_VERSION" == "$VULNERABLE_VERSION" ]; then
+        mv "$JS_PATH" "$BACKUP_PATH"
+        wget -q "https://code.jquery.com/jquery-$FIXED_VERSION.min.js" -O "$JS_PATH"
+        if [ $? -eq 0 ]; then
+            echo "jQuery updated from $VULNERABLE_VERSION to $FIXED_VERSION."
+            rm -f "$BACKUP_PATH"
+        else
+            mv "$BACKUP_PATH" "$JS_PATH"
+            echo "Failed to update jQuery. Reverting changes."
+        fi
+    else
+        echo "jQuery version $CURRENT_VERSION is not vulnerable."
+    fi
+else
+    echo "jQuery file not found at $JS_PATH."
+fi}
+{type: uploaded file
+fileName: 1vtjquery_5.txt
+fullContent:
+#!/bin/bash
+VULNERABLE_VERSION="1.8.3"
+FIXED_VERSION="1.9.0"
+FILE_PATH="/console/framework/../js/jquery-1.8.3.min.js"
+TEMP_FILE="/tmp/jquery-${FIXED_VERSION}.min.js"
+DOWNLOAD_URL="https://code.jquery.com/jquery-${FIXED_VERSION}.min.js"
+
+wget -O "${TEMP_FILE}" "${DOWNLOAD_URL}"
+if [ $? -eq 0 ]; then
+    mv "${TEMP_FILE}" "${FILE_PATH}"
+    chmod 644 "${FILE_PATH}"
+    echo "jQuery updated to version ${FIXED_VERSION}."
+else
+    echo "Failed to download jQuery ${FIXED_VERSION}."
+    exit 1
+fi}
+{type: uploaded file
+fileName: 1vtjquery_6.txt
+fullContent:
+#!/bin/bash
+JQUERY_URL="https://code.jquery.com/jquery-1.9.0.min.js"
+TARGET_DIR="/console/framework/js"
+TARGET_FILE="jquery-1.8.3.min.js"
+BACKUP_DIR="/var/backups/jquery"
+
+mkdir -p "$BACKUP_DIR"
+cp "$TARGET_DIR/$TARGET_FILE" "$BACKUP_DIR/$TARGET_FILE.bak"
+
+wget -O "$TARGET_DIR/$TARGET_FILE" "$JQUERY_URL"
+
+if [ $? -eq 0 ]; then
+    echo "jQuery atualizado com sucesso para a versão 1.9.0."
+else
+    echo "Falha ao atualizar jQuery. Restaurando backup."
+    cp "$BACKUP_DIR/$TARGET_FILE.bak" "$TARGET_DIR/$TARGET_FILE"
+fi}
+{type: uploaded file
+fileName: 1vtjquery_7.txt
+fullContent:
+#!/bin/bash
+jquery_path="/console/framework/../js/jquery-1.8.3.min.js"
+download_url="https://code.jquery.com/jquery-3.7.0.min.js"
+
+mkdir -p "$(dirname $jquery_path)"
+curl -o $jquery_path $download_url
+
+if [ $? -eq 0 ]; then
+    echo "jQuery updated to version 3.7.0."
+else
+    echo "Failed to update jQuery."
+    exit 1
+fi}
+{type: uploaded file
+fileName: 1vtjquery_8.txt
+fullContent:
+#!/bin/bash
+JQUERY_URL="https://code.jquery.com/jquery-1.9.0.min.js"
+TARGET_DIR="/console/framework/../js"
+TARGET_FILE="$TARGET_DIR/jquery-1.8.3.min.js"
+BACKUP_FILE="$TARGET_FILE.bak"
+
+mkdir -p "$TARGET_DIR"
+mv "$TARGET_FILE" "$BACKUP_FILE"
+curl -o "$TARGET_FILE" "$JQUERY_URL" > /dev/null 2>&1
+
+if [ $? -eq 0 ]; then
+    chown root:root "$TARGET_FILE"
+    chmod 644 "$TARGET_FILE"
+fi}
+{type: uploaded file
+fileName: 1vtjquery_9.txt
+fullContent:
+#!/bin/bash
+VULNERABLE_FILE="/console/framework/../js/jquery-1.8.3.min.js"
+FIXED_VERSION_URL="https://code.jquery.com/jquery-1.9.0.min.js"
+TMP_FILE=$(mktemp)
+
+wget -O $TMP_FILE $FIXED_VERSION_URL
+if [ $? -eq 0 ]; then
+    mv $TMP_FILE $VULNERABLE_FILE
+    chmod 644 $VULNERABLE_FILE
+    echo "jQuery updated to version 1.9.0"
+else
+    echo "Failed to download the fixed version"
+    rm -f $TMP_FILE
+    exit 1
+fi}
+{type: uploaded file
+fileName: 1vtjquery_10.txt
+fullContent:
+#!/bin/bash
+VULNERABLE_VERSION="1.8.3"
+FIXED_VERSION="1.9.0"
+JQUERY_FILE="/console/framework/../js/jquery-1.8.3.min.js"
+TEMP_DIR=$(mktemp -d)
+
+cd "$TEMP_DIR"
+wget "https://code.jquery.com/jquery-$FIXED_VERSION.min.js" -O jquery-$FIXED_VERSION.min.js
+
+if [ -f "jquery-$FIXED_VERSION.min.js" ]; then
+    mv "jquery-$FIXED_VERSION.min.js" "$JQUERY_FILE"
+    echo "jQuery updated to version $FIXED_VERSION."
+else
+    echo "Failed to download jQuery $FIXED_VERSION."
+fi
+
+rm -rf "$TEMP_DIR"}

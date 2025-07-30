@@ -1,0 +1,53 @@
+```bash
+#!/bin/bash
+
+# Descrição: Desabilita TLSv1.0 e TLSv1.1 para o serviço PostgreSQL (porta 5432).
+#           Este script assume que o PostgreSQL está configurado para usar TLS.
+#           Ele modifica o arquivo de configuração postgresql.conf para desabilitar TLSv1.0 e TLSv1.1.
+#           Em seguida, reinicia o serviço PostgreSQL para aplicar as mudanças.
+
+# Variáveis
+PG_CONF_FILE="/etc/postgresql/$(pg_lsclusters | awk '$2 == 5432 {print $1}')/main/postgresql.conf"
+SERVICE_NAME="postgresql"
+
+# Verifica se o arquivo de configuração existe
+if [ ! -f "$PG_CONF_FILE" ]; then
+  echo "Erro: Arquivo de configuração do PostgreSQL não encontrado: $PG_CONF_FILE"
+  exit 1
+fi
+
+# Realiza um backup do arquivo de configuração
+cp "$PG_CONF_FILE" "$PG_CONF_FILE.bak"
+
+# Desabilita TLSv1.0 e TLSv1.1 adicionando a configuração ssl_min_protocol
+if grep -q "ssl_min_protocol" "$PG_CONF_FILE"; then
+  # Se a configuração já existe, atualiza
+  sed -i "s/^ssl_min_protocol.*/ssl_min_protocol = 'TLSv1.2'/g" "$PG_CONF_FILE"
+else
+  # Se não existe, adiciona a nova configuração
+  echo "ssl_min_protocol = 'TLSv1.2'" >> "$PG_CONF_FILE"
+fi
+
+# Reinicia o serviço PostgreSQL
+if systemctl is-active --quiet "$SERVICE_NAME"; then
+  systemctl restart "$SERVICE_NAME"
+  if [ $? -eq 0 ]; then
+    echo "Serviço PostgreSQL reiniciado com sucesso."
+  else
+    echo "Erro ao reiniciar o serviço PostgreSQL."
+    exit 1
+  fi
+else
+  echo "Serviço PostgreSQL não está em execução. Iniciando..."
+  systemctl start "$SERVICE_NAME"
+  if [ $? -eq 0 ]; then
+        echo "Serviço PostgreSQL iniciado com sucesso."
+  else
+        echo "Erro ao iniciar o serviço PostgreSQL."
+        exit 1
+  fi
+fi
+
+echo "TLSv1.0 e TLSv1.1 desabilitados com sucesso no PostgreSQL."
+exit 0
+```

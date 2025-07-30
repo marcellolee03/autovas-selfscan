@@ -1,0 +1,71 @@
+#!/bin/bash
+# Backup the current sources.list
+cp /etc/apt/sources.list /etc/apt/sources.list.bak
+
+# Configure repositories for Hardy Heron (8.04) using old-releases
+echo "deb http://old-releases.ubuntu.com/ubuntu/ hardy main restricted universe multiverse" > /etc/apt/sources.list
+echo "deb http://old-releases.ubuntu.com/ubuntu/ hardy-updates main restricted universe multiverse" >> /etc/apt/sources.list
+echo "deb http://old-releases.ubuntu.com/ubuntu/ hardy-security main restricted universe multiverse" >> /etc/apt/sources.list
+
+# Update package lists and apply security updates
+DEBIAN_FRONTEND=noninteractive apt-get -y update
+DEBIAN_FRONTEND=noninteractive apt-get -y upgrade
+
+# Prepare the minimal step-by-step upgrade script for subsequent stages
+cat << 'EOF' > /root/upgrade_os.sh
+#!/bin/bash
+CURRENT_VERSION=$(lsb_release -cs)
+declare -A NEXT_VERSION=(
+    ["hardy"]="lucid"
+    ["lucid"]="precise"
+    ["precise"]="trusty"
+    ["trusty"]="xenial"
+    ["xenial"]="bionic"
+    ["bionic"]="focal"
+    ["focal"]="jammy"
+)
+NEXT=${NEXT_VERSION[$CURRENT_VERSION]}
+
+# Cleanup final rc.local after jammy upgrade
+if [ "$CURRENT_VERSION" == "focal" ]; then
+    sed -i '/upgrade_os.sh/d' /etc/rc.local
+fi
+
+# Configure repositories for EOL releases
+case "$NEXT" in
+    lucid|precise|trusty|xenial|bionic)
+        echo "deb http://old-releases.ubuntu.com/ubuntu/ $NEXT main restricted universe multiverse" > /etc/apt/sources.list
+        echo "deb http://old-releases.ubuntu.com/ubuntu/ $NEXT-updates main restricted universe multiverse" >> /etc/apt/sources.list
+        echo "deb http://old-releases.ubuntu.com/ubuntu/ $NEXT-security main restricted universe multiverse" >> /etc/apt/sources.list
+        ;;
+    focal|jammy)
+        echo "deb http://archive.ubuntu.com/ubuntu/ $NEXT main restricted universe multiverse" > /etc/apt/sources.list
+        echo "deb http://archive.ubuntu.com/ubuntu/ $NEXT-updates main restricted universe multiverse" >> /etc/apt/sources.list
+        echo "deb http://archive.ubuntu.com/ubuntu/ $NEXT-security main restricted universe multiverse" >> /etc/apt/sources.list
+        ;;
+esac
+
+# Update and partial upgrade
+DEBIAN_FRONTEND=noninteractive apt-get -y update
+DEBIAN_FRONTEND=noninteractive apt-get -y upgrade
+DEBIAN_FRONTEND=noninteractive apt-get -y dist-upgrade
+
+# Perform release upgrade
+export DEBIAN_FRONTEND=noninteractive
+do-release-upgrade -f DistUpgradeViewNonInteractive -q
+
+# Reschedule next stage upgrade if needed
+if [ -n "$NEXT" ] && [ "$NEXT" != "jammy" ]; then
+    echo "/root/upgrade_os.sh" >> /etc/rc.local
+fi
+EOF
+
+chmod +x /root/upgrade_os.sh
+
+# Schedule first upgrade in rc.local
+echo "/root/upgrade_os.sh" >> /etc/rc.local
+
+# Perform initial release upgrade to Lucid (10.04)
+export DEBIAN_FRONTEND=noninteractive
+do-release-upgrade -f DistUpgradeViewNonInteractive -q
+reboot

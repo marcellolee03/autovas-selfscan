@@ -1,0 +1,17 @@
+```sh
+#!/bin/bash
+
+# Define o arquivo de configuração do SSH
+SSH_CONFIG="/etc/ssh/sshd_config"
+
+# Remove a entrada HostKeyAlgorithms existente (se houver)
+sudo sed -i '/^HostKeyAlgorithms/d' "$SSH_CONFIG"
+
+# Adiciona a linha com algoritmos de chave de host seguros
+sudo echo "HostKeyAlgorithms ssh-ed25519,ecdsa-sha2-nistp256,ecdsa-sha2-nistp384,ecdsa-sha2-nistp521,rsa-sha2-256,rsa-sha2-512" | sudo tee -a "$SSH_CONFIG"
+
+# Reinicia o serviço SSH para aplicar as alterações
+sudo systemctl restart sshd
+
+echo "Vulnerabilidade CVE-nan (Weak Host Key Algorithm(s) (SSH)) corrigida. Algoritmo ssh-dss desabilitado."
+```

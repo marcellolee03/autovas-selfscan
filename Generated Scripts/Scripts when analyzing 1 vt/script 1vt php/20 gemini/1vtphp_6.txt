@@ -1,0 +1,68 @@
+```bash
+#!/bin/bash
+
+# Verificar se o sistema é Debian/Ubuntu (ou similar)
+if command -v apt-get &> /dev/null; then
+  # Atualizar o sistema
+  apt-get update
+  
+  # Verificar a versão atual do PHP
+  CURRENT_PHP_VERSION=$(php -v 2>&1 | head -n 1 | cut -d ' ' -f 2 | cut -d '.' -f 1,2)
+
+  # Atualizar o PHP para a versão mais recente (se a versão for vulnerável)
+  if [[ "$CURRENT_PHP_VERSION" == "5.3" ]]; then
+    apt-get install --only-upgrade php5 libapache2-mod-php5 php5-cli php5-cgi
+  elif [[ "$CURRENT_PHP_VERSION" == "5.4" ]]; then
+    apt-get install --only-upgrade php5 libapache2-mod-php5 php5-cli php5-cgi
+  else
+    echo "Versão do PHP não vulnerável ou não suportada por este script."
+    exit 0
+  fi
+  
+  # Verificar se o Apache está instalado e, se estiver, reiniciá-lo
+  if command -v apache2ctl &> /dev/null; then
+    systemctl restart apache2
+  elif command -v service &> /dev/null; then
+    service apache2 restart
+  else
+    echo "Apache não detectado. Reinicie o servidor web manualmente."
+  fi
+  
+  echo "Sistema atualizado e Apache reiniciado (se aplicável)."
+
+# Verificar se o sistema é CentOS/RHEL (ou similar)
+elif command -v yum &> /dev/null; then
+  # Atualizar o sistema
+  yum update -y
+
+  # Verificar a versão atual do PHP
+  CURRENT_PHP_VERSION=$(php -v 2>&1 | head -n 1 | cut -d ' ' -f 2 | cut -d '.' -f 1,2)
+  
+  # Atualizar o PHP para a versão mais recente (se a versão for vulnerável)
+  if [[ "$CURRENT_PHP_VERSION" == "5.3" ]]; then
+    yum update -y php
+  elif [[ "$CURRENT_PHP_VERSION" == "5.4" ]]; then
+    yum update -y php
+  else
+    echo "Versão do PHP não vulnerável ou não suportada por este script."
+    exit 0
+  fi
+  
+  # Verificar se o Apache está instalado e, se estiver, reiniciá-lo
+  if command -v systemctl &> /dev/null; then
+    systemctl restart httpd
+  elif command -v service &> /dev/null; then
+    service httpd restart
+  else
+    echo "Apache não detectado. Reinicie o servidor web manualmente."
+  fi
+  
+  echo "Sistema atualizado e Apache reiniciado (se aplicável)."
+  
+else
+  echo "Sistema operacional não suportado. Atualize o PHP manualmente."
+  exit 1
+fi
+
+exit 0
+```

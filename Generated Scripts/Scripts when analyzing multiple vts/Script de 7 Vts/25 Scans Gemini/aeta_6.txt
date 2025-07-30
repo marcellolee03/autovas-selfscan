@@ -1,0 +1,64 @@
+```bash
+#!/bin/bash
+
+# Vulnerabilidade 1: Cleartext Transmission of Sensitive Information via HTTP
+# Solução: Impossível de corrigir via script sem acesso à configuração do servidor web.
+# Requer configuração do servidor web para redirecionar HTTP para HTTPS e habilitar HSTS.
+# Este script apenas imprime um lembrete.
+echo "AVISO: Vulnerabilidade de transmissão em texto claro via HTTP detectada."
+echo "       A correção requer configuração do servidor web para habilitar HTTPS e redirecionamento HTTP."
+echo "       Considere habilitar HSTS para reforçar a segurança."
+
+# Vulnerabilidade 2: DNS Cache Snooping Vulnerability (UDP) - Active Check
+# Solução: Desabilitar recursão ou restringir acesso público ao servidor DNS.
+# Este script modifica a configuração do named/bind9 para desabilitar recursão.
+# Adapte o script para outros servidores DNS se necessário.
+if [ -f "/etc/bind/named.conf.options" ]; then
+  echo "options {" >> /tmp/named.conf.options.tmp
+  echo "  recursion no;" >> /tmp/named.conf.options.tmp
+  echo "  forwarders { 8.8.8.8; 8.8.4.4; };" >> /tmp/named.conf.options.tmp
+  echo "};" >> /tmp/named.conf.options.tmp
+  
+  sudo mv /tmp/named.conf.options.tmp /etc/bind/named.conf.options
+  sudo systemctl restart bind9
+  echo "Servidor DNS configurado para desabilitar recursão (DNS Cache Snooping)."
+else
+  echo "Arquivo de configuração do BIND9 não encontrado.  Ajuste o script se estiver usando outro servidor DNS."
+fi
+
+# Vulnerabilidade 3: ICMP Timestamp Reply Information Disclosure
+# Solução: Desabilitar ICMP timestamps.
+echo 1 > /proc/sys/net/ipv4/icmp_echo_ignore_all
+echo "ICMP Timestamp Replies desabilitados temporariamente."
+echo "Para tornar a alteração permanente, adicione 'net.ipv4.icmp_echo_ignore_all=1' em /etc/sysctl.conf e execute 'sudo sysctl -p'."
+
+# Vulnerabilidade 4: SSL/TLS: Deprecated TLSv1.0 and TLSv1.1 Protocol Detection
+# Solução: Desabilitar TLSv1.0 e TLSv1.1. Requer configuração do servidor web (Apache, Nginx, etc.).
+# Este script apenas imprime um lembrete.
+echo "AVISO: Protocolos TLSv1.0 e TLSv1.1 estão obsoletos."
+echo "       A correção requer configuração do servidor web para desabilitá-los e habilitar TLSv1.2 ou superior."
+echo "       Exemplo para Nginx: ssl_protocols TLSv1.2 TLSv1.3;"
+echo "       Exemplo para Apache: SSLProtocol all -SSLv3 -TLSv1 -TLSv1.1"
+
+# Vulnerabilidade 5: SSL/TLS: Renegotiation DoS Vulnerability (CVE-2011-1473, CVE-2011-5094)
+# Solução: Desabilitar renegotiation. Requer configuração do servidor web (Apache, Nginx, etc.).
+# Este script apenas imprime um lembrete.
+echo "AVISO: Vulnerabilidade de Renegociação SSL/TLS detectada."
+echo "       A correção requer configuração do servidor web para desabilitar a renegotiation."
+echo "       Em Apache, considere 'SSLOptions -StdEnvVars -ExportCertData -StrictRequire' e atualizar para versão >= 2.2.21."
+echo "       Em Nginx, a partir da versão 1.5.7, a renegotiation é desabilitada por padrão."
+
+# Vulnerabilidade 6: SSL/TLS: Report Weak Cipher Suites
+# Solução: Configurar cipher suites fortes. Requer configuração do servidor web (Apache, Nginx, etc.).
+# Este script apenas imprime um lembrete.
+echo "AVISO: Cipher Suites Fracos detectados."
+echo "       A correção requer configuração do servidor web para usar cipher suites fortes."
+echo "       Exemplo para Nginx: ssl_ciphers 'TLS13+AESGCM+AES128:TLS13+CHACHA20:EECDH+AESGCM+AES128:EECDH+CHACHA20:EDH+AESGCM+AES128:EDH+CHACHA20:AESGCM+AES128:CHACHA20:!aNULL:!eNULL:!EXPORT:!DES:!RC4:!MD5:!PSK';"
+echo "       Exemplo para Apache: SSLCipherSuite ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-SHA384:ECDHE-RSA-AES256-SHA384:ECDHE-ECDSA-AES128-SHA256:ECDHE-RSA-AES128-SHA256"
+
+# Vulnerabilidade 7: TCP Timestamps Information Disclosure
+# Solução: Desabilitar TCP timestamps.
+echo "net.ipv4.tcp_timestamps = 0" >> /etc/sysctl.conf
+sysctl -p
+echo "TCP Timestamps desabilitados."
+```

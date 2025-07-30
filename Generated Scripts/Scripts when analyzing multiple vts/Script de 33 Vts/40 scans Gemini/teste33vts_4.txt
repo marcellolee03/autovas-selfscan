@@ -1,0 +1,105 @@
+```bash
+#!/bin/bash
+
+# Vulnerability 1: Proxmox VE EOL
+# Solution: Update Proxmox VE to a supported version.  This script cannot automatically perform the update
+# due to the complexities and potential for data loss.  Manual update is required.
+echo "WARNING: Proxmox VE is EOL.  Manual update to a supported version is required."
+echo "Refer to the Proxmox documentation for upgrade instructions."
+
+# Vulnerability 2-6: jQuery < 1.9.0 XSS Vulnerability
+# Solution: Update jQuery to version 1.9.0 or later.
+# Vulnerable file paths:
+jquery_files=(
+    "/var/www/html/../js/jquery-1.8.3.min.js"
+    "/var/www/html/opscenter/webcommon/framework/../js/jquery-1.8.3.min.js"
+    "/var/www/html/framesets/../js/jquery-1.8.3.min.js"
+    "/var/www/html/frameset/../js/jquery-1.8.3.min.js"
+    "/var/www/html/console/framework/../js/jquery-1.8.3.min.js"
+)
+
+new_jquery_url="https://code.jquery.com/jquery-1.9.0.min.js"
+backup_dir="/tmp/jquery_backup"
+
+# Create backup directory
+mkdir -p "$backup_dir"
+
+for file in "${jquery_files[@]}"; do
+    if [ -f "$file" ]; then
+        echo "Backing up $file to $backup_dir"
+        cp "$file" "$backup_dir/$(basename "$file").$(date +%Y%m%d%H%M%S).bak"
+        echo "Downloading and replacing $file with jQuery 1.9.0"
+        wget -q "$new_jquery_url" -O "$file"
+        if [ $? -eq 0 ]; then
+          echo "$file updated successfully."
+        else
+          echo "Failed to update $file.  Restore from backup if necessary."
+        fi
+    else
+        echo "File not found: $file"
+    fi
+done
+
+# Vulnerability 7-9, 13-16, 19, 21-22: Weak SSH Algorithms
+# Solution: Disable weak SSH algorithms.
+
+ssh_config="/etc/ssh/sshd_config"
+ssh_config_backup="/etc/ssh/sshd_config.bak"
+
+# Backup sshd_config
+if [ ! -f "$ssh_config_backup" ]; then
+    cp "$ssh_config" "$ssh_config_backup"
+    echo "Backed up $ssh_config to $ssh_config_backup"
+fi
+
+# Disable weak KEX algorithms, weak MAC algorithms, and weak ciphers.
+sed -i "s/^KexAlgorithms .*/KexAlgorithms curve25519-sha256@libssh.org,ecdh-sha2-nistp256,ecdh-sha2-nistp384,ecdh-sha2-nistp521,diffie-hellman-group-exchange-sha256/g" "$ssh_config"
+sed -i "s/^Ciphers .*/Ciphers chacha20-poly1305@openssh.com,aes256-gcm@openssh.com,aes128-gcm@openssh.com,aes256-ctr,aes192-ctr,aes128-ctr/g" "$ssh_config"
+sed -i "s/^MACs .*/MACs hmac-sha2-512-etm@openssh.com,hmac-sha2-256-etm@openssh.com,umac-128-etm@openssh.com,hmac-sha2-512,hmac-sha2-256,umac-128@openssh.com/g" "$ssh_config"
+#Remove existing HostKeyAlgorithms and add new one to only allow rsa-sha2-512 and rsa-sha2-256
+sed -i '/^HostKeyAlgorithms/d' "$ssh_config"
+echo "HostKeyAlgorithms rsa-sha2-512,rsa-sha2-256,ecdsa-sha2-nistp256,ssh-ed25519" >> "$ssh_config"
+
+# Restart SSH service
+systemctl restart sshd
+echo "SSH service restarted to apply new configuration."
+
+# Vulnerability 10: DCE/RPC and MSRPC Services Enumeration Reporting
+# Solution: Filter incoming traffic to port 135 using a firewall.
+echo "WARNING: DCE/RPC and MSRPC services enumeration is possible."
+echo "Implement firewall rules to filter incoming traffic to port 135."
+echo "Example (iptables): iptables -A INPUT -p tcp --dport 135 -j DROP"
+
+# Vulnerability 11: Telnet Unencrypted Cleartext Login
+# Solution: Disable Telnet and use SSH.
+if systemctl is-active telnet.socket; then
+  systemctl stop telnet.socket
+  systemctl disable telnet.socket
+  echo "Telnet service stopped and disabled. Use SSH instead."
+else
+  echo "Telnet service is not active."
+fi
+
+# Vulnerability 12: SSL/TLS: Deprecated TLSv1.0 and TLSv1.1 Protocol Detection
+# Solution: Disable TLSv1.0 and TLSv1.1.
+# This requires configuration changes in the specific service using TLS.
+# Example for Apache:
+# SSLProtocol             all -SSLv3 -TLSv1 -TLSv1.1 +TLSv1.2 +TLSv1.3
+echo "WARNING: TLSv1.0 and TLSv1.1 are enabled. Disable them in the service configuration (e.g., Apache, Nginx)."
+echo "Example for Apache: SSLProtocol all -SSLv3 -TLSv1 -TLSv1.1 +TLSv1.2 +TLSv1.3"
+
+# Vulnerability 17-18, 20, 23-25: TCP Timestamps Information Disclosure
+# Solution: Disable TCP timestamps.
+echo "Disabling TCP timestamps."
+echo "net.ipv4.tcp_timestamps = 0" >> /etc/sysctl.conf
+sysctl -p
+echo "TCP timestamps disabled. Reboot may be required."
+
+# Vulnerability 26-32: ICMP Timestamp Reply Information Disclosure
+# Solution: Disable ICMP timestamp replies.
+echo "Disabling ICMP timestamp replies."
+echo "net.ipv4.icmp_echo_ignore_all = 1" >> /etc/sysctl.conf
+echo "net.ipv4.icmp_echo_ignore_broadcasts = 1" >> /etc/sysctl.conf
+sysctl -p
+echo "ICMP timestamp replies disabled. Reboot may be required."
+```

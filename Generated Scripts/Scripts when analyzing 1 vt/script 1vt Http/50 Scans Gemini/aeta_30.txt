@@ -1,0 +1,44 @@
+#!/bin/bash
+
+# Este script corrige a vulnerabilidade de transmissão de informações sensíveis em texto plano via HTTP.
+# Ele configura o redirecionamento de HTTP para HTTPS e implementa práticas recomendadas de segurança.
+
+# Variáveis
+HTTP_PORT=80
+HTTPS_PORT=443
+DOMINIO="seu_dominio.com" # Substitua pelo seu domínio
+NOME_CERTIFICADO="seu_dominio.com" # Substitua pelo nome do seu certificado
+
+# 1. Instalação do Certbot (se necessário)
+# Adapte o comando de instalação de acordo com sua distribuição Linux
+apt update && apt install -y certbot python3-certbot-nginx  # Exemplo para Debian/Ubuntu
+
+# 2. Obtenção de um certificado SSL/TLS (se necessário)
+# Certbot pode gerar certificados Let's Encrypt automaticamente
+# Substitua 'seu_email@exemplo.com' por um endereço de e-mail válido.
+certbot --nginx -d $DOMINIO -d www.$DOMINIO --email seu_email@exemplo.com --agree-tos --non-interactive --redirect --hsts --staple --must-staple
+
+# 3. Configuração do Nginx para redirecionamento HTTP para HTTPS
+# Este bloco adiciona um arquivo de configuração para o Nginx que redireciona todo o tráfego HTTP para HTTPS.
+cat <<EOF > /etc/nginx/conf.d/http_redirect.conf
+server {
+    listen $HTTP_PORT;
+    server_name $DOMINIO www.$DOMINIO;
+    return 301 https://\$host\$request_uri;
+}
+EOF
+
+# 4. Reiniciar o Nginx para aplicar as mudanças
+systemctl restart nginx
+
+# 5. Configuração adicional de segurança (opcional, mas recomendado)
+# Ajustar as configurações do Nginx para maior segurança
+# Exemplo: Desativar TLSv1 e TLSv1.1 (adicione ao bloco 'server' HTTPS do arquivo de configuração do seu domínio)
+
+# 6. Testar a configuração
+# Use um navegador para acessar o site via HTTP e verifique se o redirecionamento para HTTPS funciona corretamente.
+# Exemplo: http://seu_dominio.com
+
+echo "Script de correção concluído. Verifique se o redirecionamento HTTP para HTTPS está funcionando corretamente."
+echo "Lembre-se de substituir 'seu_dominio.com' e 'seu_email@exemplo.com' pelos seus valores reais."
+exit 0

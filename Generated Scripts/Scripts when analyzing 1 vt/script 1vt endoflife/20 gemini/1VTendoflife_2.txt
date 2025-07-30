@@ -1,0 +1,70 @@
+```bash
+#!/bin/bash
+
+# Este script atualiza o sistema operacional Ubuntu para uma versão suportada.
+# Ele foi projetado para migrar de Ubuntu 8.04, que atingiu o fim da vida útil (EOL).
+# Devido à grande diferença entre 8.04 e as versões atuais, uma atualização direta não é possível.
+# Este script oferece um caminho de atualização minimamente invasivo para uma versão LTS ainda suportada.
+# Recomenda-se realizar um backup completo do sistema antes de executar este script.
+
+# Interrompe a execução em caso de erros.
+set -e
+
+# Define a nova versão do Ubuntu para a qual atualizar (LTS mais recente).
+NEW_VERSION="22.04"
+
+# Exibe um aviso importante ao usuário.
+echo "######################################################################"
+echo "# AVISO: Este script atualizará seu sistema de Ubuntu 8.04 para Ubuntu ${NEW_VERSION}."
+echo "# Este processo envolve a reinstalação do sistema operacional."
+echo "# TODOS OS DADOS SERÃO PERDIDOS.  Certifique-se de ter um backup completo."
+echo "# Este script tentará preservar a partição /home, mas isso NÃO é garantido."
+echo "# Execute este script SOMENTE se você tiver um backup e entender os riscos."
+echo "######################################################################"
+echo "Pressione ENTER para continuar ou Ctrl+C para cancelar."
+read
+
+# Atualiza a lista de pacotes e atualiza o sistema (mesmo que antigo, tenta pegar algo).
+apt-get update
+apt-get upgrade -y
+apt-get dist-upgrade -y
+
+# Remove pacotes obsoletos.
+apt-get autoremove -y
+
+# Instala o 'do-release-upgrade' (pode falhar se os repositórios estiverem muito desatualizados).
+apt-get install update-manager-core -y
+
+# Executa a atualização para a versão mais recente disponível.
+# A atualização pode falhar devido a repositórios antigos ou ausentes.
+# Se falhar, o script continuará com a reinstalação.
+do-release-upgrade
+
+# Se a atualização falhar ou não for possível, procede com a reinstalação.
+echo "Atualização falhou ou não é possível.  Preparando para reinstalação."
+
+# Cria um arquivo para listar os pacotes instalados.
+dpkg --get-selections > /root/installed_packages.txt
+
+# Backup da pasta /home
+echo "Fazendo backup da pasta /home para /root/home_backup_"$(date +%Y%m%d%H%M%S)
+mv /home /root/home_backup_"$(date +%Y%m%d%H%M%S)"
+
+# Exibe instruções para reinstalar o Ubuntu e restaurar a pasta /home.
+echo "######################################################################"
+echo "# Reinstale o Ubuntu ${NEW_VERSION} a partir de uma mídia de instalação (CD/DVD/USB)."
+echo "# Durante a instalação, escolha a opção 'Apagar disco e instalar o Ubuntu'."
+echo "# Após a instalação, execute os seguintes comandos para restaurar seus dados da pasta /home:"
+echo "# 1. sudo mv /home /home_old"
+echo "# 2. sudo mv /root/home_backup_"$(date +%Y%m%d%H%M%S)" /home"
+echo "# 3. sudo chown -R $(id -u):$(id -g) /home/*"
+echo "# (Certifique-se de substituir $(id -u) e $(id -g) pelo seu UID e GID)."
+echo "#"
+echo "# Para reinstalar os pacotes, execute:"
+echo "# sudo dpkg --set-selections < /root/installed_packages.txt"
+echo "# sudo apt-get dselect-upgrade"
+echo "######################################################################"
+echo "Script concluído. Requer ação manual para reinstalar o sistema."
+echo "O sistema será desligado."
+shutdown -r now
+```

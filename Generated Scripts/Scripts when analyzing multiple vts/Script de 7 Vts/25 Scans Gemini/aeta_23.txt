@@ -1,0 +1,85 @@
+```bash
+#!/bin/bash
+
+# Desabilitar o envio de timestamps ICMP
+echo 1 > /proc/sys/net/ipv4/icmp_echo_ignore_all
+
+# Desabilitar TCP timestamps
+echo "net.ipv4.tcp_timestamps = 0" >> /etc/sysctl.conf
+sysctl -p
+
+# Desabilitar recursion no DNS (BIND9) - Ajuste conforme seu servidor DNS
+# Antes de executar, entenda o impacto de desabilitar recursion.
+# Isso pode quebrar a resolução de nomes para clientes internos se não configurado corretamente.
+# Opcionalmente, restrinja o acesso ao DNS a redes confiáveis.
+# Este script comenta a opção recursion no named.conf.options. Adapte para sua configuração.
+if [ -f "/etc/bind/named.conf.options" ]; then
+  sed -i 's/^\(\s*\)recursion yes;/\1#recursion yes;/g' /etc/bind/named.conf.options
+  # Reiniciar o BIND9 para aplicar as mudanças.
+  systemctl restart bind9
+fi
+
+# Forçar HTTPS (redirecionamento HTTP para HTTPS) - Exemplo para Apache
+# Ajuste conforme seu servidor web.  Este é apenas um exemplo genérico.
+# Você precisará ter o mod_rewrite ativado.
+if command -v apache2ctl &> /dev/null; then
+  # Cria um arquivo .htaccess na raiz do site para forçar HTTPS
+  if [ ! -f "/var/www/html/.htaccess" ]; then
+    echo "RewriteEngine On" > /var/www/html/.htaccess
+    echo "RewriteCond %{HTTPS} off" >> /var/www/html/.htaccess
+    echo "RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]" >> /var/www/html/.htaccess
+  fi
+
+  #Verificar se o mod_rewrite está habilitado
+  if ! apache2ctl -M | grep -q "rewrite_module (shared)"; then
+    a2enmod rewrite
+    systemctl restart apache2
+  fi
+
+elif command -v nginx &> /dev/null; then
+  # Configuração para Nginx (exemplo, ajuste conforme a configuração do seu site)
+  # Localize o arquivo de configuração do seu site (ex: /etc/nginx/sites-available/default)
+  # Adicione um bloco de redirecionamento para HTTPS
+  echo "A configuração do Nginx para forçar HTTPS deve ser feita manualmente."
+  echo "Exemplo:"
+  echo "server {"
+  echo "  listen 80;"
+  echo "  server_name yourdomain.com;"
+  echo "  return 301 https://\$host\$request_uri;"
+  echo "}"
+  echo "Após adicionar a configuração, reinicie o Nginx."
+  echo "sudo nginx -t && sudo systemctl reload nginx"
+
+else
+  echo "Servidor web Apache ou Nginx não detectado.  A configuração HTTPS deve ser feita manualmente."
+fi
+
+# Desabilitar TLS 1.0 e 1.1 e Renegociação insegura e ajustar cipher suites (Exemplo para OpenSSL)
+# Ajuste conforme a configuração do seu servidor.
+# Este script localiza arquivos de configuração OpenSSL e adiciona opções para desabilitar TLS 1.0/1.1, renegotiation
+# e ajustar cipher suites.
+find /etc -name "ssl.conf" -o -name "apache2.conf" -o -name "nginx.conf" | while read config_file; do
+  if [ -f "$config_file" ]; then
+    echo "Modificando $config_file"
+    # Desabilitar TLS 1.0 e 1.1
+    sed -i 's/^\(\s*\)SSLProtocol \(.*\)$/\1SSLProtocol TLSv1.2 TLSv1.3/g' "$config_file"
+    # Desabilitar Renegotiation (a forma de desabilitar depende do servidor)
+    # Exemplo para Apache (pode não funcionar em todas as versões):
+    #sed -i 's/^\(\s*\)SSLOptions \(.*\)$/\1SSLOptions -StdEnvVars -ExportCertData +StrictRequire/g' "$config_file"
+
+    # Configurar cipher suites fortes (exemplo, ajuste conforme necessário)
+    sed -i 's/^\(\s*\)SSLCipherSuite \(.*\)$/\1SSLCipherSuite ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:DHE-RSA-AES128-GCM-SHA256:DHE-RSA-AES256-GCM-SHA384/g' "$config_file"
+  fi
+done
+
+# Reiniciar serviços afetados (Apache, Nginx, etc.)
+if command -v apache2ctl &> /dev/null; then
+  systemctl restart apache2
+fi
+
+if command -v nginx &> /dev/null; then
+  systemctl restart nginx
+fi
+
+echo "Script de correção finalizado.  Verifique os arquivos de configuração e reinicie os serviços manualmente se necessário."
+```

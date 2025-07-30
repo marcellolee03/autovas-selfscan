@@ -1,0 +1,61 @@
+```bash
+#!/bin/bash
+set -euo pipefail
+if [ "$EUID" -ne 0 ]; then
+    echo "Please run as root" >&2
+    exit 1
+fi
+if { [ -d /etc/apache2 ] || [ -d /etc/httpd ]; } && { systemctl is-active apache2 2>/dev/null || systemctl is-active httpd 2>/dev/null; }; then
+    APACHE=true
+elif [ -d /etc/nginx ] && systemctl is-active nginx >/dev/null; then
+    NGINX=true
+else
+    echo "Unsupported web server or no active web server found" >&2
+    exit 1
+fi
+if [ -n "${APACHE:-}" ]; then
+    if [ -d /etc/apache2/sites-enabled ]; then
+        CONF_FILE="/etc/apache2/sites-available/000-redirect-http.conf"
+        mkdir -p /etc/apache2/sites-available
+        if [ ! -f "$CONF_FILE" ]; then
+            cat >> "$CONF_FILE" << 'EOF'
+<VirtualHost *:80>
+    ServerName _
+    Redirect permanent / https://%{HTTP_HOST}%{REQUEST_URI}
+</VirtualHost>
+EOF
+            ln -sf "$CONF_FILE" "/etc/apache2/sites-enabled/000-redirect-http.conf"
+        fi
+    elif [ -d /etc/httpd/conf.d ]; then
+        CONF_FILE="/etc/httpd/conf.d/redirect-http.conf"
+        if [ ! -f "$CONF_FILE" ]; then
+            cat >> "$CONF_FILE" << 'EOF'
+<VirtualHost *:80>
+    ServerName _
+    Redirect permanent / https://%{HTTP_HOST}%{REQUEST_URI}
+</VirtualHost>
+EOF
+        fi
+    fi
+    if command -v apachectl &>/dev/null; then
+        apachectl configtest
+    elif command -v httpd &>/dev/null; then
+        httpd -t
+    fi
+    systemctl restart apache2 || systemctl restart httpd
+elif [ -n "${NGINX:-}" ]; then
+    CONF_FILE="/etc/nginx/conf.d/redirect-http.conf"
+    if [ ! -f "$CONF_FILE" ]; then
+        cat >> "$CONF_FILE" << 'EOF'
+server {
+    listen 80 default_server;
+    listen [::]:80 default_server;
+    server_name _;
+    return 301 https://$host$request_uri;
+}
+EOF
+    fi
+    nginx -t
+    systemctl restart nginx
+fi
+```

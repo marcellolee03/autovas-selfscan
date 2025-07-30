@@ -1,0 +1,1719 @@
+>analise esse prompt contendo as vulnerabilidades encontradas em um csv do openvas e analise se os scripts que irei enviar em seguida sao capazes de corrigir esses problemas ou nao, me informando uma porcentagem de correcao das vulnerabilidades
+>Vulnerabilidades:
+   # INSTRUÇÕES PARA O MODELO DE IA
+
+    ## PERSONA
+    Você é um especialista em cibersegurança e automação de sistemas, focado em criar scripts de correção (patching). Sua única função é gerar um script que resolva a vulnerabilidade descrita abaixo.
+
+    ## TAREFA
+    Analise o contexto da vulnerabilidade a seguir e gere um script de shell (compatível com o sistema operacional do localhost) que, ao ser executado, corrija permanentemente a vulnerabilidade descrita.
+
+    ## CONTEXTO DA VULNERABILIDADE
+
+# Vulnerabilidade 1
+CVEs: nan
+NVT Name: Cleartext Transmission of Sensitive Information via HTTP
+Port: 80.0
+Port Protocol: tcp
+Summary: The host / application transmits sensitive information (username, passwords) in
+  cleartext via HTTP.
+Specific Result: Vulnerability was detected according to the Vulnerability Detection Method.
+Vulnerability Detection Method: Evaluate previous collected information and check if the host / application is not
+  enforcing the transmission of sensitive data via an encrypted SSL/TLS connection.
+
+  The script is currently checking the following:
+
+  - HTTP Basic Authentication (Basic Auth)
+
+  - HTTP Forms (e.g. Login) with input field of type 'password'
+Details:
+Cleartext Transmission of Sensitive Information via HTTP
+(OID: 1.3.6.1.4.1.25623.1.0.108440)
+Version used: 2023-09-07T05:05:21Z
+
+Affected Software/OS: Hosts / applications which doesn't enforce the transmission of sensitive data via an
+  encrypted SSL/TLS connection.
+Solution: Enforce the transmission of sensitive data via an encrypted SSL/TLS connection.
+  Additionally make sure the host / application is redirecting all users to the secured SSL/TLS connection before
+  allowing to input sensitive data into the mentioned functions.
+
+    ## REGRAS E RESTRIÇÕES DE SAÍDA
+    1.  **APENAS SCRIPT:** A sua resposta deve conter ÚNICA E EXCLUSIVAMENTE o código do script.
+    2.  **SEM EXPLICAÇÕES:** Não adicione nenhum comentário, explicação, introdução, ou despedida.
+    3.  **SEM BLOCOS DE CÓDIGO MARKDOWN:** Não envolva o script em blocos de código como ` ```bash ` ou ` ```sh `. A resposta deve ser o texto puro do script.
+    4.  **AUTOSSUFICIENTE:** O script deve ser completo, autônomo e não deve exigir interação do usuário para ser executado.
+    5.  **COMPATIBILIDADE:** O script deve ser compatível com o sistema operacional especificado em 'localhost OS'. Se o sistema operacional não for especificado, assuma um sistema baseado em Linux (como Ubuntu/Debian).
+
+    # INÍCIO DO SCRIPT DE CORREÇÃO
+
+
+
+​
+
+
+>Scripts de correção:
+{type: uploaded file
+fileName: aeta2_1.txt
+fullContent:
+#!/bin/bash
+
+set -e
+
+if ! grep -q "Redirect permanent / https://%{HTTP_HOST}%{REQUEST_URI}" /etc/apache2/sites-available/000-default.conf; then
+  cp /etc/apache2/sites-available/000-default.conf /etc/apache2/sites-available/000-default.conf.bak
+  server_name=$(hostname -f 2>/dev/null || hostname)
+  cat > /etc/apache2/sites-available/000-default.conf <<EOF
+<VirtualHost *:80>
+    ServerName $server_name
+    Redirect permanent / https://%{HTTP_HOST}%{REQUEST_URI}
+</VirtualHost>
+EOF
+fi
+
+a2enmod ssl &>/dev/null || true
+apachectl configtest && systemctl restart apache2}
+{type: uploaded file
+fileName: aeta2_2.txt
+fullContent:
+```bash
+#!/bin/bash
+
+if [ "$(id -u)" != "0" ]; then
+    echo "O script precisa ser executado como root" >&2
+    exit 1
+fi
+
+if [ -d "/etc/apache2" ]; then
+    if [ ! -f "/etc/apache2/mods-enabled/rewrite.load" ]; then
+        a2enmod rewrite >/dev/null
+    fi
+    cat <<EOF > /etc/apache2/conf-available/http_to_https_global.conf
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteCond %{HTTPS} !=on
+    RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [R=301,L]
+</IfModule>
+EOF
+    a2enconf http_to_https_global >/dev/null
+    systemctl reload apache2 >/dev/null 2>&1 || service apache2 reload >/dev/null 2>&1
+
+elif [ -d "/etc/httpd" ]; then
+    if ! grep -q "LoadModule rewrite_module" /etc/httpd/conf.modules.d/*.conf; then
+        echo "LoadModule rewrite_module modules/mod_rewrite.so" > /etc/httpd/conf.modules.d/00-rewrite.conf
+    fi
+    cat <<EOF > /etc/httpd/conf.d/http_to_https_global.conf
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteCond %{HTTPS} !=on
+    RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [R=301,L]
+</IfModule>
+EOF
+    systemctl reload httpd >/dev/null 2>&1 || service httpd reload >/dev/null 2>&1
+
+elif [ -d "/etc/nginx" ]; then
+    cat <<EOF > /etc/nginx/conf.d/http_to_https_redirect.conf
+server {
+    listen 80;
+    server_name _;
+    return 301 https://\$host\$request_uri;
+}
+EOF
+    nginx -t >/dev/null 2>&1 && (systemctl reload nginx >/dev/null 2>&1 || service nginx reload >/dev/null 2>&1)
+
+else
+    echo "Nenhum servidor web detectado. Não foi possível corrigir a vulnerabilidade." >&2
+    exit 1
+fi
+```}
+{type: uploaded file
+fileName: aeta2_3.txt
+fullContent:
+#!/bin/bash
+
+# Determine server type based on configuration directories
+if [ -d "/etc/apache2" ]; then
+  # Debian-based Apache configuration
+  a2enmod ssl headers >/dev/null 2>&1
+  if [ $? -ne 0 ]; then
+    echo "Failed to enable required Apache modules. Ensure the Apache installation is valid." >&2
+    exit 1
+  fi
+
+  backup_dir="/etc/apache2/conf-backup-$(date +%s)"
+  mkdir -p "$backup_dir"
+  
+  if [ -f "/etc/apache2/conf-enabled/security.conf" ]; then
+    cp /etc/apache2/conf-enabled/security.conf "$backup_dir"
+    sed -i 's/^[[:space:]]*\(ServerTokens\)[[:space:]].*/\1 Prod/' /etc/apache2/conf-enabled/security.conf
+    sed -i 's/^[[:space:]]*\(ServerSignature\)[[:space:]].*/\1 Off/' /etc/apache2/conf-enabled/security.conf
+  fi
+
+  if [ -f "/etc/apache2/sites-enabled/000-default.conf" ]; then
+    cp /etc/apache2/sites-enabled/000-default.conf "$backup_dir"
+    echo '<VirtualHost *:80>' > /etc/apache2/sites-enabled/000-default.conf
+    echo '    RewriteEngine On' >> /etc/apache2/sites-enabled/000-default.conf
+    echo '    RewriteCond %{SERVER_PORT} !^443$' >> /etc/apache2/sites-enabled/000-default.conf
+    echo '    RewriteRule ^/?(login|register|account|checkout|payment).* https://%{SERVER_NAME}%{REQUEST_URI} [R=301,L]' >> /etc/apache2/sites-enabled/000-default.conf
+    echo '</VirtualHost>' >> /etc/apache2/sites-enabled/000-default.conf
+  fi
+
+  # Enable HSTS header
+  if [ -f "/etc/apache2/mods-enabled/headers.load" ]; then
+    echo "Header always set Strict-Transport-Security \"max-age=63072000; includeSubDomains; preload\"" > /etc/apache2/conf-available/hsts.conf
+    a2enconf hsts >/dev/null 2>&1
+  fi
+
+  systemctl restart apache2 >/dev/null 2>&1
+
+elif [ -d "/etc/httpd" ]; then
+  # RHEL-based Apache configuration
+  backup_dir="/etc/httpd/conf-backup-$(date +%s)"
+  mkdir -p "$backup_dir"
+  
+  if [ -f "/etc/httpd/conf/httpd.conf" ]; then
+    cp /etc/httpd/conf/httpd.conf "$backup_dir"
+    sed -i 's/^[[:space:]]*\(ServerTokens\)[[:space:]].*/\1 Prod/' /etc/httpd/conf/httpd.conf
+    sed -i 's/^[[:space:]]*\(ServerSignature\)[[:space:]].*/\1 Off/' /etc/httpd/conf/httpd.conf
+    
+    echo '<LocationMatch "^/(login|register|account|checkout|payment)">' >> /etc/httpd/conf/httpd.conf
+    echo '    RewriteEngine On' >> /etc/httpd/conf/httpd.conf
+    echo '    RewriteCond %{HTTPS} off' >> /etc/httpd/conf/httpd.conf
+    echo '    RewriteRule (.*) https://%{HTTP_HOST}%{REQUEST_URI} [R=301,L]' >> /etc/httpd/conf/httpd.conf
+    echo '</LocationMatch>' >> /etc/httpd/conf/httpd.conf
+    
+    echo 'Header set Content-Security-Policy "upgrade-insecure-requests"' >> /etc/httpd/conf/httpd.conf
+    echo 'Header always set Strict-Transport-Security "max-age=63072000; includeSubDomains; preload"' >> /etc/httpd/conf/httpd.conf
+  fi
+
+  systemctl restart httpd >/dev/null 2>&1
+
+elif [ -d "/etc/nginx" ]; then
+  # NGINX configuration
+  backup_dir="/etc/nginx/conf-backup-$(date +%s)"
+  mkdir -p "$backup_dir"
+  
+  if [ -f "/etc/nginx/nginx.conf" ]; then
+    cp /etc/nginx/nginx.conf "$backup_dir"
+    
+    # Configure security headers and HSTS
+    sed -i '/http {/a \    map \$request_uri \$hsts_header {\n        ~*/(login|register|account|checkout|payment) "max-age=63072000; includeSubDomains; preload";\n    }' /etc/nginx/nginx.conf
+    
+    sed -i '/http {/a \    add_header Strict-Transport-Security \$hsts_header always;\n    add_header Content-Security-Policy "upgrade-insecure-requests";' /etc/nginx/nginx.conf
+    
+    # Location-specific SSL enforcement
+    sed -i '/http {/a \    add_header X-Frame-Options DENY;' /etc/nginx/nginx.conf
+    sed -i '/http {/a \    server_tokens off;' /etc/nginx/nginx.conf
+  fi
+
+  # Enable HTTP-to-HTTPS redirect for sensitive paths
+  for conf in $(ls /etc/nginx/conf.d/*.conf); do
+    cp "$conf" "$backup_dir"
+    sed -i '/listen[[:space:]]*80;/,/}/{/server {/a \    if ($request_uri ~ "^\/(login|register|account|checkout|payment)") { return 301 https://$host$request_uri; }\n}' "$conf"
+  done
+
+  nginx -t >/dev/null 2>&1 && nginx -s reload >/dev/null 2>&1
+
+else
+  echo "Unsupported web server configuration. No changes applied." >&2
+  exit 1
+fi}
+{type: uploaded file
+fileName: aeta2_4.txt
+fullContent:
+#!/bin/bash
+
+if systemctl is-active --quiet apache2; then
+    CONF="/etc/apache2/sites-available/000-default.conf"
+    if [ -f "$CONF" ]; then
+        cp "$CONF" "$CONF.bak"
+        if grep -q '<VirtualHost \*:80>' "$CONF"; then
+            sed -i -e '/<VirtualHost \*:80>/a Redirect permanent "/" "https://%{HTTP_HOST}/"' "$CONF"
+        else
+            echo -e "\n<VirtualHost *:80>\n    Redirect permanent \"/\" \"https://%{HTTP_HOST}/\"\n</VirtualHost>" >> "$CONF"
+        fi
+        systemctl restart apache2
+    else
+        echo "Arquivo de configuração do Apache não encontrado: $CONF" >&2
+        exit 1
+    fi
+
+elif systemctl is-active --quiet nginx; then
+    CONF="/etc/nginx/sites-available/default"
+    if [ -f "$CONF" ]; then
+        cp "$CONF" "$CONF.bak"
+        if grep -q 'listen 80;' "$CONF"; then
+            sed -i -e '/listen 80;/a return 301 https://$host$request_uri;' "$CONF"
+        else
+            echo "server { listen 80; return 301 https://\$host\$request_uri; }" >> "$CONF"
+        fi
+        systemctl restart nginx
+    else
+        echo "Arquivo de configuração do Nginx não encontrado: $CONF" >&2
+        exit 1
+    fi
+
+else
+    echo "Nenhum servidor web (Apache ou Nginx) ativo." >&2
+    exit 1
+fi}
+{type: uploaded file
+fileName: aeta2_5.txt
+fullContent:
+#!/bin/bash
+
+if [[ $EUID -ne 0 ]]; then
+    echo "Root privileges required" >&2
+    exit 1
+fi
+
+if command -v apache2 >/dev/null 2>&1; then
+    a2enmod ssl >/dev/null
+    if ! apache2ctl -S 2>/dev/null | grep ':443' >/dev/null; then
+        mkdir -p /etc/apache2/ssl
+        openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
+            -subj "/CN=localhost" \
+            -keyout /etc/apache2/ssl/key.pem \
+            -out /etc/apache2/ssl/cert.pem >/dev/null 2>&1
+        
+        if [ -f /etc/apache2/sites-available/default-ssl.conf ]; then
+            sed -i '/SSLCertificateFile/c\\tSSLCertificateFile \/etc\/apache2\/ssl\/cert.pem' /etc/apache2/sites-available/default-ssl.conf
+            sed -i '/SSLCertificateKeyFile/c\\tSSLCertificateKeyFile \/etc\/apache2\/ssl\/key.pem' /etc/apache2/sites-available/default-ssl.conf
+            a2ensite default-ssl >/dev/null
+        fi
+    fi
+
+    if ! grep -q "Redirect permanent" /etc/apache2/sites-enabled/000-default.conf 2>/dev/null; then
+        sed -i '/^<VirtualHost \*:80>/a \\tRedirect permanent \/ https:\/\/%{HTTP_HOST}%{REQUEST_URI}' /etc/apache2/sites-enabled/000-default.conf || \
+        sed -i '/^<VirtualHost \*:80>/a \\tRedirect permanent \/ https:\/\/%{HTTP_HOST}%{REQUEST_URI}' /etc/apache2/sites-available/000-default.conf
+    fi
+    systemctl restart apache2 >/dev/null 2>&1 || service apache2 restart >/dev/null 2>&1
+
+elif command -v nginx >/dev/null 2>&1; then
+    if [[ ! -f /etc/nginx/ssl/cert.pem || ! -f /etc/nginx/ssl/key.pem ]]; then
+        mkdir -p /etc/nginx/ssl
+        openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
+            -subj "/CN=localhost" \
+            -keyout /etc/nginx/ssl/key.pem \
+            -out /etc/nginx/ssl/cert.pem >/dev/null 2>&1
+    fi
+
+    if ! grep -q "listen 443 ssl" /etc/nginx/sites-enabled/*; then
+        config_file=$(grep -l "listen 80;" /etc/nginx/sites-enabled/* | head -1)
+        [ -n "$config_file" ] && {
+            cat >> "$config_file" << CONF
+server {
+    listen 443 ssl;
+    server_name _;
+    ssl_certificate /etc/nginx/ssl/cert.pem;
+    ssl_certificate_key /etc/nginx/ssl/key.pem;
+    location / {
+        try_files \$uri \$uri/ =404;
+    }
+}
+CONF
+        }
+    fi
+
+    config_file=$(grep -l "listen 80;" /etc/nginx/sites-enabled/* | head -1)
+    [ -n "$config_file" ] && {
+        if ! grep -q "return 301" "$config_file"; then
+            sed -i '/listen 80;/a \\treturn 301 https://\$host\$request_uri;' "$config_file"
+        fi
+    }
+    systemctl restart nginx >/dev/null 2>&1 || service nginx restart >/dev/null 2>&1
+
+else
+    echo "Unsupported web server" >&2
+    exit 1
+fi}
+{type: uploaded file
+fileName: aeta2_6.txt
+fullContent:
+#!/bin/bash
+
+# Verificar permissões de root
+if [ "$(id -u)" != "0" ]; then
+    echo "Erro: Este script requer privilégios de root." >&2
+    exit 1
+fi
+
+# Identificar servidor web instalado
+web_server=""
+if systemctl is-active --quiet apache2 2>/dev/null || dpkg -l apache2 &>/dev/null; then
+    web_server="apache"
+elif systemctl is-active --quiet nginx 2>/dev/null || dpkg -l nginx &>/dev/null; then
+    web_server="nginx"
+fi
+
+# Se nenhum servidor encontrado, encerrar
+if [ -z "$web_server" ]; then
+    echo "Nenhum servidor web (Apache/Nginx) foi detectado." >&2
+    exit 1
+fi
+
+# Configurar Apache
+configure_apache() {
+    # Ativar módulos necessários
+    a2enmod ssl rewrite headers >/dev/null
+
+    # Criar certificado autoassinado
+    mkdir -p /etc/apache2/ssl
+    openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
+        -keyout /etc/apache2/ssl/apache.key \
+        -out /etc/apache2/ssl/apache.crt \
+        -subj "/C=/ST=/L=/O=/CN=localhost" >/dev/null 2>&1
+
+    # Configuração de redirecionamento global para HTTPS
+    cat > /etc/apache2/conf-available/force-ssl.conf << 'EOF'
+<VirtualHost *:80>
+    ServerName localhost
+    Redirect permanent / https://localhost/
+    ErrorLog ${APACHE_LOG_DIR}/error.log
+    CustomLog ${APACHE_LOG_DIR}/access.log combined
+</VirtualHost>
+
+<VirtualHost *:443>
+    SSLEngine on
+    SSLCertificateFile /etc/apache2/ssl/apache.crt
+    SSLCertificateKeyFile /etc/apache2/ssl/apache.key
+    Header always set Strict-Transport-Security "max-age=63072000; includeSubDomains"
+
+    <Location />
+        SSLRequireSSL
+        SSLVerifyClient optional
+    </Location>
+</VirtualHost>
+EOF
+
+    # Forçar segurança em formulários/login
+    echo "Header edit Location ^http://(.*)$ https://\$1" > /etc/apache2/conf-available/security-headers.conf
+
+    # Ativar configurações
+    a2enconf force-ssl security-headers >/dev/null
+    systemctl restart apache2
+}
+
+# Configurar Nginx
+configure_nginx() {
+    # Criar certificado autoassinado
+    mkdir -p /etc/nginx/ssl
+    openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
+        -keyout /etc/nginx/ssl/nginx.key \
+        -out /etc/nginx/ssl/nginx.crt \
+        -subj "/C=/ST=/L=/O=/CN=localhost" >/dev/null 2>&1
+
+    # Configuração principal
+    cat > /etc/nginx/conf.d/ssl_redirect.conf << 'EOF'
+server {
+    listen 80 default_server;
+    listen [::]:80 default_server;
+    server_name _;
+    return 301 https://$host$request_uri;
+}
+
+server {
+    listen 443 ssl;
+    ssl_certificate /etc/nginx/ssl/nginx.crt;
+    ssl_certificate_key /etc/nginx/ssl/nginx.key;
+    ssl_protocols TLSv1.2 TLSv1.3;
+    
+    add_header Strict-Transport-Security "max-age=63072000; includeSubDomains" always;
+
+    location / {
+        if ($scheme != "https") {
+            return 301 https://$host$request_uri;
+        }
+    }
+}
+EOF
+
+    # Validar e aplicar configuração
+    nginx -t >/dev/null 2>&1 && systemctl restart nginx
+}
+
+# Executar configuração conforme servidor detectado
+case $web_server in
+    apache) configure_apache >/dev/null ;;
+    nginx)  configure_nginx >/dev/null ;;
+esac
+
+# Verificar sucesso
+if [ $? -eq 0 ]; then
+    echo "Configuração de segurança aplicada com sucesso."
+else
+    echo "Erro durante a aplicação das configurações." >&2
+    exit 1
+fi}
+{type: uploaded file
+fileName: aeta2_7.txt
+fullContent:
+#!/bin/bash
+
+if [ "$(id -u)" -ne 0 ]; then
+    echo "Erro: Este script deve ser executado como root." >&2
+    exit 1
+fi
+
+if systemctl is-active --quiet apache2; then
+    FQDN=$(hostname -f 2>/dev/null || hostname)
+    a2enmod ssl
+
+    mkdir -p /etc/ssl/private
+    mkdir -p /etc/ssl/certs
+    if ! [ -f "/etc/ssl/certs/${FQDN}.crt" ] || ! [ -f "/etc/ssl/private/${FQDN}.key" ]; then
+        openssl req -x509 -nodes -days 3650 -newkey rsa:2048 \
+            -keyout "/etc/ssl/private/${FQDN}.key" \
+            -out "/etc/ssl/certs/${FQDN}.crt" \
+            -subj "/CN=${FQDN}" >/dev/null 2>&1
+    fi
+
+    cat > /etc/apache2/sites-available/000-default.conf <<EOF
+<VirtualHost *:80>
+    ServerName $FQDN
+    Redirect permanent / https://$FQDN/
+</VirtualHost>
+EOF
+
+    if ! [ -f "/etc/apache2/sites-available/default-ssl.conf" ]; then
+        cat > /etc/apache2/sites-available/default-ssl.conf <<EOF
+<IfModule mod_ssl.c>
+    <VirtualHost *:443>
+        ServerName $FQDN
+        DocumentRoot /var/www/html
+
+        ErrorLog \${APACHE_LOG_DIR}/error.log
+        CustomLog \${APACHE_LOG_DIR}/access.log combined
+
+        SSLEngine on
+        SSLCertificateFile /etc/ssl/certs/$FQDN.crt
+        SSLCertificateKeyFile /etc/ssl/private/$FQDN.key
+    </VirtualHost>
+</IfModule>
+EOF
+    fi
+
+    a2ensite default-ssl.conf >/dev/null 2>&1
+    systemctl restart apache2
+
+elif systemctl is-active --quiet nginx; then
+    FQDN=$(hostname -f 2>/dev/null || hostname)
+
+    mkdir -p /etc/ssl/private
+    mkdir -p /etc/ssl/certs
+    if ! [ -f "/etc/ssl/certs/${FQDN}.crt" ] || ! [ -f "/etc/ssl/private/${FQDN}.key" ]; then
+        openssl req -x509 -nodes -days 3650 -newkey rsa:2048 \
+            -keyout "/etc/ssl/private/${FQDN}.key" \
+            -out "/etc/ssl/certs/${FQDN}.crt" \
+            -subj "/CN=${FQDN}" >/dev/null 2>&1
+    fi
+
+    cat > /etc/nginx/sites-available/default <<EOF
+server {
+    listen 80 default_server;
+    return 301 https://\$host\$request_uri;
+}
+EOF
+
+    if ! [ -f "/etc/nginx/sites-available/default-ssl" ] && ! [ -f "/etc/nginx/sites-enabled/default-ssl" ]; then
+        cat > /etc/nginx/sites-available/default-ssl <<EOF
+server {
+    listen 443 ssl default_server;
+    ssl_certificate /etc/ssl/certs/$FQDN.crt;
+    ssl_certificate_key /etc/ssl/private/$FQDN.key;
+    ssl_protocols TLSv1.2 TLSv1.3;
+    root /var/www/html;
+    index index.html;
+}
+EOF
+        ln -s ../sites-available/default-ssl /etc/nginx/sites-enabled/default-ssl
+    fi
+
+    systemctl restart nginx
+else
+    echo "Servidor web nao suportado." >&2
+    exit 1
+fi}
+{type: uploaded file
+fileName: aeta2_8.txt
+fullContent:
+#!/bin/bash
+
+# Verifica se o script está sendo executado como root
+if [[ $EUID -ne 0 ]]; then
+    echo "Este script deve ser executado como root." >&2
+    exit 1
+fi
+
+# Verifica se o Apache está ativo
+apache_active=false
+if systemctl is-active --quiet apache2; then
+    apache_active=true
+fi
+
+# Verifica se o Nginx está ativo
+nginx_active=false
+if systemctl is-active --quiet nginx; then
+    nginx_active=true
+fi
+
+# Processa configuração do Apache se estiver ativo
+if $apache_active; then
+    a2enmod rewrite &>/dev/null
+    file_path="/etc/apache2/sites-available/000-default.conf"
+    
+    # Localiza arquivo de configuração principal se o padrão não existir
+    if [[ ! -f $file_path ]]; then
+        alt_file="$(grep -rE "<VirtualHost.*:80>" /etc/apache2/sites-enabled/ 2>/dev/null | head -1 | cut -d: -f1)"
+        [[ -n $alt_file ]] && file_path="$alt_file"
+    fi
+    
+    if [[ -f $file_path ]]; then
+        cp "$file_path" "${file_path}.bak"
+        # Insere regras de rewite se não existirem
+        if ! grep -q "RewriteRule.*https" "$file_path"; then
+            gawk '
+            /<VirtualHost.*:80>/ {
+                print $0
+                print "\tRewriteEngine On"
+                print "\tRewriteCond %{HTTPS} off"
+                print "\tRewriteRule (.*) https://%{HTTP_HOST}%{REQUEST_URI} [R=301,L]"
+                inserted=1
+                next
+            }
+            1' "$file_path" > "${file_path}.tmp" && mv "${file_path}.tmp" "$file_path"
+        fi
+        systemctl restart apache2
+    fi
+fi
+
+# Processa configuração do Nginx se estiver ativo
+if $nginx_active; then
+    file_path="/etc/nginx/sites-enabled/default"
+    [[ ! -f $file_path ]] && file_path="$(grep -rlF "listen 80" /etc/nginx/sites-enabled/ | head -1)"
+    
+    if [[ -f $file_path ]]; then
+        cp "$file_path" "${file_path}.bak"
+        # Adiciona redirecionamento padrão se não existir
+        if ! grep -q "return 301 https" "$file_path"; then
+            gawk '
+            /listen 80;/ && !processed {
+                sub(/listen 80;/, "&\n    return 301 https://$host$request_uri;")
+                processed=1
+            }
+            1' "$file_path" > "${file_path}.tmp" && mv "${file_path}.tmp" "$file_path"
+        fi
+        nginx -t &>/dev/null && systemctl reload nginx
+    fi
+fi
+
+# Sai com erro se nenhum servidor web ativo for detectado
+if ! $apache_active && ! $nginx_active; then
+    echo "Nenhum servidor web (Apache/Nginx) ativo detectado." >&2
+    exit 1
+fi}
+{type: uploaded file
+fileName: aeta2_9.txt
+fullContent:
+```sh
+#!/bin/bash
+
+set -e
+
+APT_CMD="apt-get"
+if command -v apache2 &>/dev/null; then
+    $APT_CMD update
+    $APT_CMD install -y apache2
+    a2enmod ssl
+    systemctl restart apache2
+
+    cat > /etc/apache2/sites-available/000-redirect.conf << 'EOL'
+<VirtualHost *:80>
+    ServerName _ 
+    ServerAlias *
+    RewriteEngine On
+    RewriteCond %{REQUEST_URI} ^.*(login|signin|auth|restricted|admin|password|oauth)[^/]*$ [NC,OR]
+    RewriteCond %{QUERY_STRING} ^.*(user|name|pass|auth|code|token|key)[^&]*$ [NC]
+    RewriteRule ^(.*)$ https://%{HTTP_HOST}$1 [R=301,L]
+</VirtualHost>
+EOL
+
+    a2ensite 000-redirect.conf
+    apache2ctl configtest
+    systemctl restart apache2
+
+elif command -v nginx &>/dev/null; then
+    $APT_CMD update
+    $APT_CMD install -y nginx
+
+    sed -i '/listen \[::\*:80\].*/a \    if ($request_uri ~* "(login|signin|auth|restricted|admin|password|oauth|\\?.*(user|name|pass|auth|code|token|key))") { return 301 https://$host$request_uri; }' /etc/nginx/sites-enabled/default
+    nginx -t
+    systemctl restart nginx
+else
+    echo "HTTP server not found. No actions taken." >&2
+    exit 1
+fi
+```}
+{type: uploaded file
+fileName: aeta2_10.txt
+fullContent:
+```bash
+#!/bin/bash
+set -euo pipefail
+
+apache_redirect() {
+    if [ -d /etc/apache2/sites-enabled ]; then
+        CONF_FILE="/etc/apache2/conf-available/http_to_https.conf"
+        cat > "$CONF_FILE" << 'EOL'
+<IfModule mod_ssl.c>
+    <VirtualHost *:80>
+        ServerName _ 
+        Redirect permanent / https://%{HTTP_HOST}%{REQUEST_URI}
+    </VirtualHost>
+</IfModule>
+EOL
+        a2enconf http_to_https >/dev/null 
+        apache2ctl configtest && systemctl reload apache2
+    elif [ -d /etc/httpd/conf.d ]; then
+        CONF_FILE="/etc/httpd/conf.d/http_to_https.conf"
+        cat > "$CONF_FILE" << 'EOL'
+<IfModule mod_ssl.c>
+    <VirtualHost *:80>
+        ServerName _ 
+        Redirect permanent / https://%{HTTP_HOST}%{REQUEST_URI}
+    </VirtualHost>
+</IfModule>
+EOL
+        httpd -t && systemctl reload httpd
+    fi
+}
+
+nginx_redirect() {
+    local config_dirs=()
+    [ -d /etc/nginx/conf.d ] && config_dirs=("${config_dirs[@]}" "/etc/nginx/conf.d")
+    [ -d /etc/nginx/sites-enabled ] && config_dirs=("${config_dirs[@]}" "/etc/nginx/sites-enabled")
+    
+    if [ ${#config_dirs[@]} -eq 0 ]; then
+        config_dirs=("/etc/nginx")
+    fi
+
+    REDIRECT_SET=0
+    for dir in "${config_dirs[@]}"; do
+        FILE="$dir/global_redirect.conf"
+        cat > "$FILE" << 'EOL'
+server {
+    listen 80 default_server;
+    listen [::]:80 default_server;
+    server_name _;
+    return 301 https://$host$request_uri;
+}
+EOL
+        REDIRECT_SET=1
+        break
+    done
+
+    if [ "$REDIRECT_SET" -eq 1 ]; then
+        nginx -t && systemctl reload nginx
+    fi
+}
+
+if pgrep -x apache2 >/dev/null || pgrep -x httpd >/dev/null; then
+    apache_redirect
+elif pgrep -x nginx >/dev/null; then
+    nginx_redirect
+else
+    echo "No supported web server detected." >&2
+    exit 1
+fi
+```}
+{type: uploaded file
+fileName: aeta2_11.txt
+fullContent:
+#!/bin/bash
+
+if [ -d "/etc/apache2" ]; then
+  CONF_FILE="/etc/apache2/sites-available/000-redirect-if-http.conf"
+  if [ ! -f "$CONF_FILE" ]; then
+    cat > "$CONF_FILE" <<'EOL'
+<VirtualHost *:80>
+  ServerName _
+  Redirect permanent / https://%{HTTP_HOST}%{REQUEST_URI}
+</VirtualHost>
+EOL
+    a2ensite 000-redirect-if-http.conf >/dev/null 2>&1
+    apachectl configtest >/dev/null 2>&1 && systemctl restart apache2
+  fi
+elif [ -d "/etc/httpd" ]; then
+  CONF_FILE="/etc/httpd/conf.d/redirect-if-http.conf"
+  if [ ! -f "$CONF_FILE" ]; then
+    cat > "$CONF_FILE" <<'EOL'
+<VirtualHost *:80>
+  ServerName _
+  Redirect permanent / https://%{HTTP_HOST}%{REQUEST_URI}
+</VirtualHost>
+EOL
+    apachectl configtest >/dev/null 2>&1 && systemctl restart httpd
+  fi
+elif [ -d "/etc/nginx" ]; then
+  CONF_FILE="/etc/nginx/conf.d/redirect-if-http.conf"
+  if [ ! -f "$CONF_FILE" ]; then
+    cat > "$CONF_FILE" <<'EOL'
+server {
+  listen 80 default_server;
+  listen [::]:80 default_server;
+  server_name _;
+  return 301 https://$host$request_uri;
+}
+EOL
+    nginx -t >/dev/null 2>&1 && systemctl restart nginx
+  fi
+fi}
+{type: uploaded file
+fileName: aeta2_12.txt
+fullContent:
+```bash
+#!/bin/bash
+if [ -d "/etc/apache2" ] && command -v "apache2" >/dev/null; then
+    a2enmod -q ssl rewrite
+    if ! apache2ctl -t; then exit 1; fi
+    CONFFILE=$(find /etc/apache2/sites-enabled/ -name '*.conf' | head -n 1)
+    if [ -n "$CONFFILE" ] && grep -q "VirtualHost" "$CONFFILE" && ! grep -q "Redirect" "$CONFFILE"; then
+        sed -i '/<VirtualHost *:80>/a \\n    # Auto-redirect to HTTPS\n    Redirect 301 "/" "https://%{HTTP_HOST}/"' "$CONFFILE"
+    fi
+    systemctl restart apache2
+elif [ -d "/etc/nginx" ] && command -v "nginx" >/dev/null; then
+    mkdir -p /etc/nginx/ssl
+    if [ ! -f "/etc/nginx/ssl/server.crt" ]; then
+        openssl req -batch -x509 -nodes -days 365 -newkey rsa:2048 \
+            -keyout /etc/nginx/ssl/server.key \
+            -out /etc/nginx/ssl/server.crt 
+    fi
+    CONFFILE=$(find /etc/nginx/conf.d/ /etc/nginx/sites-enabled/ -name '*.conf' | head -n 1)
+    if [ -n "$CONFFILE" ] && grep -q "listen.*80" "$CONFFILE" && ! grep -q "return 301 https" "$CONFFILE"; then
+        sed -i '/listen.*80;/a \\n    # Auto-redirect to HTTPS\n    return 301 https://$host$request_uri;' "$CONFFILE"
+        echo "server { listen 443 ssl http2; ssl_certificate /etc/nginx/ssl/server.crt; ssl_certificate_key /etc/nginx/ssl/server.key; location / { try_files \$uri \$uri/ =404; }}" >> "/etc/nginx/conf.d/ssl_default.conf"
+    elif [ -z "$CONFFILE" ]; then
+        echo "server { listen 80; return 301 https://\$host\$request_uri; } server { listen 443 ssl http2; ssl_certificate /etc/nginx/ssl/server.crt; ssl_certificate_key /etc/nginx/ssl/server.key; location / { try_files \$uri \$uri/ =404; }}" > "/etc/nginx/conf.d/ssl_redirect.conf"
+    fi
+    if nginx -t; then systemctl restart nginx; fi
+else
+    if command -v ufw >/dev/null; then
+        if ufw status | grep -q "80.*ALLOW"; then ufw deny 80/tcp; fi
+    elif command -v iptables >/dev/null; then
+        if ! iptables -L INPUT | grep -q "dpt:http"; then 
+            iptables -A INPUT -p tcp --dport 80 -j DROP
+            if command -v iptables-save >/dev/null; then iptables-save >/etc/iptables.rules; fi
+        fi
+    fi
+fi
+```}
+{type: uploaded file
+fileName: aeta2_13.txt
+fullContent:
+```bash
+#!/bin/bash
+set -euo pipefail
+if [ "$EUID" -ne 0 ]; then
+    echo "Please run as root" >&2
+    exit 1
+fi
+if { [ -d /etc/apache2 ] || [ -d /etc/httpd ]; } && { systemctl is-active apache2 2>/dev/null || systemctl is-active httpd 2>/dev/null; }; then
+    APACHE=true
+elif [ -d /etc/nginx ] && systemctl is-active nginx >/dev/null; then
+    NGINX=true
+else
+    echo "Unsupported web server or no active web server found" >&2
+    exit 1
+fi
+if [ -n "${APACHE:-}" ]; then
+    if [ -d /etc/apache2/sites-enabled ]; then
+        CONF_FILE="/etc/apache2/sites-available/000-redirect-http.conf"
+        mkdir -p /etc/apache2/sites-available
+        if [ ! -f "$CONF_FILE" ]; then
+            cat >> "$CONF_FILE" << 'EOF'
+<VirtualHost *:80>
+    ServerName _
+    Redirect permanent / https://%{HTTP_HOST}%{REQUEST_URI}
+</VirtualHost>
+EOF
+            ln -sf "$CONF_FILE" "/etc/apache2/sites-enabled/000-redirect-http.conf"
+        fi
+    elif [ -d /etc/httpd/conf.d ]; then
+        CONF_FILE="/etc/httpd/conf.d/redirect-http.conf"
+        if [ ! -f "$CONF_FILE" ]; then
+            cat >> "$CONF_FILE" << 'EOF'
+<VirtualHost *:80>
+    ServerName _
+    Redirect permanent / https://%{HTTP_HOST}%{REQUEST_URI}
+</VirtualHost>
+EOF
+        fi
+    fi
+    if command -v apachectl &>/dev/null; then
+        apachectl configtest
+    elif command -v httpd &>/dev/null; then
+        httpd -t
+    fi
+    systemctl restart apache2 || systemctl restart httpd
+elif [ -n "${NGINX:-}" ]; then
+    CONF_FILE="/etc/nginx/conf.d/redirect-http.conf"
+    if [ ! -f "$CONF_FILE" ]; then
+        cat >> "$CONF_FILE" << 'EOF'
+server {
+    listen 80 default_server;
+    listen [::]:80 default_server;
+    server_name _;
+    return 301 https://$host$request_uri;
+}
+EOF
+    fi
+    nginx -t
+    systemctl restart nginx
+fi
+```}
+{type: uploaded file
+fileName: aeta2_14.txt
+fullContent:
+#!/bin/bash
+
+DOMAIN=$(hostname)
+CERT_DIR="/etc/apache2/ssl"
+APACHE_CONF_DIR="/etc/apache2"
+SITES_ENABLED_DIR="$APACHE_CONF_DIR/sites-enabled"
+SSL_CONF="$APACHE_CONF_DIR/sites-available/default-ssl.conf"
+REDIRECT_CONF="$APACHE_CONF_DIR/sites-available/000-redirect.conf"
+
+apt-get update
+apt-get install -y apache2 openssl
+
+a2enmod ssl
+a2enmod rewrite
+mkdir -p "$CERT_DIR"
+
+if [ ! -f "$CERT_DIR/apache.key" ] || [ ! -f "$CERT_DIR/apache.crt" ]; then
+    openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
+        -keyout "$CERT_DIR/apache.key" \
+        -out "$CERT_DIR/apache.crt" \
+        -subj "/CN=$DOMAIN"
+    chmod 600 "$CERT_DIR/apache.key"
+fi
+
+cat > "$REDIRECT_CONF" <<EOF
+<VirtualHost *:80>
+    ServerName $DOMAIN
+    RewriteEngine On
+    RewriteCond %{REQUEST_URI} !^/\.well-known/acme-challenge/
+    RewriteRule (.*) https://%{SERVER_NAME}$1 [R=301,L]
+</VirtualHost>
+EOF
+
+if [ ! -f "$SSL_CONF" ]; then
+    cp "$APACHE_CONF_DIR/sites-available/default-ssl.conf" "$SSL_CONF"
+fi
+
+sed -i "s|^\([[:space:]]*\)#*\(SSLEngine\).*|\1\2 on|" "$SSL_CONF"
+sed -i "s|^\([[:space:]]*\)#*\(SSLCertificateFile\).*|\1\2 $CERT_DIR/apache.crt|" "$SSL_CONF"
+sed -i "s|^\([[:space:]]*\)#*\(SSLCertificateKeyFile\).*|\1\2 $CERT_DIR/apache.key|" "$SSL_CONF"
+sed -i "s|^\([[:space:]]*\)#*\(SSLProtocol\).*|\1\2 All -SSLv2 -SSLv3 -TLSv1 -TLSv1.1|" "$SSL_CONF"
+
+a2dissite 000-default.conf
+a2ensite 000-redirect.conf
+a2ensite default-ssl.conf
+apache2ctl configtest && systemctl restart apache2
+
+echo "net.ipv6.conf.all.disable_ipv6=1" >> /etc/sysctl.conf
+echo "net.ipv6.conf.default.disable_ipv6=1" >> /etc/sysctl.conf
+sysctl -p
+
+iptables -A INPUT -p tcp --dport 80 -j ACCEPT
+iptables -A INPUT -p tcp --dport 443 -j ACCEPT
+iptables -A INPUT -p tcp --dport 80 -j DROP}
+{type: uploaded file
+fileName: aeta2_15.txt
+fullContent:
+#!/usr/bin/env bash
+
+# Detectar se o servidor é Apache ou Nginx
+if [[ -d /etc/apache2 ]]; then
+    readonly web_server="apache"
+elif [[ -d /etc/nginx ]]; then
+    readonly web_server="nginx"
+else
+    echo "Servidor web não identificado (apenas Apache/Nginx suportados)" >&2
+    exit 1
+fi
+
+# Criar diretório de backups
+readonly backup_dir="/tmp/conf_backup_$(date +%s)"
+mkdir -p "$backup_dir"
+
+# Caso Apache
+if [[ "$web_server" == "apache" ]]; then
+    # Verificar e habilitar módulos necessários
+    a2enmod ssl rewrite headers --quiet 2>/dev/null
+    
+    # Backup dos arquivos de configuração
+    cp -a /etc/apache2/sites-available/ "$backup_dir/apache_sites"
+    cp -a /etc/apache2/conf-enabled/ "$backup_dir/apache_conf"
+    
+    # Criar virtualhost de redirecionamento HTTPS
+    cat <<'APACHE_REDIRECT' > /etc/apache2/sites-available/000-redirect.conf
+<VirtualHost *:80>
+    RewriteEngine On
+    RewriteCond %{HTTPS} !=on
+    RewriteRule ^(.*)$ https://%{SERVER_NAME}$1 [R=301,L]
+</VirtualHost>
+APACHE_REDIRECT
+    
+    # Habilitar virtualhost de redirecionamento
+    a2ensite 000-redirect.conf --quiet
+    
+    # Adicionar HTTP Strict Transport Security (HSTS)
+    echo '<IfModule mod_headers.c>
+    Header always set Strict-Transport-Security "max-age=31536000; includeSubDomains"
+</IfModule>' > /etc/apache2/conf-available/hsts.conf
+    a2enconf hsts.conf --quiet
+    
+    # Reiniciar Apache
+    systemctl reload apache2.service
+
+# Caso Nginx
+else
+    # Configurações padrão
+    [[ -f /etc/nginx/sites-available/default ]] && mv /etc/nginx/sites-available/default "$backup_dir"
+    
+    # Novo arquivo de configuração com SSL enforcement
+    cat <<'NGINX_CONFIG' > /etc/nginx/sites-available/default
+server {
+    listen 80;
+    listen [::]:80;
+    server_name _;
+    return 301 https://$host$request_uri;
+}
+
+server {
+    listen 443 ssl;
+    listen [::]:443 ssl;
+    ssl_certificate /etc/ssl/certs/nginx-selfsigned.crt;
+    ssl_certificate_key /etc/ssl/private/nginx-selfsigned.key;
+    
+    # Configuração global para campos de senha
+    if ($request_uri ~* "/login|/auth") {
+        set $password_forms 1;
+    }
+    
+    if ($request_method = POST) {
+        set $password_forms "${password_forms}1";
+    }
+    
+    # Bloqueia POST não-HTTPS em formulários sensíveis
+    if ($password_forms = 11) {
+        return 403;
+    }
+    
+    add_header Strict-Transport-Security "max-age=31536000; includeSubDomains" always;
+    
+    # Configurações básicas do site
+    root /var/www/html;
+    index index.html index.htm;
+    
+    location / {
+        try_files $uri $uri/ =404;
+    }
+}
+NGINX_CONFIG
+    
+    # Gerar certificado autoassinado se necessário
+    if [[ ! -f /etc/ssl/certs/nginx-selfsigned.crt ]]; then
+        openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
+        -keyout /etc/ssl/private/nginx-selfsigned.key \
+        -out /etc/ssl/certs/nginx-selfsigned.crt \
+        -subj "/CN=localhost" 2>/dev/null
+    fi
+    
+    # Reiniciar Nginx
+    systemctl reload nginx.service
+fi}
+{type: uploaded file
+fileName: aeta2_16.txt
+fullContent:
+```bash
+#!/bin/bash
+
+[ "$UID" -eq 0 ] || exec sudo "$0" "$@"
+
+if [ -d /etc/apache2/sites-enabled ]; then
+    config_file="/etc/apache2/sites-available/000-default.conf"
+    if [ -f "$config_file" ]; then
+        tmp_file=$(mktemp)
+        awk -v RS='' '{
+            if ($0 ~ /<VirtualHost \*:80>/ && !/Redirect permanent/) {
+                sub(/\n?<\/VirtualHost>/, "\n    Redirect permanent \"/\" \"https://%{HTTP_HOST}%{REQUEST_URI}\"\n</VirtualHost>")
+            }
+            print $0 ORS
+        }' "$config_file" > "$tmp_file"
+        config_test=$(apache2ctl -t 2>&1)
+        if apache2ctl -t &> /dev/null && [ -z "$(grep "\\b80\\b" "$tmp_file" | grep -i listen)" ]; then
+            mv "$tmp_file" "$config_file"
+            systemctl reload apache2
+        else
+            rm -f "$tmp_file"
+            exit 1
+        fi
+    fi
+elif [ -d /etc/nginx ]; then
+    config_file="/etc/nginx/sites-available/default"
+    if [ -f "$config_file" ]; then
+        tmp_file=$(mktemp)
+        awk -v RS='' '{
+            if ($0 ~ /listen 80;/) {
+                gsub(/listen 80;/, "listen 80;\n    return 301 https://$host$request_uri;")
+            }
+            print $0 ORS
+        }' "$config_file" > "$tmp_file"
+        config_test=$(nginx -t 2>&1)
+        if nginx -t &> /dev/null && [ -z "$(grep "\\b80\\b" "$tmp_file" | grep -i listen | grep -v return)" ]; then
+            mv "$tmp_file" "$config_file"
+            systemctl reload nginx
+        else
+            rm -f "$tmp_file"
+            exit 1
+        fi
+    fi
+fi
+```}
+{type: uploaded file
+fileName: aeta2_17.txt
+fullContent:
+#!/bin/bash
+
+web_server=""
+if systemctl is-active --quiet apache2; then
+    web_server="apache"
+elif systemctl is-active --quiet nginx; then
+    web_server="nginx"
+fi
+
+if [ "$web_server" == "apache" ]; then
+    echo "Configuring Apache to redirect HTTP to HTTPS..."
+    if [ ! -f /etc/apache2/sites-available/000-redirect.conf ]; then
+        cat <<EOF > /etc/apache2/sites-available/000-redirect.conf
+<VirtualHost _default_:80>
+    ServerAdmin webmaster@localhost
+    RewriteEngine On
+    RewriteRule ^(.*)$ https://%{HTTP_HOST}\$1 [R=301,L]
+</VirtualHost>
+EOF
+        a2ensite 000-redirect.conf > /dev/null
+        a2dissite 000-default.conf > /dev/null 2>&1
+        systemctl reload apache2
+    fi
+
+elif [ "$web_server" == "nginx" ]; then
+    echo "Configuring Nginx to redirect HTTP to HTTPS..."
+    if ! grep -q "return 301 https://" /etc/nginx/sites-enabled/default; then
+        if [ -f /etc/nginx/sites-enabled/default ]; then
+            cp /etc/nginx/sites-enabled/default /etc/nginx/sites-enabled/default.bak
+        fi
+        cat <<EOF > /etc/nginx/sites-enabled/default
+server {
+    listen 80 default_server;
+    listen [::]:80 default_server;
+    return 301 https://\$host\$request_uri;
+}
+EOF
+        nginx -t -q && systemctl reload nginx
+    fi
+else
+    echo "No active supported web server detected." >&2
+    exit 1
+fi}
+{type: uploaded file
+fileName: aeta2_18.txt
+fullContent:
+#!/bin/bash
+set -e
+
+# Verificar configurações do Apache
+if [ -f "/etc/apache2/sites-enabled/000-default.conf" ] || [ -f "/etc/apache2/sites-available/000-default.conf" ]; then
+    # Backup das configurações atuais
+    backup_dir="/etc/apache2/ssl/backup_$(date +%Y%m%d%H%M%S)"
+    mkdir -p "$backup_dir"
+    for conf in sites-enabled/000-default.conf sites-available/default-ssl.conf ssl/apache.crt ssl/apache.key; do
+        if [ -f "/etc/apache2/$conf" ]; then
+            cp "/etc/apache2/$conf" "$backup_dir"
+        fi
+    done
+
+    # Configurar certificado autoassinado
+    mkdir -p /etc/apache2/ssl
+    if [ ! -f "/etc/apache2/ssl/apache.crt" ] || [ ! -f "/etc/apache2/ssl/apache.key" ]; then
+        openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
+            -keyout /etc/apache2/ssl/apache.key \
+            -out /etc/apache2/ssl/apache.crt \
+            -subj "/CN=localhost" >/dev/null 2>&1
+    fi
+
+    # Habilitar módulos necessários
+    a2enmod ssl >/dev/null 2>&1
+    a2enmod headers >/dev/null 2>&1
+    a2ensite default-ssl >/dev/null 2>&1
+
+    # Configurações para o site HTTP (redirecionamento)
+    if [ -f "/etc/apache2/sites-available/000-default.conf" ]; then
+        CONF_FILE="/etc/apache2/sites-available/000-default.conf"
+    else
+        CONF_FILE="/etc/apache2/sites-enabled/000-default.conf"
+    fi
+
+    sed -i '/<VirtualHost \*:80>/,/<\/VirtualHost>/ {
+        /<\/VirtualHost>/i \
+        \    Redirect permanent \/ https:\/\/%{HTTP_HOST}\/ \
+        \    Header always set Content-Security-Policy "upgrade-insecure-requests" \
+        /^# Redirect/d
+    }' "$CONF_FILE"
+
+    # Configurações para o site HTTPS
+    if [ ! -f "/etc/apache2/sites-available/default-ssl.conf" ]; then
+        cat > /etc/apache2/sites-available/default-ssl.conf <<EOF
+<IfModule mod_ssl.c>
+    <VirtualHost _default_:443>
+        SSLEngine on
+        SSLCertificateFile /etc/apache2/ssl/apache.crt
+        SSLCertificateKeyFile /etc/apache2/ssl/apache.key
+        Header always set Strict-Transport-Security "max-age=63072000; includeSubDomains; preload"
+        Header always set Content-Security-Policy "default-src https: 'unsafe-inline' 'unsafe-eval';"
+        RequestHeader set X-Forwarded-Proto "https"
+    </VirtualHost>
+</IfModule>
+EOF
+    else
+        sed -i '/<VirtualHost.*:443>/,/<\/VirtualHost>/ {
+            s|# SSLEngine|SSLEngine|
+            s|# SSLCertificateFile|SSLCertificateFile|
+            s|# SSLCertificateKeyFile|SSLCertificateKeyFile|
+            /<\/VirtualHost>/i \
+        \    Header always set Strict-Transport-Security "max-age=63072000; includeSubDomains; preload" \
+        \    Header always set Content-Security-Policy "default-src https: 'unsafe-inline' 'unsafe-eval';" \
+        \    RequestHeader set X-Forwarded-Proto "https"
+        }' /etc/apache2/sites-available/default-ssl.conf
+    fi
+
+    # Configurar SSL global
+    if [ -f "/etc/apache2/conf-available/ssl-params.conf" ]; then
+        ssl_params="/etc/apache2/conf-available/ssl-params.conf"
+        if ! grep -q "Header always set Strict-Transport-Security" "$ssl_params"; then
+            echo "Header always set Strict-Transport-Security \"max-age=63072000; includeSubDomains; preload\"" >> "$ssl_params"
+        fi
+    fi
+
+    systemctl restart apache2 >/dev/null 2>&1
+    exit 0
+fi
+
+# Verificar configurações do Nginx
+if [ -f "/etc/nginx/sites-enabled/default" ] || [ -f "/etc/nginx/conf.d/default.conf" ]; then
+    # Backup das configurações atuais
+    backup_dir="/etc/nginx/ssl/backup_$(date +%Y%m%d%H%M%S)"
+    mkdir -p "$backup_dir"
+    for conf in sites-enabled/default conf.d/default.conf ssl/nginx.crt ssl/nginx.key; do
+        if [ -f "/etc/nginx/$conf" ]; then
+            cp "/etc/nginx/$conf" "$backup_dir"
+        fi
+    done
+
+    # Configurar certificado autoassinado
+    mkdir -p /etc/nginx/ssl
+    if [ ! -f "/etc/nginx/ssl/nginx.crt" ] || [ ! -f "/etc/nginx/ssl/nginx.key" ]; then
+        openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
+            -keyout /etc/nginx/ssl/nginx.key \
+            -out /etc/nginx/ssl/nginx.crt \
+            -subj "/CN=localhost" >/dev/null 2>&1
+    fi
+
+    # Configurar redirecionamento HTTP->HTTPS
+    DEFAULT_CONF=""
+    if [ -f "/etc/nginx/sites-enabled/default" ]; then
+        DEFAULT_CONF="/etc/nginx/sites-enabled/default"
+    elif [ -f "/etc/nginx/conf.d/default.conf" ]; then
+        DEFAULT_CONF="/etc/nginx/conf.d/default.conf"
+    fi
+
+    if [ -n "$DEFAULT_CONF" ]; then
+        # Substituir ou adicionar bloco de redirecionamento
+        if grep -q "listen.*80" "$DEFAULT_CONF"; then
+            sed -i '/^[[:space:]]*listen[[:space:]]*80;/,/}/ {
+                /^[[:space:]]*location\/{/,/}/d
+                /^[[:space:]]*listen[[:space:]]*80;/a \    return 301 https://\$host\$request_uri;
+                /^[[:space:]]*index/d
+                /^[[:space:]]*root/d
+            }' "$DEFAULT_CONF"
+        else
+            sed -i '1i server {\n    listen 80 default_server;\n    listen [::]:80 default_server;\n    server_name _;\n    return 301 https://\$host\$request_uri;\n}\n' "$DEFAULT_CONF"
+        fi
+
+        # Configurar servidor HTTPS
+        if ! grep -q "listen.*443" "$DEFAULT_CONF"; then
+            cat >> "$DEFAULT_CONF" <<EOF
+
+server {
+    listen 443 ssl http2 default_server;
+    listen [::]:443 ssl http2 default_server;
+    server_name _;
+
+    ssl_certificate /etc/nginx/ssl/nginx.crt;
+    ssl_certificate_key /etc/nginx/ssl/nginx.key;
+    
+    ssl_protocols TLSv1.2 TLSv1.3;
+    ssl_prefer_server_ciphers on;
+    ssl_ciphers ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256;
+    
+    add_header Strict-Transport-Security "max-age=63072000; includeSubDomains; preload" always;
+    add_header Content-Security-Policy "default-src https: 'unsafe-inline' 'unsafe-eval';" always;
+
+    # Configuração original após este ponto
+    root /var/www/html;
+    index index.html index.htm index.nginx-debian.html;
+}
+EOF
+        else
+            sed -i '/^[[:space:]]*listen.*443/,/server_name/ {
+                s/http2.*/http2;/;
+                s/listen.*443.*/& ssl http2;/
+            }' "$DEFAULT_CONF"
+            
+            sed -i '/server_name.*;/a \
+    ssl_certificate /etc/nginx/ssl/nginx.crt;\
+    ssl_certificate_key /etc/nginx/ssl/nginx.key;\
+    ssl_protocols TLSv1.2 TLSv1.3;\
+    ssl_prefer_server_ciphers on;\
+    ssl_ciphers ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256;\
+    add_header Strict-Transport-Security "max-age=63072000; includeSubDomains; preload" always;\
+    add_header Content-Security-Policy "default-src https: \x27unsafe-inline\x27 \x27unsafe-eval\x27;" always;' "$DEFAULT_CONF"
+        fi
+
+        # Configurações SSL globais
+        if [ -f "/etc/nginx/nginx.conf" ]; then
+            sed -i '/events\s{/i \
+# Configurações SSL Globais\n\
+server_names_hash_bucket_size 128;\n\
+ssl_session_cache shared:SSL:10m;\n\
+ssl_session_timeout 10m;\n\
+keepalive_timeout 70;\n' /etc/nginx/nginx.conf
+        fi
+
+        systemctl restart nginx >/dev/null 2>&1
+        exit 0
+    fi
+fi
+
+# Caso não encontre Apache ou Nginx, tentar instalar webserver com SSL
+if [ -f "/etc/os-release" ]; then
+    . /etc/os-release
+    if [ "$ID" = "ubuntu" ] || [ "$ID" = "debian" ]; then
+        apt-get update >/dev/null 2>&1
+        apt-get install -y nginx openssl >/dev/null 2>&1
+        systemctl enable nginx >/dev/null 2>&1
+        systemctl start nginx >/dev/null 2>&1
+        # Executar novamente as configurações do Nginx
+        exec "$0"
+    fi
+fi
+
+exit 1}
+{type: uploaded file
+fileName: aeta2_19.txt
+fullContent:
+```bash
+#!/bin/bash
+
+if [ "$(id -u)" -ne 0 ]; then
+    echo "This script must be run as root." >&2
+    exit 1
+fi
+
+PORT=80
+process_name=""
+nginx_conf="/etc/nginx/nginx.conf"
+apache_conf_dir="/etc/apache2"
+httpd_conf_dir="/etc/httpd"
+
+detect_webserver() {
+    if command -v lsof >/dev/null 2>&1; then
+        pid=$(lsof -t -i:"$PORT" -sTCP:LISTEN 2>/dev/null | head -1)
+        [ -n "$pid" ] && process_name=$(basename "$(readlink "/proc/$pid/exe")")
+    fi
+    [ -z "$process_name" ] && if ss -tuln 2>/dev/null | grep -q ":$PORT\b"; then
+        if grep -q "httpd.conf\|apache2.conf" "$nginx_conf" 2>/dev/null; then
+            process_name="nginx"
+        fi
+    fi
+}
+
+configure_apache() {
+    conf_dir=""
+    if [ -d "$apache_conf_dir" ]; then
+        conf_dir="$apache_conf_dir"
+    elif [ -d "$httpd_conf_dir" ]; then
+        conf_dir="$httpd_conf_dir"
+    fi
+    [ -z "$conf_dir" ] && return 1
+
+    redirect_conf="$conf_dir/conf-available/https-redirect.conf"
+    if grep -q "RewriteRule .* https://%{HTTP_HOST}%{REQUEST_URI} \[R=301,L\]" "$redirect_conf" 2>/dev/null; then
+        return 0
+    fi
+
+    mkdir -p "$(dirname "$redirect_conf")"
+    cat > "$redirect_conf" <<EOF
+<VirtualHost *:80>
+    ServerName _
+    RewriteEngine On
+    RewriteCond %{REQUEST_URI} !^/server-status
+    RewriteRule ^(.*)$ https://%{HTTP_HOST}\$1 [R=301,L]
+</VirtualHost>
+EOF
+
+    enabled_conf="$conf_dir/conf-enabled/https-redirect.conf"
+    if [ ! -f "$enabled_conf" ] && [ -d "$conf_dir/conf-enabled" ]; then
+        ln -s "$redirect_conf" "$enabled_conf"
+    fi
+    service_name=$(systemctl list-units --type service | grep -E 'apache2|httpd' | head -1 | awk '{print $1}')
+    [ -n "$service_name" ] && systemctl restart "$service_name"
+    return $?
+}
+
+configure_nginx() {
+    if ! grep -q "listen 80" "$nginx_conf" 2>/dev/null; then
+        return 1
+    fi
+
+    if grep -q "return 301 https://\$host\$request_uri;" "$nginx_conf"; then
+        return 0
+    fi
+
+    if ! grep -qF "server { listen 80; server_name" "$nginx_conf"; then
+        sed -i '/http {/a \    server {\n        listen 80;\n        server_name _;\n        return 301 https://$host$request_uri;\n    }\n' "$nginx_conf"
+    else
+        sed -i '/server {/,/^[[:space:]]*}/ {/listen 88;/! s/.*/&\n    return 301 https:\/\/$host$request_uri;/}' "$nginx_conf"
+    fi
+
+    nginx -t 2>/dev/null || return 1
+    service_name=$(systemctl list-units --type service | grep -E 'nginx' | head -1 | awk '{print $1}')
+    [ -n "$service_name" ] && systemctl reload "$service_name"
+}
+
+detect_webserver
+if [ -n "$process_name" ]; then
+    case "$process_name" in
+        apache2|httpd|apache) configure_apache ;;
+        nginx) configure_nginx ;;
+    esac
+else
+    if configure_apache || configure_nginx; then
+        exit 0
+    else
+        echo "Failed to configure web server." >&2
+        exit 1
+    fi
+fi
+```}
+{type: uploaded file
+fileName: aeta2_20.txt
+fullContent:
+#!/bin/bash
+
+if systemctl is-active apache2 >/dev/null 2>&1; then
+    a2enmod rewrite >/dev/null 2>&1
+    for config in /etc/apache2/sites-enabled/*; do
+        if grep -q '<VirtualHost\s*.*:80>' "$config"; then
+            cp -- "$config" "${config}.bak_$(date +%F_%T)"
+            sed -i -E '/<VirtualHost\s*.*:80>/,/<\/VirtualHost>/{
+                /<\/VirtualHost>/i \
+    RewriteEngine On\
+    RewriteCond %{HTTPS} off \
+    RewriteRule (.*) https://%{HTTP_HOST}%{REQUEST_URI} [R=301,L]
+            }' "$config"
+        fi
+    done
+    systemctl restart apache2 >/dev/null 2>&1
+
+elif systemctl is-active nginx >/dev/null 2>&1; then
+    find /etc/nginx/sites-enabled/ -type f | while read -r config; do
+        if grep -q 'listen\s*80;' "$config"; then
+            cp -- "$config" "${config}.bak_$(date +%F_%T)"
+            sed -i '/server {/,/}/ {
+                /listen\s*80;/ {
+                    :a; n; /}/!ba; 
+                    i \
+        return 301 https://$host$request_uri;
+                }
+            }' "$config"
+        fi
+    done
+    systemctl restart nginx >/dev/null 2>&1
+fi}
+{type: uploaded file
+fileName: aeta2_21.txt
+fullContent:
+```bash
+#!/bin/bash
+
+# Apache configuration for HTTP to HTTPS redirect
+if [ -d "/etc/apache2" ]; then
+    cat > /etc/apache2/sites-available/000-redirect.conf << 'EOL'
+<VirtualHost *:80>
+    # Redirect entire site to HTTPS
+    RewriteEngine On
+    RewriteCond %{REQUEST_URI} !^/\.well-known/acme-challenge/ [NC]
+    RewriteRule ^(.*)$ https://%{HTTP_HOST}$1 [R=301,L]
+</VirtualHost>
+EOL
+
+    a2ensite 000-redirect.conf > /dev/null 2>&1
+    apache2ctl -t > /dev/null 2>&1 && systemctl restart apache2 > /dev/null 2>&1
+fi
+
+# Nginx configuration for HTTP to HTTPS redirect
+if [ -d "/etc/nginx" ]; then
+    cat > /etc/nginx/conf.d/redirect.conf << 'EOL'
+server {
+    listen 80;
+    server_name _;
+    # Redirect entire site to HTTPS
+    if ($request_uri !~ "^/\.well-known/acme-challenge/") {
+        return 301 https://$host$request_uri;
+    }
+}
+EOL
+
+    nginx -t > /dev/null 2>&1 && systemctl reload nginx > /dev/null 2>&1
+fi
+
+# Firewall configuration to block HTTP traffic
+if command -v ufw > /dev/null 2>&1; then
+    ufw deny http
+    ufw --force reload
+elif command -v firewall-cmd > /dev/null 2>&1; then
+    firewall-cmd --zone=public --remove-service=http --permanent
+    firewall-cmd --reload
+fi
+```}
+{type: uploaded file
+fileName: aeta2_22.txt
+fullContent:
+#!/bin/bash
+
+set -euo pipefail
+
+if systemctl is-active --quiet apache2 || systemctl is-active --quiet httpd; then
+    a2enmod rewrite > /dev/null
+    conf_file="/etc/apache2/sites-available/000-default.conf"
+    if [ ! -f "$conf_file" ]; then
+        echo "Erro: Apache config file not found" >&2
+        exit 1
+    fi
+    backup_file="${conf_file}.bak_$(date +%Y%m%d%H%M%S)"
+    cp "$conf_file" "$backup_file"
+    if grep -q "RewriteEngine On" "$conf_file" && grep -q "RewriteRule.*https://" "$conf_file"; then
+        exit 0
+    fi
+    sed -i '/<VirtualHost \*:80>/a \
+RewriteEngine On\
+RewriteCond %{HTTPS} off\
+RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [R=301,L]' "$conf_file"
+    systemctl reload apache2
+
+elif systemctl is-active --quiet nginx; then
+    conf_file="/etc/nginx/sites-available/default"
+    if [ ! -f "$conf_file" ]; then
+        echo "Erro: Nginx config file not found" >&2
+        exit 1
+    fi
+    backup_file="${conf_file}.bak_$(date +%Y%m%d%H%M%S)"
+    cp "$conf_file" "$backup_file"
+    if grep -q "return 301 https://" "$conf_file"; then
+        exit 0
+    fi
+    echo 'server {
+    listen 80 default_server;
+    listen [::]:80 default_server;
+    server_name _;
+    return 301 https://$host$request_uri;
+}' > "$conf_file"
+    systemctl reload nginx
+
+else
+    echo "No active webserver (Apache/Nginx) found" >&2
+    exit 1
+fi}
+{type: uploaded file
+fileName: aeta2_23.txt
+fullContent:
+#!/bin/bash
+
+# Instale o pacote apache2 se não estiver instalado (para garantia)
+if ! dpkg -l | grep -q apache2; then
+    apt update
+    apt install -y apache2
+fi
+
+# Instale o módulo SSL se não estiver instalado
+if ! a2query -m ssl; then
+    apt install -y libapache2-mod-ssl
+    a2enmod ssl
+fi
+
+# Crie diretório SSL se não existir
+mkdir -p /etc/apache2/ssl
+
+# Gere certificado autoassinado se não existir
+if [ ! -f /etc/apache2/ssl/apache-selfsigned.crt ]; then
+    openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
+        -keyout /etc/apache2/ssl/apache-selfsigned.key \
+        -out /etc/apache2/ssl/apache-selfsigned.crt \
+        -subj "/C=XX/ST=Unknown/L=Unknown/O=Unknown/CN=localhost"
+fi
+
+# Configure redirecionamento HTTP->HTTPS
+cat > /etc/apache2/sites-available/000-redirect.conf <<EOL
+<VirtualHost *:80>
+    ServerName _
+    Redirect permanent / https://%{SERVER_NAME}/
+</VirtualHost>
+EOL
+
+# Configure VirtualHost SSL com certificado autoassinado
+cat > /etc/apache2/sites-available/default-ssl.conf <<EOL
+<IfModule mod_ssl.c>
+    <VirtualHost _default_:443>
+        ServerAdmin webmaster@localhost
+        DocumentRoot /var/www/html
+        ServerName _
+        ErrorLog \${APACHE_LOG_DIR}/error.log
+        CustomLog \${APACHE_LOG_DIR}/access.log combined
+        SSLEngine on
+        SSLCertificateFile /etc/apache2/ssl/apache-selfsigned.crt
+        SSLCertificateKeyFile /etc/apache2/ssl/apache-selfsigned.key
+        <FilesMatch "\.(cgi|shtml|phtml|php)$">
+            SSLOptions +StdEnvVars
+        </FilesMatch>
+        BrowserMatch "MSIE [2-6]" nokeepalive ssl-unclean-shutdown
+        BrowserMatch "MSIE [17-9]" ssl-unclean-shutdown
+    </VirtualHost>
+</IfModule>
+EOL
+
+# Habilite sites e reinicie
+a2ensite 000-redirect.conf
+a2ensite default-ssl.conf
+a2dissite 000-default.conf
+systemctl restart apache2}
+{type: uploaded file
+fileName: aeta2_24.txt
+fullContent:
+#!/bin/bash
+FQDN=$(hostname -f)
+[ "$FQDN" = "localhost" ] && FQDN=$(hostname) || FQDN=$(echo "$FQDN" | cut -d' ' -f1)
+
+if systemctl is-active --quiet apache2; then
+    a2enmod ssl headers >/dev/null 2>&1
+    mkdir -p /etc/ssl/{private,certs}
+    openssl req -x509 -nodes -days 730 -newkey rsa:2048 \
+        -keyout /etc/ssl/private/vulnfix.key \
+        -out /etc/ssl/certs/vulnfix.crt \
+        -subj "/CN=$FQDN" >/dev/null 2>&1
+
+    cat > /etc/apache2/conf-available/redirect-to-https.conf <<EOF
+<VirtualHost *:80>
+    ServerName $FQDN
+    Redirect permanent / https://$FQDN/
+</VirtualHost>
+
+<VirtualHost _default_:443>
+    ServerName $FQDN
+    SSLEngine on
+    SSLCertificateFile /etc/ssl/certs/vulnfix.crt
+    SSLCertificateKeyFile /etc/ssl/private/vulnfix.key
+    Header always set Strict-Transport-Security "max-age=31536000; includeSubDomains"
+</VirtualHost>
+
+<Directory /var/www/html>
+    SSLOptions +StrictRequire
+</Directory>
+EOF
+    a2enconf redirect-to-https >/dev/null
+    systemctl restart apache2
+
+elif systemctl is-active --quiet nginx; then
+    mkdir -p /etc/ssl/{private,certs}
+    openssl req -x509 -nodes -days 730 -newkey rsa:2048 \
+        -keyout /etc/ssl/private/vulnfix.key \
+        -out /etc/ssl/certs/vulnfix.crt \
+        -subj "/CN=$FQDN" >/dev/null 2>&1
+
+    cat > /etc/nginx/snippets/ssl-redirect.conf <<EOF
+server {
+    listen 80;
+    listen [::]:80;
+    server_name $FQDN;
+    return 301 https://\$host\$request_uri;
+}
+
+server {
+    listen 443 ssl;
+    listen [::]:443 ssl;
+    server_name $FQDN;
+    
+    ssl_certificate /etc/ssl/certs/vulnfix.crt;
+    ssl_certificate_key /etc/ssl/private/vulnfix.key;
+    add_header Strict-Transport-Security "max-age=31536000; includeSubDomains" always;
+}
+EOF
+    grep -q "include snippets/ssl-redirect.conf;" /etc/nginx/sites-enabled/default || \
+        sed -i '/^server {/i include snippets/ssl-redirect.conf;' /etc/nginx/nginx.conf
+    nginx -s reload >/dev/null
+fi}
+{type: uploaded file
+fileName: aeta2_25.txt
+fullContent:
+#!/bin/bash
+
+REDIRECT_APACHE="/etc/apache2/sites-available/000-redirect-all-http.conf"
+REDIRECT_NGINX="/etc/nginx/sites-available/http_redirect"
+
+if [ "$(id -u)" -ne 0 ]; then
+    echo "Root required. Use sudo." >&2
+    exit 1
+fi
+
+if [ -d "/etc/apache2" ] && [ -x "$(command -v apache2)" ]; then
+    [ ! -e /etc/apache2/mods-enabled/rewrite.load ] && a2enmod rewrite >/dev/null
+    cat > "$REDIRECT_APACHE" <<'EOF'
+<VirtualHost *:80>
+    RewriteEngine On
+    RewriteCond %{HTTPS} !=on
+    RewriteRule ^(.*)$ https://%{HTTP_HOST}$1 [R=301,L]
+</VirtualHost>
+EOF
+    [ ! -e "/etc/apache2/sites-enabled/$(basename "$REDIRECT_APACHE")" ] && a2ensite "$(basename "$REDIRECT_APACHE")" >/dev/null
+    systemctl reload apache2 2>/dev/null || service apache2 reload
+
+elif [ -d "/etc/nginx" ] && [ -x "$(command -v nginx)" ]; then
+    cat > "$REDIRECT_NGINX" <<'EOF'
+server {
+    listen 80 default_server;
+    listen [::]:80 default_server;
+    server_name _;
+    return 301 https://$host$request_uri;
+}
+EOF
+    if [ ! -e "/etc/nginx/sites-enabled/http_redirect" ]; then
+        ln -s "$REDIRECT_NGINX" "/etc/nginx/sites-enabled/http_redirect" 2>/dev/null
+        rm -f /etc/nginx/sites-enabled/default 2>/dev/null
+    fi
+    nginx -t >/dev/null && systemctl reload nginx 2>/dev/null || service nginx reload
+
+else
+    echo "Unsupported web server" >&2
+    exit 1
+fi}

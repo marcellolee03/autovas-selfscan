@@ -1,0 +1,85 @@
+```bash
+#!/bin/bash
+
+# Variáveis para controle de versão e paths
+python3_10_version=$(python3.10 --version 2>&1 | awk '{print $2}' | cut -d ' ' -f 1)
+python3_12_version=$(python3.12 --version 2>&1 | awk '{print $2}' | cut -d ' ' -f 1)
+
+# Função para realizar o upgrade do Python, genérica para ambos 3.10 e 3.12
+upgrade_python() {
+    python_version="$1"
+    target_version="$2"
+    python_executable="$3"
+
+    echo "Verificando versão do ${python_version}..."
+    installed_version=$("${python_executable}" --version 2>&1 | awk '{print $2}' | cut -d ' ' -f 1)
+
+    if [ -z "$installed_version" ]; then
+        echo "${python_version} não está instalado."
+        return
+    fi
+
+    echo "Versão instalada: ${installed_version}"
+
+    # Comparar versões usando o version comparison do dpkg
+    if dpkg --compare-versions "$installed_version" lt "$target_version"; then
+        echo "Atualizando ${python_version} para ${target_version}..."
+        
+        # Tenta usar o apt para atualizar para a versão mais recente disponível
+        sudo apt-get update
+        sudo apt-get install -y "${python_executable}"
+
+        # Verifica se a atualização foi bem-sucedida
+        updated_version=$("${python_executable}" --version 2>&1 | awk '{print $2}' | cut -d ' ' -f 1)
+        if dpkg --compare-versions "$updated_version" ge "$target_version"; then
+            echo "${python_version} atualizado com sucesso para ${updated_version}."
+        else
+            echo "Falha ao atualizar ${python_version} usando apt.  Verifique as dependências ou tente instalar manualmente."
+        fi
+    else
+        echo "${python_version} já está na versão ${target_version} ou mais recente."
+    fi
+}
+
+# Vulnerabilidade 1, 8, 10, 14, 18, 21, 22, 27, 32, 36, 37, 40, 46, 50, 56, 57, 64: Python 3.10.12 para 3.10.16 (ou 3.10.14 para CVE-2023-52425, CVE-2024-0397, CVE-2024-0450)
+upgrade_python "Python 3.10" "3.10.16" "python3.10"
+
+# Vulnerabilidade 2, 3, 4, 5, 6, 7, 9, 11, 12, 13, 15, 16, 17, 19, 20, 23, 24, 25, 26, 28, 29, 30, 31, 33, 34, 35, 38, 39, 41, 42, 43, 44, 45, 47, 48, 51, 52, 53, 55, 58, 60, 61, 63, 65: Python 3.12.0 para 3.12.9 (ou 3.12.8 para CVE-2024-9287, 3.12.6 para CVE-2024-6232 etc, 3.12.5 para CVE-2024-3219 e CVE-2024-6923, 3.12.4 para CVE-2024-4030 e CVE-2025-1795, 3.12.3 para CVE-2023-52425 e CVE-2024-0397, 3.12.2 para CVE-2024-0450, 3.12.1 para CVE-2023-6597)
+upgrade_python "Python 3.12" "3.12.9" "python3.12"
+
+# Vulnerabilidade 49: SSL/TLS: Known Untrusted / Dangerous Certificate Authority (CA) Detection
+# Esta vulnerabilidade requer a substituição do certificado SSL/TLS por um assinado por uma CA confiável.
+# Como não podemos automatizar a obtenção e instalação de um novo certificado, deixaremos uma mensagem informativa.
+echo "Aviso: A vulnerabilidade SSL/TLS: Known Untrusted / Dangerous Certificate Authority (CA) requer a substituição manual do certificado SSL/TLS por um assinado por uma CA confiável."
+
+# Vulnerabilidade 54: SSL/TLS: Deprecated TLSv1.0 and TLSv1.1 Protocol Detection
+# Desabilitar TLSv1.0 e TLSv1.1 depende da configuração do servidor SSH.
+# O exemplo abaixo é para o OpenSSH, mas pode variar em outros servidores.
+# Adicione a seguinte linha ao arquivo /etc/ssh/sshd_config:
+#   Protocol 2
+# Remova TLSv1.0 e TLSv1.1 da lista de Ciphers e MACs.  Exemplo:
+# Ciphers aes256-gcm@openssh.com,chacha20-poly1305@openssh.com,aes256-ctr,aes128-gcm@openssh.com,aes128-ctr
+# MACs umac-128-etm@openssh.com,hmac-sha2-512-etm@openssh.com,hmac-sha2-256-etm@openssh.com,umac-128@openssh.com,hmac-sha2-512,hmac-sha2-256
+echo "Aviso: A vulnerabilidade SSL/TLS: Deprecated TLSv1.0 and TLSv1.1 Protocol Detection requer a desativação manual dos protocolos TLSv1.0 e TLSv1.1 no arquivo de configuração do servidor SSH (/etc/ssh/sshd_config)."
+echo "   Exemplo: Adicione 'Protocol 2' e ajuste Ciphers e MACs removendo algoritmos fracos."
+echo "   Reinicie o serviço SSH após a modificação."
+
+# Vulnerabilidade 59: Weak MAC Algorithm(s) Supported (SSH)
+# Semelhante a desativação de TLSv1.0 e TLSv1.1, esta correção depende da configuração do servidor SSH.
+# Remova os algoritmos de MAC fracos (umac-64-etm@openssh.com, umac-64@openssh.com) da lista de MACs no arquivo /etc/ssh/sshd_config.
+echo "Aviso: A vulnerabilidade Weak MAC Algorithm(s) Supported (SSH) requer a desativação manual dos algoritmos MAC fracos no arquivo de configuração do servidor SSH (/etc/ssh/sshd_config)."
+echo "   Exemplo: Remova 'umac-64-etm@openssh.com, umac-64@openssh.com' da lista de MACs."
+echo "   Reinicie o serviço SSH após a modificação."
+
+# Vulnerabilidade 62: ICMP Timestamp Reply Information Disclosure
+# Para desabilitar ICMP Timestamp Replies, pode-se usar o sysctl.
+echo "Aviso: A vulnerabilidade ICMP Timestamp Reply Information Disclosure requer a desativação de respostas ICMP Timestamp."
+echo "   Execute o seguinte comando para desativar temporariamente: sudo sysctl -w net.ipv4.icmp_echo_ignore_all=1"
+echo "   Para tornar a alteração permanente, adicione 'net.ipv4.icmp_echo_ignore_all=1' ao arquivo /etc/sysctl.conf e execute 'sudo sysctl -p'."
+
+# Reiniciar serviços (necessário após a alteração do sshd_config)
+echo "Reiniciando o serviço SSH para aplicar as alterações (se houver)..."
+sudo systemctl restart ssh || sudo service ssh restart
+
+echo "Script de correção concluído."
+```

@@ -1,0 +1,664 @@
+```bash
+#!/bin/bash
+
+# Variáveis Globais
+OS=$(uname -s)
+TWIKI_INSTALLED="01.Feb.2003"
+
+# Funções de Log
+log_info() {
+    echo "[INFO] $1"
+}
+
+log_error() {
+    echo "[ERROR] $1"
+}
+
+# Função para verificar se o comando existe
+command_exists() {
+    command -v "$1" >/dev/null 2>&1
+}
+
+# 1. TWiki XSS and Command Execution Vulnerabilities (CVE-2008-5304, CVE-2008-5305)
+patch_twiki() {
+    log_info "Iniciando correção para vulnerabilidades no TWiki."
+    
+    # A solução é atualizar para a versão 4.2.4 ou posterior.
+    # Este script assume que o TWiki foi instalado via gerenciador de pacotes ou por descompactação manual.
+    
+    # Método 1: Tentar atualizar via gerenciador de pacotes (se possível)
+    if command_exists apt-get; then
+        log_info "Tentando atualizar TWiki via apt-get."
+        apt-get update
+        apt-get install twiki=4.2.4* -y
+    elif command_exists yum; then
+        log_info "Tentando atualizar TWiki via yum."
+        yum update twiki -y
+    else
+        log_error "Não foi possível detectar um gerenciador de pacotes. A atualização manual é necessária."
+        log_error "Por favor, atualize o TWiki para a versão 4.2.4 ou posterior manualmente."
+        exit 1
+    fi
+    
+    log_info "Correção para TWiki concluída."
+}
+
+# 2. Distributed Ruby (dRuby/DRb) Multiple RCE Vulnerabilities
+patch_druby() {
+    log_info "Iniciando correção para vulnerabilidades no Distributed Ruby (dRuby/DRb)."
+    
+    # A solução envolve implementar controles de código.
+    # Este script irá tentar desativar o serviço DRb como medida preventiva.
+    
+    if command_exists systemctl; then
+        log_info "Tentando desativar o serviço DRb via systemctl."
+        systemctl stop drb
+        systemctl disable drb
+    else
+        log_error "systemctl não encontrado. Desative o serviço DRb manualmente."
+        exit 1
+    fi
+    
+    log_info "Serviço DRb desativado. Implemente controles de código conforme recomendado."
+}
+
+# 3, 5, 19, 20. rlogin, rexec, rsh vulnerabilities
+disable_r_services() {
+    log_info "Iniciando desativação dos serviços rlogin, rexec e rsh."
+
+    # Desativar rlogin
+    if command_exists systemctl; then
+        log_info "Desativando rlogin via systemctl."
+        systemctl stop rlogin.socket rlogin.service
+        systemctl disable rlogin.socket rlogin.service
+    else
+        log_error "systemctl não encontrado. Desative rlogin manualmente."
+    fi
+
+    # Desativar rexec
+    if command_exists systemctl; then
+        log_info "Desativando rexec via systemctl."
+        systemctl stop rexec.socket rexec.service
+        systemctl disable rexec.socket rexec.service
+    else
+        log_error "systemctl não encontrado. Desative rexec manualmente."
+    fi
+
+    # Desativar rsh
+    if command_exists systemctl; then
+        log_info "Desativando rsh via systemctl."
+        systemctl stop rsh.socket rsh.service
+        systemctl disable rsh.socket rsh.service
+    else
+        log_error "systemctl não encontrado. Desative rsh manualmente."
+    fi
+    
+    log_info "Serviços rlogin, rexec e rsh desativados."
+}
+
+# 4. Operating System (OS) End of Life (EOL) Detection
+eol_os() {
+    log_error "O sistema operacional está obsoleto (Ubuntu 8.04). Atualize para uma versão suportada o mais rápido possível."
+}
+
+# 6. Possible Backdoor: Ingreslock
+handle_ingreslock() {
+    log_error "Possível backdoor Ingreslock detectado. A limpeza completa do sistema infectado é altamente recomendada."
+    log_error "Execute uma varredura completa com um software antivírus e considere reinstalar o sistema operacional."
+}
+
+# 7. Apache Tomcat AJP RCE Vulnerability (Ghostcat)
+patch_tomcat_ajp() {
+    log_info "Iniciando correção para vulnerabilidade Ghostcat no Apache Tomcat."
+    
+    # A solução é atualizar o Tomcat para a versão 7.0.100, 8.5.51, 9.0.31 ou posterior.
+    # Este script irá comentar o conector AJP no arquivo server.xml como mitigação.
+    
+    TOMCAT_SERVER_XML=$(find / -name "server.xml" 2>/dev/null | grep -v "javadoc")
+
+    if [ -z "$TOMCAT_SERVER_XML" ]; then
+        log_error "Arquivo server.xml do Tomcat não encontrado. Impossível corrigir."
+        exit 1
+    fi
+
+    log_info "Arquivo server.xml encontrado: $TOMCAT_SERVER_XML"
+    
+    # Criar um backup do arquivo server.xml
+    cp "$TOMCAT_SERVER_XML" "${TOMCAT_SERVER_XML}.bak"
+    log_info "Backup do server.xml criado: ${TOMCAT_SERVER_XML}.bak"
+    
+    # Comentar o conector AJP no server.xml
+    sed -i "s/<Connector port=\"8009\"/<-- <Connector port=\"8009\"/g" "$TOMCAT_SERVER_XML"
+    sed -i "s/<\/Connector>/<\/Connector> -->/g" "$TOMCAT_SERVER_XML"
+    
+    log_info "Conector AJP comentado no server.xml. Reinicie o Tomcat para aplicar as mudanças."
+}
+
+# 8. MySQL / MariaDB Default Credentials
+secure_mysql() {
+    log_info "Iniciando correção para credenciais padrão do MySQL / MariaDB."
+    
+    # A solução é alterar a senha do usuário root.
+    # Este script tenta alterar a senha do root para uma senha forte.
+    
+    if command_exists mysql; then
+        log_info "Tentando alterar a senha do root do MySQL."
+        
+        # Gerar uma senha aleatória forte
+        NEW_PASSWORD=$(openssl rand -base64 32)
+        
+        mysql -u root -e "ALTER USER 'root'@'localhost' IDENTIFIED BY '$NEW_PASSWORD';"
+        mysql -u root -e "ALTER USER 'root'@'127.0.0.1' IDENTIFIED BY '$NEW_PASSWORD';"
+        mysql -u root -e "ALTER USER 'root'@'::1' IDENTIFIED BY '$NEW_PASSWORD';"
+
+        log_info "Senha do usuário root do MySQL alterada. Anote a nova senha e guarde-a em local seguro: $NEW_PASSWORD"
+    else
+        log_error "Comando mysql não encontrado. Altere a senha do root manualmente."
+        exit 1
+    fi
+    
+    log_info "Correção para credenciais padrão do MySQL concluída."
+}
+
+# 9, 10. PHP Multiple Vulnerabilities
+patch_php() {
+    log_info "Iniciando correção para vulnerabilidades no PHP."
+    
+    # A solução é atualizar para a versão 5.6.30, 7.0.15, 7.1.1 ou posterior.
+    # Este script tenta atualizar o PHP via gerenciador de pacotes.
+    
+    if command_exists apt-get; then
+        log_info "Tentando atualizar PHP via apt-get."
+        apt-get update
+        apt-get install php5 php5-cli php5-common php5-curl php5-dev php5-gd php5-imagick php5-mcrypt php5-mysql php5-pspell php5-snmp php5-sqlite php5-xmlrpc -y
+    elif command_exists yum; then
+        log_info "Tentando atualizar PHP via yum."
+        yum update php -y
+    else
+        log_error "Não foi possível detectar um gerenciador de pacotes. A atualização manual é necessária."
+        log_error "Por favor, atualize o PHP para a versão 5.6.30 ou posterior manualmente."
+        exit 1
+    fi
+    
+    log_info "Correção para vulnerabilidades no PHP concluída."
+}
+
+# 11, 12. vsftpd Compromised Source Packages Backdoor Vulnerability
+patch_vsftpd() {
+    log_info "Iniciando correção para vulnerabilidade no vsftpd."
+    
+    # A solução é reinstalar o pacote vsftpd a partir de uma fonte confiável.
+
+    if command_exists apt-get; then
+      log_info "Removendo e reinstalando vsftpd via apt-get."
+      apt-get remove --purge -y vsftpd
+      apt-get update
+      apt-get install vsftpd -y
+    elif command_exists yum; then
+      log_info "Removendo e reinstalando vsftpd via yum."
+      yum remove vsftpd -y
+      yum install vsftpd -y
+    else
+      log_error "Gerenciador de pacotes não detectado. Reinstale vsftpd manualmente a partir de uma fonte confiável."
+      exit 1
+    fi
+
+    log_info "vsftpd reinstalado. Certifique-se de validar o pacote com sua assinatura."
+}
+
+# 13. DistCC RCE Vulnerability (CVE-2004-2687)
+patch_distcc() {
+    log_info "Iniciando correção para vulnerabilidade RCE no DistCC."
+
+    # A solução é desativar ou remover o DistCC se não for necessário.
+    if command_exists systemctl; then
+        log_info "Desativando DistCC via systemctl."
+        systemctl stop distccd
+        systemctl disable distccd
+    elif command_exists apt-get; then
+        log_info "Removendo DistCC via apt-get."
+        apt-get remove --purge -y distcc
+    elif command_exists yum; then
+        log_info "Removendo DistCC via yum."
+        yum remove distcc -y
+    else
+        log_error "systemctl ou gerenciador de pacotes não encontrado. Desative ou remova DistCC manualmente."
+        exit 1
+    fi
+
+    log_info "Correção para DistCC concluída."
+}
+
+# 14. PostgreSQL Default Credentials
+secure_postgresql() {
+    log_info "Iniciando correção para credenciais padrão do PostgreSQL."
+
+    # A solução é alterar a senha do usuário postgres.
+    if command_exists psql; then
+        log_info "Alterando a senha do usuário postgres."
+        
+        # Gerar uma senha aleatória forte
+        NEW_PASSWORD=$(openssl rand -base64 32)
+        
+        # Alterar a senha usando psql
+        psql -U postgres -c "ALTER USER postgres WITH PASSWORD '$NEW_PASSWORD';"
+
+        log_info "Senha do usuário postgres alterada. Anote a nova senha e guarde-a em local seguro: $NEW_PASSWORD"
+
+    else
+        log_error "Comando psql não encontrado. Altere a senha do usuário postgres manualmente."
+        exit 1
+    fi
+
+    log_info "Correção para credenciais padrão do PostgreSQL concluída."
+}
+
+# 15. VNC Brute Force Login
+secure_vnc() {
+    log_info "Vulnerabilidade VNC Brute Force Login. A senha VNC é fraca. Altere a senha para uma senha forte e complexa."
+    log_info "Consulte a documentação do seu servidor VNC para alterar a senha."
+}
+
+# 16. Test HTTP dangerous methods
+disable_http_methods() {
+    log_info "Removendo métodos HTTP perigosos (PUT, DELETE)."
+
+    # Assume-se Apache, outras configurações de servidor web precisam ser ajustadas manualmente
+    APACHE_CONF=$(find /etc/apache2 /etc/httpd -name apache2.conf -o -name httpd.conf 2>/dev/null | head -n 1)
+    
+    if [ -z "$APACHE_CONF" ]; then
+        log_error "Arquivo de configuração do Apache não encontrado. Ajuste a configuração manualmente."
+        exit 1
+    fi
+
+    # Criar um backup do arquivo de configuração do Apache
+    cp "$APACHE_CONF" "${APACHE_CONF}.bak"
+    log_info "Backup do arquivo de configuração do Apache criado: ${APACHE_CONF}.bak"
+
+    # Adicionar restrições de acesso aos métodos PUT e DELETE
+    echo -e "<Limit PUT DELETE>\n\tRequire all denied\n</Limit>" >> "$APACHE_CONF"
+    
+    log_info "Restrições de acesso adicionadas ao arquivo de configuração do Apache. Reinicie o Apache para aplicar as mudanças."
+}
+
+# 17, 18. FTP Brute Force Logins With Default Credentials Reporting
+secure_ftp() {
+    log_info "Vulnerabilidade FTP Brute Force Logins With Default Credentials Reporting. Altere as senhas dos seguintes usuários para senhas fortes e complexas:"
+    log_info "msfadmin, postgres, service, user"
+}
+
+# 21. SSL/TLS: OpenSSL CCS Man in the Middle Security Bypass Vulnerability
+patch_openssl_ccs() {
+    log_info "Iniciando correção para vulnerabilidade OpenSSL CCS Man in the Middle."
+    
+    # A solução é atualizar o OpenSSL para a versão 0.9.8za, 1.0.0m ou 1.0.1h ou posterior.
+    # Este script tenta atualizar o OpenSSL via gerenciador de pacotes.
+    
+    if command_exists apt-get; then
+        log_info "Tentando atualizar OpenSSL via apt-get."
+        apt-get update
+        apt-get install openssl libssl-dev -y
+    elif command_exists yum; then
+        log_info "Tentando atualizar OpenSSL via yum."
+        yum update openssl -y
+    else
+        log_error "Não foi possível detectar um gerenciador de pacotes. A atualização manual é necessária."
+        log_error "Por favor, atualize o OpenSSL para a versão 0.9.8za, 1.0.0m, 1.0.1h ou posterior manualmente."
+        exit 1
+    fi
+    
+    log_info "Correção para vulnerabilidade OpenSSL CCS Man in the Middle concluída."
+}
+
+# 22. Multiple Vendors STARTTLS Implementation Plaintext Arbitrary Command Injection Vulnerability
+patch_starttls() {
+    log_info "Iniciando correção para vulnerabilidade STARTTLS."
+    
+    # Devido à complexidade e variedade de implementações, este script apenas alerta.
+    log_error "Vulnerabilidade STARTTLS detectada. Atualizações estão disponíveis para Ipswitch, Kerio, Postfix, Qmail-TLS, Oracle, SCO Group, spamdyke, ISC. Consulte os fornecedores para obter patchs específicos."
+}
+
+# 23, 26, 27. TWiki CSRF Vulnerability, TWiki < 6.1.0 XSS Vulnerability, TWiki Cross-Site Request Forgery Vulnerability
+patch_twiki2() {
+    log_info "Iniciando correção para vulnerabilidades no TWiki."
+    
+    # A solução é atualizar para a versão 4.3.2, 6.1.0 ou posterior.
+    # Este script assume que o TWiki foi instalado via gerenciador de pacotes ou por descompactação manual.
+    
+    # Método 1: Tentar atualizar via gerenciador de pacotes (se possível)
+    if command_exists apt-get; then
+        log_info "Tentando atualizar TWiki via apt-get."
+        apt-get update
+        apt-get install twiki -y
+    elif command_exists yum; then
+        log_info "Tentando atualizar TWiki via yum."
+        yum update twiki -y
+    else
+        log_error "Não foi possível detectar um gerenciador de pacotes. A atualização manual é necessária."
+        log_error "Por favor, atualize o TWiki para a versão 4.3.2, 6.1.0 ou posterior manualmente."
+        exit 1
+    fi
+    
+    log_info "Correção para TWiki concluída."
+}
+
+# 24. Anonymous FTP Login Reporting
+disable_anonymous_ftp() {
+    log_info "Iniciando desativação do login anônimo no FTP."
+
+    # Este script assume que o vsftpd está em uso.
+
+    VSFTPD_CONF="/etc/vsftpd.conf"
+
+    if [ ! -f "$VSFTPD_CONF" ]; then
+        log_error "Arquivo de configuração do vsftpd não encontrado: $VSFTPD_CONF. Desative o login anônimo manualmente."
+        exit 1
+    fi
+
+    # Criar um backup do arquivo de configuração do vsftpd
+    cp "$VSFTPD_CONF" "${VSFTPD_CONF}.bak"
+    log_info "Backup do arquivo de configuração do vsftpd criado: ${VSFTPD_CONF}.bak"
+
+    # Desativar o login anônimo
+    sed -i "s/^anonymous_enable=YES/anonymous_enable=NO/g" "$VSFTPD_CONF"
+
+    log_info "Login anônimo desativado no arquivo de configuração do vsftpd. Reinicie o vsftpd para aplicar as mudanças."
+
+    # Reiniciar o serviço vsftpd
+    if command_exists systemctl; then
+        log_info "Reiniciando o serviço vsftpd via systemctl."
+        systemctl restart vsftpd
+    else
+        log_error "systemctl não encontrado. Reinicie o serviço vsftpd manualmente."
+    fi
+}
+
+# 25, 55. jQuery < 1.9.0 XSS Vulnerability, jQuery < 1.6.3 XSS Vulnerability
+patch_jquery() {
+    log_info "Vulnerabilidade jQuery XSS detectada. Atualize o jQuery para a versão 1.9.0, 1.6.3 ou superior. A atualização manual é necessária."
+    log_info "Localize o arquivo /mutillidae/javascript/ddsmoothmenu/jquery.min.js e substitua por uma versão atualizada."
+}
+
+# 28, 29. SSL/TLS: Deprecated SSLv2 and SSLv3 Protocol Detection
+disable_sslv2_sslv3() {
+    log_info "Desativando protocolos SSLv2 e SSLv3."
+
+    # Assume-se OpenSSL, a configuração pode variar dependendo do serviço
+
+    # Localizar o arquivo de configuração do OpenSSL
+    OPENSSL_CONF=$(find /etc/ssl -name openssl.cnf -o -name openssl.conf 2>/dev/null | head -n 1)
+    
+    if [ -z "$OPENSSL_CONF" ]; then
+        log_error "Arquivo de configuração do OpenSSL não encontrado. Desative SSLv2 e SSLv3 manualmente."
+        exit 1
+    fi
+    
+    # Criar um backup do arquivo de configuração do OpenSSL
+    cp "$OPENSSL_CONF" "${OPENSSL_CONF}.bak"
+    log_info "Backup do arquivo de configuração do OpenSSL criado: ${OPENSSL_CONF}.bak"
+
+    # Adicionar a opção No SSLv3 e No SSLv2
+    sed -i "/^\[system_default_sect\]/a MinProtocol = TLSv1.2" "$OPENSSL_CONF"
+
+    log_info "SSLv2 e SSLv3 desativados no arquivo de configuração do OpenSSL. Reinicie os serviços para aplicar as mudanças."
+}
+
+# 30. SSL/TLS: Report Weak Cipher Suites
+# 56, 61. SSL/TLS: RSA Temporary Key Handling RSA_EXPORT Downgrade Issue (FREAK), SSL/TLS: DHE_EXPORT MITM Security Bypass Vulnerability (LogJam)
+# 58, 59. SSL/TLS: Diffie-Hellman Key Exchange Insufficient DH Group Strength Vulnerability
+# 62, 63. SSL/TLS: SSLv3 Protocol CBC Cipher Suites Information Disclosure Vulnerability (POODLE)
+secure_tls() {
+    log_info "Removendo Cipher Suites Fracas."
+
+    # Assume-se OpenSSL, a configuração pode variar dependendo do serviço
+
+    # Localizar o arquivo de configuração do OpenSSL
+    OPENSSL_CONF=$(find /etc/ssl -name openssl.cnf -o -name openssl.conf 2>/dev/null | head -n 1)
+    
+    if [ -z "$OPENSSL_CONF" ]; then
+        log_error "Arquivo de configuração do OpenSSL não encontrado. Desative Cipher Suites Fracas manualmente."
+        exit 1
+    fi
+
+    # Criar um backup do arquivo de configuração do OpenSSL
+    cp "$OPENSSL_CONF" "${OPENSSL_CONF}.bak"
+    log_info "Backup do arquivo de configuração do OpenSSL criado: ${OPENSSL_CONF}.bak"
+    
+    sed -i "/^\[system_default_sect\]/a CipherString = DEFAULT@SECLEVEL=2" "$OPENSSL_CONF"
+
+    log_info "Cipher Suites Fracas desativado no arquivo de configuração do OpenSSL. Reinicie os serviços para aplicar as mudanças."
+}
+
+# 31. HTTP Debugging Methods (TRACE/TRACK) Enabled
+disable_http_trace() {
+    log_info "Desativando métodos de depuração HTTP (TRACE/TRACK)."
+
+    # Assume-se Apache, outras configurações de servidor web precisam ser ajustadas manualmente
+    APACHE_CONF=$(find /etc/apache2 /etc/httpd -name apache2.conf -o -name httpd.conf 2>/dev/null | head -n 1)
+    
+    if [ -z "$APACHE_CONF" ]; then
+        log_error "Arquivo de configuração do Apache não encontrado. Ajuste a configuração manualmente."
+        exit 1
+    fi
+
+    # Criar um backup do arquivo de configuração do Apache
+    cp "$APACHE_CONF" "${APACHE_CONF}.bak"
+    log_info "Backup do arquivo de configuração do Apache criado: ${APACHE_CONF}.bak"
+
+    # Desativar o método TRACE
+    sed -i 's/TraceEnable On/TraceEnable Off/g' "$APACHE_CONF"
+    
+    log_info "Método TRACE desativado no arquivo de configuração do Apache. Reinicie o Apache para aplicar as mudanças."
+}
+
+# 32, 33. SSL/TLS: Server Certificate / Certificate in Chain with RSA keys less than 2048 bits
+# 40, 41. SSL/TLS: Certificate Expired
+replace_weak_ssl_cert() {
+    log_error "Certificado SSL/TLS fraco (RSA < 2048 bits) ou expirado detectado. Substitua o certificado por um certificado válido e forte."
+}
+
+# 34. Weak Key Exchange (KEX) Algorithm(s) Supported (SSH)
+# 36. Weak Host Key Algorithm(s) (SSH)
+# 51. Weak Encryption Algorithm(s) Supported (SSH)
+# 64. Weak MAC Algorithm(s) Supported (SSH)
+secure_ssh() {
+    log_info "Removendo algoritmo SSH Fracas."
+
+    SSH_CONF="/etc/ssh/sshd_config"
+
+    if [ ! -f "$SSH_CONF" ]; then
+        log_error "Arquivo de configuração SSH não encontrado: $SSH_CONF. Ajuste a configuração SSH manualmente."
+        exit 1
+    fi
+
+    # Criar um backup do arquivo de configuração SSH
+    cp "$SSH_CONF" "${SSH_CONF}.bak"
+    log_info "Backup do arquivo de configuração SSH criado: ${SSH_CONF}.bak"
+
+    echo "KexAlgorithms curve25519-sha256@libssh.org,ecdh-sha2-nistp256,ecdh-sha2-nistp384,ecdh-sha2-nistp521,diffie-hellman-group-exchange-sha256" >> "$SSH_CONF"
+    echo "Ciphers chacha20-poly1305@openssh.com,aes256-gcm@openssh.com,aes128-gcm@openssh.com,aes256-ctr,aes192-ctr,aes128-ctr" >> "$SSH_CONF"
+    echo "MACs hmac-sha2-512,hmac-sha2-256,umac-128@openssh.com" >> "$SSH_CONF"
+    echo "HostKeyAlgorithms ecdsa-sha2-nistp256-cert-v01@openssh.com,ecdsa-sha2-nistp384-cert-v01@openssh.com,ecdsa-sha2-nistp521-cert-v01@openssh.com,ssh-rsa-cert-v01@openssh.com,rsa-sha2-512,rsa-sha2-256,ecdsa-sha2-nistp256,ecdsa-sha2-nistp384,ecdsa-sha2-nistp521,ssh-rsa" >> "$SSH_CONF"
+
+    log_info "Alterado algoritmo SSH Fracas no arquivo de configuração SSH. Reinicie o SSH para aplicar as mudanças."
+
+    # Reiniciar o serviço SSH
+    if command_exists systemctl; then
+        log_info "Reiniciando o serviço SSH via systemctl."
+        systemctl restart sshd
+    else
+        log_error "systemctl não encontrado. Reinicie o serviço SSH manualmente."
+    fi
+}
+
+# 35. phpinfo() Output Reporting (HTTP)
+remove_phpinfo() {
+    log_info "Removendo arquivos phpinfo() encontrados."
+
+    rm -f /var/www/html/mutillidae/phpinfo.php /var/www/html/phpinfo.php
+
+    log_info "Remoção do arquivo phpinfo() concluída."
+}
+
+# 37. Check if Mailserver answer to VRFY and EXPN requests
+disable_vrfy_expn() {
+    log_info "Desativando VRFY e EXPN no servidor de e-mail."
+
+    # Detectar qual servidor de e-mail está em uso (Postfix, Sendmail)
+
+    if [ -f /etc/postfix/main.cf ]; then
+        log_info "Postfix detectado. Desativando VRFY e EXPN."
+        echo "disable_vrfy_command = yes" >> /etc/postfix/main.cf
+        service postfix restart
+    elif [ -f /etc/mail/sendmail.cf ]; then
+        log_info "Sendmail detectado. Desativando VRFY e EXPN."
+        sed -i 's/^O PrivacyOptions=/O PrivacyOptions=goaway/g' /etc/mail/sendmail.cf
+        service sendmail restart
+    else
+        log_error "Servidor de e-mail não detectado. Desative VRFY e EXPN manualmente."
+        exit 1
+    fi
+
+    log_info "VRFY e EXPN desativados no servidor de e-mail."
+}
+
+# 38, 39. SSL/TLS: Renegotiation DoS Vulnerability (CVE-2011-1473, CVE-2011-5094)
+disable_ssl_renegotiation() {
+    log_info "Desativando Renegociação SSL/TLS para evitar ataque DoS."
+    log_error "Não é possível desativar a renegociação SSL/TLS automaticamente. Consulte a documentação do servidor para desativar a renegociação iniciada pelo cliente."
+}
+
+# 42, 43. QWikiwiki directory traversal vulnerability, awiki <= 20100125 Multiple LFI Vulnerabilities - Active Check
+remove_vulnerable_wiki() {
+    log_info "Removendo QWikiwiki e awiki devido a vulnerabilidades LFI."
+
+    rm -rf /var/www/html/mutillidae/
+
+    log_info "Remoção do diretório QWikiwiki e awiki concluída."
+}
+
+# 44. /doc directory browsable
+restrict_doc_dir() {
+    log_info "Restringindo o acesso ao diretório /doc."
+
+    # Assume-se Apache
+    APACHE_CONF=$(find /etc/apache2 /etc/httpd -name apache2.conf -o -name httpd.conf 2>/dev/null | head -n 1)
+
+    if [ -z "$APACHE_CONF" ]; then
+        log_error "Arquivo de configuração do Apache não encontrado. Ajuste a configuração manualmente."
+        exit 1
+    fi
+
+    # Criar um backup do arquivo de configuração do Apache
+    cp "$APACHE_CONF" "${APACHE_CONF}.bak"
+    log_info "Backup do arquivo de configuração do Apache criado: ${APACHE_CONF}.bak"
+
+    # Adicionar restrições de acesso ao diretório /doc
+    echo -e "<Directory /usr/share/doc>\n\tOptions -Indexes\n\t<FilesMatch \"index.html?\">\n\t\tAllow from all\n\t</FilesMatch>\n</Directory>" >> "$APACHE_CONF"
+
+    log_info "Restrições de acesso adicionadas ao diretório /doc no arquivo de configuração do Apache. Reinicie o Apache para aplicar as mudanças."
+}
+
+# 45. Telnet Unencrypted Cleartext Login
+disable_telnet() {
+    log_info "Desativando serviço Telnet."
+
+    if command_exists systemctl; then
+        log_info "Desativando Telnet via systemctl."
+        systemctl stop telnet.socket telnet.service
+        systemctl disable telnet.socket telnet.service
+    elif command_exists apt-get; then
+        log_info "Removendo Telnet via apt-get."
+        apt-get remove --purge -y telnetd
+    elif command_exists yum; then
+        log_info "Removendo Telnet via yum."
+        yum remove telnet-server -y
+    else
+        log_error "systemctl ou gerenciador de pacotes não encontrado. Desative ou remova o Telnet manualmente."
+        exit 1
+    fi
+
+    log_info "Serviço Telnet desativado ou removido."
+}
+
+# 46, 48. FTP Unencrypted Cleartext Login
+enforce_ftps() {
+    log_info "Ativando FTPS ou forçando conexões seguras via AUTH TLS."
+
+    # Este script assume que o vsftpd está em uso.
+
+    VSFTPD_CONF="/etc/vsftpd.conf"
+
+    if [ ! -f "$VSFTPD_CONF" ]; then
+        log_error "Arquivo de configuração do vsftpd não encontrado: $VSFTPD_CONF. Ajuste a configuração manualmente."
+        exit 1
+    fi
+
+    # Criar um backup do arquivo de configuração do vsftpd
+    cp "$VSFTPD_CONF" "${VSFTPD_CONF}.bak"
+    log_info "Backup do arquivo de configuração do vsftpd criado: ${VSFTPD_CONF}.bak"
+
+    # Habilitar FTPS ou forçar AUTH TLS
+    sed -i "s/^ssl_enable=NO/ssl_enable=YES/g" "$VSFTPD_CONF"
+    sed -i "s/^allow_anon_ssl=YES/allow_anon_ssl=NO/g" "$VSFTPD_CONF"
+    sed -i "s/^force_local_data_ssl=NO/force_local_data_ssl=YES/g" "$VSFTPD_CONF"
+    sed -i "s/^force_local_logins_ssl=NO/force_local_logins_ssl=YES/g" "$VSFTPD_CONF"
+
+    log_info "FTPS habilitado e AUTH TLS forçado no arquivo de configuração do vsftpd. Reinicie o vsftpd para aplicar as mudanças."
+
+    # Reiniciar o serviço vsftpd
+    if command_exists systemctl; then
+        log_info "Reiniciando o serviço vsftpd via systemctl."
+        systemctl restart vsftpd
+    else
+        log_error "systemctl não encontrado. Reinicie o serviço vsftpd manualmente."
+    fi
+}
+
+# 47. VNC Server Unencrypted Data Transmission
+secure_vnc_encryption() {
+  log_info "VNC Server: Transmissão de dados não criptografada detectada. Ative a criptografia de dados no servidor VNC ou execute a sessão em um canal criptografado (IPSec ou SSH)."
+}
+
+# 49. Cleartext Transmission of Sensitive Information via HTTP
+enforce_https() {
+    log_info "Implementando HTTPS para evitar transmissão de informações confidenciais em texto não criptografado."
+
+    # Assume-se Apache
+    APACHE_CONF=$(find /etc/apache2 /etc/httpd -name apache2.conf -o -name httpd.conf 2>/dev/null | head -n 1)
+
+    if [ -z "$APACHE_CONF" ]; then
+        log_error "Arquivo de configuração do Apache não encontrado. Implemente HTTPS manualmente."
+        exit 1
+    fi
+
+    # Criar um backup do arquivo de configuração do Apache
+    cp "$APACHE_CONF" "${APACHE_CONF}.bak"
+    log_info "Backup do arquivo de configuração do Apache criado: ${APACHE_CONF}.bak"
+
+    # Redirecionar HTTP para HTTPS
+    echo -e "<VirtualHost *:80>\n\tServerName ${SERVER_NAME}\n\tRedirect permanent / https://${SERVER_NAME}/\n</VirtualHost>" >> "$APACHE_CONF"
+    
+    log_info "Redirecionamento HTTP para HTTPS configurado no arquivo de configuração do Apache. Reinicie o Apache para aplicar as mudanças."
+}
+
+# 50, 54. SSL/TLS: Deprecated TLSv1.0 and TLSv1.1 Protocol Detection
+disable_tlsv1_tlsv11() {
+    log_info "Desativando protocolos TLSv1.0 e TLSv1.1."
+
+    # Assume-se OpenSSL, a configuração pode variar dependendo do serviço
+
+    # Localizar o arquivo de configuração do OpenSSL
+    OPENSSL_CONF=$(find /etc/ssl -name openssl.cnf -o -name openssl.conf 2>/dev/null | head -n 1)
+    
+    if [ -z "$OPENSSL_CONF" ]; then
+        log_error "Arquivo de configuração do OpenSSL não encontrado. Desative TLSv1.0 e TLSv1.1 manualmente."
+        exit 1
+    fi
+    
+    # Criar um backup do arquivo de configuração do OpenSSL
+    cp "$OPENSSL_CONF" "${OPENSSL_CONF}.bak"
+    log_info "Backup do arquivo de configuração do OpenSSL criado: ${OPENSSL_CONF}.bak"
+
+    # Adicionar a opção MinProtocol = TLSv1.2
+    sed -i "/^\[system_default_sect\]/

@@ -1,0 +1,75 @@
+#!/bin/bash
+# Vulnerabilidade 1 (TWiki): Remover TWiki vulnerável
+rm -rf /var/www/twiki
+
+# Vulnerabilidade 2 (dRuby): Parar serviço DRb
+pkill -f "druby"
+systemctl stop druby 2>/dev/null
+systemctl disable druby 2>/dev/null
+
+# Vulnerabilidades 3,5,6,11,12,13,19,20,24,45,46,47,48: Remover/parar serviços inseguros
+apt purge -y rsh-client rsh-server netkit-rsh rexecd rexec vsftpd distcc telnetd
+apt purge -y vnc4server xtightvncviewer vinagre
+systemctl stop rlogin 2>/dev/null
+systemctl disable rlogin 2>/dev/null
+systemctl stop distcc 2>/dev/null
+systemctl disable distcc 2>/dev/null
+systemctl stop vncserver 2>/dev/null
+systemctl disable vncserver 2>/dev/null
+
+# Vulnerabilidades MySQL/PostgreSQL (8,14): Alterar senhas e bloquear acesso remoto
+mysql -e "ALTER USER 'root'@'localhost' IDENTIFIED BY 'NpSpcF!BZ9Xx&W@o#k'; FLUSH PRIVILEGES;"
+sudo -u postgres psql -c "ALTER USER postgres WITH PASSWORD 'U5erStR0nGp4ss!';"
+
+# Vulnerabilidade 7 (Tomcat): Parar Tomcat e desativar AJP
+systemctl stop tomcat
+sed -i 's/secretRequired="true"/secretRequired="true" address="127.0.0.1"/g' /etc/tomcat*/server.xml
+
+# Vulnerabilidades 9,10 (PHP): Atualizar PHP e remover ini inseguro
+apt install -y php=5.6.30* libapache2-mod-php=5.6.30*
+rm -f /etc/php5/cgi/php.ini /etc/php5/apache2/php.ini
+cp /etc/php5/apache2/php.ini.dpkg-dist /etc/php5/apache2/php.ini
+find /var/www -name phpinfo.php -delete
+
+# Vulnerabilidades Apache (16,31,44): Desativar métodos perigosos
+echo -e "<Location "/">\nAllowMethods GET POST OPTIONS\n</Location>" > /etc/apache2/conf-available/disable-methods.conf
+a2enconf disable-methods
+a2dismod -f autoindex
+sed -i 's/Options Indexes/Options -Indexes/' /etc/apache2/apache2.conf
+systemctl restart apache2
+
+# Vulnerabilidades SSH (34,36,51,64): Segurança SSH
+sed -i '/^KexAlgorithms/d' /etc/ssh/sshd_config
+echo "KexAlgorithms curve25519-sha256@libssh.org,diffie-hellman-group-exchange-sha256" >> /etc/ssh/sshd_config
+echo "HostKeyAlgorithms ssh-ed25519,ssh-rsa" >> /etc/ssh/sshd_config
+echo "Ciphers chacha20-poly1305@openssh.com,aes256-gcm@openssh.com,aes128-gcm@openssh.com" >> /etc/ssh/sshd_config
+echo "MACs hmac-sha2-512-etm@openssh.com,hmac-sha2-256-etm@openssh.com" >> /etc/ssh/sshd_config
+systemctl restart ssh
+
+# Vulnerabilidades TLS (21,22,28,29,30,32,33,38,39,40,41,50,54,56,57,58,59,60,61,62,63)
+update-ca-certificates --fresh
+find /etc/ssl/ -name "*.crt" -mtime +365 -delete
+openssl req -x509 -nodes -days 365 -newkey rsa:4096 -keyout /etc/ssl/private/nginx-selfsigned.key -out /etc/ssl/certs/nginx-selfsigned.crt -subj "/CN=localhost"
+
+# Vulnerabilidade 25,55 (jQuery): Atualizar jQuery
+find /var/www -name 'jquery*.js' -exec rm -f {} \;
+wget -P /var/www/mutillidae/javascript/ https://code.jquery.com/jquery-3.6.0.min.js
+
+# Vulnerabilidade 37 (Servidor de email): Desativar VRFY/EXPN
+postconf -e "disable_vrfy_command=yes"
+systemctl reload postfix
+
+# Vulnerabilidades network (65,66): Configurar sysctl
+echo "net.ipv4.tcp_timestamps=0" >> /etc/sysctl.conf
+echo "net.ipv4.icmp_echo_ignore_all=1" >> /etc/sysctl.conf
+sysctl -p
+
+# Atualizar sistema e limpar
+apt update -y
+apt full-upgrade -y
+apt autoremove -y --purge
+apt clean
+
+# Auditar e reverter vulnerabilidade da porta 1524 (Vulnerabilidade 6)
+netstat -tulpn | awk '$NF ~ /1524/ {system("kill -9 " $7)}'
+crontab -l | grep -v "192.168.100.20" | crontab -

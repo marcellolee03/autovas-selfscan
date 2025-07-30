@@ -1,0 +1,41 @@
+#!/bin/sh
+
+vulnerable_file="/console/js/jquery-1.8.3.min.js"
+backup_file="$vulnerable_file.bak"
+download_url="https://code.jquery.com/jquery-1.12.4.min.js"
+temp_file="$(mktemp /tmp/jquery-update.XXXXXX.js)"
+
+[ ! -f "$vulnerable_file" ] && echo "Error: Vulnerable file not found." >&2 && exit 1
+
+if ! cp "$vulnerable_file" "$backup_file"; then
+    echo "Error: Backup failed." >&2
+    exit 1
+fi
+
+download_success=0
+if command -v curl > /dev/null 2>&1; then
+    if curl -sf -o "$temp_file" "$download_url"; then
+        download_success=1
+    fi
+elif command -v wget > /dev/null 2>&1; then
+    if wget -q -O "$temp_file" "$download_url"; then
+        download_success=1
+    fi
+else
+    echo "Error: No download tool found." >&2
+    exit 1
+fi
+
+if [ $download_success -eq 1 ] && [ -s "$temp_file" ]; then
+    if ! mv "$temp_file" "$vulnerable_file"; then
+        echo "Error: File replacement failed." >&2
+        rm -f "$temp_file"
+        exit 1
+    fi
+else
+    echo "Error: Download failed or empty file." >&2
+    rm -f "$temp_file"
+    exit 1
+fi
+
+exit 0

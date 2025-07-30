@@ -1,0 +1,35 @@
+```bash
+#!/bin/bash
+
+# Verifica se o sistema é baseado em Debian/Ubuntu (e usa apt) ou outro (e tenta yum)
+if command -v apt-get &> /dev/null; then
+  PKG_MANAGER="apt"
+elif command -v yum &> /dev/null; then
+  PKG_MANAGER="yum"
+else
+  echo "Gerenciador de pacotes não suportado.  Este script requer apt ou yum."
+  exit 1
+fi
+
+# Atualiza a lista de pacotes e atualiza o PHP
+if [ "$PKG_MANAGER" = "apt" ]; then
+  apt-get update
+  apt-get upgrade -y php5 php5-cgi php5-cli
+elif [ "$PKG_MANAGER" = "yum" ]; then
+  yum update -y php php-cli php-cgi
+fi
+
+# Reinicia o serviço web (Apache ou Nginx, tenta ambos)
+if command -v systemctl &> /dev/null; then
+  systemctl restart apache2.service 2>/dev/null
+  systemctl restart httpd.service 2>/dev/null
+  systemctl restart nginx.service 2>/dev/null
+else
+  service apache2 restart 2>/dev/null
+  service httpd restart 2>/dev/null
+  service nginx restart 2>/dev/null
+fi
+
+echo "Atualização do PHP e reinicialização do servidor web concluídas."
+exit 0
+```

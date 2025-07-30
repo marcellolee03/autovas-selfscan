@@ -1,0 +1,53 @@
+```bash
+#!/bin/bash
+
+# Script para desabilitar o serviço rexec (CVE-1999-0618) em sistemas Linux.
+
+# Verifica se o serviço rexec está instalado e habilitado via systemd.
+if systemctl is-active rexec.socket 2>/dev/null; then
+  # Desabilita o serviço rexec.socket para prevenir que inicie no boot.
+  systemctl disable rexec.socket >/dev/null 2>&1
+
+  # Para o serviço rexec.socket imediatamente.
+  systemctl stop rexec.socket >/dev/null 2>&1
+
+  echo "Serviço rexec desabilitado e parado (via systemd)."
+fi
+
+# Verifica se o serviço rexec está instalado e habilitado via xinetd.
+if [[ -f /etc/xinetd.d/rexec ]]; then
+  # Desabilita o serviço rexec no arquivo de configuração do xinetd.
+  sed -i 's/^\s*disable\s*=\s*no/disable = yes/' /etc/xinetd.d/rexec
+
+  # Reinicia o serviço xinetd para aplicar as mudanças.
+  if systemctl is-active xinetd 2>/dev/null; then
+    systemctl restart xinetd >/dev/null 2>&1
+    echo "Serviço rexec desabilitado (via xinetd) e xinetd reiniciado."
+  else
+    service xinetd restart >/dev/null 2>&1
+    echo "Serviço rexec desabilitado (via xinetd) e xinetd reiniciado (via service)."
+  fi
+fi
+
+# Remove o pacote rexec, se existir
+dpkg -s rexec 2>/dev/null >/dev/null && apt-get remove --purge -y rexec >/dev/null 2>&1
+
+# Remove o pacote rsh-server, se existir
+dpkg -s rsh-server 2>/dev/null >/dev/null && apt-get remove --purge -y rsh-server >/dev/null 2>&1
+
+# Garante que o pacote netkit-inetd também seja removido.
+dpkg -s netkit-inetd 2>/dev/null >/dev/null && apt-get remove --purge -y netkit-inetd >/dev/null 2>&1
+
+# Remove o arquivo de configuração /etc/inetd.conf
+if [ -f /etc/inetd.conf ]; then
+  rm -f /etc/inetd.conf
+  echo "Arquivo /etc/inetd.conf removido."
+fi
+
+# Medidas adicionais para garantir a remoção completa (Debian/Ubuntu).
+apt-get autoremove -y >/dev/null 2>&1
+apt-get clean >/dev/null 2>&1
+
+echo "Script concluído.  O serviço rexec (e serviços relacionados) foi desabilitado ou removido."
+exit 0
+```

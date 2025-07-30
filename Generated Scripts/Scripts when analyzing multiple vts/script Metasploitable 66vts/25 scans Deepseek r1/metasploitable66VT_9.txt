@@ -1,0 +1,100 @@
+#!/bin/bash
+set -e
+
+# Atualizar repositórios e pacotes
+apt-get update
+DEBIAN_FRONTEND=noninteractive apt-get -y upgrade
+DEBIAN_FRONTEND=noninteractive apt-get -y dist-upgrade
+apt-get -y --purge autoremove
+
+# Desabilitar e remover serviços inseguros
+services=("rsh-server" "rsh-redone-client" "rsh-client" "rlogin" "telnetd" "inetd")
+for service in "${services[@]}"; do
+    apt-get -y --purge remove "$service" || true
+    systemctl disable "$service" 2>/dev/null || true
+    update-rc.d "$service" remove 2>/dev/null || true
+done
+find /etc/inetd.conf /etc/inetd.d/ -type f -exec sed -i '/\(rexec\|rlogin\|rsh\|rshd\|ingreslock\|distccd\)/d' {} \;
+killall -9 rpc.rexecd 2>/dev/null || true
+systemctl restart inetutils-inetd 2>/dev/null || true
+
+# Fix para distcc
+if dpkg -l | grep -qw distcc; then
+    apt-get -y remove --purge distcc
+fi
+
+# Fix para vsftpd (backdoor)
+if dpkg -l | grep -q 'vsftpd.*2\.3\.4'; then
+    apt-get -y remove --purge vsftpd
+fi
+
+# Fix Tomcat Ghostcat (desabilita ou atualiza)
+if dpkg -l | grep -q tomcat5.5; then
+    apt-get -y remove --purge tomcat5.5
+fi
+rm -f /etc/xinetd.d/tomcat*
+
+# Fix PostgreSQL: Remover senha padrão
+if dpkg -l | grep -q postgresql; then
+    echo "ALTER USER postgres WITH PASSWORD 'SecurePassword123!';" | sudo -u postgres psql
+fi
+
+# Fix MySQL/MariaDB: Remover senha padrão
+if dpkg -l | grep -E 'mysql-server|mariadb-server'; then
+    mysql -e "ALTER USER 'root'@'localhost' IDENTIFIED BY 'SecureRootPass123!'; FLUSH PRIVILEGES;"
+fi
+
+# Fix VNC: Forçar uso de senha e remover backdoors
+if pkill -9 vnc; then
+    sed -i '/^Permissions:/d' ~/.vnc/config
+    vncserver -SecurityTypes VncAuth -localhost yes
+fi
+
+# Disable Ruby RCE
+sed -i '$SAFE = 3' /usr/bin/druby
+
+# Atualizar PHP e derivados
+if dpkg -l | grep -q php5; then
+    apt-get install --only-upgrade php5 php5-cli libapache2-mod-php5 -y
+    systemctl restart apache2
+fi
+
+# Bloqueio físico das portas via iptables
+bad_ports=("21" "23" "80" "110" "135" "139" "445" "512" "513" "514" "1524" "2000" "3306" "3632" "5900" "6000" "6667" "8787" "12345")
+for port in "${bad_ports[@]}"; do
+    iptables -A INPUT -p tcp --dport "$port" -j DROP
+done
+iptables-save > /etc/iptables.rules
+
+# Desabilitar TRACE/TRACK
+if apache2ctl -M 2>/dev/null | grep -q 'headers_module'; then
+    echo -e "<IfModule mod_headers.c>\nRequestHeader unset X-Forwarded-Host\nHeader set X-Content-Type-Options nosniff\n</IfModule>" > /etc/apache2/conf-available/security.conf
+    a2enmod headers
+    echo 'TraceEnable off' >> /etc/apache2/apache2.conf
+    systemctl restart apache2
+fi
+
+# Remover arquivos sensíveis
+rm -f /var/www/*/phpinfo.php /etc/xinetd.d/*ingreslock* /tmp/backdoor /dev/shm/exploit
+find / -name '*.php' -exec sed -i 's/<?php system(id)/<?php/g' {} +
+rm -Rf /usr/lib/ruby/1.8/drb/drb.rb
+
+# Disable unsafe SSH ciphers
+sed -i 's/^HostKeyAli*.*ssh-dss//' /etc/ssh/sshd_config
+echo -e "Ciphers aes256-cbc,aes256-ctr\nHostKeyAlgorithm ssh-rsa,ssh-dss" >> /etc/ssh/sshd_config
+echo "KexAlgorithms ecdh-sha2-nistp256" >> /etc/ssh/sshd_config
+systemctl restart ssh
+
+# Correções SSL/TLS (Apache)
+sed -i 's/SSLProtocol All/SSLProtocol all -SSLv2 -SSLv3/' /etc/apache2/mods-available/ssl.conf
+sed -i 's/SSLCipherSuite .*/SSLCipherSuite HIGH:!aNULL:!MD5:!3DES/' /etc/apache2/mods-available/ssl.conf
+apachectl configtest && systemctl restart apache2
+
+# Final hardening
+touch /etc/cron.allow && echo 'root' > /etc/cron.allow
+chmod 1811 /var/spool/cron/crontabs /var/www && chmod o-rwx /var/www/*
+chattr +i /etc/hosts /etc/inittab /etc/resolv.conf
+lpd fix || true; cupsd fix || true
+echo 'none /dev/shm tmpfs defaults,ro 0 0' >> /etc/fstab && mount -o remount,ro /dev/shm
+
+exit 0

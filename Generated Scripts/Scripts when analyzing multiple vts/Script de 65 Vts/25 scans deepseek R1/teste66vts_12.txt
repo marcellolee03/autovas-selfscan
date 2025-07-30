@@ -1,0 +1,71 @@
+```powershell
+try {
+    # Download Python 3.10.16 and 3.12.9 installers
+    $downloads = @(
+        @{Version="3.10.16"; Url="https://www.python.org/ftp/python/3.10.16/python-3.10.16-amd64.exe"; OutFile="$env:TEMP\python-3.10.16.exe"},
+        @{Version="3.12.9"; Url="https://www.python.org/ftp/python/3.12.9/python-3.12.9-amd64.exe"; OutFile="$env:TEMP\python-3.12.9.exe"}
+    )
+    
+    foreach ($item in $downloads) {
+        Invoke-WebRequest -Uri $item.Url -OutFile $item.OutFile
+        Start-Process -Wait -FilePath $item.OutFile -ArgumentList "/quiet InstallAllUsers=1 PrependPath=1 Include_test=0"
+        Remove-Item -Path $item.OutFile
+    }
+
+    # Disable TLS 1.0 and 1.1
+    $regBase = "HKLM:\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Protocols"
+    $versions = "TLS 1.0", "TLS 1.1"
+    foreach ($ver in $versions) {
+        $serverPath = Join-Path -Path $regBase -ChildPath "$ver\Server"
+        $clientPath = Join-Path -Path $regBase -ChildPath "$ver\Client"
+        
+        if (-not (Test-Path $serverPath)) { New-Item -Path $serverPath -Force }
+        if (-not (Test-Path $clientPath)) { New-Item -Path $clientPath -Force }
+        
+        Set-ItemProperty -Path $serverPath -Name "Enabled" -Value 0 -Type DWord
+        Set-ItemProperty -Path $serverPath -Name "DisabledByDefault" -Value 1 -Type DWord
+        Set-ItemProperty -Path $clientPath -Name "Enabled" -Value 0 -Type DWord
+        Set-ItemProperty -Path $clientPath -Name "DisabledByDefault" -Value 1 -Type DWord
+    }
+
+    # Update SSH configuration to remove weak MAC algorithms
+    $sshConfigPath = "C:\ProgramData\ssh\sshd_config"
+    $newMacs = "hmac-sha2-256-etm@openssh.com,hmac-sha2-512-etm@openssh.com,hmac-sha2-256,hmac-sha2-512"
+    
+    if (Test-Path $sshConfigPath) {
+        $config = Get-Content -Path $sshConfigPath
+        $found = $false
+        $config = $config | ForEach-Object {
+            if ($_ -match '^\s*MACs\s+') {
+                $found = $true
+                "MACs $newMacs"
+            } else { $_ }
+        }
+        if (-not $found) {
+            $config += ""
+            $config += "MACs $newMacs"
+        }
+        $config | Set-Content -Path $sshConfigPath
+    }
+
+    # Restart SSH Service
+    Restart-Service -Name sshtty -Force -ErrorAction SilentlyContinue
+    Restart-Service -Name sshd -Force -ErrorAction SilentlyContinue
+
+    # Disable ICMP Timestamp responses
+    $tcpipParams = "HKLM:\SYSTEM\CurrentControlSet\Services\Tcpip\Parameters"
+    if (-not (Test-Path $tcpipParams)) { New-Item -Path $tcpipParams -Force }
+    Set-ItemProperty -Path $tcpipParams -Name "DisableICMPTimestamp" -Value 1 -Type DWord
+    
+    # Set environment changes registry entry
+    $newPath = [System.Environment]::GetEnvironmentVariable("Path", "Machine")
+    $newPath = "C:\Python310;C:\Python310\Scripts;C:\Python312;C:\Python312\Scripts;" + $newPath
+    [System.Environment]::SetEnvironmentVariable("Path", $newPath, "Machine")
+
+    # Force GPO update to apply environment changes
+    gpupdate.exe /force
+}
+catch {
+    exit 1
+}
+```

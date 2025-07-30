@@ -1,0 +1,30 @@
+#!/bin/bash
+# Atualiza o Proxmox VE para a versão mais recente
+apt-get update
+apt-get install -y proxmox-ve
+pveam update
+# Atualiza jQuery para a versão 1.9.0 ou superior
+wget https://code.jquery.com/jquery-3.6.0.min.js -O /var/www/html/js/jquery-1.8.3.min.js
+wget https://code.jquery.com/jquery-3.6.0.min.js -O /var/www/html/opscenter/webcommon/framework/../js/jquery-1.8.3.min.js
+wget https://code.jquery.com/jquery-3.6.0.min.js -O /var/www/html/framesets/../js/jquery-1.8.3.min.js
+wget https://code.jquery.com/jquery-3.6.0.min.js -O /var/www/html/frameset/../js/jquery-1.8.3.min.js
+wget https://code.jquery.com/jquery-3.6.0.min.js -O /var/www/html/console/framework/../js/jquery-1.8.3.min.js
+# Configurações de segurança para SSH
+sed -i 's/^HostKeyAlgorithms.*/HostKeyAlgorithms ssh-ed25519-cert-v01@openssh.com,ssh-ed25519,rsa-sha2-512-cert-v01@openssh.com,rsa-sha2-512,rsa-sha2-256-cert-v01@openssh.com,rsa-sha2-256/' /etc/ssh/sshd_config
+sed -i 's/^KexAlgorithms.*/KexAlgorithms curve25519-sha256,curve25519-sha256@libssh.org,diffie-hellman-group-exchange-sha256/' /etc/ssh/sshd_config
+sed -i 's/^Ciphers.*/Ciphers chacha20-poly1305@openssh.com,aes256-gcm@openssh.com,aes128-gcm@openssh.com,aes256-ctr,aes192-ctr,aes128-ctr/' /etc/ssh/sshd_config
+sed -i 's/^MACs.*/MACs hmac-sha2-512-etm@openssh.com,hmac-sha2-256-etm@openssh.com,hmac-sha2-512,hmac-sha2-256/' /etc/ssh/sshd_config
+systemctl restart sshd
+# Desabilita TCP Timestamps
+echo "net.ipv4.tcp_timestamps = 0" >> /etc/sysctl.conf
+sysctl -p
+# Desabilita Telnet
+systemctl stop telnet.socket
+systemctl disable telnet.socket
+# Configurações de segurança para TLS
+sed -i 's/^MinProtocol.*/MinProtocol = TLSv1.2/' /etc/ssl/openssl.cnf
+sed -i 's/^CipherString.*/CipherString = DEFAULT@SECLEVEL=2/' /etc/ssl/openssl.cnf
+# Desabilita ICMP Timestamp Reply
+echo "net.ipv4.icmp_echo_ignore_broadcasts = 1" >> /etc/sysctl.conf
+echo "net.ipv4.icmp_ignore_bogus_error_responses = 1" >> /etc/sysctl.conf
+sysctl -p

@@ -1,0 +1,87 @@
+#!/bin/bash
+
+# Atualização do sistema
+for repo in /etc/apt/sources.list /etc/apt/sources.list.d/*; do
+    [ -f "$repo" ] && sed -i 's|http://.*archive.ubuntu.com|http://old-releases.ubuntu.com|g' "$repo"
+done
+apt-get update -y
+apt-get upgrade -y
+
+# Desativar serviços vulneráveis
+services=(rlogin rexec rsh ingreslock druby)
+for service in "${services[@]}"; do
+    pkill -9 "$service"
+    update-inetd --disable "$service"
+done
+
+# Remover pacotes vulneráveis
+apt-get purge -y rsh-client rsh-server vsftpd distcc xinetd \
+    apache-solr tomcat6 tomcat7
+
+# Configurar MySQL
+mysql_root_pw=$(openssl rand -base64 24)
+mysql -e "ALTER USER 'root'@'localhost' IDENTIFIED BY '$mysql_root_pw'; FLUSH PRIVILEGES;"
+
+# Configurar PostgreSQL
+postgres_pw=$(openssl rand -base64 24)
+sudo -u postgres psql -c "ALTER USER postgres WITH PASSWORD '$postgres_pw';"
+
+# Alterar senhas de usuários comuns
+common_users=(msfadmin postgres service user)
+for user in "${common_users[@]}"; do
+    [ -f "/etc/passwd" ] && grep -q "^$user:" /etc/passwd && \
+        echo "$user:$(openssl rand -base64 24)" | chpasswd
+done
+
+# Configuração do SSH
+ssh_config="/etc/ssh/sshd_config"
+[ -f "$ssh_config" ] && {
+    sed -i 's/^#PermitRootLogin.*/PermitRootLogin no/' "$ssh_config"
+    echo -e "KexAlgorithms diffie-hellman-group-exchange-sha256\nMACs hmac-sha2-512\nHostKeyAlgorithms ssh-rsa-sha256" >> "$ssh_config"
+    systemctl restart ssh
+}
+
+# Configurar TLS/SSL
+a2enmod ssl >/dev/null
+apache_conf="/etc/apache2/apache2.conf"
+[ -f "$apache_conf" ] && {
+    echo "SSLProtocol -all +TLSv1.2" >> "$apache_conf"
+    echo "SSLHonorCipherOrder on" >> "$apache_conf"
+    echo "SSLCipherSuite HIGH:!aNULL:!MD5:!RC4" >> "$apache_conf"
+    systemctl restart apache2
+}
+
+# Remover arquivos de informações sensíveis
+find /var/www/ -type f \( -name phpinfo.php -o -name info.php \) -delete
+find /var/www/ -type d -name /doc -exec chmod 700 {} \;
+
+# Atualizar PHP
+apt-get install -y php5.6
+php_ini=$(find /etc/php/*/apache2/ -name php.ini)
+[ -f "$php_ini" ] && {
+    sed -i 's/allow_url_include = On/allow_url_include = Off/' "$php_ini"
+    sed -i 's/expose_php = On/expose_php = Off/' "$php_ini"
+}
+
+# Remover acesso anônimo FTP
+ftp_config="/etc/vsftpd.conf"
+[ -f "$ftp_config" ] && {
+    sed -i 's/anonymous_enable=.*/anonymous_enable=NO/' "$ftp_config"
+    systemctl restart vsftpd
+}
+
+# Desativar TLS antigo
+openssl_conf="/etc/ssl/openssl.cnf"
+[ -f "$openssl_conf" ] && {
+    sed -i 's/MinProtocol = TLSv1.2/MinProtocol = TLSv1.3/' "$openssl_conf"
+    echo "[system_default]" >> "$openssl_conf"
+    echo "MinProtocol = TLSv1.3" >> "$openssl_conf"
+}
+
+# Reconfigurar sysctl para segurança
+sysctl_conf="/etc/sysctl.conf"
+[ -f "$sysctl_conf" ] && {
+    echo "net.ipv4.tcp_syncookies=1" >> "$sysctl_conf"
+    echo "net.ipv4.tcp_timestamps=0" >> "$sysctl_conf"
+    sysctl -p
+}

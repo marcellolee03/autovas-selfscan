@@ -1,0 +1,42 @@
+#!/bin/bash
+if [ "$EUID" -ne 0 ]; then
+    echo "Execute como root."
+    exit 1
+fi
+iptables -A INPUT -p icmp --icmp-type timestamp-request -j DROP
+iptables -A INPUT -p icmp --icmp-type timestamp-reply -j DROP
+if command -v netfilter-persistent >/dev/null; then
+    netfilter-persistent save
+elif [ -f /etc/iptables/rules.v4 ]; then
+    iptables-save > /etc/iptables/rules.v4
+fi
+echo "net.ipv4.tcp_timestamps=0" >> /etc/sysctl.conf
+sysctl -p
+if command -v apache2 >/dev/null; then
+    a2enmod ssl rewrite >/dev/null
+    for config in $(grep -rl "<VirtualHost .*:80>" /etc/apache2/sites-enabled/); do
+        sed -i '/<VirtualHost .*:80>/a RewriteEngine On\nRewriteCond %{HTTPS} off\nRewriteRule (.*) https://%{HTTP_HOST}%{REQUEST_URI} [R=301,L]' "$config"
+    done
+    for config in $(grep -rl "<VirtualHost .*:443>" /etc/apache2/sites-enabled/); do
+        sed -i '/<VirtualHost .*:443>/a SSLProtocol all -SSLv2 -SSLv3 -TLSv1 -TLSv1.1\nSSLCipherSuite HIGH:!aNULL:!MD5:!RC4:!3DES\nSSLHonorCipherOrder on\nSSLInsecureRenegotiation off' "$config"
+    done
+    systemctl restart apache2
+fi
+if command -v nginx >/dev/null; then
+    for config in $(grep -rl "listen 80;" /etc/nginx/sites-enabled/); do
+        sed -i '/listen 80;/a return 301 https://$host$request_uri;' "$config"
+    done
+    for config in $(grep -rl "listen 443 ssl" /etc/nginx/sites-enabled/); do
+        sed -i '/listen 443 ssl/a ssl_protocols TLSv1.2 TLSv1.3;\nssl_ciphers HIGH:!aNULL:!MD5:!RC4:!3DES;\nssl_prefer_server_ciphers on;' "$config"
+    done
+    nginx -t && systemctl restart nginx
+fi
+if command -v named >/dev/null || command -v bind9 >/dev/null; then
+    bind_dir=$(dirname "$(readlink -f "$(command -v named)")")
+    bind_conf="${bind_dir%/sbin}/etc/named.conf"
+    [ -f "$bind_conf" ] || bind_conf="/etc/bind/named.conf"
+    if [ -f "$bind_conf" ]; then
+        sed -i -e '/options {/,/};/s/^\([[:space:]]*\)allow-query {\([^}]*\)};/\1allow-recursion { none; };\n\1allow-query-cache { none; };/' -e '/options {/a \    recursion no;' "$bind_conf"
+        systemctl restart bind9
+    fi
+fi

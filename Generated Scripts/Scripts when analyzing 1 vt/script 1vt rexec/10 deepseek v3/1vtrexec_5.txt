@@ -1,0 +1,9 @@
+#!/bin/bash
+systemctl stop rexec.socket
+systemctl disable rexec.socket
+systemctl mask rexec.socket
+systemctl stop rexec.service
+systemctl disable rexec.service
+systemctl mask rexec.service
+ufw deny 512/tcp
+echo "rexec service has been disabled and masked. Port 512/tcp has been denied via UFW."

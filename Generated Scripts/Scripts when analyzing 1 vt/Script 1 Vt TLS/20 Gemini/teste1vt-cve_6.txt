@@ -1,0 +1,34 @@
+```bash
+#!/bin/bash
+
+# Identifica o serviço PostgreSQL em execução na porta 5432
+PG_CONFIG_FILE=$(ps -ef | grep postgres | grep "port=5432" | grep -v grep | awk '{print $NF}')
+
+# Verifica se o arquivo de configuração foi encontrado
+if [ -z "$PG_CONFIG_FILE" ]; then
+  echo "Erro: Arquivo de configuração do PostgreSQL não encontrado."
+  exit 1
+fi
+
+# Cria um backup do arquivo de configuração original
+cp "$PG_CONFIG_FILE" "${PG_CONFIG_FILE}.bak.$(date +%Y%m%d%H%M%S)"
+
+# Desabilita TLSv1 e TLSv1.1
+sed -i "s/^ssl_min_protocol =.*/ssl_min_protocol = tls1.2/g" "$PG_CONFIG_FILE"
+
+# Reinicia o serviço PostgreSQL
+systemctl restart postgresql
+
+# Verifica se o serviço foi reiniciado com sucesso
+if [ $? -eq 0 ]; then
+  echo "PostgreSQL reiniciado com sucesso. TLSv1 e TLSv1.1 desabilitados."
+else
+  echo "Erro ao reiniciar o PostgreSQL."
+  echo "Restauração do arquivo de configuração original..."
+  cp "${PG_CONFIG_FILE}.bak" "$PG_CONFIG_FILE"
+  systemctl restart postgresql
+  exit 1
+fi
+
+exit 0
+```

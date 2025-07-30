@@ -1,0 +1,55 @@
+```bash
+#!/bin/bash
+
+# Este script atualiza o sistema operacional Ubuntu 8.04 para uma versão suportada.
+# Devido ao fato do Ubuntu 8.04 ser extremamente antigo e fora de suporte,
+# uma atualização direta não é possível. Este script oferece um caminho para
+# atualizar para uma versão mais recente através de upgrades sucessivos.
+
+# AVISO: Este processo é demorado e pode resultar em falhas. É altamente recomendável
+# fazer um backup completo do sistema antes de prosseguir. Este script
+# é fornecido SEM GARANTIA.
+
+# Define a versão mínima suportada para upgrade.
+MIN_SUPPORTED_VERSION="12.04"
+
+# Verifica se o usuário é root.
+if [[ $EUID -ne 0 ]]; then
+  echo "Este script precisa ser executado como root."
+  exit 1
+fi
+
+# Informa o usuário sobre os riscos.
+echo "ATENÇÃO: Este script irá tentar atualizar o sistema operacional."
+echo "Este processo é arriscado e pode resultar em perda de dados ou falha do sistema."
+echo "Certifique-se de ter um backup completo antes de continuar."
+read -p "Você deseja continuar? (s/n) " -n 1 -r
+echo    # Move para a próxima linha
+if [[ ! $REPLY =~ ^[Ss]$ ]]; then
+    echo "Atualização cancelada."
+    exit 1
+fi
+
+# Atualiza a lista de pacotes.
+apt-get update
+
+# Atualiza os pacotes instalados.
+apt-get upgrade -y
+
+# Instala o gerenciador de atualização.
+apt-get install update-manager-core -y
+
+# Inicia o processo de atualização para a versão mais próxima suportada.
+do-release-upgrade
+
+# Informa o usuário sobre os próximos passos.
+echo "A atualização para uma versão mais recente foi iniciada."
+echo "Após a conclusão, execute este script novamente para continuar a atualizar para versões mais recentes."
+echo "É recomendado atualizar para pelo menos a versão $MIN_SUPPORTED_VERSION."
+echo "Repita o processo até chegar a uma versão suportada."
+
+# Adiciona uma mensagem no final para lembrar o usuário da necessidade de continuar o processo.
+echo "ATENÇÃO: Este script apenas inicia o processo de atualização. Você precisará executar este script novamente após a conclusão da atualização atual para continuar até chegar a uma versão suportada do Ubuntu."
+
+exit 0
+```

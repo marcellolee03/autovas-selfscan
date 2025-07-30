@@ -1,0 +1,15 @@
+#!/bin/bash
+BACKUP_FILE="/etc/ssh/sshd_config.bak_$(date +%F_%T)"
+[ -f "/etc/ssh/sshd_config" ] && cp -p /etc/ssh/sshd_config "$BACKUP_FILE"
+sed -i -e '/^HostKey[[:space:]]\+\/.*\bdsa\b/I s/^/#/' /etc/ssh/sshd_config
+sed -i -e '/^[[:space:]]*HostKeyAlgorithms[[:space:]]\+/ { 
+    s/\bssh-dss\b//g
+    s/,,\+/,/g
+    s/\(HostKeyAlgorithms\)[[:space:]]\+,[[:space:]]*/\1 /
+    s/,[[:space:]]*$//
+}' /etc/ssh/sshd_config
+grep -qE '^[[:space:]]*HostKeyAlgorithms' /etc/ssh/sshd_config || \
+    echo -e "\nHostKeyAlgorithms ecdsa-sha2-nistp256-cert-v01@openssh.com,ecdsa-sha2-nistp384-cert-v01@openssh.com,ecdsa-sha2-nistp521-cert-v01@openssh.com,ssh-ed25519-cert-v01@openssh.com,rsa-sha2-512-cert-v01@openssh.com,rsa-sha2-256-cert-v01@openssh.com,ecdsa-sha2-nistp256,ecdsa-sha2-nistp384,ecdsa-sha2-nistp521,ssh-ed25519,rsa-sha2-512,rsa-sha2-256" >> /etc/ssh/sshd_config
+if /usr/sbin/sshd -t; then
+    systemctl restart sshd 2>/dev/null || service ssh restart 2>/dev/null || /etc/init.d/ssh restart 2>/dev/null
+fi

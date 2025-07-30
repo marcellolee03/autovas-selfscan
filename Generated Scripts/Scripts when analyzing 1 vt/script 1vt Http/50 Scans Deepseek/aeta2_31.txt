@@ -1,0 +1,50 @@
+#!/bin/bash
+
+# Configuração do Apache para forçar HTTPS
+APACHE_CONF="/etc/apache2/sites-available/000-default.conf"
+
+# Verifica se o Apache está instalado
+if ! command -v apache2 &> /dev/null; then
+    echo "Apache não está instalado. Instalando..."
+    apt-get update
+    apt-get install -y apache2
+fi
+
+# Cria um certificado SSL autoassinado para teste
+mkdir -p /etc/apache2/ssl
+openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout /etc/apache2/ssl/apache.key -out /etc/apache2/ssl/apache.crt -subj "/CN=localhost"
+
+# Configura o Apache para usar SSL
+a2enmod ssl
+a2ensite default-ssl
+
+# Edita o arquivo de configuração do Apache para redirecionar HTTP para HTTPS
+cat <<EOL >> $APACHE_CONF
+<VirtualHost *:80>
+    ServerAdmin webmaster@localhost
+    DocumentRoot /var/www/html
+    ErrorLog ${APACHE_LOG_DIR}/error.log
+    CustomLog ${APACHE_LOG_DIR}/access.log combined
+    Redirect permanent / https://localhost/
+</VirtualHost>
+
+<VirtualHost *:443>
+    ServerAdmin webmaster@localhost
+    DocumentRoot /var/www/html
+    ErrorLog ${APACHE_LOG_DIR}/error.log
+    CustomLog ${APACHE_LOG_DIR}/access.log combined
+    SSLEngine on
+    SSLCertificateFile /etc/apache2/ssl/apache.crt
+    SSLCertificateKeyFile /etc/apache2/ssl/apache.key
+</VirtualHost>
+EOL
+
+# Reinicia o Apache para aplicar as mudanças
+systemctl restart apache2
+
+# Verifica se o redirecionamento está funcionando
+if curl -I http://localhost | grep "Location: https://localhost/"; then
+    echo "Redirecionamento para HTTPS configurado com sucesso."
+else
+    echo "Erro ao configurar o redirecionamento para HTTPS."
+fi

@@ -1,0 +1,66 @@
+#!/bin/bash
+
+# Verifica se o usuário é root para garantir permissões necessárias
+if [[ $EUID -ne 0 ]]; then
+    echo "Este script deve ser executado como root." >&2
+    exit 1
+fi
+
+# Determinar o caminho da instalação do TWiki verificando locais comuns
+declare -a POTENTIAL_PATHS=(
+    "/var/www/twiki"
+    "/usr/local/twiki"
+    "/opt/twiki"
+    "/var/lib/twiki"
+    "/srv/twiki"
+    "/www/twiki"
+    "/web/twiki"
+)
+
+TWIKI_PATH=""
+for path in "${POTENTIAL_PATHS[@]}"; do
+    if [[ -d "$path" && -f "$path/bin/view" ]]; then
+        TWIKI_PATH="$path"
+        break
+    fi
+done
+
+if [[ -z "$TWIKI_PATH" ]]; then
+    echo "TWiki não encontrado em locais padrão. Encerrando."
+    exit 1
+fi
+
+# Definir dados de download
+DOWNLOAD_URL="https://sourceforge.net/projects/twiki/files/TWiki%20for%20all%20platforms/TWiki%2004.2.4/TWiki-4.2.4.tgz"
+TEMPDIR=$(mktemp -d)
+BACKUP_DIR="/var/backups"
+BACKUP_FILE="$BACKUP_DIR/twiki_backup_$(date +%Y%m%d_%H%M%S).tar.gz"
+
+# Criar backup da instalação atual
+mkdir -p "$BACKUP_DIR"
+tar -czf "$BACKUP_FILE" -C "$TWIKI_PATH" . || { echo "Falha ao criar backup"; exit 1; }
+
+# Baixar e extrair nova versão
+curl -L -s "$DOWNLOAD_URL" -o "$TEMPDIR/twiki.tgz" || { echo "Falha ao baixar TWiki"; exit 1; }
+tar -xzf "$TEMPDIR/twiki.tgz" -C "$TEMPDIR" || { echo "Falha ao extrair arquivo"; exit 1; }
+
+# Calcular usuário e grupo proprietários atuais
+WEB_USER=$(stat -c '%U' "$TWIKI_PATH")
+WEB_GROUP=$(stat -c '%G' "$TWIKI_PATH")
+
+# Sincronizar arquivos excluindo diretórios críticos
+rsync -ac --delete --exclude 'data' --exclude 'pub' --exclude '*.save*' --exclude '*#*' "$TEMPDIR/TWiki-4.2.4/" "$TWIKI_PATH/" || { 
+    echo "Falha ao sincronizar arquivos"; 
+    echo "Restaurando backup: $BACKUP_FILE";
+    tar -xzf "$BACKUP_FILE" -C "$TWIKI_PATH" || echo "ERRO CRÍTICO: Falha ao restaurar backup";
+    exit 1;
+}
+
+# Corrigir permissões recursivamente
+chown -R "$WEB_USER:$WEB_GROUP" "$TWIKI_PATH"
+find "$TWIKI_PATH" -type d -exec chmod 755 {} \;
+find "$TWIKI_PATH" -type f -exec chmod 644 {} \;
+chmod 755 "$TWIKI_PATH/bin/"* &>/dev/null
+
+# Limpeza
+rm -rf "$TEMPDIR"

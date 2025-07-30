@@ -1,0 +1,109 @@
+```ps1
+# Requires admin rights
+if (-not ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) {
+    Start-Process pwsh -ArgumentList "-NoProfile -ExecutionPolicy Bypass -File `"$PSCommandPath`"" -Verb RunAs
+    exit
+}
+
+$rebootRequired = $false
+
+function Restart-PythonServices {
+    $services = Get-CimInstance -ClassName Win32_Service | Where-Object {
+        $_.State -eq 'Running' -and 
+        ($_.PathName -like "*python.exe*" -or $_.PathName -like "*python310*" -or $_.PathName -like "*python312*")
+    }
+    foreach ($svc in $services) {
+        Stop-Service -Name $svc.Name -Force
+        Start-Service -Name $svc.Name
+        Start-Sleep -Seconds 3
+    }
+}
+
+function Installer-ExitCodeHandler($exitCode) {
+    if ($exitCode -eq 3010) {
+        $script:rebootRequired = $true
+    }
+    elseif ($exitCode -ne 0) {
+        Write-Host "Installer failed with code $exitCode"
+    }
+}
+
+# Update Python 3.10
+$python310 = Get-ItemProperty -Path "HKLM:\SOFTWARE\Python\PythonCore\3.10\InstallPath" -ErrorAction SilentlyContinue
+if ($python310) {
+    $version = & "$($python310.'(Default)')\python.exe" --version 2>&1
+    if ($version -notmatch "3\.10\.16") {
+        Invoke-WebRequest -Uri "https://www.python.org/ftp/python/3.10.16/python-3.10.16-amd64.exe" -OutFile "python-3.10.16.exe"
+        Start-Process -FilePath ".\python-3.10.16.exe" -ArgumentList "/quiet InstallAllUsers=1 PrependPath=1" -Wait
+        Installer-ExitCodeHandler $LASTEXITCODE
+        Remove-Item -Path ".\python-3.10.16.exe" -Force
+    }
+}
+
+# Update Python 3.12
+$python312 = Get-ItemProperty -Path "HKLM:\SOOTWARE\Python\PythonCore\3.12\InstallPath" -ErrorAction SilentlyContinue
+if (-not $python312) {
+    $python312 = Get-ItemProperty -Path "HKLM:\SOFTWARE\Python\PythonCore\3.12\InstallPath" -ErrorAction SilentlyContinue
+}
+if ($python312) {
+    $version = & "$($python312.'(Default)')\python.exe" --version 2>&1
+    if ($version -notmatch "3\.12\.9") {
+        Invoke-WebRequest -Uri "https://www.python.org/ftp/python/3.12.9/python-3.12.9-amd64.exe" -OutFile "python-3.12.9.exe"
+        Start-Process -FilePath ".\python-3.12.9.exe" -ArgumentList "/quiet InstallAllUsers=1 PrependPath=1" -Wait
+        Installer-ExitCodeHandler $LASTEXITCODE
+        Remove-Item -Path ".\python-3.12.9.exe" -Force
+    }
+}
+
+# Restart Python-related services
+Restart-PythonServices
+
+# Fix SSH weak MACs
+$sshdConfigPath = "$env:ProgramData\ssh\sshd_config"
+if (Test-Path $sshdConfigPath) {
+    $config = Get-Content $sshdConfigPath
+    $newConfig = @()
+    $macsConfigured = $false
+
+    foreach ($line in $config) {
+        if ($line -match '^\s*MACs\s+') {
+            $macsConfigured = $true
+            $newMacs = ($line -split '\s+')[1] -split ',' | Where-Object {
+                $_ -notin @('umac-64-etm@openssh.com', 'umac-64@openssh.com')
+            }
+            $newConfig += "MACs $($newMacs -join ',')"
+        }
+        else {
+            $newConfig += $line
+        }
+    }
+
+    if (-not $macsConfigured) {
+        $newConfig += "MACs hmac-sha2-256-etm@openssh.com,hmac-sha2-512-etm@openssh.com,umac-128-etm@openssh.com"
+    }
+
+    Set-Content -Path $sshdConfigPath -Value $newConfig -Force
+    Restart-Service -Name sshd -Force
+}
+
+# Disable old TLS protocols for RDP
+$regBase = "HKLM:\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Protocols"
+$tlsVersions = @("TLS 1.0", "TLS 1.1")
+
+foreach ($tls in $tlsVersions) {
+    $path = "$regBase\$tls\Server"
+    if (-not (Test-Path $path)) {
+        New-Item -Path $path -Force | Out-Null
+    }
+    Set-ItemProperty -Path $path -Name "Enabled" -Value 0 -Type DWord
+    Set-ItemProperty -Path $path -Name "DisabledByDefault" -Value 1 -Type DWord
+}
+
+# Restart TermService
+Restart-Service -Name TermService -Force
+
+# Final reboot check
+if ($rebootRequired) {
+    shutdown /r /t 0
+}
+```

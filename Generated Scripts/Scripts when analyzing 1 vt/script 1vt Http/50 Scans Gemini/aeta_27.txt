@@ -1,0 +1,65 @@
+```bash
+#!/bin/bash
+
+# Este script corrige a vulnerabilidade de transmissão de informações sensíveis em texto puro via HTTP,
+# redirecionando todo o tráfego HTTP para HTTPS.  Ele assume que você já tem um servidor HTTPS configurado e funcional.
+# Este script é específico para servidores Apache em sistemas baseados em Debian/Ubuntu.
+
+# 1. Detectar o sistema operacional (opcional, mas recomendado para garantir compatibilidade)
+if [ -f /etc/os-release ]; then
+  source /etc/os-release
+  OS=$ID
+else
+  OS="unknown"
+fi
+
+# 2. Detectar o servidor web (Apache)
+if command -v apache2ctl &> /dev/null; then
+  WEB_SERVER="apache2"
+elif command -v httpd &> /dev/null; then
+  WEB_SERVER="httpd"
+else
+  echo "Nenhum servidor web Apache detectado.  Por favor, instale e configure o Apache primeiro."
+  exit 1
+fi
+
+# 3. Configurar o redirecionamento HTTP para HTTPS no Apache
+
+# Localizar o arquivo de configuração virtual host padrão do Apache
+if [ "$WEB_SERVER" == "apache2" ]; then
+  DEFAULT_VHOST_FILE="/etc/apache2/sites-available/000-default.conf"
+elif [ "$WEB_SERVER" == "httpd" ]; then
+  DEFAULT_VHOST_FILE="/etc/httpd/conf/httpd.conf" # Pode variar dependendo da distribuição
+  echo "Atenção: A localização padrão do arquivo de configuração do Apache (httpd) pode variar na sua distribuição.  Verifique a localização correta."
+fi
+
+# Criar um arquivo de configuração virtual host para redirecionamento HTTP para HTTPS
+REDIRECT_VHOST_FILE="/tmp/redirect_http_to_https.conf"
+
+cat > "$REDIRECT_VHOST_FILE" <<EOF
+<VirtualHost *:80>
+    ServerName \$(hostname)  # Redireciona para o hostname atual
+
+    Redirect permanent / https://\${SERVER_NAME}\${REQUEST_URI}
+</VirtualHost>
+EOF
+
+
+# Habilitar o arquivo de configuração de redirecionamento
+if [ "$WEB_SERVER" == "apache2" ]; then
+  sudo a2ensite "/tmp/redirect_http_to_https.conf"
+elif [ "$WEB_SERVER" == "httpd" ]; then
+  # Para httpd, geralmente envolve adicionar 'Include /tmp/redirect_http_to_https.conf' ao arquivo de configuração principal.  Como isso varia muito, deixo essa parte manual.
+  echo "Para o httpd, adicione 'Include $REDIRECT_VHOST_FILE' ao arquivo de configuração principal do Apache (geralmente /etc/httpd/conf/httpd.conf) e reinicie o servidor."
+  exit 1
+fi
+
+# 4. Reiniciar o servidor Apache para aplicar as alterações
+if [ "$WEB_SERVER" == "apache2" ]; then
+  sudo systemctl restart apache2
+elif [ "$WEB_SERVER" == "httpd" ]; then
+  sudo systemctl restart httpd
+fi
+
+echo "Redirecionamento HTTP para HTTPS configurado.  Verifique se está funcionando corretamente."
+```

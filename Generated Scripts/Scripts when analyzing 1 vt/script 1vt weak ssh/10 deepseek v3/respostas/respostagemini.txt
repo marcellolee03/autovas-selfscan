@@ -1,0 +1,48 @@
+Com base na análise da vulnerabilidade de "Weak Host Key Algorithm(s) (SSH)"  e dos 10 scripts de correção fornecidos, apresento a avaliação de cada um:
+
+A vulnerabilidade indicada aponta que o servidor SSH permite o uso do algoritmo de chave de host fraco ssh-dss. A solução consiste em desabilitar este algoritmo específico no arquivo de configuração do SSH (sshd_config).
+
+Análise dos Scripts
+
+    Script 1 (1vtweakssh_1.txt): Sim
+        Este script substitui completamente a linha HostKeyAlgorithms por uma nova contendo apenas algoritmos fortes, o que efetivamente remove o ssh-dss.
+
+    Script 2 (1vtweakssh_2.txt): Não
+        O comando sed -i '/HostKeyAlgorithms/s/ssh-dss//g' é falho, pois pode deixar uma sintaxe incorreta no arquivo de configuração (como vírgulas duplicadas) ao simplesmente remover o texto "ssh-dss" sem tratar as vírgulas adjacentes.
+
+Script 3 (1vtweakssh_3.txt): Sim
+
+    Este script remove de forma segura o ssh-dss e quaisquer vírgulas ao redor dele, garantindo que a sintaxe do arquivo permaneça correta.
+
+Script 4 (1vtweakssh_4.txt): Sim
+
+    O script apaga a linha de configuração HostKeyAlgorithms existente e a substitui por uma nova lista de algoritmos seguros, garantindo a remoção do ssh-dss.
+
+Script 5 (1vtweakssh_5.txt): Não
+
+    Tenta remover o ssh-dss e depois limpar a sintaxe com múltiplos comandos sed. Essa abordagem é excessivamente complexa, propensa a erros e menos robusta que soluções mais simples.
+
+Script 6 (1vtweakssh_6.txt): Sim
+
+    Assim como o script 4, ele remove a diretiva HostKeyAlgorithms existente e adiciona uma nova com algoritmos fortes, corrigindo a vulnerabilidade.
+
+Script 7 (1vtweakssh_7.txt): Sim
+
+    Utiliza a mesma abordagem eficaz dos scripts 4 e 6, removendo a linha antiga e adicionando uma nova e segura.
+
+Script 8 (1vtweakssh_8.txt): Sim
+
+    Este script executa a mesma lógica de apagar e reescrever a diretiva HostKeyAlgorithms e adiciona uma verificação para garantir que o arquivo de configuração existe antes de modificá-lo.
+
+Script 9 (1vtweakssh_9.txt): Sim
+
+    Utiliza sed para remover a linha e tee -a para adicionar uma nova lista de algoritmos seguros, o que corrige o problema.
+
+    Script 10 (1vtweakssh_10.txt): Não
+        O comando sed utilizado não remove a vírgula que pode ficar após a remoção de ssh-dss, podendo gerar uma sintaxe inválida (ex: algoritmo1,,algoritmo2) no arquivo de configuração.
+
+Média de Correção
+
+Com base na análise individual, 7 dos 10 scripts são capazes de corrigir a vulnerabilidade de forma eficaz e segura.
+
+Porcentagem geral de correção: 70%

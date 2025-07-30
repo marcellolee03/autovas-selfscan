@@ -1,0 +1,73 @@
+```bash
+#!/bin/bash
+
+# Este script corrige a vulnerabilidade de transmissão de informações sensíveis em texto claro via HTTP,
+# redirecionando todas as requisições HTTP para HTTPS.
+# Assume-se que um servidor web (Apache ou Nginx) está instalado e configurado.
+
+# Detecção do servidor web (Apache ou Nginx)
+if command -v apache2ctl &> /dev/null; then
+  WEB_SERVER="apache"
+elif command -v nginx &> /dev/null; then
+  WEB_SERVER="nginx"
+else
+  echo "Servidor web Apache ou Nginx não detectado. Saindo."
+  exit 1
+fi
+
+# Configuração para Apache
+if [ "$WEB_SERVER" == "apache" ]; then
+  # 1. Habilitar o módulo rewrite se não estiver habilitado
+  if ! a2enmod rewrite &> /dev/null; then
+    echo "Habilitando o módulo rewrite do Apache..."
+    a2enmod rewrite
+  fi
+
+  # 2. Criar/Modificar o arquivo .htaccess na raiz do site para redirecionar HTTP para HTTPS
+  #    (Assumindo que o .htaccess já existe ou pode ser criado)
+  echo "
+RewriteEngine On
+RewriteCond %{HTTPS} off
+RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+" > /var/www/html/.htaccess
+
+  # 3. Garantir que o Apache possa ler o .htaccess (se necessário)
+  if ! grep -q "AllowOverride All" /etc/apache2/apache2.conf; then
+    echo "<Directory /var/www/html>" >> /etc/apache2/apache2.conf
+    echo "  AllowOverride All" >> /etc/apache2/apache2.conf
+    echo "</Directory>" >> /etc/apache2/apache2.conf
+  fi
+
+  # 4. Reiniciar o Apache para aplicar as mudanças
+  echo "Reiniciando o Apache..."
+  systemctl restart apache2
+fi
+
+# Configuração para Nginx
+if [ "$WEB_SERVER" == "nginx" ]; then
+  # 1. Localizar o arquivo de configuração do Nginx (pode variar dependendo da instalação)
+  CONFIG_FILE="/etc/nginx/nginx.conf"
+  if [ ! -f "$CONFIG_FILE" ]; then
+    CONFIG_FILE="/etc/nginx/conf.d/default.conf" # Tentativa alternativa
+  fi
+  if [ ! -f "$CONFIG_FILE" ]; then
+      echo "Arquivo de configuração do Nginx não encontrado.  Por favor, ajuste o script com o caminho correto."
+      exit 1
+  fi
+  # 2. Adicionar redirecionamento HTTP para HTTPS no arquivo de configuração
+  echo "Adicionando redirecionamento HTTP para HTTPS no arquivo de configuração do Nginx..."
+  
+  # Faz um backup do arquivo de configuração original
+  cp "$CONFIG_FILE" "$CONFIG_FILE.bak"
+
+  # Insere o bloco de redirecionamento no início do bloco 'http'
+  sed -i 's/http {/http {\n\tserver {\n\t\tlisten 80;\n\t\tserver_name _;\n\t\treturn 301 https\$host\$request_uri;\n\t}\n/' "$CONFIG_FILE"
+
+  # 3. Reiniciar o Nginx para aplicar as mudanças
+  echo "Reiniciando o Nginx..."
+  systemctl restart nginx
+fi
+
+echo "Redirecionamento HTTP para HTTPS configurado com sucesso!"
+exit 0
+```

@@ -1,0 +1,44 @@
+#!/bin/bash
+
+# Vulnerabilidade 1: Cleartext Transmission of Sensitive Information via HTTP
+nginx_conf="/etc/nginx/nginx.conf"
+if [ -f "$nginx_conf" ]; then
+    sed -i 's/listen 80;/listen 80;\n    return 301 https:\/\/\$host\$request_uri;/' "$nginx_conf"
+    systemctl restart nginx
+fi
+
+# Vulnerabilidade 2: DNS Cache Snooping Vulnerability (UDP)
+bind_conf="/etc/bind/named.conf.options"
+if [ -f "$bind_conf" ]; then
+    sed -i 's/recursion yes;/recursion no;/' "$bind_conf"
+    systemctl restart bind9
+fi
+
+# Vulnerabilidade 3: ICMP Timestamp Reply Information Disclosure
+echo "net.ipv4.icmp_echo_ignore_all = 1" >> /etc/sysctl.conf
+sysctl -p
+
+# Vulnerabilidade 4: SSL/TLS: Deprecated TLSv1.0 and TLSv1.1 Protocol Detection
+openssl_conf="/etc/ssl/openssl.cnf"
+if [ -f "$openssl_conf" ]; then
+    sed -i 's/MinProtocol = TLSv1.0/MinProtocol = TLSv1.2/' "$openssl_conf"
+    systemctl restart apache2
+fi
+
+# Vulnerabilidade 5: SSL/TLS: Renegotiation DoS Vulnerability (CVE-2011-1473, CVE-2011-5094)
+apache_conf="/etc/apache2/apache2.conf"
+if [ -f "$apache_conf" ]; then
+    echo "SSLInsecureRenegotiation off" >> "$apache_conf"
+    systemctl restart apache2
+fi
+
+# Vulnerabilidade 6: SSL/TLS: Report Weak Cipher Suites
+apache_ssl_conf="/etc/apache2/mods-available/ssl.conf"
+if [ -f "$apache_ssl_conf" ]; then
+    sed -i 's/SSLCipherSuite HIGH:!aNULL:!MD5/SSLCipherSuite HIGH:!aNULL:!MD5:!3DES:!DES:!RC4/' "$apache_ssl_conf"
+    systemctl restart apache2
+fi
+
+# Vulnerabilidade 7: TCP Timestamps Information Disclosure
+echo "net.ipv4.tcp_timestamps = 0" >> /etc/sysctl.conf
+sysctl -p

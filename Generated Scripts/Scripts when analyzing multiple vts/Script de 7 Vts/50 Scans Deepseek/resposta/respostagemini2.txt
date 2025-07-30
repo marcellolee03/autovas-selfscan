@@ -1,0 +1,54 @@
+
+Segue a análise breve de cada script e a média de porcentagem geral de correção:
+
+aeta_1.txt: Consegue resolver parcialmente, com falhas na vulnerabilidade 3 e 5. Porcentagem de correção: 60%.
+aeta_2.txt: Consegue resolver a maioria, mas a correção da vulnerabilidade 1 pode não ser robusta. Porcentagem de correção: 85%.
+aeta_3.txt: Consegue resolver todos os problemas de forma eficaz. Porcentagem de correção: 100%.
+aeta_4.txt: Consegue resolver a maioria, mas a correção da vulnerabilidade 1 é muito agressiva. Porcentagem de correção: 90%.
+aeta_5.txt: Consegue resolver todos os problemas de forma eficaz. Porcentagem de correção: 100%.
+aeta_6.txt: Consegue resolver parcialmente, com falhas na vulnerabilidade 2 e 5. Porcentagem de correção: 60%.
+aeta_7.txt: Consegue resolver a maioria, mas a vulnerabilidade 5 tem uma linha irrelevante. Porcentagem de correção: 95%.
+aeta_8.txt: Consegue resolver todos os problemas de forma eficaz. Porcentagem de correção: 100%.
+aeta_9.txt: Consegue resolver a maioria, com falha na vulnerabilidade 3 e um redirecionamento incompleto na vulnerabilidade 1. Porcentagem de correção: 85%.
+aeta_10.txt: Consegue resolver alguns problemas, mas falha nas vulnerabilidades 1, 2, 5 e tem uma correção parcial na 6. Porcentagem de correção: 40%.
+aeta_11.txt: Consegue resolver a maioria, mas falha na vulnerabilidade 5 e tem uma abordagem questionável na 4. Porcentagem de correção: 70%.
+aeta_12.txt: Consegue resolver todos os problemas de forma eficaz. Porcentagem de correção: 100%.
+aeta_13.txt: Consegue resolver a maioria, mas falha na vulnerabilidade 3. Porcentagem de correção: 85%.
+aeta_14.txt: Consegue resolver todos os problemas de forma eficaz. Porcentagem de correção: 100%.
+aeta_15.txt: Consegue resolver todos os problemas de forma eficaz. Porcentagem de correção: 100%.
+aeta_16.txt: Consegue resolver a maioria, mas falha na vulnerabilidade 3. Porcentagem de correção: 85%.
+aeta_17.txt: Consegue resolver todos os problemas de forma eficaz. Porcentagem de correção: 100%.
+aeta_18.txt: Consegue resolver todos os problemas de forma eficaz e abrangente. Porcentagem de correção: 100%.
+aeta_19.txt: Consegue resolver a maioria, mas a vulnerabilidade 1 tem uma URL incompleta. Porcentagem de correção: 90%.
+aeta_20.txt: Consegue resolver alguns problemas, mas falha nas vulnerabilidades 3 e 5, e tem uma correção indireta na 4. Porcentagem de correção: 55%.
+aeta_21.txt: Consegue resolver alguns problemas, mas as vulnerabilidades 4 e 5 são corrigidas incorretamente. Porcentagem de correção: 50%.
+aeta_22.txt: Consegue resolver a maioria, mas a correção da vulnerabilidade 1 não é a mais robusta. Porcentagem de correção: 85%.
+aeta_23.txt: Consegue resolver a maioria, mas a vulnerabilidade 5 é abordada parcialmente. Porcentagem de correção: 90%.
+aeta_24.txt: Consegue resolver todos os problemas de forma eficaz. Porcentagem de correção: 100%.
+aeta_25.txt: Consegue resolver alguns problemas, mas as vulnerabilidades 2 e partes de 4 e 6 são incorretas/não padrão. Porcentagem de correção: 60%.
+aeta_26.txt: Consegue resolver a maioria, mas a vulnerabilidade 5 tem uma localização incomum. Porcentagem de correção: 90%.
+aeta_27.txt: Consegue resolver a maioria, mas a vulnerabilidade 1 pode ter um posicionamento subótimo. Porcentagem de correção: 95%.
+aeta_28.txt: Consegue resolver a maioria, mas a vulnerabilidade 1 não é abordada diretamente para redirecionamento. Porcentagem de correção: 85%.
+aeta_29.txt: Consegue resolver a maioria, mas falha na vulnerabilidade 3. Porcentagem de correção: 85%.
+aeta_30.txt: Consegue resolver todos os problemas de forma eficaz e abrangente. Porcentagem de correção: 100%.
+aeta_31.txt: Consegue resolver a maioria, mas a vulnerabilidade 1 pode ser melhorada. Porcentagem de correção: 90%.
+aeta_32.txt: Consegue resolver alguns problemas, mas falha nas vulnerabilidades 3 e 5. Porcentagem de correção: 60%.
+aeta_33.txt: Consegue resolver todos os problemas de forma eficaz. Porcentagem de correção: 100%.
+aeta_34.txt: Consegue resolver a maioria, mas falha na vulnerabilidade 3. Porcentagem de correção: 85%.
+aeta_35.txt: Consegue resolver a maioria, mas a vulnerabilidade 1 pode ser melhorada. Porcentagem de correção: 90%.
+aeta_36.txt: Consegue resolver a maioria, mas falha na vulnerabilidade 5 e a 1 pode ser melhorada. Porcentagem de correção: 85%.
+aeta_37.txt: Consegue resolver alguns problemas, mas falha nas vulnerabilidades 1 e 5. Porcentagem de correção: 70%.
+aeta_38.txt: Consegue resolver a maioria, mas a vulnerabilidade 6 poderia ser mais abrangente. Porcentagem de correção: 95%.
+aeta_39.txt: Consegue resolver todos os problemas de forma eficaz. Porcentagem de correção: 100%.
+aeta_40.txt: Consegue resolver a maioria, mas a vulnerabilidade 1 pode ser melhorada. Porcentagem de correção: 90%.
+aeta_41.txt: Consegue resolver todos os problemas de forma eficaz. Porcentagem de correção: 100%.
+aeta_42.txt: Consegue resolver todos os problemas de forma eficaz e abrangente. Porcentagem de correção: 100%.
+aeta_43.txt: Consegue resolver a maioria, mas falha na vulnerabilidade 1 e 3. Porcentagem de correção: 70%.
+aeta_44.txt: Consegue resolver a maioria, mas a vulnerabilidade 6 é abordada indiretamente. Porcentagem de correção: 95%.
+aeta_45.txt: Consegue resolver todos os problemas de forma eficaz. Porcentagem de correção: 100%.
+aeta_46.txt: Consegue resolver a maioria, mas as correções da vulnerabilidade 1 e 5 poderiam ser mais robustas. Porcentagem de correção: 90%.
+aeta_47.txt: Consegue resolver a maioria, mas a vulnerabilidade 6 tem uma lista de cifras muito restritiva. Porcentagem de correção: 95%.
+aeta_48.txt: Consegue resolver a maioria, mas a vulnerabilidade 1 não inclui um redirecionamento HTTP para HTTPS. Porcentagem de correção: 90%.
+aeta_49.txt: Consegue resolver a maioria, mas a vulnerabilidade 3 é corrigida incorretamente. Porcentagem de correção: 85%.
+aeta_50.txt: Consegue resolver a maioria, mas a vulnerabilidade 6 tem uma abordagem menos direta. Porcentagem de correção: 90%.
+Média de porcentagem geral de todos os scripts: 89.2%

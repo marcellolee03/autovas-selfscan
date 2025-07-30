@@ -1,0 +1,36 @@
+#!/bin/bash
+
+# Atualiza o sistema e instala as dependências necessárias
+apt-get update && apt-get install -y curl gnupg
+
+# Adiciona o repositório oficial do Python
+echo "deb [arch=amd64] http://ppa.launchpad.net/deadsnakes/ppa/ubuntu $(lsb_release -cs) main" | tee /etc/apt/sources.list.d/python.list
+curl -sSL http://keyserver.ubuntu.com:11371/pks/lookup?op=get&search=0xF23C5A6CF475977595C89F51BA6932366A755776 | apt-key add -
+
+# Atualiza novamente e instala as versões corrigidas do Python
+apt-get update
+apt-get install -y python3.10=3.10.15-1+jammy1 python3.12=3.12.6-1+jammy1
+
+# Remove o repositório adicionado para evitar conflitos futuros
+rm /etc/apt/sources.list.d/python.list
+apt-key del F23C5A6CF475977595C89F51BA6932366A755776
+
+# Verifica se instalações foram bem-sucedidas
+if [[ $(python3.10 --version) == "Python 3.10.15" && $(python3.12 --version) == "Python 3.12.6" ]]; then
+    echo "Atualização do Python realizada com sucesso."
+else
+    echo "Erro na atualização do Python."
+    exit 1
+fi
+
+# Desabilita TLS 1.0 e 1.1 no SSH
+sed -i 's/^\(Protocols\s\+\).*/\12/' /etc/ssh/sshd_config
+systemctl restart ssh
+
+# Configuração para desabilitar ICMP timestamp
+echo "net.ipv4.icmp_echo_ignore_all = 1" | tee -a /etc/sysctl.conf
+sysctl -p
+
+# Reinicia serviços para aplicar as mudanças
+systemctl restart sshd
+systemctl restart NetworkManager

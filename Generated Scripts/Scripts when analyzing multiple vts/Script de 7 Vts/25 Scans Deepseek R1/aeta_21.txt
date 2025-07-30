@@ -1,0 +1,45 @@
+#!/bin/bash
+
+# Vulnerabilidade 1: Redirecionar HTTP para HTTPS no Apache
+if [ -d "/etc/apache2" ]; then
+    cat << EOF > /etc/apache2/conf-enabled/redirect_http.conf
+<VirtualHost *:80>
+    RewriteEngine On
+    RewriteCond %{REQUEST_URI} !^/\.well-known/acme-challenge/
+    RewriteRule ^(.*)$ https://%{HTTP_HOST}\$1 [R=301,L]
+</VirtualHost>
+EOF
+    systemctl restart apache2
+fi
+
+# Vulnerabilidade 2: Prevenir DNS Cache Snooping no BIND
+if [ -f "/etc/bind/named.conf.options" ]; then
+    sed -i '/options {/a \\tallow-query { localhost; localnets; };' /etc/bind/named.conf.options
+    sed -i '/options {/a \\trecursion no;' /etc/bind/named.conf.options
+    systemctl restart bind9
+fi
+
+# Vulnerabilidade 3: Bloquear ICMP timestamp
+iptables -A INPUT -p icmp --icmp-type timestamp-request -j DROP
+iptables -A INPUT -p icmp --icmp-type timestamp-reply -j DROP
+
+# Vulnerabilidades 4,5,6: Configurar TLS no Apache
+SSL_CONF=""
+[ -f /etc/apache2/mods-available/ssl.conf ] && SSL_CONF="/etc/apache2/mods-available/ssl.conf"
+[ -z "$SSL_CONF" ] && [ -f /etc/apache2/mods-enabled/ssl.conf ] && SSL_CONF="/etc/apache2/mods-enabled/ssl.conf"
+
+if [ -n "$SSL_CONF" ]; then
+    # Desabilitar TLS antigos
+    sed -i 's/SSLProtocol.*/SSLProtocol all -SSLv2 -SSLv3 -TLSv1 -TLSv1.1/g' "$SSL_CONF"
+    
+    # Desabilitar renegociação e cifras fracas
+    sed -i '/SSLProtocol/ a \\n# Mitigacao para renegociacao e cifras\nSSLInsecureRenegotiation off\nSSLCipherSuite ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305\nSSLHonorCipherOrder on' "$SSL_CONF"
+    systemctl restart apache2
+fi
+
+# Vulnerabilidade 7: Desabilitar TCP timestamps
+SYSCTL_CONF="/etc/sysctl.conf"
+grep -q "net.ipv4.tcp_timestamps" "$SYSCTL_CONF" && 
+    sed -i 's/^net.ipv4.tcp_timestamps.*/net.ipv4.tcp_timestamps = 0/' "$SYSCTL_CONF" ||
+    echo "net.ipv4.tcp_timestamps = 0" >> "$SYSCTL_CONF"
+sysctl -p &>/dev/null

@@ -1,0 +1,104 @@
+```bash
+#!/bin/bash
+
+# Vulnerability 1: Proxmox VE EOL
+# This script is not applicable as it requires a full system upgrade, which is beyond the scope of a simple script.
+# The user should follow the official Proxmox upgrade guide.
+echo "Vulnerability 1: Proxmox VE EOL - Requires a full system upgrade. Please follow the official Proxmox upgrade guide."
+
+# Vulnerability 2, 3, 4, 5, 6: jQuery < 1.9.0 XSS Vulnerability
+# Define the vulnerable jQuery file paths
+jquery_paths=(
+    "/var/www/html/../js/jquery-1.8.3.min.js"
+    "/var/www/html/opscenter/webcommon/framework/../js/jquery-1.8.3.min.js"
+    "/var/www/html/framesets/../js/jquery-1.8.3.min.js"
+    "/var/www/html/frameset/../js/jquery-1.8.3.min.js"
+    "/var/www/html/console/framework/../js/jquery-1.8.3.min.js"
+)
+
+# Define the URL for jQuery 1.9.0
+jquery_1_9_0_url="https://code.jquery.com/jquery-1.9.0.min.js"
+
+# Loop through each path and replace the vulnerable jQuery version
+for path in "${jquery_paths[@]}"; do
+    # Sanitize the path to prevent directory traversal
+    sanitized_path=$(realpath "$path" 2>/dev/null)
+
+    if [ -z "$sanitized_path" ]; then
+        echo "Warning: Path '$path' is invalid or inaccessible. Skipping."
+        continue
+    fi
+
+    # Check if the file exists
+    if [ -f "$sanitized_path" ]; then
+        # Download jQuery 1.9.0 and replace the existing file
+        echo "Replacing '$sanitized_path' with jQuery 1.9.0"
+        curl -s -o "$sanitized_path" "$jquery_1_9_0_url"
+
+        # Verify the file integrity (optional, but recommended)
+        if [ $? -eq 0 ]; then
+            echo "Successfully replaced '$sanitized_path' with jQuery 1.9.0"
+        else
+            echo "Error: Failed to download jQuery 1.9.0 for '$sanitized_path'"
+        fi
+    else
+        echo "Warning: File '$sanitized_path' not found. Skipping."
+    fi
+done
+
+# Vulnerability 7, 8, 9, 13, 14, 15, 16, 19, 21, 22: Weak SSH Algorithms
+# Edit the SSH configuration file
+ssh_config="/etc/ssh/sshd_config"
+
+# Backup the original SSH configuration file
+cp -n "$ssh_config" "$ssh_config.bak"
+
+# Disable weak algorithms
+sed -i "s/^#?KexAlgorithms .*/KexAlgorithms curve25519-sha256@libssh.org,ecdh-sha2-nistp256,ecdh-sha2-nistp384,ecdh-sha2-nistp521,diffie-hellman-group-exchange-sha256,diffie-hellman-group16-sha512,diffie-hellman-group18-sha512/g" "$ssh_config"
+sed -i "s/^#?Ciphers .*/Ciphers chacha20-poly1305@openssh.com,aes256-gcm@openssh.com,aes128-gcm@openssh.com,aes256-ctr,aes128-ctr/g" "$ssh_config"
+sed -i "s/^#?MACs .*/MACs hmac-sha2-256,hmac-sha2-512/g" "$ssh_config"
+sed -i "s/^#?HostKeyAlgorithms .*/HostKeyAlgorithms ecdsa-sha2-nistp256-cert-v01@openssh.com,ecdsa-sha2-nistp384-cert-v01@openssh.com,ecdsa-sha2-nistp521-cert-v01@openssh.com,ecdsa-sha2-nistp256,ecdsa-sha2-nistp384,ecdsa-sha2-nistp521,rsa-sha2-512,rsa-sha2-256/g" "$ssh_config"
+
+# Ensure PermitRootLogin is set appropriately (optional, but recommended)
+sed -i "s/^#?PermitRootLogin .*/PermitRootLogin no/g" "$ssh_config"
+
+# Restart SSH service
+systemctl restart sshd
+
+# Vulnerability 10: DCE/RPC and MSRPC Services Enumeration Reporting
+# This vulnerability requires firewall configuration, which is beyond the scope of this script.
+echo "Vulnerability 10: DCE/RPC and MSRPC Services Enumeration Reporting - Requires firewall configuration to filter incoming traffic to port 135."
+
+# Vulnerability 11: Telnet Unencrypted Cleartext Login
+# Remove Telnet package
+apt remove --purge telnetd telnet -y
+
+# Vulnerability 12: SSL/TLS: Deprecated TLSv1.0 and TLSv1.1 Protocol Detection
+# Disable TLS 1.0 and 1.1 - Assuming OpenSSL configuration
+# Locate the openssl.cnf file
+openssl_cnf=$(find /etc/ssl/ -name "openssl.cnf" | head -n 1)
+
+if [ -f "$openssl_cnf" ]; then
+    # Add the following line to the openssl.cnf file to disable TLS 1.0 and 1.1
+    sed -i '/\[system_default_sect\]/a MinProtocol = TLSv1.2' "$openssl_cnf"
+else
+    echo "Warning: openssl.cnf not found. TLSv1.0 and TLSv1.1 may still be enabled."
+fi
+
+# Vulnerability 17, 18, 20, 23, 24, 25: TCP Timestamps Information Disclosure
+# Disable TCP timestamps
+echo "net.ipv4.tcp_timestamps = 0" >> /etc/sysctl.conf
+sysctl -p
+
+# Vulnerability 26, 27, 28, 29, 30, 31, 32: ICMP Timestamp Reply Information Disclosure
+# Disable ICMP timestamp replies
+echo 1 > /proc/sys/net/ipv4/icmp_echo_ignore_all
+
+# Make the change permanent (Debian/Ubuntu)
+if [ -f /etc/sysctl.d/99-disable-icmp-timestamp.conf ]; then
+    echo "net.ipv4.icmp_echo_ignore_all = 1" > /etc/sysctl.d/99-disable-icmp-timestamp.conf
+else
+    echo "net.ipv4.icmp_echo_ignore_all = 1" > /etc/sysctl.conf
+fi
+sysctl -p
+```

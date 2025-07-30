@@ -1,0 +1,108 @@
+```bash
+#!/bin/bash
+
+# Vulnerabilidade 1: Cleartext Transmission of Sensitive Information via HTTP
+# Solução: Forçar HTTPS e redirecionar HTTP para HTTPS.
+# Implementação: Requer configuração do servidor web (e.g., Apache, Nginx).
+# Este script apenas inclui um exemplo de configuração para Apache.
+# Adapte-o para o seu servidor web específico.
+
+# Exemplo para Apache (requer mod_rewrite e mod_ssl habilitados):
+# Crie/Edite o arquivo .htaccess na raiz do site HTTP para redirecionar para HTTPS:
+#
+# echo "RewriteEngine On" > .htaccess
+# echo "RewriteCond %{HTTPS} off" >> .htaccess
+# echo "RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]" >> .htaccess
+#
+# OU, se você tiver acesso à configuração do VirtualHost do Apache:
+#
+# <VirtualHost *:80>
+#     ServerName seu_dominio.com
+#     Redirect permanent / https://seu_dominio.com/
+# </VirtualHost>
+#
+# Nota: Substitua "seu_dominio.com" pelo seu domínio real.
+# Certifique-se de ter um certificado SSL/TLS válido instalado.
+
+# Vulnerabilidade 2: DNS Cache Snooping Vulnerability (UDP)
+# Solução: Desabilitar recursão (se o servidor DNS não precisar dela) ou restringir o acesso.
+# Implementação: Edição do arquivo de configuração do servidor DNS (e.g., named.conf para BIND).
+
+# Exemplo para BIND (named.conf.options):
+#
+# echo "options {" > /etc/bind/named.conf.options.patch
+# echo "    recursion no;" >> /etc/bind/named.conf.options.patch
+# echo "};" >> /etc/bind/named.conf.options.patch
+#
+# cat /etc/bind/named.conf.options.patch >> /etc/bind/named.conf.options
+# rm /etc/bind/named.conf.options.patch
+#
+# systemctl restart bind9
+#
+# OU, para permitir recursão apenas para redes internas:
+#
+# echo "acl goodclients {" > /etc/bind/named.conf.options.patch
+# echo "    127.0.0.1;    # localhost" >> /etc/bind/named.conf.options.patch
+# echo "    localnet;     # RFC 1918 local networks" >> /etc/bind/named.conf.options.patch
+# echo "    10.0.0.0/8;" >> /etc/bind/named.conf.options.patch
+# echo "    172.16.0.0/12;" >> /etc/bind/named.conf.options.patch
+# echo "    192.168.0.0/16;" >> /etc/bind/named.conf.options.patch
+# echo "};" >> /etc/bind/named.conf.options.patch
+# echo "options {" >> /etc/bind/named.conf.options.patch
+# echo "    recursion yes;" >> /etc/bind/named.conf.options.patch
+# echo "    allow-recursion { goodclients; };" >> /etc/bind/named.conf.options.patch
+# echo "};" >> /etc/bind/named.conf.options.patch
+#
+# cat /etc/bind/named.conf.options.patch >> /etc/bind/named.conf.options
+# rm /etc/bind/named.conf.options.patch
+#
+# systemctl restart bind9
+
+# Vulnerabilidade 3: ICMP Timestamp Reply Information Disclosure
+# Solução: Desabilitar respostas ICMP timestamp.
+# Implementação: Regra de firewall ou configuração do kernel.
+
+# Desabilitar ICMP timestamps via sysctl
+echo "net.ipv4.icmp_echo_ignore_all=1" >> /etc/sysctl.conf
+sysctl -p
+
+# Vulnerabilidade 4: SSL/TLS: Deprecated TLSv1.0 and TLSv1.1 Protocol Detection
+# Solução: Desabilitar TLSv1.0 e TLSv1.1 e habilitar TLSv1.2+.
+# Implementação: Configuração do servidor web (e.g., Apache, Nginx).
+
+# Exemplo para Apache (em /etc/apache2/mods-available/ssl.conf):
+# SSLProtocol all -SSLv3 -TLSv1 -TLSv1.1
+# SSLCipherSuite HIGH:!aNULL:!MD5
+# systemctl restart apache2
+
+# Exemplo para Nginx (em /etc/nginx/nginx.conf ou arquivos de configuração do site):
+# ssl_protocols TLSv1.2 TLSv1.3;
+# ssl_ciphers HIGH:!aNULL:!MD5;
+# systemctl restart nginx
+
+# Vulnerabilidade 5: SSL/TLS: Renegotiation DoS Vulnerability (CVE-2011-1473, CVE-2011-5094)
+# Solução: Desabilitar a renegociação ou aplicar patches fornecidos pelo vendor.
+# Implementação: Depende do servidor SSL/TLS. Exemplo para Apache:
+# <Directory /var/www/>
+#   <Files ~ "\.(cgi|shtml|phtml|php3?)$">
+#     SSLOptions +StdEnvVars
+#   </Files>
+#   <Files ~ "\.php[45]?$">
+#     SSLOptions +StdEnvVars
+#   </Files>
+#   SSLOptions +StrictRequire
+# </Directory>
+
+# vulnerability 6: SSL/TLS: Report Weak Cipher Suites
+# Solution: disable weak ciphers
+# Implementation: web server configuration(e.g apache, Nginx)
+# see vulnerability 4 for apache and Nginx example
+
+# Vulnerabilidade 7: TCP Timestamps Information Disclosure
+# Solução: Desabilitar TCP timestamps.
+# Implementação: Configuração do kernel.
+
+# Desabilitar TCP timestamps via sysctl
+echo "net.ipv4.tcp_timestamps = 0" >> /etc/sysctl.conf
+sysctl -p
+```

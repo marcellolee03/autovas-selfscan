@@ -1,0 +1,42 @@
+#!/bin/bash
+# Script para corrigir as vulnerabilidades identificadas
+
+# 1. Atualizar TWiki para a versão 4.2.4 ou superior
+wget https://twiki.org/p/pub/Codev/ReleaseHistoryTWiki/TWiki-4.2.4.zip
+unzip TWiki-4.2.4.zip -d /var/www/html/twiki
+chown -R www-data:www-data /var/www/html/twiki
+rm TWiki-4.2.4.zip
+
+# 2. Configurar $SAFE level para >= 2 em sistemas Ruby
+echo "$SAFE = 2" >> /etc/ruby/config
+
+# 3. Desabilitar o serviço rlogin
+systemctl stop rlogin
+systemctl disable rlogin
+
+# 4. Atualizar o sistema operacional Ubuntu 8.04 para uma versão suportada
+do-release-upgrade
+
+# 5. Desabilitar o serviço rexec
+systemctl stop rexec
+systemctl disable rexec
+
+# 6. Remover backdoor Ingreslock
+rm -rf /usr/bin/ingreslock
+
+# 7. Atualizar Apache Tomcat para a versão 7.0.100, 8.5.51 ou 9.0.31
+wget https://downloads.apache.org/tomcat/tomcat-9/v9.0.31/bin/apache-tomcat-9.0.31.tar.gz
+tar -xzf apache-tomcat-9.0.31.tar.gz -C /opt
+chown -R tomcat:tomcat /opt/apache-tomcat-9.0.31
+rm apache-tomcat-9.0.31.tar.gz
+
+# 8. Alterar senha padrão do MySQL
+mysql -u root -e "ALTER USER 'root'@'localhost' IDENTIFIED BY 'NovaSenhaSegura';"
+
+# 9. Atualizar PHP para a versão 5.6.30 ou superior
+apt-get update
+apt-get install php5.6
+
+# 10. Desabilitar métodos HTTP perigosos (PUT/DELETE)
+sed -i 's/AllowOverride None/AllowOverride None\n    <Limit PUT DELETE>\n        Order deny,allow\n        Deny from all\n    </Limit>/' /etc/apache2/apache2.conf
+systemctl restart apache2

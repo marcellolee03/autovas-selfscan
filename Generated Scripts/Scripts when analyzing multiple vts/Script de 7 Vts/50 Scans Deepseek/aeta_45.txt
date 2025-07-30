@@ -1,0 +1,35 @@
+#!/bin/bash
+# Fixing Vulnerabilities
+# 1. Enforce SSL/TLS for sensitive data transmission
+apt-get update
+apt-get install -y apache2
+a2enmod ssl
+a2ensite default-ssl
+systemctl restart apache2
+
+# 2. DNS Cache Snooping Mitigation
+echo "options {
+    allow-query { localhost; };
+    recursion no;
+};" > /etc/bind/named.conf.options
+systemctl restart bind9
+
+# 3. Disable ICMP Timestamp
+echo "1" > /proc/sys/net/ipv4/icmp_echo_ignore_all
+sysctl -w net.ipv4.icmp_echo_ignore_all=1
+
+# 4. Disable TLSv1.0 and TLSv1.1
+sed -i 's/^SSLProtocol all -SSLv3$/SSLProtocol all -SSLv3 -TLSv1 -TLSv1.1/' /etc/apache2/mods-enabled/ssl.conf
+systemctl restart apache2
+
+# 5. Disable SSL/TLS Renegotiation
+echo "SSLInsecureRenegotiation off" >> /etc/apache2/mods-enabled/ssl.conf
+systemctl restart apache2
+
+# 6. Remove Weak Cipher Suites
+sed -i 's/^SSLCipherSuite HIGH:!aNULL:!MD5$/SSLCipherSuite HIGH:!aNULL:!MD5:!3DES:!DES:!RC4/' /etc/apache2/mods-enabled/ssl.conf
+systemctl restart apache2
+
+# 7. Disable TCP Timestamps
+echo "net.ipv4.tcp_timestamps = 0" >> /etc/sysctl.conf
+sysctl -p

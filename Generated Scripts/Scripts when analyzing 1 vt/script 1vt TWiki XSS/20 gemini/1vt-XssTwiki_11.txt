@@ -1,0 +1,86 @@
+#!/bin/bash
+
+# Variáveis
+TWIKI_DIR="/var/www/twiki"  # Ajuste este diretório se sua instalação TWiki estiver em outro lugar
+BACKUP_DIR="/tmp/twiki_backup"
+VERSION="4.2.4"
+TEMP_DIR="/tmp/twiki_update"
+
+# Verifica se o diretório TWiki existe
+if [ ! -d "$TWIKI_DIR" ]; then
+  echo "Erro: Diretório TWiki não encontrado em $TWIKI_DIR.  Por favor, ajuste a variável TWIKI_DIR no script."
+  exit 1
+fi
+
+# Cria diretório de backup
+mkdir -p "$BACKUP_DIR"
+
+# Cria diretório temporário para atualização
+mkdir -p "$TEMP_DIR"
+
+# Função para fazer backup dos arquivos TWiki
+backup_twiki() {
+  echo "Fazendo backup dos arquivos TWiki para $BACKUP_DIR..."
+  tar -czvf "$BACKUP_DIR/twiki_backup_$(date +%Y%m%d%H%M%S).tar.gz" -C "$TWIKI_DIR" .
+  echo "Backup concluído."
+}
+
+# Função para baixar e extrair a nova versão do TWiki
+download_and_extract_twiki() {
+  echo "Baixando TWiki versão $VERSION..."
+  wget "https://sourceforge.net/projects/twiki/files/TWiki%20Release/TWiki-$VERSION/TWiki-$VERSION.tgz/download" -O "$TEMP_DIR/twiki.tgz"
+
+  if [ ! -f "$TEMP_DIR/twiki.tgz" ]; then
+    echo "Erro: Falha ao baixar o arquivo TWiki. Verifique a URL e sua conexão com a internet."
+    exit 1
+  fi
+
+  echo "Extraindo TWiki..."
+  tar -xzvf "$TEMP_DIR/twiki.tgz" -C "$TEMP_DIR"
+
+  # Move o diretório extraído para um nome padrão
+  mv "$TEMP_DIR/TWiki-$VERSION" "$TEMP_DIR/twiki_extracted"
+  echo "Extração concluída."
+}
+
+# Função para atualizar os arquivos TWiki
+update_twiki() {
+  echo "Atualizando arquivos TWiki..."
+
+  # Remove arquivos e diretórios que podem causar problemas (adaptado do processo de atualização oficial do TWiki)
+  rm -rf "$TWIKI_DIR/templates/pattern"
+  rm -rf "$TWIKI_DIR/pub/TWiki/TWikiDocGraphics"
+  rm -rf "$TWIKI_DIR/pub/TWiki/TWikiLogos"
+
+
+  # Copia os arquivos da nova versão para o diretório TWiki, excluindo o diretório /LocalSettings.pm (configurações locais)
+  rsync -avz --exclude 'LocalSettings.pm' "$TEMP_DIR/twiki_extracted/" "$TWIKI_DIR/"
+
+  # Restaura o arquivo LocalSettings.pm (configurações locais), se existir
+  if [ -f "$BACKUP_DIR/LocalSettings.pm" ]; then
+    echo "Restaurando LocalSettings.pm..."
+    cp "$BACKUP_DIR/LocalSettings.pm" "$TWIKI_DIR/LocalSettings.pm"
+  else
+      echo "LocalSettings.pm não encontrado no backup. Mantendo o existente (se houver)."
+  fi
+
+
+  echo "Atualização concluída."
+}
+
+# Função para limpar arquivos temporários
+cleanup() {
+  echo "Limpando arquivos temporários..."
+  rm -rf "$TEMP_DIR"
+  echo "Limpeza concluída."
+}
+
+# Execução principal
+backup_twiki
+download_and_extract_twiki
+update_twiki
+cleanup
+
+echo "TWiki atualizado para a versão $VERSION.  Verifique o funcionamento do TWiki."
+
+exit 0

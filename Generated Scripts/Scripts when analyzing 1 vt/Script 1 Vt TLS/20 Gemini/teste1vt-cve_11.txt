@@ -1,0 +1,58 @@
+```bash
+#!/bin/bash
+
+# Identifica o serviço rodando na porta 5432 (PostgreSQL provavelmente)
+SERVICE=$(ss -tlpn | grep ":5432" | awk '{split($5,a,":"); print a[1]}')
+
+# Verifica se o serviço foi encontrado
+if [ -z "$SERVICE" ]; then
+  echo "Serviço na porta 5432 não encontrado. Verifique se o PostgreSQL está rodando."
+  exit 1
+fi
+
+# Localiza o arquivo de configuração do PostgreSQL
+CONFIG_FILE=$(find /etc/postgresql/ /var/lib/postgresql/ -name postgresql.conf 2>/dev/null | head -n 1)
+
+# Verifica se o arquivo de configuração foi encontrado
+if [ -z "$CONFIG_FILE" ]; then
+  echo "Arquivo de configuração do PostgreSQL não encontrado."
+  exit 1
+fi
+
+# Define as configurações de SSL/TLS desejadas
+TLS_VERSIONS="TLSv1.2,TLSv1.3"
+
+# Modifica o arquivo de configuração para desabilitar TLSv1.0 e TLSv1.1
+# e habilitar TLSv1.2 e TLSv1.3
+
+# Cria um backup do arquivo de configuração
+cp "$CONFIG_FILE" "${CONFIG_FILE}.bak"
+
+# Remove as linhas existentes de ssl_min_protocol e ssl_max_protocol (se existirem)
+sed -i '/ssl_min_protocol/d' "$CONFIG_FILE"
+sed -i '/ssl_max_protocol/d' "$CONFIG_FILE"
+
+# Adiciona as novas configurações de protocolo TLS
+echo "# Desabilita TLSv1.0 e TLSv1.1, habilita TLSv1.2 e TLSv1.3" >> "$CONFIG_FILE"
+echo "ssl_min_protocol = 'TLSv1.2'" >> "$CONFIG_FILE"
+echo "ssl_max_protocol = 'TLSv1.3'" >> "$CONFIG_FILE"
+
+# Reinicia o serviço PostgreSQL
+if systemctl is-active --quiet postgresql; then
+  systemctl restart postgresql
+else
+  service postgresql restart
+fi
+
+# Verifica se o serviço foi reiniciado com sucesso
+if [ $? -eq 0 ]; then
+  echo "PostgreSQL reiniciado com sucesso. TLSv1.0 e TLSv1.1 foram desabilitados."
+else
+  echo "Erro ao reiniciar o PostgreSQL. Verifique o arquivo de log para mais detalhes."
+  echo "Reverter para o arquivo de configuração de backup."
+  cp "${CONFIG_FILE}.bak" "$CONFIG_FILE"
+  exit 1
+fi
+
+exit 0
+```

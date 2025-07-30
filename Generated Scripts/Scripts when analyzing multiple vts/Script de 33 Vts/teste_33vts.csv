@@ -1,0 +1,871 @@
+IP,Hostname,Port,Port Protocol,CVSS,Severity,QoD,Solution Type,NVT Name,Summary,Specific Result,NVT OID,CVEs,Task ID,Task Name,Timestamp,Result ID,Impact,Solution,Affected Software/OS,Vulnerability Insight,Vulnerability Detection Method,Product Detection Result,BIDs,CERTs,Other References
+      10.129.4.25,,,,10.0,High,80,"VendorFix","Proxmox Virtual Environment (VE, PVE) End of Life (EOL) Detection","The Proxmox Virtual Environment (VE, PVE) version on
+  the remote host has reached the end of life (EOL) and should not be used anymore.","The ""Proxmox Virtual Environment (VE, PVE)"" version on the remote host has reached the end of life.
+
+CPE:               cpe:/a:proxmox:virtual_environment:7.3-3
+Installed version: 7.3-3
+EOL version:       7
+EOL date:          2024-07-01
+",1.3.6.1.4.1.25623.1.0.108283,"",b8d4227f-7a5c-430b-81b3-4308809abe26,"self_scan",2025-05-29T11:36:56Z,00d9b376-9e4f-40cf-8bbc-e733f6a0a170,"An EOL version of Proxmox Virtual Environment is not
+  receiving any security updates from the vendor. Unfixed security vulnerabilities might
+  be leveraged by an attacker to compromise the security of this host.","Update the PVE version on the remote host to a still
+  supported version.","","","Checks if an EOL version is present on the
+  target host.
+Details:
+Proxmox Virtual Environment (VE, PVE) End of Life (EOL) Detection
+(OID: 1.3.6.1.4.1.25623.1.0.108283)
+Version used: 2025-04-15T05:54:49Z
+","Product: cpe:/a:proxmox:virtual_environment:7.3-3
+Method: Proxmox Virtual Environment (VE, PVE) Detection Consolidation
+(OID: 1.3.6.1.4.1.25623.1.0.117270)
+","","",""
+10.129.4.254,,80,tcp,6.1,Medium,80,"VendorFix","jQuery < 1.9.0 XSS Vulnerability","jQuery is prone to a cross-site scripting (XSS)
+  vulnerability.","Installed version: 1.8.3
+Fixed version:     1.9.0
+Installation
+path / port:       /../js/jquery-1.8.3.min.js
+
+Detection info (see OID: 1.3.6.1.4.1.25623.1.0.150658 for more info):
+- Identified file: http://10.129.4.254/../js/jquery-1.8.3.min.js
+- Referenced at:   http://10.129.4.254/
+",1.3.6.1.4.1.25623.1.0.141636,"CVE-2012-6708",b8d4227f-7a5c-430b-81b3-4308809abe26,"self_scan",2025-05-29T11:36:56Z,e86892c1-3849-48e1-b154-23fe8a57afc2,"","Update to version 1.9.0 or later.","jQuery prior to version 1.9.0.","The jQuery(strInput) function does not differentiate selectors
+  from HTML in a reliable fashion. In vulnerable versions, jQuery determined whether the input was
+  HTML by looking for the '<' character anywhere in the string, giving attackers more flexibility
+  when attempting to construct a malicious payload. In fixed versions, jQuery only deems the input
+  to be HTML if it explicitly starts with the '<' character, limiting exploitability only to
+  attackers who can control the beginning of a string, which is far less common.","Checks if a vulnerable version is present on the target host.
+Details:
+jQuery < 1.9.0 XSS Vulnerability
+(OID: 1.3.6.1.4.1.25623.1.0.141636)
+Version used: 2023-07-14T05:06:08Z
+","","","DFN-CERT-2023-1197,DFN-CERT-2020-0590,WID-SEC-2022-0673,CB-K22/0045,CB-K18/1131",""
+10.129.4.254,,80,tcp,6.1,Medium,80,"VendorFix","jQuery < 1.9.0 XSS Vulnerability","jQuery is prone to a cross-site scripting (XSS)
+  vulnerability.","Installed version: 1.8.3
+Fixed version:     1.9.0
+Installation
+path / port:       /opscenter/webcommon/framework/../js/jquery-1.8.3.min.js
+
+Detection info (see OID: 1.3.6.1.4.1.25623.1.0.150658 for more info):
+- Identified file: http://10.129.4.254/opscenter/webcommon/framework/../js/jquery-1.8.3.min.js
+- Referenced at:   http://10.129.4.254/opscenter/webcommon/framework/
+",1.3.6.1.4.1.25623.1.0.141636,"CVE-2012-6708",b8d4227f-7a5c-430b-81b3-4308809abe26,"self_scan",2025-05-29T11:36:56Z,42b1f743-4894-4b48-bb33-57ede8f11a9a,"","Update to version 1.9.0 or later.","jQuery prior to version 1.9.0.","The jQuery(strInput) function does not differentiate selectors
+  from HTML in a reliable fashion. In vulnerable versions, jQuery determined whether the input was
+  HTML by looking for the '<' character anywhere in the string, giving attackers more flexibility
+  when attempting to construct a malicious payload. In fixed versions, jQuery only deems the input
+  to be HTML if it explicitly starts with the '<' character, limiting exploitability only to
+  attackers who can control the beginning of a string, which is far less common.","Checks if a vulnerable version is present on the target host.
+Details:
+jQuery < 1.9.0 XSS Vulnerability
+(OID: 1.3.6.1.4.1.25623.1.0.141636)
+Version used: 2023-07-14T05:06:08Z
+","","","DFN-CERT-2023-1197,DFN-CERT-2020-0590,WID-SEC-2022-0673,CB-K22/0045,CB-K18/1131",""
+10.129.4.254,,80,tcp,6.1,Medium,80,"VendorFix","jQuery < 1.9.0 XSS Vulnerability","jQuery is prone to a cross-site scripting (XSS)
+  vulnerability.","Installed version: 1.8.3
+Fixed version:     1.9.0
+Installation
+path / port:       /framesets/../js/jquery-1.8.3.min.js
+
+Detection info (see OID: 1.3.6.1.4.1.25623.1.0.150658 for more info):
+- Identified file: http://10.129.4.254/framesets/../js/jquery-1.8.3.min.js
+- Referenced at:   http://10.129.4.254/framesets/
+",1.3.6.1.4.1.25623.1.0.141636,"CVE-2012-6708",b8d4227f-7a5c-430b-81b3-4308809abe26,"self_scan",2025-05-29T11:36:56Z,d4c75259-61a4-4ad4-8428-ae12b5833ee6,"","Update to version 1.9.0 or later.","jQuery prior to version 1.9.0.","The jQuery(strInput) function does not differentiate selectors
+  from HTML in a reliable fashion. In vulnerable versions, jQuery determined whether the input was
+  HTML by looking for the '<' character anywhere in the string, giving attackers more flexibility
+  when attempting to construct a malicious payload. In fixed versions, jQuery only deems the input
+  to be HTML if it explicitly starts with the '<' character, limiting exploitability only to
+  attackers who can control the beginning of a string, which is far less common.","Checks if a vulnerable version is present on the target host.
+Details:
+jQuery < 1.9.0 XSS Vulnerability
+(OID: 1.3.6.1.4.1.25623.1.0.141636)
+Version used: 2023-07-14T05:06:08Z
+","","","DFN-CERT-2023-1197,DFN-CERT-2020-0590,WID-SEC-2022-0673,CB-K22/0045,CB-K18/1131",""
+10.129.4.254,,80,tcp,6.1,Medium,80,"VendorFix","jQuery < 1.9.0 XSS Vulnerability","jQuery is prone to a cross-site scripting (XSS)
+  vulnerability.","Installed version: 1.8.3
+Fixed version:     1.9.0
+Installation
+path / port:       /frameset/../js/jquery-1.8.3.min.js
+
+Detection info (see OID: 1.3.6.1.4.1.25623.1.0.150658 for more info):
+- Identified file: http://10.129.4.254/frameset/../js/jquery-1.8.3.min.js
+- Referenced at:   http://10.129.4.254/frameset/
+",1.3.6.1.4.1.25623.1.0.141636,"CVE-2012-6708",b8d4227f-7a5c-430b-81b3-4308809abe26,"self_scan",2025-05-29T11:36:56Z,7610aec8-7ec5-480a-9f78-31fe13b4c0e3,"","Update to version 1.9.0 or later.","jQuery prior to version 1.9.0.","The jQuery(strInput) function does not differentiate selectors
+  from HTML in a reliable fashion. In vulnerable versions, jQuery determined whether the input was
+  HTML by looking for the '<' character anywhere in the string, giving attackers more flexibility
+  when attempting to construct a malicious payload. In fixed versions, jQuery only deems the input
+  to be HTML if it explicitly starts with the '<' character, limiting exploitability only to
+  attackers who can control the beginning of a string, which is far less common.","Checks if a vulnerable version is present on the target host.
+Details:
+jQuery < 1.9.0 XSS Vulnerability
+(OID: 1.3.6.1.4.1.25623.1.0.141636)
+Version used: 2023-07-14T05:06:08Z
+","","","DFN-CERT-2023-1197,DFN-CERT-2020-0590,WID-SEC-2022-0673,CB-K22/0045,CB-K18/1131",""
+10.129.4.254,,80,tcp,6.1,Medium,80,"VendorFix","jQuery < 1.9.0 XSS Vulnerability","jQuery is prone to a cross-site scripting (XSS)
+  vulnerability.","Installed version: 1.8.3
+Fixed version:     1.9.0
+Installation
+path / port:       /console/framework/../js/jquery-1.8.3.min.js
+
+Detection info (see OID: 1.3.6.1.4.1.25623.1.0.150658 for more info):
+- Identified file: http://10.129.4.254/console/framework/../js/jquery-1.8.3.min.js
+- Referenced at:   http://10.129.4.254/console/framework/
+",1.3.6.1.4.1.25623.1.0.141636,"CVE-2012-6708",b8d4227f-7a5c-430b-81b3-4308809abe26,"self_scan",2025-05-29T11:36:56Z,425fb30a-8b8d-421f-9764-0b6420c5e0a6,"","Update to version 1.9.0 or later.","jQuery prior to version 1.9.0.","The jQuery(strInput) function does not differentiate selectors
+  from HTML in a reliable fashion. In vulnerable versions, jQuery determined whether the input was
+  HTML by looking for the '<' character anywhere in the string, giving attackers more flexibility
+  when attempting to construct a malicious payload. In fixed versions, jQuery only deems the input
+  to be HTML if it explicitly starts with the '<' character, limiting exploitability only to
+  attackers who can control the beginning of a string, which is far less common.","Checks if a vulnerable version is present on the target host.
+Details:
+jQuery < 1.9.0 XSS Vulnerability
+(OID: 1.3.6.1.4.1.25623.1.0.141636)
+Version used: 2023-07-14T05:06:08Z
+","","","DFN-CERT-2023-1197,DFN-CERT-2020-0590,WID-SEC-2022-0673,CB-K22/0045,CB-K18/1131",""
+10.129.4.254,,22,tcp,5.3,Medium,80,"Mitigation","Weak Host Key Algorithm(s) (SSH)","The remote SSH server is configured to allow / support weak host
+  key algorithm(s).","The remote SSH server supports the following weak host key algorithm(s):
+
+host key algorithm | Description
+-----------------------------------------------------------------------------------------
+ssh-dss            | Digital Signature Algorithm (DSA) / Digital Signature Standard (DSS)
+",1.3.6.1.4.1.25623.1.0.117687,"",b8d4227f-7a5c-430b-81b3-4308809abe26,"self_scan",2025-05-29T11:36:56Z,ef554b3b-7fb6-400d-8520-fda26416d623,"","Disable the reported weak host key algorithm(s).","","","Checks the supported host key algorithms of the remote SSH
+  server.
+
+  Currently weak host key algorithms are defined as the following:
+
+  - ssh-dss: Digital Signature Algorithm (DSA) / Digital Signature Standard (DSS)
+Details:
+Weak Host Key Algorithm(s) (SSH)
+(OID: 1.3.6.1.4.1.25623.1.0.117687)
+Version used: 2024-06-14T05:05:48Z
+","Product: cpe:/a:ietf:secure_shell_protocol
+Method: SSH Protocol Algorithms Supported
+(OID: 1.3.6.1.4.1.25623.1.0.105565)
+","","",""
+10.129.4.22,,22,tcp,5.3,Medium,80,"Mitigation","Weak Key Exchange (KEX) Algorithm(s) Supported (SSH)","The remote SSH server is configured to allow / support weak key
+  exchange (KEX) algorithm(s).","The remote SSH server supports the following weak KEX algorithm(s):
+
+KEX algorithm              | Reason
+-----------------------------------------------------------------------------------
+diffie-hellman-group1-sha1 | Using Oakley Group 2 (a 1024-bit MODP group) and SHA-1
+",1.3.6.1.4.1.25623.1.0.150713,"",b8d4227f-7a5c-430b-81b3-4308809abe26,"self_scan",2025-05-29T11:36:56Z,787375c5-e2b2-453b-85b2-6164beda2db0,"An attacker can quickly break individual connections.","Disable the reported weak KEX algorithm(s)
+
+  - 1024-bit MODP group / prime KEX algorithms:
+
+  Alternatively use elliptic-curve Diffie-Hellmann in general, e.g. Curve 25519.","","'- 1024-bit MODP group / prime KEX algorithms:
+
+  Millions of HTTPS, SSH, and VPN servers all use the same prime numbers for Diffie-Hellman key
+  exchange. Practitioners believed this was safe as long as new key exchange messages were generated
+  for every connection. However, the first step in the number field sieve-the most efficient
+  algorithm for breaking a Diffie-Hellman connection-is dependent only on this prime.
+
+  A nation-state can break a 1024-bit prime.","Checks the supported KEX algorithms of the remote SSH server.
+
+  Currently weak KEX algorithms are defined as the following:
+
+  - non-elliptic-curve Diffie-Hellmann (DH) KEX algorithms with 1024-bit MODP group / prime
+
+  - ephemerally generated key exchange groups uses SHA-1
+
+  - using RSA 1024-bit modulus key
+Details:
+Weak Key Exchange (KEX) Algorithm(s) Supported (SSH)
+(OID: 1.3.6.1.4.1.25623.1.0.150713)
+Version used: 2024-06-14T05:05:48Z
+","Product: cpe:/a:ietf:secure_shell_protocol
+Method: SSH Protocol Algorithms Supported
+(OID: 1.3.6.1.4.1.25623.1.0.105565)
+","","",""
+10.129.4.254,,22,tcp,5.3,Medium,80,"Mitigation","Weak Key Exchange (KEX) Algorithm(s) Supported (SSH)","The remote SSH server is configured to allow / support weak key
+  exchange (KEX) algorithm(s).","The remote SSH server supports the following weak KEX algorithm(s):
+
+KEX algorithm              | Reason
+-----------------------------------------------------------------------------------
+diffie-hellman-group1-sha1 | Using Oakley Group 2 (a 1024-bit MODP group) and SHA-1
+",1.3.6.1.4.1.25623.1.0.150713,"",b8d4227f-7a5c-430b-81b3-4308809abe26,"self_scan",2025-05-29T11:36:56Z,7954d3ec-f554-450b-90b5-b2e34d0d889c,"An attacker can quickly break individual connections.","Disable the reported weak KEX algorithm(s)
+
+  - 1024-bit MODP group / prime KEX algorithms:
+
+  Alternatively use elliptic-curve Diffie-Hellmann in general, e.g. Curve 25519.","","'- 1024-bit MODP group / prime KEX algorithms:
+
+  Millions of HTTPS, SSH, and VPN servers all use the same prime numbers for Diffie-Hellman key
+  exchange. Practitioners believed this was safe as long as new key exchange messages were generated
+  for every connection. However, the first step in the number field sieve-the most efficient
+  algorithm for breaking a Diffie-Hellman connection-is dependent only on this prime.
+
+  A nation-state can break a 1024-bit prime.","Checks the supported KEX algorithms of the remote SSH server.
+
+  Currently weak KEX algorithms are defined as the following:
+
+  - non-elliptic-curve Diffie-Hellmann (DH) KEX algorithms with 1024-bit MODP group / prime
+
+  - ephemerally generated key exchange groups uses SHA-1
+
+  - using RSA 1024-bit modulus key
+Details:
+Weak Key Exchange (KEX) Algorithm(s) Supported (SSH)
+(OID: 1.3.6.1.4.1.25623.1.0.150713)
+Version used: 2024-06-14T05:05:48Z
+","Product: cpe:/a:ietf:secure_shell_protocol
+Method: SSH Protocol Algorithms Supported
+(OID: 1.3.6.1.4.1.25623.1.0.105565)
+","","",""
+10.129.4.125,LARCES-SERVER,135,tcp,5.0,Medium,80,"Mitigation","DCE/RPC and MSRPC Services Enumeration Reporting","Distributed Computing Environment / Remote Procedure Calls (DCE/RPC) or MSRPC services running
+  on the remote host can be enumerated by connecting on port 135 and doing the appropriate queries.","Here is the list of DCE/RPC or MSRPC services running on this host via the TCP protocol:
+
+Port: 39710/tcp
+
+     UUID: 367abb81-9844-35f1-ad32-98f038001003, version 2
+     Endpoint: ncacn_ip_tcp:10.129.4.125[39710]
+
+Port: 49664/tcp
+
+     UUID: 12345778-1234-abcd-ef00-0123456789ac, version 1
+     Endpoint: ncacn_ip_tcp:10.129.4.125[49664]
+     Named pipe : lsass
+     Win32 service or process : lsass.exe
+     Description : SAM access
+
+     UUID: 51a227ae-825b-41f2-b4a9-1ac9557a1018, version 1
+     Endpoint: ncacn_ip_tcp:10.129.4.125[49664]
+     Annotation: Ngc Pop Key Service
+
+     UUID: 8fb74744-b2ff-4c00-be0d-9ef9a191fe1b, version 1
+     Endpoint: ncacn_ip_tcp:10.129.4.125[49664]
+     Annotation: Ngc Pop Key Service
+
+     UUID: b25a52bf-e5dd-4f4a-aea6-8ca7272a0e86, version 2
+     Endpoint: ncacn_ip_tcp:10.129.4.125[49664]
+     Annotation: KeyIso
+
+Port: 49665/tcp
+
+     UUID: d95afe70-a6d5-4259-822e-2c84da1ddb0d, version 1
+     Endpoint: ncacn_ip_tcp:10.129.4.125[49665]
+
+Port: 49666/tcp
+
+     UUID: f6beaff7-1e19-4fbb-9f8f-b89e2018337c, version 1
+     Endpoint: ncacn_ip_tcp:10.129.4.125[49666]
+     Annotation: Event log TCPIP
+
+Port: 49667/tcp
+
+     UUID: 3a9ef155-691d-4449-8d05-09ad57031823, version 1
+     Endpoint: ncacn_ip_tcp:10.129.4.125[49667]
+
+     UUID: 86d35949-83c9-4044-b424-db363231fd0c, version 1
+     Endpoint: ncacn_ip_tcp:10.129.4.125[49667]
+
+Port: 49668/tcp
+
+     UUID: 0b6edbfa-4a24-4fc6-8a23-942b1eca65d1, version 1
+     Endpoint: ncacn_ip_tcp:10.129.4.125[49668]
+
+     UUID: 12345678-1234-abcd-ef00-0123456789ab, version 1
+     Endpoint: ncacn_ip_tcp:10.129.4.125[49668]
+     Named pipe : spoolss
+     Win32 service or process : spoolsv.exe
+     Description : Spooler service
+
+     UUID: 4a452661-8290-4b36-8fbe-7f4093a94978, version 1
+     Endpoint: ncacn_ip_tcp:10.129.4.125[49668]
+
+     UUID: 76f03f96-cdfd-44fc-a22c-64950a001209, version 1
+     Endpoint: ncacn_ip_tcp:10.129.4.125[49668]
+
+     UUID: ae33069b-a2a8-46ee-a235-ddfd339be281, version 1
+     Endpoint: ncacn_ip_tcp:10.129.4.125[49668]
+
+Port: 49670/tcp
+
+     UUID: 29770a8f-829b-4158-90a2-78cd488501f7, version 1
+     Endpoint: ncacn_ip_tcp:10.129.4.125[49670]
+
+Port: 7832/tcp
+
+     UUID: 6b5bdd1e-528c-422c-af8c-a4079be4fe48, version 1
+     Endpoint: ncacn_ip_tcp:10.129.4.125[7832]
+     Annotation: Remote Fw APIs
+
+Note: DCE/RPC or MSRPC services running on this host locally were identified. Reporting this list is not enabled by default due to the possible large size of this list. See the script preferences to enable this reporting.
+",1.3.6.1.4.1.25623.1.0.10736,"",b8d4227f-7a5c-430b-81b3-4308809abe26,"self_scan",2025-05-29T11:36:56Z,e786f0c1-433d-4a41-897d-539fadacf007,"An attacker may use this fact to gain more knowledge
+  about the remote host.","Filter incoming traffic to this ports.","","","
+Details:
+DCE/RPC and MSRPC Services Enumeration Reporting
+(OID: 1.3.6.1.4.1.25623.1.0.10736)
+Version used: 2022-06-03T10:17:07Z
+","","","",""
+10.129.4.254,,23,tcp,4.8,Medium,70,"Mitigation","Telnet Unencrypted Cleartext Login","The remote host is running a Telnet service that allows cleartext logins over
+  unencrypted connections.","Vulnerability was detected according to the Vulnerability Detection Method.",1.3.6.1.4.1.25623.1.0.108522,"",b8d4227f-7a5c-430b-81b3-4308809abe26,"self_scan",2025-05-29T11:36:56Z,22f89e3e-2918-4328-90d2-69bee5d1de60,"An attacker can uncover login names and passwords by sniffing traffic to the
+  Telnet service.","Replace Telnet with a protocol like SSH which supports encrypted connections.","","","
+Details:
+Telnet Unencrypted Cleartext Login
+(OID: 1.3.6.1.4.1.25623.1.0.108522)
+Version used: 2023-10-13T05:06:09Z
+","","","",""
+10.129.4.125,LARCES-SERVER,3389,tcp,4.3,Medium,98,"Mitigation","SSL/TLS: Deprecated TLSv1.0 and TLSv1.1 Protocol Detection","It was possible to detect the usage of the deprecated TLSv1.0
+  and/or TLSv1.1 protocol on this system.","In addition to TLSv1.2+ the service is also providing the deprecated TLSv1.0 and TLSv1.1 protocols and supports one or more ciphers. Those supported ciphers can be found in the 'SSL/TLS: Report Supported Cipher Suites' (OID: 1.3.6.1.4.1.25623.1.0.802067) VT.
+",1.3.6.1.4.1.25623.1.0.117274,"CVE-2011-3389,CVE-2015-0204,CVE-2025-3200",b8d4227f-7a5c-430b-81b3-4308809abe26,"self_scan",2025-05-29T11:36:56Z,2a7b42b3-71c0-4bc7-a7d5-b14a2e661315,"An attacker might be able to use the known cryptographic flaws to
+  eavesdrop the connection between clients and the service to get access to sensitive data
+  transferred within the secured connection.
+
+  Furthermore newly uncovered vulnerabilities in this protocols won't receive security updates
+  anymore.","It is recommended to disable the deprecated TLSv1.0 and/or
+  TLSv1.1 protocols in favor of the TLSv1.2+ protocols.
+
+  Please see the references for more resources supporting you with this task.","'- All services providing an encrypted communication using the
+  TLSv1.0 and/or TLSv1.1 protocols
+
+  - CVE-2025-3200: Multiple products from Wiesemann & Theis","The TLSv1.0 and TLSv1.1 protocols contain known cryptographic
+  flaws like:
+
+  - CVE-2011-3389: Browser Exploit Against SSL/TLS (BEAST)
+
+  - CVE-2015-0204: Factoring Attack on RSA-EXPORT Keys Padding Oracle On Downgraded Legacy
+  Encryption (FREAK)","Checks the used TLS protocols of the services provided by this
+  system.
+Details:
+SSL/TLS: Deprecated TLSv1.0 and TLSv1.1 Protocol Detection
+(OID: 1.3.6.1.4.1.25623.1.0.117274)
+Version used: 2025-04-29T05:39:55Z
+","Product: cpe:/a:ietf:transport_layer_security:1.0
+Method: SSL/TLS: Version Detection
+(OID: 1.3.6.1.4.1.25623.1.0.105782)
+","","DFN-CERT-2020-0177,DFN-CERT-2020-0111,DFN-CERT-2019-0068,DFN-CERT-2018-1441,DFN-CERT-2018-1408,DFN-CERT-2016-1372,DFN-CERT-2016-1164,DFN-CERT-2016-0388,DFN-CERT-2015-1853,DFN-CERT-2015-1332,DFN-CERT-2015-0884,DFN-CERT-2015-0800,DFN-CERT-2015-0758,DFN-CERT-2015-0567,DFN-CERT-2015-0544,DFN-CERT-2015-0530,DFN-CERT-2015-0396,DFN-CERT-2015-0375,DFN-CERT-2015-0374,DFN-CERT-2015-0305,DFN-CERT-2015-0199,DFN-CERT-2015-0079,DFN-CERT-2015-0021,DFN-CERT-2014-1414,DFN-CERT-2013-1847,DFN-CERT-2013-1792,DFN-CERT-2012-1979,DFN-CERT-2012-1829,DFN-CERT-2012-1530,DFN-CERT-2012-1380,DFN-CERT-2012-1377,DFN-CERT-2012-1292,DFN-CERT-2012-1214,DFN-CERT-2012-1213,DFN-CERT-2012-1180,DFN-CERT-2012-1156,DFN-CERT-2012-1155,DFN-CERT-2012-1039,DFN-CERT-2012-0956,DFN-CERT-2012-0908,DFN-CERT-2012-0868,DFN-CERT-2012-0867,DFN-CERT-2012-0848,DFN-CERT-2012-0838,DFN-CERT-2012-0776,DFN-CERT-2012-0722,DFN-CERT-2012-0638,DFN-CERT-2012-0627,DFN-CERT-2012-0451,DFN-CERT-2012-0418,DFN-CERT-2012-0354,DFN-CERT-2012-0234,DFN-CERT-2012-0221,DFN-CERT-2012-0177,DFN-CERT-2012-0170,DFN-CERT-2012-0146,DFN-CERT-2012-0142,DFN-CERT-2012-0126,DFN-CERT-2012-0123,DFN-CERT-2012-0095,DFN-CERT-2012-0051,DFN-CERT-2012-0047,DFN-CERT-2012-0021,DFN-CERT-2011-1953,DFN-CERT-2011-1946,DFN-CERT-2011-1844,DFN-CERT-2011-1826,DFN-CERT-2011-1774,DFN-CERT-2011-1743,DFN-CERT-2011-1738,DFN-CERT-2011-1706,DFN-CERT-2011-1628,DFN-CERT-2011-1627,DFN-CERT-2011-1619,DFN-CERT-2011-1482,WID-SEC-2023-1435,CB-K18/0799,CB-K16/1289,CB-K16/1096,CB-K15/1751,CB-K15/1266,CB-K15/0850,CB-K15/0764,CB-K15/0720,CB-K15/0548,CB-K15/0526,CB-K15/0509,CB-K15/0493,CB-K15/0384,CB-K15/0365,CB-K15/0364,CB-K15/0302,CB-K15/0192,CB-K15/0079,CB-K15/0016,CB-K14/1342,CB-K14/0231,CB-K13/0845,CB-K13/0796,CB-K13/0790",""
+10.129.4.22,,22,tcp,4.3,Medium,80,"Mitigation","Weak Encryption Algorithm(s) Supported (SSH)","The remote SSH server is configured to allow / support weak
+  encryption algorithm(s).","The remote SSH server supports the following weak client-to-server encryption algorithm(s):
+
+3des-cbc
+aes128-cbc
+aes256-cbc
+twofish-cbc
+twofish128-cbc
+twofish256-cbc
+
+
+The remote SSH server supports the following weak server-to-client encryption algorithm(s):
+
+3des-cbc
+aes128-cbc
+aes256-cbc
+twofish-cbc
+twofish128-cbc
+twofish256-cbc
+",1.3.6.1.4.1.25623.1.0.105611,"",b8d4227f-7a5c-430b-81b3-4308809abe26,"self_scan",2025-05-29T11:36:56Z,42494d38-be29-4eb5-9d8b-fdd61181e92d,"","Disable the reported weak encryption algorithm(s).","","'- The 'arcfour' cipher is the Arcfour stream cipher with 128-bit
+  keys. The Arcfour cipher is believed to be compatible with the RC4 cipher [SCHNEIER]. Arcfour
+  (and RC4) has problems with weak keys, and should not be used anymore.
+
+  - The 'none' algorithm specifies that no encryption is to be done. Note that this method provides
+  no confidentiality protection, and it is NOT RECOMMENDED to use it.
+
+  - A vulnerability exists in SSH messages that employ CBC mode that may allow an attacker to
+  recover plaintext from a block of ciphertext.","Checks the supported encryption algorithms (client-to-server
+  and server-to-client) of the remote SSH server.
+
+  Currently weak encryption algorithms are defined as the following:
+
+  - Arcfour (RC4) cipher based algorithms
+
+  - 'none' algorithm
+
+  - CBC mode cipher based algorithms
+Details:
+Weak Encryption Algorithm(s) Supported (SSH)
+(OID: 1.3.6.1.4.1.25623.1.0.105611)
+Version used: 2024-06-14T05:05:48Z
+","Product: cpe:/a:ietf:secure_shell_protocol
+Method: SSH Protocol Algorithms Supported
+(OID: 1.3.6.1.4.1.25623.1.0.105565)
+","","",""
+10.129.4.254,,22,tcp,4.3,Medium,80,"Mitigation","Weak Encryption Algorithm(s) Supported (SSH)","The remote SSH server is configured to allow / support weak
+  encryption algorithm(s).","The remote SSH server supports the following weak client-to-server encryption algorithm(s):
+
+3des-cbc
+aes128-cbc
+aes256-cbc
+twofish-cbc
+twofish128-cbc
+twofish256-cbc
+
+
+The remote SSH server supports the following weak server-to-client encryption algorithm(s):
+
+3des-cbc
+aes128-cbc
+aes256-cbc
+twofish-cbc
+twofish128-cbc
+twofish256-cbc
+",1.3.6.1.4.1.25623.1.0.105611,"",b8d4227f-7a5c-430b-81b3-4308809abe26,"self_scan",2025-05-29T11:36:56Z,d1751220-6240-48c8-8ead-800906c064eb,"","Disable the reported weak encryption algorithm(s).","","'- The 'arcfour' cipher is the Arcfour stream cipher with 128-bit
+  keys. The Arcfour cipher is believed to be compatible with the RC4 cipher [SCHNEIER]. Arcfour
+  (and RC4) has problems with weak keys, and should not be used anymore.
+
+  - The 'none' algorithm specifies that no encryption is to be done. Note that this method provides
+  no confidentiality protection, and it is NOT RECOMMENDED to use it.
+
+  - A vulnerability exists in SSH messages that employ CBC mode that may allow an attacker to
+  recover plaintext from a block of ciphertext.","Checks the supported encryption algorithms (client-to-server
+  and server-to-client) of the remote SSH server.
+
+  Currently weak encryption algorithms are defined as the following:
+
+  - Arcfour (RC4) cipher based algorithms
+
+  - 'none' algorithm
+
+  - CBC mode cipher based algorithms
+Details:
+Weak Encryption Algorithm(s) Supported (SSH)
+(OID: 1.3.6.1.4.1.25623.1.0.105611)
+Version used: 2024-06-14T05:05:48Z
+","Product: cpe:/a:ietf:secure_shell_protocol
+Method: SSH Protocol Algorithms Supported
+(OID: 1.3.6.1.4.1.25623.1.0.105565)
+","","",""
+10.129.4.125,LARCES-SERVER,22,tcp,2.6,Low,80,"Mitigation","Weak MAC Algorithm(s) Supported (SSH)","The remote SSH server is configured to allow / support weak MAC
+  algorithm(s).","The remote SSH server supports the following weak client-to-server MAC algorithm(s):
+
+umac-64-etm@openssh.com
+umac-64@openssh.com
+
+
+The remote SSH server supports the following weak server-to-client MAC algorithm(s):
+
+umac-64-etm@openssh.com
+umac-64@openssh.com
+",1.3.6.1.4.1.25623.1.0.105610,"",b8d4227f-7a5c-430b-81b3-4308809abe26,"self_scan",2025-05-29T11:36:56Z,6e893591-338b-40c0-958d-9253b4f44194,"","Disable the reported weak MAC algorithm(s).","","","Checks the supported MAC algorithms (client-to-server and
+  server-to-client) of the remote SSH server.
+
+  Currently weak MAC algorithms are defined as the following:
+
+  - MD5 based algorithms
+
+  - 96-bit based algorithms
+
+  - 64-bit based algorithms
+
+  - 'none' algorithm
+Details:
+Weak MAC Algorithm(s) Supported (SSH)
+(OID: 1.3.6.1.4.1.25623.1.0.105610)
+Version used: 2024-06-14T05:05:48Z
+","Product: cpe:/a:ietf:secure_shell_protocol
+Method: SSH Protocol Algorithms Supported
+(OID: 1.3.6.1.4.1.25623.1.0.105565)
+","","",""
+10.129.4.25,,22,tcp,2.6,Low,80,"Mitigation","Weak MAC Algorithm(s) Supported (SSH)","The remote SSH server is configured to allow / support weak MAC
+  algorithm(s).","The remote SSH server supports the following weak client-to-server MAC algorithm(s):
+
+umac-64-etm@openssh.com
+umac-64@openssh.com
+
+
+The remote SSH server supports the following weak server-to-client MAC algorithm(s):
+
+umac-64-etm@openssh.com
+umac-64@openssh.com
+",1.3.6.1.4.1.25623.1.0.105610,"",b8d4227f-7a5c-430b-81b3-4308809abe26,"self_scan",2025-05-29T11:36:56Z,a58a230d-aea3-4aac-9e58-8756605fbc6b,"","Disable the reported weak MAC algorithm(s).","","","Checks the supported MAC algorithms (client-to-server and
+  server-to-client) of the remote SSH server.
+
+  Currently weak MAC algorithms are defined as the following:
+
+  - MD5 based algorithms
+
+  - 96-bit based algorithms
+
+  - 64-bit based algorithms
+
+  - 'none' algorithm
+Details:
+Weak MAC Algorithm(s) Supported (SSH)
+(OID: 1.3.6.1.4.1.25623.1.0.105610)
+Version used: 2024-06-14T05:05:48Z
+","Product: cpe:/a:ietf:secure_shell_protocol
+Method: SSH Protocol Algorithms Supported
+(OID: 1.3.6.1.4.1.25623.1.0.105565)
+","","",""
+10.129.4.143,,,,2.6,Low,80,"Mitigation","TCP Timestamps Information Disclosure","The remote host implements TCP timestamps and therefore allows
+  to compute the uptime.","It was detected that the host implements RFC1323/RFC7323.
+
+The following timestamps were retrieved with a delay of 1 seconds in-between:
+Packet 1: 1641193698
+Packet 2: 1641194750
+",1.3.6.1.4.1.25623.1.0.80091,"",b8d4227f-7a5c-430b-81b3-4308809abe26,"self_scan",2025-05-29T11:36:56Z,75f8ddeb-03c6-475c-b6ee-2b7a7646c362,"A side effect of this feature is that the uptime of the remote
+  host can sometimes be computed.","To disable TCP timestamps on linux add the line
+  'net.ipv4.tcp_timestamps = 0' to /etc/sysctl.conf. Execute 'sysctl -p' to apply the settings at
+  runtime.
+
+  To disable TCP timestamps on Windows execute 'netsh int tcp set global timestamps=disabled'
+
+  Starting with Windows Server 2008 and Vista, the timestamp can not be completely disabled.
+
+  The default behavior of the TCP/IP stack on this Systems is to not use the Timestamp options when
+  initiating TCP connections, but use them if the TCP peer that is initiating communication includes
+  them in their synchronize (SYN) segment.
+
+  See the references for more information.","TCP implementations that implement RFC1323/RFC7323.","The remote host implements TCP timestamps, as defined by
+  RFC1323/RFC7323.","Special IP packets are forged and sent with a little delay in
+  between to the target IP. The responses are searched for a timestamps. If found, the timestamps
+  are reported.
+Details:
+TCP Timestamps Information Disclosure
+(OID: 1.3.6.1.4.1.25623.1.0.80091)
+Version used: 2023-12-15T16:10:08Z
+","","","",""
+10.129.4.129,,,,2.6,Low,80,"Mitigation","TCP Timestamps Information Disclosure","The remote host implements TCP timestamps and therefore allows
+  to compute the uptime.","It was detected that the host implements RFC1323/RFC7323.
+
+The following timestamps were retrieved with a delay of 1 seconds in-between:
+Packet 1: 221041394
+Packet 2: 221041503
+",1.3.6.1.4.1.25623.1.0.80091,"",b8d4227f-7a5c-430b-81b3-4308809abe26,"self_scan",2025-05-29T11:36:56Z,76b4453c-ac8f-41e5-9807-50235b4f9264,"A side effect of this feature is that the uptime of the remote
+  host can sometimes be computed.","To disable TCP timestamps on linux add the line
+  'net.ipv4.tcp_timestamps = 0' to /etc/sysctl.conf. Execute 'sysctl -p' to apply the settings at
+  runtime.
+
+  To disable TCP timestamps on Windows execute 'netsh int tcp set global timestamps=disabled'
+
+  Starting with Windows Server 2008 and Vista, the timestamp can not be completely disabled.
+
+  The default behavior of the TCP/IP stack on this Systems is to not use the Timestamp options when
+  initiating TCP connections, but use them if the TCP peer that is initiating communication includes
+  them in their synchronize (SYN) segment.
+
+  See the references for more information.","TCP implementations that implement RFC1323/RFC7323.","The remote host implements TCP timestamps, as defined by
+  RFC1323/RFC7323.","Special IP packets are forged and sent with a little delay in
+  between to the target IP. The responses are searched for a timestamps. If found, the timestamps
+  are reported.
+Details:
+TCP Timestamps Information Disclosure
+(OID: 1.3.6.1.4.1.25623.1.0.80091)
+Version used: 2023-12-15T16:10:08Z
+","","","",""
+10.129.4.143,,22,tcp,2.6,Low,80,"Mitigation","Weak MAC Algorithm(s) Supported (SSH)","The remote SSH server is configured to allow / support weak MAC
+  algorithm(s).","The remote SSH server supports the following weak client-to-server MAC algorithm(s):
+
+umac-64-etm@openssh.com
+umac-64@openssh.com
+
+
+The remote SSH server supports the following weak server-to-client MAC algorithm(s):
+
+umac-64-etm@openssh.com
+umac-64@openssh.com
+",1.3.6.1.4.1.25623.1.0.105610,"",b8d4227f-7a5c-430b-81b3-4308809abe26,"self_scan",2025-05-29T11:36:56Z,46df1e0d-2294-46d8-83d0-cfc579f8ee24,"","Disable the reported weak MAC algorithm(s).","","","Checks the supported MAC algorithms (client-to-server and
+  server-to-client) of the remote SSH server.
+
+  Currently weak MAC algorithms are defined as the following:
+
+  - MD5 based algorithms
+
+  - 96-bit based algorithms
+
+  - 64-bit based algorithms
+
+  - 'none' algorithm
+Details:
+Weak MAC Algorithm(s) Supported (SSH)
+(OID: 1.3.6.1.4.1.25623.1.0.105610)
+Version used: 2024-06-14T05:05:48Z
+","Product: cpe:/a:ietf:secure_shell_protocol
+Method: SSH Protocol Algorithms Supported
+(OID: 1.3.6.1.4.1.25623.1.0.105565)
+","","",""
+10.129.4.254,,,,2.6,Low,80,"Mitigation","TCP Timestamps Information Disclosure","The remote host implements TCP timestamps and therefore allows
+  to compute the uptime.","It was detected that the host implements RFC1323/RFC7323.
+
+The following timestamps were retrieved with a delay of 1 seconds in-between:
+Packet 1: 367942076
+Packet 2: 367942336
+",1.3.6.1.4.1.25623.1.0.80091,"",b8d4227f-7a5c-430b-81b3-4308809abe26,"self_scan",2025-05-29T11:36:56Z,b97e6fa7-e3ec-486d-a737-1b4fbba49756,"A side effect of this feature is that the uptime of the remote
+  host can sometimes be computed.","To disable TCP timestamps on linux add the line
+  'net.ipv4.tcp_timestamps = 0' to /etc/sysctl.conf. Execute 'sysctl -p' to apply the settings at
+  runtime.
+
+  To disable TCP timestamps on Windows execute 'netsh int tcp set global timestamps=disabled'
+
+  Starting with Windows Server 2008 and Vista, the timestamp can not be completely disabled.
+
+  The default behavior of the TCP/IP stack on this Systems is to not use the Timestamp options when
+  initiating TCP connections, but use them if the TCP peer that is initiating communication includes
+  them in their synchronize (SYN) segment.
+
+  See the references for more information.","TCP implementations that implement RFC1323/RFC7323.","The remote host implements TCP timestamps, as defined by
+  RFC1323/RFC7323.","Special IP packets are forged and sent with a little delay in
+  between to the target IP. The responses are searched for a timestamps. If found, the timestamps
+  are reported.
+Details:
+TCP Timestamps Information Disclosure
+(OID: 1.3.6.1.4.1.25623.1.0.80091)
+Version used: 2023-12-15T16:10:08Z
+","","","",""
+10.129.4.254,,22,tcp,2.6,Low,80,"Mitigation","Weak MAC Algorithm(s) Supported (SSH)","The remote SSH server is configured to allow / support weak MAC
+  algorithm(s).","The remote SSH server supports the following weak client-to-server MAC algorithm(s):
+
+hmac-md5
+hmac-sha1-96
+
+
+The remote SSH server supports the following weak server-to-client MAC algorithm(s):
+
+hmac-md5
+hmac-sha1-96
+",1.3.6.1.4.1.25623.1.0.105610,"",b8d4227f-7a5c-430b-81b3-4308809abe26,"self_scan",2025-05-29T11:36:56Z,45df207e-1bd3-4d4f-972a-7db1705f104c,"","Disable the reported weak MAC algorithm(s).","","","Checks the supported MAC algorithms (client-to-server and
+  server-to-client) of the remote SSH server.
+
+  Currently weak MAC algorithms are defined as the following:
+
+  - MD5 based algorithms
+
+  - 96-bit based algorithms
+
+  - 64-bit based algorithms
+
+  - 'none' algorithm
+Details:
+Weak MAC Algorithm(s) Supported (SSH)
+(OID: 1.3.6.1.4.1.25623.1.0.105610)
+Version used: 2024-06-14T05:05:48Z
+","Product: cpe:/a:ietf:secure_shell_protocol
+Method: SSH Protocol Algorithms Supported
+(OID: 1.3.6.1.4.1.25623.1.0.105565)
+","","",""
+10.129.4.22,,22,tcp,2.6,Low,80,"Mitigation","Weak MAC Algorithm(s) Supported (SSH)","The remote SSH server is configured to allow / support weak MAC
+  algorithm(s).","The remote SSH server supports the following weak client-to-server MAC algorithm(s):
+
+hmac-md5
+hmac-sha1-96
+
+
+The remote SSH server supports the following weak server-to-client MAC algorithm(s):
+
+hmac-md5
+hmac-sha1-96
+",1.3.6.1.4.1.25623.1.0.105610,"",b8d4227f-7a5c-430b-81b3-4308809abe26,"self_scan",2025-05-29T11:36:56Z,047d5cb0-ddec-4d32-9bc3-00bc757483a3,"","Disable the reported weak MAC algorithm(s).","","","Checks the supported MAC algorithms (client-to-server and
+  server-to-client) of the remote SSH server.
+
+  Currently weak MAC algorithms are defined as the following:
+
+  - MD5 based algorithms
+
+  - 96-bit based algorithms
+
+  - 64-bit based algorithms
+
+  - 'none' algorithm
+Details:
+Weak MAC Algorithm(s) Supported (SSH)
+(OID: 1.3.6.1.4.1.25623.1.0.105610)
+Version used: 2024-06-14T05:05:48Z
+","Product: cpe:/a:ietf:secure_shell_protocol
+Method: SSH Protocol Algorithms Supported
+(OID: 1.3.6.1.4.1.25623.1.0.105565)
+","","",""
+10.129.4.1,_gateway,,,2.6,Low,80,"Mitigation","TCP Timestamps Information Disclosure","The remote host implements TCP timestamps and therefore allows
+  to compute the uptime.","It was detected that the host implements RFC1323/RFC7323.
+
+The following timestamps were retrieved with a delay of 1 seconds in-between:
+Packet 1: 4200952942
+Packet 2: 4253954641
+",1.3.6.1.4.1.25623.1.0.80091,"",b8d4227f-7a5c-430b-81b3-4308809abe26,"self_scan",2025-05-29T11:36:56Z,20ba061f-1591-44c0-9455-e7f7bc05c714,"A side effect of this feature is that the uptime of the remote
+  host can sometimes be computed.","To disable TCP timestamps on linux add the line
+  'net.ipv4.tcp_timestamps = 0' to /etc/sysctl.conf. Execute 'sysctl -p' to apply the settings at
+  runtime.
+
+  To disable TCP timestamps on Windows execute 'netsh int tcp set global timestamps=disabled'
+
+  Starting with Windows Server 2008 and Vista, the timestamp can not be completely disabled.
+
+  The default behavior of the TCP/IP stack on this Systems is to not use the Timestamp options when
+  initiating TCP connections, but use them if the TCP peer that is initiating communication includes
+  them in their synchronize (SYN) segment.
+
+  See the references for more information.","TCP implementations that implement RFC1323/RFC7323.","The remote host implements TCP timestamps, as defined by
+  RFC1323/RFC7323.","Special IP packets are forged and sent with a little delay in
+  between to the target IP. The responses are searched for a timestamps. If found, the timestamps
+  are reported.
+Details:
+TCP Timestamps Information Disclosure
+(OID: 1.3.6.1.4.1.25623.1.0.80091)
+Version used: 2023-12-15T16:10:08Z
+","","","",""
+10.129.4.22,,,,2.6,Low,80,"Mitigation","TCP Timestamps Information Disclosure","The remote host implements TCP timestamps and therefore allows
+  to compute the uptime.","It was detected that the host implements RFC1323/RFC7323.
+
+The following timestamps were retrieved with a delay of 1 seconds in-between:
+Packet 1: 311232842
+Packet 2: 311232946
+",1.3.6.1.4.1.25623.1.0.80091,"",b8d4227f-7a5c-430b-81b3-4308809abe26,"self_scan",2025-05-29T11:36:56Z,aaf2eab2-032c-43d7-93ee-df9208677e0f,"A side effect of this feature is that the uptime of the remote
+  host can sometimes be computed.","To disable TCP timestamps on linux add the line
+  'net.ipv4.tcp_timestamps = 0' to /etc/sysctl.conf. Execute 'sysctl -p' to apply the settings at
+  runtime.
+
+  To disable TCP timestamps on Windows execute 'netsh int tcp set global timestamps=disabled'
+
+  Starting with Windows Server 2008 and Vista, the timestamp can not be completely disabled.
+
+  The default behavior of the TCP/IP stack on this Systems is to not use the Timestamp options when
+  initiating TCP connections, but use them if the TCP peer that is initiating communication includes
+  them in their synchronize (SYN) segment.
+
+  See the references for more information.","TCP implementations that implement RFC1323/RFC7323.","The remote host implements TCP timestamps, as defined by
+  RFC1323/RFC7323.","Special IP packets are forged and sent with a little delay in
+  between to the target IP. The responses are searched for a timestamps. If found, the timestamps
+  are reported.
+Details:
+TCP Timestamps Information Disclosure
+(OID: 1.3.6.1.4.1.25623.1.0.80091)
+Version used: 2023-12-15T16:10:08Z
+","","","",""
+10.129.4.25,,,,2.6,Low,80,"Mitigation","TCP Timestamps Information Disclosure","The remote host implements TCP timestamps and therefore allows
+  to compute the uptime.","It was detected that the host implements RFC1323/RFC7323.
+
+The following timestamps were retrieved with a delay of 1 seconds in-between:
+Packet 1: 1831935723
+Packet 2: 1831936805
+",1.3.6.1.4.1.25623.1.0.80091,"",b8d4227f-7a5c-430b-81b3-4308809abe26,"self_scan",2025-05-29T11:36:56Z,9c707add-3d2b-4a0b-8860-9b9fd540023c,"A side effect of this feature is that the uptime of the remote
+  host can sometimes be computed.","To disable TCP timestamps on linux add the line
+  'net.ipv4.tcp_timestamps = 0' to /etc/sysctl.conf. Execute 'sysctl -p' to apply the settings at
+  runtime.
+
+  To disable TCP timestamps on Windows execute 'netsh int tcp set global timestamps=disabled'
+
+  Starting with Windows Server 2008 and Vista, the timestamp can not be completely disabled.
+
+  The default behavior of the TCP/IP stack on this Systems is to not use the Timestamp options when
+  initiating TCP connections, but use them if the TCP peer that is initiating communication includes
+  them in their synchronize (SYN) segment.
+
+  See the references for more information.","TCP implementations that implement RFC1323/RFC7323.","The remote host implements TCP timestamps, as defined by
+  RFC1323/RFC7323.","Special IP packets are forged and sent with a little delay in
+  between to the target IP. The responses are searched for a timestamps. If found, the timestamps
+  are reported.
+Details:
+TCP Timestamps Information Disclosure
+(OID: 1.3.6.1.4.1.25623.1.0.80091)
+Version used: 2023-12-15T16:10:08Z
+","","","",""
+10.129.4.125,LARCES-SERVER,,,2.1,Low,80,"Mitigation","ICMP Timestamp Reply Information Disclosure","The remote host responded to an ICMP timestamp request.","The following response / ICMP packet has been received:
+- ICMP Type: 14
+- ICMP Code: 0
+",1.3.6.1.4.1.25623.1.0.103190,"CVE-1999-0524",b8d4227f-7a5c-430b-81b3-4308809abe26,"self_scan",2025-05-29T11:36:56Z,cde1781c-ad32-4b76-8ea3-44b920373162,"This information could theoretically be used to exploit weak
+  time-based random number generators in other services.","Various mitigations are possible:
+
+  - Disable the support for ICMP timestamp on the remote host completely
+
+  - Protect the remote host by a firewall, and block ICMP packets passing through the firewall in
+  either direction (either completely or only for untrusted networks)","","The Timestamp Reply is an ICMP message which replies to a
+  Timestamp message. It consists of the originating timestamp sent by the sender of the Timestamp as
+  well as a receive timestamp and a transmit timestamp.","Sends an ICMP Timestamp (Type 13) request and checks if a
+  Timestamp Reply (Type 14) is received.
+Details:
+ICMP Timestamp Reply Information Disclosure
+(OID: 1.3.6.1.4.1.25623.1.0.103190)
+Version used: 2025-01-21T05:37:33Z
+","","","DFN-CERT-2014-0658,CB-K15/1514,CB-K14/0632",""
+10.129.4.207,pop-os,,,2.1,Low,80,"Mitigation","ICMP Timestamp Reply Information Disclosure","The remote host responded to an ICMP timestamp request.","The following response / ICMP packet has been received:
+- ICMP Type: 14
+- ICMP Code: 0
+",1.3.6.1.4.1.25623.1.0.103190,"CVE-1999-0524",b8d4227f-7a5c-430b-81b3-4308809abe26,"self_scan",2025-05-29T11:36:56Z,bc82aab6-e46c-4a90-89d5-6b01df6b1ede,"This information could theoretically be used to exploit weak
+  time-based random number generators in other services.","Various mitigations are possible:
+
+  - Disable the support for ICMP timestamp on the remote host completely
+
+  - Protect the remote host by a firewall, and block ICMP packets passing through the firewall in
+  either direction (either completely or only for untrusted networks)","","The Timestamp Reply is an ICMP message which replies to a
+  Timestamp message. It consists of the originating timestamp sent by the sender of the Timestamp as
+  well as a receive timestamp and a transmit timestamp.","Sends an ICMP Timestamp (Type 13) request and checks if a
+  Timestamp Reply (Type 14) is received.
+Details:
+ICMP Timestamp Reply Information Disclosure
+(OID: 1.3.6.1.4.1.25623.1.0.103190)
+Version used: 2025-01-21T05:37:33Z
+","","","DFN-CERT-2014-0658,CB-K15/1514,CB-K14/0632",""
+10.129.4.143,,,,2.1,Low,80,"Mitigation","ICMP Timestamp Reply Information Disclosure","The remote host responded to an ICMP timestamp request.","The following response / ICMP packet has been received:
+- ICMP Type: 14
+- ICMP Code: 0
+",1.3.6.1.4.1.25623.1.0.103190,"CVE-1999-0524",b8d4227f-7a5c-430b-81b3-4308809abe26,"self_scan",2025-05-29T11:36:56Z,c844605f-7937-4d54-ba55-497b1a33e020,"This information could theoretically be used to exploit weak
+  time-based random number generators in other services.","Various mitigations are possible:
+
+  - Disable the support for ICMP timestamp on the remote host completely
+
+  - Protect the remote host by a firewall, and block ICMP packets passing through the firewall in
+  either direction (either completely or only for untrusted networks)","","The Timestamp Reply is an ICMP message which replies to a
+  Timestamp message. It consists of the originating timestamp sent by the sender of the Timestamp as
+  well as a receive timestamp and a transmit timestamp.","Sends an ICMP Timestamp (Type 13) request and checks if a
+  Timestamp Reply (Type 14) is received.
+Details:
+ICMP Timestamp Reply Information Disclosure
+(OID: 1.3.6.1.4.1.25623.1.0.103190)
+Version used: 2025-01-21T05:37:33Z
+","","","DFN-CERT-2014-0658,CB-K15/1514,CB-K14/0632",""
+10.129.4.25,,,,2.1,Low,80,"Mitigation","ICMP Timestamp Reply Information Disclosure","The remote host responded to an ICMP timestamp request.","The following response / ICMP packet has been received:
+- ICMP Type: 14
+- ICMP Code: 0
+",1.3.6.1.4.1.25623.1.0.103190,"CVE-1999-0524",b8d4227f-7a5c-430b-81b3-4308809abe26,"self_scan",2025-05-29T11:36:56Z,93460c39-02f6-42dd-a4a4-23770b0c18b4,"This information could theoretically be used to exploit weak
+  time-based random number generators in other services.","Various mitigations are possible:
+
+  - Disable the support for ICMP timestamp on the remote host completely
+
+  - Protect the remote host by a firewall, and block ICMP packets passing through the firewall in
+  either direction (either completely or only for untrusted networks)","","The Timestamp Reply is an ICMP message which replies to a
+  Timestamp message. It consists of the originating timestamp sent by the sender of the Timestamp as
+  well as a receive timestamp and a transmit timestamp.","Sends an ICMP Timestamp (Type 13) request and checks if a
+  Timestamp Reply (Type 14) is received.
+Details:
+ICMP Timestamp Reply Information Disclosure
+(OID: 1.3.6.1.4.1.25623.1.0.103190)
+Version used: 2025-01-21T05:37:33Z
+","","","DFN-CERT-2014-0658,CB-K15/1514,CB-K14/0632",""
+10.129.4.1,_gateway,,,2.1,Low,80,"Mitigation","ICMP Timestamp Reply Information Disclosure","The remote host responded to an ICMP timestamp request.","The following response / ICMP packet has been received:
+- ICMP Type: 14
+- ICMP Code: 0
+",1.3.6.1.4.1.25623.1.0.103190,"CVE-1999-0524",b8d4227f-7a5c-430b-81b3-4308809abe26,"self_scan",2025-05-29T11:36:56Z,ee228f1b-5aa8-4e97-85e5-d795d90376fe,"This information could theoretically be used to exploit weak
+  time-based random number generators in other services.","Various mitigations are possible:
+
+  - Disable the support for ICMP timestamp on the remote host completely
+
+  - Protect the remote host by a firewall, and block ICMP packets passing through the firewall in
+  either direction (either completely or only for untrusted networks)","","The Timestamp Reply is an ICMP message which replies to a
+  Timestamp message. It consists of the originating timestamp sent by the sender of the Timestamp as
+  well as a receive timestamp and a transmit timestamp.","Sends an ICMP Timestamp (Type 13) request and checks if a
+  Timestamp Reply (Type 14) is received.
+Details:
+ICMP Timestamp Reply Information Disclosure
+(OID: 1.3.6.1.4.1.25623.1.0.103190)
+Version used: 2025-01-21T05:37:33Z
+","","","DFN-CERT-2014-0658,CB-K15/1514,CB-K14/0632",""
+10.129.4.254,,,,2.1,Low,80,"Mitigation","ICMP Timestamp Reply Information Disclosure","The remote host responded to an ICMP timestamp request.","The following response / ICMP packet has been received:
+- ICMP Type: 14
+- ICMP Code: 0
+",1.3.6.1.4.1.25623.1.0.103190,"CVE-1999-0524",b8d4227f-7a5c-430b-81b3-4308809abe26,"self_scan",2025-05-29T11:36:56Z,fdb3103f-152d-40d5-a6cb-79433345b08f,"This information could theoretically be used to exploit weak
+  time-based random number generators in other services.","Various mitigations are possible:
+
+  - Disable the support for ICMP timestamp on the remote host completely
+
+  - Protect the remote host by a firewall, and block ICMP packets passing through the firewall in
+  either direction (either completely or only for untrusted networks)","","The Timestamp Reply is an ICMP message which replies to a
+  Timestamp message. It consists of the originating timestamp sent by the sender of the Timestamp as
+  well as a receive timestamp and a transmit timestamp.","Sends an ICMP Timestamp (Type 13) request and checks if a
+  Timestamp Reply (Type 14) is received.
+Details:
+ICMP Timestamp Reply Information Disclosure
+(OID: 1.3.6.1.4.1.25623.1.0.103190)
+Version used: 2025-01-21T05:37:33Z
+","","","DFN-CERT-2014-0658,CB-K15/1514,CB-K14/0632",""
+10.129.4.129,,,,2.1,Low,80,"Mitigation","ICMP Timestamp Reply Information Disclosure","The remote host responded to an ICMP timestamp request.","The following response / ICMP packet has been received:
+- ICMP Type: 14
+- ICMP Code: 0
+",1.3.6.1.4.1.25623.1.0.103190,"CVE-1999-0524",b8d4227f-7a5c-430b-81b3-4308809abe26,"self_scan",2025-05-29T11:36:56Z,82fd2c2c-7db1-4a11-be66-f626ef52c068,"This information could theoretically be used to exploit weak
+  time-based random number generators in other services.","Various mitigations are possible:
+
+  - Disable the support for ICMP timestamp on the remote host completely
+
+  - Protect the remote host by a firewall, and block ICMP packets passing through the firewall in
+  either direction (either completely or only for untrusted networks)","","The Timestamp Reply is an ICMP message which replies to a
+  Timestamp message. It consists of the originating timestamp sent by the sender of the Timestamp as
+  well as a receive timestamp and a transmit timestamp.","Sends an ICMP Timestamp (Type 13) request and checks if a
+  Timestamp Reply (Type 14) is received.
+Details:
+ICMP Timestamp Reply Information Disclosure
+(OID: 1.3.6.1.4.1.25623.1.0.103190)
+Version used: 2025-01-21T05:37:33Z
+","","","DFN-CERT-2014-0658,CB-K15/1514,CB-K14/0632",""

@@ -1,0 +1,66 @@
+```bash
+#!/bin/bash
+
+# Desabilitar transmissão em texto claro via HTTP
+# Redirecionar HTTP para HTTPS (requer configuração do servidor web)
+# Exemplo para Apache:
+# echo "Redirect permanent / https://\${SERVER_NAME}/" > /etc/apache2/sites-available/000-default.conf
+# systemctl reload apache2
+
+# Exemplo para Nginx:
+# Em /etc/nginx/sites-available/default, adicionar:
+# server {
+#   listen 80;
+#   server_name _;
+#   return 301 https://$host$request_uri;
+# }
+
+# Proteção contra DNS Cache Snooping
+# Desativar recursão (se não for um servidor DNS público)
+# Alterar /etc/bind/named.conf.options (para BIND9) ou arquivo de configuração similar para outros servidores DNS
+# Adicionar/modificar a linha: recursion no;
+# Reiniciar o serviço DNS
+# systemctl restart bind9
+
+# Proteção contra ICMP Timestamp Reply Information Disclosure
+echo 1 > /proc/sys/net/ipv4/icmp_echo_ignore_all
+
+# Desabilitar ICMP Timestamp (mais permanente - requer reinicialização ou sysctl -p)
+echo "net.ipv4.icmp_echo_ignore_all = 1" >> /etc/sysctl.conf
+
+# Desabilitar TLSv1.0 e TLSv1.1 (requer configuração do servidor web)
+# Exemplo para Apache:
+# Em /etc/apache2/mods-available/ssl.conf, adicionar/modificar:
+# SSLProtocol all -TLSv1 -TLSv1.1
+# systemctl reload apache2
+
+# Exemplo para Nginx:
+# Em /etc/nginx/nginx.conf ou /etc/nginx/conf.d/default.conf ou arquivo de configuração do site, adicionar/modificar:
+# ssl_protocols TLSv1.2 TLSv1.3;
+# nginx -t && systemctl reload nginx
+
+# Mitigação de Renegotiation DoS Vulnerability (requer configuração do servidor web)
+# Desabilitar renegotiation (se possível - depende do servidor web e versão)
+# Exemplo para Apache (pode não funcionar em todas as versões):
+# SSLRenegBufferSize 0
+# systemctl reload apache2
+
+# Exemplo para Nginx (mais complexo, pode exigir um patch ou atualização):
+# Não há uma diretiva direta para desabilitar completamente a renegotiation.  Considerar atualização.
+
+# Remover Cipher Suites Fracos (requer configuração do servidor web)
+# Exemplo para Apache:
+# SSLCipherSuite HIGH:!aNULL:!MD5
+# systemctl reload apache2
+
+# Exemplo para Nginx:
+# ssl_ciphers HIGH:!aNULL:!MD5;
+# nginx -t && systemctl reload nginx
+
+# Desabilitar TCP Timestamps
+echo "net.ipv4.tcp_timestamps = 0" >> /etc/sysctl.conf
+sysctl -p
+
+# Aplicar as configurações do sysctl.conf (se necessário, reiniciar para aplicar todas as mudanças)
+# sysctl -p
+```

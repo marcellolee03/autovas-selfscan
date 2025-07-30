@@ -1,0 +1,102 @@
+#!/bin/bash
+
+# Corrigir vulnerabilidades do TWiki
+TWIKI_VERSION=$(twiki -v 2>&1 | grep "TWiki version" | awk '{print $3}')
+if [[ "$TWIKI_VERSION" < "4.2.4" ]]; then
+    wget http://twiki.org/pub/TWiki/TWikiRelease/TWiki-4.2.4.zip
+    unzip TWiki-4.2.4.zip
+    cp -r TWiki-4.2.4/* /var/www/twiki/
+    chown -R www-data:www-data /var/www/twiki/
+    rm -rf TWiki-4.2.4.zip TWiki-4.2.4
+fi
+
+# Corrigir vulnerabilidade do dRuby
+if systemctl is-active --quiet drb; then
+    echo "drb.service" >> /etc/systemd/system/drb.service.d/override.conf
+    echo "LoadCredential=null" >> /etc/systemd/system/drb.service.d/override.conf
+    systemctl daemon-reload
+    systemctl restart drb
+fi
+
+# Corrigir vulnerabilidade do rlogin
+if systemctl is-active --quiet rlogin; then
+    systemctl stop rlogin
+    systemctl disable rlogin
+fi
+
+# Corrigir vulnerabilidade do rexec
+if systemctl is-active --quiet rexec; then
+    systemctl stop rexec
+    systemctl disable rexec
+fi
+
+# Corrigir vulnerabilidade do Ingreslock
+if systemctl is-active --quiet ingreslock; then
+    systemctl stop ingreslock
+    systemctl disable ingreslock
+fi
+
+# Corrigir vulnerabilidade do Ghostcat
+if systemctl is-active --quiet tomcat; then
+    wget https://archive.apache.org/dist/tomcat/tomcat-9/v9.0.31/bin/apache-tomcat-9.0.31.tar.gz
+    tar -xzf apache-tomcat-9.0.31.tar.gz -C /opt/
+    systemctl stop tomcat
+    rm -rf /opt/tomcat
+    mv /opt/apache-tomcat-9.0.31 /opt/tomcat
+    systemctl start tomcat
+    rm -f apache-tomcat-9.0.31.tar.gz
+fi
+
+# Corrigir vulnerabilidade do MySQL
+mysql -u root -e "ALTER USER 'root'@'localhost' IDENTIFIED BY 'NewSecurePassword';"
+
+# Corrigir vulnerabilidade do PHP
+PHP_VERSION=$(php -v | grep "PHP" | awk '{print $2}')
+if [[ "$PHP_VERSION" < "5.6.30" ]]; then
+    apt-get update
+    apt-get install -y php5.6
+fi
+
+# Corrigir vulnerabilidade do VNC
+if systemctl is-active --quiet vncserver; then
+    systemctl stop vncserver
+    systemctl disable vncserver
+fi
+
+# Corrigir vulnerabilidade de métodos HTTP perigosos
+if systemctl is-active --quiet apache2; then
+    echo "<Directory /var/www/html>
+        AllowMethods GET POST HEAD
+    </Directory>" >> /etc/apache2/apache2.conf
+    systemctl restart apache2
+fi
+
+# Corrigir vulnerabilidade do FTP
+if systemctl is-active --quiet vsftpd; then
+    echo "anonymous_enable=NO" >> /etc/vsftpd.conf
+    systemctl restart vsftpd
+fi
+
+# Corrigir vulnerabilidade do SSH
+SSH_CONFIG="/etc/ssh/sshd_config"
+if grep -q "Ciphers aes128-ctr,aes192-ctr,aes256-ctr" $SSH_CONFIG; then
+    echo "Ciphers aes128-ctr,aes192-ctr,aes256-ctr" >> $SSH_CONFIG
+    systemctl restart sshd
+fi
+
+# Corrigir vulnerabilidade SSL/TLS
+if systemctl is-active --quiet apache2; then
+    a2enmod ssl
+    a2ensite default-ssl
+    systemctl restart apache2
+fi
+
+# Corrigir vulnerabilidade do Telnet
+if systemctl is-active --quiet telnet; then
+    systemctl stop telnet
+    systemctl disable telnet
+fi
+
+# Corrigir vulnerabilidade do ICMP
+echo "net.ipv4.icmp_echo_ignore_all=1" >> /etc/sysctl.conf
+sysctl -p

@@ -1,0 +1,95 @@
+```powershell
+#Requires -RunAsAdministrator
+
+# Define as versões fixas
+$fixedVersion = "3.10.15"
+
+# Função para verificar se o Python está instalado e na versão vulnerável
+function Check-PythonVersion {
+  param (
+    [string]$versionToCheck
+  )
+
+  try {
+    # Tenta executar o Python para obter a versão
+    $pythonVersion = & python -V 2>&1
+    
+    # Extrai a versão
+    if ($pythonVersion -match "Python\s+(.+)") {
+      $installedVersion = $Matches[1]
+      Write-Output "Versão instalada do Python: $installedVersion"
+
+      # Compara a versão instalada com a versão vulnerável
+      if ($installedVersion -eq $versionToCheck) {
+        Write-Output "Versão vulnerável detectada."
+        return $true
+      } else {
+        Write-Output "Versão segura detectada."
+        return $false
+      }
+    } else {
+      Write-Output "Python não encontrado no PATH."
+      return $false
+    }
+  } catch {
+    Write-Output "Erro ao verificar a versão do Python: $($_.Exception.Message)"
+    return $false
+  }
+}
+
+# Função para fazer o download e instalar o Python
+function Install-Python {
+  param (
+    [string]$version
+  )
+
+  $tempDir = Join-Path $env:TEMP "PythonUpdate"
+  if (!(Test-Path -Path $tempDir)) {
+    New-Item -ItemType Directory -Path $tempDir | Out-Null
+  }
+
+  $installerUrl = "https://www.python.org/ftp/python/$version/python-$version-amd64.exe"  # Ajuste o nome do arquivo conforme necessário
+  $installerPath = Join-Path $tempDir "python-$version-amd64.exe"
+
+  Write-Output "Downloading Python $version from $installerUrl"
+  try {
+    Invoke-WebRequest -Uri $installerUrl -OutFile $installerPath
+    Write-Output "Download completo."
+  } catch {
+    Write-Error "Erro ao fazer o download do instalador: $($_.Exception.Message)"
+    return $false
+  }
+
+  Write-Output "Instalando Python $version..."
+  try {
+    # Execute o instalador com parâmetros silenciosos
+    Start-Process -FilePath $installerPath -ArgumentList "/quiet InstallAllUsers=1 Include_doc=0 Include_debug=0 Include_tcltk=0 CompileAll=1" -Wait
+    Write-Output "Instalação completa."
+  } catch {
+    Write-Error "Erro ao instalar o Python: $($_.Exception.Message)"
+    return $false
+  }
+
+  # Limpa o diretório temporário
+  Remove-Item -Path $tempDir -Recurse -Force
+
+  Write-Output "Python atualizado para a versão $version."
+  return $true
+}
+
+# Verifica se a versão vulnerável está instalada
+if (Check-PythonVersion -versionToCheck "3.10.12") {
+  # Atualiza o Python para a versão fixa
+  Write-Output "Atualizando o Python para a versão $fixedVersion..."
+  if (Install-Python -version $fixedVersion) {
+    Write-Output "Python atualizado com sucesso!"
+  } else {
+    Write-Error "Falha ao atualizar o Python."
+    exit 1
+  }
+} else {
+  Write-Output "Nenhuma versão vulnerável do Python encontrada. Nenhuma ação necessária."
+}
+
+exit 0
+```

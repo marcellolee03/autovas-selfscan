@@ -1,0 +1,23 @@
+#!/bin/bash
+python_command="python3"
+python_uninstall_command="apt-get remove -y python3"
+
+if command -v $python_command &> /dev/null; then
+    current_version=$($python_command --version 2>&1 | awk '{print $2}')
+    required_version="3.10.15"
+    if [[ "$current_version" < "$required_version" ]]; then
+        echo "Current Python version is $current_version, updating to $required_version..."
+        $python_uninstall_command
+        apt-get update
+        apt-get install -y python3=3.10.15*
+        if command -v $python_command &> /dev/null; then
+            echo "Python successfully updated to $required_version"
+        else
+            echo "Failed to update Python."
+        fi
+    else
+        echo "Python version is already $current_version, no update needed."
+    fi
+else
+    echo "Python is not installed."
+fi

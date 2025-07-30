@@ -1,0 +1,70 @@
+```bash
+#!/bin/bash
+
+# Este script corrige a vulnerabilidade de transmissão de informações sensíveis em texto claro via HTTP.
+# Ele configura um redirecionamento automático de HTTP para HTTPS usando Apache ou Nginx, dependendo do que estiver instalado.
+
+# Variáveis
+APACHE_CONFIG="/etc/apache2/sites-available/000-default.conf"
+APACHE_DEFAULT_SSL="/etc/apache2/sites-available/default-ssl.conf"
+NGINX_CONFIG="/etc/nginx/sites-available/default"
+
+# Funções
+
+# Checa se o Apache está instalado
+is_apache_installed() {
+  command -v apache2 &> /dev/null
+}
+
+# Checa se o Nginx está instalado
+is_nginx_installed() {
+  command -v nginx &> /dev/null
+}
+
+# Redireciona HTTP para HTTPS usando Apache
+configure_apache_redirect() {
+  if [ ! -f "$APACHE_CONFIG.backup" ]; then
+    sudo cp "$APACHE_CONFIG" "$APACHE_CONFIG.backup"
+  fi
+
+  # Adiciona a regra de redirecionamento no VirtualHost padrão
+  sudo sed -i "s/<VirtualHost \*:80>/<VirtualHost *:80>\n\tRedirect permanent \/ https:\/\/%{HTTP_HOST}\/ /" "$APACHE_CONFIG"
+
+  # Verifica se o módulo rewrite está habilitado. Caso não, habilita.
+  if ! apache2ctl -M | grep -q "rewrite_module"; then
+    sudo a2enmod rewrite
+  fi
+
+  # Reinicia o Apache
+  sudo systemctl restart apache2
+}
+
+# Redireciona HTTP para HTTPS usando Nginx
+configure_nginx_redirect() {
+  if [ ! -f "$NGINX_CONFIG.backup" ]; then
+    sudo cp "$NGINX_CONFIG" "$NGINX_CONFIG.backup"
+  fi
+
+  # Adiciona o bloco de redirecionamento para HTTPS
+  sudo sed -i "s/listen 80 default_server;/listen 80 default_server;\n\treturn 301 https:\/\/${server_name}\$request_uri;/" "$NGINX_CONFIG"
+
+  # Reinicia o Nginx
+  sudo systemctl restart nginx
+}
+
+# Script principal
+if is_apache_installed; then
+  echo "Apache detectado. Configurando redirecionamento HTTP para HTTPS..."
+  configure_apache_redirect
+elif is_nginx_installed; then
+  echo "Nginx detectado. Configurando redirecionamento HTTP para HTTPS..."
+  configure_nginx_redirect
+else
+  echo "Nenhum servidor web (Apache ou Nginx) detectado. Instale um servidor web e execute este script novamente."
+  exit 1
+fi
+
+echo "Redirecionamento HTTP para HTTPS configurado com sucesso!"
+
+exit 0
+```

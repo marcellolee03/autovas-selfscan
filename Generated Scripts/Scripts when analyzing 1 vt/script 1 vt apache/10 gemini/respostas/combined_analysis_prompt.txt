@@ -1,0 +1,561 @@
+>analise esse prompt contendo as vulnerabilidades encontradas em um csv do openvas e analise se os scripts que irei enviar em seguida sao capazes de corrigir esses problemas ou nao, me informando uma porcentagem de correcao das vulnerabilidades
+>Vulnerabilidades:
+    # INÍCIO DO SCRIPT DE CORREÇÃO
+Script 9 salvo em: generatedscripts/1vtapache_9.txt (Tempo: 4.38 segundos)
+
+    # INSTRUÇÕES PARA O MODELO DE IA
+
+    ## PERSONA
+    Você é um especialista em cibersegurança e automação de sistemas, focado em criar scripts de correção (patching). Sua única função é gerar um script que resolva a vulnerabilidade descrita abaixo.
+
+    ## TAREFA
+    Analise o contexto da vulnerabilidade a seguir e gere um script de shell (compatível com o sistema operacional do localhost) que, ao ser executado, corrija permanentemente a vulnerabilidade descrita.
+
+    ## CONTEXTO DA VULNERABILIDADE
+
+# Vulnerabilidade 1
+CVEs: CVE-2012-0053
+NVT Name: Apache HTTP Server httpOnly Cookie Information Disclosure Vulnerability
+Port: 80
+Port Protocol: tcp
+Summary: Apache HTTP Server is prone to a cookie information disclosure vulnerability.
+Specific Result: Vulnerability was detected according to the Vulnerability Detection Method.
+Vulnerability Detection Method: 
+Details:
+Apache HTTP Server 'httpOnly' Cookie Information Disclosure Vulnerability
+(OID: 1.3.6.1.4.1.25623.1.0.902830)
+Version used: 2025-03-05T05:38:53Z
+
+Affected Software/OS: Apache HTTP Server versions 2.2.0 through 2.2.21.
+Product Detection Result: Product: cpe:/a:apache:http_server:2.2.8
+Method: Apache HTTP Server Detection Consolidation
+(OID: 1.3.6.1.4.1.25623.1.0.117232)
+
+Solution: Update to Apache HTTP Server version 2.2.22 or later.
+
+    ## REGRAS E RESTRIÇÕES DE SAÍDA
+    1.  **APENAS SCRIPT:** A sua resposta deve conter ÚNICA E EXCLUSIVAMENTE o código do script.
+    2.  **SEM EXPLICAÇÕES:** Não adicione nenhum comentário, explicação, introdução, ou despedida.
+    3.  **SEM BLOCOS DE CÓDIGO MARKDOWN:** Não envolva o script em blocos de código como ` ```bash ` ou ` ```sh `. A resposta deve ser o texto puro do script.
+    4.  **AUTOSSUFICIENTE:** O script deve ser completo, autônomo e não deve exigir interação do usuário para ser executado.
+    5.  **COMPATIBILIDADE:** O script deve ser compatível com o sistema operacional especificado em 'localhost OS'. Se o sistema operacional não for especificado, assuma um sistema baseado em Linux (como Ubuntu/Debian).
+
+    # INÍCIO DO SCRIPT DE CORREÇÃO
+
+>Scripts de correção:
+{type: uploaded file
+fileName: 1vtapache_1.txt
+fullContent:
+```bash
+#!/bin/bash
+
+# Script para mitigar a vulnerabilidade CVE-2012-0053 no Apache HTTP Server (httpOnly Cookie Information Disclosure).
+# Este script assume um sistema baseado em Debian/Ubuntu.
+
+# 1. Verificar a versão do Apache
+apache_version=$(apachectl -v 2>&1 | grep "Server version:" | awk '{print $3}' | cut -d '/' -f2)
+
+# 2. Comparar a versão instalada com a versão corrigida (2.2.22)
+if dpkg --compare-versions "$apache_version" lt "2.2.22"; then
+  echo "Versão vulnerável do Apache detectada: $apache_version. Iniciando atualização..."
+
+  # 3. Atualizar o índice de pacotes
+  apt-get update
+
+  # 4. Atualizar o Apache para a versão mais recente disponível
+  apt-get install --only-upgrade apache2 -y
+
+  # 5. Verificar se a atualização foi bem-sucedida
+  new_apache_version=$(apachectl -v 2>&1 | grep "Server version:" | awk '{print $3}' | cut -d '/' -f2)
+
+  if dpkg --compare-versions "$new_apache_version" ge "2.2.22"; then
+    echo "Apache atualizado com sucesso para a versão $new_apache_version."
+
+    # 6. Reiniciar o serviço Apache para aplicar as alterações
+    systemctl restart apache2
+
+    echo "Serviço Apache reiniciado."
+  else
+    echo "Falha ao atualizar o Apache. A versão permanece $new_apache_version."
+    echo "Verifique os logs e tente a atualização manualmente."
+    exit 1
+  fi
+
+else
+  echo "Apache já está atualizado (versão $apache_version ou superior). Nenhuma ação necessária."
+fi
+
+exit 0
+```}
+{type: uploaded file
+fileName: 1vtapache_2.txt
+fullContent:
+#!/bin/bash
+
+# Script para mitigar a vulnerabilidade CVE-2012-0053 no Apache HTTP Server.
+# Atualiza o Apache HTTP Server para uma versão >= 2.2.22.
+
+# 1. Detecta o sistema operacional.
+if command -v apt-get &> /dev/null; then
+  OS="debian"
+elif command -v yum &> /dev/null; then
+  OS="redhat"
+else
+  echo "Sistema operacional não suportado. Abortando."
+  exit 1
+fi
+
+# 2. Atualiza o gerenciador de pacotes e o Apache.
+echo "Atualizando o sistema e o Apache HTTP Server..."
+
+if [[ "$OS" == "debian" ]]; then
+  apt-get update
+  apt-get -y upgrade apache2
+elif [[ "$OS" == "redhat" ]]; then
+  yum update -y httpd
+fi
+
+# 3. Verifica a versão do Apache após a atualização.
+APACHE_VERSION=$(apachectl -v 2>&1 | grep "Server version:" | awk '{print $3}')
+
+echo "Versão do Apache após a atualização: $APACHE_VERSION"
+
+# 4. Reinicia o Apache para aplicar as atualizações.
+echo "Reiniciando o Apache HTTP Server..."
+if [[ "$OS" == "debian" ]]; then
+  systemctl restart apache2
+elif [[ "$OS" == "redhat" ]]; then
+  systemctl restart httpd
+fi
+
+echo "Atualização e reinicialização do Apache HTTP Server concluídas."
+
+exit 0
+}
+{type: uploaded file
+fileName: 1vtapache_3.txt
+fullContent:
+#!/bin/bash
+
+# Script para corrigir a vulnerabilidade CVE-2012-0053 no Apache HTTP Server
+
+# Verificar se o Apache está instalado
+if ! command -v apache2 &> /dev/null && ! command -v httpd &> /dev/null; then
+  echo "Apache HTTP Server não encontrado. Verifique se está instalado."
+  exit 1
+fi
+
+# Determinar o gerenciador de pacotes
+if command -v apt-get &> /dev/null; then
+  package_manager="apt-get"
+elif command -v yum &> /dev/null; then
+  package_manager="yum"
+else
+  echo "Gerenciador de pacotes não suportado. Use apt-get ou yum."
+  exit 1
+fi
+
+# Atualizar a lista de pacotes e atualizar o Apache
+if [ "$package_manager" == "apt-get" ]; then
+  apt-get update
+  apt-get upgrade apache2 -y
+elif [ "$package_manager" == "yum" ]; then
+  yum update httpd -y
+fi
+
+# Verificar a versão do Apache após a atualização
+apache_version=$(apache2 -v 2>&1 | grep "Server version:" | awk '{print $3}' | cut -d '/' -f2)
+if [ -z "$apache_version" ]; then
+  apache_version=$(httpd -v 2>&1 | grep "Server version:" | awk '{print $3}' | cut -d '/' -f2)
+fi
+
+
+# Comparar a versão atual com a versão corrigida (2.2.22)
+if [[ $(printf '%s\n' "$apache_version" "2.2.22" | sort -V | head -n1) == "2.2.22" ]]; then
+  echo "Apache HTTP Server foi atualizado para a versão 2.2.22 ou superior."
+else
+  echo "A atualização do Apache HTTP Server pode ter falhado. Verifique a versão."
+fi
+
+# Reiniciar o Apache para aplicar as alterações
+if command -v systemctl &> /dev/null; then
+  systemctl restart apache2
+elif command -v service &> /dev/null; then
+  service apache2 restart
+else
+  echo "Não foi possível reiniciar o Apache. Reinicie manualmente."
+fi
+
+echo "Script concluído."
+exit 0
+}
+{type: uploaded file
+fileName: 1vtapache_4.txt
+fullContent:
+```bash
+#!/bin/bash
+
+# Script para mitigar a vulnerabilidade CVE-2012-0053 no Apache HTTP Server.
+# Este script é projetado para sistemas baseados em Debian/Ubuntu.
+
+# 1. Verificar se o script está sendo executado como root.
+if [[ $EUID -ne 0 ]]; then
+  echo "Este script deve ser executado como root."
+  exit 1
+fi
+
+# 2. Verificar se o Apache está instalado.
+if ! command -v apache2 &> /dev/null; then
+  echo "Apache HTTP Server não encontrado. Instalando..."
+  apt-get update
+  apt-get install -y apache2
+fi
+
+# 3. Verificar a versão do Apache.
+apache_version=$($(apache2 -v 2>&1) | grep "Server version:" | awk '{print $3}' | cut -d '/' -f2 | cut -d '.' -f1,2)
+
+# 4. Atualizar o Apache se a versão for vulnerável (2.2.0 a 2.2.21).
+if [[ $(echo "$apache_version < 2.2" | bc) -eq 1 ]] || [[ $(echo "$apache_version == 2.2" | bc) -eq 1 ]]; then
+  echo "Versão vulnerável do Apache detectada: $apache_version. Atualizando..."
+  apt-get update
+  apt-get upgrade -y apache2
+  apache_version=$($(apache2 -v 2>&1) | grep "Server version:" | awk '{print $3}' | cut -d '/' -f2 | cut -d '.' -f1,2)
+
+  # Verificar se a atualização foi bem-sucedida.
+  if [[ $(echo "$apache_version >= 2.2" | bc) -eq 1 ]]; then
+        echo "Apache atualizado para a versão: $apache_version"
+        systemctl restart apache2
+        echo "Apache reiniciado."
+  else
+        echo "Falha ao atualizar o Apache."
+        exit 1
+  fi
+
+else
+  echo "Versão do Apache ($apache_version) não é vulnerável ou já está atualizada."
+fi
+
+echo "Verificação concluída."
+exit 0
+```}
+{type: uploaded file
+fileName: 1vtapache_5.txt
+fullContent:
+#!/bin/bash
+
+# Script para corrigir a vulnerabilidade CVE-2012-0053 no Apache HTTP Server
+
+# Verificar se o Apache está instalado
+if ! command -v apache2 &> /dev/null; then
+  echo "Apache HTTP Server não está instalado. Nada a fazer."
+  exit 0
+fi
+
+# Verificar a versão do Apache
+apache_version=$ (apache2 -v 2>&1 | grep "Server version:" | awk '{print $3}' | cut -d '/' -f1)
+
+# Função para comparar versões (adaptada para lidar com versões como 2.2.8)
+version_gt() {
+  test "$(printf '%s\n' "$1" "$2" | sort -V | head -n 1)" != "$1"
+}
+
+# Verificar se a versão é vulnerável (inferior a 2.2.22)
+if version_gt "2.2.22" "$apache_version"; then
+  echo "A versão do Apache HTTP Server ($apache_version) é vulnerável (CVE-2012-0053)."
+
+  # Atualizar o sistema e o Apache
+  echo "Atualizando o sistema e o Apache HTTP Server..."
+  apt-get update
+  apt-get upgrade -y apache2
+
+  # Verificar a nova versão após a atualização
+  new_apache_version=$ (apache2 -v 2>&1 | grep "Server version:" | awk '{print $3}' | cut -d '/' -f1)
+
+  # Verificar se a atualização foi bem-sucedida
+  if version_gt "2.2.22" "$new_apache_version"; then
+    echo "Apache HTTP Server atualizado para a versão $new_apache_version."
+    echo "Vulnerabilidade CVE-2012-0053 corrigida."
+  else
+    echo "A atualização do Apache HTTP Server falhou. A vulnerabilidade pode não ter sido corrigida."
+    exit 1
+  fi
+
+  # Reiniciar o Apache para aplicar as alterações
+  echo "Reiniciando o Apache HTTP Server..."
+  systemctl restart apache2
+
+  echo "Script de correção concluído."
+else
+  echo "A versão do Apache HTTP Server ($apache_version) não é vulnerável (CVE-2012-0053)."
+fi
+
+exit 0
+}
+{type: uploaded file
+fileName: 1vtapache_6.txt
+fullContent:
+#!/bin/bash
+
+# Script para mitigar a vulnerabilidade CVE-2012-0053 no Apache HTTP Server.
+# Atualiza o Apache HTTP Server para uma versão >= 2.2.22.
+
+# Verifica se o sistema é baseado em Debian/Ubuntu.
+if command -v apt-get &> /dev/null; then
+    # Atualiza o índice de pacotes.
+    apt-get update
+
+    # Atualiza o Apache HTTP Server.
+    apt-get install --only-upgrade apache2 -y
+
+    # Reinicia o Apache HTTP Server para aplicar as atualizações.
+    systemctl restart apache2
+
+    echo "Apache HTTP Server atualizado e reiniciado. CVE-2012-0053 mitigado."
+
+# Verifica se o sistema é baseado em CentOS/RHEL/Fedora.
+elif command -v yum &> /dev/null; then
+    # Atualiza o Apache HTTP Server.
+    yum update httpd -y
+
+    # Reinicia o Apache HTTP Server para aplicar as atualizações.
+    systemctl restart httpd
+
+    echo "Apache HTTP Server atualizado e reiniciado. CVE-2012-0053 mitigado."
+
+# Verifica se o sistema é baseado em SUSE Linux Enterprise Server/openSUSE
+elif command -v zypper &> /dev/null; then
+    # Atualiza o índice de pacotes
+    zypper refresh
+
+    # Atualiza o Apache HTTP Server.
+    zypper update apache2 -y
+
+    # Reinicia o Apache HTTP Server para aplicar as atualizações.
+    systemctl restart apache2
+
+    echo "Apache HTTP Server atualizado e reiniciado. CVE-2012-0053 mitigado."
+
+else
+    echo "Sistema operacional não suportado. Por favor, atualize o Apache HTTP Server manualmente."
+    exit 1
+fi
+
+exit 0
+}
+{type: uploaded file
+fileName: 1vtapache_7.txt
+fullContent:
+#!/bin/bash
+
+# Script para mitigar a vulnerabilidade CVE-2012-0053 no Apache HTTP Server
+
+# 1. Verificar a versão do Apache instalada
+apache_version=$(apachectl -v 2>&1 | grep "Server version:" | awk '{print $3}' | cut -d '/' -f 2)
+
+# 2. Verificar se a versão é vulnerável (2.2.0 até 2.2.21)
+if [[ $(echo "$apache_version < 2.2.0" | bc) -eq 1 ]]; then
+  echo "Apache HTTP Server não vulnerável (versão $apache_version)."
+  exit 0
+elif [[ $(echo "$apache_version > 2.2.21" | bc) -eq 1 ]]; then
+  echo "Apache HTTP Server não vulnerável (versão $apache_version)."
+  exit 0
+fi
+
+# 3. Atualizar o sistema e o Apache (abordagem mais segura)
+echo "Atualizando o sistema e o Apache HTTP Server..."
+if command -v apt-get &> /dev/null; then
+  apt-get update
+  apt-get upgrade apache2 -y
+elif command -v yum &> /dev/null; then
+  yum update apache2 -y
+elif command -v dnf &> /dev/null; then
+  dnf update apache2 -y
+else
+  echo "Gerenciador de pacotes não suportado.  Atualize o Apache manualmente."
+  exit 1
+fi
+
+# 4. Verificar a versão atualizada do Apache
+updated_apache_version=$(apachectl -v 2>&1 | grep "Server version:" | awk '{print $3}' | cut -d '/' -f 2)
+
+# 5. Verificar se a atualização foi bem-sucedida
+if [[ $(echo "$updated_apache_version < 2.2.22" | bc) -eq 1 ]]; then
+  echo "Falha na atualização do Apache HTTP Server. A vulnerabilidade pode persistir."
+  exit 1
+else
+  echo "Apache HTTP Server atualizado com sucesso para a versão $updated_apache_version."
+fi
+
+# 6. Reiniciar o Apache para aplicar as alterações
+echo "Reiniciando o Apache HTTP Server..."
+if command -v systemctl &> /dev/null; then
+  systemctl restart apache2
+elif command -v service &> /dev/null; then
+  service apache2 restart
+else
+  echo "Não foi possível reiniciar o Apache. Reinicie manualmente."
+  exit 1
+fi
+
+echo "Processo de correção concluído."
+exit 0
+}
+{type: uploaded file
+fileName: 1vtapache_8.txt
+fullContent:
+```bash
+#!/bin/bash
+
+# Script para mitigar a vulnerabilidade CVE-2012-0053 no Apache HTTP Server.
+# Este script atualiza o Apache HTTP Server para uma versão segura (2.2.22 ou superior).
+
+# Verifica se o sistema é baseado em Debian/Ubuntu
+if command -v apt-get &> /dev/null; then
+  # Atualiza a lista de pacotes
+  apt-get update
+
+  # Atualiza o Apache HTTP Server
+  apt-get install --only-upgrade apache2 -y
+
+  # Reinicia o Apache HTTP Server para aplicar as atualizações
+  systemctl restart apache2
+
+  echo "Apache HTTP Server atualizado e reiniciado para mitigar CVE-2012-0053."
+
+# Verifica se o sistema é baseado em CentOS/RHEL/Fedora
+elif command -v yum &> /dev/null; then
+  # Atualiza o Apache HTTP Server
+  yum update httpd -y
+
+  # Reinicia o Apache HTTP Server para aplicar as atualizações
+  systemctl restart httpd
+
+  echo "Apache HTTP Server atualizado e reiniciado para mitigar CVE-2012-0053."
+
+# Verifica se o sistema é baseado em Arch Linux
+elif command -v pacman &> /dev/null; then
+  # Atualiza o sistema
+  pacman -Syu --noconfirm
+
+  # Atualiza o Apache HTTP Server
+  pacman -S apache --noconfirm
+
+  # Reinicia o Apache HTTP Server para aplicar as atualizações
+  systemctl restart httpd
+
+  echo "Apache HTTP Server atualizado e reiniciado para mitigar CVE-2012-0053."
+
+else
+  echo "Sistema operacional não suportado. Por favor, atualize o Apache HTTP Server manualmente para a versão 2.2.22 ou superior."
+  exit 1
+fi
+
+exit 0
+```}
+{type: uploaded file
+fileName: 1vtapache_9.txt
+fullContent:
+#!/bin/bash
+
+# Script para mitigar a vulnerabilidade CVE-2012-0053 no Apache HTTP Server
+
+# 1. Verificar se o Apache está instalado e em execução
+if ! command -v apache2 &> /dev/null || ! systemctl is-active --quiet apache2; then
+  echo "Apache HTTP Server não está instalado ou não está em execução. Saindo."
+  exit 0
+fi
+
+# 2. Detectar a versão do Apache
+apache_version=$(apache2 -v 2>&1 | grep "Server version:" | awk '{print $3}' | cut -d '/' -f2)
+
+# 3. Verificar se a versão é vulnerável (2.2.0 até 2.2.21)
+if [[ $(printf "%s\n" "$apache_version" "2.2.0" | sort -V | head -n1) == "2.2.0" ]] && [[ $(printf "%s\n" "$apache_version" "2.2.21" | sort -V | tail -n1) == "2.2.21" ]]; then
+  echo "Versão vulnerável do Apache HTTP Server detectada: $apache_version"
+
+  # 4. Atualizar o sistema e o Apache
+  echo "Atualizando o sistema..."
+  apt-get update -y
+  apt-get upgrade -y
+
+  echo "Atualizando o Apache HTTP Server..."
+  apt-get install apache2 -y
+
+  # 5. Verificar a nova versão
+  new_apache_version=$(apache2 -v 2>&1 | grep "Server version:" | awk '{print $3}' | cut -d '/' -f2)
+
+  # 6. Verificar se a atualização foi bem-sucedida (versão >= 2.2.22)
+  if [[ $(printf "%s\n" "$new_apache_version" "2.2.22" | sort -V | head -n1) == "2.2.22" ]]; then
+    echo "Apache HTTP Server atualizado com sucesso para a versão $new_apache_version."
+
+    # 7. Reiniciar o Apache para aplicar as alterações
+    echo "Reiniciando o Apache HTTP Server..."
+    systemctl restart apache2
+
+    echo "Correção da vulnerabilidade CVE-2012-0053 concluída."
+  else
+    echo "Falha ao atualizar o Apache HTTP Server. A versão permanece $new_apache_version. Verifique os logs para mais detalhes."
+    exit 1
+  fi
+else
+  echo "Versão do Apache HTTP Server ($apache_version) não é vulnerável."
+fi
+
+exit 0
+}
+{type: uploaded file
+fileName: 1vtapache_10.txt
+fullContent:
+#!/bin/bash
+
+# Script para corrigir a vulnerabilidade CVE-2012-0053 no Apache HTTP Server.
+# Este script atualiza o Apache HTTP Server para a versão 2.2.22 ou posterior.
+
+# Verificar se o sistema é Debian/Ubuntu
+if command -v apt-get &> /dev/null; then
+  # Atualizar o índice de pacotes
+  apt-get update
+
+  # Atualizar o Apache HTTP Server
+  apt-get upgrade apache2 -y
+
+  # Verificar a versão do Apache após a atualização
+  apache2ctl -v
+
+  # Reiniciar o Apache para aplicar as atualizações
+  systemctl restart apache2
+
+  echo "Apache HTTP Server atualizado para a versão mais recente. Reiniciado."
+
+# Verificar se o sistema é Red Hat/CentOS/Fedora
+elif command -v yum &> /dev/null; then
+  # Atualizar o Apache HTTP Server
+  yum update httpd -y
+
+  # Verificar a versão do Apache após a atualização
+  httpd -v
+
+  # Reiniciar o Apache para aplicar as atualizações
+  systemctl restart httpd
+
+  echo "Apache HTTP Server atualizado para a versão mais recente. Reiniciado."
+
+# Verificar se o sistema é SUSE Linux
+elif command -v zypper &> /dev/null; then
+  # Atualizar o Apache HTTP Server
+  zypper update apache2 -y
+
+  # Verificar a versão do Apache após a atualização
+  apache2 -v
+
+  # Reiniciar o Apache para aplicar as atualizações
+  systemctl restart apache2
+
+  echo "Apache HTTP Server atualizado para a versão mais recente. Reiniciado."
+
+else
+  echo "Sistema operacional não suportado. A atualização do Apache HTTP Server deve ser feita manualmente."
+  exit 1
+fi
+
+exit 0
+}

@@ -1,0 +1,150 @@
+```bash
+#!/bin/bash
+
+# Vulnerability 1: Proxmox VE EOL
+# This vulnerability requires a full system upgrade, which is a complex process
+# and should be performed with caution, including backups.  This script will
+# attempt the upgrade, but manual intervention may be required.
+if command -v apt-get &> /dev/null
+then
+  echo "Attempting to upgrade Proxmox VE. This may take a while."
+  apt-get update
+  apt-get dist-upgrade -y
+  apt-get autoremove -y
+  echo "Proxmox VE upgrade completed.  Reboot the system to apply changes."
+else
+  echo "apt-get not found.  Unable to upgrade Proxmox VE automatically."
+  echo "Please upgrade Proxmox VE manually."
+fi
+
+# Vulnerabilities 2-6: jQuery < 1.9.0 XSS Vulnerability
+# Paths to vulnerable files
+jquery_files=(
+    "/var/www/html/../js/jquery-1.8.3.min.js"
+    "/var/www/html/opscenter/webcommon/framework/../js/jquery-1.8.3.min.js"
+    "/var/www/html/framesets/../js/jquery-1.8.3.min.js"
+    "/var/www/html/frameset/../js/jquery-1.8.3.min.js"
+    "/var/www/html/console/framework/../js/jquery-1.8.3.min.js"
+    "/js/jquery-1.8.3.min.js" #adding for testing
+    "/opscenter/webcommon/framework/js/jquery-1.8.3.min.js" #adding for testing
+    "/framesets/js/jquery-1.8.3.min.js" #adding for testing
+    "/frameset/js/jquery-1.8.3.min.js" #adding for testing
+    "/console/framework/js/jquery-1.8.3.min.js" #adding for testing
+
+)
+
+# Function to download jQuery 1.9.0
+download_jquery() {
+    echo "Downloading jQuery 1.9.0..."
+    curl -o /tmp/jquery-1.9.0.min.js https://code.jquery.com/jquery-1.9.0.min.js
+    if [ $? -ne 0 ]; then
+        echo "Error downloading jQuery 1.9.0."
+        return 1
+    fi
+    return 0
+}
+
+# Check if jQuery 1.9.0 is already downloaded
+if [ ! -f /tmp/jquery-1.9.0.min.js ]; then
+    download_jquery
+    if [ $? -ne 0 ]; then
+        exit 1
+    fi
+fi
+
+# Replace vulnerable files
+for file in "${jquery_files[@]}"; do
+    if [ -f "$file" ]; then
+        echo "Replacing $file with jQuery 1.9.0..."
+        cp /tmp/jquery-1.9.0.min.js "$file"
+        if [ $? -ne 0 ]; then
+            echo "Error replacing $file."
+        else
+            echo "Successfully replaced $file."
+        fi
+    else
+        echo "File not found: $file"
+    fi
+done
+
+# Vulnerabilities 7, 8, 9, 13, 14, 15, 16, 19, 21, 22: SSH Weak Algorithms
+# Modify SSH configuration
+ssh_config="/etc/ssh/sshd_config"
+
+# Backup the original sshd_config file
+if [ -f "$ssh_config" ]; then
+    cp "$ssh_config" "$ssh_config.bak"
+    echo "Backed up $ssh_config to $ssh_config.bak"
+fi
+
+# Disable weak KEX algorithms
+sed -i '/KexAlgorithms/s/diffie-hellman-group1-sha1//g' "$ssh_config"
+
+# Disable weak MAC algorithms
+sed -i '/MACs/s/umac-64-etm@openssh.com//g' "$ssh_config"
+sed -i '/MACs/s/umac-64@openssh.com//g' "$ssh_config"
+sed -i '/MACs/s/hmac-md5//g' "$ssh_config"
+sed -i '/MACs/s/hmac-sha1-96//g' "$ssh_config"
+
+# Disable weak Ciphers
+sed -i '/Ciphers/s/3des-cbc//g' "$ssh_config"
+sed -i '/Ciphers/s/aes128-cbc//g' "$ssh_config"
+sed -i '/Ciphers/s/aes256-cbc//g' "$ssh_config"
+sed -i '/Ciphers/s/twofish-cbc//g' "$ssh_config"
+sed -i '/Ciphers/s/twofish128-cbc//g' "$ssh_config"
+sed -i '/Ciphers/s/twofish256-cbc//g' "$ssh_config"
+
+# Disable weak HostKeyAlgorithms
+sed -i '/HostKeyAlgorithms/s/ssh-dss//g' "$ssh_config"
+
+# Restart SSH service
+if command -v systemctl &> /dev/null
+then
+    systemctl restart sshd
+    echo "SSH service restarted."
+else
+    service ssh restart
+    echo "SSH service restarted."
+fi
+
+# Vulnerability 10: DCE/RPC and MSRPC Services Enumeration Reporting
+# This vulnerability requires firewall configuration.  Since we don't know the desired policy,
+# we will only print instructions to the console.
+echo "For DCE/RPC and MSRPC Services Enumeration Reporting vulnerability:"
+echo "Filter incoming traffic to port 135 using a firewall."
+
+# Vulnerability 11: Telnet Unencrypted Cleartext Login
+# Disable Telnet service
+if command -v systemctl &> /dev/null
+then
+    systemctl stop telnet.socket telnet.service
+    systemctl disable telnet.socket telnet.service
+    echo "Telnet service disabled."
+else
+    service telnet stop
+    update-rc.d telnet disable
+    echo "Telnet service disabled."
+fi
+
+# Vulnerability 12: SSL/TLS: Deprecated TLSv1.0 and TLSv1.1 Protocol Detection
+# Disable TLS 1.0 and 1.1. This requires modifying the configuration of the specific service using TLS.
+# This script cannot automatically determine the service and its configuration, so the user must do so manually.
+echo "For SSL/TLS Deprecated Protocol Detection vulnerability:"
+echo "Disable TLSv1.0 and TLSv1.1 in the service's configuration (e.g., Apache, Nginx)."
+
+# Vulnerabilities 17, 18, 20, 23, 24, 25: TCP Timestamps Information Disclosure
+# Disable TCP timestamps
+echo "Disabling TCP timestamps..."
+echo "net.ipv4.tcp_timestamps = 0" >> /etc/sysctl.conf
+sysctl -p
+echo "TCP timestamps disabled.  Apply the settings at runtime by running: sysctl -p"
+
+# Vulnerabilities 26, 27, 28, 29, 30, 31, 32: ICMP Timestamp Reply Information Disclosure
+# Disable ICMP timestamp replies
+echo "Disabling ICMP timestamp replies..."
+echo "net.ipv4.icmp_echo_ignore_all = 1" >> /etc/sysctl.conf
+sysctl -p
+echo "ICMP timestamp replies disabled.  Apply the settings at runtime by running: sysctl -p"
+
+echo "Patching complete.  Some vulnerabilities required manual intervention.  Please review the output."
+```

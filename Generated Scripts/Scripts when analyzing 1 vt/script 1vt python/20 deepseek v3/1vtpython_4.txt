@@ -1,0 +1,7 @@
+#!/bin/bash
+python_version=$(python3 --version 2>&1 | awk '{print $2}')
+required_version="3.10.15"
+if [[ "$(printf '%s\n' "$required_version" "$python_version" | sort -V | head -n1)" != "$required_version" ]]; then
+    sudo apt-get update
+    sudo apt-get install -y python3.10
+fi

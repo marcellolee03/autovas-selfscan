@@ -1,0 +1,20 @@
+#!/bin/bash
+systemctl stop inetd.socket 2>/dev/null || true
+systemctl disable inetd.socket 2>/dev/null || true
+systemctl stop rexec.socket 2>/dev/null || true
+systemctl disable rexec.socket 2>/dev/null || true
+systemctl stop rexecd.socket 2>/dev/null || true
+systemctl disable rexecd.socket 2>/dev/null || true
+find /etc/xinetd.d -type f -name '*rexec*' -exec mv {} {}.disabled \; 2>/dev/null
+sed -i '/^[[:space:]]*service[[:space:]]*rexec[[:space:]]*{,*/{:x;N;/}[[:space:]]*$/!bx}; s/^/#/I' /etc/xinetd.conf 2>/dev/null
+if [ -f /etc/inetd.conf ]; then
+   sed -i -E '/^[# ]*rexec[[:space:]]/Id' /etc/inetd.conf
+   if pgrep -x inetd >/dev/null; then
+      pkill -HUP inetd 2>/dev/null
+   fi
+fi
+if systemctl is-active xinetd &>/dev/null; then
+   systemctl restart xinetd 2>/dev/null
+elif pgrep -x xinetd &>/dev/null; then
+   pkill -HUP xinetd 2>/dev/null || pkill -TERM xinetd 2>/dev/null
+fi

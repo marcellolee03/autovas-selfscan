@@ -1,0 +1,50 @@
+```powershell
+# Set Execution Policy to allow script to run
+Set-ExecutionPolicy -ExecutionPolicy Bypass -Scope Process -Force
+
+# Run Python installer
+Start-Process -FilePath "\\Gremio5510\Departamento TI\Utils\python-3.10.16-amd64.exe" -ArgumentList "/quiet InstallaAllUsers=1 PrependPath=1 Include_test=0" -Wait
+
+# Disable TLS 1.0 and 1.1
+$tls10 = "HKLM:\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Protocols\TLS 1.0\Server"
+$tls11 = "HKLM:\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Protocols\TLS 1.1\Server"
+foreach ($key in @($tls10, $tls11)) {
+    if (-not (Test-Path $key)) { New-Item -Path $key -Force | Out-Null }
+    New-ItemProperty -Path $key -Name "Enabled" -Value 0 -PropertyType DWORD -Force | Out-Null
+    New-ItemProperty -Path $key -Name "DisabledByDefault" -Value 1 -PropertyType DWORD -Force | Out-Null
+}
+
+# Update SSH configuration
+$sshdConfig = "C:\ProgramData\ssh\sshd_config"
+if (Test-Path $sshdConfig) {
+    $newConfig = Get-Content $sshdConfig | ForEach-Object {
+        if ($_ -match "^MACs") {
+            "MACs hmac-sha2-512-etm@openssh.com,hmac-sha2-256-etm@openssh.com,hmac-sha2-512,hmac-sha2-256"
+        } else { $_ }
+    }
+    $newConfig | Set-Content $sshdConfig -Force
+    if (Get-Service -Name "sshd" -ErrorAction SilentlyContinue) {
+        if ((Get-Service -Name "sshd").Status -eq 'Running') {
+            Restart-Service -Name "sshd" -Force
+        }
+    }
+}
+
+# Configure firewall rule
+$firewallName = "Block Inbound ICMP Timestamp"
+$firewallRule = Get-NetFirewallRule -DisplayName $firewallName -ErrorAction SilentlyContinue
+if (-not $firewallRule) {
+    New-NetFirewallRule -DisplayName $firewallName -Direction Inbound -IcmpType 13 -Action Block -Protocol "ICMPv4" | Out-Null
+}
+
+# Verify Python version
+$pythonPath = "C:\Program Files\Python310\python.exe"
+if (Test-Path $pythonPath) {
+    $versionOutput = & $pythonPath --version 2>&1
+    if ($versionOutput -match "3\.10\.16") {
+        Write-Host "Successfully upgraded Python to 3.10.16"
+    } else {
+        Write-Host "Python upgrade verification failed"
+    }
+}
+```

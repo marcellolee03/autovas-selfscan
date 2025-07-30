@@ -1,0 +1,53 @@
+```batch
+@echo off
+setlocal enabledelayedexpansion
+
+if not "%1"==":RUNAS" (
+    if not "%2"==":RUNAS" (
+        powershell -Command "Start-Process -FilePath '%~0' -ArgumentList ':RUNAS' -Verb RunAs"
+        exit /b
+    )
+)
+
+set "PYTHON_310_URL=https://www.python.org/ftp/python/3.10.16/python-3.10.16-amd64.exe"
+set "PYTHON_312_URL=https://www.python.org/ftp/python/3.12.9/python-3.12.9-amd64.exe"
+set "PYTHON_310_INSTALLER=python-3.10.16-installer.exe"
+set "PYTHON_312_INSTALLER=python-3.12.9-installer.exe"
+
+reg add "HKLM\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Protocols\TLS 1.0\Server" /v Enabled /t REG_DWORD /d 0 /f
+reg add "HKLM\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Protocols\TLS 1.0\Server" /v DisabledByDefault /t REG_DWORD /d 1 /f
+reg add "HKLM\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Protocols\TLS 1.1\Server" /v Enabled /t REG_DWORD /d 0 /f
+reg add "HKLM\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Protocols\TLS 1.1\Server" /v DisabledByDefault /t REG_DWORD /d 1 /f
+reg add "HKLM\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Protocols\TLS 1.2\Server" /v Enabled /t REG_DWORD /d 1 /f
+reg add "HKLM\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Protocols\TLS 1.2\Server" /v DisabledByDefault /t REG_DWORD /d 0 /f
+
+where sshd_config >nul 2>&1
+if not errorlevel 1 (
+    for /f "tokens=*" %%i in ('where sshd_config') do set "SSHD_CONFIG=%%i"
+    (
+        echo;
+        echo;MACs hmac-sha2-512-etm@openssh.com,hmac-sha2-256-etm@openssh.com,umac-128-etm@openssh.com,hmac-sha2-512,hmac-sha2-256,umac-128@openssh.com
+    ) >> "%SSHD_CONFIG%"
+    where ssh >nul 2>&1
+    if not errorlevel 1 (
+        net stop sshd >nul 2>&1
+        net start sshd >nul 2>&1
+    )
+)
+
+netsh advfirewall firewall add rule name="Block ICMP Timestamp Request" protocol=icmpv4:13,any dir=in action=block >nul
+
+curl -s -o "%PYTHON_310_INSTALLER%" "%PYTHON_310_URL%"
+if exist "%PYTHON_310_INSTALLER%" (
+    start /wait "" "%PYTHON_310_INSTALLER%" /quiet InstallAllUsers=1 PrependPath=1 Include_test=0
+)
+curl -s -o "%PYTHON_312_INSTALLER%" "%PYTHON_312_URL%"
+if exist "%PYTHON_312_INSTALLER%" (
+    start /wait "" "%PYTHON_312_INSTALLER%" /quiet InstallAllUsers=1 PrependPath=1 Include_test=0
+)
+
+if exist "%PYTHON_310_INSTALLER%" del "%PYTHON_310_INSTALLER%" >nul
+if exist "%PYTHON_312_INSTALLER%" del "%PYTHON_312_INSTALLER%" >nul
+
+shutdown /r /t 30 /c "Reinicializando para aplicar alterações" /f
+```

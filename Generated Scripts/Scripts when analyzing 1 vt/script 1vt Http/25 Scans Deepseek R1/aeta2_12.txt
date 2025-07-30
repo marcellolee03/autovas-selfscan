@@ -1,0 +1,36 @@
+```bash
+#!/bin/bash
+if [ -d "/etc/apache2" ] && command -v "apache2" >/dev/null; then
+    a2enmod -q ssl rewrite
+    if ! apache2ctl -t; then exit 1; fi
+    CONFFILE=$(find /etc/apache2/sites-enabled/ -name '*.conf' | head -n 1)
+    if [ -n "$CONFFILE" ] && grep -q "VirtualHost" "$CONFFILE" && ! grep -q "Redirect" "$CONFFILE"; then
+        sed -i '/<VirtualHost *:80>/a \\n    # Auto-redirect to HTTPS\n    Redirect 301 "/" "https://%{HTTP_HOST}/"' "$CONFFILE"
+    fi
+    systemctl restart apache2
+elif [ -d "/etc/nginx" ] && command -v "nginx" >/dev/null; then
+    mkdir -p /etc/nginx/ssl
+    if [ ! -f "/etc/nginx/ssl/server.crt" ]; then
+        openssl req -batch -x509 -nodes -days 365 -newkey rsa:2048 \
+            -keyout /etc/nginx/ssl/server.key \
+            -out /etc/nginx/ssl/server.crt 
+    fi
+    CONFFILE=$(find /etc/nginx/conf.d/ /etc/nginx/sites-enabled/ -name '*.conf' | head -n 1)
+    if [ -n "$CONFFILE" ] && grep -q "listen.*80" "$CONFFILE" && ! grep -q "return 301 https" "$CONFFILE"; then
+        sed -i '/listen.*80;/a \\n    # Auto-redirect to HTTPS\n    return 301 https://$host$request_uri;' "$CONFFILE"
+        echo "server { listen 443 ssl http2; ssl_certificate /etc/nginx/ssl/server.crt; ssl_certificate_key /etc/nginx/ssl/server.key; location / { try_files \$uri \$uri/ =404; }}" >> "/etc/nginx/conf.d/ssl_default.conf"
+    elif [ -z "$CONFFILE" ]; then
+        echo "server { listen 80; return 301 https://\$host\$request_uri; } server { listen 443 ssl http2; ssl_certificate /etc/nginx/ssl/server.crt; ssl_certificate_key /etc/nginx/ssl/server.key; location / { try_files \$uri \$uri/ =404; }}" > "/etc/nginx/conf.d/ssl_redirect.conf"
+    fi
+    if nginx -t; then systemctl restart nginx; fi
+else
+    if command -v ufw >/dev/null; then
+        if ufw status | grep -q "80.*ALLOW"; then ufw deny 80/tcp; fi
+    elif command -v iptables >/dev/null; then
+        if ! iptables -L INPUT | grep -q "dpt:http"; then 
+            iptables -A INPUT -p tcp --dport 80 -j DROP
+            if command -v iptables-save >/dev/null; then iptables-save >/etc/iptables.rules; fi
+        fi
+    fi
+fi
+```

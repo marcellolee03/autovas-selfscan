@@ -1,0 +1,42 @@
+```bash
+#!/bin/bash
+
+# Correções para vulnerabilidades de serviços desnecessários
+systemctl stop xinetd rsh.socket rlogin.socket rexec.socket distcc vncserver || service xinetd stop
+systemctl disable xinetd rsh.socket rlogin.socket rexec.socket distcc vncserver || update-rc.d -f xinetd remove
+apt-get purge -y rsh-client rsh-redone-client rlogin telnetd distcc tightvncserver xinetd
+
+# Impedir reinicialização de serviços removidos
+rm -f /etc/init.d/distcc /etc/init.d/vncserver /etc/init.d/xinetd
+killall -9 drb_server 2>/dev/null
+
+# Correções para MySQL e PostgreSQL
+mysql -e "ALTER USER 'root'@'localhost' IDENTIFIED BY 'StrongPass123!';" &&
+psql -U postgres -c "ALTER USER postgres WITH PASSWORD 'Secure!5432@Pg';"
+
+# Remoção de backdoors e serviços comprometidos
+rm -rf /usr/lib/ruby/1.8/drb/drb.rb
+pkill -f ingreslock
+rm -f /etc/xinetd.d/rexec /etc/xinetd.d/rlogin /etc/xinetd.d/rsh
+
+# Atualização de pacotes
+apt-get update && apt-get upgrade -y php5 tomcat6 mysql-server postgresql openssl
+
+# Correções de configuração para Apache e outros serviços
+echo "SSLProtocol -all +TLSv1.2" >> /etc/apache2/apache2.conf
+sed -i 's/SSLProtocol.*/SSLProtocol –all +TLSv1.2/' /etc/postgresql-common/ssl.conf
+sed -i 's/CipherSuite.*/CipherSuite HIGH:!aNULL:!MD5:!RC4/' /etc/ssh/sshd_config
+sed -i '/PUT/d; /DELETE/d; /TRACE/d' /etc/apache2/mods-enabled/dav.load
+rm -f /var/www/html/phpinfo.php /var/www/html/mutillidae/phpinfo.php
+
+# Configuração do Firewall
+iptables -A INPUT -p tcp --dport 513 -j DROP
+iptables -A INPUT -p tcp --dport 512 -j DROP
+iptables -A INPUT -p tcp --dport 514 -j DROP
+iptables -A INPUT -p tcp --dport 3632 -j DROP
+iptables -A INPUT -p tcp --dport 1524 -j DROP
+iptables -A INPUT -p tcp --dport 8787 -j DROP
+
+# Reiniciar serviços
+systemctl restart apache2 postgresql ssh mysql || service apache2 restart
+```

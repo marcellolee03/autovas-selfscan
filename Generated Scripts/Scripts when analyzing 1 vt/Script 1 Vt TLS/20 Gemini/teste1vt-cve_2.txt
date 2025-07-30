@@ -1,0 +1,61 @@
+```bash
+#!/bin/bash
+
+# Identifica o serviço PostgreSQL rodando na porta 5432 (assumindo ser PostgreSQL)
+# e desabilita TLSv1.0 e TLSv1.1.
+# Este script é projetado para sistemas Linux com PostgreSQL instalado via pacote.
+# Requer privilégios de root (sudo).
+
+# Define o arquivo de configuração do PostgreSQL
+PG_CONFIG_FILE=$(find /etc/postgresql/ -name postgresql.conf | head -n 1)
+
+# Verifica se o arquivo de configuração foi encontrado
+if [ -z "$PG_CONFIG_FILE" ]; then
+  echo "Arquivo de configuração postgresql.conf não encontrado.  Verifique a instalação do PostgreSQL."
+  exit 1
+fi
+
+# Define as configurações TLS seguras
+TLS_VERSIONS="TLSv1.2,TLSv1.3"
+
+# Cria um backup do arquivo de configuração
+cp "$PG_CONFIG_FILE" "${PG_CONFIG_FILE}.bak.$(date +%Y%m%d%H%M%S)"
+
+# Modifica o arquivo de configuração para desabilitar TLSv1.0 e TLSv1.1
+# Adiciona ou atualiza as linhas ssl_min_protocol e ssl_max_protocol.
+# O '|| true' garante que o script continue mesmo se o comando grep não encontrar correspondências.
+sudo sed -i "s/^#ssl_min_protocol =.*/ssl_min_protocol = TLSv1.2/g" "$PG_CONFIG_FILE" || true
+sudo sed -i "s/^ssl_min_protocol =.*/ssl_min_protocol = TLSv1.2/g" "$PG_CONFIG_FILE" || true
+sudo sed -i "s/^#ssl_max_protocol =.*/ssl_max_protocol = TLSv1.3/g" "$PG_CONFIG_FILE" || true
+sudo sed -i "s/^ssl_max_protocol =.*/ssl_max_protocol = TLSv1.3/g" "$PG_CONFIG_FILE" || true
+
+# Adiciona as configurações se não existirem
+if ! grep -q "^ssl_min_protocol" "$PG_CONFIG_FILE"; then
+  echo "ssl_min_protocol = TLSv1.2" | sudo tee -a "$PG_CONFIG_FILE"
+fi
+
+if ! grep -q "^ssl_max_protocol" "$PG_CONFIG_FILE"; then
+  echo "ssl_max_protocol = TLSv1.3" | sudo tee -a "$PG_CONFIG_FILE"
+fi
+
+# Reinicia o serviço PostgreSQL para aplicar as alterações
+# Encontra o nome do serviço PostgreSQL
+PG_SERVICE=$(systemctl list-unit-files | grep postgresql | awk '{print $1}' | head -n 1)
+
+if [ -z "$PG_SERVICE" ]; then
+  echo "Serviço PostgreSQL não encontrado.  Verifique a instalação do PostgreSQL e ajuste o script conforme necessário."
+  exit 1
+fi
+
+sudo systemctl restart "$PG_SERVICE"
+
+# Verifica se o serviço foi reiniciado com sucesso
+if [ $? -eq 0 ]; then
+  echo "Serviço PostgreSQL reiniciado com sucesso. TLSv1.0 e TLSv1.1 foram desabilitados."
+else
+  echo "Falha ao reiniciar o serviço PostgreSQL. Verifique os logs do sistema."
+  exit 1
+fi
+
+exit 0
+```

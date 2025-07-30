@@ -1,0 +1,370 @@
+```bash
+#!/bin/bash
+
+# Script para corrigir vulnerabilidades detectadas
+
+# Variáveis globais
+OS=$(uname -s)
+
+# Funções auxiliares
+
+# Atualizar e instalar pacotes (Debian/Ubuntu)
+update_packages() {
+    apt-get update && apt-get upgrade -y
+    apt-get install -f -y
+}
+
+# Desabilitar um serviço
+disable_service() {
+    service "$1" stop
+    update-rc.d "$1" disable
+}
+
+# Remover um pacote
+remove_package() {
+    apt-get remove --purge -y "$1"
+}
+
+# Vulnerabilidade 1: TWiki XSS and Command Execution Vulnerabilities
+# Solução: Upgrade to version 4.2.4 or later.
+echo "Atualizando TWiki (se instalado)"
+if [ -x "$(command -v apt-get)" ]; then
+    update_packages
+    # Assumindo que TWiki é gerenciado pelo sistema de pacotes
+    apt-get install twiki -y
+fi
+
+# Vulnerabilidade 2: Distributed Ruby (dRuby/DRb) Multiple RCE Vulnerabilities
+# Solução: Implementar controles de acesso, taint, e SAFE levels.
+echo "Protegendo Distributed Ruby (dRuby/DRb)"
+# Como a vulnerabilidade é no código, não podemos aplicar um patch automático genérico.
+# As sugestões são para implementar no código Ruby.
+# Implementar $SAFE levels >=2 ou 3 e ACLs.
+
+# Vulnerabilidade 3: rlogin Passwordless Login
+# Solução: Disable the rlogin service and use alternatives like SSH instead.
+echo "Desabilitando rlogin"
+if [ -x "$(command -v service)" ]; then
+    disable_service rlogin
+fi
+if [ -x "$(command -v apt-get)" ]; then
+    remove_package rsh-server
+fi
+
+# Vulnerabilidade 4: Operating System (OS) End of Life (EOL) Detection
+# Solução: Update the OS on the remote host to a version which is still supported.
+echo "AVISO: O sistema operacional está obsoleto. Requer atualização manual para uma versão suportada."
+
+# Vulnerabilidade 5: The rexec service is running
+# Solução: Disable the rexec service and use alternatives like SSH instead.
+echo "Desabilitando rexec"
+if [ -x "$(command -v service)" ]; then
+    disable_service rexec
+fi
+if [ -x "$(command -v apt-get)" ]; then
+    remove_package rexecd
+fi
+
+# Vulnerabilidade 6: Possible Backdoor: Ingreslock
+# Solução: A whole cleanup of the infected system is recommended.
+echo "AVISO: Possível backdoor Ingreslock detectado. Requer análise e limpeza manuais do sistema."
+
+# Vulnerabilidade 7: Apache Tomcat AJP RCE Vulnerability (Ghostcat)
+# Solução: Update Apache Tomcat to version 7.0.100, 8.5.51, 9.0.31 or later.
+echo "Atualizando Apache Tomcat (se instalado)"
+# Como Tomcat pode ser instalado de diversas formas, a atualização automática é complexa.
+# Requer intervenção manual para atualizar Tomcat.
+
+# Vulnerabilidade 8: MySQL / MariaDB Default Credentials (MySQL Protocol)
+# Solução: Change the password as soon as possible
+echo "AVISO: Credenciais padrão do MySQL/MariaDB detectadas. Alterar a senha do usuário 'root' imediatamente."
+# A alteração da senha deve ser feita manualmente usando o cliente mysql.
+
+# Vulnerabilidade 9: PHP < 5.6.30, 7.x < 7.0.15, 7.1.x < 7.1.1 Multiple Vulnerabilities (Jan 2017) - Linux
+# Solução: Update to version 5.6.30, 7.0.15, 7.1.1 or later.
+echo "Atualizando PHP"
+if [ -x "$(command -v apt-get)" ]; then
+    update_packages
+    # Devido à complexidade das dependências, pode ser necessário adicionar repositórios específicos para versões mais recentes do PHP.
+    # Exemplo (NÃO EXECUTAR AUTOMATICAMENTE):
+    # add-apt-repository ppa:ondrej/php
+    # apt-get update
+    # apt-get install php7.4 -y
+fi
+
+# Vulnerabilidade 10: PHP < 5.3.13, 5.4.x < 5.4.3 Multiple Vulnerabilities - Active Check
+# Solução: Update to version 5.3.13, 5.4.3 or later
+# (Idem à vulnerabilidade 9)
+echo "Atualizando PHP (CVE-2012-1823)"
+if [ -x "$(command -v apt-get)" ]; then
+    update_packages
+fi
+
+# Vulnerabilidade 11 & 12: vsftpd Compromised Source Packages Backdoor Vulnerability
+# Solução: The repaired package can be downloaded from the referenced vendor homepage.
+echo "Atualizando vsftpd"
+if [ -x "$(command -v apt-get)" ]; then
+    update_packages
+    # O script não consegue verificar a assinatura do pacote automaticamente.
+fi
+
+# Vulnerabilidade 13: DistCC RCE Vulnerability (CVE-2004-2687)
+# Solução: Vendor updates are available.
+echo "Removendo DistCC"
+if [ -x "$(command -v apt-get)" ]; then
+    remove_package distcc
+fi
+
+# Vulnerabilidade 14: PostgreSQL Default Credentials (PostgreSQL Protocol)
+# Solução: Change the password as soon as possible.
+echo "AVISO: Credenciais padrão do PostgreSQL detectadas. Alterar a senha do usuário 'postgres' imediatamente."
+# A alteração da senha deve ser feita manualmente usando o cliente psql.
+
+# Vulnerabilidade 15: VNC Brute Force Login
+# Solução: Change the password to something hard to guess or enable password protection at all.
+echo "AVISO: Senha fraca do VNC detectada. Alterar a senha do VNC imediatamente."
+
+# Vulnerabilidade 16: Test HTTP dangerous methods
+# Solução: Use access restrictions to these dangerous HTTP methods or disable them completely.
+echo "Desabilitando métodos HTTP perigosos (PUT/DELETE)"
+# Requer configuração específica do servidor web (Apache, Nginx).
+# Exemplo para Apache:
+# <LimitExcept GET POST>
+#   Order Deny,Allow
+#   Deny from all
+# </LimitExcept>
+
+# Vulnerabilidade 17 & 18: FTP Brute Force Logins With Default Credentials Reporting
+# Solução: Change the password as soon as possible.
+echo "AVISO: Credenciais padrão do FTP detectadas. Alterar as senhas dos usuários FTP imediatamente."
+
+# Vulnerabilidade 19: The rlogin service is running
+# Solução: Disable the rlogin service and use alternatives like SSH instead.
+echo "Desabilitando rlogin (repetição)"
+if [ -x "$(command -v service)" ]; then
+    disable_service rlogin
+fi
+if [ -x "$(command -v apt-get)" ]; then
+    remove_package rsh-server
+fi
+
+# Vulnerabilidade 20: rsh Unencrypted Cleartext Login
+# Solução: Disable the rsh service and use alternatives like SSH instead.
+echo "Desabilitando rsh"
+if [ -x "$(command -v service)" ]; then
+    disable_service rsh
+fi
+if [ -x "$(command -v apt-get)" ]; then
+    remove_package rsh-server
+fi
+
+# Vulnerabilidade 21: SSL/TLS: OpenSSL CCS Man in the Middle Security Bypass Vulnerability
+# Solução: Updates are available.
+echo "Atualizando OpenSSL"
+if [ -x "$(command -v apt-get)" ]; then
+    update_packages
+fi
+
+# Vulnerabilidade 22: Multiple Vendors STARTTLS Implementation Plaintext Arbitrary Command Injection Vulnerability
+# Solução: Updates are available.
+echo "AVISO: Vulnerabilidade STARTTLS detectada. Requer atualização manual dos serviços afetados (Postfix, Qmail, etc.)."
+
+# Vulnerabilidade 23, 26 & 27: TWiki Cross-Site Request Forgery Vulnerability (Sep 2010), TWiki < 6.1.0 XSS Vulnerability, TWiki CSRF Vulnerability
+# Solução: Upgrade to TWiki version 4.3.2 or later,  Update to version 6.1.0 or later
+echo "Atualizando TWiki (se instalado) (repetição)"
+if [ -x "$(command -v apt-get)" ]; then
+    update_packages
+    # Assumindo que TWiki é gerenciado pelo sistema de pacotes
+    apt-get install twiki -y
+fi
+
+# Vulnerabilidade 24: Anonymous FTP Login Reporting
+# Solução: If you do not want to share files, you should disable anonymous logins.
+echo "Desabilitando login anônimo no FTP"
+# Requer configuração específica do servidor FTP (vsftpd, proftpd).
+# Exemplo para vsftpd:
+# anonymous_enable=NO
+
+# Vulnerabilidade 25 & 55: jQuery < 1.9.0 XSS Vulnerability, jQuery < 1.6.3 XSS Vulnerability
+# Solução: Update to version 1.9.0 or later, Update to version 1.6.3 or later.
+echo "AVISO: Versões vulneráveis do jQuery detectadas. Requer atualização manual dos arquivos jQuery."
+
+# Vulnerabilidade 28 & 29: SSL/TLS: Deprecated SSLv2 and SSLv3 Protocol Detection
+# Solução: It is recommended to disable the deprecated SSLv2 and/or SSLv3 protocols
+echo "Desabilitando SSLv2 e SSLv3"
+# Requer configuração específica de cada serviço (Postfix, PostgreSQL, etc.).
+# Exemplo para PostgreSQL:
+# ssl_min_protocol = 'TLSv1.2'
+
+# Vulnerabilidade 30: SSL/TLS: Report Weak Cipher Suites
+# Solução: The configuration of this services should be changed so that it does not accept the listed weak cipher suites anymore.
+echo "Desabilitando cipher suites fracas"
+# Requer configuração específica de cada serviço (Postfix, PostgreSQL, etc.).
+
+# Vulnerabilidade 31: HTTP Debugging Methods (TRACE/TRACK) Enabled
+# Solução: Disable the TRACE and TRACK methods in your web server configuration.
+echo "Desabilitando TRACE/TRACK"
+# Requer configuração específica do servidor web (Apache, Nginx).
+# Exemplo para Apache:
+# TraceEnable Off
+
+# Vulnerabilidade 32 & 33: SSL/TLS: Server Certificate / Certificate in Chain with RSA keys less than 2048 bits
+# Solução: Replace the certificate with a stronger key and reissue the certificates it signed.
+echo "AVISO: Certificados SSL/TLS com chaves RSA fracas detectados. Requer substituição dos certificados."
+
+# Vulnerabilidade 34: Weak Key Exchange (KEX) Algorithm(s) Supported (SSH)
+# Solução: Disable the reported weak KEX algorithm(s)
+echo "Desabilitando algoritmos KEX fracos no SSH"
+# Edita /etc/ssh/sshd_config
+#KexAlgorithms curve25519-sha256@libssh.org,ecdh-sha2-nistp256,ecdh-sha2-nistp384,ecdh-sha2-nistp521,diffie-hellman-group-exchange-sha256
+
+if [ -f /etc/ssh/sshd_config ]; then
+    sed -i 's/^#KexAlgorithms.*/KexAlgorithms curve25519-sha256@libssh.org,ecdh-sha2-nistp256,ecdh-sha2-nistp384,ecdh-sha2-nistp521,diffie-hellman-group-exchange-sha256/g' /etc/ssh/sshd_config
+    service ssh restart
+fi
+
+# Vulnerabilidade 35: phpinfo() Output Reporting (HTTP)
+# Solução: Delete the listed files or restrict access to them.
+echo "AVISO: Arquivos phpinfo() detectados. Remover ou restringir o acesso aos arquivos phpinfo.php."
+
+# Vulnerabilidade 36: Weak Host Key Algorithm(s) (SSH)
+# Solução: Disable the reported weak host key algorithm(s).
+echo "Desabilitando algoritmos de chave de host fracos no SSH"
+# Edita /etc/ssh/sshd_config
+#HostKeyAlgorithms ecdsa-sha2-nistp256,ssh-rsa
+
+if [ -f /etc/ssh/sshd_config ]; then
+    sed -i 's/^#HostKeyAlgorithms.*/HostKeyAlgorithms ecdsa-sha2-nistp256,ssh-rsa/g' /etc/ssh/sshd_config
+    service ssh restart
+fi
+
+# Vulnerabilidade 37: Check if Mailserver answer to VRFY and EXPN requests
+# Solução: Disable VRFY and/or EXPN on your Mailserver.
+echo "Desabilitando VRFY e EXPN no servidor de email"
+# Requer configuração específica do servidor de email (Postfix, Sendmail).
+
+# Vulnerabilidade 38 & 39: SSL/TLS: Renegotiation DoS Vulnerability (CVE-2011-1473, CVE-2011-5094)
+# Solução: A general solution is to remove/disable renegotiation capabilities altogether
+echo "Desabilitando renegotiation SSL/TLS"
+# Requer configuração específica de cada serviço (Postfix, PostgreSQL, etc.).
+
+# Vulnerabilidade 40 & 41: SSL/TLS: Certificate Expired
+# Solução: Replace the SSL/TLS certificate by a new one.
+echo "AVISO: Certificados SSL/TLS expirados detectados. Requer substituição dos certificados."
+
+# Vulnerabilidade 42 & 43: QWikiwiki directory traversal vulnerability, awiki <= 20100125 Multiple LFI Vulnerabilities - Active Check
+# Solução: Upgrade to a newer release, disable respective features, remove the product or replace the product by another one.
+echo "AVISO: QWikiwiki e awiki com LFI detectados. Requer atualização, remoção ou substituição."
+
+# Vulnerabilidade 44: /doc directory browsable
+# Solução: Use access restrictions for the /doc directory.
+echo "Restringindo acesso ao diretório /doc"
+# Requer configuração específica do servidor web (Apache, Nginx).
+# Exemplo para Apache:
+# <Directory /usr/share/doc>
+#   Options -Indexes
+# </Directory>
+
+# Vulnerabilidade 45: Telnet Unencrypted Cleartext Login
+# Solução: Replace Telnet with a protocol like SSH
+echo "Desabilitando Telnet"
+if [ -x "$(command -v service)" ]; then
+    disable_service telnetd
+    disable_service telnet
+fi
+if [ -x "$(command -v apt-get)" ]; then
+    remove_package telnetd
+    remove_package telnet
+fi
+
+# Vulnerabilidade 46 & 48: FTP Unencrypted Cleartext Login
+# Solução: Enable FTPS or enforce the connection via the 'AUTH TLS' command.
+echo "Forçando FTPS ou AUTH TLS"
+# Requer configuração específica do servidor FTP (vsftpd, proftpd).
+# Exemplo para vsftpd:
+# ftps_enable=YES
+# force_local_data_ssl=YES
+# force_local_logins_ssl=YES
+
+# Vulnerabilidade 47: VNC Server Unencrypted Data Transmission
+# Solução: Run the session over an encrypted channel provided by IPsec or SSH
+echo "AVISO: VNC sem encriptação detectado. Usar túnel SSH ou IPsec."
+
+# Vulnerabilidade 49: Cleartext Transmission of Sensitive Information via HTTP
+# Solução: Enforce the transmission of sensitive data via an encrypted SSL/TLS connection.
+echo "AVISO: Transmissão de dados sensíveis via HTTP detectada. Habilitar HTTPS e redirecionar HTTP para HTTPS."
+
+# Vulnerabilidade 50 & 54: SSL/TLS: Deprecated TLSv1.0 and TLSv1.1 Protocol Detection
+# Solução: It is recommended to disable the deprecated TLSv1.0 and/or TLSv1.1 protocols
+echo "Desabilitando TLSv1.0 e TLSv1.1 (repetição)"
+# Requer configuração específica de cada serviço (Postfix, PostgreSQL, etc.).
+# Exemplo para PostgreSQL:
+# ssl_min_protocol = 'TLSv1.2'
+
+# Vulnerabilidade 51: Weak Encryption Algorithm(s) Supported (SSH)
+# Solução: Disable the reported weak encryption algorithm(s).
+echo "Desabilitando algoritmos de encriptação fracos no SSH"
+# Edita /etc/ssh/sshd_config
+# Ciphers aes256-ctr,aes192-ctr,aes128-ctr
+
+if [ -f /etc/ssh/sshd_config ]; then
+    sed -i 's/^#Ciphers.*/Ciphers aes256-ctr,aes192-ctr,aes128-ctr/g' /etc/ssh/sshd_config
+    service ssh restart
+fi
+
+# Vulnerabilidade 52: Apache HTTP Server httpOnly Cookie Information Disclosure Vulnerability
+# Solução: Update to Apache HTTP Server version 2.2.22 or later.
+echo "Atualizando Apache HTTP Server (se instalado)"
+if [ -x "$(command -v apt-get)" ]; then
+    update_packages
+fi
+
+# Vulnerabilidade 53: phpMyAdmin error.php Cross Site Scripting Vulnerability
+# Solução: No known solution was made available for at least one year
+echo "AVISO: phpMyAdmin vulnerável detectado. Requer atualização, remoção ou substituição."
+
+# Vulnerabilidade 56 & 61: SSL/TLS: RSA Temporary Key Handling RSA_EXPORT Downgrade Issue (FREAK), SSL/TLS: 'DHE_EXPORT' MITM Security Bypass Vulnerability (LogJam)
+# Solução: Remove support for 'RSA_EXPORT' cipher suites from the service.
+echo "Removendo suporte para RSA_EXPORT e DHE_EXPORT"
+# Requer configuração específica de cada serviço (Postfix, PostgreSQL, etc.).
+
+# Vulnerabilidade 57 & 60: SSL/TLS: Certificate Signed Using A Weak Signature Algorithm
+# Solução:  need to obtain new SHA-2 signed SSL/TLS certificates
+echo "AVISO: Certificados SSL/TLS com algoritmo de assinatura fraco detectados. Requer substituição dos certificados."
+
+# Vulnerabilidade 58 & 59: SSL/TLS: Diffie-Hellman Key Exchange Insufficient DH Group Strength Vulnerab
+# Solução: Deploy (Ephemeral) Elliptic-Curve Diffie-Hellman (ECDHE) or use a 2048-bit or stronger Diffie-Hellman group
+echo "Aumentando a força do Diffie-Hellman Key Exchange"
+# Requer configuração específica de cada serviço (Postfix, PostgreSQL, etc.).
+
+# Vulnerabilidade 62 & 63: SSL/TLS: SSLv3 Protocol CBC Cipher Suites Information Disclosure Vulnerability (POODLE)
+# Solução: Disable SSLv3
+echo "Desabilitando SSLv3 (repetição)"
+# Requer configuração específica de cada serviço (Postfix, PostgreSQL, etc.).
+
+# Vulnerabilidade 64: Weak MAC Algorithm(s) Supported (SSH)
+# Solução: Disable the reported weak MAC algorithm(s).
+echo "Desabilitando algoritmos MAC fracos no SSH"
+# Edita /etc/ssh/sshd_config
+#MacAlgorithms hmac-sha2-512,hmac-sha2-256
+
+if [ -f /etc/ssh/sshd_config ]; then
+    sed -i 's/^#MacAlgorithms.*/MacAlgorithms hmac-sha2-512,hmac-sha2-256/g' /etc/ssh/sshd_config
+    service ssh restart
+fi
+
+# Vulnerabilidade 65: TCP Timestamps Information Disclosure
+# Solução: To disable TCP timestamps on linux add the line  'net.ipv4.tcp_timestamps = 0' to /etc/sysctl.conf.
+echo "Desabilitando TCP Timestamps"
+if [ -f /etc/sysctl.conf ]; then
+    echo "net.ipv4.tcp_timestamps = 0" >> /etc/sysctl.conf
+    sysctl -p
+fi
+
+# Vulnerabilidade 66: ICMP Timestamp Reply Information Disclosure
+# Solução: Disable the support for ICMP timestamp on the remote host completely
+echo "Bloqueando ICMP Timestamp"
+# Implementar regra de firewall para bloquear ICMP Timestamp.
+
+echo "Script de correção finalizado.  Verifique os avisos e realize as configurações manuais necessárias."
+```

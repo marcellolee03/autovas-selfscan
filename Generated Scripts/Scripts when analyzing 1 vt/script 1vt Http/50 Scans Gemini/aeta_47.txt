@@ -1,0 +1,71 @@
+```bash
+#!/bin/bash
+
+# Este script corrige a vulnerabilidade de transmissão de informações sensíveis em texto claro via HTTP.
+# Ele assume que você deseja redirecionar todo o tráfego HTTP (porta 80) para HTTPS (porta 443).
+# Este script é compatível com sistemas baseados em Linux que utilizam Apache ou Nginx.
+
+# Detecção do servidor web
+if command -v apache2ctl &> /dev/null
+then
+  WEB_SERVER="apache"
+elif command -v nginx &> /dev/null
+then
+  WEB_SERVER="nginx"
+else
+  echo "Servidor web não detectado. Por favor, configure o redirecionamento manualmente."
+  exit 1
+fi
+
+# Configuração para Apache
+if [ "$WEB_SERVER" = "apache" ]; then
+  # 1. Habilitar o módulo rewrite
+  sudo a2enmod rewrite
+
+  # 2. Criar/Editar o arquivo de configuração do VirtualHost padrão (ou o VirtualHost que serve o conteúdo HTTP)
+  #    Substitua '000-default.conf' pelo nome do seu arquivo de configuração, se necessário.
+  VHOST_FILE="/etc/apache2/sites-available/000-default.conf"
+
+  # 3. Adicionar o redirecionamento no início do arquivo VirtualHost
+  #    Este bloco redireciona todo o tráfego HTTP para HTTPS.
+
+  # Criar um backup do arquivo original
+  sudo cp "$VHOST_FILE" "$VHOST_FILE.bak"
+
+  # Inserir o bloco de redirecionamento
+  sudo sed -i '1i\
+<VirtualHost *:80>\n\
+        ServerName ${SERVER_NAME}\n\
+        Redirect permanent / https://${SERVER_NAME}/\n\
+</VirtualHost>\
+' "$VHOST_FILE"
+
+  # 4. Reiniciar o Apache
+  sudo systemctl restart apache2
+  echo "Redirecionamento HTTP para HTTPS configurado para Apache. Reiniciei o servidor."
+fi
+
+# Configuração para Nginx
+if [ "$WEB_SERVER" = "nginx" ]; then
+  # 1. Criar/Editar o arquivo de configuração do VirtualHost padrão (ou o VirtualHost que serve o conteúdo HTTP)
+  #    Substitua 'default' pelo nome do seu arquivo de configuração, se necessário.
+  VHOST_FILE="/etc/nginx/sites-available/default"
+
+  # Criar um backup do arquivo original
+  sudo cp "$VHOST_FILE" "$VHOST_FILE.bak"
+
+  # 2. Adicionar o redirecionamento no bloco 'server' que escuta na porta 80.
+
+  # Inserir o bloco de redirecionamento
+  sudo sed -i 's/listen 80;/listen 80;\n\
+    return 301 https://$host$request_uri;/' "$VHOST_FILE"
+
+  # 3. Reiniciar o Nginx
+  sudo systemctl restart nginx
+  echo "Redirecionamento HTTP para HTTPS configurado para Nginx. Reiniciei o servidor."
+fi
+
+echo "Script concluído. Certifique-se de ter um certificado SSL/TLS válido configurado para HTTPS."
+
+exit 0
+```

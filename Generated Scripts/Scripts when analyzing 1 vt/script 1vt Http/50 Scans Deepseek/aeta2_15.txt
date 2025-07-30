@@ -1,0 +1,9 @@
+#!/bin/bash
+apt-get update
+apt-get install -y apache2
+a2enmod ssl
+a2ensite default-ssl
+systemctl restart apache2
+sed -i '/<VirtualHost \*:80>/a Redirect permanent / https://localhost/' /etc/apache2/sites-available/000-default.conf
+sed -i '/<VirtualHost \*:443>/a SSLEngine on\nSSLCertificateFile /etc/ssl/certs/ssl-cert-snakeoil.pem\nSSLCertificateKeyFile /etc/ssl/private/ssl-cert-snakeoil.key' /etc/apache2/sites-available/default-ssl.conf
+systemctl restart apache2

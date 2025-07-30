@@ -1,0 +1,18 @@
+#!/bin/bash
+PHP_VERSION=$(php -v | head -n 1 | cut -d " " -f 2 | cut -d "." -f 1,2,3)
+REQUIRED_VERSION_1="5.3.13"
+REQUIRED_VERSION_2="5.4.3"
+
+if [[ "$PHP_VERSION" < "$REQUIRED_VERSION_1" || ("$PHP_VERSION" < "$REQUIRED_VERSION_2" && "$PHP_VERSION" == 5.4.*) ]]; then
+    sudo apt-get update
+    sudo apt-get install --only-upgrade php5
+fi
+
+if [[ "$PHP_VERSION" == 5.4.* && "$PHP_VERSION" < "$REQUIRED_VERSION_2" ]]; then
+    sudo apt-get update
+    sudo apt-get install --only-upgrade php5
+fi
+
+if [[ "$PHP_VERSION" < "$REQUIRED_VERSION_1" || ("$PHP_VERSION" < "$REQUIRED_VERSION_2" && "$PHP_VERSION" == 5.4.*) ]]; then
+    sudo service apache2 restart
+fi

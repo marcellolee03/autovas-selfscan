@@ -1,0 +1,57 @@
+#!/bin/bash
+
+# Verificar superusuário
+if [ "$EUID" -ne 0 ]; then
+    echo "Necessário executar como root. Utilize sudo." >&2
+    exit 1
+fi
+
+# Corrigir Vulnerabilidade 1: HTTP para HTTPS
+if [ -d "/etc/apache2" ]; then
+    a2enmod ssl rewrite > /dev/null 2>&1
+    cat > /etc/apache2/conf-available/https-redirect.conf << 'EOF'
+<VirtualHost *:80>
+    ServerAdmin webmaster@localhost
+    RewriteEngine On
+    RewriteCond %{HTTPS} off
+    RewriteRule (.*) https://%{HTTP_HOST}%{REQUEST_URI}
+</VirtualHost>
+EOF
+    a2enconf https-redirect > /dev/null 2>&1
+    systemctl restart apache2
+fi
+
+# Corrigir Vulnerabilidade 2: DNS Cache Snooping
+if [ -f "/etc/bind/named.conf" ]; then
+    sed -i '/options {/a \\tallow-recursion { none; };' /etc/bind/named.conf
+    sed -i '/recursion yes/c\recursion no;' /etc/bind/named.conf
+    systemctl restart bind9
+fi
+
+# Corrigir Vulnerabilidade 3: ICMP Timestamp
+iptables -A INPUT -p icmp --icmp-type timestamp-request -j DROP
+iptables -A INPUT -p icmp --icmp-type timestamp-reply -j DROP
+
+# Corrigir Vulnerabilidades 4,5,6: Configurações TLS/SSL
+if [ -d "/etc/apache2" ]; then
+    cat > /etc/apache2/conf-available/ssl-security.conf << 'EOF'
+SSLProtocol all -TLSv1 -TLSv1.1 -SSLv2 -SSLv3
+SSLCipherSuite HIGH:!aNULL:!MD5:!RC4:!3DES
+SSLHonorCipherOrder on
+SSLCompression off
+SSLSessionTickets off
+SSLUseStapling on
+SSLStaplingCache "shmcb:logs/ssl_stapling(32768)"
+EOF
+    a2enconf ssl-security > /dev/null 2>&1
+    systemctl restart apache2
+fi
+
+# Corrigir Vulnerabilidade 7: TCP Timestamps
+sysctl -w net.ipv4.tcp_timestamps=0
+
+# Persistir configurações sysctl
+if [ -d "/etc/sysctl.d" ]; then
+    echo "net.ipv4.tcp_timestamps = 0" > /etc/sysctl.d/50-disable-tcp-timestamps.conf
+    sysctl -p /etc/sysctl.d/50-disable-tcp-timestamps.conf > /dev/null
+fi

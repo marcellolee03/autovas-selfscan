@@ -1,0 +1,100 @@
+```sh
+#!/bin/bash
+
+# Verificar qual sistema operacional está sendo usado
+if command -v apt-get &> /dev/null; then
+  # Sistema baseado em Debian (Ubuntu, etc.)
+  OS="debian"
+elif command -v yum &> /dev/null; then
+  # Sistema baseado em Red Hat (CentOS, Fedora, etc.)
+  OS="redhat"
+else
+  echo "Sistema operacional não suportado.  Por favor, adapte este script para sua distribuição."
+  exit 1
+fi
+
+# Verificar se o PHP está instalado
+if ! command -v php &> /dev/null; then
+  echo "PHP não está instalado. Instalando..."
+  if [ "$OS" = "debian" ]; then
+    apt-get update
+    apt-get install -y php5 php5-cgi
+  elif [ "$OS" = "redhat" ]; then
+    yum install -y php php-cgi
+  fi
+
+  if ! command -v php &> /dev/null; then
+    echo "Falha ao instalar o PHP. Por favor, instale manualmente."
+    exit 1
+  fi
+fi
+
+# Determinar a versão do PHP
+PHP_VERSION=$(`php -r "echo phpversion();"`)
+PHP_MAJOR_VERSION=$(echo $PHP_VERSION | cut -d'.' -f1)
+PHP_MINOR_VERSION=$(echo $PHP_VERSION | cut -d'.' -f2)
+
+# Verificar se a versão do PHP é vulnerável
+VULNERABLE=0
+if [ "$PHP_MAJOR_VERSION" -eq 5 ]; then
+  if [ "$PHP_MINOR_VERSION" -eq 3 ]; then
+    PHP_PATCH_VERSION=$(echo $PHP_VERSION | cut -d'.' -f3)
+    if [ "$PHP_PATCH_VERSION" -lt 13 ]; then
+      VULNERABLE=1
+    fi
+  elif [ "$PHP_MINOR_VERSION" -eq 4 ]; then
+    PHP_PATCH_VERSION=$(echo $PHP_VERSION | cut -d'.' -f3)
+    if [ "$PHP_PATCH_VERSION" -lt 3 ]; then
+      VULNERABLE=1
+    fi
+  fi
+fi
+
+if [ "$VULNERABLE" -eq 0 ]; then
+  echo "A versão do PHP ($PHP_VERSION) não é vulnerável."
+  exit 0
+fi
+
+echo "A versão do PHP ($PHP_VERSION) é vulnerável. Atualizando..."
+
+# Atualizar o PHP
+if [ "$OS" = "debian" ]; then
+  apt-get update
+  apt-get install -y php5 php5-cgi
+elif [ "$OS" = "redhat" ]; then
+  yum update -y php php-cgi
+fi
+
+# Verificar a versão do PHP após a atualização
+NEW_PHP_VERSION=$(`php -r "echo phpversion();"`)
+echo "PHP atualizado para a versão: $NEW_PHP_VERSION"
+
+# Reiniciar o servidor web (Apache ou Nginx)
+if command -v systemctl &> /dev/null; then
+  # Sistemas com systemd
+  if systemctl is-active apache2 &> /dev/null; then
+    systemctl restart apache2
+    echo "Apache reiniciado."
+  elif systemctl is-active nginx &> /dev/null; then
+    systemctl restart nginx
+    echo "Nginx reiniciado."
+  else
+    echo "Servidor web não detectado. Reinicie-o manualmente."
+  fi
+elif command -v service &> /dev/null; then
+  # Sistemas com service
+  if service apache2 status &> /dev/null; then
+    service apache2 restart
+    echo "Apache reiniciado."
+  elif service nginx status &> /dev/null; then
+    service nginx restart
+    echo "Nginx reiniciado."
+  else
+    echo "Servidor web não detectado. Reinicie-o manualmente."
+  fi
+else
+  echo "Sistema de gerenciamento de serviços não detectado. Reinicie o servidor web manualmente."
+fi
+
+echo "Correção concluída."
+```

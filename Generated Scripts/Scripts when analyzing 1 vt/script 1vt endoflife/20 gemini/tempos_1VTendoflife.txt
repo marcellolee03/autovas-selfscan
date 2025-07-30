@@ -1,0 +1,26 @@
+Request 1: 7.1694 segundos
+Request 2: 7.3720 segundos
+Request 3: 4.3032 segundos
+Request 4: 4.4020 segundos
+Request 5: 2.7656 segundos
+Request 6: 3.7888 segundos
+Request 7: 2.1484 segundos
+Request 8: 3.2794 segundos
+Request 9: 5.3271 segundos
+Request 10: 4.2501 segundos
+Request 11: 2.6057 segundos
+Request 12: 5.1199 segundos
+Request 13: 4.8125 segundos
+Request 14: 5.8342 segundos
+Request 15: 6.9663 segundos
+Request 16: 3.3649 segundos
+Request 17: 4.4176 segundos
+Request 18: 3.1741 segundos
+Request 19: 6.1441 segundos
+Request 20: 5.2265 segundos
+
+Você forneceu os tempos de 20 requisições, totalizando:
+
+Soma = 98,6609 /20 segundos = 4,9330
+
+

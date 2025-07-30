@@ -1,0 +1,31 @@
+Com base na análise da vulnerabilidade CVE-1999-0618, que aponta que o serviço rexec está em execução, e nos scripts de correção fornecidos, a avaliação de cada script é a seguinte:
+
+A solução para a vulnerabilidade é desativar o serviço rexec e utilizar alternativas mais seguras como o SSH. 
+
+Análise Individual dos Scripts
+
+    Script 1 (1vtrexec_1.txt): Sim. Este script é capaz de resolver o problema. Ele verifica e desativa o serviço rexec via systemctl , remove os pacotes associados para sistemas baseados em Debian e Red Hat , e limpa as configurações dos super-servidores inetd e xinetd.
+
+Script 2 (1vtrexec_2.txt): Sim. Este script consegue resolver a vulnerabilidade. Ele desativa o serviço via systemctl, remove os pacotes relacionados (rsh-server, rexecd, etc.) e remove a configuração do xinetd.
+
+Script 3 (1vtrexec_3.txt): Sim. Este script é eficaz. Ele desativa o serviço tanto via systemctl  quanto xinetd (modificando o arquivo de configuração) , e remove múltiplos pacotes relacionados em sistemas Debian , além de remover o arquivo de configuração do inetd.
+
+Script 4 (1vtrexec_4.txt): Sim. Este script é muito completo e resolve o problema. Ele tenta parar e desabilitar o serviço rexec, remove pacotes de uma vasta gama de gerenciadores (apt, yum, zypper, pacman, emerge), limpa as configurações de inetd e xinetd, e adiciona uma camada de proteção com regras de firewall.
+
+Script 5 (1vtrexec_5.txt): Sim. Este script corrige a vulnerabilidade. Ele desativa os serviços via systemctl, remove os pacotes para sistemas Debian e Red Hat, e remove as configurações de inetd e xinetd, reiniciando os serviços para garantir a aplicação das mudanças.
+
+Script 6 (1vtrexec_6.txt): Sim. Este script é abrangente e resolve o problema. Ele desativa os serviços via systemctl , remove pacotes de múltiplos sistemas, limpa configurações de inetd, e reinicia os super-servidores de forma compatível com sistemas mais antigos (init.d) e novos (systemctl).
+
+Script 7 (1vtrexec_7.txt): Sim. Este script é capaz de resolver o problema. Ele desativa o serviço, remove os pacotes para múltiplos gerenciadores como apt, yum, dnf e zypper , e remove as configurações do xinetd , além de reiniciar o serviço.
+
+Script 8 (1vtrexec_8.txt): Sim. Este script corrige a vulnerabilidade. Ele desativa os serviços rexec.socket e rexecd via systemctl , remove os pacotes rsh-server  e comenta as linhas de configuração nos arquivos inetd.conf e xinetd.conf, o que efetivamente desabilita o serviço.
+
+Script 9 (1vtrexec_9.txt): Sim. Este script soluciona o problema. Ele para e desabilita o serviço rexec.socket , remove o pacote rexec  e desabilita a configuração no xinetd ao renomear o arquivo correspondente.
+
+Script 10 (1vtrexec_10.txt): Sim. Este script é eficaz. Ele verifica se o serviço está ativo e, em caso afirmativo, o para, desabilita e mascara (systemctl mask), uma forma robusta de impedir sua ativação. Ele também remove o pacote inetd.
+
+Média de Correção
+
+Todos os 10 scripts apresentados são capazes de corrigir a vulnerabilidade CVE-1999-0618, pois todos executam ações para desativar ou remover o serviço rexec.
+
+Média geral de porcentagem de correção: 100%

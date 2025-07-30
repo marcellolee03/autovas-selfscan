@@ -1,0 +1,55 @@
+#!/bin/bash
+
+# Instalar Apache2 se não estiver instalado
+if ! command -v apache2 &> /dev/null; then
+    sudo apt-get update
+    sudo apt-get install -y apache2
+fi
+
+# Habilitar o módulo SSL do Apache
+sudo a2enmod ssl
+
+# Criar um certificado autoassinado
+sudo openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout /etc/ssl/private/apache-selfsigned.key -out /etc/ssl/certs/apache-selfsigned.crt -subj "/CN=localhost"
+
+# Configurar o Apache para usar SSL
+sudo bash -c 'cat > /etc/apache2/sites-available/default-ssl.conf <<EOF
+<IfModule mod_ssl.c>
+    <VirtualHost _default_:443>
+        ServerAdmin webmaster@localhost
+        DocumentRoot /var/www/html
+        SSLEngine on
+        SSLCertificateFile /etc/ssl/certs/apache-selfsigned.crt
+        SSLCertificateKeyFile /etc/ssl/private/apache-selfsigned.key
+        <FilesMatch "\.(cgi|shtml|phtml|php)$">
+            SSLOptions +StdEnvVars
+        </FilesMatch>
+        <Directory /usr/lib/cgi-bin>
+            SSLOptions +StdEnvVars
+        </Directory>
+        BrowserMatch "MSIE [2-6]" \\
+            nokeepalive ssl-unclean-shutdown \\
+            downgrade-1.0 force-response-1.0
+        BrowserMatch "MSIE [17-9]" ssl-unclean-shutdown
+    </VirtualHost>
+</IfModule>
+EOF'
+
+# Habilitar o site SSL
+sudo a2ensite default-ssl
+
+# Redirecionar HTTP para HTTPS
+sudo bash -c 'cat > /etc/apache2/sites-available/000-default.conf <<EOF
+<VirtualHost *:80>
+    ServerAdmin webmaster@localhost
+    DocumentRoot /var/www/html
+    RewriteEngine On
+    RewriteCond %{HTTPS} off
+    RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+    ErrorLog \${APACHE_LOG_DIR}/error.log
+    CustomLog \${APACHE_LOG_DIR}/access.log combined
+</VirtualHost>
+EOF'
+
+# Reiniciar o Apache para aplicar as alterações
+sudo systemctl restart apache2

@@ -1,0 +1,27 @@
+#!/bin/sh
+set -e
+
+if [ -f /etc/os-release ]; then
+    . /etc/os-release
+    case $ID in
+        debian|ubuntu)
+            if [ "$(id -u)" -ne 0 ]; then
+                echo "Erro: Script requer permissões root. Execute com sudo." >&2
+                exit 1
+            fi
+            apt-get update -qq
+            pkgs=$(dpkg -l | awk '/^ii.*php[0-9\.]*-(cgi|common|core)/ {print $2}' | xargs)
+            if [ -n "$pkgs" ]; then
+                apt-get install --only-upgrade -y $pkgs
+            else
+                echo "Nenhum pacote PHP-CGI vulnerável encontrado. Verifique manualmente."
+            fi
+            exit 0
+            ;;
+        *)
+            ;;
+    esac
+fi
+
+echo "Sistema não suportado ou não Debian/Ubuntu. Use métodos alternativos de atualização." >&2
+exit 1

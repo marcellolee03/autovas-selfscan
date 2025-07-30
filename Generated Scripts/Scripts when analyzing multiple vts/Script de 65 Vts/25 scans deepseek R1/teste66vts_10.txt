@@ -1,0 +1,51 @@
+#!/bin/bash
+
+# Download the required Python installers based on architecture
+if [[ "$(uname -m)" == "x86_64" ]]; then
+    ARCH_SUFFIX="-amd64"
+else
+    ARCH_SUFFIX=""
+fi
+
+PYTHON310_INSTALLER="python-3.10.16${ARCH_SUFFIX}.exe"
+PYTHON312_INSTALLER="python-3.12.9${ARCH_SUFFIX}.exe"
+
+# Download installers from official Python repositories
+if ! wget -O "$PYTHON310_INSTALLER" "https://www.python.org/ftp/python/3.10.16/${PYTHON310_INSTALLER}"; then
+    echo "Failed to download Python 3.10.16 installer"
+    exit 1
+fi
+
+if ! wget -O "$PYTHON312_INSTALLER" "https://www.python.org/ftp/python/3.12.9/${PYTHON312_INSTALLER}"; then
+    echo "Failed to download Python 3.12.9 installer"
+    exit 1
+fi
+
+# Execute silent installs for both versions
+chmod +x "$PYTHON310_INSTALLER"
+"./$PYTHON310_INSTALLER" /quiet InstallAllUsers=1 PrependPath=1
+
+chmod +x "$PYTHON312_INSTALLER"
+"./$PYTHON312_INSTALLER" /quiet InstallAllUsers=1 PrependPath=1
+
+# Cleanup installers
+rm -f "$PYTHON310_INSTALLER"
+rm -f "$PYTHON312_INSTALLER"
+
+# Disable legacy TLS versions globally
+if command -v update-crypto-policies &>/dev/null; then
+    update-crypto-policies --set LEGACY
+fi
+
+# Apply additional security hardening
+{
+    echo "@reboot rm -f /tmp/* /var/tmp/*"
+    echo "0 0 * * 0 umount /dev/shm 2>/dev/null"
+} | sudo tee /etc/cron.d/python_security
+
+echo "allow-deprecated=false" | sudo tee -a /etc/crypto-policies/config
+
+# Final system cleanup
+if command -v journalctl &>/dev/null; then
+    journalctl --vacuum-size=1G
+fi

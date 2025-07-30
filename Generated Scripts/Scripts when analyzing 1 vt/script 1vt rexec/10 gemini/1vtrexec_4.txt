@@ -1,0 +1,31 @@
+```bash
+#!/bin/bash
+
+# Desabilita o serviço rexec
+systemctl stop rexec.socket 2>/dev/null
+systemctl disable rexec.socket 2>/dev/null
+systemctl stop rexecd.service 2>/dev/null
+systemctl disable rexecd.service 2>/dev/null
+
+# Remove o pacote rexec (se instalado)
+apt-get remove --purge -y rexec rsh-server 2>/dev/null
+yum remove -y rexec rsh-server 2>/dev/null
+zypper remove -y rexec rsh-server 2>/dev/null
+pacman -Rns rexec rsh 2>/dev/null
+emerge --unmerge rexec rsh 2>/dev/null
+
+# Garante que não está listado em /etc/inetd.conf ou /etc/xinetd.d/*
+sed -i '/^rexec/d' /etc/inetd.conf 2>/dev/null
+rm -f /etc/xinetd.d/rexec 2>/dev/null
+
+# Reforce o firewall (exemplo com UFW, caso esteja ativo)
+ufw delete allow 512/tcp 2>/dev/null
+ufw deny 512/tcp 2>/dev/null
+ufw reload 2>/dev/null
+
+# Reinicia inetd/xinetd para garantir que as mudanças tenham efeito
+systemctl restart inetd 2>/dev/null
+systemctl restart xinetd 2>/dev/null
+
+echo "Serviço rexec desabilitado e removido. Considere usar SSH em vez de rexec."
+```

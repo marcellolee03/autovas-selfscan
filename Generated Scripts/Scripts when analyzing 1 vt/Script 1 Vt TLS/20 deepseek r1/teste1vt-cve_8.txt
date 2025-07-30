@@ -1,0 +1,41 @@
+#!/bin/sh
+
+set -e
+
+if ! command -v ss >/dev/null || ! command -v awk >/dev/null || ! command -v tr >/dev/null || ! command -v sed >/dev/null; then
+    exit 1
+fi
+
+pid=$(ss -ltnp | awk -F ' ' '$4 ~ /:5432\b/ && $1 == "LISTEN" { split($6, arr, /(,|=)/); print arr[3] }' 2>/dev/null | head -n1)
+[ -z "$pid" ] && exit 1
+
+if [ ! -r "/proc/$pid/cmdline" ]; then
+    exit 1
+fi
+
+cmdline=$(tr '\0' ' ' < "/proc/$pid/cmdline")
+
+config_file=""
+if echo "$cmdline" | grep -q -- '--config-file'; then
+    config_file=$(echo "$cmdline" | sed -e 's/^.*--config-file[= ]\([^ ]*\).*$/\1/' -e "s/'//g" -e 's/"//g')
+fi
+
+if [ -z "$config_file" ] && echo "$cmdline" | grep -q -- '-D'; then
+    data_dir=$(echo "$cmdline" | sed -e 's/^.*-D[= ]\([^ ]*\).*$/\1/' -e "s/'//g" -e 's/"//g')
+    [ -d "$data_dir" ] && [ -f "$data_dir/postgresql.conf" ] && config_file="$data_dir/postgresql.conf"
+fi
+
+if [ -z "$config_file" ]; then
+    for f in $(find /etc/postgresql /var/lib/postgresql /var/lib/pgsql /usr/local/var/postgres -name postgresql.conf 2>/dev/null); do
+        [ -f "$f" ] && config_file="$f" && break
+    done
+fi
+
+[ -z "$config_file" ] && exit 1
+
+cp "$config_file" "${config_file}.bak_$(date +%Y%m%d%H%M%S)"
+
+sed -i '/^[[:blank:]]*ssl_min_protocol_version[[:blank:]]*=/d' "$config_file"
+echo "ssl_min_protocol_version = 'TLSv1.2'" >> "$config_file"
+
+kill -HUP "$pid" || exit 1

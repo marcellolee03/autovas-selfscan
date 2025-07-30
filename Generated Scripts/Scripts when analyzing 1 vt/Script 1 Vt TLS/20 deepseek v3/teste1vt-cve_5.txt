@@ -1,0 +1,9 @@
+#!/bin/bash
+NETWORK_SERVICES=$(ss -tln | grep ':5432 ' | awk '{print $4}')
+for SERVICE in $NETWORK_SERVICES; do
+    CONFIG_FILE=$(grep -l "listen_addresses.*${SERVICE%:*}" /etc/postgresql/*/main/postgresql.conf)
+    if [ -n "$CONFIG_FILE" ]; then
+        sed -i 's/^ssl_protocols.*/ssl_protocols = TLSv1.2,TLSv1.3/' "$CONFIG_FILE"
+        systemctl restart postgresql
+    fi
+done

@@ -1,0 +1,62 @@
+```powershell
+#Requires -RunAsAdministrator
+
+# Define a versão alvo do Python
+$targetVersion = "3.10.15"
+
+# Define o nome do instalador do Python
+$installerName = "python-$targetVersion-amd64.exe"
+
+# Define a URL para download do instalador do Python
+$installerURL = "https://www.python.org/ftp/python/$targetVersion/$installerName"
+
+# Define o caminho para salvar o instalador
+$installerPath = "$env:TEMP\$installerName"
+
+# Define o caminho da instalação existente do Python (Porta 5000/tcp sugere uma instalação local)
+# Este script tentará detectar o caminho, mas pode precisar ser ajustado.
+$pythonPath = Get-ItemProperty -Path "HKLM:\SOFTWARE\Python\PythonCore\3.10\InstallPath" | Select-Object -ExpandProperty InstallPath
+
+# Verifica se o Python está instalado e se a versão é vulnerável
+if ($pythonPath) {
+    Write-Host "Python encontrado em: $pythonPath"
+    $currentVersion = python -V 2>&1
+    $currentVersion = $currentVersion.Split(" ")[1].TrimStart("3.").TrimStart("10.")
+
+    if ($currentVersion -lt $targetVersion) {
+        Write-Host "Versão atual do Python ($currentVersion) é vulnerável. Atualizando para $targetVersion..."
+
+        # Download do instalador
+        Write-Host "Baixando o instalador do Python..."
+        try {
+            Invoke-WebRequest -Uri $installerURL -OutFile $installerPath
+        }
+        catch {
+            Write-Error "Falha ao baixar o instalador: $($_.Exception.Message)"
+            exit 1
+        }
+
+        # Instalação do Python
+        Write-Host "Instalando o Python..."
+        try {
+            Start-Process -FilePath $installerPath -ArgumentList "/quiet", "InstallAllUsers=1", "Include_doc=0", "Include_pip=1", "AssociateFiles=1", "CreateShortcuts=1", "AddToPath=1", "CompileAll=1" -Wait
+            Write-Host "Python atualizado com sucesso para a versão $targetVersion."
+        }
+        catch {
+            Write-Error "Falha na instalação do Python: $($_.Exception.Message)"
+            exit 1
+        }
+
+        # Remove o instalador
+        Remove-Item $installerPath
+
+    }
+    else {
+        Write-Host "A versão do Python ($currentVersion) já é a versão mais recente ou superior. Nenhuma atualização necessária."
+    }
+}
+else {
+    Write-Host "Python não encontrado. Certifique-se de que o Python 3.10 esteja instalado."
+    exit 1
+}
+```

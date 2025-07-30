@@ -1,0 +1,41 @@
+```bash
+#!/bin/bash
+
+# Script para mitigar a vulnerabilidade CVE-2012-0053 no Apache HTTP Server (httpOnly Cookie Information Disclosure).
+# Este script assume um sistema baseado em Debian/Ubuntu.
+
+# 1. Verificar a versão do Apache
+apache_version=$(apachectl -v 2>&1 | grep "Server version:" | awk '{print $3}' | cut -d '/' -f2)
+
+# 2. Comparar a versão instalada com a versão corrigida (2.2.22)
+if dpkg --compare-versions "$apache_version" lt "2.2.22"; then
+  echo "Versão vulnerável do Apache detectada: $apache_version. Iniciando atualização..."
+
+  # 3. Atualizar o índice de pacotes
+  apt-get update
+
+  # 4. Atualizar o Apache para a versão mais recente disponível
+  apt-get install --only-upgrade apache2 -y
+
+  # 5. Verificar se a atualização foi bem-sucedida
+  new_apache_version=$(apachectl -v 2>&1 | grep "Server version:" | awk '{print $3}' | cut -d '/' -f2)
+
+  if dpkg --compare-versions "$new_apache_version" ge "2.2.22"; then
+    echo "Apache atualizado com sucesso para a versão $new_apache_version."
+
+    # 6. Reiniciar o serviço Apache para aplicar as alterações
+    systemctl restart apache2
+
+    echo "Serviço Apache reiniciado."
+  else
+    echo "Falha ao atualizar o Apache. A versão permanece $new_apache_version."
+    echo "Verifique os logs e tente a atualização manualmente."
+    exit 1
+  fi
+
+else
+  echo "Apache já está atualizado (versão $apache_version ou superior). Nenhuma ação necessária."
+fi
+
+exit 0
+```

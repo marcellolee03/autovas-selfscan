@@ -1,0 +1,132 @@
+```bash
+#!/bin/bash
+
+# Vulnerability 1: Proxmox VE EOL
+# This script does NOT automatically update Proxmox.  Automatic updates can be risky.
+# Instead, it provides a warning and instructions.
+
+echo "WARNING: Proxmox VE 7.3-3 is end-of-life (EOL).  It reached EOL on 2024-07-01."
+echo "SOLUTION: Update Proxmox VE to a supported version (e.g., 8.x)."
+echo "Refer to the Proxmox documentation for upgrade instructions: https://pve.proxmox.com/wiki/Upgrade_from_7_to_8"
+
+# Vulnerabilities 2-6: jQuery < 1.9.0 XSS Vulnerability (CVE-2012-6708)
+# Define the vulnerable jQuery file paths and the replacement version
+declare -a jquery_paths=(
+    "/var/www/html/../js/jquery-1.8.3.min.js"
+    "/var/www/html/opscenter/webcommon/framework/../js/jquery-1.8.3.min.js"
+    "/var/www/html/framesets/../js/jquery-1.8.3.min.js"
+    "/var/www/html/frameset/../js/jquery-1.8.3.min.js"
+    "/var/www/html/console/framework/../js/jquery-1.8.3.min.js"
+)
+new_jquery_version="1.9.0"
+new_jquery_url="https://code.jquery.com/jquery-${new_jquery_version}.min.js"
+
+# Function to update jQuery
+update_jquery() {
+    local file_path="$1"
+    
+    # Check if the file exists
+    if [ -f "$file_path" ]; then
+        # Backup the old file
+        cp "$file_path" "${file_path}.bak"
+        echo "Backed up $file_path to ${file_path}.bak"
+
+        # Download the new jQuery version
+        wget -q "$new_jquery_url" -O "$file_path"
+        if [ $? -eq 0 ]; then
+            echo "Successfully updated $file_path to jQuery ${new_jquery_version}"
+        else
+            echo "ERROR: Failed to download jQuery ${new_jquery_version} for $file_path. Restoring backup."
+            mv "${file_path}.bak" "$file_path"
+        fi
+    else
+        echo "WARNING: File not found: $file_path"
+    fi
+}
+
+# Loop through the vulnerable paths and update jQuery
+for path in "${jquery_paths[@]}"; do
+  update_jquery "$path"
+done
+
+# Vulnerabilities 7-9, 13-16, 19, 21-22: Weak SSH Algorithms
+# Modify SSH configuration
+ssh_config="/etc/ssh/sshd_config"
+
+# Create a backup of the SSH config file
+cp "$ssh_config" "$ssh_config.bak"
+echo "Backed up $ssh_config to $ssh_config.bak"
+
+# Disable weak KEX algorithms (diffie-hellman-group1-sha1)
+sed -i '/KexAlgorithms/s/diffie-hellman-group1-sha1//g' "$ssh_config"
+
+# Disable weak MAC algorithms (umac-64*, hmac-md5, hmac-sha1-96)
+sed -i '/MACs/s/umac-64-etm@openssh.com//g' "$ssh_config"
+sed -i '/MACs/s/umac-64@openssh.com//g' "$ssh_config"
+sed -i '/MACs/s/hmac-md5//g' "$ssh_config"
+sed -i '/MACs/s/hmac-sha1-96//g' "$ssh_config"
+
+#Disable weak Ciphers
+sed -i '/Ciphers/s/3des-cbc//g' "$ssh_config"
+sed -i '/Ciphers/s/aes128-cbc//g' "$ssh_config"
+sed -i '/Ciphers/s/aes256-cbc//g' "$ssh_config"
+sed -i '/Ciphers/s/twofish-cbc//g' "$ssh_config"
+sed -i '/Ciphers/s/twofish128-cbc//g' "$ssh_config"
+sed -i '/Ciphers/s/twofish256-cbc//g' "$ssh_config"
+
+#Disable weak HostKeyAlgorithms (ssh-dss)
+sed -i '/HostKeyAlgorithms/s/ssh-dss//g' "$ssh_config"
+
+# Restart SSH service
+systemctl restart sshd
+echo "SSH service restarted."
+
+# Vulnerabilities 10: DCE/RPC and MSRPC Services Enumeration Reporting
+# This is an information disclosure vulnerability.  The solution is to filter traffic.
+echo "SOLUTION: Filter incoming traffic to port 135 (DCE/RPC) using a firewall."
+echo "Configure your firewall to only allow necessary traffic to this port."
+
+# Vulnerabilities 11: Telnet Unencrypted Cleartext Login
+# Disable Telnet service
+systemctl stop telnet.socket
+systemctl disable telnet.socket
+systemctl stop telnetd
+systemctl disable telnetd
+echo "Telnet service disabled.  Use SSH instead."
+
+# Vulnerabilities 12: SSL/TLS: Deprecated TLSv1.0 and TLSv1.1 Protocol Detection
+# This assumes that the vulnerable service is using OpenSSL.  Adjust the path as needed.
+ssl_config_file="/etc/ssl/openssl.cnf"
+if [ -f "$ssl_config_file" ]; then
+    sed -i 's/^\(openssl_conf = default_conf\)/#\1/' "$ssl_config_file"
+    echo "
+[default_conf]
+ssl_conf = ssl_sect
+
+[ssl_sect]
+system_default = system_default_sect
+
+[system_default_sect]
+MinProtocol = TLSv1.2
+" >> "$ssl_config_file"
+    echo "Disabled TLSv1.0 and TLSv1.1 in $ssl_config_file.  You may need to restart the affected service."
+else
+    echo "WARNING: $ssl_config_file not found.  Unable to disable TLSv1.0 and TLSv1.1. Check the TLS configuration for the affected service."
+fi
+
+# Vulnerabilities 17, 18, 20, 23-25: TCP Timestamps Information Disclosure
+# Disable TCP timestamps
+echo "net.ipv4.tcp_timestamps = 0" >> /etc/sysctl.conf
+sysctl -p
+echo "TCP timestamps disabled.  Reboot may be required."
+
+# Vulnerabilities 26-32: ICMP Timestamp Reply Information Disclosure
+# Disable ICMP timestamp replies using iptables
+iptables -I INPUT -p icmp --icmp-type timestamp-request -j DROP
+iptables -I OUTPUT -p icmp --icmp-type timestamp-reply -j DROP
+iptables -I INPUT -p icmp --icmp-type timestamp -j DROP
+iptables -I OUTPUT -p icmp --icmp-type timestamp -j DROP
+netfilter-persistent save #or systemctl restart netfilter-persistent
+
+echo "ICMP timestamp replies disabled using iptables. Firewall configuration saved."
+```

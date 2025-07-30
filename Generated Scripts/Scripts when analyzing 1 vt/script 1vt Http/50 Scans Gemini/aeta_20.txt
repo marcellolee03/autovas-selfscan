@@ -1,0 +1,106 @@
+#!/bin/bash
+
+# Detecção do Sistema Operacional (genérico para Linux/Debian/Ubuntu)
+OS=$(uname -s)
+
+# Variáveis globais
+APACHE_CONFIG_FILE=""
+NGINX_CONFIG_FILE=""
+
+# Funções de tratamento de erros
+error_exit() {
+  echo "Erro: $1" >&2
+  exit 1
+}
+
+# Função para detectar e configurar o Apache
+configure_apache() {
+  # Localizar arquivo de configuração principal do Apache
+  if [[ -f /etc/apache2/apache2.conf ]]; then
+    APACHE_CONFIG_FILE="/etc/apache2/apache2.conf"
+  elif [[ -f /etc/httpd/conf/httpd.conf ]]; then
+    APACHE_CONFIG_FILE="/etc/httpd/conf/httpd.conf"
+  else
+    echo "Apache não detectado ou configuração não encontrada. Pulando configuração do Apache."
+    return
+  fi
+
+  # Verificar se o módulo mod_rewrite está habilitado
+  if ! apachectl -M | grep -q "rewrite_module (shared)"; then
+    echo "Habilitando mod_rewrite para Apache..."
+    sudo a2enmod rewrite
+  fi
+
+  # Adicionar redirecionamento HTTP para HTTPS ao arquivo de configuração
+  echo "Adicionando redirecionamento HTTP para HTTPS no arquivo de configuração do Apache..."
+  if [[ -f /etc/apache2/sites-available/000-default.conf ]]; then
+    SITE_CONFIG="/etc/apache2/sites-available/000-default.conf"
+    sudo sed -i 's|<VirtualHost \*:80>|<VirtualHost *:80>\n\tRewriteEngine On\n\tRewriteCond %{HTTPS} off\n\tRewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [R=301,L]|g' "$SITE_CONFIG"
+  elif [[ -f /etc/httpd/conf/httpd.conf ]]; then
+    sudo sed -i 's/<\/VirtualHost>/RewriteEngine On\nRewriteCond %{HTTPS} off\nRewriteRule ^(.*)$ https:\/\/%{HTTP_HOST}%{REQUEST_URI} [R=301,L]\n<\/VirtualHost>/g' "$APACHE_CONFIG_FILE"
+  else
+   echo "Arquivo de configuração do site padrão do Apache não encontrado."
+  fi
+  
+
+  # Reiniciar o Apache
+  echo "Reiniciando o Apache..."
+  sudo systemctl restart apache2 || sudo systemctl restart httpd
+}
+
+# Função para detectar e configurar o Nginx
+configure_nginx() {
+  # Localizar arquivo de configuração principal do Nginx
+  if [[ -f /etc/nginx/nginx.conf ]]; then
+    NGINX_CONFIG_FILE="/etc/nginx/nginx.conf"
+  elif [[ -f /usr/local/nginx/conf/nginx.conf ]]; then
+    NGINX_CONFIG_FILE="/usr/local/nginx/conf/nginx.conf"
+  else
+    echo "Nginx não detectado ou configuração não encontrada. Pulando configuração do Nginx."
+    return
+  fi
+
+  # Adicionar redirecionamento HTTP para HTTPS ao arquivo de configuração
+  echo "Adicionando redirecionamento HTTP para HTTPS no arquivo de configuração do Nginx..."
+
+  # Primeiro, tentar encontrar um bloco server que escuta na porta 80
+  if sudo grep -q "listen 80" "$NGINX_CONFIG_FILE"; then
+    sudo sed -i 's/listen 80;/listen 80;\n\t\treturn 301 https:\/\/${host}${request_uri};/g' "$NGINX_CONFIG_FILE"
+  else
+    # Se não encontrar, adicionar um bloco server padrão para redirecionamento
+    echo "Adicionando bloco server para redirecionamento HTTP para HTTPS..."
+    REDIRECT_BLOCK="server {\n\tlisten 80;\n\tserver_name _;\n\treturn 301 https://\$host\$request_uri;\n}"
+    sudo sed -i '$i'"\n$REDIRECT_BLOCK\n" "$NGINX_CONFIG_FILE"
+  fi
+
+  # Reiniciar o Nginx
+  echo "Reiniciando o Nginx..."
+  sudo systemctl restart nginx
+}
+
+# Função principal para executar as configurações
+main() {
+  echo "Iniciando correção para redirecionamento HTTP para HTTPS..."
+
+  # Verificar se é root
+  if [[ $EUID -ne 0 ]]; then
+    error_exit "Este script precisa ser executado como root."
+  fi
+
+  # Detectar e configurar Apache
+  if command -v apachectl &> /dev/null; then
+    echo "Detectado Apache..."
+    configure_apache
+  fi
+
+  # Detectar e configurar Nginx
+  if command -v nginx &> /dev/null; then
+    echo "Detectado Nginx..."
+    configure_nginx
+  fi
+
+  echo "Correção concluída."
+}
+
+# Executar a função principal
+main

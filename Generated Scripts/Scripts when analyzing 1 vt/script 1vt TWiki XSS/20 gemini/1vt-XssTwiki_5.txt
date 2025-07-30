@@ -1,0 +1,74 @@
+```shell
+#!/bin/bash
+
+# Variáveis
+TWIKI_DIR="/var/www/twiki" # Ajuste para o diretório de instalação do TWiki
+BACKUP_DIR="/tmp/twiki_backup"
+TWIKI_VERSION="4.2.4"
+
+# Verifica se o diretório do TWiki existe
+if [ ! -d "$TWIKI_DIR" ]; then
+  echo "Erro: Diretório do TWiki não encontrado em $TWIKI_DIR."
+  exit 1
+fi
+
+# Cria diretório de backup
+if [ ! -d "$BACKUP_DIR" ]; then
+  mkdir -p "$BACKUP_DIR"
+fi
+
+# Para o servidor web
+echo "Parando o servidor web..."
+if command -v systemctl &> /dev/null
+then
+    systemctl stop apache2
+    systemctl stop httpd
+else
+    service apache2 stop
+    service httpd stop
+fi
+
+# Backup do diretório do TWiki
+echo "Fazendo backup do TWiki em $BACKUP_DIR..."
+tar -czvf "$BACKUP_DIR/twiki_backup.tar.gz" "$TWIKI_DIR"
+
+# Baixa a nova versão do TWiki
+echo "Baixando o TWiki versão $TWIKI_VERSION..."
+wget "https://sourceforge.net/projects/twiki/files/TWiki%20Release/TWiki-$TWIKI_VERSION/TWiki-$TWIKI_VERSION.tgz/download" -O "/tmp/twiki-$TWIKI_VERSION.tgz"
+
+# Extrai a nova versão
+echo "Extraindo o TWiki..."
+tar -xzvf "/tmp/twiki-$TWIKI_VERSION.tgz" -C /tmp/
+
+# Remove o diretório antigo do TWiki
+echo "Removendo o diretório antigo do TWiki..."
+rm -rf "$TWIKI_DIR"
+
+# Move a nova versão para o diretório correto
+echo "Movendo a nova versão para $TWIKI_DIR..."
+mv "/tmp/TWiki-$TWIKI_VERSION" "$TWIKI_DIR"
+
+# Ajusta as permissões
+echo "Ajustando as permissões..."
+chown -R www-data:www-data "$TWIKI_DIR" # Ajuste 'www-data' para o usuário/grupo do seu servidor web
+chmod -R 755 "$TWIKI_DIR"
+
+# Remove o arquivo baixado e diretório temporário
+echo "Limpeza..."
+rm "/tmp/twiki-$TWIKI_VERSION.tgz"
+rm -rf "/tmp/TWiki-$TWIKI_VERSION"
+
+# Inicia o servidor web
+echo "Iniciando o servidor web..."
+if command -v systemctl &> /dev/null
+then
+    systemctl start apache2
+    systemctl start httpd
+else
+    service apache2 start
+    service httpd start
+fi
+
+echo "TWiki atualizado para a versão $TWIKI_VERSION com sucesso!"
+exit 0
+```

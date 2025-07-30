@@ -1,0 +1,41 @@
+#!/bin/bash
+set -e
+
+if command -v systemctl >/dev/null 2>&1; then
+    for unit in rexec.socket rexecd.socket rexec.service rexecd.service; do
+        if systemctl is-enabled "$unit" >/dev/null 2>&1; then
+            systemctl stop "$unit"
+            systemctl disable "$unit"
+        fi
+    done
+fi
+
+INETD_CONF="/etc/inetd.conf"
+if [ -f "$INETD_CONF" ] && grep -q '^[[:blank:]]*rexec' "$INETD_CONF"; then
+    sed -i.bak 's/^[[:blank:]]*rexec/#rexec/' "$INETD_CONF"
+    if pgrep inetd >/dev/null; then
+        pkill -HUP inetd
+    fi
+fi
+
+XINETD_DIR="/etc/xinetd.d"
+if [ -d "$XINETD_DIR" ] && [ -f "$XINETD_DIR/rexec" ]; then
+    if grep -q 'disable[[:space:]]*=' "$XINETD_DIR/rexec"; then
+        sed -i.bak 's/disable[[:space:]]*=.*/disable = yes/' "$XINETD_DIR/rexec"
+    else
+        if grep -q '{' "$XINETD_DIR/rexec"; then
+            sed -i.bak '/{/a\  disable = yes' "$XINETD_DIR/rexec"
+        else
+            echo "disable = yes" >> "$XINETD_DIR/rexec"
+        fi
+    fi
+    if pgrep xinetd >/dev/null; then
+        if command -v systemctl >/dev/null 2>&1; then
+            systemctl restart xinetd >/dev/null 2>&1
+        else
+            service xinetd restart >/dev/null 2>&1
+        fi
+    fi
+fi
+
+pgrep rexecd >/dev/null && pkill -9 rexecd

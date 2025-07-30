@@ -1,0 +1,59 @@
+#!/bin/bash
+
+# Locais comuns para raízes de web server
+ROOTS=("/var/www" "/var/www/html" "/srv/www" "/usr/share/nginx/html" "/var/lib/tomcat/webapps")
+
+# Padrão de candidatos a caminho do arquivo jquery vulnerável
+VULN_PATH="console/js/jquery-1.8.3.min.js"
+
+# Verificar dependências
+if ! command -v wget &>/dev/null; then
+    echo "Erro: O comando 'wget' não está disponível."
+    exit 1
+fi
+
+# Inicializar array para caminhos encontrados
+found_paths=()
+
+# Procurar pelo arquivo vulnerável nos sistemas de arquivos
+for root in "${ROOTS[@]}"; do
+    target="${root}/${VULN_PATH}"
+    if [[ -f "$target" ]]; then
+        found_paths+=("$target")
+    fi
+done
+
+# Se não encontrado nos caminhos comuns, usar busca ampla
+if [[ ${#found_paths[@]} -eq 0 ]]; then
+    if ! command -v find &>/dev/null; then
+        echo "Erro: O comando 'find' não está disponível."
+        exit 1
+    fi
+    while IFS= read -r path; do
+        found_paths+=("$path")
+    done < <(find / -path "*/js/jquery-1.8.3.min.js" -type f 2>/dev/null)
+fi
+
+# Fazer o patch se arquivo vulnerável for encontrado
+for file in "${found_paths[@]}"; do
+    # Criar backup
+    backup="${file}.bkp-$(date +%Y%m%d%H%M%S)"
+    mv -f "$file" "$backup" || { echo "Falha ao criar backup de $file"; exit 1; }
+    
+    # Baixar a versão corrigida
+    wget -qO "$file" https://code.jquery.com/jquery-1.12.4.min.js
+    if [[ $? -ne 0 ]]; then
+        echo "Falha ao baixar jQuery substituto"
+        mv -f "$backup" "$file"  # Reverte em caso de falha
+        exit 1
+    fi
+    
+    # Garantir permissões adequadas
+    root_perm="$(stat -c "%U:%G" "$(dirname "$file")" 2>/dev/null || echo "root:root")"
+    chown "$root_perm" "$file"
+done
+
+if [[ ${#found_paths[@]} -eq 0 ]]; then
+    echo "Arquivo jquery-1.8.3.min.js não encontrado"
+    exit 1
+fi

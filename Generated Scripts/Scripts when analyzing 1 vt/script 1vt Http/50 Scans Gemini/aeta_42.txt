@@ -1,0 +1,81 @@
+#!/bin/bash
+
+# Este script corrige a vulnerabilidade de transmissão de informações sensíveis em texto claro via HTTP.
+# Ele configura o redirecionamento de HTTP para HTTPS e habilita o HTTPS.
+
+# Variáveis
+HTTP_PORT=80
+HTTPS_PORT=443
+DOMINIO="seu_dominio.com" # Substitua por seu domínio
+
+# 1. Verifica se o Apache está instalado
+if ! command -v apache2 &> /dev/null; then
+  echo "Apache não encontrado. Instalando..."
+  apt-get update
+  apt-get install -y apache2
+fi
+
+# 2. Habilita o módulo rewrite (se necessário)
+if ! a2enmod rewrite &> /dev/null; then
+  a2enmod rewrite
+fi
+
+# 3. Configura um VirtualHost para redirecionar HTTP para HTTPS
+
+VHOST_CONFIG="/etc/apache2/sites-available/http_redirect.conf"
+
+cat > "$VHOST_CONFIG" <<EOL
+<VirtualHost *:80>
+    ServerName $DOMINIO
+    Redirect permanent / https://$DOMINIO/
+</VirtualHost>
+EOL
+
+# 4. Ativa o VirtualHost de redirecionamento
+a2ensite http_redirect.conf
+
+# 5. Verifica se o certificado SSL existe
+if [ ! -f /etc/ssl/certs/$DOMINIO.crt ] || [ ! -f /etc/ssl/private/$DOMINIO.key ]; then
+    echo "Certificado SSL não encontrado. Gerando um certificado autoassinado..."
+    mkdir -p /etc/ssl/private
+    openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout /etc/ssl/private/$DOMINIO.key -out /etc/ssl/certs/$DOMINIO.crt -subj "/CN=$DOMINIO"
+    chmod 400 /etc/ssl/private/$DOMINIO.key
+fi
+
+# 6. Configura o VirtualHost para HTTPS
+
+HTTPS_VHOST_CONFIG="/etc/apache2/sites-available/$DOMINIO-ssl.conf"
+
+cat > "$HTTPS_VHOST_CONFIG" <<EOL
+<VirtualHost *:443>
+    ServerName $DOMINIO
+
+    SSLEngine on
+    SSLCertificateFile /etc/ssl/certs/$DOMINIO.crt
+    SSLCertificateKeyFile /etc/ssl/private/$DOMINIO.key
+
+    DocumentRoot /var/www/$DOMINIO # Ajuste para o diretório raiz do seu site
+
+    <Directory /var/www/$DOMINIO>
+        AllowOverride All
+        Require all granted
+    </Directory>
+
+    ErrorLog \${APACHE_LOG_DIR}/error.log
+    CustomLog \${APACHE_LOG_DIR}/access.log combined
+</VirtualHost>
+EOL
+
+# 7. Ativa o VirtualHost HTTPS e o módulo SSL
+a2enmod ssl
+a2ensite $DOMINIO-ssl.conf
+
+# 8. Desativa o site padrão (se necessário e se estiver usando)
+a2dissite 000-default.conf 2>/dev/null
+
+# 9. Reinicia o Apache para aplicar as mudanças
+systemctl restart apache2
+
+echo "Redirecionamento HTTP para HTTPS configurado e HTTPS habilitado."
+echo "Certifique-se de atualizar o registro DNS do seu domínio para apontar para este servidor."
+echo "Se você gerou um certificado autoassinado, considere obter um certificado de uma CA confiável para evitar avisos de segurança no navegador."

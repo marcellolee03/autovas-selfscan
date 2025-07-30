@@ -1,0 +1,137 @@
+#!/bin/bash
+# Vulnerabilidade 1: TWiki XSS and Command Execution Vulnerabilities
+wget -O /tmp/twiki-latest.tar.gz https://sourceforge.net/projects/twiki/files/latest/download
+tar -xzf /tmp/twiki-latest.tar.gz -C /opt/
+rm /tmp/twiki-latest.tar.gz
+chown -R www-data:www-data /opt/twiki
+
+# Vulnerabilidade 2: Distributed Ruby (dRuby/DRb) Multiple RCE Vulnerabilities
+echo "Setting \$SAFE level to 2 for dRuby"
+export DRbSAFE=2
+
+# Vulnerabilidade 3: rlogin Passwordless Login
+systemctl disable rlogin.socket
+systemctl stop rlogin.socket
+
+# Vulnerabilidade 4: Operating System (OS) End of Life (EOL) Detection
+echo "Updating Ubuntu OS"
+apt-get update
+apt-get -y dist-upgrade
+
+# Vulnerabilidade 5: The rexec service is running
+systemctl disable rexec.socket
+systemctl stop rexec.socket
+
+# Vulnerabilidade 6: Possible Backdoor: Ingreslock
+systemctl stop ingreslock
+systemctl disable ingreslock
+rm -f /etc/init.d/ingreslock
+
+# Vulnerabilidade 7: Apache Tomcat AJP RCE Vulnerability (Ghostcat)
+wget -O /tmp/tomcat-latest.tar.gz https://downloads.apache.org/tomcat/tomcat-9/v9.0.31/bin/apache-tomcat-9.0.31.tar.gz
+tar -xzf /tmp/tomcat-latest.tar.gz -C /opt/
+rm /tmp/tomcat-latest.tar.gz
+chown -R tomcat:tomcat /opt/apache-tomcat-9.0.31
+
+# Vulnerabilidade 8: MySQL / MariaDB Default Credentials (MySQL Protocol)
+mysql -u root -e "ALTER USER 'root'@'localhost' IDENTIFIED BY 'NewStrongPassword123!';"
+
+# Vulnerabilidade 9: PHP < 5.6.30, 7.x < 7.0.15, 7.1.x < 7.1.1 Multiple Vulnerabilities (Jan 2017) - Linux
+apt-get install -y php7.0
+
+# Vulnerabilidade 10: PHP < 5.3.13, 5.4.x < 5.4.3 Multiple Vulnerabilities - Active Check
+apt-get install -y php5.6
+
+# Vulnerabilidade 11: vsftpd Compromised Source Packages Backdoor Vulnerability
+apt-get remove -y vsftpd
+apt-get install -y vsftpd
+
+# Vulnerabilidade 12: vsftpd Compromised Source Packages Backdoor Vulnerability
+apt-get remove -y vsftpd
+apt-get install -y vsftpd
+
+# Vulnerabilidade 13: DistCC RCE Vulnerability (CVE-2004-2687)
+systemctl stop distcc
+systemctl disable distcc
+apt-get remove -y distcc
+
+# Vulnerabilidade 14: PostgreSQL Default Credentials (PostgreSQL Protocol)
+sudo -u postgres psql -c "ALTER USER postgres WITH PASSWORD 'NewStrongPassword123!';"
+
+# Vulnerabilidade 15: VNC Brute Force Login
+vncpasswd /etc/vncpasswd
+
+# Vulnerabilidade 16: Test HTTP dangerous methods
+a2dismod include
+
+# Vulnerabilidade 17: FTP Brute Force Logins With Default Credentials Reporting
+sed -i 's/anonymous_enable=YES/anonymous_enable=NO/' /etc/vsftpd.conf
+systemctl restart vsftpd
+
+# Vulnerabilidade 18: FTP Brute Force Logins With Default Credentials Reporting
+sed -i 's/anonymous_enable=YES/anonymous_enable=NO/' /etc/vsftpd.conf
+systemctl restart vsftpd
+
+# Vulnerabilidade 19: The rlogin service is running
+systemctl disable rlogin.socket
+systemctl stop rlogin.socket
+
+# Vulnerabilidade 20: rsh Unencrypted Cleartext Login
+systemctl disable rsh.socket
+systemctl stop rsh.socket
+
+# Vulnerabilidade 21: SSL/TLS: OpenSSL CCS Man in the Middle Security Bypass Vulnerability
+apt-get install -y openssl
+
+# Vulnerabilidade 22: Multiple Vendors STARTTLS Implementation Plaintext Arbitrary Command Injection Vulnerability
+postconf -e smtpd_tls_security_level=may
+postfix reload
+
+# Vulnerabilidade 23: TWiki Cross-Site Request Forgery Vulnerability (Sep 2010)
+wget -O /tmp/twiki-latest.tar.gz https://sourceforge.net/projects/twiki/files/latest/download
+tar -xzf /tmp/twiki-latest.tar.gz -C /opt/
+rm /tmp/twiki-latest.tar.gz
+chown -R www-data:www-data /opt/twiki
+
+# Vulnerabilidade 24: Anonymous FTP Login Reporting
+sed -i 's/anonymous_enable=YES/anonymous_enable=NO/' /etc/vsftpd.conf
+systemctl restart vsftpd
+
+# Vulnerabilidade 25: jQuery < 1.9.0 XSS Vulnerability
+wget -O /var/www/html/mutillidae/javascript/ddsmoothmenu/jquery.min.js https://code.jquery.com/jquery-1.9.0.min.js
+
+# Vulnerabilidade 26: TWiki < 6.1.0 XSS Vulnerability
+wget -O /tmp/twiki-latest.tar.gz https://sourceforge.net/projects/twiki/files/latest/download
+tar -xzf /tmp/twiki-latest.tar.gz -C /opt/
+rm /tmp/twiki-latest.tar.gz
+chown -R www-data:www-data /opt/twiki
+
+# Vulnerabilidade 27: TWiki CSRF Vulnerability
+wget -O /tmp/twiki-latest.tar.gz https://sourceforge.net/projects/twiki/files/latest/download
+tar -xzf /tmp/twiki-latest.tar.gz -C /opt/
+rm /tmp/twiki-latest.tar.gz
+chown -R www-data:www-data /opt/twiki
+
+# Vulnerabilidade 28: SSL/TLS: Deprecated SSLv2 and SSLv3 Protocol Detection
+a2enmod ssl
+a2ensite default-ssl
+systemctl restart apache2
+
+# Vulnerabilidade 29: SSL/TLS: Deprecated SSLv2 and SSLv3 Protocol Detection
+a2enmod ssl
+a2ensite default-ssl
+systemctl restart apache2
+
+# Vulnerabilidade 30: SSL/TLS: Report Weak Cipher Suites
+a2enmod ssl
+a2ensite default-ssl
+systemctl restart apache2
+
+# Vulnerabilidade 31: HTTP Debugging Methods (TRACE/TRACK) Enabled
+a2dismod include
+
+# Vulnerabilidade 32: SSL/TLS: Server Certificate / Certificate in Chain with RSA keys less than 2048 bits
+openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout /etc/ssl/private/apache-selfsigned.key -out /etc/ssl/certs/apache-selfsigned.crt
+
+# Vulnerabilidade 33: SSL/TLS: Server Certificate / Certificate in Chain with RSA keys less than 2048 bits
+openssl req -x509 -nodes -days 365 -newkey rsa:204

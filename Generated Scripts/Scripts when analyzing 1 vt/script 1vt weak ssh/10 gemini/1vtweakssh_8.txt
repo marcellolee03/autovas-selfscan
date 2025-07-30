@@ -1,0 +1,36 @@
+```bash
+#!/bin/bash
+
+# Define o arquivo de configuração do SSH
+SSH_CONFIG="/etc/ssh/sshd_config"
+
+# Define o algoritmo de chave de host fraco a ser removido
+WEAK_ALGORITHM="ssh-dss"
+
+# Remove a linha 'HostKeyAlgorithms' se ela existir e contiver apenas o algoritmo fraco
+if grep -q "^HostKeyAlgorithms.*${WEAK_ALGORITHM}" "$SSH_CONFIG"; then
+  if grep -q "^HostKeyAlgorithms.*${WEAK_ALGORITHM}$" "$SSH_CONFIG"; then
+    sed -i "/^HostKeyAlgorithms.*${WEAK_ALGORITHM}$/d" "$SSH_CONFIG"
+  else
+    # Remove apenas o algoritmo fraco da linha 'HostKeyAlgorithms'
+    sed -i "s/,${WEAK_ALGORITHM}//g" "$SSH_CONFIG"
+    sed -i "s/${WEAK_ALGORITHM},//g" "$SSH_CONFIG"
+    sed -i "s/${WEAK_ALGORITHM}//g" "$SSH_CONFIG"
+  fi
+fi
+
+# Remove qualquer menção ao algoritmo fraco dentro do arquivo
+# Isso é para garantir que não haja outras configurações conflitantes
+sed -i "/${WEAK_ALGORITHM}/d" "$SSH_CONFIG"
+
+# Reinicia o serviço SSH para aplicar as alterações
+if command -v systemctl &> /dev/null; then
+  systemctl restart sshd
+elif command -v service &> /dev/null; then
+  service sshd restart
+else
+  /etc/init.d/sshd restart
+fi
+
+echo "Vulnerabilidade SSH (ssh-dss) corrigida. Serviço SSH reiniciado."
+```

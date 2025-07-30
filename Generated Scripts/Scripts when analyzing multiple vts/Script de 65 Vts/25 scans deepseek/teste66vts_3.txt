@@ -1,0 +1,32 @@
+#!/bin/bash
+
+# Atualizar o Python para versões fixas
+sudo apt-get update
+sudo apt-get install -y python3.10=3.10.15-1~20.04 python3.12=3.12.6-1~20.04
+
+# Remover versões antigas e vulneráveis
+sudo apt-get remove -y python3.10.12 python3.12.0
+
+# Configurar alternativas para garantir o uso das versões corretas
+sudo update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.10 1
+sudo update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.12 2
+
+# Verificar se o SSL/TLS está configurado corretamente
+sudo sed -i 's/TLSv1.0//g' /etc/ssl/openssl.cnf
+sudo sed -i 's/TLSv1.1//g' /etc/ssl/openssl.cnf
+sudo systemctl restart apache2
+
+# Substituir o certificado SSL/TLS por um de confiança
+sudo cp /path/to/trusted/certificate.crt /etc/ssl/certs/
+sudo cp /path/to/trusted/private.key /etc/ssl/private/
+sudo systemctl restart apache2
+
+# Desabilitar protocolos SSH inseguros
+sudo sed -i 's/^MACs.*/MACs hmac-sha2-256,hmac-sha2-512/' /etc/ssh/sshd_config
+sudo systemctl restart sshd
+
+# Bloquear ICMP Timestamp
+sudo iptables -A INPUT -p icmp --icmp-type timestamp-request -j DROP
+sudo iptables -A OUTPUT -p icmp --icmp-type timestamp-reply -j DROP
+
+exit 0

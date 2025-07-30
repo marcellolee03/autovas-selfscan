@@ -1,0 +1,50 @@
+#!/bin/sh
+
+command -v pveversion >/dev/null && {
+  grep -q "pve-no-subscription" /etc/apt/sources.list || \
+    echo "deb http://download.proxmox.com/debian/pve bookworm pve-no-subscription" >>/etc/apt/sources.list
+  apt-get update
+  DEBIAN_FRONTEND=noninteractive apt-get -y dist-upgrade
+}
+
+paths="/js/jquery-1.8.3.min.js /opscenter/js/jquery-1.8.3.min.js /console/js/jquery-1.8.3.min.js"
+for path in $paths; do
+  [ -f "$path" ] && {
+    wget -O "$path" https://code.jquery.com/jquery-1.12.4.min.js
+  }
+done
+
+SSH_CONFIG="/etc/ssh/sshd_config"
+[ -f "$SSH_CONFIG" ] && {
+  sed -i '/ssh-dss/d' "$SSH_CONFIG"
+  sed -i '/diffie-hellman-group1-sha1/d' "$SSH_CONFIG"
+  sed -i '/3des-cbc\|aes128-cbc\|aes256-cbc\|twofish-cbc\|arcfour\|arcfour128\|arcfour256/d' "$SSH_CONFIG"
+  sed -i '/umac-64\|hmac-md5\|hmac-sha1-96/d' "$SSH_CONFIG"
+  
+  grep -q "^KexAlgorithms" "$SSH_CONFIG" && \
+    sed -i "s/^KexAlgorithms.*/KexAlgorithms curve25519-sha256@libssh.org,ecdh-sha2-nistp521,ecdh-sha2-nistp384,ecdh-sha2-nistp256,diffie-hellman-group-exchange-sha256/" "$SSH_CONFIG" || \
+    echo "KexAlgorithms curve25519-sha256@libssh.org,ecdh-sha2-nistp521,ecdh-sha2-nistp384,ecdh-sha2-nistp256,diffie-hellman-group-exchange-sha256" >> "$SSH_CONFIG"
+  
+  grep -q "^Ciphers" "$SSH_CONFIG" && \
+    sed -i "s/^Ciphers.*/Ciphers chacha20-poly1305@openssh.com,aes256-gcm@openssh.com,aes128-gcm@openssh.com,aes256-ctr,aes192-ctr,aes128-ctr/" "$SSH_CONFIG" || \
+    echo "Ciphers chacha20-poly1305@openssh.com,aes256-gcm@openssh.com,aes128-gcm@openssh.com,aes256-ctr,aes192-ctr,aes128-ctr" >> "$SSH_CONFIG"
+  
+  grep -q "^MACs" "$SSH_CONFIG" && \
+    sed -i "s/^MACs.*/MACs hmac-sha2-512-etm@openssh.com,hmac-sha2-256-etm@openssh.com/" "$SSH_CONFIG" || \
+    echo "MACs hmac-sha2-512-etm@openssh.com,hmac-sha2-256-etm@openssh.com" >> "$SSH_CONFIG"
+    
+  systemctl restart ssh
+}
+
+apt-get purge -y telnetd
+
+grep -q "net.ipv4.tcp_timestamps" /etc/sysctl.conf && \
+  sed -i "s/^net.ipv4.tcp_timestamps.*/net.ipv4.tcp_timestamps=0/" /etc/sysctl.conf || \
+  echo "net.ipv4.tcp_timestamps=0" >> /etc/sysctl.conf
+sysctl -p
+
+command -v iptables >/dev/null && {
+  iptables -A INPUT -p icmp --icmp-type timestamp-request -j DROP
+  iptables -A INPUT -p icmp --icmp-type timestamp-reply -j DROP
+  [ -x /usr/sbin/iptables-save ] && iptables-save > /etc/iptables/rules.v4
+}

@@ -1,0 +1,18 @@
+#!/bin/bash
+TWIKI_DIR="/var/www/html/twiki"
+BACKUP_DIR="/var/backups/twiki"
+CURRENT_VERSION=$(grep -oP '(?<=VERSION=).*' $TWIKI_DIR/bin/setlib.cfg | tr -d '\r')
+FIXED_VERSION="4.2.4"
+
+if [[ "$CURRENT_VERSION" < "$FIXED_VERSION" ]]; then
+    mkdir -p $BACKUP_DIR
+    tar -czf $BACKUP_DIR/twiki_backup_$(date +%F).tar.gz $TWIKI_DIR
+    wget -O /tmp/twiki.tar.gz https://sourceforge.net/projects/twiki/files/TWiki/TWiki%20$FIXED_VERSION/TWiki-$FIXED_VERSION.tgz/download
+    tar -xzf /tmp/twiki.tar.gz -C /tmp
+    rsync -a /tmp/TWiki-$FIXED_VERSION/ $TWIKI_DIR
+    rm -rf /tmp/TWiki-$FIXED_VERSION /tmp/twiki.tar.gz
+    chown -R www-data:www-data $TWIKI_DIR
+    echo "TWiki upgraded to version $FIXED_VERSION successfully."
+else
+    echo "TWiki is already at version $FIXED_VERSION or higher."
+fi

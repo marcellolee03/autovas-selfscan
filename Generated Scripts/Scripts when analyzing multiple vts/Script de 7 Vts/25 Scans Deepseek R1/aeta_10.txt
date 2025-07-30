@@ -1,0 +1,82 @@
+#!/bin/bash
+
+if [ "$(id -u)" -ne 0 ]; then
+    echo "Este script deve ser executado como root" >&2
+    exit 1
+fi
+
+if [ -f "/etc/apache2/apache2.conf" ]; then
+    a2enmod ssl
+    if [ ! -f /etc/apache2/sites-available/000-redirect.conf ]; then
+        cat <<EOF > /etc/apache2/sites-available/000-redirect.conf
+<VirtualHost *:80>
+    ServerName localhost
+    Redirect permanent / https://%{HTTP_HOST}%{REQUEST_URI}
+</VirtualHost>
+EOF
+        a2ensite 000-redirect.conf
+    fi
+    systemctl restart apache2
+fi
+
+if [ -f "/etc/bind/named.conf" ]; then
+    cp /etc/bind/named.conf.options /etc/bind/named.conf.options.bak
+    if grep -q "recursion" /etc/bind/named.conf.options; then
+        sed -i '/recursion/c\trecursion no;' /etc/bind/named.conf.options
+        sed -i '/allow-recursion/c\allow-recursion { none; };' /etc/bind/named.conf.options
+    else
+        sed -i '/options {/a \\tallow-recursion { none; };\n\trecursion no;' /etc/bind/named.conf.options
+    fi
+    systemctl restart bind9
+fi
+
+iptables -A INPUT -p icmp --icmp-type timestamp-request -j DROP
+iptables -A OUTPUT -p icmp --icmp-type timestamp-reply -j DROP
+if command -v netfilter-persistent &> /dev/null; then
+    netfilter-persistent save
+elif command -v iptables-save &> /dev/null && [ -d /etc/iptables ]; then
+    iptables-save > /etc/iptables/rules.v4
+fi
+
+if [ -f "/etc/apache2/apache2.conf" ]; then
+    conf_file="/etc/apache2/mods-enabled/ssl.conf"
+    if [ -f "$conf_file" ]; then
+        cp "$conf_file" "$conf_file.bak"
+        if grep -q "SSLProtocol" "$conf_file"; then
+            sed -i 's/^SSLProtocol.*/SSLProtocol all -TLSv1 -TLSv1.1/' "$conf_file"
+        else
+            echo "SSLProtocol all -TLSv1 -TLSv1.1" >> "$conf_file"
+        fi
+        if grep -q "SSLCipherSuite" "$conf_file"; then
+            sed -i 's/^SSLCipherSuite.*/SSLCipherSuite HIGH:!aNULL:!MD5:!RC4:!3DES/' "$conf_file"
+        else
+            echo "SSLCipherSuite HIGH:!aNULL:!MD5:!RC4:!3DES" >> "$conf_file"
+        fi
+        echo "SSLHonorCipherOrder on" >> "$conf_file"
+        echo "SSLCompression off" >> "$conf_file"
+        echo "SSLInsecureRenegotiation off" >> "$conf_file"
+        systemctl restart apache2
+    fi
+fi
+
+if [ -f "/etc/nginx/nginx.conf" ]; then
+    for conf_file in /etc/nginx/sites-enabled/*; do
+        if [ -f "$conf_file" ]; then
+            cp "$conf_file" "$conf_file.bak"
+            if grep -q "listen[[:space:]]*443 ssl" "$conf_file"; then
+                sed -i '/listen[[:space:]]*443 ssl/a \\tssl_protocols TLSv1.2 TLSv1.3;' "$conf_file"
+                sed -i '/listen[[:space:]]*443 ssl/a \\tssl_ciphers "TLS_AES_128_GCM_SHA256:TLS_AES_256_GCM_SHA384:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-RSA-AES256-GCM-SHA384";' "$conf_file"
+                sed -i '/listen[[:space:]]*443 ssl/a \\tssl_prefer_server_ciphers on;' "$conf_file"
+                sed -i '/listen[[:space:]]*443 ssl/a \\tssl_session_tickets off;' "$conf_file"
+            fi
+        fi
+    done
+    systemctl restart nginx
+fi
+
+if grep -q "net.ipv4.tcp_timestamps" /etc/sysctl.conf; then
+    sed -i 's/^net.ipv4.tcp_timestamps.*/net.ipv4.tcp_timestamps=0/' /etc/sysctl.conf
+else
+    echo "net.ipv4.tcp_timestamps=0" >> /etc/sysctl.conf
+fi
+sysctl -p

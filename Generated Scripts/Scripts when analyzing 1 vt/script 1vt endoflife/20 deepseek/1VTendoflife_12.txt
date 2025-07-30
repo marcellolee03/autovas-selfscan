@@ -1,0 +1,15 @@
+#!/bin/bash
+OS_NAME=$(lsb_release -si)
+OS_VERSION=$(lsb_release -sr)
+
+if [[ "$OS_NAME" == "Ubuntu" && "$OS_VERSION" == "8.04" ]]; then
+    echo "Upgrading Ubuntu 8.04 to a supported version..."
+    sudo do-release-upgrade
+    if [[ $? -eq 0 ]]; then
+        echo "Upgrade completed successfully."
+    else
+        echo "Upgrade failed. Please check for errors and try again."
+    fi
+else
+    echo "The system is not running Ubuntu 8.04. No action taken."
+fi

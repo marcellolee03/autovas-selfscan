@@ -1,0 +1,35 @@
+#!/bin/bash
+if [ "$(id -u)" != "0" ]; then exit 1; fi
+
+if [ -f /etc/debian_version ]; then
+    apt-get update
+    for pkg in $(dpkg -l | awk '/php.*cgi/ {print $2}' | grep -E '^php[0-9]?'); do
+        apt-get install --only-upgrade -y "$pkg"
+    done
+    for pkg in $(dpkg -l | awk '/php.*cgi/ {print $2}'); do
+        ver=$(dpkg -s "$pkg" | grep Version)
+        if [[ "$ver" =~ (5\.3\.) && "${ver#*5.3.}" < 13 ]] || 
+           [[ "$ver" =~ (5\.4\.) && "${ver#*5.4.}" < 3 ]]; then
+            apt-get remove --purge -y "$pkg"
+        fi
+    done
+
+    systemctl restart apache2 >/dev/null 2>&1
+    systemctl restart nginx >/dev/null 2>&1
+
+elif [ -f /etc/redhat-release ] || [ -f /etc/centos-release ]; then
+    yum update -y php*
+    installed=$(rpm -qa '*cgi')
+    if [ -n "$installed" ]; then
+        ver=$(php-cgi -v 2>/dev/null | grep -oP 'PHP \K[0-9.]+')
+        if [[ "$ver" =~ ^5\.3\..* && "${ver#5.3.}" -lt 13 ]] || 
+           [[ "$ver" =~ ^5\.4\..* && "${ver#5.4.}" -lt 3 ]]; then
+            yum remove -y "$installed"
+        fi
+    fi
+    
+    systemctl restart httpd >/dev/null 2>&1
+    systemctl restart nginx >/dev/null 2>&1
+else
+    exit 2
+fi

@@ -1,0 +1,189 @@
+>analise esse prompt contendo as vulnerabilidades encontradas em um csv do openvas e analise se os scripts que irei enviar em seguida sao capazes de corrigir esses problemas ou nao, me informando uma porcentagem de correcao das vulnerabilidades
+>Vulnerabilidades:
+    # INSTRUÇÕES PARA O MODELO DE IA
+
+    ## PERSONA
+    Você é um especialista em cibersegurança e automação de sistemas, focado em criar scripts de correção (patching). Sua única função é gerar um script que resolva a vulnerabilidade descrita abaixo.
+
+    ## TAREFA
+    Analise o contexto da vulnerabilidade a seguir e gere um script de shell (compatível com o sistema operacional do localhost) que, ao ser executado, corrija permanentemente a vulnerabilidade descrita.
+
+    ## CONTEXTO DA VULNERABILIDADE
+
+# Vulnerabilidade 1
+CVEs: CVE-1999-0618
+NVT Name: The rexec service is running
+Port: 512
+Port Protocol: tcp
+Summary: This remote host is running a rexec service.
+Specific Result: The rexec service was detected on the target system.
+
+Vulnerability Detection Method: Checks whether an rexec service is exposed on the target
+  host.
+Details:
+The rexec service is running
+(OID: 1.3.6.1.4.1.25623.1.0.100111)
+Version used: 2023-09-12T05:05:19Z
+
+Affected Software/OS: nan
+Product Detection Result: nan
+Solution: Disable the rexec service and use alternatives like SSH
+  instead.
+
+    ## REGRAS E RESTRIÇÕES DE SAÍDA
+    1.  **APENAS SCRIPT:** A sua resposta deve conter ÚNICA E EXCLUSIVAMENTE o código do script.
+    2.  **SEM EXPLICAÇÕES:** Não adicione nenhum comentário, explicação, introdução, ou despedida.
+    3.  **SEM BLOCOS DE CÓDIGO MARKDOWN:** Não envolva o script em blocos de código como ` ```bash ` ou ` ```sh `. A resposta deve ser o texto puro do script.
+    4.  **AUTOSSUFICIENTE:** O script deve ser completo, autônomo e não deve exigir interação do usuário para ser executado.
+    5.  **COMPATIBILIDADE:** O script deve ser compatível com o sistema operacional especificado em 'localhost OS'. Se o sistema operacional não for especificado, assuma um sistema baseado em Linux (como Ubuntu/Debian).
+
+    # INÍCIO DO SCRIPT DE CORREÇÃO
+
+>Scripts de correção:
+{type: uploaded file
+fileName: 1vtrexec_1.txt
+fullContent:
+#!/bin/bash
+systemctl stop rexec.socket
+systemctl stop rexec.service
+systemctl disable rexec.socket
+systemctl disable rexec.service
+if grep -q "^rexec" /etc/inetd.conf; then
+    sed -i '/^rexec/d' /etc/inetd.conf
+fi
+if [ -f /etc/xinetd.d/rexec ]; then
+    rm -f /etc/xinetd.d/rexec
+fi
+iptables -A INPUT -p tcp --dport 512 -j DROP
+iptables -A INPUT -p udp --dport 512 -j DROP
+iptables-save > /etc/iptables/rules.v4
+iptables-save > /etc/iptables/rules.v6
+echo "Disabling rexec service and blocking port 512 completed."}
+{type: uploaded file
+fileName: 1vtrexec_2.txt
+fullContent:
+#!/bin/bash
+systemctl stop rexec
+systemctl disable rexec
+ufw deny 512/tcp}
+{type: uploaded file
+fileName: 1vtrexec_3.txt
+fullContent:
+#!/bin/bash
+systemctl stop rexec
+systemctl disable rexec
+ufw deny 512/tcp
+sed -i '/^rexec/s/^/#/' /etc/inetd.conf
+systemctl restart inetd}
+{type: uploaded file
+fileName: 1vtrexec_4.txt
+fullContent:
+#!/bin/bash
+if systemctl is-active --quiet rexec; then
+    systemctl stop rexec
+    systemctl disable rexec
+fi
+if grep -q "rexecd" /etc/inetd.conf; then
+    sed -i '/rexecd/d' /etc/inetd.conf
+    pkill -HUP inetd
+fi
+if grep -q "rexecd" /etc/xinetd.d/*; then
+    sed -i '/rexecd/d' /etc/xinetd.d/*
+    systemctl restart xinetd
+fi
+iptables -A INPUT -p tcp --dport 512 -j DROP
+iptables -A INPUT -p udp --dport 512 -j DROP
+iptables-save > /etc/iptables/rules.v4
+ip6tables -A INPUT -p tcp --dport 512 -j DROP
+ip6tables -A INPUT -p udp --dport 512 -j DROP
+ip6tables-save > /etc/iptables/rules.v6}
+{type: uploaded file
+fileName: 1vtrexec_5.txt
+fullContent:
+#!/bin/bash
+systemctl stop rexec.socket
+systemctl disable rexec.socket
+systemctl mask rexec.socket
+systemctl stop rexec.service
+systemctl disable rexec.service
+systemctl mask rexec.service
+ufw deny 512/tcp
+echo "rexec service has been disabled and masked. Port 512/tcp has been denied via UFW."}
+{type: uploaded file
+fileName: 1vtrexec_6.txt
+fullContent:
+#!/bin/bash
+systemctl stop rexec.service
+systemctl disable rexec.service
+ufw deny 512/tcp
+ufw reload}
+{type: uploaded file
+fileName: 1vtrexec_7.txt
+fullContent:
+#!/bin/bash
+systemctl stop rexec
+systemctl disable rexec
+if [ -f /etc/inetd.conf ]; then
+    sed -i '/^rexec/d' /etc/inetd.conf
+fi
+if [ -f /etc/xinetd.d/rexec ]; then
+    rm -f /etc/xinetd.d/rexec
+fi
+iptables -A INPUT -p tcp --dport 512 -j DROP
+iptables-save > /etc/iptables/rules.v4
+if [ -f /etc/ufw/user.rules ]; then
+    ufw deny 512/tcp
+fi
+echo "rexec service has been disabled and port 512 is blocked."}
+{type: uploaded file
+fileName: 1vtrexec_8.txt
+fullContent:
+#!/bin/bash
+if systemctl is-active --quiet rexec; then
+    systemctl stop rexec
+    systemctl disable rexec
+fi
+if [ -f /etc/xinetd.d/rexec ]; then
+    sed -i 's/disable = no/disable = yes/' /etc/xinetd.d/rexec
+    service xinetd restart
+fi
+if grep -q "rexec" /etc/inetd.conf; then
+    sed -i '/^rexec/d' /etc/inetd.conf
+    killall -HUP inetd
+fi}
+{type: uploaded file
+fileName: 1vtrexec_9.txt
+fullContent:
+#!/bin/bash
+systemctl stop rexec
+systemctl disable rexec
+sed -i '/^rexec/d' /etc/inetd.conf
+sed -i '/^rexec/d' /etc/xinetd.d/rexec
+killall -9 rexecd >/dev/null 2>&1
+iptables -A INPUT -p tcp --dport 512 -j DROP
+iptables-save > /etc/iptables/rules.v4
+systemctl restart iptables >/dev/null 2>&1}
+{type: uploaded file
+fileName: 1vtrexec_10.txt
+fullContent:
+#!/bin/bash
+systemctl stop rexec
+systemctl disable rexec
+if grep -q "^rexec" /etc/inetd.conf; then
+    sed -i '/^rexec/d' /etc/inetd.conf
+fi
+if grep -q "^exec" /etc/inetd.conf; then
+    sed -i '/^exec/d' /etc/inetd.conf
+fi
+if grep -q "^512" /etc/services; then
+    sed -i '/^512\/tcp.*rexec/d' /etc/services
+fi
+if [ -f /etc/xinetd.d/rexec ]; then
+    rm -f /etc/xinetd.d/rexec
+fi
+if [ -f /etc/xinetd.d/exec ]; then
+    rm -f /etc/xinetd.d/exec
+fi
+iptables -A INPUT -p tcp --dport 512 -j DROP
+iptables-save > /etc/iptables/rules.v4
+echo "rexec service has been disabled and secured."}

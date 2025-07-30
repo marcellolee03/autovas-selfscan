@@ -1,0 +1,58 @@
+```bash
+#!/bin/bash
+
+# Define the URL of the vulnerable jQuery file
+VULNERABLE_FILE_URL="http://10.129.4.254/console/framework/../js/jquery-1.8.3.min.js"
+
+# Define the local path where the file is currently located (inferred from URL)
+LOCAL_FILE_PATH="/var/www/html/console/framework/js/jquery-1.8.3.min.js"  # Adjust base path if necessary. Assumes /var/www/html
+
+# Define the URL of the patched jQuery file (version 1.9.0)
+PATCHED_FILE_URL="https://code.jquery.com/jquery-1.9.0.min.js"
+
+# Define the temporary file path to store the downloaded patched file
+TEMP_FILE="/tmp/jquery-1.9.0.min.js"
+
+# Check if the vulnerable file exists
+if [ ! -f "$LOCAL_FILE_PATH" ]; then
+  echo "Vulnerable file not found at $LOCAL_FILE_PATH. Please adjust LOCAL_FILE_PATH if necessary."
+  exit 1
+fi
+
+# Download the patched jQuery file
+echo "Downloading patched jQuery file from $PATCHED_FILE_URL to $TEMP_FILE..."
+curl -s "$PATCHED_FILE_URL" -o "$TEMP_FILE"
+
+# Check if the download was successful
+if [ ! -f "$TEMP_FILE" ]; then
+  echo "Failed to download patched jQuery file."
+  exit 1
+fi
+
+# Backup the vulnerable jQuery file
+echo "Backing up vulnerable file to $LOCAL_FILE_PATH.bak..."
+cp "$LOCAL_FILE_PATH" "$LOCAL_FILE_PATH.bak"
+
+# Replace the vulnerable jQuery file with the patched file
+echo "Replacing vulnerable file with patched file..."
+cp "$TEMP_FILE" "$LOCAL_FILE_PATH"
+
+# Clean up the temporary file
+echo "Cleaning up temporary file..."
+rm "$TEMP_FILE"
+
+# Verify the file replacement (optional - can be removed if speed is critical)
+# file_hash_old=$(md5sum "$LOCAL_FILE_PATH.bak" | awk '{print $1}')
+# file_hash_new=$(md5sum "$LOCAL_FILE_PATH" | awk '{print $1}')
+
+# if [ "$file_hash_old" != "$file_hash_new" ]; then
+#   echo "File replacement successful."
+# else
+#   echo "File replacement failed.  Restoring from backup..."
+#   cp "$LOCAL_FILE_PATH.bak" "$LOCAL_FILE_PATH"
+#   exit 1
+# fi
+
+echo "jQuery file updated to version 1.9.0."
+exit 0
+```

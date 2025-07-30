@@ -1,0 +1,49 @@
+```sh
+#!/bin/sh
+
+backup_file() {
+    [ -f "$1" ] && cp "$1" "$1.bak.$(date +%Y%m%d%H%M%S)"
+}
+
+if [ -d /etc/postgresql ]; then
+    for config in $(find /etc/postgresql -name postgresql.conf); do
+        backup_file "$config"
+        version_part=$(echo "$config" | sed -n 's|/etc/postgresql/\([0-9.]*\)/main.*|\1|p')
+        if [ -n "$version_part" ]; then
+            major_version=${version_part%%.*}
+            if [ "$major_version" -ge 12 ]; then
+                sed -i -e "s/^#*\s*ssl_min_protocol_version\s*=.*$/ssl_min_protocol_version = 'TLSv1.2'/" "$config"
+                grep -q "^ssl_min_protocol_version" "$config" || echo "ssl_min_protocol_version = 'TLSv1.2'" >> "$config"
+            else
+                sed -i -e "s/^#*\s*ssl_protocols\s*=.*$/ssl_protocols = 'TLSv1.2'/" "$config"
+                grep -q "^ssl_protocols" "$config" || echo "ssl_protocols = 'TLSv1.2'" >> "$config"
+            fi
+        fi
+    done
+    [ -x /usr/bin/systemctl ] && systemctl status postgresql >/dev/null 2>&1 && systemctl restart postgresql
+fi
+
+APACHE_CONF="/etc/apache2/mods-available/ssl.conf"
+if [ -f "$APACHE_CONF" ]; then
+    backup_file "$APACHE_CONF"
+    sed -i -e 's/^\(#\)*SSLProtocol.*$/SSLProtocol -all +TLSv1.2 +TLSv1.3/' "$APACHE_CONF"
+    grep -q "^SSLProtocol" "$APACHE_CONF" || echo "SSLProtocol -all +TLSv1.2 +TLSv1.3" >> "$APACHE_CONF"
+    if command -v apache2ctl >/dev/null 2>&1 && apache2ctl -t >/dev/null 2>&1; then
+        [ -x /usr/bin/systemctl ] && systemctl status apache2 >/dev/null 2>&1 && systemctl restart apache2
+    fi
+fi
+
+NGINX_CONF="/etc/nginx/nginx.conf"
+if [ -f "$NGINX_CONF" ]; then
+    backup_file "$NGINX_CONF"
+    NGINX_CONFS="$NGINX_CONF $(find /etc/nginx/conf.d -type f -name '*.conf') $(find /etc/nginx/sites-enabled -type f)"
+    for conf in $NGINX_CONFS; do
+        backup_file "$conf"
+        sed -i -e '/^\s*#*\s*ssl_protocols\s\+/s/TLSv1\.0\|TLSv1\.1\|SSLv2\|SSLv3//g' -e 's/^\(\s*\)#*\s*ssl_protocols\s\+.*$/\1ssl_protocols TLSv1.2 TLSv1.3;/' "$conf"
+        grep -qE '^\s*ssl_protocols[[:space:]]' "$conf" || sed -i '/\s*listen[[:space:]]\+.*ssl.*/a \    ssl_protocols TLSv1.2 TLSv1.3;' "$conf"
+    done
+    if nginx -t >/dev/null 2>&1; then
+        [ -x /usr/bin/systemctl ] && systemctl status nginx >/dev/null 2>&1 && systemctl restart nginx
+    fi
+fi
+```

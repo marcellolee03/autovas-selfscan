@@ -1,0 +1,6 @@
+#!/bin/bash
+echo "Atualizando o Apache HTTP Server para a versão mais recente..."
+apt-get update
+apt-get install --only-upgrade apache2 -y
+systemctl restart apache2
+echo "Atualização concluída e serviço reiniciado."

@@ -1,0 +1,24 @@
+```bash
+#!/bin/bash
+
+# Este script atualiza o sistema operacional Ubuntu 8.04 para uma versão suportada.
+# Devido ao fato de o Ubuntu 8.04 ser extremamente antigo e não ter suporte,
+# a atualização direta não é possível. Este script orienta o usuário sobre o processo.
+# Ele exibe uma mensagem de aviso e instruções para realizar uma nova instalação.
+
+echo "AVISO: O Ubuntu 8.04 (Hardy Heron) atingiu o fim da vida útil (EOL) em 2013 e não recebe mais atualizações de segurança."
+echo "A atualização direta para uma versão suportada não é possível devido à antiguidade do sistema."
+echo "A solução recomendada é realizar uma nova instalação do Ubuntu com uma versão LTS (Long Term Support) mais recente."
+echo ""
+echo "Instruções:"
+echo "1. Faça backup de todos os seus dados importantes."
+echo "2. Baixe a imagem ISO de uma versão LTS do Ubuntu (por exemplo, Ubuntu 22.04 LTS) do site oficial do Ubuntu: https://ubuntu.com/download/desktop"
+echo "3. Crie uma mídia de instalação (USB ou DVD) a partir da imagem ISO."
+echo "4. Inicialize o computador a partir da mídia de instalação."
+echo "5. Siga as instruções na tela para instalar o Ubuntu, sobrescrevendo a instalação existente do Ubuntu 8.04."
+echo ""
+echo "Observação: Certifique-se de escolher a opção de instalação que formata a partição existente do Ubuntu 8.04 para evitar conflitos."
+echo "Após a instalação, restaure seus dados a partir do backup."
+
+exit 1
+```

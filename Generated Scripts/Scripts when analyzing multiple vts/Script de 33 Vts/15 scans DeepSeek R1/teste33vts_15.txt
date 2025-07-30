@@ -1,0 +1,32 @@
+```bash
+#!/bin/bash
+
+# Fix Proxmox EOL (update system)
+apt-get update -y
+apt-get dist-upgrade -y --with-new-pkgs -o Dpkg::Options::="--force-confold"
+
+# Fix SSH vulnerabilities (host keys, KEX, ciphers, MACs)
+cat << EOF >> /etc/ssh/sshd_config
+HostKeyAlgorithms *,-ssh-dss
+KexAlgorithms *,-diffie-hellman-group1-sha1,-diffie-hellman-group14-sha1
+Ciphers *,-3des-cbc,-aes128-cbc,-aes256-cbc,-twofish-cbc,-twofish128-cbc,-twofish256-cbc
+MACs *,-umac-64@openssh.com,-umac-64-etm@openssh.com,-hmac-md5,-hmac-sha1-96
+EOF
+systemctl restart sshd
+
+# Disable telnet
+systemctl unmask telnet.socket
+systemctl stop telnet.socket
+systemctl disable telnet.socket
+systemctl stop telnet.service
+systemctl disable telnet.service
+apt-get purge telnetd -y
+
+# Disable TCP timestamps
+grep -q "net.ipv4.tcp_timestamps" /etc/sysctl.conf && \
+sed -i '/net.ipv4.tcp_timestamps/d' /etc/sysctl.conf
+echo "net.ipv4.tcp_timestamps = 0" >> /etc/sysctl.conf
+sysctl -p
+
+echo "Cibernex relatório: Vulnerabilidades corrigidas."
+```

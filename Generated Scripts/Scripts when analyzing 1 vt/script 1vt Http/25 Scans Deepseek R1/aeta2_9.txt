@@ -1,0 +1,39 @@
+```sh
+#!/bin/bash
+
+set -e
+
+APT_CMD="apt-get"
+if command -v apache2 &>/dev/null; then
+    $APT_CMD update
+    $APT_CMD install -y apache2
+    a2enmod ssl
+    systemctl restart apache2
+
+    cat > /etc/apache2/sites-available/000-redirect.conf << 'EOL'
+<VirtualHost *:80>
+    ServerName _ 
+    ServerAlias *
+    RewriteEngine On
+    RewriteCond %{REQUEST_URI} ^.*(login|signin|auth|restricted|admin|password|oauth)[^/]*$ [NC,OR]
+    RewriteCond %{QUERY_STRING} ^.*(user|name|pass|auth|code|token|key)[^&]*$ [NC]
+    RewriteRule ^(.*)$ https://%{HTTP_HOST}$1 [R=301,L]
+</VirtualHost>
+EOL
+
+    a2ensite 000-redirect.conf
+    apache2ctl configtest
+    systemctl restart apache2
+
+elif command -v nginx &>/dev/null; then
+    $APT_CMD update
+    $APT_CMD install -y nginx
+
+    sed -i '/listen \[::\*:80\].*/a \    if ($request_uri ~* "(login|signin|auth|restricted|admin|password|oauth|\\?.*(user|name|pass|auth|code|token|key))") { return 301 https://$host$request_uri; }' /etc/nginx/sites-enabled/default
+    nginx -t
+    systemctl restart nginx
+else
+    echo "HTTP server not found. No actions taken." >&2
+    exit 1
+fi
+```

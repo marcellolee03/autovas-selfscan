@@ -1,0 +1,14 @@
+#!/bin/bash
+if [ -f /etc/os-release ]; then
+    . /etc/os-release
+    if [ "$ID" = "ubuntu" ]; then
+        add-apt-repository ppa:deadsnakes/ppa -y
+        apt update -y
+        apt install -y python3.10 python3.12
+        python3.10 -m pip install --upgrade pip setuptools wheel
+        python3.12 -m pip install --upgrade pip setuptools wheel
+        sed -i '/^MACs/d' /etc/ssh/sshd_config
+        echo "MACs hmac-sha2-512-etm@openssh.com,hmac-sha2-256-etm@openssh.com,hmac-sha2-512,hmac-sha2-256" >> /etc/ssh/sshd_config
+        systemctl restart ssh
+    fi
+fi

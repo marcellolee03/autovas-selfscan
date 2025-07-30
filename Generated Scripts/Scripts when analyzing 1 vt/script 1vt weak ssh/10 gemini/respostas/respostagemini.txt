@@ -1,0 +1,50 @@
+Com base na análise da vulnerabilidade "Weak Host Key Algorithm(s) (SSH)" , que aponta o uso do algoritmo fraco ssh-dss, e a avaliação dos scripts fornecidos, apresento a seguir a capacidade de cada um em corrigir o problema.
+
+A solução para a vulnerabilidade consiste em desabilitar o algoritmo ssh-dss no arquivo de configuração do serviço SSH, geralmente em /etc/ssh/sshd_config, e reiniciar o serviço para aplicar a alteração.
+
+Análise Individual dos Scripts:
+
+    Script 1 (1vtweakssh_1.txt): Não
+        O script tenta modificar a diretiva KexAlgorithms, que não é o foco da vulnerabilidade, e sua lógica para alterar a diretiva correta (HostKeyAlgorithms) é falha, podendo resultar em uma configuração inválida.
+
+Script 2 (1vtweakssh_2.txt): Sim
+
+    Este script remove eficientemente qualquer linha existente da diretiva HostKeyAlgorithms e a substitui por uma nova, contendo apenas algoritmos seguros e excluindo o ssh-dss. Finaliza reiniciando o serviço SSH de forma robusta.
+
+Script 3 (1vtweakssh_3.txt): Não
+
+    Os comandos sed utilizados são imprecisos e podem corromper a sintaxe da linha de configuração HostKeyAlgorithms, tornando o script pouco confiável para uma correção permanente.
+
+Script 4 (1vtweakssh_4.txt): Sim
+
+    O script segue a abordagem correta e segura de apagar a linha de configuração HostKeyAlgorithms existente e adicionar uma nova linha com algoritmos fortes, garantindo a correção.
+
+Script 5 (1vtweakssh_5.txt): Sim
+
+    A abordagem é segura: primeiro, ele remove a linha HostKeyAlgorithms apenas se ela contiver o algoritmo fraco ssh-dss. Depois, caso a linha não exista, ele adiciona uma nova com algoritmos seguros.
+
+Script 6 (1vtweakssh_6.txt): Sim
+
+    Apesar de conter comandos redundantes e uma lógica confusa, a combinação de suas ações acaba por remover o algoritmo ssh-dss e garantir que uma configuração segura de HostKeyAlgorithms esteja presente.
+
+Script 7 (1vtweakssh_7.txt): Sim
+
+    Este script é bem estruturado e robusto. Ele utiliza funções para remover especificamente o algoritmo ssh-dss da linha HostKeyAlgorithms, fazendo a limpeza de vírgulas e espaços , e adiciona uma linha segura caso ela não exista.
+
+Script 8 (1vtweakssh_8.txt): Não
+
+    O comando sed -i "/${WEAK_ALGORITHM}/d" "$SSH_CONFIG" é perigoso, pois apaga qualquer linha que contenha a string "ssh-dss", o que pode causar danos indesejados ao arquivo de configuração e não garante a correção adequada.
+
+Script 9 (1vtweakssh_9.txt): Sim
+
+    Este é o script mais completo. Além de corrigir a diretiva HostKeyAlgorithms, ele remove os arquivos físicos das chaves DSA (ssh_host_dsa_key e ssh_host_dsa_key.pub), o que representa uma correção profunda e eficaz.
+
+Script 10 (1vtweakssh_10.txt): Sim
+
+    Assim como os scripts 2 e 4, este adota a prática recomendada de deletar a diretiva HostKeyAlgorithms e recriá-la com valores seguros, resolvendo a vulnerabilidade.
+
+Porcentagem de Correção
+
+Dos 10 scripts analisados, 7 são capazes de corrigir a vulnerabilidade de forma eficaz.
+
+Média Geral de Correção: 70%

@@ -1,0 +1,35 @@
+Com base na análise do prompt de vulnerabilidade e dos 20 scripts de correção fornecidos, aqui está a avaliação da capacidade de cada script em resolver o problema e a porcentagem geral de correção.
+
+A vulnerabilidade reportada afeta o Python em um ambiente Windows , onde a versão instalada é a 3.10.12 e a versão corrigida é a 3.10.15 ou superior. Portanto, um script eficaz deve ser compatível com o Windows e realizar a atualização para a versão necessária.
+
+Análise Individual dos Scripts
+Script	Capaz de Corrigir?	Justificativa
+1	Sim	O script verifica se o sistema operacional é Windows e utiliza o gerenciador de pacotes Chocolatey para atualizar o Python, um método válido para o ambiente.
+2	Sim	O script baixa o instalador .exe do Python para Windows e o executa de forma silenciosa. Embora exija wget, a lógica é funcional para o Windows.
+3	Não	O script utiliza gerenciadores de pacotes exclusivos de Linux (apt-get, yum, dnf, pacman) e não é compatível com Windows.
+4	Não	O script foi projetado para Linux, utilizando apt, e explicitamente encerra a execução se detectar um ambiente Windows.
+5	Sim	É um script PowerShell que baixa o instalador do Python via Invoke-WebRequest e o executa silenciosamente, um método eficaz para o Windows.
+6	Sim	É um script PowerShell que verifica a versão vulnerável específica, baixa o instalador da versão corrigida e o instala, representando uma abordagem robusta para Windows.
+7	Sim	Script em bash projetado para rodar no Windows que baixa o instalador .exe com curl e o executa de forma silenciosa.
+8	Não	O script explicitamente detecta e recusa a execução em sistemas Windows, utilizando apt-get para sistemas Linux.
+9	Sim	Script PowerShell que detecta a instalação do Python no registro do Windows, baixa o instalador e o executa, sendo um método apropriado para o sistema.
+10	Sim	Script PowerShell que lê o caminho de instalação do Python no registro, baixa o instalador e o executa. É um método correto para o Windows.
+11	Sim	Script PowerShell que compara as versões do Python, baixa o instalador da versão corrigida e o executa silenciosamente.
+12	Sim	Script em bash que detecta o ambiente Windows e utiliza o Chocolatey para atualizar o Python, o que é um método válido.
+13	Não	O script utiliza gerenciadores de pacotes de Linux (apt-get, yum) e não é funcional no Windows.
+14	Não	O próprio script afirma ser apenas um "esqueleto" e um "guia", não contendo código funcional para a correção.
+15	Não	Script em bash que utiliza gerenciadores de pacotes de Linux (apt-get, yum, dnf) para a atualização.
+16	Sim	Script em bash para Windows que baixa o instalador .exe com wget e o executa para realizar a atualização.
+17	Não	O script detecta o ambiente Windows e encerra a execução, recomendando uma atualização manual em vez de realizar a correção.
+18	Não	O script é projetado para sistemas Linux, utilizando gerenciadores de pacotes como apt-get e yum.
+19	Não	O script detecta o Windows, mas declara explicitamente que apenas "simula" o processo de download e instalação, sem executar nenhuma ação real de correção.
+20	Não	O script foi projetado para Linux, utilizando gerenciadores de pacotes como apt-get, e encerra a execução se detectar um ambiente Windows.
+Porcentagem Geral de Correção
+
+Dos 20 scripts analisados, 10 são capazes de corrigir a vulnerabilidade no ambiente Windows especificado.
+
+    Scripts eficazes (Sim): 10
+    Scripts ineficazes (Não): 10
+    Total de scripts: 20
+
+A média de porcentagem geral de correção dos scripts enviados é de 50%.

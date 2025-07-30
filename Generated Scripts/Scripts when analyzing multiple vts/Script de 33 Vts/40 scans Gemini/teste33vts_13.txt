@@ -1,0 +1,117 @@
+```bash
+#!/bin/bash
+
+# Vulnerability 1: Proxmox VE EOL
+# Solution: Update Proxmox VE to a supported version.  This script only provides a warning and instructions.
+echo "WARNING: Proxmox VE version 7.3-3 is end of life."
+echo "Please upgrade to a supported version (e.g., Proxmox VE 8) using the following steps:"
+echo "1. Consult the official Proxmox VE documentation for upgrade instructions."
+echo "2. Back up your Proxmox VE configuration and virtual machines."
+echo "3. Follow the upgrade guide to upgrade to a supported version."
+echo "4. Verify the upgrade and restore any necessary configurations."
+echo "Refer to: https://pve.proxmox.com/wiki/Upgrade_from_7_to_8"
+
+# Vulnerabilities 2-6: jQuery < 1.9.0 XSS Vulnerability (CVE-2012-6708)
+# Solution: Replace vulnerable jQuery files with version 1.9.0 or later.
+# Identified vulnerable file paths:
+jquery_files=(
+    "/var/www/html/../js/jquery-1.8.3.min.js"
+    "/var/www/html/opscenter/webcommon/framework/../js/jquery-1.8.3.min.js"
+    "/var/www/html/framesets/../js/jquery-1.8.3.min.js"
+    "/var/www/html/frameset/../js/jquery-1.8.3.min.js"
+    "/var/www/html/console/framework/../js/jquery-1.8.3.min.js"
+)
+
+new_jquery_version="1.9.0"
+new_jquery_url="https://code.jquery.com/jquery-${new_jquery_version}.min.js"
+
+for file in "${jquery_files[@]}"; do
+    # Ensure the path is absolute and cleaned
+    file=$(realpath "$file" 2>/dev/null)
+
+    if [[ -z "$file" ]]; then
+        echo "Warning: Could not resolve path or file does not exist. Skipping."
+        continue
+    fi
+
+    if [[ -f "$file" ]]; then
+        echo "Backing up vulnerable jQuery file: $file"
+        mv "$file" "${file}.bak"
+        echo "Downloading jQuery ${new_jquery_version} to replace: $file"
+        wget -q "$new_jquery_url" -O "$file"
+        echo "Successfully replaced $file with jQuery ${new_jquery_version}"
+    else
+        echo "Warning: File not found: $file"
+    fi
+done
+
+# Vulnerabilities 7-9, 13-16, 19, 21, 22: Weak SSH algorithms
+# Solution: Disable weak SSH algorithms in /etc/ssh/sshd_config
+
+# Backup sshd_config
+cp /etc/ssh/sshd_config /etc/ssh/sshd_config.bak
+
+# Disable weak KEX algorithms (diffie-hellman-group1-sha1)
+sed -i '/KexAlgorithms/s/diffie-hellman-group1-sha1//g' /etc/ssh/sshd_config
+
+# Disable weak MAC algorithms (umac-64*, hmac-md5, hmac-sha1-96)
+sed -i '/MACs/s/umac-64-etm@openssh.com//g' /etc/ssh/sshd_config
+sed -i '/MACs/s/umac-64@openssh.com//g' /etc/ssh/sshd_config
+sed -i '/MACs/s/hmac-md5//g' /etc/ssh/sshd_config
+sed -i '/MACs/s/hmac-sha1-96//g' /etc/ssh/sshd_config
+
+# Disable weak ciphers (3des-cbc, aes128-cbc, aes256-cbc, twofish-cbc, twofish128-cbc, twofish256-cbc)
+sed -i '/Ciphers/s/3des-cbc//g' /etc/ssh/sshd_config
+sed -i '/Ciphers/s/aes128-cbc//g' /etc/ssh/sshd_config
+sed -i '/Ciphers/s/aes256-cbc//g' /etc/ssh/sshd_config
+sed -i '/Ciphers/s/twofish-cbc//g' /etc/ssh/sshd_config
+sed -i '/Ciphers/s/twofish128-cbc//g' /etc/ssh/sshd_config
+sed -i '/Ciphers/s/twofish256-cbc//g' /etc/ssh/sshd_config
+
+#Disable weak host key algorithms (ssh-dss)
+sed -i '/HostKeyAlgorithms/s/ssh-dss//g' /etc/ssh/sshd_config
+
+# Restart SSH service
+systemctl restart sshd
+
+echo "Weak SSH algorithms disabled. SSH service restarted."
+
+# Vulnerability 10: DCE/RPC and MSRPC Services Enumeration Reporting
+# Solution: Filter incoming traffic to port 135 and listed dynamic ports.
+# This needs to be configured via firewall (iptables, firewalld, etc.) and is outside the scope of this script.
+echo "WARNING: DCE/RPC and MSRPC services are exposed."
+echo "Please configure your firewall to block access to port 135 and the following dynamic ports:"
+echo "39710, 49664, 49665, 49666, 49667, 49668, 49670, 7832"
+
+# Vulnerability 11: Telnet Unencrypted Cleartext Login
+# Solution: Disable Telnet and use SSH instead.
+systemctl stop telnet.socket
+systemctl disable telnet.socket
+systemctl stop telnetd.socket
+systemctl disable telnetd.socket
+apt-get remove --purge -y telnetd xinetd
+echo "Telnet service disabled and package removed. Use SSH instead."
+
+# Vulnerability 12: SSL/TLS: Deprecated TLSv1.0 and TLSv1.1 Protocol Detection
+# Solution: Disable TLSv1.0 and TLSv1.1.  This requires identifying the service using TLS and modifying its configuration.
+# This script provides a placeholder, assuming it's RDP on port 3389, but you'll need to adapt this to your specific service.
+echo "WARNING: TLSv1.0 and TLSv1.1 are enabled on port 3389.  This script cannot automatically disable this.  Modify the service's configuration to disable these protocols. Consult its documentation for specifics."
+echo "For RDP, this may involve modifying registry keys.  Refer to Microsoft documentation for details."
+
+# Vulnerabilities 17, 18, 20, 23-25: TCP Timestamps Information Disclosure
+# Solution: Disable TCP timestamps.
+echo "Disabling TCP timestamps..."
+echo "net.ipv4.tcp_timestamps = 0" >> /etc/sysctl.conf
+sysctl -p
+echo "TCP timestamps disabled. Reboot may be required for complete effect."
+
+# Vulnerabilities 26-32: ICMP Timestamp Reply Information Disclosure
+# Solution: Block ICMP timestamp requests.
+echo "Disabling ICMP timestamp replies..."
+echo "net.ipv4.icmp_echo_ignore_all = 1" >> /etc/sysctl.conf
+echo "net.ipv4.icmp_ignore_bogus_error_responses = 1" >> /etc/sysctl.conf
+sysctl -p
+echo "ICMP timestamp replies disabled. Reboot may be required for complete effect. Consider configuring your firewall to drop ICMP traffic."
+
+echo "Script completed. Reboot the system to apply all changes."
+```

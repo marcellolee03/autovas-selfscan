@@ -1,0 +1,117 @@
+```bash
+#!/bin/bash
+
+# Vulnerability 1: Proxmox VE EOL
+# This vulnerability requires a system update/upgrade, which is beyond the scope of a simple script.
+# Recommend manual upgrade of Proxmox VE.
+
+# Vulnerabilities 2-6: jQuery < 1.9.0 XSS Vulnerability (CVE-2012-6708)
+# Define the target IP address
+TARGET_IP="10.129.4.254"
+
+# Define the vulnerable file paths
+VULNERABLE_FILES=(
+    "/../js/jquery-1.8.3.min.js"
+    "/opscenter/webcommon/framework/../js/jquery-1.8.3.min.js"
+    "/framesets/../js/jquery-1.8.3.min.js"
+    "/frameset/../js/jquery-1.8.3.min.js"
+    "/console/framework/../js/jquery-1.8.3.min.js"
+)
+
+# Define the URL to download jQuery 1.9.0
+JQUERY_1_9_0_URL="https://code.jquery.com/jquery-1.9.0.min.js"
+
+# Loop through each vulnerable file and replace it with jQuery 1.9.0
+for FILE_PATH in "${VULNERABLE_FILES[@]}"; do
+    # Construct the full URL to the vulnerable file
+    FULL_URL="$TARGET_IP$FILE_PATH"
+
+    # Extract the directory path from the file path
+    DIR_PATH=$(dirname "$FILE_PATH")
+
+    # Extract the filename from the file path
+    FILE_NAME=$(basename "$FILE_PATH")
+
+    # Create the directory if it doesn't exist
+    if ! mkdir -p "$DIR_PATH"; then
+        echo "Error: Failed to create directory $DIR_PATH.  You might need to create this directory structure manually on the web server."
+        continue # Skip to the next file
+    fi
+
+    # Construct the full local path
+    LOCAL_PATH="$DIR_PATH/$FILE_NAME"
+
+    # Download jQuery 1.9.0 and replace the vulnerable file
+    if curl -s "$JQUERY_1_9_0_URL" -o "$LOCAL_PATH"; then
+        echo "Successfully replaced $FULL_URL with jQuery 1.9.0"
+    else
+        echo "Error: Failed to download jQuery 1.9.0 and replace $FULL_URL.  Check write permissions and network connectivity."
+    fi
+done
+
+# Vulnerabilities 7-9, 13-16, 19, 21-22: Weak SSH Algorithms
+# These vulnerabilities require modifying the SSH server configuration.
+# The following script disables weak algorithms in /etc/ssh/sshd_config.
+# It's crucial to back up the original configuration file first.
+
+# Backup the original sshd_config file
+cp /etc/ssh/sshd_config /etc/ssh/sshd_config.bak
+
+# Disable weak KEX algorithms
+sed -i '/KexAlgorithms/s/diffie-hellman-group1-sha1//g' /etc/ssh/sshd_config
+
+# Disable weak MAC algorithms
+sed -i '/MACs/s/umac-64-etm@openssh.com//g' /etc/ssh/sshd_config
+sed -i '/MACs/s/umac-64@openssh.com//g' /etc/ssh/sshd_config
+sed -i '/MACs/s/hmac-md5//g' /etc/ssh/sshd_config
+sed -i '/MACs/s/hmac-sha1-96//g' /etc/ssh/sshd_config
+
+# Disable weak Ciphers
+sed -i '/Ciphers/s/3des-cbc//g' /etc/ssh/sshd_config
+sed -i '/Ciphers/s/aes128-cbc//g' /etc/ssh/sshd_config
+sed -i '/Ciphers/s/aes256-cbc//g' /etc/ssh/sshd_config
+sed -i '/Ciphers/s/twofish-cbc//g' /etc/ssh/sshd_config
+sed -i '/Ciphers/s/twofish128-cbc//g' /etc/ssh/sshd_config
+sed -i '/Ciphers/s/twofish256-cbc//g' /etc/ssh/sshd_config
+
+#Disable weak HostKeyAlgorithms
+sed -i '/HostKeyAlgorithms/s/ssh-dss//g' /etc/ssh/sshd_config
+
+#Restart SSH service
+systemctl restart sshd
+
+# Vulnerability 10: DCE/RPC and MSRPC Services Enumeration Reporting
+# This vulnerability is related to information disclosure.
+# The solution is to filter incoming traffic to port 135 and the reported dynamic ports.
+# This requires firewall configuration, which is beyond the scope of this script.
+# Recommend configuring a firewall to block access to these ports from untrusted networks.
+
+# Vulnerability 11: Telnet Unencrypted Cleartext Login
+# This vulnerability can be mitigated by disabling the Telnet service.
+systemctl stop telnet.socket
+systemctl disable telnet.socket
+
+# Vulnerability 12: SSL/TLS: Deprecated TLSv1.0 and TLSv1.1 Protocol Detection
+# This requires disabling TLSv1.0 and TLSv1.1 in the service's configuration.  Since it's on port 3389, assume RDP.
+# This is usually done in the Windows registry (if it's a Windows server), and is beyond the scope of a Linux script.
+# Provide instructions for Windows:
+#   1. Open Registry Editor (regedit) as an administrator.
+#   2. Navigate to HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Protocols.
+#   3. Create the following keys if they don't exist:
+#        - TLS 1.0
+#        - TLS 1.0\Server
+#        - TLS 1.1
+#        - TLS 1.1\Server
+#   4. In each "Server" key, create a DWORD (32-bit) Value named "Enabled" and set its value to 0.
+#   5. Reboot the system.
+# OR, if this is Linux, and it's some *other* TLS service, the configuration method is service-specific, so it can't be automated.
+
+#Vulnerabilities 17, 18, 20, 23-25: TCP Timestamps Information Disclosure
+#Disable TCP timestamps
+echo "net.ipv4.tcp_timestamps = 0" >> /etc/sysctl.conf
+sysctl -p
+
+#Vulnerabilities 26-32: ICMP Timestamp Reply Information Disclosure
+#Disable ICMP timestamp replies
+echo 1 > /proc/sys/net/ipv4/icmp_echo_ignore_all
+```

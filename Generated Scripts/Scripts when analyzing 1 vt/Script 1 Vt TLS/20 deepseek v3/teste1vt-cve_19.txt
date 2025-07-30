@@ -1,0 +1,19 @@
+#!/bin/bash
+if grep -q "TLSv1.0" /etc/ssl/openssl.cnf || grep -q "TLSv1.1" /etc/ssl/openssl.cnf; then
+    sed -i '/^MinProtocol = TLSv1.0/d' /etc/ssl/openssl.cnf
+    sed -i '/^MaxProtocol = TLSv1.1/d' /etc/ssl/openssl.cnf
+    echo "MinProtocol = TLSv1.2" >> /etc/ssl/openssl.cnf
+    echo "MaxProtocol = TLSv1.3" >> /etc/ssl/openssl.cnf
+fi
+if grep -q "TLSv1.0" /etc/nginx/nginx.conf || grep -q "TLSv1.1" /etc/nginx/nginx.conf; then
+    sed -i 's/TLSv1.0//g' /etc/nginx/nginx.conf
+    sed -i 's/TLSv1.1//g' /etc/nginx/nginx.conf
+    sed -i 's/ssl_protocols.*/ssl_protocols TLSv1.2 TLSv1.3;/g' /etc/nginx/nginx.conf
+fi
+if grep -q "TLSv1.0" /etc/apache2/mods-enabled/ssl.conf || grep -q "TLSv1.1" /etc/apache2/mods-enabled/ssl.conf; then
+    sed -i 's/TLSv1.0//g' /etc/apache2/mods-enabled/ssl.conf
+    sed -i 's/TLSv1.1//g' /etc/apache2/mods-enabled/ssl.conf
+    sed -i 's/SSLProtocol.*/SSLProtocol +TLSv1.2 +TLSv1.3/g' /etc/apache2/mods-enabled/ssl.conf
+fi
+systemctl restart nginx
+systemctl restart apache2

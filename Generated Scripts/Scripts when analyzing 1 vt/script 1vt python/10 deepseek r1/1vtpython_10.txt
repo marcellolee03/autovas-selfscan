@@ -1,0 +1,50 @@
+#!/usr/bin/env pwsh
+$ErrorActionPreference = "Stop"
+$fixedVersions = @{
+    '3.8' = '3.8.20'
+    '3.9' = '3.9.20'
+    '3.10' = '3.10.15'
+    '3.11' = '3.11.10'
+    '3.12' = '3.12.6'
+}
+$hives = @('HKLM:\SOFTWARE\Python\PythonCore', 'HKCU:\SOFTWARE\Python\PythonCore')
+$instances = New-Object System.Collections.Generic.List[object]
+foreach ($hive in $hives) {
+    if (Test-Path $hive) {
+        $keys = Get-ChildItem -Path $hive -Directory
+        foreach ($key in $keys) {
+            $versionProp = Get-ItemProperty -Path $key.PSPath -Name "Version" -ErrorAction SilentlyContinue
+            $installPathProp = Get-ItemProperty -Path $key.PSPath -Name "InstallPath" -ErrorAction SilentlyContinue
+            if ($versionProp -and $installPathProp -and $versionProp.Version) {
+                $majorMinor = $key.PSChildName
+                if ($majorMinor -match "^\d+\.\d+$" -and $fixedVersions.ContainsKey($majorMinor)) {
+                    $currentVersion = [version]$versionProp.Version
+                    $requiredVersion = [version]$fixedVersions[$majorMinor]
+                    if ($currentVersion -lt $requiredVersion) {
+                        $arch = if ($installPathProp.InstallPath -match "Program Files \(x86\)") { "win32" } else { "amd64" }
+                        $instances.Add([PSCustomObject]@{
+                            MajorMinor = $majorMinor
+                            FixedVersion = $fixedVersions[$majorMinor]
+                            Architecture = $arch
+                        })
+                    }
+                }
+            }
+        }
+    }
+}
+if ($instances.Count -eq 0) { exit 0 }
+$instances = $instances | Sort-Object MajorMinor -Unique
+$tempDir = [System.IO.Path]::GetTempPath()
+foreach ($instance in $instances) {
+    $version = $instance.FixedVersion
+    $arch = $instance.Architecture
+    $fileName = if ($arch -eq "amd64") { "python-${version}-amd64.exe" } else { "python-${version}.exe" }
+    $url = "https://www.python.org/ftp/python/${version}/$fileName"
+    $localPath = Join-Path -Path $tempDir -ChildPath $fileName
+    try {
+        Invoke-WebRequest -Uri $url -OutFile $localPath -ErrorAction Stop
+        Start-Process -FilePath $localPath -ArgumentList "/quiet" -NoNewWindow -Wait
+    }
+    finally { if (Test-Path $localPath) { Remove-Item -Path $localPath -Force } }
+}

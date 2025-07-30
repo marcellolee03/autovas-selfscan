@@ -1,0 +1,69 @@
+```bash
+#!/bin/bash
+
+# Variáveis
+TWIKI_DIR="/var/www/twiki"  # Ajuste este caminho se a instalação do TWiki estiver em outro diretório
+BACKUP_DIR="/tmp/twiki_backup"
+TWIKI_VERSION="4.2.4"
+
+# Funções
+error_exit() {
+  echo "Erro: $1" >&2
+  exit 1
+}
+
+# 1. Para tudo o serviço web (Apache ou Nginx)
+if command -v systemctl &> /dev/null; then
+  echo "Parando o serviço web (Apache ou Nginx)..."
+  systemctl stop apache2 || systemctl stop httpd || systemctl stop nginx
+else
+  echo "systemctl não encontrado. Por favor, pare o serviço web manualmente."
+  exit 1
+fi
+
+# 2. Backup da instalação atual do TWiki
+echo "Fazendo backup da instalação atual em $BACKUP_DIR..."
+mkdir -p "$BACKUP_DIR"
+if [ -d "$TWIKI_DIR" ]; then
+  tar -czvf "$BACKUP_DIR/twiki_backup.tar.gz" "$TWIKI_DIR"
+else
+  error_exit "Diretório TWiki não encontrado em $TWIKI_DIR. Verifique a instalação."
+fi
+
+# 3. Download da versão corrigida (4.2.4)
+echo "Baixando TWiki versão $TWIKI_VERSION..."
+TEMP_DIR=$(mktemp -d)
+cd "$TEMP_DIR" || error_exit "Não foi possível criar/acessar o diretório temporário"
+wget "https://sourceforge.net/projects/twiki/files/TWiki%20Release/TWiki-4.2.4/TWiki-4.2.4.zip/download" -O twiki.zip
+
+# 4. Descompactar o arquivo e substituir a instalação antiga
+echo "Descompactando e substituindo a instalação antiga..."
+unzip twiki.zip
+TWIKI_EXTRACTED_DIR="TWiki-4.2.4"  # Nome da pasta descompactada
+
+# Remove a instalação antiga
+rm -rf "$TWIKI_DIR"
+
+# Move a nova instalação para o lugar da antiga
+mv "$TEMP_DIR/$TWIKI_EXTRACTED_DIR" "$TWIKI_DIR"
+
+# Limpa o diretório temporário
+cd /tmp
+rm -rf "$TEMP_DIR"
+
+# Ajustar permissões (importante!)
+echo "Ajustando permissões..."
+chown -R www-data:www-data "$TWIKI_DIR" # Ajuste 'www-data' para o usuário/grupo do seu servidor web
+
+# 5. Reiniciar o serviço web
+if command -v systemctl &> /dev/null; then
+  echo "Reiniciando o serviço web..."
+  systemctl start apache2 || systemctl start httpd || systemctl start nginx
+else
+  echo "systemctl não encontrado. Por favor, inicie o serviço web manualmente."
+  exit 1
+fi
+
+echo "Atualização do TWiki para a versão $TWIKI_VERSION concluída."
+echo "Verifique se o TWiki está funcionando corretamente."
+```

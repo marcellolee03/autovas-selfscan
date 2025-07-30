@@ -1,0 +1,609 @@
+```bash
+#!/bin/bash
+
+# Variáveis globais
+OS=$(uname -s)
+
+# Funções de utilidade
+log() {
+  echo "$(date +'%Y-%m-%d %H:%M:%S') - $1"
+}
+
+# Vulnerabilidade 1: TWiki XSS and Command Execution Vulnerabilities (CVE-2008-5304, CVE-2008-5305)
+# Solução: Atualizar o TWiki para a versão 4.2.4 ou posterior.
+# Como o TWiki está muito desatualizado e não há um caminho de atualização direta confiável,
+# a recomendação é remover completamente o TWiki e, se necessário, instalar uma solução mais moderna.
+remove_twiki() {
+  log "Removendo TWiki devido a vulnerabilidades críticas (CVE-2008-5304, CVE-2008-5305)."
+  if [[ -d /var/www/twiki ]]; then # Caminho comum, ajuste se necessário
+    rm -rf /var/www/twiki
+    log "Diretório TWiki removido."
+  elif [[ -d /var/lib/twiki ]]; then
+     rm -rf /var/lib/twiki
+    log "Diretório TWiki removido."
+  else
+    log "Diretório TWiki não encontrado em /var/www/twiki ou /var/lib/twiki. Verifique a instalação e remova manualmente, se necessário."
+  fi
+
+  # Remover configuração do Apache, se existir
+  if [[ -f /etc/apache2/conf.d/twiki.conf ]]; then
+    rm /etc/apache2/conf.d/twiki.conf
+    log "Arquivo de configuração do Apache removido."
+    apache2ctl restart
+    log "Apache reiniciado."
+  elif [[ -f /etc/httpd/conf.d/twiki.conf ]]; then
+    rm /etc/httpd/conf.d/twiki.conf
+    log "Arquivo de configuração do Apache removido."
+    systemctl restart httpd
+    log "Apache reiniciado."
+  else
+    log "Arquivo de configuração do Apache para TWiki não encontrado. Verifique e remova manualmente, se necessário."
+  fi
+}
+
+# Vulnerabilidade 2: Distributed Ruby (dRuby/DRb) Multiple RCE Vulnerabilities
+# Solução: Desabilitar o serviço DRb ou implementar controles de segurança (taint, SAFE levels, ACL).
+disable_drb() {
+  log "Desabilitando o serviço Distributed Ruby (DRb) para mitigar vulnerabilidades RCE."
+  
+  # Tentar identificar o script de inicialização do DRb e comentá-lo.
+  if [[ -f /etc/init.d/druby_timeserver.rb ]]; then
+    sed -i 's/^/#/g' /etc/init.d/druby_timeserver.rb
+    log "Script de inicialização do DRb comentado em /etc/init.d/druby_timeserver.rb."
+  elif [[ -f /usr/sbin/druby_timeserver.rb ]]; then
+    mv /usr/sbin/druby_timeserver.rb /usr/sbin/druby_timeserver.rb.disabled
+    log "Script DRb renomeado para desabilitar em /usr/sbin."
+
+    #Remover do init.d, caso exista
+    if [[ -L /etc/rc2.d/S99druby_timeserver.rb ]]; then
+      rm /etc/rc2.d/S99druby_timeserver.rb
+      log "Removido link simbólico do init.d."
+    fi
+
+  else
+    log "Script de inicialização do DRb não encontrado. Desabilite manualmente, se necessário."
+  fi
+  
+  # Tentar parar o serviço, caso esteja rodando
+  kill $(lsof -t -i:8787) 2>/dev/null
+  log "Serviço DRb interrompido (se estivesse em execução)."
+}
+
+# Vulnerabilidade 3: rlogin Passwordless Login & 19: The rlogin service is running
+# Solução: Desabilitar o serviço rlogin.
+disable_rlogin() {
+  log "Desabilitando o serviço rlogin."
+  if [[ "$OS" == "Linux" ]]; then
+    if systemctl is-active rlogin.socket 2>/dev/null; then
+      systemctl stop rlogin.socket
+      systemctl disable rlogin.socket
+      log "Serviço rlogin desabilitado via systemctl."
+    elif [[ -f /etc/init.d/rlogin ]]; then
+      service rlogin stop
+      update-rc.d -f rlogin remove
+      log "Serviço rlogin desabilitado via init.d."
+    else
+      log "Serviço rlogin não encontrado. Verifique a configuração e desabilite manualmente, se necessário."
+    fi
+  else
+    log "Sistema operacional não suportado para desabilitação automática do rlogin. Desabilite manualmente."
+  fi
+}
+
+# Vulnerabilidade 4: Operating System (OS) End of Life (EOL) Detection
+# Solução: Atualizar o sistema operacional.  Não é possível automatizar isso com um script simples.
+warn_eol() {
+  log "AVISO: O sistema operacional Ubuntu 8.04 atingiu o fim da vida útil (EOL). A atualização é altamente recomendada, mas não pode ser automatizada por este script."
+}
+
+# Vulnerabilidade 5: The rexec service is running
+# Solução: Desabilitar o serviço rexec.
+disable_rexec() {
+  log "Desabilitando o serviço rexec."
+  if [[ "$OS" == "Linux" ]]; then
+    if systemctl is-active rexec.socket 2>/dev/null; then
+      systemctl stop rexec.socket
+      systemctl disable rexec.socket
+      log "Serviço rexec desabilitado via systemctl."
+    elif [[ -f /etc/init.d/rexec ]]; then
+      service rexec stop
+      update-rc.d -f rexec remove
+      log "Serviço rexec desabilitado via init.d."
+    else
+      log "Serviço rexec não encontrado. Verifique a configuração e desabilite manualmente, se necessário."
+    fi
+  else
+    log "Sistema operacional não suportado para desabilitação automática do rexec. Desabilite manualmente."
+  fi
+}
+
+# Vulnerabilidade 6: Possible Backdoor: Ingreslock
+# Solução: Requer uma limpeza completa do sistema infectado.
+warn_ingreslock() {
+  log "AVISO: Possível backdoor Ingreslock detectado. Este script NÃO pode remover o backdoor. Recomenda-se uma reinstalação completa do sistema."
+}
+
+# Vulnerabilidade 7: Apache Tomcat AJP RCE Vulnerability (Ghostcat) (CVE-2020-1938)
+# Solução: Desabilitar ou proteger o conector AJP.
+disable_ajp() {
+  log "Desabilitando o conector AJP no Tomcat para mitigar a vulnerabilidade Ghostcat (CVE-2020-1938)."
+  TOMCAT_HOME=$(find /opt -maxdepth 2 -name "apache-tomcat*" -type d 2>/dev/null | head -n 1)
+  if [[ -n "$TOMCAT_HOME" ]]; then
+    SERVER_XML="$TOMCAT_HOME/conf/server.xml"
+    if [[ -f "$SERVER_XML" ]]; then
+      # Comentar o conector AJP (porta 8009 por padrão)
+      sed -i "s/<Connector port=\"8009\"/<-- <Connector port=\"8009\"/g" "$SERVER_XML"
+      sed -i "s/<\/Connector>/<\/Connector> -->/g" "$SERVER_XML"
+      log "Conector AJP comentado em $SERVER_XML."
+      
+      # Reiniciar o Tomcat
+      if [[ -f "$TOMCAT_HOME/bin/shutdown.sh" && -f "$TOMCAT_HOME/bin/startup.sh" ]]; then
+        "$TOMCAT_HOME/bin/shutdown.sh"
+        sleep 5
+        "$TOMCAT_HOME/bin/startup.sh"
+        log "Tomcat reiniciado."
+      else
+        log "Scripts de inicialização/parada do Tomcat não encontrados. Reinicie manualmente."
+      fi
+    else
+      log "Arquivo server.xml do Tomcat não encontrado em $SERVER_XML. Verifique a instalação do Tomcat."
+    fi
+  else
+    log "Diretório de instalação do Tomcat não encontrado em /opt. Verifique a instalação do Tomcat."
+  fi
+}
+
+# Vulnerabilidade 8: MySQL / MariaDB Default Credentials (MySQL Protocol)
+# Solução: Alterar a senha do usuário root do MySQL.
+change_mysql_root_password() {
+  log "Alterando a senha do usuário root do MySQL devido a credenciais padrão."
+  
+  # Tentar alterar a senha sem senha atual (comum em instalações vulneráveis)
+  mysqladmin -u root password "SecurePassword123!" 2>/dev/null
+
+  #Se falhar, tentar com a senha em branco.
+  if [ $? -ne 0 ]; then
+    mysqladmin -u root -h localhost password "SecurePassword123!" -p 2>/dev/null
+  fi
+    
+  if [ $? -eq 0 ]; then
+    log "Senha do usuário root do MySQL alterada com sucesso para 'SecurePassword123!'."
+    log "Lembre-se de atualizar as configurações da aplicação que usam o MySQL para usar a nova senha."
+  else
+    log "Falha ao alterar a senha do usuário root do MySQL. Verifique a instalação do MySQL e tente manualmente."
+  fi
+}
+
+# Vulnerabilidade 9: PHP < 5.6.30, 7.x < 7.0.15, 7.1.x < 7.1.1 Multiple Vulnerabilities (Jan 2017) - Linux & 10: PHP < 5.3.13, 5.4.x < 5.4.3 Multiple Vulnerabilities - Active Check
+# Solução: Atualizar o PHP.
+upgrade_php() {
+  log "Atualizando o PHP para mitigar vulnerabilidades."
+  if [[ "$OS" == "Linux" ]]; then
+    apt-get update -y
+    apt-get upgrade php -y
+    log "PHP atualizado via apt-get."
+  else
+    log "Sistema operacional não suportado para atualização automática do PHP. Atualize manualmente."
+  fi
+}
+
+# Vulnerabilidade 11 & 12: vsftpd Compromised Source Packages Backdoor Vulnerability (CVE-2011-2523)
+# Solução: Atualizar ou reinstalar o vsftpd a partir de uma fonte confiável.
+reinstall_vsftpd() {
+  log "Reinstalando o vsftpd para remover possível backdoor (CVE-2011-2523)."
+  if [[ "$OS" == "Linux" ]]; then
+    apt-get remove --purge -y vsftpd
+    apt-get update -y
+    apt-get install vsftpd -y
+    log "vsftpd reinstalado via apt-get."
+  else
+    log "Sistema operacional não suportado para reinstalação automática do vsftpd. Reinstale manualmente a partir de uma fonte confiável."
+  fi
+}
+
+# Vulnerabilidade 13: DistCC RCE Vulnerability (CVE-2004-2687)
+# Solução: Desabilitar ou restringir o acesso ao DistCC.
+disable_distcc() {
+  log "Desabilitando o serviço DistCC para mitigar vulnerabilidade RCE (CVE-2004-2687)."
+  if [[ "$OS" == "Linux" ]]; then
+    if systemctl is-active distccd 2>/dev/null; then
+      systemctl stop distccd
+      systemctl disable distccd
+      log "Serviço DistCC desabilitado via systemctl."
+    elif [[ -f /etc/init.d/distccd ]]; then
+      service distccd stop
+      update-rc.d -f distccd remove
+      log "Serviço DistCC desabilitado via init.d."
+    else
+      log "Serviço DistCC não encontrado. Verifique a configuração e desabilite manualmente, se necessário."
+    fi
+  else
+    log "Sistema operacional não suportado para desabilitação automática do DistCC. Desabilite manualmente."
+  fi
+}
+
+# Vulnerabilidade 14: PostgreSQL Default Credentials (PostgreSQL Protocol)
+# Solução: Alterar a senha do usuário postgres do PostgreSQL.
+change_postgres_password() {
+  log "Alterando a senha do usuário postgres do PostgreSQL devido a credenciais padrão."
+  PGPASSWORD=postgres psql -U postgres -c "ALTER USER postgres WITH PASSWORD 'SecurePassword123!';" 2>/dev/null
+  if [ $? -eq 0 ]; then
+    log "Senha do usuário postgres do PostgreSQL alterada com sucesso para 'SecurePassword123!'."
+    log "Lembre-se de atualizar as configurações da aplicação que usam o PostgreSQL para usar a nova senha."
+  else
+    log "Falha ao alterar a senha do usuário postgres do PostgreSQL. Verifique a instalação do PostgreSQL e tente manualmente."
+  fi
+}
+
+# Vulnerabilidade 15: VNC Brute Force Login
+# Solução: Alterar a senha do VNC.
+# Não é possível automatizar a alteração da senha do VNC de forma genérica.
+warn_vnc_password() {
+  log "AVISO: A senha do VNC é fraca. Altere a senha do VNC para uma senha forte manualmente."
+}
+
+# Vulnerabilidade 16: Test HTTP dangerous methods
+# Solução: Desabilitar os métodos HTTP PUT e DELETE.
+disable_http_methods() {
+  log "Desabilitando os métodos HTTP PUT e DELETE no Apache."
+
+  if command -v apachectl >/dev/null 2>&1; then
+    if [[ -f /etc/apache2/mods-available/dav.conf ]]; then
+      a2dismod dav
+      a2dismod dav_fs
+      a2dismod dav_lock
+      apachectl restart
+      log "Módulos DAV desabilitados e Apache reiniciado."
+    else
+      log "Módulos DAV não encontrados. Verifique a configuração do Apache e desabilite os métodos PUT e DELETE manualmente."
+    fi
+  else
+    log "Apache não encontrado. Verifique a configuração do servidor web e desabilite os métodos PUT e DELETE manualmente."
+  fi
+}
+
+# Vulnerabilidade 17 & 18: FTP Brute Force Logins With Default Credentials Reporting
+# Solução: Alterar a senha das contas FTP vulneráveis.
+warn_ftp_passwords() {
+  log "AVISO: Contas FTP com credenciais padrão detectadas (msfadmin, postgres, service, user). Altere as senhas dessas contas manualmente."
+}
+
+# Vulnerabilidade 20: rsh Unencrypted Cleartext Login
+# Solução: Desabilitar o serviço rsh.
+disable_rsh() {
+    log "Desabilitando o serviço rsh."
+    if [[ "$OS" == "Linux" ]]; then
+        if systemctl is-active rsh.socket 2>/dev/null; then
+          systemctl stop rsh.socket
+          systemctl disable rsh.socket
+          log "Serviço rsh desabilitado via systemctl."
+        elif [[ -f /etc/init.d/rsh ]]; then
+          service rsh stop
+          update-rc.d -f rsh remove
+          log "Serviço rsh desabilitado via init.d."
+        else
+          log "Serviço rsh não encontrado. Verifique a configuração e desabilite manualmente, se necessário."
+        fi
+    else
+        log "Sistema operacional não suportado para desabilitação automática do rsh. Desabilite manualmente."
+    fi
+}
+
+# Vulnerabilidade 21: SSL/TLS: OpenSSL CCS Man in the Middle Security Bypass Vulnerability (CVE-2014-0224)
+# Solução: Atualizar o OpenSSL.
+upgrade_openssl() {
+  log "Atualizando o OpenSSL para mitigar a vulnerabilidade CCS (CVE-2014-0224)."
+  if [[ "$OS" == "Linux" ]]; then
+    apt-get update -y
+    apt-get upgrade openssl -y
+    log "OpenSSL atualizado via apt-get."
+  else
+    log "Sistema operacional não suportado para atualização automática do OpenSSL. Atualize manualmente."
+  fi
+}
+
+# Vulnerabilidade 22: Multiple Vendors STARTTLS Implementation Plaintext Arbitrary Command Injection Vulnerability
+# Solução: Atualizar o software vulnerável.  Este script não pode identificar e atualizar todos os softwares afetados.
+warn_starttls() {
+  log "AVISO: Vulnerabilidade de injeção de comandos no STARTTLS detectada. Atualize o software de e-mail (Postfix, Qmail, etc.) manualmente."
+}
+
+# Vulnerabilidade 23: TWiki Cross-Site Request Forgery Vulnerability (Sep 2010) & 26: TWiki < 6.1.0 XSS Vulnerability & 27: TWiki CSRF Vulnerability
+# Solução: Atualizar o TWiki. Como TWiki já é removido por ter XSS, a prioridade é mantê-lo removido.
+#remove_twiki # Já removido na vulnerabilidade 1.
+
+# Vulnerabilidade 24: Anonymous FTP Login Reporting
+# Solução: Desabilitar o login anônimo no FTP.
+disable_anonymous_ftp() {
+  log "Desabilitando o login anônimo no FTP."
+  if [[ -f /etc/vsftpd.conf ]]; then
+    sed -i 's/^anonymous_enable=YES/anonymous_enable=NO/g' /etc/vsftpd.conf
+    systemctl restart vsftpd
+    log "Login anônimo desabilitado em /etc/vsftpd.conf e vsftpd reiniciado."
+  else
+    log "Arquivo de configuração do vsftpd não encontrado. Verifique a configuração do FTP e desabilite o login anônimo manualmente."
+  fi
+}
+
+# Vulnerabilidade 25 & 55: jQuery < 1.9.0 XSS Vulnerability e jQuery < 1.6.3 XSS Vulnerability
+# Solução: Atualizar o jQuery.
+# Como o jQuery está localizado dentro do diretório mutillidae,  presume-se que ele faça parte de uma aplicação web específica (Mutillidae).
+# Portanto, a atualização do jQuery deve ser feita dentro do contexto dessa aplicação.
+
+update_jquery_mutillidae() {
+  log "AVISO: Vulnerabilidade XSS no jQuery (versão 1.3.2) detectada no Mutillidae."
+  log "Este script NÃO atualiza o jQuery automaticamente. Atualize o jQuery dentro do Mutillidae ou remova o Mutillidae, se não for necessário."
+}
+
+# Vulnerabilidade 28 & 29: SSL/TLS: Deprecated SSLv2 and SSLv3 Protocol Detection
+# Solução: Desabilitar SSLv2 e SSLv3.
+disable_sslv2_sslv3() {
+  log "Desabilitando os protocolos SSLv2 e SSLv3 no OpenSSL."
+  
+  # Localizar o arquivo de configuração do OpenSSL
+  OPENSSL_CONF=$(find /etc/ssl -name openssl.cnf 2>/dev/null | head -n 1)
+
+  if [[ -n "$OPENSSL_CONF" ]]; then
+    # Adicionar "-SSLv2" e "-SSLv3" às opções de ciphersuites para desabilitar os protocolos
+    sed -i 's/Options = .*/Options = \-SSLv2,\-SSLv3/g' "$OPENSSL_CONF"
+    
+    log "SSLv2 e SSLv3 desabilitados no arquivo $OPENSSL_CONF."
+
+    #Reiniciar todos os serviços usando OpenSSL
+    systemctl restart $(systemctl list-dependencies --plain --no-legend openssl.service | awk '{print $1}') 2>/dev/null
+    log "Serviços usando OpenSSL reiniciados (se aplicável)."
+
+  else
+    log "Arquivo de configuração do OpenSSL não encontrado. Verifique a instalação do OpenSSL e desabilite os protocolos manualmente."
+  fi
+}
+
+# Vulnerabilidade 30: SSL/TLS: Report Weak Cipher Suites
+# Solução: Desabilitar as cipher suites fracas.
+# Não é possível automatizar a desabilitação de cipher suites fracas de forma genérica.
+
+warn_weak_ciphers() {
+    log "AVISO: Cipher suites fracas detectadas. Configure os serviços para usar cipher suites mais fortes manualmente. Consulte a documentação do serviço para obter instruções."
+}
+
+# Vulnerabilidade 31: HTTP Debugging Methods (TRACE/TRACK) Enabled
+# Solução: Desabilitar os métodos TRACE e TRACK.
+#disable_http_methods # Já implementado na vulnerabilidade 16.
+
+# Vulnerabilidade 32 & 33: SSL/TLS: Server Certificate / Certificate in Chain with RSA keys less than 2048 bits
+# Solução: Substituir o certificado por um certificado com uma chave mais forte (>= 2048 bits).
+warn_weak_rsa_key() {
+  log "AVISO: Certificado SSL/TLS com chave RSA inferior a 2048 bits detectado. Substitua o certificado por um certificado com uma chave mais forte (>= 2048 bits)."
+}
+
+# Vulnerabilidade 34: Weak Key Exchange (KEX) Algorithm(s) Supported (SSH)
+# Solução: Desabilitar os algoritmos KEX fracos.
+disable_weak_kex() {
+  log "Desabilitando algoritmos KEX fracos no SSH."
+
+  if [[ -f /etc/ssh/sshd_config ]]; then
+    # Adicionar KexAlgorithms à configuração, excluindo os algoritmos fracos
+    echo "KexAlgorithms curve25519-sha256@libssh.org,ecdh-sha2-nistp256,ecdh-sha2-nistp384,ecdh-sha2-nistp521,diffie-hellman-group14-sha256,diffie-hellman-group16-sha512,diffie-hellman-group18-sha512" >> /etc/ssh/sshd_config
+    
+    systemctl restart sshd
+    log "Algoritmos KEX fracos desabilitados e SSH reiniciado."
+  else
+    log "Arquivo de configuração do SSH não encontrado. Verifique a instalação do SSH e desabilite os algoritmos KEX fracos manualmente."
+  fi
+}
+
+# Vulnerabilidade 35: phpinfo() Output Reporting (HTTP)
+# Solução: Remover os arquivos phpinfo.php.
+remove_phpinfo() {
+  log "Removendo arquivos phpinfo.php."
+  find /var/www -name "phpinfo.php" -print0 | while IFS= read -r -d $'' file; do
+    rm -f "$file"
+    log "Arquivo phpinfo.php removido: $file"
+  done
+}
+
+# Vulnerabilidade 36: Weak Host Key Algorithm(s) (SSH)
+# Solução: Desabilitar os algoritmos de chave de host fracos.
+disable_weak_hostkey() {
+  log "Desabilitando algoritmos de chave de host fracos no SSH."
+
+  if [[ -f /etc/ssh/sshd_config ]]; then
+    #Adicionar HostKeyAlgorithms à configuração, excluindo os algoritmos fracos
+    echo "HostKeyAlgorithms ecdsa-sha2-nistp256-cert-v01@openssh.com,ecdsa-sha2-nistp384-cert-v01@openssh.com,ecdsa-sha2-nistp521-cert-v01@openssh.com,ssh-rsa-cert-v01@openssh.com,ecdsa-sha2-nistp256,ecdsa-sha2-nistp384,ecdsa-sha2-nistp521,ssh-rsa" >> /etc/ssh/sshd_config
+    
+    systemctl restart sshd
+    log "Algoritmos de chave de host fracos desabilitados e SSH reiniciado."
+  else
+    log "Arquivo de configuração do SSH não encontrado. Verifique a instalação do SSH e desabilite os algoritmos de chave de host fracos manualmente."
+  fi
+}
+
+# Vulnerabilidade 37: Check if Mailserver answer to VRFY and EXPN requests
+# Solução: Desabilitar VRFY e EXPN.
+disable_vrfy_expn() {
+  log "Desabilitando VRFY e EXPN no Postfix."
+  if [[ -f /etc/postfix/main.cf ]]; then
+    echo "disable_vrfy_command = yes" >> /etc/postfix/main.cf
+    postfix reload
+    log "VRFY e EXPN desabilitados no Postfix e Postfix recarregado."
+  else
+    log "Arquivo de configuração do Postfix não encontrado. Verifique a instalação do Postfix e desabilite VRFY e EXPN manualmente."
+  fi
+}
+
+# Vulnerabilidade 38 & 39: SSL/TLS: Renegotiation DoS Vulnerability (CVE-2011-1473, CVE-2011-5094)
+# Solução: Desabilitar a renegociação ou limitar o número de renegociações.
+# Este script não pode automatizar isso de forma genérica.
+warn_renegotiation_dos() {
+  log "AVISO: Vulnerabilidade de DoS por renegociação SSL/TLS detectada. Consulte a documentação do servidor para desabilitar a renegociação ou limitar o número de renegociações."
+}
+
+# Vulnerabilidade 40 & 41: SSL/TLS: Certificate Expired
+# Solução: Substituir o certificado expirado.
+warn_expired_certificate() {
+  log "AVISO: Certificado SSL/TLS expirado detectado. Substitua o certificado por um certificado válido."
+}
+
+# Vulnerabilidade 42: QWikiwiki directory traversal vulnerability
+# Solução: Remover o QWikiwiki.
+remove_qwikiwiki() {
+  log "Removendo QWikiwiki devido à vulnerabilidade de directory traversal (CVE-2005-0283)."
+  if [[ -d /var/www/qwikiwiki ]]; then # Caminho comum, ajuste se necessário
+    rm -rf /var/www/qwikiwiki
+    log "Diretório QWikiwiki removido."
+  else
+    log "Diretório QWikiwiki não encontrado. Verifique a instalação e remova manualmente, se necessário."
+  fi
+}
+
+# Vulnerabilidade 43: awiki <= 20100125 Multiple LFI Vulnerabilities - Active Check
+# Solução: Remover awiki
+remove_awiki() {
+  log "Removendo awiki devido às vulnerabilidades LFI."
+  if [[ -d /var/www/awiki ]]; then # Caminho comum, ajuste se necessário
+    rm -rf /var/www/awiki
+    log "Diretório awiki removido."
+  else
+    log "Diretório awiki não encontrado. Verifique a instalação e remova manualmente, se necessário."
+  fi
+}
+
+# Vulnerabilidade 44: /doc directory browsable
+# Solução: Restringir o acesso ao diretório /doc.
+restrict_doc_directory() {
+  log "Restringindo o acesso ao diretório /doc no Apache."
+    if command -v apachectl >/dev/null 2>&1; then
+    echo "<Directory /usr/share/doc/>
+    Options None
+    <Limit GET POST OPTIONS>
+        Require all denied
+    </Limit>
+</Directory>" > /etc/apache2/conf-available/no-doc.conf
+    a2enconf no-doc
+    apachectl restart
+    log "Acesso ao diretório /usr/share/doc restrito e Apache reiniciado."
+  else
+    log "Apache não encontrado. Verifique a configuração do servidor web e restrinja o acesso ao diretório /doc manualmente."
+  fi
+}
+
+# Vulnerabilidade 45: Telnet Unencrypted Cleartext Login
+# Solução: Desabilitar o serviço Telnet.
+disable_telnet() {
+  log "Desabilitando o serviço Telnet."
+  if [[ "$OS" == "Linux" ]]; then
+    if systemctl is-active telnet.socket 2>/dev/null; then
+      systemctl stop telnet.socket
+      systemctl disable telnet.socket
+      log "Serviço Telnet desabilitado via systemctl."
+    elif [[ -f /etc/init.d/telnetd ]]; then
+      service telnetd stop
+      update-rc.d -f telnetd remove
+      log "Serviço Telnet desabilitado via init.d."
+    else
+      log "Serviço Telnet não encontrado. Verifique a configuração e desabilite manualmente, se necessário."
+    fi
+  else
+    log "Sistema operacional não suportado para desabilitação automática do Telnet. Desabilite manualmente."
+  fi
+}
+
+# Vulnerabilidade 46 & 48: FTP Unencrypted Cleartext Login
+# Solução: Habilitar FTPS ou forçar a conexão via AUTH TLS.
+
+enable_ftps() {
+  log "Habilitando FTPS e forçando conexões seguras."
+
+  if [[ -f /etc/vsftpd.conf ]]; then
+    sed -i 's/^ssl_enable=NO/ssl_enable=YES/g' /etc/vsftpd.conf
+    sed -i 's/^force_local_data_ssl=NO/force_local_data_ssl=YES/g' /etc/vsftpd.conf
+    sed -i 's/^force_local_logins_ssl=NO/force_local_logins_ssl=YES/g' /etc/vsftpd.conf
+    systemctl restart vsftpd
+    log "FTPS habilitado no /etc/vsftpd.conf e vsftpd reiniciado."
+  else
+    log "Arquivo de configuração do vsftpd não encontrado. Verifique a configuração do FTP e habilite o FTPS e force conexões seguras manualmente."
+  fi
+}
+
+# Vulnerabilidade 47: VNC Server Unencrypted Data Transmission
+# Solução: Executar o VNC através de um canal encriptado (SSH tunnel)
+warn_vnc_unencrypted() {
+    log "AVISO: O VNC está transmitindo dados não encriptados. Use SSH tunneling para proteger a conexão."
+}
+
+# Vulnerabilidade 49: Cleartext Transmission of Sensitive Information via HTTP
+# Solução: Forçar a transmissão de informações sensíveis através de HTTPS.
+warn_cleartext_http() {
+    log "AVISO: Transmissão de informações sensíveis em texto não encriptado via HTTP detectada. Habilite HTTPS e redirecione todo o tráfego para HTTPS."
+}
+
+# Vulnerabilidade 50 & 54: SSL/TLS: Deprecated TLSv1.0 and TLSv1.1 Protocol Detection
+# Solução: Desabilitar TLSv1.0 e TLSv1.1.
+disable_tlsv1_tlsv11() {
+  log "Desabilitando os protocolos TLSv1.0 e TLSv1.1 no OpenSSL."
+  
+  # Localizar o arquivo de configuração do OpenSSL
+  OPENSSL_CONF=$(find /etc/ssl -name openssl.cnf 2>/dev/null | head -n 1)
+
+  if [[ -n "$OPENSSL_CONF" ]]; then
+    # Adicionar "-TLSv1" e "-TLSv1.1" às opções de ciphersuites para desabilitar os protocolos
+    sed -i 's/Options = .*/Options = \-TLSv1,\-TLSv1.1/g' "$OPENSSL_CONF"
+    
+    log "TLSv1.0 e TLSv1.1 desabilitados no arquivo $OPENSSL_CONF."
+
+    #Reiniciar todos os serviços usando OpenSSL
+    systemctl restart $(systemctl list-dependencies --plain --no-legend openssl.service | awk '{print $1}') 2>/dev/null
+    log "Serviços usando OpenSSL reiniciados (se aplicável)."
+
+  else
+    log "Arquivo de configuração do OpenSSL não encontrado. Verifique a instalação do OpenSSL e desabilite os protocolos manualmente."
+  fi
+}
+
+# Vulnerabilidade 51: Weak Encryption Algorithm(s) Supported (SSH)
+# Solução: Desabilitar algoritmos de encriptação fracos no SSH
+disable_weak_ciphers_ssh() {
+    log "Desabilitando algoritmos de encriptação fracos no SSH."
+
+    if [[ -f /etc/ssh/sshd_config ]]; then
+        #Remover Ciphers fracos.
+        sed -i '/Ciphers aes128-cbc,aes192-cbc,aes256-cbc,3des-cbc,arcfour,arcfour128,arcfour256,blowfish-cbc,cast128-cbc,rijndael-cbc@lysator.liu.se/d' /etc/ssh/sshd_config
+        
+        echo "Ciphers chacha20-poly1305@openssh.com,aes256-gcm@openssh.com,aes128-gcm@openssh.com,aes256-ctr,aes192-ctr,aes128-ctr" >> /etc/ssh/sshd_config
+        
+        systemctl restart sshd
+        log "Algoritmos de encriptação fracos desabilitados e SSH reiniciado."
+    else
+        log "Arquivo de configuração do SSH não encontrado. Verifique a instalação do SSH e desabilite os algoritmos de encriptação fracos manualmente."
+    fi
+}
+
+# Vulnerabilidade 52: Apache HTTP Server httpOnly Cookie Information Disclosure Vulnerability
+upgrade_apache() {
+  log "Atualizando o Apache HTTP Server para mitigar vulnerabilidade httpOnly Cookie Information Disclosure."
+  if [[ "$OS" == "Linux" ]]; then
+    apt-get update -y
+    apt-get upgrade apache2 -y
+    log "Apache HTTP Server atualizado via apt-get."
+  else
+    log "Sistema operacional não suportado para atualização automática do Apache HTTP Server. Atualize manualmente."
+  fi
+}
+
+# Vulnerabilidade 53: phpMyAdmin error.php Cross Site Scripting Vulnerability
+remove_phpmyadmin() {
+  log "Removendo phpMyAdmin devido à vulnerabilidade XSS (CVE-2010-4480)."
+  if [[ -d /var/www/phpMyAdmin ]]; then # Caminho comum, ajuste se necessário
+    rm -rf /var/www/phpMyAdmin
+    log "Diretório phpMyAdmin removido."
+  else
+    log "Diretório phpMyAdmin não encontrado. Verifique a instalação e remova manualmente, se necessário."
+  fi
+
+  # Remover configuração do Apache, se existir
+  if [[ -f /etc/apache2/conf.d/phpmyadmin.conf ]]; then
+    rm /etc/apache2/conf.d/phpmyadmin.conf
+    log "Arquivo de configuração do Apache removido."
+    apache2ctl restart
+    log "Apache reiniciado."
+  elif [[ -f /etc/httpd/

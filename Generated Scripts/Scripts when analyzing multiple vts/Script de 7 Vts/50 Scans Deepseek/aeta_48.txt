@@ -1,0 +1,39 @@
+#!/bin/bash
+
+# Vulnerabilidade 1: Cleartext Transmission of Sensitive Information via HTTP
+echo "Configuring SSL/TLS for sensitive data transmission..."
+sed -i 's/^#*\(Listen 80\)/\1\nListen 443/g' /etc/apache2/ports.conf
+a2enmod ssl
+systemctl restart apache2
+
+# Vulnerabilidade 2: DNS Cache Snooping Vulnerability (UDP)
+echo "Disabling DNS recursion..."
+sed -i 's/^recursion yes;/recursion no;/g' /etc/named.conf
+systemctl restart named
+
+# Vulnerabilidade 3: ICMP Timestamp Reply Information Disclosure
+echo "Disabling ICMP timestamp reply..."
+echo "1" > /proc/sys/net/ipv4/icmp_echo_ignore_all
+
+# Vulnerabilidade 4: SSL/TLS: Deprecated TLSv1.0 and TLSv1.1 Protocol Detection
+echo "Disabling TLSv1.0 and TLSv1.1..."
+openssl_conf=$(openssl ciphers -v | grep -E 'TLSv1\.0|TLSv1\.1')
+if [ -n "$openssl_conf" ]; then
+    sed -i 's/SSLProtocol all -SSLv2 -SSLv3/SSLProtocol all -SSLv2 -SSLv3 -TLSv1 -TLSv1.1/g' /etc/apache2/mods-enabled/ssl.conf
+    systemctl restart apache2
+fi
+
+# Vulnerabilidade 5: SSL/TLS: Renegotiation DoS Vulnerability (CVE-2011-1473, CVE-2011-5094)
+echo "Disabling SSL/TLS renegotiation..."
+sed -i 's/SSLHonorCipherOrder on/SSLHonorCipherOrder on\nSSLInsecureRenegotiation off/g' /etc/apache2/mods-enabled/ssl.conf
+systemctl restart apache2
+
+# Vulnerabilidade 6: SSL/TLS: Report Weak Cipher Suites
+echo "Disabling weak SSL/TLS cipher suites..."
+sed -i 's/SSLCipherSuite HIGH:!aNULL/SSLCipherSuite HIGH:!aNULL:!MD5:!RC4:!DES:!3DES/g' /etc/apache2/mods-enabled/ssl.conf
+systemctl restart apache2
+
+# Vulnerabilidade 7: TCP Timestamps Information Disclosure
+echo "Disabling TCP timestamps..."
+echo "net.ipv4.tcp_timestamps = 0" >> /etc/sysctl.conf
+sysctl -p

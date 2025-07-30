@@ -1,0 +1,37 @@
+#!/bin/bash
+# Vulnerabilidade 1: Redirecionar HTTP para HTTPS
+if [ -f /etc/apache2/sites-available/000-default.conf ]; then
+    sed -i 's/<VirtualHost \*:80>/<VirtualHost *:80>\n    Redirect permanent \/ https:\/\/$HOSTNAME\//' /etc/apache2/sites-available/000-default.conf
+    systemctl restart apache2
+fi
+
+# Vulnerabilidade 2: Desabilitar recursão DNS
+if [ -f /etc/bind/named.conf.options ]; then
+    sed -i 's/recursion yes;/recursion no;/' /etc/bind/named.conf.options
+    systemctl restart bind9
+fi
+
+# Vulnerabilidade 3: Bloquear ICMP timestamp
+iptables -A INPUT -p icmp --icmp-type timestamp-request -j DROP
+iptables -A OUTPUT -p icmp --icmp-type timestamp-reply -j DROP
+
+# Vulnerabilidade 4: Desabilitar TLSv1.0 e TLSv1.1
+if [ -f /etc/ssl/openssl.cnf ]; then
+    sed -i 's/MinProtocol = TLSv1.0/MinProtocol = TLSv1.2/' /etc/ssl/openssl.cnf
+    sed -i 's/MaxProtocol = TLSv1.1/MaxProtocol = TLSv1.3/' /etc/ssl/openssl.cnf
+fi
+
+# Vulnerabilidade 5: Desabilitar renegociação SSL/TLS
+if [ -f /etc/apache2/mods-available/ssl.conf ]; then
+    sed -i 's/SSLInsecureRenegotiation on/SSLInsecureRenegotiation off/' /etc/apache2/mods-available/ssl.conf
+    systemctl restart apache2
+fi
+
+# Vulnerabilidade 6: Remover cifras fracas
+if [ -f /etc/ssl/openssl.cnf ]; then
+    sed -i 's/CipherString = DEFAULT@SECLEVEL=1/CipherString = DEFAULT@SECLEVEL=2/' /etc/ssl/openssl.cnf
+fi
+
+# Vulnerabilidade 7: Desabilitar TCP timestamps
+echo "net.ipv4.tcp_timestamps = 0" >> /etc/sysctl.conf
+sysctl -p

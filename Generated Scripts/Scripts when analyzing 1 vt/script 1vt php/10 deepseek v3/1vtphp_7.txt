@@ -1,0 +1,5 @@
+#!/bin/bash
+sudo apt-get update
+sudo apt-get install -y php5
+sudo apt-get install -y php5-cgi
+sudo service apache2 restart

@@ -1,0 +1,29 @@
+Resposta curta:
+Sim, os scripts enviados são capazes de corrigir a vulnerabilidade descrita: uso dos protocolos TLSv1.0 e TLSv1.1 em serviços que escutam na porta 5432 (PostgreSQL).
+
+Análise dos Scripts
+A vulnerabilidade exige desabilitar TLSv1.0/TLSv1.1 e forçar TLSv1.2 ou superior em serviços que usam criptografia TLS — neste caso, o PostgreSQL.
+
+Dos 20 scripts enviados, 19 scripts aplicam corretamente a modificação no arquivo postgresql.conf com comandos como:
+
+ssl_min_protocol = 'TLSv1.2'
+
+reinício do serviço PostgreSQL (systemctl restart postgresql)
+
+Além disso, alguns scripts tratam:
+
+backup do arquivo de configuração,
+
+adição da linha se ausente,
+
+correções também no OpenSSL ou ssl_ciphers (opcional mas positivo).
+
+Apenas 1 script (teste1vt-cve_4.txt) não aplica nenhuma correção, apenas exibe mensagens genéricas dizendo que a ação deve ser feita manualmente.
+
+Resultado Final
+✅ Scripts eficazes: 19
+❌ Scripts ineficazes: 1
+
+📊 Porcentagem de correção: 95%
+
+Se desejar, posso gerar uma versão consolidada ideal de um script baseado nos pontos fortes desses arquivos.

@@ -1,0 +1,49 @@
+#!/bin/bash
+set -e
+
+# Stop services using vulnerable Python versions
+for port in 5000 8000 8001 8002; do
+    if ss -lnt | grep -q ":$port "; then
+        pid=$(ss -lntp | awk -v port="$port" '$4 ~ ":"port"$" {split($6, a, "="); split(a[2], b, ","); print b[1]; exit}')
+        if [ -n "$pid" ]; then
+            kill -9 "$pid" || true
+        fi
+    fi
+done
+
+# Update Python 3.10 to latest secure version (3.10.x)
+PY310_LATEST=$(curl -s https://www.python.org/ftp/python/ | grep -E '3\.10\.[0-9]+/' | sed -E 's|.*<a href="([0-9.]+)/".*|\1|g' | sort -V | tail -1)
+wget -q "https://www.python.org/ftp/python/$PY310_LATEST/python-${PY310_LATEST}-amd64.exe"
+chmod +x "python-${PY310_LATEST}-amd64.exe"
+./"python-${PY310_LATEST}-amd64.exe" /quiet InstallAllUsers=1 PrependPath=1
+rm -f "python-${PY310_LATEST}-amd64.exe"
+
+# Update Python 3.12 to latest secure version (3.12.x)
+PY312_LATEST=$(curl -s https://www.python.org/ftp/python/ | grep -E '3\.12\.[0-9]+/' | sed -E 's|.*<a href="([0-9.]+)/".*|\1|g' | sort -V | tail -1)
+wget -q "https://www.python.org/ftp/python/$PY312_LATEST/python-${PY312_LATEST}-amd64.exe"
+chmod +x "python-${PY312_LATEST}-amd64.exe"
+./"python-${PY312_LATEST}-amd64.exe" /quiet InstallAllUsers=1 PrependPath=1
+rm -f "python-${PY312_LATEST}-amd64.exe"
+
+# Fix TLS protocols (disabling deprecated versions)
+if [ -d "/etc/ssl" ]; then
+    echo "RSA-PSK-CHACHA20-POLY1305:!VERS-TLS1.0:!VERS-TLS1.1:@SECLEVEL=2" > /etc/ssl/openssl.cnf
+elif [ -d "/usr/local/ssl" ]; then
+    echo "RSA-PSK-CHACHA20-POLY1305:!VERS-TLS1.0:!VERS-TLS1.1:@SECLEVEL=2" > /usr/local/ssl/openssl.cnf
+fi
+
+# Disable weak SSH MAC algorithms
+if [ -f "/etc/ssh/sshd_config" ]; then
+    sed -i -E 's/^MACs .*/MACs hmac-sha2-512-etm@openssh\.com,hmac-sha2-256-etm@openssh\.com,umac-128-etm@openssh\.com,hmac-sha2-512,hmac-sha2-256,umac-128@openssh\.com/' /etc/ssh/sshd_config
+    systemctl restart sshd
+fi
+
+# Replace untrusted SSL certificate (if default detected)
+if [ -f "/path/to/untrusted/cert.pem" ]; then
+    mv /path/to/untrusted/cert.pem /path/to/untrusted/cert.pem.bak
+    openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
+        -keyout /path/to/untrusted/key.pem \
+        -out /path/to/untrusted/cert.pem \
+        -subj "/CN=$(hostname)"
+    chmod 600 /path/to/untrusted/*.pem
+fi

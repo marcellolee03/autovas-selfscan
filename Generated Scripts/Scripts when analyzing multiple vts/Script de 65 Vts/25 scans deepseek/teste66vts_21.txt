@@ -1,0 +1,31 @@
+#!/bin/bash
+
+# Verifica e atualiza Python para versões corrigidas
+python_versions=("3.10.12" "3.10.15" "3.10.16" "3.12.0" "3.12.3" "3.12.4" "3.12.5" "3.12.6" "3.12.8" "3.12.9")
+fixed_versions=("3.10.15" "3.10.16" "3.12.3" "3.12.4" "3.12.5" "3.12.6" "3.12.8" "3.12.9")
+
+for version in "${python_versions[@]}"; do
+    if command -v python$version &> /dev/null; then
+        installed_version=$(python$version -c "import sys; print('.'.join(map(str, sys.version_info[:3])))")
+        for fixed_version in "${fixed_versions[@]}"; do
+            if [[ $installed_version == $version ]]; then
+                if [[ $fixed_version > $installed_version ]]; then
+                    python$version -m pip install --upgrade pip
+                    python$version -m pip install --upgrade python
+                    break
+                fi
+            fi
+        done
+    fi
+done
+
+# Desabilita TLS 1.0 e 1.1
+sed -i 's/^TLSv1$/TLSv1.2/' /etc/ssl/openssl.cnf
+sed -i 's/^TLSv1.1$/TLSv1.2/' /etc/ssl/openssl.cnf
+
+# Substitui certificado SSL/TLS
+openssl req -x509 -newkey rsa:2048 -keyout /etc/ssl/private/localhost.key -out /etc/ssl/certs/localhost.crt -days 365 -nodes -subj "/CN=localhost"
+
+# Reinicia serviços para aplicar as mudanças
+systemctl restart apache2
+systemctl restart ssh

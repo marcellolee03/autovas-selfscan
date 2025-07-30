@@ -1,0 +1,55 @@
+#!/bin/bash
+
+# Vulnerabilidade 1: Configurar redirecionamento HTTP para HTTPS no Apache
+if [ -f /etc/apache2/sites-available/000-default.conf ]; then
+    cat > /etc/apache2/sites-available/000-default.conf << 'EOL'
+<VirtualHost *:80>
+    ServerAdmin webmaster@localhost
+    DocumentRoot /var/www/html
+
+    ErrorLog ${APACHE_LOG_DIR}/error.log
+    CustomLog ${APACHE_LOG_DIR}/access.log combined
+
+    # Redirecionamento forçado para HTTPS
+    RewriteEngine On
+    RewriteCond %{HTTPS} off
+    RewriteRule (.*) https://%{HTTP_HOST}%{REQUEST_URI} [R=301,L]
+</VirtualHost>
+EOL
+    systemctl reload apache2
+fi
+
+# Vulnerabilidade 2: Configurar BIND para desabilitar recursão pública
+if [ -f /etc/bind/named.conf.options ]; then
+    sed -i '/options {/a \    recursion no;\n    allow-recursion { none; };' /etc/bind/named.conf.options
+    systemctl restart bind9
+fi
+
+# Vulnerabilidade 3: Bloquear ICMP Timestamp com iptables
+iptables -A INPUT -p icmp --icmp-type timestamp-request -j DROP
+iptables -A INPUT -p icmp --icmp-type timestamp-reply -j DROP
+echo iptables-persistent iptables-persistent/autosave_v4 boolean true | debconf-set-selections
+echo iptables-persistent iptables-persistent/autosave_v6 boolean true | debconf-set-selections
+apt-get install -y iptables-persistent
+
+# Vulnerabilidades 4-6: Configurar SSL/TLS no Apache
+if [ -f /etc/apache2/mods-enabled/ssl.conf ]; then
+    sed -i '/SSLProtocol/s/.*/SSLProtocol -all +TLSv1.2 +TLSv1.3/' /etc/apache2/mods-enabled/ssl.conf
+    sed -i '/SSLCipherSuite/s/.*/SSLCipherSuite ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:DHE-RSA-AES128-GCM-SHA256:DHE-RSA-AES256-GCM-SHA384/' /etc/apache2/mods-enabled/ssl.conf
+    sed -i 's/SSLInsecureRenegotiation on/SSLInsecureRenegotiation off/' /etc/apache2/mods-enabled/ssl.conf
+    a2enmod ssl
+    systemctl restart apache2
+fi
+
+# Vulnerabilidade 7: Desabilitar TCP Timestamps
+echo "net.ipv4.tcp_timestamps = 0" >> /etc/sysctl.conf
+sysctl -p
+
+# Vulnerabilidade 2 alternativo: Configurar firewalls
+if command -v ufw &> /dev/null; then
+    ufw default deny incoming
+    ufw allow 22/tcp
+    ufw allow 80/tcp
+    ufw allow 443/tcp
+    ufw --force enable
+fi

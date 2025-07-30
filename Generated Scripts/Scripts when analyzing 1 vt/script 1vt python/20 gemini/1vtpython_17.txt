@@ -1,0 +1,88 @@
+```bash
+#!/bin/bash
+
+# Variáveis
+PYTHON_VERSION=$(python3 --version 2>&1 | awk '{print $2}' | cut -d '.' -f 1,2)
+REQUIRED_VERSION="3.10"
+FIXED_VERSION="3.10.15"
+INSTALLED_VERSION=$(python3 --version 2>&1 | awk '{print $2}')
+
+# Função para verificar se o Python está instalado
+check_python() {
+  if ! command -v python3 &> /dev/null; then
+    echo "Python 3 não está instalado. Impossível prosseguir."
+    exit 1
+  fi
+}
+
+# Função para comparar versões (necessária pois bash não lida bem com decimais)
+version_gt() {
+  test "$(printf '%s\n' "$1" "$2" | sort -V | head -n 1)" != "$1"
+}
+
+
+# Atualizar o Python
+update_python() {
+  echo "Iniciando atualização do Python..."
+  
+  # Verificar se o sistema é Windows (cygwin ou WSL)
+  if [[ "$(uname -o)" == "Cygwin"* || "$(uname -r)" == *"Microsoft"* ]]; then
+    echo "Ambiente Windows detectado. A atualização do Python não é suportada diretamente por este script."
+    echo "Por favor, atualize o Python utilizando o instalador do Windows ou um gerenciador de pacotes como o Chocolatey."
+    echo "Exemplo com Chocolatey: choco upgrade python3"
+    exit 1
+  else
+
+    # Verificar qual gerenciador de pacotes usar (apt, yum, etc.)
+    if command -v apt &> /dev/null; then
+      echo "Usando apt para atualizar..."
+      sudo apt update
+      sudo apt upgrade python3 -y
+    elif command -v yum &> /dev/null; then
+      echo "Usando yum para atualizar..."
+      sudo yum update python3 -y
+    elif command -v dnf &> /dev/null; then
+      echo "Usando dnf para atualizar..."
+      sudo dnf update python3 -y
+    elif command -v pacman &> /dev/null; then
+      echo "Usando pacman para atualizar..."
+      sudo pacman -Syu python
+    else
+      echo "Nenhum gerenciador de pacotes suportado encontrado. Impossível atualizar automaticamente."
+      echo "Por favor, atualize o Python manualmente usando o gerenciador de pacotes do seu sistema."
+      exit 1
+    fi
+  fi
+
+  echo "Atualização concluída."
+}
+
+# Verificar e corrigir a vulnerabilidade
+main() {
+  check_python
+
+  # Verificar a versão instalada
+  if version_gt "$REQUIRED_VERSION.99" "$PYTHON_VERSION"; then
+      echo "A versão do Python ($INSTALLED_VERSION) é anterior a $REQUIRED_VERSION. Impossível prosseguir."
+      exit 1
+  fi
+  
+  if version_gt "$FIXED_VERSION" "$INSTALLED_VERSION"; then
+    echo "A versão do Python ($INSTALLED_VERSION) é vulnerável. Iniciando atualização."
+    update_python
+  else
+    echo "A versão do Python ($INSTALLED_VERSION) não é vulnerável. Nenhuma ação necessária."
+  fi
+
+  #Verificar a versão após atualização
+  INSTALLED_VERSION=$(python3 --version 2>&1 | awk '{print $2}')
+  if version_gt "$FIXED_VERSION" "$INSTALLED_VERSION"; then
+        echo "Falha ao atualizar o python! A versão instalada ($INSTALLED_VERSION) ainda é vulnerável."
+        exit 1
+  else
+        echo "Python atualizado para a versão $INSTALLED_VERSION. Vulnerabilidade corrigida."
+  fi
+}
+
+main
+```

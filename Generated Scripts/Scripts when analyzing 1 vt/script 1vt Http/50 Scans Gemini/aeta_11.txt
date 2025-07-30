@@ -1,0 +1,85 @@
+```bash
+#!/bin/bash
+
+# Este script corrige a vulnerabilidade de transmissão de informações sensíveis em texto claro via HTTP.
+# Ele configura o redirecionamento de HTTP para HTTPS usando o Apache ou Nginx.
+
+# Verifica se o script está sendo executado como root
+if [[ $EUID -ne 0 ]]; then
+  echo "Este script precisa ser executado como root."
+  exit 1
+fi
+
+# Detecta qual servidor web está sendo usado (Apache ou Nginx)
+if command -v apache2ctl &> /dev/null; then
+  WEB_SERVER="apache"
+elif command -v nginx &> /dev/null; then
+  WEB_SERVER="nginx"
+else
+  echo "Servidor web não detectado (Apache ou Nginx necessários)."
+  exit 1
+fi
+
+# Função para configurar o redirecionamento no Apache
+apache_redirect() {
+  # Habilita o módulo rewrite do Apache
+  a2enmod rewrite
+
+  # Determina o arquivo de configuração padrão do site
+  DEFAULT_SITE_CONFIG=$(find /etc/apache2/sites-available/ -name "000-default.conf" 2>/dev/null)
+  if [ -z "$DEFAULT_SITE_CONFIG" ]; then
+    DEFAULT_SITE_CONFIG=$(find /etc/apache2/sites-available/ -name "default.conf" 2>/dev/null)
+  fi
+
+  # Verifica se o arquivo de configuração padrão foi encontrado
+  if [ -z "$DEFAULT_SITE_CONFIG" ]; then
+    echo "Arquivo de configuração padrão do Apache não encontrado.  Por favor, configure o redirecionamento HTTP para HTTPS manualmente."
+    exit 1
+  fi
+  
+  # Adiciona a regra de redirecionamento ao arquivo de configuração
+  sed -i 's/<VirtualHost \*:80>/<VirtualHost *:80>\n\tRewriteEngine On\n\tRewriteCond %{HTTPS} !=on\n\tRewriteRule \^ https:\/\/%{HTTP_HOST}%{REQUEST_URI} \[L,R=301]/g' "$DEFAULT_SITE_CONFIG"
+
+  # Reinicia o Apache
+  systemctl restart apache2
+  echo "Redirecionamento HTTP para HTTPS configurado no Apache. Reiniciei o Apache."
+}
+
+# Função para configurar o redirecionamento no Nginx
+nginx_redirect() {
+  # Determina o arquivo de configuração padrão do site
+  DEFAULT_SITE_CONFIG=$(find /etc/nginx/sites-available/ -name "default" 2>/dev/null)
+  if [ -z "$DEFAULT_SITE_CONFIG" ]; then
+    DEFAULT_SITE_CONFIG=$(find /etc/nginx/conf.d/ -name "default.conf" 2>/dev/null)
+  fi
+
+  # Verifica se o arquivo de configuração padrão foi encontrado
+    if [ -z "$DEFAULT_SITE_CONFIG" ]; then
+    echo "Arquivo de configuração padrão do Nginx não encontrado. Por favor, configure o redirecionamento HTTP para HTTPS manualmente."
+    exit 1
+  fi
+  
+  # Adiciona o bloco de redirecionamento ao arquivo de configuração
+  sed -i 's/listen 80 default_server;/listen 80 default_server;\n\treturn 301 https:\/\/$host$request_uri;/g' "$DEFAULT_SITE_CONFIG"
+
+  # Reinicia o Nginx
+  systemctl restart nginx
+  echo "Redirecionamento HTTP para HTTPS configurado no Nginx. Reiniciei o Nginx."
+}
+
+# Executa a configuração apropriada com base no servidor web detectado
+case "$WEB_SERVER" in
+  "apache")
+    apache_redirect
+    ;;
+  "nginx")
+    nginx_redirect
+    ;;
+  *)
+    echo "Servidor web não suportado."
+    exit 1
+    ;;
+esac
+
+exit 0
+```

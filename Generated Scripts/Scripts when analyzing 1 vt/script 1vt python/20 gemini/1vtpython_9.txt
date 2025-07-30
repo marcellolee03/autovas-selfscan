@@ -1,0 +1,85 @@
+```powershell
+# Script para atualizar o Python em Windows para corrigir CVE-2024-6232, CVE-2024-7592, CVE-2024-8088, CVE-2024-45490, CVE-2024-45491, CVE-2024-45492
+
+# Configurar as variáveis
+$currentVersion = "3.10.12"
+$fixedVersion = "3.10.15"
+$pythonPath = "" # Inicializar $pythonPath
+
+# Detectar o caminho de instalação do Python 3.10
+try {
+    $pythonPath = (Get-ItemProperty -Path "HKLM:\SOFTWARE\Python\PythonCore\3.10\InstallPath").'(default)'
+} catch {
+    Write-Host "Erro: Não foi possível encontrar o caminho de instalação do Python 3.10 no registro."
+    exit 1
+}
+
+# Verificar se o Python está instalado e na versão correta
+if ($pythonPath -and (Test-Path -Path $pythonPath)) {
+    Write-Host "Python 3.10 detectado em: $pythonPath"
+
+    # Verificar a versão atual do Python (opcional, mas recomendado para confirmação)
+    try {
+        $pythonExe = Join-Path -Path $pythonPath -ChildPath "python.exe"
+        $versionInfo = & $pythonExe --version 2>&1
+        Write-Host "Versão atual do Python: $versionInfo"
+
+        if ($versionInfo -like "*$currentVersion*") {
+            Write-Host "A versão vulnerável do Python ($currentVersion) foi detectada."
+
+            # Baixar a versão corrigida do Python (3.10.15)
+            $downloadUrl = "https://www.python.org/ftp/python/3.10.15/python-3.10.15-amd64.exe" #Adaptar para arquitetura x86 se necessário
+            $installerPath = Join-Path -Path $env:TEMP -ChildPath "python-3.10.15-amd64.exe" #Adaptar para arquitetura x86 se necessário
+
+            Write-Host "Baixando o instalador do Python $fixedVersion..."
+            try {
+                Invoke-WebRequest -Uri $downloadUrl -OutFile $installerPath
+                Write-Host "Download concluído."
+            } catch {
+                Write-Host "Erro ao baixar o instalador: $($_.Exception.Message)"
+                exit 1
+            }
+
+            # Executar o instalador silenciosamente
+            Write-Host "Executando o instalador do Python $fixedVersion silenciosamente..."
+            try {
+                Start-Process -FilePath $installerPath -ArgumentList "/quiet InstallAllUsers=1 Include_doc=0 Include_pip=1 Include_tcltk=0 ExecutableShortcuts=0 InstallLauncherAllUsers=1 PrependPath=1" -Wait
+                Write-Host "Instalação concluída."
+            } catch {
+                Write-Host "Erro ao executar o instalador: $($_.Exception.Message)"
+                exit 1
+            }
+
+            # Verificar a versão após a atualização
+             try {
+                $versionInfoUpdated = & $pythonExe --version 2>&1
+                Write-Host "Versão do Python após a atualização: $versionInfoUpdated"
+
+                if ($versionInfoUpdated -like "*$fixedVersion*") {
+                    Write-Host "Python atualizado com sucesso para a versão $fixedVersion."
+                } else {
+                    Write-Host "A atualização parece ter falhado. Verifique a versão do Python manualmente."
+                }
+
+            } catch {
+                Write-Host "Erro ao verificar a versão do Python após a atualização."
+                exit 1
+            }
+
+
+        } else {
+            Write-Host "A versão do Python instalada não corresponde à versão vulnerável ($currentVersion)."
+        }
+
+    } catch {
+        Write-Host "Erro ao verificar a versão do Python: $($_.Exception.Message)"
+        exit 1
+    }
+
+} else {
+    Write-Host "Python 3.10 não encontrado ou não instalado corretamente."
+    exit 1
+}
+
+exit 0
+```

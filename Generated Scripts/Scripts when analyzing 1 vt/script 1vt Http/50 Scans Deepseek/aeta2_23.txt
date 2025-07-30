@@ -1,0 +1,33 @@
+#!/bin/bash
+# Configura o Apache para redirecionar HTTP para HTTPS
+if [ -f /etc/apache2/sites-available/000-default.conf ]; then
+    sed -i 's/<VirtualHost \*:80>/<VirtualHost \*:80>\n    Redirect permanent \/ https:\/\/'"$(hostname)"'\//' /etc/apache2/sites-available/000-default.conf
+    a2enmod ssl
+    systemctl restart apache2
+fi
+
+# Configura o Nginx para redirecionar HTTP para HTTPS
+if [ -f /etc/nginx/sites-available/default ]; then
+    sed -i 's/listen 80 default_server;/listen 80 default_server;\n    return 301 https:\/\/$host$request_uri;/' /etc/nginx/sites-available/default
+    systemctl restart nginx
+fi
+
+# Verifica se o certificado SSL está configurado
+if [ ! -f /etc/ssl/certs/ssl-cert-snakeoil.pem ]; then
+    openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout /etc/ssl/private/ssl-cert-snakeoil.key -out /etc/ssl/certs/ssl-cert-snakeoil.pem -subj "/CN=$(hostname)"
+fi
+
+# Habilita o SSL no Apache
+if [ -f /etc/apache2/sites-available/default-ssl.conf ]; then
+    a2ensite default-ssl.conf
+    systemctl restart apache2
+fi
+
+# Habilita o SSL no Nginx
+if [ -f /etc/nginx/sites-available/default-ssl ]; then
+    ln -s /etc/nginx/sites-available/default-ssl /etc/nginx/sites-enabled/
+    systemctl restart nginx
+fi
+
+# Verifica se o redirecionamento está funcionando
+curl -I http://$(hostname) | grep "Location: https://$(hostname)"

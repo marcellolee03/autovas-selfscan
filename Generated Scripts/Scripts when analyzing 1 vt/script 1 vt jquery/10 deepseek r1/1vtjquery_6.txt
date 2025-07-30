@@ -1,0 +1,30 @@
+#!/bin/bash
+
+set -euo pipefail
+
+TARGET_FILE="/console/js/jquery-1.8.3.min.js"
+
+if [ ! -f "$TARGET_FILE" ]; then
+    echo "Error: O arquivo alvo $TARGET_FILE não foi encontrado" >&2
+    exit 1
+fi
+
+backup_file="${TARGET_FILE}.bak"
+cp -p "$TARGET_FILE" "$backup_file"
+
+if command -v wget >/dev/null 2>&1; then
+    wget -q -O "$TARGET_FILE" "https://code.jquery.com/jquery-1.9.1.min.js" || download_error=1
+elif command -v curl >/dev/null 2>&1; then
+    curl -s -o "$TARGET_FILE" "https://code.jquery.com/jquery-1.9.1.min.js" || download_error=1
+else
+    echo "Erro: Nenhum utilitário de download (wget/curl) disponível" >&2
+    exit 1
+fi
+
+if [[ -v download_error ]] || [ ! -s "$TARGET_FILE" ]; then
+    echo "Erro: Falha ao baixar o jQuery fixo" >&2
+    mv -f "$backup_file" "$TARGET_FILE"
+    exit 1
+fi
+
+echo "Atualização concluída: jQuery 1.8.3 substituído por versão 1.9.1 fixada"

@@ -1,0 +1,55 @@
+```bash
+#!/bin/bash
+
+# Identifica o serviço rodando na porta 5432 (PostgreSQL por padrão)
+SERVICE=$(ss -tlpn | grep ':5432' | awk '{split($5,a,":"); print a[1]}')
+
+# Verifica se o serviço foi encontrado
+if [ -z "$SERVICE" ]; then
+  echo "Serviço na porta 5432 não encontrado. Verifique se PostgreSQL ou outro serviço está rodando nessa porta."
+  exit 1
+fi
+
+# Assume que é PostgreSQL e tenta desabilitar TLSv1.0 e TLSv1.1
+
+# Localiza o arquivo de configuração do PostgreSQL (pg_hba.conf)
+PG_HBA_CONF=$(find /etc/postgresql/ /var/lib/postgresql/ -name pg_hba.conf 2>/dev/null | head -n 1)
+
+# Verifica se o arquivo pg_hba.conf foi encontrado
+if [ -z "$PG_HBA_CONF" ]; then
+  echo "Arquivo pg_hba.conf não encontrado. Impossível configurar TLS."
+  exit 1
+fi
+
+# Localiza o arquivo de configuração do PostgreSQL (postgresql.conf)
+PG_CONF=$(find /etc/postgresql/ /var/lib/postgresql/ -name postgresql.conf 2>/dev/null | head -n 1)
+
+# Verifica se o arquivo postgresql.conf foi encontrado
+if [ -z "$PG_CONF" ]; then
+  echo "Arquivo postgresql.conf não encontrado. Impossível configurar TLS."
+  exit 1
+fi
+
+# Define a string de configuração TLS para postgresql.conf
+TLS_CONFIG="ssl = on
+ssl_min_protocol = 'TLSv1.2'"
+
+# Adiciona ou atualiza as configurações TLS no postgresql.conf
+if grep -q "ssl_min_protocol" "$PG_CONF"; then
+  sed -i "s/ssl_min_protocol =.*/ssl_min_protocol = 'TLSv1.2'/" "$PG_CONF"
+else
+  echo "$TLS_CONFIG" >> "$PG_CONF"
+fi
+
+# Reinicia o serviço PostgreSQL
+if systemctl is-active --quiet postgresql; then
+  systemctl restart postgresql
+  echo "Serviço PostgreSQL reiniciado."
+else
+  echo "Serviço PostgreSQL não está ativo. Verifique a instalação."
+  exit 1
+fi
+
+echo "Proteção contra TLSv1.0 e TLSv1.1 aplicada (assumindo PostgreSQL)."
+exit 0
+```

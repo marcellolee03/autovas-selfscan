@@ -1,0 +1,86 @@
+```sh
+#!/bin/bash
+
+# Verifica se o TWiki está instalado
+if ! command -v twiki &> /dev/null
+then
+    echo "TWiki não está instalado. Nada a fazer."
+    exit 0
+fi
+
+# Define o diretório de instalação do TWiki (pode precisar ser ajustado)
+TWIKI_DIR="/var/www/twiki"  # Ajuste se necessário. Comum: /var/lib/twiki, /opt/twiki, /usr/share/twiki
+
+# Verifica se o diretório existe
+if [ ! -d "$TWIKI_DIR" ]; then
+  echo "Diretório do TWiki não encontrado: $TWIKI_DIR. Por favor, ajuste a variável TWIKI_DIR no script."
+  exit 1
+fi
+
+# Cria um diretório temporário para baixar a nova versão
+TMP_DIR=$(mktemp -d)
+if [ -z "$TMP_DIR" ]; then
+  echo "Falha ao criar diretório temporário."
+  exit 1
+fi
+
+# Baixa a versão 4.2.4 do TWiki (ou a mais recente, se disponível)
+TWIKI_VERSION="4.2.4"
+DOWNLOAD_URL="https://sourceforge.net/projects/twiki/files/TWiki%20Release/TWiki-$TWIKI_VERSION/TWiki-$TWIKI_VERSION.tgz/download" #Pode mudar com o tempo. Melhor baixar a versão mais recente no site oficial
+DOWNLOADED_FILE="$TMP_DIR/twiki.tgz"
+
+echo "Baixando TWiki $TWIKI_VERSION..."
+wget -O "$DOWNLOADED_FILE" "$DOWNLOAD_URL"
+if [ ! -f "$DOWNLOADED_FILE" ]; then
+  echo "Falha ao baixar o TWiki."
+  rm -rf "$TMP_DIR"
+  exit 1
+fi
+
+# Extrai o arquivo
+echo "Extraindo o arquivo..."
+tar -xzf "$DOWNLOADED_FILE" -C "$TMP_DIR"
+TWIKI_EXTRACTED_DIR="$TMP_DIR/TWiki-$TWIKI_VERSION"
+
+# Para a aplicação web (assumindo Apache e mod_perl) - Ajuste conforme o seu servidor web
+echo "Parando o servidor web..."
+systemctl stop apache2
+# or sudo service apache2 stop
+# or sudo /etc/init.d/apache2 stop
+
+# Backup do diretório atual do TWiki
+BACKUP_DIR="$TWIKI_DIR.bak.$(date +%Y%m%d%H%M%S)"
+echo "Fazendo backup do TWiki para $BACKUP_DIR..."
+mv "$TWIKI_DIR" "$BACKUP_DIR"
+
+# Move a nova versão para o diretório de instalação
+echo "Instalando a nova versão..."
+mv "$TWIKI_EXTRACTED_DIR" "$TWIKI_DIR"
+
+# Ajusta as permissões (importante!) - Ajuste os usuários e grupos conforme a sua configuração.
+echo "Ajustando as permissões..."
+chown -R www-data:www-data "$TWIKI_DIR" # Substitua www-data:www-data pelos usuários/grupos do seu servidor web
+find "$TWIKI_DIR" -type d -exec chmod 755 {} \;
+find "$TWIKI_DIR" -type f -exec chmod 644 {} \;
+
+# Executa scripts de atualização (se existirem) - Depende da versão e da complexidade da instalação.
+# Consulte a documentação do TWiki para obter detalhes específicos.
+# Exemplo (muito genérico e provavelmente incompleto):
+# if [ -x "$TWIKI_DIR/tools/upgrade" ]; then
+#   echo "Executando script de atualização..."
+#   "$TWIKI_DIR/tools/upgrade"
+# fi
+
+# Inicia o servidor web
+echo "Iniciando o servidor web..."
+systemctl start apache2
+# or sudo service apache2 start
+# or sudo /etc/init.d/apache2 start
+
+# Limpa o diretório temporário
+echo "Limpando arquivos temporários..."
+rm -rf "$TMP_DIR"
+
+echo "TWiki atualizado para a versão $TWIKI_VERSION.  Verifique a funcionalidade e revise as configurações!"
+exit 0
+```

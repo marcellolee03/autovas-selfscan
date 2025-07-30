@@ -1,0 +1,35 @@
+#!/bin/bash
+# Verificar se o serviço rexecd está ativo e desabilitá-lo
+if systemctl is-active rexec.socket &>/dev/null; then
+    systemctl stop rexec.socket
+    systemctl disable rexec.socket
+fi
+if systemctl is-active rexecd &>/dev/null; then
+    systemctl stop rexecd
+    systemctl disable rexecd
+fi
+
+# Remover entrada do rexec no inetd.conf se existir
+if [ -f /etc/inetd.conf ]; then
+    sed -i '/^rexec[[:space:]]/s/^/#/' /etc/inetd.conf
+    kill -HUP "$(cat /var/run/inetd.pid 2>/dev/null)" 2>/dev/null
+fi
+
+# Desabilitar o serviço via xinetd
+if [ -d /etc/xinetd.d ]; then
+    for config in /etc/xinetd.d/*; do
+        if grep -q "service.*rexec" "$config" 2>/dev/null; then
+            sed -i '/disable\s*=/s/no/yes/' "$config"
+            sed -i '/disable\s*=/s/\bno\b/yes/' "$config"
+            kill -HUP "$(pidof xinetd)" 2>/dev/null
+        fi
+    done
+fi
+
+# Remover pacotes relacionados ao rexec
+{ apt-get remove --purge -y rsh-server rsh-redone-server netkit-rsh-server; } 2>/dev/null
+{ yum remove -y rsh-server; } 2>/dev/null
+
+# Finalizar qualquer instância remanescente do rexecd
+pkill -9 rexecd
+exit 0

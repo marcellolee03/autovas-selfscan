@@ -1,0 +1,40 @@
+```bash
+#!/bin/bash
+
+# Identifica o serviço que está rodando na porta 5432 (PostgreSQL por padrão)
+SERVICE=$(ss -tulnp | grep ':5432' | awk '{split($5,a,":"); print a[1]}')
+
+# Se nenhum serviço for encontrado, tenta identificar usando lsof
+if [ -z "$SERVICE" ]; then
+  SERVICE=$(sudo lsof -i :5432 -sTCP:LISTEN | awk 'NR==2 {print $1}')
+fi
+
+# Define o arquivo de configuração do PostgreSQL
+CONFIG_FILE=$(find /etc/postgresql/ -name postgresql.conf)
+
+# Verifica se o arquivo de configuração foi encontrado
+if [ -z "$CONFIG_FILE" ]; then
+  echo "Arquivo de configuração postgresql.conf não encontrado."
+  exit 1
+fi
+
+# Cria um backup do arquivo de configuração
+cp "$CONFIG_FILE" "${CONFIG_FILE}.bak.$(date +%Y%m%d%H%M%S)"
+
+# Desabilita TLSv1.0 e TLSv1.1 no arquivo de configuração
+sed -i "s/^ssl_min_protocol = .*/ssl_min_protocol = 'TLSv1.2'/g" "$CONFIG_FILE"
+
+# Reinicia o serviço PostgreSQL
+if [ -n "$SERVICE" ]; then
+  if systemctl is-active --quiet "$SERVICE"; then
+    systemctl restart "$SERVICE"
+    echo "Serviço $SERVICE reiniciado."
+  else
+    echo "Serviço $SERVICE não está ativo ou não pôde ser reiniciado via systemctl. Tente reiniciar manualmente."
+  fi
+else
+  echo "Serviço não identificado na porta 5432. Reinicie o serviço PostgreSQL manualmente."
+fi
+
+echo "Correção aplicada. TLSv1.0 e TLSv1.1 desabilitados no PostgreSQL."
+```

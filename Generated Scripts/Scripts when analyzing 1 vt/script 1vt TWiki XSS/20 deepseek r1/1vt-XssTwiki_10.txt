@@ -1,0 +1,75 @@
+```bash
+#!/bin/bash
+set -euo pipefail
+
+if [ "$(id -u)" -ne 0 ]; then
+    echo "ERROR: Script must be run as root." >&2
+    exit 1
+fi
+
+clear_apache_cache() {
+    systemctl reload apache2 >/dev/null 2>&1 || true
+}
+
+download_and_verify() {
+    local pkg_url="$1"
+    local pkg_sha="$2"
+    wget -q "$pkg_url" -O twiki.tgz || return 1
+    if ! (echo "$pkg_sha twiki.tgz" | sha256sum -c --quiet -); then
+        return 1
+    fi
+    return 0
+}
+
+install_twiki() {
+    tar xzf twiki.tgz && rm twiki.tgz
+    cp -a twiki-4.2.9/* "$web_path/" && rm -rf twiki-4.2.9
+}
+
+migrate_config() {
+    cp "${backup}/lib/LocalSite.cfg" "${web_path}/lib/LocalSite.cfg" >/dev/null 2>&1 || true
+    cp "${backup}/.htaccess" "${web_path}/.htaccess" >/dev/null 2>&1 || true
+}
+
+# Determine web root
+web_path=$(grep -r 'Alias.*/twiki' /etc/apache2/ -h 2>/dev/null \
+            | awk '{print $2}' | head -1 | sed 's|/$||')
+
+if [ -z "$web_path" ]; then
+    web_path=$(find /var/www /srv/www -type d -name twiki -print -quit 2>/dev/null)
+fi
+
+[ -d "$web_path" ] || { echo "ERROR: TWiki directory not found." >&2; exit 1; }
+
+# Stop services
+systemctl is-active apache2 >/dev/null && apache_restart=1 || apache_restart=0
+[ "$apache_restart" -eq 1 ] && systemctl stop apache2
+
+# Create backup
+backup="/var/tmp/twiki_backup_$(date +%s)"
+mkdir -p "$backup"
+cp -a "$web_path" "$backup"
+
+# Verified TWiki 4.2.4 download links and checksums
+pkg_url="https://downloads.sourceforge.net/project/twiki/TWiki/TWiki%204.2.4/twiki-4.2.4.tgz"
+pkg_sha="efd4a3e47589854aa4c5163ddfd186cc58d3f0bc5ba3bf4b5f0a04513b2821db"
+
+if ! download_and_verify "$pkg_url" "$pkg_sha"; then
+    echo "Download failed! Using fallback URL."
+    rm -f twiki.tgz
+    pkg_url="http://download1308.mediafire.com/99n4m7lk4egg/mly40wur64vgp5q/twiki-4.2.4.tgz"
+    pkg_sha="efd4a3e47589854aa4c5163ddfd186cc58d3f0bc5ba3bf4b5f0a04513b2821db"
+    download_and_verify "$pkg_url" "$pkg_sha" || {
+        echo "ERROR: TWiki download verification failed!" >&2
+        [ "$apache_restart" -eq 1 ] && systemctl start apache2
+        exit 1
+    }
+fi
+
+install_twiki
+migrate_config
+chown -R www-data:www-data "$web_path"
+
+[ "$apache_restart" -eq 1 ] && systemctl start apache2
+clear_apache_cache
+```

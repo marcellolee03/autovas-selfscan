@@ -1,0 +1,87 @@
+```powershell
+# Script para atualizar as versões do Python e corrigir vulnerabilidades no Windows
+
+# Define um dicionário para mapear as versões atuais do Python e as versões corrigidas desejadas.
+# As chaves são as versões vulneráveis detectadas e os valores são as versões que devem ser instaladas para mitigar as vulnerabilidades.
+$pythonUpdates = @{
+    "3.10.12" = "3.10.16"
+    "3.12.0" = "3.12.9"
+}
+
+# Função para verificar se o Python está instalado e obter sua versão
+function Get-PythonVersion {
+    try {
+        # Tenta executar o comando 'python --version' e captura a saída
+        $pythonVersion = python --version 2>&1
+        # Extrai a versão do Python da saída
+        if ($pythonVersion -match "Python (\d+\.\d+\.\d+)") {
+            return $Matches[1]
+        } else {
+            return $null
+        }
+    } catch {
+        return $null
+    }
+}
+
+# Função para instalar uma nova versão do Python
+function Install-PythonVersion {
+    param (
+        [string]$version
+    )
+
+    # Define o nome do arquivo de instalação do Python com base na versão fornecida
+    $installerFileName = "python-$version-amd64.exe"
+    # Define a URL para baixar o instalador do Python
+    $installerUrl = "https://www.python.org/ftp/python/$version/$installerFileName"
+    # Define o caminho onde o instalador será salvo localmente
+    $installerPath = "$PSScriptRoot\$installerFileName"
+
+    try {
+        # Baixa o instalador do Python da URL especificada e o salva no caminho local
+        Write-Host "Baixando Python $version de $installerUrl para $installerPath"
+        Invoke-WebRequest -Uri $installerUrl -OutFile $installerPath
+
+        # Executa o instalador do Python com opções para instalação silenciosa, adicionando Python ao PATH e instalando para todos os usuários
+        Write-Host "Instalando Python $version silenciosamente..."
+        Start-Process -FilePath $installerPath -ArgumentList "/quiet InstallAllUsers=1 Include_doc=0 Include_pip=1 Include_test=0" -Wait
+
+        # Remove o arquivo do instalador após a instalação
+        Remove-Item $installerPath
+
+        Write-Host "Python $version instalado com sucesso."
+    } catch {
+        Write-Error "Falha ao instalar Python $version: $($_.Exception.Message)"
+    }
+}
+
+# Obtém a versão atual do Python
+$currentVersion = Get-PythonVersion
+
+# Verifica se o Python está instalado
+if ($currentVersion) {
+    Write-Host "Versão atual do Python instalada: $currentVersion"
+
+    # Verifica se a versão atual do Python precisa ser atualizada
+    if ($pythonUpdates.ContainsKey($currentVersion)) {
+        $newVersion = $pythonUpdates[$currentVersion]
+        Write-Host "Atualizando Python da versão $currentVersion para $newVersion..."
+
+        # Instala a nova versão do Python
+        Install-PythonVersion -version $newVersion
+    } else {
+        Write-Host "A versão atual do Python está atualizada. Nenhuma ação necessária."
+    }
+} else {
+    Write-Host "Python não está instalado."
+}
+
+# Desabilita o protocolo TLSv1.0 e TLSv1.1
+#REG ADD "HKLM\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Protocols\TLS 1.0\Server" /v Enabled /t REG_DWORD /d 0 /f
+#REG ADD "HKLM\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Protocols\TLS 1.0\Client" /v Enabled /t REG_DWORD /d 0 /f
+#REG ADD "HKLM\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Protocols\TLS 1.1\Server" /v Enabled /t REG_DWORD /d 0 /f
+#REG ADD "HKLM\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Protocols\TLS 1.1\Client" /v Enabled /t REG_DWORD /d 0 /f
+Write-Host "As chaves de registro para desabilitar TLS 1.0 e 1.1 foram comentadas, descomente para desabilitar."
+
+Write-Host "Script concluído."
+```

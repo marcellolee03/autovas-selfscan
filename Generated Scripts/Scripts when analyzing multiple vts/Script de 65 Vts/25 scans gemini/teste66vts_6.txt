@@ -1,0 +1,117 @@
+```powershell
+# Script para atualizar o Python em Windows para mitigar as vulnerabilidades encontradas
+
+# Funções auxiliares
+function Get-PythonInstallPath {
+    param (
+        [string]$version
+    )
+    # Procura a instalação do Python no registro
+    $keyPath = "HKLM:\SOFTWARE\Python\PythonCore\$version\InstallPath"
+    if (Test-Path $keyPath) {
+        return (Get-ItemProperty -Path $keyPath).'(default)'
+    }
+    return $null
+}
+
+function Update-Python {
+    param (
+        [string]$currentVersion,
+        [string]$targetVersion
+    )
+    Write-Host "Atualizando Python de $currentVersion para $targetVersion..."
+    # Determina a arquitetura do sistema
+    if ([Environment]::Is64BitOperatingSystem) {
+        $architecture = "amd64"
+    } else {
+        $architecture = "x86"
+    }
+    # Cria um diretório temporário para o instalador
+    $tempDir = Join-Path $env:TEMP "PythonUpdate_$currentVersion"
+    if (!(Test-Path -Path $tempDir)) {
+        New-Item -ItemType Directory -Path $tempDir
+    }
+
+    # Define o nome do arquivo do instalador
+    $installerFileName = "python-$targetVersion-windows-$architecture.exe" # Ajuste para refletir a arquitetura correta
+    $installerPath = Join-Path $tempDir $installerFileName
+    $downloadURL = "https://www.python.org/ftp/python/$targetVersion/$installerFileName"
+
+    # Baixa o instalador
+    Write-Host "Baixando $installerFileName de $downloadURL..."
+    try {
+        Invoke-WebRequest -Uri $downloadURL -OutFile $installerPath
+    } catch {
+        Write-Error "Falha ao baixar o instalador: $($_.Exception.Message)"
+        Remove-Item -Path $tempDir -Recurse -Force
+        return $false
+    }
+
+    # Executa o instalador
+    Write-Host "Executando o instalador..."
+    try {
+        Start-Process -FilePath $installerPath -ArgumentList "/quiet InstallAllUsers=1 Include_doc=0 Include_launcher=1 Include_test=0" -Wait -NoNewWindow
+    } catch {
+        Write-Error "Falha ao executar o instalador: $($_.Exception.Message)"
+        Remove-Item -Path $tempDir -Recurse -Force
+        return $false
+    }
+
+    # Remove o diretório temporário
+    Write-Host "Limpando arquivos temporários..."
+    Remove-Item -Path $tempDir -Recurse -Force
+
+    Write-Host "Python atualizado com sucesso para a versão $targetVersion."
+    return $true
+}
+
+# Script principal
+Write-Host "Iniciando script de atualização do Python..."
+
+# Vulnerabilidade 1, 8, 10, 14, 18, 21, 22, 27, 32, 36, 37, 40, 46, 50, 56, 57, 64
+$python31012Path = Get-PythonInstallPath "3.10"
+if ($python31012Path) {
+    Update-Python -currentVersion "3.10.12" -targetVersion "3.10.16"
+}
+
+# Vulnerabilidade 2, 3, 4, 5, 6, 7, 9, 11, 12, 13, 15, 16, 17, 19, 20, 23, 24, 25, 26, 28, 29, 30, 31, 33, 34, 35, 38, 39, 41, 42, 43, 44, 45, 47, 48, 51, 52, 53, 55, 58, 60, 61, 63, 65
+$python3120Path = Get-PythonInstallPath "3.12"
+if ($python3120Path) {
+    # Ordem de atualização é importante para corrigir todas as CVEs corretamente
+    Update-Python -currentVersion "3.12.0" -targetVersion "3.12.1" # CVE-2023-6597
+    Update-Python -currentVersion "3.12.1" -targetVersion "3.12.2" # CVE-2024-0450
+    Update-Python -currentVersion "3.12.2" -targetVersion "3.12.3" # CVE-2024-0397, CVE-2023-52425
+    Update-Python -currentVersion "3.12.3" -targetVersion "3.12.4" # CVE-2024-4030, CVE-2024-4032, CVE-2025-1795
+    Update-Python -currentVersion "3.12.4" -targetVersion "3.12.5" # CVE-2024-6923, CVE-2024-3219
+    Update-Python -currentVersion "3.12.5" -targetVersion "3.12.6" # CVE-2024-6232, CVE-2024-7592, CVE-2024-8088, CVE-2024-45490, CVE-2024-45491, CVE-2024-45492
+    Update-Python -currentVersion "3.12.6" -targetVersion "3.12.8" # CVE-2024-9287
+    Update-Python -currentVersion "3.12.8" -targetVersion "3.12.9" # CVE-2025-0938
+}
+
+# Vulnerabilidade 54: Desabilitar TLSv1.0 e TLSv1.1 (necessita configuração no sistema)
+Write-Host "Para a vulnerabilidade SSL/TLS (TLSv1.0 e TLSv1.1), é necessário desabilitar esses protocolos nas configurações do sistema."
+Write-Host "Este script não pode realizar essa ação automaticamente. Consulte a documentação do Windows para instruções detalhadas."
+
+# Vulnerabilidade 49: Substituir certificado SSL/TLS auto-assinado (necessita ação manual)
+Write-Host "Para a vulnerabilidade do certificado SSL/TLS auto-assinado, é necessário substituir o certificado por um assinado por uma CA confiável."
+Write-Host "Este script não pode gerar ou instalar certificados automaticamente. Consulte a documentação do servidor web para instruções detalhadas."
+
+# Vulnerabilidade 59: Desabilitar algoritmos MAC fracos no SSH (necessita configuração no SSH)
+Write-Host "Para a vulnerabilidade dos algoritmos MAC fracos no SSH, é necessário configurar o servidor SSH para desabilitar esses algoritmos."
+Write-Host "Edite o arquivo de configuração do SSH (sshd_config) e remova os algoritmos fracos da lista MACs."
+
+# Vulnerabilidade 62: Desabilitar ICMP Timestamp Reply (necessita configuração no firewall ou no sistema)
+Write-Host "Para a vulnerabilidade do ICMP Timestamp Reply, é necessário desabilitar a resposta a esses pacotes no firewall ou no sistema."
+Write-Host "Este script não pode realizar essa ação automaticamente. Consulte a documentação do Windows Firewall para instruções detalhadas."
+
+# Vulnerabilidade 20, 25, 28 : Sem solução disponível. Ações manuais ou desativação dos features podem ser necessárias
+Write-Host "Para as vulnerabilidades de Untrusted Search Path (CVE-2024-3220) não há correção disponível no momento. Considere mitigações alternativas."
+
+# Vulnerabilidade 33, 34, 35, 36: Sem solução disponível. Ações manuais ou desativação dos features podem ser necessárias
+Write-Host "Para as vulnerabilidades de Security Bypass (CVE-2023-27043) não há correção disponível no momento. Considere mitigações alternativas."
+
+# Vulnerabilidade 9, 15: Sem solução disponível. Ações manuais ou desativação dos features podem ser necessárias
+Write-Host "Para as vulnerabilidades de RecursionError (CVE-2023-36632) não há correção disponível no momento. Considere mitigações alternativas."
+
+Write-Host "Script de atualização do Python finalizado."
+```

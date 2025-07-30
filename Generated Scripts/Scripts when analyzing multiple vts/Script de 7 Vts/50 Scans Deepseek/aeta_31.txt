@@ -1,0 +1,30 @@
+#!/bin/bash
+# Disable HTTP and enforce HTTPS
+sed -i 's/^Listen 80$/Listen 443/' /etc/apache2/ports.conf
+a2enmod ssl
+systemctl restart apache2
+
+# Disable DNS recursion
+sed -i 's/^recursion yes$/recursion no/' /etc/named.conf
+systemctl restart named
+
+# Disable ICMP timestamp replies
+echo 1 > /proc/sys/net/ipv4/icmp_echo_ignore_all
+echo "net.ipv4.icmp_echo_ignore_all = 1" >> /etc/sysctl.conf
+sysctl -p
+
+# Disable deprecated TLSv1.0 and TLSv1.1
+sed -i 's/^SSLProtocol.*$/SSLProtocol all -SSLv2 -SSLv3 -TLSv1 -TLSv1.1/' /etc/apache2/mods-enabled/ssl.conf
+systemctl restart apache2
+
+# Disable SSL/TLS renegotiation
+sed -i 's/^SSLHonorCipherOrder.*$/SSLHonorCipherOrder on\nSSLInsecureRenegotiation off/' /etc/apache2/mods-enabled/ssl.conf
+systemctl restart apache2
+
+# Remove weak cipher suites
+sed -i 's/^SSLCipherSuite.*$/SSLCipherSuite HIGH:!aNULL:!MD5:!RC4:!3DES/' /etc/apache2/mods-enabled/ssl.conf
+systemctl restart apache2
+
+# Disable TCP timestamps
+echo "net.ipv4.tcp_timestamps = 0" >> /etc/sysctl.conf
+sysctl -p

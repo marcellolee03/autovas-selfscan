@@ -1,0 +1,81 @@
+```bash
+#!/bin/bash
+
+# Este script corrige a vulnerabilidade de transmissão de informações sensíveis em texto claro via HTTP.
+# Ele configura o redirecionamento de HTTP para HTTPS e habilita o HTTPS para o servidor web Apache.
+
+# Variáveis
+WEB_SERVER="apache2" # Pode ser apache2, nginx, httpd, etc. Ajuste conforme necessário.
+HTTP_PORT="80"
+HTTPS_PORT="443"
+DOMINIO="example.com" # Substitua pelo seu domínio
+DIRETORIO_SSL="/etc/ssl"
+CERT_NAME="selfsigned"
+
+# 1. Verifica se o script está sendo executado como root.
+if [[ $EUID -ne 0 ]]; then
+  echo "Este script precisa ser executado como root."
+  exit 1
+fi
+
+# 2. Verifica se o servidor web está instalado.
+if ! command -v "$WEB_SERVER" &> /dev/null; then
+  echo "Servidor web $WEB_SERVER não encontrado. Instale-o antes de executar este script."
+  exit 1
+fi
+
+# 3. Instala o mod_ssl (se necessário).
+if ! a2enmod ssl &> /dev/null; then
+  apt-get update && apt-get install -y openssl
+  apt-get install -y ssl-cert
+  a2enmod ssl
+fi
+
+# 4. Gera um certificado autoassinado (se necessário).
+if [ ! -f "$DIRETORIO_SSL/certs/$CERT_NAME.crt" ] || [ ! -f "$DIRETORIO_SSL/private/$CERT_NAME.key" ]; then
+  echo "Gerando certificado autoassinado..."
+  mkdir -p "$DIRETORIO_SSL/certs" "$DIRETORIO_SSL/private"
+  openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout "$DIRETORIO_SSL/private/$CERT_NAME.key" -out "$DIRETORIO_SSL/certs/$CERT_NAME.crt" -subj "/CN=$DOMINIO"
+  chmod 600 "$DIRETORIO_SSL/private/$CERT_NAME.key"
+fi
+
+# 5. Cria um arquivo de configuração virtual host para HTTPS.
+cat > /etc/apache2/sites-available/default-ssl.conf <<EOL
+<VirtualHost *:443>
+    ServerName $DOMINIO
+
+    SSLEngine on
+    SSLCertificateFile $DIRETORIO_SSL/certs/$CERT_NAME.crt
+    SSLCertificateKeyFile $DIRETORIO_SSL/private/$CERT_NAME.key
+
+    DocumentRoot /var/www/html
+
+    <Directory /var/www/html>
+        AllowOverride All
+        Require all granted
+    </Directory>
+
+    ErrorLog \${APACHE_LOG_DIR}/error.log
+    CustomLog \${APACHE_LOG_DIR}/access.log combined
+</VirtualHost>
+EOL
+
+# 6. Habilita o site HTTPS e desabilita o site HTTP padrão.
+a2ensite default-ssl.conf
+a2dissite 000-default.conf
+
+# 7. Configura o redirecionamento de HTTP para HTTPS.
+cat > /etc/apache2/sites-available/http-redirect.conf <<EOL
+<VirtualHost *:${HTTP_PORT}>
+    ServerName $DOMINIO
+    Redirect permanent / https://${DOMINIO}/
+</VirtualHost>
+EOL
+
+a2ensite http-redirect.conf
+
+# 8. Reinicia o servidor web.
+systemctl restart "$WEB_SERVER"
+
+echo "Redirecionamento de HTTP para HTTPS configurado e HTTPS habilitado. Reinicie o navegador e acesse o site usando HTTPS."
+```

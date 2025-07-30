@@ -1,0 +1,28 @@
+```bash
+#!/bin/bash
+
+# Este script atualiza o sistema operacional Ubuntu para uma versão suportada.
+# Ele assume que o sistema está executando uma versão EOL do Ubuntu 
+# e tenta atualizar para a versão LTS mais recente disponível.
+
+# Atualiza a lista de pacotes
+apt update
+
+# Atualiza o sistema para a versão mais recente disponível dentro da versão atual.
+apt upgrade -y
+
+# Instala o utilitário de atualização do Ubuntu.
+apt install update-manager-core -y
+
+# Executa a atualização para a versão LTS mais recente.
+do-release-upgrade
+
+# Remove pacotes obsoletos.
+apt autoremove -y
+
+# Limpa o cache do APT.
+apt clean
+
+echo "A atualização do sistema operacional foi iniciada. Por favor, siga as instruções no terminal."
+echo "O sistema pode ser reiniciado automaticamente durante o processo."
+```

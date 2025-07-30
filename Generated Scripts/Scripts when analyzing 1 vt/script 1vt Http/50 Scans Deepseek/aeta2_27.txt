@@ -1,0 +1,33 @@
+#!/bin/bash
+# Enforce HTTPS by configuring Apache to redirect HTTP to HTTPS
+if [ -f /etc/apache2/sites-available/000-default.conf ]; then
+    sed -i '/<VirtualHost \*:80>/a\\tRedirect permanent / https://'"$(hostname)"'/' /etc/apache2/sites-available/000-default.conf
+    systemctl restart apache2
+fi
+
+# Enforce HTTPS by configuring Nginx to redirect HTTP to HTTPS
+if [ -f /etc/nginx/sites-available/default ]; then
+    sed -i '/listen 80 default_server;/a\\treturn 301 https://$host$request_uri;' /etc/nginx/sites-available/default
+    systemctl restart nginx
+fi
+
+# Ensure SSL/TLS is enabled for any running web service
+if ! command -v certbot &> /dev/null; then
+    apt-get update && apt-get install -y certbot python3-certbot-apache python3-certbot-nginx
+fi
+
+# Obtain and install SSL certificate for Apache
+if systemctl is-active --quiet apache2; then
+    certbot --apache --non-interactive --agree-tos --redirect -m admin@example.com -d "$(hostname)"
+fi
+
+# Obtain and install SSL certificate for Nginx
+if systemctl is-active --quiet nginx; then
+    certbot --nginx --non-interactive --agree-tos --redirect -m admin@example.com -d "$(hostname)"
+fi
+
+# Update firewall rules to allow HTTPS
+if command -v ufw &> /dev/null; then
+    ufw allow 'Apache Full'
+    ufw allow 'Nginx Full'
+fi

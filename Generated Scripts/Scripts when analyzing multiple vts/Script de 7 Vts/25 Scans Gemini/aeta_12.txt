@@ -1,0 +1,76 @@
+```bash
+#!/bin/bash
+
+# Desabilitar o envio de informações sensíveis em texto plano via HTTP (Vulnerabilidade 1)
+# A correção dessa vulnerabilidade depende da aplicação. O script abaixo instala e configura
+# um servidor web (nginx) para redirecionar HTTP para HTTPS e habilitar HTTPS.
+# Assumindo sistema baseado em Debian/Ubuntu.
+
+# Atualizar pacotes
+apt update -y
+
+# Instalar nginx
+apt install nginx -y
+
+# Gerar certificado SSL auto-assinado (para fins de teste. Em produção, usar Let's Encrypt ou similar)
+openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout /etc/ssl/private/nginx-selfsigned.key -out /etc/ssl/certs/nginx-selfsigned.crt -subj "/CN=localhost"
+
+# Criar um arquivo de configuração para o nginx
+cat > /etc/nginx/sites-available/default <<EOL
+server {
+    listen 80 default_server;
+    listen [::]:80 default_server;
+    server_name _;
+    return 301 https://\$host\$request_uri;
+}
+
+server {
+    listen 443 ssl default_server;
+    listen [::]:443 ssl default_server;
+
+    ssl_certificate /etc/ssl/certs/nginx-selfsigned.crt;
+    ssl_certificate_key /etc/ssl/private/nginx-selfsigned.key;
+
+    ssl_protocols TLSv1.2 TLSv1.3;
+    ssl_prefer_server_ciphers on;
+    ssl_ciphers "EECDH+AESGCM:EDH+AESGCM:AES256+EECDH:AES256+EDH";
+
+    server_name _;
+    root /var/www/html;
+    index index.html index.htm index.nginx-debian.html;
+
+    location / {
+        try_files \$uri \$uri/ =404;
+    }
+}
+EOL
+
+# Reiniciar o nginx
+systemctl restart nginx
+
+# Vulnerabilidade 2: DNS Cache Snooping
+# Desabilitar recursão no bind9 (se estiver instalado)
+if command -v named >/dev/null 2>&1; then
+    sed -i 's/recursion yes;/recursion no;/g' /etc/bind/named.conf.options
+    systemctl restart bind9
+fi
+
+# Vulnerabilidade 3: ICMP Timestamp Reply Information Disclosure
+echo 1 > /proc/sys/net/ipv4/icmp_echo_ignore_all
+# Persistir a configuração após o reboot
+echo "net.ipv4.icmp_echo_ignore_all=1" >> /etc/sysctl.conf
+sysctl -p
+
+# Vulnerabilidade 4: SSL/TLS: Deprecated TLSv1.0 and TLSv1.1 Protocol Detection
+# Vulnerabilidade 5: SSL/TLS: Renegotiation DoS Vulnerability (CVE-2011-1473, CVE-2011-5094)
+# Vulnerabilidade 6: SSL/TLS: Report Weak Cipher Suites
+# Correções aplicadas na configuração do Nginx acima. As linhas:
+# ssl_protocols TLSv1.2 TLSv1.3;
+# ssl_prefer_server_ciphers on;
+# ssl_ciphers "EECDH+AESGCM:EDH+AESGCM:AES256+EECDH:AES256+EDH";
+# Desabilitam TLS 1.0 e 1.1, priorizam os cipher suites do servidor e configuram cipher suites fortes.
+
+# Vulnerabilidade 7: TCP Timestamps Information Disclosure
+echo "net.ipv4.tcp_timestamps = 0" >> /etc/sysctl.conf
+sysctl -p
+```

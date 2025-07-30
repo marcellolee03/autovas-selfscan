@@ -1,0 +1,58 @@
+```bash
+#!/bin/bash
+
+# Variáveis
+JQUERY_FILE="/var/www/html/console/framework/js/jquery-1.8.3.min.js"
+BACKUP_DIR="/var/tmp/jquery_backup"
+NEW_JQUERY_URL="https://code.jquery.com/jquery-1.9.0.min.js"
+NEW_JQUERY_FILE="/tmp/jquery-1.9.0.min.js"
+
+# Criar diretório de backup se não existir
+mkdir -p "$BACKUP_DIR"
+
+# Verificar se o arquivo jQuery vulnerável existe
+if [ ! -f "$JQUERY_FILE" ]; then
+  echo "Arquivo jQuery vulnerável não encontrado: $JQUERY_FILE"
+  exit 1
+fi
+
+# Fazer backup do arquivo jQuery existente
+cp "$JQUERY_FILE" "$BACKUP_DIR/jquery-1.8.3.min.js.bak"
+
+# Verificar se o backup foi bem-sucedido
+if [ ! -f "$BACKUP_DIR/jquery-1.8.3.min.js.bak" ]; then
+  echo "Falha ao fazer backup do arquivo jQuery."
+  exit 1
+fi
+
+# Baixar a nova versão do jQuery
+wget -q "$NEW_JQUERY_URL" -O "$NEW_JQUERY_FILE"
+
+# Verificar se o download foi bem-sucedido
+if [ ! -f "$NEW_JQUERY_FILE" ]; then
+  echo "Falha ao baixar a nova versão do jQuery."
+  exit 1
+fi
+
+# Substituir o arquivo jQuery antigo pelo novo
+cp "$NEW_JQUERY_FILE" "$JQUERY_FILE"
+
+# Verificar se a substituição foi bem-sucedida
+if [ ! -f "$JQUERY_FILE" ]; then
+    echo "Falha ao substituir o arquivo jQuery."
+    # Restaurar o backup
+    cp "$BACKUP_DIR/jquery-1.8.3.min.js.bak" "$JQUERY_FILE"
+    if [ -f "$JQUERY_FILE" ]; then
+      echo "Arquivo jQuery restaurado do backup."
+    else
+      echo "Falha ao restaurar o arquivo jQuery do backup."
+    fi
+    exit 1
+fi
+
+# Limpar o arquivo temporário
+rm "$NEW_JQUERY_FILE"
+
+echo "jQuery atualizado para a versão 1.9.0 com sucesso."
+exit 0
+```

@@ -1,0 +1,29 @@
+#!/bin/bash
+twiki_home=$(find / -wholename '*lib/TWiki.pm' -exec dirname {} \; 2>/dev/null | head -n 1)
+if [ -z "$twiki_home" ]; then
+  exit 1
+fi
+twiki_home=$(dirname "$twiki_home")
+backup_dir="${twiki_home}_backup_$(date +%Y%m%d)"
+cp -a "$twiki_home" "$backup_dir"
+tmp_dir=$(mktemp -d)
+wget -q -P "$tmp_dir" http://sourceforge.net/projects/twiki/files/TWiki/TWiki%204.2.4/twiki-4.2.4.tgz
+tar -xzf "$tmp_dir/twiki-4.2.4.tgz" -C "$tmp_dir"
+new_twiki="$tmp_dir/twiki-4.2.4"
+mv "$twiki_home" "${twiki_home}.old"
+mv "$new_twiki" "$twiki_home"
+rm -rf "$twiki_home/data"
+cp -a "${twiki_home}.old/data" "$twiki_home/"
+rm -rf "$twiki_home/pub"
+cp -a "${twiki_home}.old/pub" "$twiki_home/"
+cp "${twiki_home}.old/lib/LocalSite.cfg" "$twiki_home/lib/LocalSite.cfg"
+if [ $(id -u) -eq 0 ]; then
+  chown -R www-data:www-data "$twiki_home/data" "$twiki_home/pub"
+fi
+if systemctl is-active --quiet apache2; then
+  systemctl restart apache2
+elif [ -f /etc/init.d/apache2 ]; then
+  /etc/init.d/apache2 restart
+fi
+rm -rf "$tmp_dir"
+rm -rf "${twiki_home}.old"

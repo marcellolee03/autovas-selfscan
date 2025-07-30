@@ -1,0 +1,37 @@
+```bash
+#!/bin/bash
+
+# Este script atualiza o sistema operacional Ubuntu 8.04 para uma versão suportada.
+# Este script assume que você tem uma conexão de rede funcional e privilégios de root.
+# Devido ao Ubuntu 8.04 ser EOL, a atualização direta não é possível.
+# Este script demonstra como você tentaria atualizar um sistema EOL.
+# Recomenda-se uma instalação limpa de uma versão suportada do Ubuntu.
+
+echo "AVISO: Este script tentará atualizar um sistema operacional EOL (End-of-Life)."
+echo "       Não há garantia de que isso funcionará e pode causar instabilidade."
+echo "       Recomenda-se uma instalação limpa de uma versão suportada do Ubuntu."
+
+# Remova as entradas do Ubuntu 8.04 dos arquivos sources.list.
+sudo sed -i '/hardy/d' /etc/apt/sources.list
+sudo sed -i '/Hardy/d' /etc/apt/sources.list
+
+# Adicione os repositórios antigos (archive) para Hardy.
+echo "Adicionando repositórios antigos do Ubuntu 8.04..."
+sudo tee -a /etc/apt/sources.list.d/hardy.list <<EOF
+deb http://old-releases.ubuntu.com/ubuntu/ hardy main restricted universe multiverse
+deb http://old-releases.ubuntu.com/ubuntu/ hardy-updates main restricted universe multiverse
+deb http://old-releases.ubuntu.com/ubuntu/ hardy-security main restricted universe multiverse
+deb http://old-releases.ubuntu.com/ubuntu/ hardy-backports main restricted universe multiverse
+EOF
+
+# Atualize a lista de pacotes
+echo "Atualizando a lista de pacotes..."
+sudo apt-get update
+
+# Tente fazer o upgrade para uma versão mais recente. Atenção: Provavelmente não vai funcionar!
+echo "Tentando fazer o upgrade para uma versão mais recente..."
+sudo apt-get dist-upgrade -y
+
+echo "Atualização concluída (ou falhou). Por favor, verifique o sistema."
+echo "RECOMENDA-SE FORTEMENTE uma instalação limpa de uma versão suportada do Ubuntu."
+```

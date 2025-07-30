@@ -1,0 +1,29 @@
+```bash
+#!/bin/bash
+
+# Identifica o sistema operacional para determinar o método de correção.
+os_info=$(uname -a)
+
+# Define a porta afetada
+port=5432
+
+# Função genérica para desabilitar TLS 1.0 e 1.1.  Adaptar conforme necessário para o serviço.
+disable_tls() {
+  echo "Nenhuma ação genérica aplicável. Requer configuração específica do serviço na porta $port."
+  echo "Por favor, consulte a documentação do serviço que utiliza a porta $port para desabilitar TLSv1.0 e TLSv1.1."
+  echo "Exemplo (PostgreSQL): Editar pg_hba.conf e postgresql.conf para definir ssl_min_protocol = 'TLSv1.2'."
+  exit 1
+}
+
+# Determina a ação baseada no sistema operacional.
+if [[ "$os_info" == *"Debian"* || "$os_info" == *"Ubuntu"* ]]; then
+  # Exemplo de correção genérica (inaplicável neste caso, requer configuração específica do serviço)
+  disable_tls
+elif [[ "$os_info" == *"CentOS"* || "$os_info" == *"Red Hat"* ]]; then
+  # Exemplo de correção genérica (inaplicável neste caso, requer configuração específica do serviço)
+  disable_tls
+else
+  echo "Sistema operacional não suportado. Requer adaptação manual."
+  disable_tls
+fi
+```

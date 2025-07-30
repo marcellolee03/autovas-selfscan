@@ -1,0 +1,21 @@
+#!/bin/bash
+CONFIG_FILE="/etc/ssl/openssl.cnf"
+BACKUP_FILE="$CONFIG_FILE.bak"
+TLS_PROTOCOLS="TLSv1.2:TLSv1.3"
+CIPHER_LIST="HIGH:!aNULL:!eNULL:!EXPORT:!DES:!RC4:!MD5:!PSK:!SRP:!CAMELLIA"
+
+if [ -f "$CONFIG_FILE" ]; then
+    cp "$CONFIG_FILE" "$BACKUP_FILE"
+    sed -i '/^MinProtocol/d' "$CONFIG_FILE"
+    sed -i '/^CipherString/d' "$CONFIG_FILE"
+    echo "MinProtocol = $TLS_PROTOCOLS" >> "$CONFIG_FILE"
+    echo "CipherString = $CIPHER_LIST" >> "$CONFIG_FILE"
+    echo "Configuração do OpenSSL atualizada com sucesso."
+else
+    echo "Arquivo de configuração do OpenSSL não encontrado."
+    exit 1
+fi
+
+systemctl restart apache2
+systemctl restart postgresql
+echo "Serviços reiniciados para aplicar as novas configurações de TLS."

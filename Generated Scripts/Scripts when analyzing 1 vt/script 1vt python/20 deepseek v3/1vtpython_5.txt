@@ -1,0 +1,5 @@
+#!/bin/bash
+sudo apt update
+sudo apt install -y python3.10=3.10.15*
+sudo apt-mark hold python3.10
+python3 --version | grep -q "3.10.15" || exit 1

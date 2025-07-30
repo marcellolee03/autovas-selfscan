@@ -1,0 +1,52 @@
+```bash
+#!/bin/bash
+
+# Script para mitigar a vulnerabilidade de transmissão de informações sensíveis em texto claro via HTTP.
+# Este script configura um redirecionamento HTTP para HTTPS utilizando Apache.
+
+# Variáveis
+APACHE_CONFIG_FILE="/etc/apache2/sites-available/000-default.conf"
+DEFAULT_SITE_CONFIG="/etc/apache2/sites-available/default-ssl.conf"
+APACHE_SSL_ENABLED="/etc/apache2/mods-enabled/ssl.load"
+
+# Checa se o Apache está instalado
+if ! command -v apache2 &> /dev/null || ! command -v a2enmod &> /dev/null; then
+  echo "Apache web server não está instalado. Instalando..."
+  apt update
+  apt install -y apache2
+  apt install -y openssl
+fi
+
+# Habilita o módulo SSL
+if [ ! -f "$APACHE_SSL_ENABLED" ]; then
+    a2enmod ssl
+fi
+
+# Força redirecionamento HTTP para HTTPS no arquivo de configuração padrão
+if [ -f "$APACHE_CONFIG_FILE" ]; then
+  echo "Redirecionando HTTP para HTTPS..."
+  sed -i 's/<\/VirtualHost>/  RewriteEngine On\n  RewriteCond %{HTTPS} off\n  RewriteRule ^(.*)$ https:\/\/%{HTTP_HOST}%{REQUEST_URI} [L,R=301]\n<\/VirtualHost>/g' "$APACHE_CONFIG_FILE"
+else
+  echo "Arquivo de configuração do Apache padrão não encontrado: $APACHE_CONFIG_FILE"
+  exit 1
+fi
+
+# Habilita o site padrão com SSL, se existir
+if [ -f "$DEFAULT_SITE_CONFIG" ]; then
+    echo "Verificando configuração SSL padrão..."
+    if ! grep -q "443" "$DEFAULT_SITE_CONFIG"; then
+        echo "Configurando porta 443 no VirtualHost SSL..."
+        sed -i 's/<VirtualHost _default_:80>/<VirtualHost _default_:443>/g' "$DEFAULT_SITE_CONFIG"
+        sed -i 's/    ServerAdmin webmaster@localhost/    ServerAdmin webmaster@localhost\n    SSLEngine On\n    SSLCertificateFile \/etc\/ssl\/certs\/ssl-cert-snakeoil.pem\n    SSLCertificateKeyFile \/etc\/ssl\/private\/ssl-cert-snakeoil.key/g' "$DEFAULT_SITE_CONFIG"
+
+    fi
+else
+    echo "Configuração SSL padrão não encontrada: $DEFAULT_SITE_CONFIG.  Será necessário configurar o SSL manualmente."
+fi
+# Reinicia o Apache para aplicar as alterações
+echo "Reiniciando o Apache..."
+systemctl restart apache2
+
+echo "Redirecionamento HTTP para HTTPS configurado com sucesso. Reinicie o apache se necessário."
+exit 0
+```

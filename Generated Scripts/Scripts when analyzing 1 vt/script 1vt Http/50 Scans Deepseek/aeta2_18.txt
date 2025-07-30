@@ -1,0 +1,43 @@
+#!/bin/bash
+
+# Desativar o serviço HTTP
+systemctl stop apache2
+systemctl disable apache2
+
+# Instalar o Apache SSL se não estiver instalado
+if ! dpkg -l | grep -q apache2; then
+    apt-get update
+    apt-get install -y apache2
+fi
+
+if ! dpkg -l | grep -q ssl-cert; then
+    apt-get install -y ssl-cert
+fi
+
+if ! a2query -m ssl; then
+    a2enmod ssl
+fi
+
+if ! a2query -s default-ssl; then
+    a2ensite default-ssl
+fi
+
+# Configurar redirecionamento HTTP para HTTPS
+if ! grep -q "RewriteEngine On" /etc/apache2/sites-available/000-default.conf; then
+    echo '<VirtualHost *:80>
+    RewriteEngine On
+    RewriteCond %{HTTPS} off
+    RewriteRule (.*) https://%{HTTP_HOST}%{REQUEST_URI}
+</VirtualHost>' > /etc/apache2/sites-available/000-default.conf
+fi
+
+# Reiniciar o Apache para aplicar as mudanças
+systemctl restart apache2
+
+# Verificar se o serviço está rodando
+if systemctl is-active --quiet apache2; then
+    echo "Apache configurado com SSL e redirecionamento HTTP para HTTPS."
+else
+    echo "Erro ao configurar o Apache."
+    exit 1
+fi

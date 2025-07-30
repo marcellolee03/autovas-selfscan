@@ -1,0 +1,41 @@
+#!/bin/bash
+
+REDIRECT_APACHE="/etc/apache2/sites-available/000-redirect-all-http.conf"
+REDIRECT_NGINX="/etc/nginx/sites-available/http_redirect"
+
+if [ "$(id -u)" -ne 0 ]; then
+    echo "Root required. Use sudo." >&2
+    exit 1
+fi
+
+if [ -d "/etc/apache2" ] && [ -x "$(command -v apache2)" ]; then
+    [ ! -e /etc/apache2/mods-enabled/rewrite.load ] && a2enmod rewrite >/dev/null
+    cat > "$REDIRECT_APACHE" <<'EOF'
+<VirtualHost *:80>
+    RewriteEngine On
+    RewriteCond %{HTTPS} !=on
+    RewriteRule ^(.*)$ https://%{HTTP_HOST}$1 [R=301,L]
+</VirtualHost>
+EOF
+    [ ! -e "/etc/apache2/sites-enabled/$(basename "$REDIRECT_APACHE")" ] && a2ensite "$(basename "$REDIRECT_APACHE")" >/dev/null
+    systemctl reload apache2 2>/dev/null || service apache2 reload
+
+elif [ -d "/etc/nginx" ] && [ -x "$(command -v nginx)" ]; then
+    cat > "$REDIRECT_NGINX" <<'EOF'
+server {
+    listen 80 default_server;
+    listen [::]:80 default_server;
+    server_name _;
+    return 301 https://$host$request_uri;
+}
+EOF
+    if [ ! -e "/etc/nginx/sites-enabled/http_redirect" ]; then
+        ln -s "$REDIRECT_NGINX" "/etc/nginx/sites-enabled/http_redirect" 2>/dev/null
+        rm -f /etc/nginx/sites-enabled/default 2>/dev/null
+    fi
+    nginx -t >/dev/null && systemctl reload nginx 2>/dev/null || service nginx reload
+
+else
+    echo "Unsupported web server" >&2
+    exit 1
+fi

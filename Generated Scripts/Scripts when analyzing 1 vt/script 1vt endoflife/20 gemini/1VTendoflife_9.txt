@@ -1,0 +1,44 @@
+```bash
+#!/bin/bash
+
+# Este script atualiza o sistema operacional Ubuntu 8.04 para uma versão suportada.
+# AVISO: Este script realiza uma atualização principal do sistema operacional.
+#       Recomenda-se fazer um backup completo do sistema antes de executar este script.
+#       Este script pode não ser adequado para todos os ambientes e pode causar
+#       instabilidade ou perda de dados. Use-o por sua própria conta e risco.
+
+# Verifica se o script está sendo executado como root
+if [[ $EUID -ne 0 ]]; then
+  echo "Este script precisa ser executado como root."
+  exit 1
+fi
+
+# Desativa o sources.list existente (Ubuntu 8.04 é EOL)
+mv /etc/apt/sources.list /etc/apt/sources.list.old
+
+# Adiciona sources.list apontando para o repositório 'old-releases' do Ubuntu
+cat > /etc/apt/sources.list <<EOL
+# Repositórios do Ubuntu 8.04 (Hardy Heron) - Arquivo
+# (Este Ubuntu não é mais suportado. Usar com cautela!)
+deb http://old-releases.ubuntu.com/ubuntu/ hardy main restricted universe multiverse
+deb http://old-releases.ubuntu.com/ubuntu/ hardy-updates main restricted universe multiverse
+deb http://old-releases.ubuntu.com/ubuntu/ hardy-security main restricted universe multiverse
+deb http://old-releases.ubuntu.com/ubuntu/ hardy-backports main restricted universe multiverse
+EOL
+
+# Atualiza a lista de pacotes
+apt-get update
+
+# Atualiza para a versão mais recente disponível no repositório antigo (Hardy Heron)
+apt-get dist-upgrade -y
+
+# AVISO: A partir deste ponto, a atualização para uma versão suportada é complexa
+#       e requer uma atualização gradual através de várias versões EOL.
+#       É fortemente recomendado considerar uma instalação limpa de uma versão suportada do Ubuntu.
+
+echo "A atualização para Ubuntu 8.04 Hardy Heron foi concluída."
+echo "Recomenda-se fortemente uma instalação limpa de uma versão suportada do Ubuntu."
+echo "A execução de atualizações incrementais através de versões EOL pode ser complexa e instável."
+
+exit 0
+```

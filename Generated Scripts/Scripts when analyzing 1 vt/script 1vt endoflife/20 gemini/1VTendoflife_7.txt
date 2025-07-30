@@ -1,0 +1,25 @@
+```bash
+#!/bin/bash
+
+# Este script atualiza o sistema operacional Ubuntu para uma versão suportada.
+# Ele assume que o sistema operacional atual é Ubuntu 8.04 (Hardy Heron),
+# que atingiu o fim da vida útil (EOL).
+# Este script irá atualizar para a versão mais recente do Ubuntu LTS.
+
+# Interrompe em caso de erro
+set -e
+
+# Atualiza a lista de pacotes.
+apt-get update
+
+# Atualiza para a versão mais recente do Ubuntu.
+do-release-upgrade
+
+# Remove pacotes obsoletos.
+apt-get autoremove
+
+# Limpa o cache de pacotes.
+apt-get clean
+
+echo "A atualização do sistema operacional foi concluída. Por favor, reinicie o sistema."
+```

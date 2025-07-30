@@ -1,0 +1,43 @@
+```bash
+#!/bin/bash
+
+# Verificar se o sistema é baseado em Debian/Ubuntu (assumindo que sim, pois não foi especificado)
+if command -v apt-get &> /dev/null; then
+  # Atualizar o índice de pacotes
+  apt-get update
+
+  # Tentar atualizar para a versão mais recente do PHP
+  apt-get install --only-upgrade php5 php5-cgi php5-cli
+
+  # Verificar se o PHP foi atualizado para uma versão >= 5.3.13 ou 5.4.3
+  php_version=$(php -v | head -n 1 | awk '{print $2}')
+
+  # Extrair a versão principal e secundária
+  major_version=$(echo "$php_version" | cut -d'.' -f1)
+  minor_version=$(echo "$php_version" | cut -d'.' -f2)
+
+  # Comparar as versões
+  if [[ "$major_version" -gt 5 ]] || [[ "$major_version" -eq 5 && "$minor_version" -gt 4 ]] || [[ "$major_version" -eq 5 && "$minor_version" -eq 4 && $(echo "$php_version >= 5.4.3" | bc -l) -eq 1 ]] || [[ "$major_version" -eq 5 && "$minor_version" -eq 3 && $(echo "$php_version >= 5.3.13" | bc -l) -eq 1 ]]; then
+    echo "PHP foi atualizado para a versão $php_version ou superior."
+  else
+    echo "A atualização do PHP pode ter falhado ou a versão ainda é vulnerável.  Tente atualizar manualmente ou considere atualizar para uma versão mais recente suportada."
+  fi
+
+  # Reiniciar o servidor web (Apache2 ou Nginx, tentar ambos)
+  if systemctl is-active apache2 &> /dev/null; then
+    systemctl restart apache2
+  elif systemctl is-active nginx &> /dev/null; then
+    systemctl restart nginx
+  else
+    service apache2 restart 2>/dev/null || service nginx restart 2>/dev/null
+  fi
+
+  echo "Servidor web reiniciado."
+
+else
+  echo "Este script foi projetado para sistemas Debian/Ubuntu. Adapte-o para o seu sistema operacional."
+  exit 1
+fi
+
+exit 0
+```

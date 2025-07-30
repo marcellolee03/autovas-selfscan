@@ -1,0 +1,62 @@
+```bash
+#!/bin/bash
+
+# Verifica se o sistema operacional é Windows
+if [[ "$OSTYPE" == "msys" ]] || [[ "$OSTYPE" == "cygwin" ]]; then
+  echo "Este script não é adequado para ambientes Windows."
+  exit 1
+fi
+
+# Define a versão alvo do Python
+PYTHON_VERSION="3.10.15"
+
+# Define o nome do executável do Python
+PYTHON_EXECUTABLE="python3.10"
+
+# Verifica se o Python está instalado
+if ! command -v "$PYTHON_EXECUTABLE" &> /dev/null; then
+  echo "Python 3.10 não está instalado. Por favor, instale-o antes de executar este script."
+  exit 1
+fi
+
+# Obtém a versão atual do Python instalada
+CURRENT_VERSION=$("$PYTHON_EXECUTABLE" --version 2>&1 | awk '{print $2}' | cut -d. -f1-2)
+
+# Verifica se a versão atual é vulnerável
+if [[ $(printf '%s\n' "$CURRENT_VERSION" "$PYTHON_VERSION" | sort -V | head -n1) == "$CURRENT_VERSION" ]]; then
+  echo "Versão vulnerável do Python detectada: $CURRENT_VERSION."
+  echo "Iniciando atualização para a versão $PYTHON_VERSION..."
+
+  # Atualiza o Python utilizando o gerenciador de pacotes do sistema
+  if command -v apt-get &> /dev/null; then
+      echo "Atualizando Python via apt-get..."
+      sudo apt-get update
+      sudo apt-get install --only-upgrade "python3.10=$PYTHON_VERSION" -y
+  elif command -v yum &> /dev/null; then
+      echo "Atualizando Python via yum..."
+      sudo yum update python3 -y
+  elif command -v dnf &> /dev/null; then
+      echo "Atualizando Python via dnf..."
+      sudo dnf update python3 -y
+  elif command -v pacman &> /dev/null; then
+      echo "Atualizando Python via pacman..."
+      sudo pacman -Syu python -y
+  else
+      echo "Gerenciador de pacotes não suportado. Por favor, atualize o Python manualmente."
+      exit 1
+  fi
+
+  # Verifica se a atualização foi bem-sucedida
+  NEW_VERSION=$("$PYTHON_EXECUTABLE" --version 2>&1 | awk '{print $2}' | cut -d. -f1-2)
+  if [[ "$NEW_VERSION" == "$PYTHON_VERSION" ]]; then
+    echo "Python atualizado com sucesso para a versão $PYTHON_VERSION."
+  else
+    echo "Falha ao atualizar o Python. A versão instalada é $NEW_VERSION."
+    exit 1
+  fi
+else
+  echo "Python já está em uma versão segura."
+fi
+
+exit 0
+```

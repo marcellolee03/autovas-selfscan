@@ -1,0 +1,107 @@
+```bash
+#!/bin/bash
+
+# Vulnerability 1: Cleartext Transmission of Sensitive Information via HTTP
+# This vulnerability requires application-level changes to enforce HTTPS.
+# This script can only help enforce redirection to HTTPS if HTTP server is present.
+# Assuming Apache web server, creating a .htaccess file for redirection:
+if command -v apache2ctl &> /dev/null; then
+  echo "Redirecting HTTP to HTTPS for Apache..."
+  echo "RewriteEngine On" > /var/www/html/.htaccess
+  echo "RewriteCond %{HTTPS} off" >> /var/www/html/.htaccess
+  echo "RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]" >> /var/www/html/.htaccess
+  # Enable .htaccess if not already enabled
+  if grep -q "AllowOverride None" /etc/apache2/apache2.conf; then
+    sed -i 's/AllowOverride None/AllowOverride All/' /etc/apache2/apache2.conf
+    apache2ctl restart
+    echo "Apache restarted to enable .htaccess"
+  fi
+elif command -v nginx &> /dev/null; then
+  echo "Redirecting HTTP to HTTPS for Nginx..."
+  # This requires manual configuration of the Nginx server block.
+  echo "Please manually configure Nginx to redirect HTTP to HTTPS."
+  echo "Example configuration:"
+  echo "server {"
+  echo "  listen 80;"
+  echo "  server_name your_domain.com;"
+  echo "  return 301 https://\$host\$request_uri;"
+  echo "}"
+else
+  echo "No web server detected (Apache or Nginx). Please manually configure HTTPS redirection."
+fi
+
+# Vulnerability 2: DNS Cache Snooping Vulnerability (UDP)
+# Disable recursion in the DNS server.  Assuming BIND9.
+if [ -f /etc/bind/named.conf.options ]; then
+  echo "Disabling DNS recursion..."
+  sed -i 's/recursion yes;/recursion no;/' /etc/bind/named.conf.options
+  systemctl restart bind9
+  echo "BIND9 restarted."
+else
+  echo "BIND9 not found. Please configure your DNS server manually to disable recursion."
+fi
+
+# Vulnerability 3: ICMP Timestamp Reply Information Disclosure
+# Disable ICMP timestamp replies.
+echo "Disabling ICMP timestamp replies..."
+echo "net.ipv4.icmp_echo_ignore_all=1" >> /etc/sysctl.conf
+sysctl -p
+echo "ICMP timestamp replies disabled."
+
+# Vulnerability 4: SSL/TLS: Deprecated TLSv1.0 and TLSv1.1 Protocol Detection
+# Disable TLSv1.0 and TLSv1.1. Assuming OpenSSL configuration.
+if [ -f /etc/ssl/openssl.cnf ]; then
+  echo "Disabling TLSv1.0 and TLSv1.1 in OpenSSL..."
+  sed -i 's/DEFAULT@SECLEVEL=2/DEFAULT@SECLEVEL=2\nssl_conf = ssl_sect/' /etc/ssl/openssl.cnf
+  echo "[ssl_sect]" >> /etc/ssl/openssl.cnf
+  echo "system_default = system_default_sect" >> /etc/ssl/openssl.cnf
+  echo "" >> /etc/ssl/openssl.cnf
+  echo "[system_default_sect]" >> /etc/ssl/openssl.cnf
+  echo "MinProtocol = tls1.2" >> /etc/ssl/openssl.cnf
+  echo "TLS protocols disabled. Restart your services that use TLS (e.g., Apache, Nginx) to apply the changes."
+else
+  echo "OpenSSL configuration file not found.  Please manually disable TLSv1.0 and TLSv1.1 in your TLS-enabled services (e.g., Apache, Nginx)."
+fi
+
+# Vulnerability 5: SSL/TLS: Renegotiation DoS Vulnerability (CVE-2011-1473, CVE-2011-5094)
+# Disable renegotiation.  This requires service-specific configuration.
+# Example for Apache:
+if command -v apache2ctl &> /dev/null; then
+  echo "Disabling TLS renegotiation for Apache..."
+  echo "SSLHonorCipherOrder On" >> /etc/apache2/conf-available/security.conf
+  echo "<Location />" >> /etc/apache2/conf-available/security.conf
+  echo "  <IfModule mod_ssl.c>" >> /etc/apache2/conf-available/security.conf
+  echo "    SSLOptions -StdEnvVars +StrictRequire" >> /etc/apache2/conf-available/security.conf
+  echo "  </IfModule>" >> /etc/apache2/conf-available/security.conf
+  echo "</Location>" >> /etc/apache2/conf-available/security.conf
+  a2enconf security
+  apache2ctl restart
+  echo "Apache restarted with TLS renegotiation disabled."
+else
+  echo "Please manually disable renegotiation in your TLS-enabled services."
+fi
+
+# Vulnerability 6: SSL/TLS: Report Weak Cipher Suites
+#  Disable weak cipher suites. Assuming OpenSSL configuration.
+if [ -f /etc/ssl/openssl.cnf ]; then
+  echo "Configuring strong cipher suites..."
+  sed -i 's/DEFAULT@SECLEVEL=2/DEFAULT@SECLEVEL=2\nssl_conf = ssl_sect/' /etc/ssl/openssl.cnf
+  echo "[ssl_sect]" >> /etc/ssl/openssl.cnf
+  echo "system_default = system_default_sect" >> /etc/ssl/openssl.cnf
+  echo "" >> /etc/ssl/openssl.cnf
+  echo "[system_default_sect]" >> /etc/ssl/openssl.cnf
+  echo "CipherString = DEFAULT:@SECLEVEL=2" >> /etc/ssl/openssl.cnf
+  echo "Strong cipher suites configured. Restart your services that use TLS (e.g., Apache, Nginx) to apply the changes."
+else
+  echo "OpenSSL configuration file not found.  Please manually configure strong cipher suites in your TLS-enabled services."
+fi
+
+# Vulnerability 7: TCP Timestamps Information Disclosure
+# Disable TCP timestamps.
+echo "Disabling TCP timestamps..."
+echo "net.ipv4.tcp_timestamps = 0" >> /etc/sysctl.conf
+sysctl -p
+echo "TCP timestamps disabled."
+
+echo "Vulnerability mitigation script completed."
+```

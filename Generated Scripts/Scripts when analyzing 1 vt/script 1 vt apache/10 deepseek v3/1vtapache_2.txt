@@ -1,0 +1,21 @@
+#!/bin/bash
+APT_GET=$(which apt-get)
+YUM=$(which yum)
+DNF=$(which dnf)
+ZYPPER=$(which zypper)
+APACHE_VER=$(apache2 -v 2>/dev/null | grep 'Server version' | awk '{print $3}' | cut -d'/' -f2)
+if [[ -n $APT_GET ]]; then
+    $APT_GET update && $APT_GET install -y apache2
+elif [[ -n $YUM ]]; then
+    $YUM update -y httpd
+elif [[ -n $DNF ]]; then
+    $DNF update -y httpd
+elif [[ -n $ZYPPER ]]; then
+    $ZYPPER refresh && $ZYPPER update -y apache2
+else
+    echo "No compatible package manager found."
+    exit 1
+fi
+if [[ "$(printf '%s\n' "2.2.22" "$APACHE_VER" | sort -V | head -n1)" != "2.2.22" ]]; then
+    service apache2 restart
+fi

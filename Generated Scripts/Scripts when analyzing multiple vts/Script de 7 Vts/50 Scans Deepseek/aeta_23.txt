@@ -1,0 +1,29 @@
+#!/bin/bash
+# Corrige a Vulnerabilidade 1: Força o uso de SSL/TLS
+sed -i 's/^#\?\(Listen 80\)/\1\nRedirect permanent \/ https:\/\/$HOSTNAME\//' /etc/apache2/sites-available/000-default.conf
+a2enmod ssl
+systemctl restart apache2
+
+# Corrige a Vulnerabilidade 2: Desabilita recursão no DNS
+sed -i 's/^\(recursion\).*/\1 no;/' /etc/bind/named.conf.options
+systemctl restart bind9
+
+# Corrige a Vulnerabilidade 3: Desabilita respostas ICMP Timestamp
+echo "net.ipv4.icmp_echo_ignore_all=1" >> /etc/sysctl.conf
+sysctl -p
+
+# Corrige a Vulnerabilidade 4: Desabilita TLSv1.0 e TLSv1.1
+sed -i 's/^\(SSLProtocol\).*/\1 all -TLSv1 -TLSv1.1/' /etc/apache2/mods-enabled/ssl.conf
+systemctl restart apache2
+
+# Corrige a Vulnerabilidade 5: Desabilita renegociação SSL/TLS
+sed -i 's/^\(SSLOptions\).*/\1 +StrictRequire/' /etc/apache2/mods-enabled/ssl.conf
+systemctl restart apache2
+
+# Corrige a Vulnerabilidade 6: Remove cifras fracas
+sed -i 's/^\(SSLCipherSuite\).*/\1 HIGH:!aNULL:!MD5:!RC4:!3DES/' /etc/apache2/mods-enabled/ssl.conf
+systemctl restart apache2
+
+# Corrige a Vulnerabilidade 7: Desabilita timestamps TCP
+echo "net.ipv4.tcp_timestamps = 0" >> /etc/sysctl.conf
+sysctl -p

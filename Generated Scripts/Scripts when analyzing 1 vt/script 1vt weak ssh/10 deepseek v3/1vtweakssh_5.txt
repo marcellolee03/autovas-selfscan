@@ -1,0 +1,16 @@
+#!/bin/bash
+SSHD_CONFIG="/etc/ssh/sshd_config"
+BACKUP_CONFIG="/etc/ssh/sshd_config.backup"
+
+cp $SSHD_CONFIG $BACKUP_CONFIG
+
+if grep -q "HostKeyAlgorithms" $SSHD_CONFIG; then
+    sed -i '/HostKeyAlgorithms/s/ssh-dss//g' $SSHD_CONFIG
+    sed -i '/HostKeyAlgorithms/s/,,/,/g' $SSHD_CONFIG
+    sed -i '/HostKeyAlgorithms/s/^,*//g' $SSHD_CONFIG
+    sed -i '/HostKeyAlgorithms/s/,$//g' $SSHD_CONFIG
+else
+    echo "HostKeyAlgorithms ssh-rsa,ecdsa-sha2-nistp256,ssh-ed25519" >> $SSHD_CONFIG
+fi
+
+systemctl restart sshd

@@ -1,0 +1,12 @@
+Request 1: 104.1361 segundos
+Request 2: 90.6181 segundos
+Request 3: 162.2399 segundos
+Request 4: 98.6126 segundos
+Request 5: 63.3890 segundos
+Request 6: 190.3911 segundos
+Request 7: 227.0970 segundos
+Request 8: 91.1007 segundos
+Request 9: 255.2143 segundos
+Request 10: 147.1600 segundos
+
+media = 1429,96 segundos/10 = 143,00 segundos.

@@ -1,0 +1,58 @@
+```bash
+#!/bin/bash
+
+# Stopping and disabling services
+services=("portmap" "rlogin" "rsh" "rexec" "distcc" "tomcat5.5" "druby" "vnc" "ingreslock" "telnet" "vsftpd")
+for svc in "${services[@]}"; do
+    service "$svc" stop 2>/dev/null
+    update-rc.d -f "$svc" remove 2>/dev/null
+done
+
+# Removing packages
+packages=("rsh-server" "rsh-client" "rexecd" "distcc" "tomcat5.5" "vnc-server" "tingres-server" "telnetd" "vsftpd")
+dpkg --purge "${packages[@]}" 2>/dev/null
+apt-get -y remove "${packages[@]}" --purge 2>/dev/null
+
+# Blocking ports
+iptables -F
+unwanted_ports=(21 23 25 80 513 514 512 5900 8787 6200 3632 8009)
+for port in "${unwanted_ports[@]}"; do
+    iptables -A INPUT -p tcp --dport "$port" -j DROP
+done
+iptables-save > /etc/iptables.rules
+
+# Disabling TWiki and phpinfo
+find /var/www /srv/www -type f -wholename "*/phpinfo.php" -delete
+find /var/www /srv/www -type d -name "twiki" -exec rm -rf {} +
+rm -rf /usr/share/twiki
+
+# Database password reset
+mysql_password=$(tr -dc A-Za-z0-9 </dev/urandom | head -c 32)
+mysql -e "SET PASSWORD FOR 'root'@'localhost' = PASSWORD('$mysql_password'); DELETE FROM mysql.user WHERE User=''; FLUSH PRIVILEGES;"
+
+pg_password=$(tr -dc A-Za-z0-9 </dev/urandom | head -c 32)
+service postgresql start
+sudo -u postgres psql -c "ALTER USER postgres PASSWORD '$pg_password';"
+
+# SSH hardening
+sed -i '/^#*Protocol.*/d; /^#*KexAlgorithms.*/d; /^#*Ciphers.*/d; /^#*MACs.*/d; /^#*HostKeyAlgorithms.*/d' /etc/ssh/sshd_config
+echo -e "Protocol 2\nKexAlgorithms curve25519-sha256@libssh.org,diffie-hellman-group-exchange-sha256\nCiphers chacha20-poly1305@openssh.com,aes256-gcm@openssh.com,aes128-gcm@openssh.com\nMACs hmac-sha2-512-etm@openssh.com,hmac-sha2-256-etm@openssh.com\nHostKeyAlgorithms ecdsa-sha2-nistp521-cert-v01@openssh.com,ssh-ed25519-cert-v01@openssh.com" >> /etc/ssh/sshd_config
+service ssh restart
+
+# Apache hardening
+apache_dir=("/etc/apache2" "/etc/httpd")
+for dir in "${apache_dir[@]}"; do
+    if [ -d "$dir" ]; then
+        echo -e "<IfModule mod_ssl.c>\nSSLProtocol TLSv1.3 TLSv1.2\nSSLCipherSuite HIGH:!RC4:!MD5:!DHE:!kRSA\n</IfModule>\n\n<LimitExcept GET POST HEAD>\nDeny from all\n</LimitExcept>\nTraceEnable off\nRequestHeader unset Proxy early\n<Directory /doc>\nRequire all denied\n</Directory>" >> "$dir"/conf.d/security.conf
+    fi
+done
+apache2ctl graceful || httpd -k graceful
+
+# SSL/TLS certificate renewal
+cert_dir="/etc/ssl"
+fqdn=$(hostname -f)
+openssl req -x509 -nodes -days 3650 -newkey rsa:4096 -keyout "$cert_dir"/private/server.key -out "$cert_dir"/certs/server.crt -subj "/CN=$fqdn"
+
+# Final cleanup
+updatedb && find / \( -name "*.bak" -o -name "*.orig" \) -delete
+```

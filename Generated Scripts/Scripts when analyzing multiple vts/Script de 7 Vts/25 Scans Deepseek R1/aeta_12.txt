@@ -1,0 +1,59 @@
+#!/bin/bash
+
+# Vulnerabilidade 1: Redirecionar HTTP para HTTPS no Apache e Nginx
+if [ -d "/etc/apache2" ]; then
+    sed -i.bak 's|#\?Redirect .*||g; /<VirtualHost/,/<\/VirtualHost/s/\([^#]*\)/\nRedirect permanent \/ https:\/\/%{HTTP_HOST}%{REQUEST_URI}\n/' /etc/apache2/sites-enabled/*.conf
+    echo -e "<IfModule mod_ssl.c>\n  <VirtualHost _default_:443>\n    SSLEngine on\n  </VirtualHost>\n</IfModule>" >> /etc/apache2/sites-enabled/default-ssl.conf
+    a2enmod ssl rewrite > /dev/null
+    systemctl restart apache2
+fi
+
+if [ -d "/etc/nginx" ]; then
+    for CONF in /etc/nginx/sites-enabled/*; do
+        if grep -q "listen 80" "$CONF"; then
+            sed -i.bak '/listen 80;/a \    return 301 https://$host$request_uri;' "$CONF"
+        else
+            sed -i.bak 's/#* *listen *80;/listen 80; return 301 https:\/\/$host$request_uri;/' "$CONF"
+        fi
+    done
+    systemctl restart nginx
+fi
+
+# Vulnerabilidade 2: Configurar BIND (DNS) para bloquear recursão pública
+if [ -f "/etc/bind/named.conf.options" ]; then
+    cp /etc/bind/named.conf.options /etc/bind/named.conf.options.bak
+    sed -i.bak '/options {/a \\tallow-recursion { none; };\n\trecursion no;' /etc/bind/named.conf.options
+    sed -i.bak 's/allow-query .*/allow-query { localhost; };/' /etc/bind/named.conf.options
+    systemctl restart bind9
+fi
+
+# Vulnerabilidade 3: Desativar respostas ICMP Timestamp com iptables
+iptables -A INPUT -p icmp --icmp-type timestamp-request -j DROP
+iptables -A OUTPUT -p icmp --icmp-type timestamp-reply -j DROP
+
+# Vulnerabilidade 4 e 5: Configurar TLS (Apache + Nginx) - Protocolos e Renegociações
+if [ -d "/etc/apache2" ]; then
+    aprx_conf="/etc/apache2/mods-available/ssl.conf"
+    if [ -f "$aprx_conf" ]; then
+        sed -i.bak 's/SSLProtocol .*/SSLProtocol all -SSLv3 -TLSv1 -TLSv1.1/' "$aprx_conf"
+        sed -i.bak 's/SSLCipherSuite .*/SSLCipherSuite HIGH:!aNULL:!MD5:!RC4:!3DES/' "$aprx_conf"
+        sed -i.bak '/SSLProtocol/a SSLInsecureRenegotiation off' "$aprx_conf"
+    fi
+    systemctl restart apache2
+fi
+
+if [ -d "/etc/nginx" ]; then
+    ngx_conf="/etc/nginx/nginx.conf"
+    if [ -f "$ngx_conf" ]; then
+        sed -i.bak '/ssl_protocols/s/.*/ssl_protocols TLSv1.2 TLSv1.3;/' "$ngx_conf"
+        sed -i.bak '/ssl_ciphers/s/.*/ssl_ciphers "ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256";/' "$ngx_conf"
+        echo 'ssl_renegotiate_limit 0;' >> "$ngx_conf"
+    fi
+    systemctl restart nginx
+fi
+
+# Vulnerabilidade 6: Remover CBC-mode ciphers (Implementado junto com vuln4/5 acima)
+
+# Vulnerabilidade 7: Desativar TCP Timestamps via sysctl
+sysctl -w net.ipv4.tcp_timestamps=0
+echo "net.ipv4.tcp_timestamps = 0" >> /etc/sysctl.conf

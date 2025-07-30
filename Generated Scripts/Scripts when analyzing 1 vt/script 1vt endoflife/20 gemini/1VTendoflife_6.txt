@@ -1,0 +1,21 @@
+```bash
+#!/bin/bash
+
+# Este script atualiza o sistema operacional Ubuntu 8.04 para uma versão suportada.
+# Devido ao fato de o Ubuntu 8.04 ser extremamente antigo, a atualização direta não é possível.
+# Este script irá instruir o usuário a realizar uma nova instalação de uma versão suportada do Ubuntu.
+
+echo "O sistema operacional Ubuntu 8.04 atingiu o fim da vida útil e não recebe mais atualizações de segurança."
+echo "A atualização direta para uma versão suportada não é possível devido à antiguidade da versão."
+echo "A solução recomendada é realizar uma nova instalação de uma versão suportada do Ubuntu, como a versão LTS mais recente."
+echo "Para realizar a nova instalação, siga os seguintes passos:"
+echo "1. Faça backup de todos os seus dados importantes."
+echo "2. Baixe a imagem ISO da versão mais recente do Ubuntu LTS no site oficial: https://ubuntu.com/download/desktop"
+echo "3. Crie uma mídia de instalação (DVD ou pendrive bootável) utilizando a imagem ISO baixada."
+echo "4. Inicialize o computador a partir da mídia de instalação."
+echo "5. Siga as instruções na tela para realizar a instalação, formatando a partição atual do Ubuntu 8.04."
+echo "Após a instalação, restaure seus dados a partir do backup."
+echo "Este script não pode realizar a atualização automaticamente, pois isso requer uma nova instalação do sistema operacional."
+
+exit 1
+```

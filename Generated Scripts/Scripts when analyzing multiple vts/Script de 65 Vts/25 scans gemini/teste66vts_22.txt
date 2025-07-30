@@ -1,0 +1,71 @@
+```bash
+#!/bin/bash
+
+# Variáveis para rastrear as versões do Python e as ações de atualização
+declare -A python_versions
+python_versions["3.10"]="3.10.16"
+python_versions["3.12"]="3.12.9"
+
+# Função para atualizar uma instalação específica do Python
+update_python() {
+    local current_version="$1"
+    local target_version="$2"
+
+    echo "Atualizando Python $current_version para $target_version..."
+
+    # Construir o comando para atualizar o Python
+    update_command="python -m pip install --upgrade python==$target_version"
+
+    # Executar o comando de atualização
+    eval "$update_command"
+}
+
+# Verificar se o sistema é Windows
+if [[ "$OSTYPE" == "msys" || "$OSTYPE" == "cygwin" || "$OSTYPE" == "win32" ]]; then
+    echo "Este script deve ser executado em um ambiente Linux/Unix."
+    exit 1
+fi
+
+# Atualizar o Python 3.10
+if command -v python3.10 &> /dev/null; then
+  current_version=$(python3.10 -c "import sys; print('.'.join(map(str, sys.version_info[:3])))")
+  if [[ "$current_version" == "3.10.12" ]]; then
+        update_python "3.10.12" "${python_versions["3.10"]}"
+  fi
+fi
+
+# Atualizar o Python 3.12
+if command -v python3.12 &> /dev/null; then
+  current_version=$(python3.12 -c "import sys; print('.'.join(map(str, sys.version_info[:3])))")
+  if [[ "$current_version" == "3.12.0" ]]; then
+    update_python "3.12.0" "${python_versions["3.12"]}"
+  fi
+fi
+
+# Desabilitar TLSv1.0 e TLSv1.1 em OpenSSL
+if command -v openssl &> /dev/null; then
+  echo "Desabilitando TLSv1.0 e TLSv1.1 em OpenSSL..."
+  # Localizar o arquivo de configuração OpenSSL
+  openssl_config=$(openssl version -d | awk '{print $2}' | sed 's/\"//g')
+
+  # Verificar se o arquivo de configuração existe
+  if [ -f "$openssl_config/openssl.cnf" ]; then
+    # Criar um backup do arquivo de configuração
+    cp "$openssl_config/openssl.cnf" "$openssl_config/openssl.cnf.bak"
+    # Adicionar a restrição de versão TLS ao arquivo de configuração
+    sed -i 's/Options =/Options = MinProtocol=TLSv1.2/g' "$openssl_config/openssl.cnf"
+    echo "TLSv1.0 e TLSv1.1 desabilitados no arquivo de configuração OpenSSL."
+  else
+    echo "Arquivo de configuração OpenSSL não encontrado em $openssl_config/openssl.cnf. A desabilitação manual pode ser necessária."
+  fi
+fi
+
+# Lidar com certificado autoassinado (Inspecionar e potencialmente substituir)
+echo "Atenção: Certificado autoassinado detectado. Recomenda-se substituir por um certificado assinado por uma CA confiável."
+
+# Reiniciar serviços que utilizam Python para aplicar as atualizações
+echo "Reiniciando serviços Python..."
+systemctl restart $(systemctl list-units --type=service | grep -i python | awk '{print $1}')
+
+echo "Script de correção concluído."
+```

@@ -1,0 +1,65 @@
+#!/bin/bash
+
+# Script para redirecionar tráfego HTTP para HTTPS e desabilitar HTTP Basic Auth (se aplicável)
+
+# Variáveis
+HTTP_PORT=80
+HTTPS_PORT=443
+VHOST_CONFIG_DIR="/etc/apache2/sites-available" # Alterar se usar Nginx ou outro servidor web
+APACHE_CONFIGURED=$(command -v apache2ctl)
+
+# Verifica se o Apache está instalado
+if [ -z "$APACHE_CONFIGURED" ]; then
+  echo "Apache não detectado. Este script é projetado para servidores Apache."
+  exit 1
+fi
+
+# Função para criar um arquivo de configuração VirtualHost para redirecionamento HTTP para HTTPS
+create_redirect_vhost() {
+  SERVER_NAME="$1"
+  VHOST_FILE="$VHOST_CONFIG_DIR/$SERVER_NAME.http.conf"
+
+  cat > "$VHOST_FILE" <<EOL
+<VirtualHost *:$HTTP_PORT>
+    ServerName $SERVER_NAME
+    Redirect permanent / https://$SERVER_NAME/
+</VirtualHost>
+EOL
+
+  echo "Arquivo de VirtualHost para redirecionamento HTTP para HTTPS criado: $VHOST_FILE"
+  a2ensite "$SERVER_NAME.http.conf"
+}
+
+# Função para desabilitar HTTP Basic Auth (se necessário - requer adaptação para o caso específico)
+disable_basic_auth() {
+  # Este é um exemplo genérico. Adapte conforme a configuração do seu servidor.
+  # Geralmente envolve remover ou comentar diretivas 'AuthType Basic', 'AuthName', 'AuthUserFile', 'Require valid-user'
+  # nos arquivos de configuração do VirtualHost ou .htaccess.
+
+  echo "Desabilitação de HTTP Basic Auth requer configuração específica.  Verifique os arquivos de configuração do VirtualHost e .htaccess."
+  # Exemplo:
+  # sed -i 's/AuthType Basic/#AuthType Basic/g' /path/to/virtualhost/config
+  # sed -i 's/Require valid-user/#Require valid-user/g' /path/to/virtualhost/config
+}
+
+# Obtém a lista de VirtualHosts configurados (pode variar dependendo da configuração do servidor)
+# Este é um exemplo, pode precisar ser adaptado dependendo da configuração.
+VHOSTS=$(apachectl -S 2>/dev/null | grep "ServerName" | awk '{print $2}')
+
+# Itera sobre os VirtualHosts e cria a configuração de redirecionamento
+if [ -n "$VHOSTS" ]; then
+  for VHOST in $VHOSTS; do
+    create_redirect_vhost "$VHOST"
+  done
+else
+  echo "Nenhum VirtualHost encontrado.  Crie a configuração manualmente ou adapte o script."
+fi
+
+# Desabilita HTTP Basic Auth (se necessário)
+disable_basic_auth
+
+# Reinicia o Apache para aplicar as alterações
+systemctl restart apache2
+
+echo "Redirecionamento HTTP para HTTPS configurado.  Apache reiniciado."
+echo "Verifique a configuração e o redirecionamento no seu navegador."

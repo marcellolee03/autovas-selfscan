@@ -1,0 +1,69 @@
+#!/bin/bash
+
+# Update and Upgrade System
+sed -i 's|http.*ubuntu\.com|http://old-releases.ubuntu.com|g' /etc/apt/sources.list
+apt-get update && apt-get -y upgrade
+apt-get -y dist-upgrade
+
+# Disable Insecure Services
+systemctl stop rlogin rexec rsh rexec.socket rexecd ssh.socket &>/dev/null
+systemctl disable rlogin rexec rsh rexec.socket rexecd ssh.socket &>/dev/null
+apt-get -y remove rsh-client rsh-server &>/dev/null
+
+update-rc.d -f vsftpd remove &>/dev/null
+systemctl stop vsftpd &>/dev/null
+systemctl disable vsftpd &>/dev/null
+pkill vsftpd &>/dev/null
+
+update-rc.d -f distcc remove &>/dev/null
+systemctl stop distcc &>/dev/null
+systemctl disable distcc &>/dev/null
+pkill distcc &>/dev/null
+
+systemctl stop vncserver &>/dev/null
+systemctl disable vncserver &>/dev/null
+pkill vncserver &>/dev/null
+
+systemctl stop telnet.socket &>/dev/null
+systemctl disable telnet.socket &>/dev/null
+apt-get -y remove telnetd &>/dev/null
+
+# Secure MySQL/PostgreSQL
+mysql -e "ALTER USER 'root'@'localhost' IDENTIFIED BY '$(openssl rand -hex 24)'; FLUSH PRIVILEGES;" &>/dev/null
+
+if systemctl is-active postgresql &>/dev/null; then
+    sudo -u postgres psql -c "ALTER USER postgres PASSWORD '$(openssl rand -hex 24)';" &>/dev/null
+fi
+
+# Harden Web Servers
+a2dismod cgi status autoindex &>/dev/null
+for dir in /doc /usr/doc /var/www/doc; do
+    echo -e "<Directory \"$dir\">\n\tRequire all denied\n</Directory>" >> /etc/apache2/conf-available/disable-dir.conf
+done
+a2enconf disable-dir &>/dev/null
+
+sed -i 's/SSLProtocol all -SSLv2$/SSLProtocol all -SSLv2 -SSLv3 -TLSv1 -TLSv1.1/' /etc/apache2/mods-available/ssl.conf
+echo -e "TraceEnable off\n<LimitExcept GET POST HEAD>\n\tRequire all denied\n</LimitExcept>" >> /etc/apache2/conf-available/security.conf
+
+# Secure SSH
+cp /etc/ssh/sshd_config /etc/ssh/sshd_config.bak
+sed -i 's/^#?KexAlgorithms.*/KexAlgorithms curve25519-sha256@libssh.org,diffie-hellman-group-exchange-sha256/' /etc/ssh/sshd_config
+sed -i 's/^#?HostKeyAlgorithms.*/HostKeyAlgorithms ssh-ed25519-cert-v01@openssh.com,ssh-rsa-cert-v01@openssh.com,ssh-ed25519,rsa-sha2-512,rsa-sha2-256/' /etc/ssh/sshd_config
+sed -i 's/^#?Ciphers.*/Ciphers chacha20-poly1305@openssh.com,aes256-gcm@openssh.com,aes128-gcm@openssh.com,aes256-ctr,aes192-ctr,aes128-ctr/' /etc/ssh/sshd_config
+sed -i 's/^#?MACs.*/MACs hmac-sha2-512-etm@openssh.com,hmac-sha2-256-etm@openssh.com,umac-128-etm@openssh.com,hmac-sha2-512,hmac-sha2-256/' /etc/ssh/sshd_config
+systemctl restart ssh
+
+# Disable Unsecure Kernel Features
+echo "net.ipv4.tcp_timestamps=0" >> /etc/sysctl.conf
+sysctl -p
+
+# File Management
+find /var/www/ -iname 'phpinfo.php' -delete &>/dev/null
+find /var/www/ -iname 'test*.html' -delete &>/dev/null
+
+# Service Restarts
+systemctl restart apache2 postgresql mysql &>/dev/null
+
+# Final Cleanup
+apt-get -y autoremove
+apt-get -y clean

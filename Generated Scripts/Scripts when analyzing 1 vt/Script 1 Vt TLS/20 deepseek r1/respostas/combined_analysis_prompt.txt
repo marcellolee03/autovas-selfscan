@@ -1,0 +1,940 @@
+>analise esse prompt contendo as vulnerabilidades encontradas em um csv do openvas e analise se os scripts que irei enviar em seguida sao capazes de corrigir esses problemas ou nao, me informando uma porcentagem de correcao das vulnerabilidades
+>Vulnerabilidades:
+
+    # INSTRUÇÕES PARA O MODELO DE IA
+
+    ## PERSONA
+    Você é um especialista em cibersegurança e automação de sistemas, focado em criar scripts de correção (patching). Sua única função é gerar um script que resolva a vulnerabilidade descrita abaixo.
+
+    ## TAREFA
+    Analise o contexto da vulnerabilidade a seguir e gere um script de shell (compatível com o sistema operacional do localhost) que, ao ser executado, corrija permanentemente a vulnerabilidade descrita.
+
+    ## CONTEXTO DA VULNERABILIDADE
+
+# Vulnerabilidade 1
+CVEs: CVE-2011-3389,CVE-2015-0204,CVE-2023-41928,CVE-2024-41270,CVE-2025-3200
+NVT Name: SSL/TLS: Deprecated TLSv1.0 and TLSv1.1 Protocol Detection
+Port: 5432
+Port Protocol: tcp
+Summary: It was possible to detect the usage of the deprecated TLSv1.0
+  and/or TLSv1.1 protocol on this system.
+Specific Result: The service is only providing the deprecated TLSv1.0 protocol and supports one or more ciphers. Those supported ciphers can be found in the 'SSL/TLS: Report Supported Cipher Suites' (OID: 1.3.6.1.4.1.25623.1.0.802067) VT.
+
+Vulnerability Detection Method: Checks the used TLS protocols of the services provided by this
+  system.
+Details:
+SSL/TLS: Deprecated TLSv1.0 and TLSv1.1 Protocol Detection
+(OID: 1.3.6.1.4.1.25623.1.0.117274)
+Version used: 2025-04-30T05:39:51Z
+
+Affected Software/OS: '- All services providing an encrypted communication using the
+  TLSv1.0 and/or TLSv1.1 protocols
+
+  - CVE-2023-41928: Kiloview P1 4G and P2 4G Video Encoder
+
+  - CVE-2024-41270: Gorush v1.18.4
+
+  - CVE-2025-3200: Multiple products from Wiesemann & Theis
+Product Detection Result: Product: cpe:/a:ietf:transport_layer_security:1.0
+Method: SSL/TLS: Version Detection
+(OID: 1.3.6.1.4.1.25623.1.0.105782)
+
+Solution: It is recommended to disable the deprecated TLSv1.0 and/or
+  TLSv1.1 protocols in favor of the TLSv1.2+ protocols.
+
+  Please see the references for more resources supporting you with this task.
+
+    ## REGRAS E RESTRIÇÕES DE SAÍDA
+    1.  **APENAS SCRIPT:** A sua resposta deve conter ÚNICA E EXCLUSIVAMENTE o código do script.
+    2.  **SEM EXPLICAÇÕES:** Não adicione nenhum comentário, explicação, introdução, ou despedida.
+    3.  **SEM BLOCOS DE CÓDIGO MARKDOWN:** Não envolva o script em blocos de código como ` ```bash ` ou ` ```sh `. A resposta deve ser o texto puro do script.
+    4.  **AUTOSSUFICIENTE:** O script deve ser completo, autônomo e não deve exigir interação do usuário para ser executado.
+    5.  **COMPATIBILIDADE:** O script deve ser compatível com o sistema operacional especificado em 'localhost OS'. Se o sistema operacional não for especificado, assuma um sistema baseado em Linux (como Ubuntu/Debian).
+
+    # INÍCIO DO SCRIPT DE CORREÇÃO
+
+>Scripts de correção:
+{type: uploaded file
+fileName: teste1vt-cve_1.txt
+fullContent:
+#!/bin/bash
+if [ "$(id -u)" -ne 0 ]; then
+    echo "Error: Script must be run as root" >&2
+    exit 1
+fi
+
+config_file=""
+locations=(
+    "/etc/postgresql/*/main/postgresql.conf"
+    "/var/lib/pgsql/data/postgresql.conf"
+    "/var/lib/pgsql/*/data/postgresql.conf"
+    "/usr/local/pgsql/data/postgresql.conf"
+)
+
+pg_pid=$(pgrep -n postmaster || pgrep -n postgres)
+if [ -n "$pg_pid" ] && [ -d "/proc/$pg_pid" ]; then
+    pg_data=$(cat "/proc/$pg_pid/cmdline" | tr -d '\0' | sed -n 's/.*-D\+\([^ ]*\).*/\1/p')
+    if [ -n "$pg_data" ] && [ -f "$pg_data/postgresql.conf" ]; then
+        locations+=("$pg_data/postgresql.conf")
+    fi
+fi
+
+for loc in "${locations[@]}"; do
+    for expanded in $loc; do
+        if [ -f "$expanded" ]; then
+            config_file="$expanded"
+            break 2
+        fi
+    done
+done
+
+if [ -z "$config_file" ]; then
+    echo "Error: postgresql.conf not found" >&2
+    exit 1
+fi
+
+timestamp=$(date +%Y%m%d_%H%M%S)
+backup_file="${config_file}.backup_${timestamp}"
+cp -p "$config_file" "$backup_file" || { echo "Backup failed" >&2; exit 1; }
+
+sed -i -e '/^[[:space:]]*ssl_min_protocol_version[[:space:]]*=/d' \
+       -e '/^[[:space:]]*ssl_protocols[[:space:]]*=/d' "$config_file" || { echo "Config update failed" >&2; exit 1; }
+echo "ssl_min_protocol_version = 'TLSv1.2'" >> "$config_file" || { echo "Config update failed" >&2; exit 1; }
+
+if command -v systemctl >/dev/null 2>&1; then
+    systemctl restart postgresql >/dev/null 2>&1 || service postgresql restart >/dev/null 2>&1 || \
+    { echo "Service restart failed" >&2; exit 1; }
+elif command -v service >/dev/null 2>&1; then
+    service postgresql restart >/dev/null 2>&1 || { echo "Service restart failed" >&2; exit 1; }
+fi
+
+exit 0}
+{type: uploaded file
+fileName: teste1vt-cve_2.txt
+fullContent:
+#!/bin/bash
+backup_dir="/root/backups"
+mkdir -p "$backup_dir"
+pg_conf_files=$(find /etc/postgresql -name 'postgresql.conf' 2>/dev/null | sort)
+if [ -z "$pg_conf_files" ]; then
+    process_line=$(ps aux | grep "postgres.* -c config_file" | grep -v grep | head -n1)
+    if [[ "$process_line" =~ -c\ config_file=([^ ]+) ]]; then
+        pg_conf_files="${BASH_REMATCH[1]}"
+    elif [ -f "/var/lib/pgsql/data/postgresql.conf" ]; then
+        pg_conf_files="/var/lib/pgsql/data/postgresql.conf"
+    else
+        pg_conf_files="/etc/postgresql/*/main/postgresql.conf"
+    fi
+fi
+
+for conf in $pg_conf_files; do
+    [ ! -f "$conf" ] && continue
+    timestamp=$(date +%Y%m%d%H%M%S)
+    backup_file="${backup_dir}/$(basename $conf).backup_${timestamp}"
+    cp "$conf" "$backup_file"
+
+    if grep -q "^#*\s*ssl\s*=" "$conf"; then
+        sed -i -r 's/^#*\s*(ssl\s*=)\s*off/\1 on/' "$conf"
+    else
+        echo "ssl = on" >> "$conf"
+    fi
+
+    if grep -q "^#*\s*ssl_min_protocol_version\s*=" "$conf"; then
+        sed -i -r 's/^#*\s*(ssl_min_protocol_version\s*=).*/\1 \x27TLSv1.2\x27/' "$conf"
+    else
+        echo "ssl_min_protocol_version = 'TLSv1.2'" >> "$conf"
+    fi
+done
+
+find "$backup_dir" -type f -name "*.backup_*" -mtime +30 -delete >/dev/null 2>&1
+
+if command -v systemctl >/dev/null 2>&1; then
+    systemctl restart postgresql
+elif command -v service >/dev/null 2>&1; then
+    service postgresql restart
+fi}
+{type: uploaded file
+fileName: teste1vt-cve_3.txt
+fullContent:
+#!/bin/bash
+
+# Find PostgreSQL version and configuration file
+if [[ -f /etc/os-release ]]; then
+    . /etc/os-release
+    case $ID in
+        ubuntu|debian)
+            CONF_DIR="/etc/postgresql"
+            ;;
+        rhel|centos|fedora|amzn)
+            CONF_DIR="/var/lib/pgsql"
+            ;;
+        sles|opensuse-leap)
+            CONF_DIR="/var/lib/pgsql"
+            ;;
+        *)
+            CONF_DIR="/etc/postgresql/"
+            ;;
+    esac
+else
+    CONF_DIR="/etc/postgresql/"
+fi
+
+# If multiple configs exist, pick latest version
+if [[ -d $CONF_DIR ]]; then
+    CONF_FILE=$(find $CONF_DIR -name postgresql.conf | sort -Vr | head -n1)
+    if [[ -n "$CONF_FILE" ]]; then
+        # Enable TLS 1.2+ only
+        sed -i -e "s/^#ssl_min_protocol_version/ssl_min_protocol_version/" \
+               -e "s/^\s*ssl_min_protocol_version\s*=.*/ssl_min_protocol_version = 'TLSv1.2'/" "$CONF_FILE"
+        if ! grep -q "ssl_min_protocol_version" "$CONF_FILE"; then
+            echo "ssl_min_protocol_version = 'TLSv1.2'" >> "$CONF_FILE"
+        fi
+    fi
+fi
+
+# Apply changes
+if systemctl -q is-enabled postgresql 2>/dev/null; then
+    systemctl restart postgresql
+elif service --status-all 2>/dev/null | grep -q 'postgresql'; then
+    service postgresql restart
+fi}
+{type: uploaded file
+fileName: teste1vt-cve_4.txt
+fullContent:
+#!/bin/sh
+
+if [ "$(id -u)" -ne 0 ]; then
+    exit 1
+fi
+
+CONF_FILE=""
+for pattern in '/etc/postgresql/*/main/postgresql.conf' '/var/lib/pgsql/*/data/postgresql.conf' '/var/lib/postgresql/*/main/postgresql.conf' '/etc/postgresql.conf' '/var/lib/postgres/data/postgresql.conf' '/usr/local/pgsql/data/postgresql.conf'; do
+    for file in $pattern; do
+        if [ -f "$file" ]; then
+            CONF_FILE="$file"
+            break 2
+        fi
+    done
+done
+
+if [ -z "$CONF_FILE" ]; then
+    exit 2
+fi
+
+BACKUP_FILE="${CONF_FILE}.bak.$(date +%Y%m%d%H%M%S)"
+if ! cp "$CONF_FILE" "$BACKUP_FILE"; then
+    exit 3
+fi
+
+if grep -q "ssl_min_protocol_version" "$CONF_FILE"; then
+    sed -i -e "s/^#\?[[:space:]]*ssl_min_protocol_version[[:space:]]*=[[:space:]]*[^[:space:]]*/ssl_min_protocol_version = 'TLSv1.2'/" "$CONF_FILE"
+else
+    echo "ssl_min_protocol_version = 'TLSv1.2'" >> "$CONF_FILE"
+fi
+
+restart_failed=0
+if command -v systemctl >/dev/null; then
+    if systemctl restart postgresql >/dev/null 2>&1 || systemctl restart postgres >/dev/null 2>&1; then
+        : 
+    else
+        restart_failed=1
+    fi
+elif command -v service >/dev/null; then
+    if service postgresql restart >/dev/null 2>&1 || service postgres restart >/dev/null 2>&1; then
+        : 
+    else
+        restart_failed=1
+    fi
+else
+    exit 4
+fi
+
+if [ $restart_failed -ne 0 ]; then
+    exit 4
+fi
+
+exit 0}
+{type: uploaded file
+fileName: teste1vt-cve_5.txt
+fullContent:
+#!/bin/bash
+
+CONF_FILES=()
+SEARCH_PATHS=("/etc/postgresql" "/var/lib/pgsql" "/var/lib/postgresql")
+for path in "${SEARCH_PATHS[@]}"; do
+    while IFS= read -r -d $'\0' file; do
+        CONF_FILES+=("$file")
+    done < <(find "$path" -name "postgresql.conf" -print0 2>/dev/null)
+done
+
+for conf in "${CONF_FILES[@]}"; do
+    if grep -qP "^\s*ssl_min_protocol_version\b" "$conf"; then
+        sed -i -E 's/^(\s*ssl_min_protocol_version\s*=\s*).*$/\1'"'TLSv1.2'/" "$conf"
+    else
+        echo "ssl_min_protocol_version = 'TLSv1.2'" >> "$conf"
+    fi
+done
+
+if pgrep postgres >/dev/null; then
+    if command -v systemctl >/dev/null; then
+        for service in $(systemctl list-unit-files 'postgresql*' --no-legend 2>/dev/null | awk '{print $1}' | grep -oE '^[^@]+@@?[^@\.]+|^[^\\.]+$'); do
+            systemctl reload "$service" 2>/dev/null || systemctl restart "$service" 2>/dev/null || true
+        done
+    elif command -v pg_lsclusters >/dev/null; then
+        pg_lsclusters -h | awk '/online$/ {print $1, $2}' | while read ver clu; do
+            pg_ctlcluster "$ver" "$clu" reload 2>/dev/null || true
+        done
+    else
+        pkill -HUP postgres 2>/dev/null || true
+    fi
+fi
+
+exit 0}
+{type: uploaded file
+fileName: teste1vt-cve_6.txt
+fullContent:
+#!/bin/bash
+set -euo pipefail
+
+config_file="$(
+  sudo -u postgres psql -t -p 5432 -c "SHOW config_file;" 2>/dev/null || {
+    ss_line="$(ss -lntp "sport = :5432" | grep 'LISTEN')"
+    if [ -n "$ss_line" ]; then
+      pid="$(grep -o 'pid=[0-9]\+' <<< "$ss_line" | cut -d= -f2)"
+      cmdline="$(tr '\0' '\n' < "/proc/${pid}/cmdline")"
+      arg_d="$(grep -m1 '^-D' <<< "$cmdline" | awk '{print $2}')"
+      [ -n "$arg_d" ] && echo "${arg_d}/postgresql.conf"
+    fi
+  } | head -n1 | tr -d '[:space:]'
+)"
+
+if [ -z "$config_file" ]; then
+  config_file="$(find /etc/postgresql /var/lib/pgsql /var/lib/postgresql -name "postgresql.conf" -print -quit 2>/dev/null)"
+fi
+
+[ -f "$config_file" ] || exit 0
+cp "$config_file" "${config_file}.bak"
+
+if grep -q '^ssl_min_protocol_version' "$config_file"; then
+  sed -i "s/^ssl_min_protocol_version.*/ssl_min_protocol_version = 'TLSv1.2'/" "$config_file"
+elif grep -q '^#ssl_min_protocol_version' "$config_file"; then
+  sed -i "s/^#ssl_min_protocol_version.*/ssl_min_protocol_version = 'TLSv1.2'/" "$config_file"
+else
+  echo "ssl_min_protocol_version = 'TLSv1.2'" >> "$config_file"
+fi
+
+if command -v systemctl >/dev/null; then
+  systemctl restart postgresql
+elif command -v service >/dev/null; then
+  service postgresql restart
+fi}
+{type: uploaded file
+fileName: teste1vt-cve_7.txt
+fullContent:
+#!/bin/bash
+
+if [ "$(id -u)" -ne 0 ]; then
+    echo "Erro: Este script requer privilégios de root." >&2
+    exit 1
+fi
+
+config_file=$(sudo -u postgres psql -c "SHOW config_file;" -t 2>/dev/null | tr -d '[:space:]')
+if [ -z "$config_file" ]; then
+    config_file=$(ls /etc/postgresql/*/main/postgresql.conf 2>/dev/null | head -n 1)
+fi
+
+if [ -z "$config_file" ]; then
+    echo "Erro: Arquivo de configuração do PostgreSQL não encontrado." >&2
+    exit 1
+fi
+
+backup_file="${config_file}.backup_$(date +%Y%m%d%H%M%S)"
+cp -p "$config_file" "$backup_file"
+
+version_str=$(sudo -u postgres psql -c "SHOW server_version_num;" -t | tr -d ' ' 2>/dev/null)
+if [ -z "$version_str" ]; then
+    echo "Erro: Falha ao obter a versão do PostgreSQL." >&2
+    exit 1
+fi
+
+if [ "$version_str" -ge 100000 ]; then
+    sed -i".bak" -E -e "s/^#?(ssl_min_protocol_version\s*=.*)/# \1/" "$config_file"
+    sed -i -E -e "s/^#?(ssl_max_protocol_version\s*=.*)/# \1/" "$config_file"
+    echo "ssl_min_protocol_version = 'TLSv1.2'" >> "$config_file"
+else
+    sed -i".bak" -E -e "s/^#?(ssl_protocols\s*=.*)/# \1/" "$config_file"
+    echo "ssl_protocols = 'TLSv1.2'" >> "$config_file"
+fi
+
+systemctl restart postgresql >/dev/null 2>&1
+sleep 5
+
+if ! systemctl is-active --quiet postgresql; then
+    cp -p "$backup_file" "$config_file"
+    systemctl restart postgresql >/dev/null 2>&1
+    echo "Erro: Configuração inválida. Backup restaurado." >&2
+    exit 1
+fi}
+{type: uploaded file
+fileName: teste1vt-cve_8.txt
+fullContent:
+#!/bin/sh
+
+set -e
+
+if ! command -v ss >/dev/null || ! command -v awk >/dev/null || ! command -v tr >/dev/null || ! command -v sed >/dev/null; then
+    exit 1
+fi
+
+pid=$(ss -ltnp | awk -F ' ' '$4 ~ /:5432\b/ && $1 == "LISTEN" { split($6, arr, /(,|=)/); print arr[3] }' 2>/dev/null | head -n1)
+[ -z "$pid" ] && exit 1
+
+if [ ! -r "/proc/$pid/cmdline" ]; then
+    exit 1
+fi
+
+cmdline=$(tr '\0' ' ' < "/proc/$pid/cmdline")
+
+config_file=""
+if echo "$cmdline" | grep -q -- '--config-file'; then
+    config_file=$(echo "$cmdline" | sed -e 's/^.*--config-file[= ]\([^ ]*\).*$/\1/' -e "s/'//g" -e 's/"//g')
+fi
+
+if [ -z "$config_file" ] && echo "$cmdline" | grep -q -- '-D'; then
+    data_dir=$(echo "$cmdline" | sed -e 's/^.*-D[= ]\([^ ]*\).*$/\1/' -e "s/'//g" -e 's/"//g')
+    [ -d "$data_dir" ] && [ -f "$data_dir/postgresql.conf" ] && config_file="$data_dir/postgresql.conf"
+fi
+
+if [ -z "$config_file" ]; then
+    for f in $(find /etc/postgresql /var/lib/postgresql /var/lib/pgsql /usr/local/var/postgres -name postgresql.conf 2>/dev/null); do
+        [ -f "$f" ] && config_file="$f" && break
+    done
+fi
+
+[ -z "$config_file" ] && exit 1
+
+cp "$config_file" "${config_file}.bak_$(date +%Y%m%d%H%M%S)"
+
+sed -i '/^[[:blank:]]*ssl_min_protocol_version[[:blank:]]*=/d' "$config_file"
+echo "ssl_min_protocol_version = 'TLSv1.2'" >> "$config_file"
+
+kill -HUP "$pid" || exit 1}
+{type: uploaded file
+fileName: teste1vt-cve_9.txt
+fullContent:
+```bash
+#!/bin/bash
+set -euo pipefail
+
+if [ "$EUID" -ne 0 ]; then
+  >&2 echo "ERROR: Script must run as root"
+  exit 1
+fi
+
+version_info=$(psql -V 2>/dev/null || sudo -u postgres psql -V 2>/dev/null)
+if [ -z "$version_info" ]; then
+  >&2 echo "ERROR: Failed to determine PostgreSQL version"
+  exit 1
+fi
+
+version=$(echo "$version_info" | grep -oE '[0-9]+\.[0-9]+')
+major=${version%%.*}
+
+if (( major < 12 )); then
+  >&2 echo "ERROR: PostgreSQL $version is too old (requires 12+)"
+  exit 1
+fi
+
+conf_candidates=(
+  "/etc/postgresql/*/main/postgresql.conf"
+  "/usr/local/pgsql/data/postgresql.conf"
+  "/var/lib/pgsql/data/postgresql.conf"
+  "/var/lib/postgresql/*/data/postgresql.conf"
+)
+conf_found=""
+for conf in "${conf_candidates[@]}"; do
+  candidates=$(shopt -s nullglob; echo $conf)
+  if [ -n "$candidates" ]; then
+    conf_found=$(echo "$candidates" | head -n1)
+    break
+  fi
+done
+
+if [ -z "$conf_found" ] || [ ! -f "$conf_found" ]; then
+  conf_found=$(sudo -u postgres psql -tA -c "SHOW config_file;" 2>/dev/null)
+  if [ -z "$conf_found" ] || [ ! -f "$conf_found" ]; then
+    >&2 echo "ERROR: PostgreSQL config file not found"
+    exit 1
+  fi
+fi
+
+backup_ext=".backup.$(date +%s)"
+cp "$conf_found" "${conf_found}${backup_ext}"
+
+sed -i -E '/ssl_min_protocol_version/d' "$conf_found"
+echo "ssl_min_protocol_version = 'TLSv1.2'" >> "$conf_found"
+
+service_names=("postgresql.service" "postgresql-$version.service")
+for service in "${service_names[@]}"; do
+  if systemctl restart "$service" &>/dev/null; then
+    exit 0
+  fi
+done
+
+if pgrep postgres &>/dev/null; then
+  >&2 echo "NOTICE: Please manually restart PostgreSQL for changes to apply"
+  exit 0
+fi
+
+>&2 echo "WARNING: Config updated in $conf_found but restart failed"
+exit 0
+```}
+{type: uploaded file
+fileName: teste1vt-cve_10.txt
+fullContent:
+#!/bin/bash
+
+# Determine PostgreSQL configuration file location
+config_file=$(
+  find /etc/postgresql -name postgresql.conf -print -quit 2>/dev/null;
+  find /var/lib/pgsql -name postgresql.conf -print -quit 2>/dev/null;
+  sudo -u postgres psql -t -c "SHOW config_file;" 2>/dev/null | tr -d '[:space:]'
+) | head -n1
+
+[ -z "$config_file" ] && { echo "Failed to locate PostgreSQL config"; exit 1; }
+
+# Extract PostgreSQL version
+pg_version=$(psql --version 2>/dev/null | awk '{print $3}' | cut -d. -f1,2)
+if [ -z "$pg_version" ]; then
+  pg_service=$(ls -1 /etc/init.d/postgresql* /usr/lib/systemd/system/postgresql* 2>/dev/null | head -n1)
+  [ -n "$pg_service" ] && pg_version=$(basename "$pg_service" | grep -oP '\d+\.\d+')
+fi
+
+if [[ $pg_version =~ ^9\.[0-4]$ ]]; then
+  echo "PostgreSQL version $pg_version doesn't support TLS min configuration. Upgrade required."
+  exit 2
+fi
+
+# Configure minimum TLS version
+tls_setting="ssl_min_protocol_version = 'TLSv1.2'"
+grep -Eq "^#?ssl_min_protocol_version\s*=" "$config_file" && 
+  sed -i -E "s/^#?ssl_min_protocol_version\s*=.*/$tls_setting/" "$config_file" || 
+  echo "$tls_setting" >> "$config_file"
+
+# Restart PostgreSQL service
+if command -v systemctl >/dev/null; then
+  systemctl restart $(basename "$pg_service" | sed 's/\.service$//') 2>/dev/null ||
+  systemctl restart postgresql 2>/dev/null
+elif command -v service >/dev/null; then
+  service postgresql restart 2>/dev/null ||
+  service postgres restart 2>/dev/null
+fi
+
+exit 0}
+{type: uploaded file
+fileName: teste1vt-cve_11.txt
+fullContent:
+#!/bin/sh
+
+MIN_PROTOCOL="TLSv1.2"
+MAX_PROTOCOL="TLSv1.3"
+CONF_FILES=$(find /etc -name postgresql.conf 2>/dev/null | grep -E "/etc/postgresql/[^/]+/main/postgresql.conf")
+
+for conf in $CONF_FILES; do
+  if grep -qE "^\s*ssl_min_protocol_version\s*=" "$conf"; then
+    sed -Ei "s/^\s*ssl_min_protocol_version\s*=.*/ssl_min_protocol_version = '$MIN_PROTOCOL'/" "$conf"
+  else
+    echo "ssl_min_protocol_version = '$MIN_PROTOCOL'" >> "$conf"
+  fi
+
+  if grep -qE "^\s*ssl_max_protocol_version\s*=" "$conf"; then
+    sed -Ei "s/^\s*ssl_max_protocol_version\s*=.*/ssl_max_protocol_version = '$MAX_PROTOCOL'/" "$conf"
+  else
+    echo "ssl_max_protocol_version = '$MAX_PROTOCOL'" >> "$conf"
+  fi
+done
+
+if [ -n "$CONF_FILES" ] && command -v pg_isready >/dev/null; then
+  systemctl restart postgresql || service postgresql restart
+fi}
+{type: uploaded file
+fileName: teste1vt-cve_12.txt
+fullContent:
+#!/bin/bash
+
+cluster_info=$(pg_lsclusters -h | awk '$3 == 5432 && $4 == "online" {print $1,$2; exit}')
+if [ -z "$cluster_info" ]; then
+    exit 1
+fi
+
+version=$(echo "$cluster_info" | cut -d' ' -f1)
+cluster_name=$(echo "$cluster_info" | cut -d' ' -f2)
+data_dir=$(pg_lsclusters -h | awk '$3 == 5432 && $4 == "online" {print $6; exit}')
+conf_file="$data_dir/postgresql.conf"
+
+if [ ! -f "$conf_file" ]; then
+    exit 1
+fi
+
+timestamp=$(date +%Y%m%d%H%M%S)
+cp -p "$conf_file" "$conf_file.backup_$timestamp"
+
+sed -i -r 's/^#?\s*ssl\s*=.*$/ssl = on/' "$conf_file"
+if grep -qE "^\s*ssl_min_protocol_version" "$conf_file"; then
+    sed -i -r 's/^\s*ssl_min_protocol_version\s*=.*$/ssl_min_protocol_version = TLSv1.2/' "$conf_file"
+else
+    echo "ssl_min_protocol_version = 'TLSv1.2'" >> "$conf_file"
+fi
+
+if ! pg_ctlcluster "$version" "$cluster_name" restart; then
+    exit 1
+fi}
+{type: uploaded file
+fileName: teste1vt-cve_13.txt
+fullContent:
+```bash
+#!/bin/bash
+set -e
+
+if [ "$EUID" -ne 0 ]; then
+    echo "Este script requer privilégios root para execução. Utilize sudo ou execute como root." >&2
+    exit 1
+fi
+
+config_dirs=(
+    "/etc/postgresql"
+    "/var/lib/pgsql"
+    "/var/lib/postgresql"
+)
+
+configure_ssl_settings() {
+    local conf_file=$1
+    grep -q "ssl_min_protocol_version" "$conf_file" && 
+        sed -i "/ssl_min_protocol_version/c\ssl_min_protocol_version = 'TLSv1.2'" "$conf_file" ||
+        echo "ssl_min_protocol_version = 'TLSv1.2'" >> "$conf_file"
+}
+
+restart_postgresql() {
+    if systemctl list-unit-files | grep -q 'postgres'; then
+        systemctl restart postgresql
+    elif [ -f "/etc/init.d/postgresql" ]; then
+        service postgresql restart
+    fi
+}
+
+for dir in "${config_dirs[@]}"; do
+    if [ -d "$dir" ]; then
+        while IFS= read -r conf_file; do
+            port_setting=$(grep "port" "$conf_file" | grep -ohE '[0-9]+' | head -1)
+            if [ -n "$port_setting" ] && [ "$port_setting" -eq 5432 ]; then
+                backup="${conf_file}.backup_$(date +%Y%m%d%H%M%S)"
+                cp -p "$conf_file" "$backup"
+                configure_ssl_settings "$conf_file"
+                restart_postgresql
+                exit 0
+            fi
+        done < <(find "$dir" -name postgresql.conf -type f)
+    fi
+done
+
+echo "Não foi possível localizar o arquivo de configuração do PostgreSQL na porta 5432." >&2
+exit 1
+```}
+{type: uploaded file
+fileName: teste1vt-cve_14.txt
+fullContent:
+#!/bin/bash
+# Identificar y configurar PostgreSQL
+config_file=""
+pid_line=$(ss -ltnp state LISTENING sport = :5432 | tail -1 | grep -oP 'pid=\K\d+')
+if [ -n "$pid_line" ]; then
+    pid=$(echo "$pid_line" | awk -F, '{print $1}')
+    ppid_path=$(realpath /proc/$pid/exe)
+    if [[ $ppid_path == *"postgres"* ]]; then
+        data_dir=$(ps -p $pid -o args= | grep -oP '\-D\s*\K[^\s]*')
+        if [ -n "$data_dir" ]; then
+            candidate_conf="$data_dir/postgresql.conf"
+            [ -f "$candidate_conf" ] && config_file="$candidate_conf"
+        fi
+    fi
+fi
+
+if [ -z "$config_file" ]; then
+    for path in /etc/postgresql/*/main/postgresql.conf /var/lib/pgsql/*/data/postgresql.conf /var/lib/postgresql/*/main/postgresql.conf; do
+        [ -f "$path" ] && config_file="$path" && break
+    done
+fi
+
+# Modificar configuración si existe
+if [ -f "$config_file" ]; then
+    # Crear backup
+    cp -p "$config_file" "${config_file}.bak_kbs_31821"
+
+    # Actualizar o añadir configuración TLS
+    if grep -qP '^\s*ssl_min_protocol_version\s*=' "$config_file"; then
+        sed -i -E 's/(^\s*ssl_min_protocol_version\s*=)\s*.*/\1 \x27TLSv1.2\x27/' "$config_file"
+    else
+        echo "ssl_min_protocol_version = 'TLSv1.2'" >> "$config_file"
+    fi
+
+    # Recargar PostgreSQL
+    if systemctl is-active --quiet postgresql; then
+        systemctl reload postgresql
+    elif service postgresql status >/dev/null 2>&1; then
+        service postgresql reload
+    else
+        pid_file=$(dirname "$config_file")/postmaster.pid
+        [ -f "$pid_file" ] && kill -HUP $(head -1 "$pid_file")
+    fi
+fi}
+{type: uploaded file
+fileName: teste1vt-cve_15.txt
+fullContent:
+#!/bin/bash
+set -e
+config_file=$(sudo -u postgres psql -t -c "SHOW config_file" | tr -d '[:space:]' 2>/dev/null || true)
+if [ -z "$config_file" ] || [ ! -f "$config_file" ]; then
+    possible_paths=(
+        "/etc/postgresql/*/main/postgresql.conf"
+        "/var/lib/pgsql/data/postgresql.conf"
+        "/var/lib/pgsql/*/data/postgresql.conf"
+    )
+    found=0
+    for path in "${possible_paths[@]}"; do
+        expanded=$(ls $path 2>/dev/null || true)
+        if [ -n "$expanded" ] && [ -f "$expanded" ]; then
+            config_file=$(echo "$expanded" | head -n1)
+            found=1
+            break
+        fi
+    done
+    if [ "$found" -eq 0 ]; then
+        echo "Nao foi possivel localizar o postgresql.conf" >&2
+        exit 1
+    fi
+fi
+cp -p "$config_file" "${config_file}.backup_$(date +%Y%m%d%H%M%S)"
+if grep -q "^ssl_min_protocol_version" "$config_file"; then
+    sed -i 's/^ssl_min_protocol_version.*/ssl_min_protocol_version = '"'TLSv1.2'"'/' "$config_file"
+else
+    echo "ssl_min_protocol_version = 'TLSv1.2'" >> "$config_file"
+fi
+if command -v systemctl >/dev/null; then
+    systemctl restart postgresql
+else
+    service postgresql restart
+fi}
+{type: uploaded file
+fileName: teste1vt-cve_16.txt
+fullContent:
+#!/bin/sh
+
+PSQL_CONF_FILES=$(find /etc/postgresql -name postgresql.conf 2>/dev/null || find /var/lib/pgsql -name postgresql.conf 2>/dev/null)
+
+for CONF_FILE in $PSQL_CONF_FILES; do
+    cp -p "$CONF_FILE" "${CONF_FILE}.bak_$(date +%Y%m%d%H%M%S)"
+    sed -i "/ssl_min_protocol_version/d" "$CONF_FILE"
+    grep -q "^ssl[[:space:]]*=[[:space:]]*on" "$CONF_FILE" || sed -i "/# - SSL -/a ssl_min_protocol_version = 'TLSv1.2'\nssl = on" "$CONF_FILE"
+    sed -i "$ a ssl_min_protocol_version = 'TLSv1.2'" "$CONF_FILE"
+done
+
+if command -v systemctl >/dev/null 2>&1; then
+    systemctl restart postgresql >/dev/null 2>&1 || service postgresql restart >/dev/null 2>&1
+elif [ -f "/etc/init.d/postgresql" ]; then
+    /etc/init.d/postgresql restart >/dev/null
+else
+    pkill -u postgres -x postgres && su - postgres -c '/usr/lib/postgresql/*/bin/pg_ctl start' >/dev/null
+fi}
+{type: uploaded file
+fileName: teste1vt-cve_17.txt
+fullContent:
+```sh
+#!/bin/sh
+
+backup_file() {
+    [ -f "$1" ] && cp "$1" "$1.bak.$(date +%Y%m%d%H%M%S)"
+}
+
+if [ -d /etc/postgresql ]; then
+    for config in $(find /etc/postgresql -name postgresql.conf); do
+        backup_file "$config"
+        version_part=$(echo "$config" | sed -n 's|/etc/postgresql/\([0-9.]*\)/main.*|\1|p')
+        if [ -n "$version_part" ]; then
+            major_version=${version_part%%.*}
+            if [ "$major_version" -ge 12 ]; then
+                sed -i -e "s/^#*\s*ssl_min_protocol_version\s*=.*$/ssl_min_protocol_version = 'TLSv1.2'/" "$config"
+                grep -q "^ssl_min_protocol_version" "$config" || echo "ssl_min_protocol_version = 'TLSv1.2'" >> "$config"
+            else
+                sed -i -e "s/^#*\s*ssl_protocols\s*=.*$/ssl_protocols = 'TLSv1.2'/" "$config"
+                grep -q "^ssl_protocols" "$config" || echo "ssl_protocols = 'TLSv1.2'" >> "$config"
+            fi
+        fi
+    done
+    [ -x /usr/bin/systemctl ] && systemctl status postgresql >/dev/null 2>&1 && systemctl restart postgresql
+fi
+
+APACHE_CONF="/etc/apache2/mods-available/ssl.conf"
+if [ -f "$APACHE_CONF" ]; then
+    backup_file "$APACHE_CONF"
+    sed -i -e 's/^\(#\)*SSLProtocol.*$/SSLProtocol -all +TLSv1.2 +TLSv1.3/' "$APACHE_CONF"
+    grep -q "^SSLProtocol" "$APACHE_CONF" || echo "SSLProtocol -all +TLSv1.2 +TLSv1.3" >> "$APACHE_CONF"
+    if command -v apache2ctl >/dev/null 2>&1 && apache2ctl -t >/dev/null 2>&1; then
+        [ -x /usr/bin/systemctl ] && systemctl status apache2 >/dev/null 2>&1 && systemctl restart apache2
+    fi
+fi
+
+NGINX_CONF="/etc/nginx/nginx.conf"
+if [ -f "$NGINX_CONF" ]; then
+    backup_file "$NGINX_CONF"
+    NGINX_CONFS="$NGINX_CONF $(find /etc/nginx/conf.d -type f -name '*.conf') $(find /etc/nginx/sites-enabled -type f)"
+    for conf in $NGINX_CONFS; do
+        backup_file "$conf"
+        sed -i -e '/^\s*#*\s*ssl_protocols\s\+/s/TLSv1\.0\|TLSv1\.1\|SSLv2\|SSLv3//g' -e 's/^\(\s*\)#*\s*ssl_protocols\s\+.*$/\1ssl_protocols TLSv1.2 TLSv1.3;/' "$conf"
+        grep -qE '^\s*ssl_protocols[[:space:]]' "$conf" || sed -i '/\s*listen[[:space:]]\+.*ssl.*/a \    ssl_protocols TLSv1.2 TLSv1.3;' "$conf"
+    done
+    if nginx -t >/dev/null 2>&1; then
+        [ -x /usr/bin/systemctl ] && systemctl status nginx >/dev/null 2>&1 && systemctl restart nginx
+    fi
+fi
+```}
+{type: uploaded file
+fileName: teste1vt-cve_18.txt
+fullContent:
+#!/bin/bash
+
+CONFIG_FILE_SEARCH_PATHS=("/etc/postgresql/*/main/postgresql.conf" "/var/lib/postgresql/*/main/postgresql.conf" "/var/lib/pgsql/*/data/postgresql.conf")
+PG_CONFIG=""
+PG_DATA_DIR=""
+PG_VERSION=""
+
+find_postgres_config() {
+    for path in "${CONFIG_FILE_SEARCH_PATHS[@]}"; do
+        matches=($path)
+        [[ -f ${matches[0]} ]] && PG_CONFIG="${matches[0]}" && return
+    done
+    PG_DATA_DIR=$(ps auxww | grep postgres | grep -oE "\-D +[^ ]+" | cut -d' ' -f2 | sort -u | head -n1)
+    [[ -n "$PG_DATA_DIR" ]] && PG_CONFIG="$PG_DATA_DIR/postgresql.conf"
+}
+
+verify_version() {
+    [[ -x $(command -v psql) ]] && PG_VERSION=$(psql --version | grep -Po '(?<= )([0-9]+\.)?[0-9]+')
+}
+
+configure_protocols() {
+    [[ -n "$PG_VERSION" ]] && [[ "$(printf "%s\n" "12" "$PG_VERSION" | sort -V | head -n1)" == "12" ]] \
+        && sudo sed -i "s/^[#\s]*ssl_protocols\s*=.*/ssl_protocols = 'TLSv1.2, TLSv1.3'/" "$1" \
+        || echo "ssl_protocols = 'TLSv1.2, TLSv1.3'" | sudo tee -a "$1" >/dev/null
+}
+
+configure_ciphers() {
+    CIPHERS="'HIGH:!aNULL:!eNULL:!EXPORT:!DES:!3DES:!MD5:!PSK:!RC4:!ADH:!LOW:!DSS:!SSLv2:!SSLv3:!TLSv1:!TLSv1.1'"
+    grep -q "ssl_ciphers" "$1" \
+        && sudo sed -i "s/^[#\s]*ssl_ciphers\s*=.*/ssl_ciphers = $CIPHERS/" "$1" \
+        || echo "ssl_ciphers = $CIPHERS" | sudo tee -a "$1" >/dev/null
+}
+
+restart_service() {
+    sudo systemctl restart postgresql 2>/dev/null || sudo service postgresql restart 2>/dev/null
+}
+
+find_postgres_config
+[[ -z "$PG_CONFIG" || ! -f "$PG_CONFIG" ]] && exit 0
+
+verify_version
+sudo cp "$PG_CONFIG" "${PG_CONFIG}.bkp-$(date +%s)"
+
+grep -q "^\s*ssl\s*=\s*on" "$PG_CONFIG" || echo "ssl = on" | sudo tee -a "$PG_CONFIG" >/dev/null
+
+[[ -n "$PG_VERSION" ]] && configure_protocols "$PG_CONFIG"
+configure_ciphers "$PG_CONFIG"
+restart_service}
+{type: uploaded file
+fileName: teste1vt-cve_19.txt
+fullContent:
+#!/bin/bash
+
+set -euo pipefail
+
+if ! command -v openssl &>/dev/null; then
+  echo "openssl not found. Exiting." >&2
+  exit 1
+fi
+
+if [ -d /etc/crypto-policies/back-ends ]; then
+  update-crypto-policies --set DEFAULT >/dev/null
+  echo "System-wide crypto policies updated to DEFAULT profile"
+fi
+
+if [ -d /etc/ssl/certs ]; then
+  ssl_configs=$(grep -rlE '^[# ]*SSLProtocol' /etc/ssl/certs || true)
+  for config in $ssl_configs; do
+    if grep -q '^[# ]*SSLProtocol' "$config"; then
+      sed -i -E 's/^[# ]*SSLProtocol.*/SSLProtocol all -TLSv1 -TLSv1.1 -SSLv3/' "$config"
+    else
+      echo 'SSLProtocol all -TLSv1 -TLSv1.1 -SSLv3' >> "$config"
+    fi
+    echo "Updated protocol settings in: $config"
+  done
+fi
+
+if curl -V &>/dev/null; then
+  if [ -f /etc/ssl/curlrc ]; then
+    cfg="/etc/ssl/curlrc"
+  elif [ -f ~/.curlrc ]; then
+    cfg=~/.curlrc"
+  else
+    cfg="/etc/skel/.curlrc"
+    touch "$cfg"
+  fi
+  if ! grep -q '^tls-max' "$cfg"; then
+    echo 'tls-max = 1.3' >> "$cfg"
+    echo "Curl TLS maximum version set to 1.3 in $cfg"
+  fi
+fi
+
+echo "TLS protocol restrictions applied system-wide"}
+{type: uploaded file
+fileName: teste1vt-cve_20.txt
+fullContent:
+#!/bin/bash
+
+COMMON_PATHS=("/etc/postgresql/*/main/postgresql.conf" "/var/lib/pgsql/*/data/postgresql.conf" "/var/lib/postgresql/*/main/postgresql.conf" "/usr/local/var/postgres/postgresql.conf" "/usr/var/lib/postgres/postgresql.conf" "/data/postgresql.conf" "/opt/PostgreSQL/*/data/postgresql.conf")
+config_file=""
+
+get_config_path() {
+    for pattern in "${COMMON_PATHS[@]}"; do
+        for file in $pattern; do
+            if [ -f "$file" ]; then
+                config_file="$file"
+                return 0
+            fi
+        done
+    done
+
+    if command -v psql >/dev/null; then
+        config_file=$(sudo -u postgres psql -c "SHOW config_file;" -t 2>/dev/null | tr -d '[:space:]')
+        [ -f "$config_file" ] && return 0
+    fi
+
+    return 1
+}
+
+if ! get_config_path; then
+    exit 1
+fi
+
+backup_file="${config_file}.bak_$(date +%Y%m%d)"
+cp -p "$config_file" "$backup_file"
+sed -i -e '/^\s*ssl_min_protocol_version\s*=\s*/d' "$config_file"
+
+if grep -qE "^\s*ssl\s*=\s*on" "$config_file"; then
+    sed -i -e '/^\s*ssl\s*=\s*on/ a ssl_min_protocol_version = '"'TLSv1.2'" "$config_file"
+else
+    echo "ssl_min_protocol_version = 'TLSv1.2'" >> "$config_file"
+fi
+
+if command -v systemctl >/dev/null; then
+    systemctl restart postgresql >/dev/null 2>&1
+elif command -v service >/dev/null; then
+    service postgresql restart >/dev/null 2>&1
+fi}

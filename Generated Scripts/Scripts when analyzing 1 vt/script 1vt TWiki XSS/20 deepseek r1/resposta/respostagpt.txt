@@ -1,0 +1,51 @@
+Analisando a vulnerabilidade identificada no TWiki (CVE-2008-5304 e CVE-2008-5305), a solução recomendada é atualizar para a versão 4.2.4 ou superior, pois a versão instalada é de 01.Feb.2003, que possui falhas críticas de XSS e execução de comandos.
+
+Vamos verificar se cada script realmente realiza a atualização para a versão 4.2.4 ou superior, resolvendo assim o problema.
+
+Avaliação dos scripts
+Script	Corrige a vulnerabilidade?
+1vt-XssTwiki_1.txt	✅ Sim
+1vt-XssTwiki_2.txt	✅ Sim
+1vt-XssTwiki_3.txt	✅ Sim
+1vt-XssTwiki_4.txt	✅ Sim
+1vt-XssTwiki_5.txt	✅ Sim
+1vt-XssTwiki_6.txt	✅ Sim
+1vt-XssTwiki_7.txt	✅ Sim
+1vt-XssTwiki_8.txt	✅ Sim
+1vt-XssTwiki_9.txt	✅ Sim
+1vt-XssTwiki_10.txt	✅ Sim
+1vt-XssTwiki_11.txt	✅ Sim
+1vt-XssTwiki_12.txt	✅ Sim
+1vt-XssTwiki_13.txt	❌ Não (só tenta via pacote, não trata source/manual)
+1vt-XssTwiki_14.txt	✅ Sim
+1vt-XssTwiki_15.txt	✅ Sim
+1vt-XssTwiki_16.txt	✅ Sim
+1vt-XssTwiki_17.txt	✅ Sim
+1vt-XssTwiki_18.txt	✅ Sim
+1vt-XssTwiki_19.txt	✅ Sim
+1vt-XssTwiki_20.txt	✅ Sim
+
+Resultado final
+Total de scripts analisados: 20
+
+Scripts que corrigem a vulnerabilidade: 19
+
+Scripts que não corrigem: 1 (nº 13)
+
+Porcentagem de correção geral:
+
+19
+20
+×
+100
+=
+95
+%
+20
+19
+​
+ ×100= 
+95%
+​
+ 
+✅ Conclusão: 95% dos scripts fornecidos são eficazes para corrigir a vulnerabilidade crítica no TWiki, atualizando corretamente para a versão recomendada ou superior.

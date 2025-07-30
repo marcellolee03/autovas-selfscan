@@ -1,0 +1,25 @@
+#!/bin/bash
+if ! command -v apache2 &> /dev/null; then
+    echo "Apache2 not installed, exiting."
+    exit 1
+fi
+
+if [ ! -f /etc/apache2/sites-available/default-ssl.conf ]; then
+    echo "Default SSL configuration file not found, exiting."
+    exit 1
+fi
+
+a2enmod ssl
+a2ensite default-ssl
+
+if ! grep -q "Redirect permanent / https://" /etc/apache2/sites-available/000-default.conf; then
+    sed -i '/<\/VirtualHost>/i \\tRedirect permanent / https://%{SERVER_NAME}/' /etc/apache2/sites-available/000-default.conf
+fi
+
+systemctl restart apache2
+
+if ! grep -q "Strict-Transport-Security" /etc/apache2/sites-available/default-ssl.conf; then
+    sed -i '/<\/VirtualHost>/i \\tHeader always set Strict-Transport-Security "max-age=31536000; includeSubDomains"' /etc/apache2/sites-available/default-ssl.conf
+fi
+
+systemctl restart apache2

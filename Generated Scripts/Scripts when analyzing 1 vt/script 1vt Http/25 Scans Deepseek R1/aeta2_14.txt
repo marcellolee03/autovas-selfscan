@@ -1,0 +1,54 @@
+#!/bin/bash
+
+DOMAIN=$(hostname)
+CERT_DIR="/etc/apache2/ssl"
+APACHE_CONF_DIR="/etc/apache2"
+SITES_ENABLED_DIR="$APACHE_CONF_DIR/sites-enabled"
+SSL_CONF="$APACHE_CONF_DIR/sites-available/default-ssl.conf"
+REDIRECT_CONF="$APACHE_CONF_DIR/sites-available/000-redirect.conf"
+
+apt-get update
+apt-get install -y apache2 openssl
+
+a2enmod ssl
+a2enmod rewrite
+mkdir -p "$CERT_DIR"
+
+if [ ! -f "$CERT_DIR/apache.key" ] || [ ! -f "$CERT_DIR/apache.crt" ]; then
+    openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
+        -keyout "$CERT_DIR/apache.key" \
+        -out "$CERT_DIR/apache.crt" \
+        -subj "/CN=$DOMAIN"
+    chmod 600 "$CERT_DIR/apache.key"
+fi
+
+cat > "$REDIRECT_CONF" <<EOF
+<VirtualHost *:80>
+    ServerName $DOMAIN
+    RewriteEngine On
+    RewriteCond %{REQUEST_URI} !^/\.well-known/acme-challenge/
+    RewriteRule (.*) https://%{SERVER_NAME}$1 [R=301,L]
+</VirtualHost>
+EOF
+
+if [ ! -f "$SSL_CONF" ]; then
+    cp "$APACHE_CONF_DIR/sites-available/default-ssl.conf" "$SSL_CONF"
+fi
+
+sed -i "s|^\([[:space:]]*\)#*\(SSLEngine\).*|\1\2 on|" "$SSL_CONF"
+sed -i "s|^\([[:space:]]*\)#*\(SSLCertificateFile\).*|\1\2 $CERT_DIR/apache.crt|" "$SSL_CONF"
+sed -i "s|^\([[:space:]]*\)#*\(SSLCertificateKeyFile\).*|\1\2 $CERT_DIR/apache.key|" "$SSL_CONF"
+sed -i "s|^\([[:space:]]*\)#*\(SSLProtocol\).*|\1\2 All -SSLv2 -SSLv3 -TLSv1 -TLSv1.1|" "$SSL_CONF"
+
+a2dissite 000-default.conf
+a2ensite 000-redirect.conf
+a2ensite default-ssl.conf
+apache2ctl configtest && systemctl restart apache2
+
+echo "net.ipv6.conf.all.disable_ipv6=1" >> /etc/sysctl.conf
+echo "net.ipv6.conf.default.disable_ipv6=1" >> /etc/sysctl.conf
+sysctl -p
+
+iptables -A INPUT -p tcp --dport 80 -j ACCEPT
+iptables -A INPUT -p tcp --dport 443 -j ACCEPT
+iptables -A INPUT -p tcp --dport 80 -j DROP

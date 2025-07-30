@@ -1,0 +1,62 @@
+#!/bin/bash
+
+# Verifica se o sistema é baseado em Debian/Ubuntu (para usar apt-get)
+if command -v apt-get &> /dev/null; then
+  # Atualiza a lista de pacotes
+  apt-get update
+
+  # Tenta atualizar o PHP para a versão mais recente disponível
+  apt-get install --only-upgrade php5 php5-cgi php5-cli
+
+  # Verifica se a atualização foi bem-sucedida (pode não resolver se os repositórios estiverem desatualizados)
+  if dpkg -s php5 | grep -q "Version: 5\.3\."; then
+      echo "A atualização padrão para a versão mais recente disponível não resolveu a vulnerabilidade."
+      echo "Tentando adicionar um repositório para uma versão mais recente do PHP."
+
+      # Adiciona o repositório ondrej/php (PPA) - CUIDADO: isto pode atualizar outras dependências
+      add-apt-repository ppa:ondrej/php -y
+      apt-get update
+
+      # Tenta instalar uma versão mais recente do PHP (PHP 5.6 ou superior, dependendo do PPA)
+      apt-get install php5.6 php5.6-cgi php5.6-cli -y
+
+      # Desabilita o PHP antigo, caso a instalação do novo tenha sido bem-sucedida
+      if command -v a2dismod &> /dev/null; then
+          a2dismod php5
+          a2enmod php5.6
+          service apache2 restart
+      elif command -v systemctl &> /dev/null; then
+        #Se o apache estiver sendo usado diretamente
+        systemctl restart apache2
+      fi
+  fi
+
+  # Verifica se a atualização foi bem-sucedida
+  if dpkg -s php5 | grep -q "Version: 5\.3\."; then
+      echo "A atualização do PHP falhou.  A vulnerabilidade pode ainda existir."
+      echo "Considere atualizar manualmente ou usar uma versão mais recente do sistema operacional."
+  else
+      echo "PHP atualizado com sucesso. Verifique a versão do PHP para confirmar a correção da vulnerabilidade."
+      php -v
+  fi
+
+# Verifica se o sistema é baseado em CentOS/RHEL (para usar yum)
+elif command -v yum &> /dev/null; then
+  # Atualiza o PHP usando yum
+  yum update php
+
+  #Verifica se a atualização foi bem sucedida
+  if rpm -q php | grep -q "php-5\.3\."; then
+      echo "A atualização do PHP falhou. A vulnerabilidade pode ainda existir."
+      echo "Considere atualizar manualmente ou usar uma versão mais recente do sistema operacional."
+  else
+      echo "PHP atualizado com sucesso. Verifique a versão do PHP para confirmar a correção da vulnerabilidade."
+      php -v
+  fi
+
+else
+  echo "Sistema operacional não detectado.  Por favor, atualize o PHP manualmente."
+  echo "Entre em contato com o administrador do sistema para obter assistência."
+fi
+
+exit 0

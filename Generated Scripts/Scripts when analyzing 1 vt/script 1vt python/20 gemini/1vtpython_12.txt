@@ -1,0 +1,62 @@
+```bash
+#!/bin/bash
+
+# Script para atualizar o Python para a versão 3.10.15 no Windows
+
+# Verificar se o sistema operacional é Windows
+if [[ "$OSTYPE" != "msys" ]]; then
+  echo "Este script foi projetado para ser executado no Windows."
+  exit 1
+fi
+
+# Função para verificar se um programa está instalado
+is_program_installed() {
+  local program_name="$1"
+  where "$program_name" >/dev/null 2>&1
+  return $?
+}
+
+# Função para verificar se o Chocolatey está instalado
+is_chocolatey_installed() {
+  is_program_installed choco
+}
+
+# Instalar o Chocolatey se não estiver instalado
+install_chocolatey() {
+  echo "Chocolatey não está instalado. Instalando..."
+  Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; iex ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))
+  echo "Chocolatey instalado com sucesso. Reiniciando o shell..."
+  # Reiniciar o shell para carregar as variáveis de ambiente
+  exit
+}
+
+# Atualizar o Python usando o Chocolatey
+update_python() {
+  echo "Atualizando o Python para a versão 3.10.15..."
+  choco upgrade python --version=3.10.15 -y
+  if [ $? -eq 0 ]; then
+    echo "Python atualizado com sucesso para a versão 3.10.15."
+  else
+    echo "Falha ao atualizar o Python. Verifique a saída do Chocolatey para mais detalhes."
+    exit 1
+  fi
+}
+
+# Verificar se o Chocolatey está instalado
+if ! is_chocolatey_installed; then
+  install_chocolatey
+fi
+
+# Verificar a versão atual do Python
+python --version
+
+# Atualizar o Python
+update_python
+
+# Verificar a versão atualizada do Python
+python --version
+
+echo "Script de correção concluído."
+
+exit 0
+```

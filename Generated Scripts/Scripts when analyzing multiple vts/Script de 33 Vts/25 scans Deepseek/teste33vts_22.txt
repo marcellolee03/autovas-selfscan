@@ -1,0 +1,47 @@
+#!/bin/bash
+
+# Vulnerabilidade 1: Atualizar Proxmox VE
+apt-get update
+apt-get install -y proxmox-ve
+
+# Vulnerabilidades 2-6: Atualizar jQuery
+wget -O /tmp/jquery.min.js https://code.jquery.com/jquery-3.6.0.min.js
+cp /tmp/jquery.min.js /var/www/html/js/jquery-1.8.3.min.js
+cp /tmp/jquery.min.js /var/www/html/opscenter/webcommon/framework/js/jquery-1.8.3.min.js
+cp /tmp/jquery.min.js /var/www/html/framesets/js/jquery-1.8.3.min.js
+cp /tmp/jquery.min.js /var/www/html/frameset/js/jquery-1.8.3.min.js
+cp /tmp/jquery.min.js /var/www/html/console/framework/js/jquery-1.8.3.min.js
+
+# Vulnerabilidades 7-22: Configurar SSH
+sed -i 's/^HostKeyAlgorithms.*/HostKeyAlgorithms ecdsa-sha2-nistp256,ssh-rsa/' /etc/ssh/sshd_config
+sed -i 's/^KexAlgorithms.*/KexAlgorithms curve25519-sha256@libssh.org/' /etc/ssh/sshd_config
+sed -i 's/^Ciphers.*/Ciphers chacha20-poly1305@openssh.com,aes256-gcm@openssh.com,aes128-gcm@openssh.com/' /etc/ssh/sshd_config
+sed -i 's/^MACs.*/MACs hmac-sha2-512-etm@openssh.com,hmac-sha2-256-etm@openssh.com/' /etc/ssh/sshd_config
+systemctl restart sshd
+
+# Vulnerabilidade 23-25: Desabilitar TCP Timestamps
+echo "net.ipv4.tcp_timestamps = 0" >> /etc/sysctl.conf
+sysctl -p
+
+# Vulnerabilidades 26-32: Desabilitar ICMP Timestamp
+echo "net.ipv4.timestamp_response = 0" >> /etc/sysctl.conf
+sysctl -p
+
+# Vulnerabilidade 10: Filtrar portas DCE/RPC e MSRPC
+iptables -A INPUT -p tcp --dport 135 -j DROP
+iptables -A INPUT -p tcp --dport 49710 -j DROP
+iptables -A INPUT -p tcp --dport 49664 -j DROP
+iptables -A INPUT -p tcp --dport 49665 -j DROP
+iptables -A INPUT -p tcp --dport 49666 -j DROP
+iptables -A INPUT -p tcp --dport 49667 -j DROP
+iptables -A INPUT -p tcp --dport 49668 -j DROP
+iptables -A INPUT -p tcp --dport 49670 -j DROP
+iptables -A INPUT -p tcp --dport 7832 -j DROP
+
+# Vulnerabilidade 11: Substituir Telnet por SSH
+apt-get remove --purge -y telnetd
+apt-get install -y openssh-server
+
+# Vulnerabilidade 12: Desabilitar TLSv1.0 e TLSv1.1
+sed -i 's/^SSLProtocol.*/SSLProtocol -all +TLSv1.2 +TLSv1.3/' /etc/apache2/mods-enabled/ssl.conf
+systemctl restart apache2

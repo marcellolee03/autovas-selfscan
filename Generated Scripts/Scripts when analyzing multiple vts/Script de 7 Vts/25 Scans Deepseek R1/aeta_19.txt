@@ -1,0 +1,59 @@
+#!/bin/bash
+
+# Vulnerabilidade 1: Redirecionar HTTP para HTTPS (Apache ou Nginx)
+if command -v apache2 &> /dev/null; then
+    if ! grep -q "Redirect permanent / https://" /etc/apache2/sites-enabled/*; then
+        sed -i '/<VirtualHost \*:80>/a \\tRedirect permanent / https://0.0.0.0/' /etc/apache2/sites-enabled/*
+        systemctl restart apache2
+    fi
+elif command -v nginx &> /dev/null; then
+    if ! grep -q "return 301 https://" /etc/nginx/sites-enabled/*; then
+        sed -i '/listen 80;/a \\treturn 301 https://$host$request_uri;' /etc/nginx/sites-enabled/*
+        systemctl restart nginx
+    fi
+fi
+
+# Vulnerabilidade 2: Desabilitar recursão DNS (BIND)
+if command -v named &> /dev/null; then
+    if grep -q "recursion yes" /etc/bind/named.conf.options; then
+        sed -i 's/recursion yes/recursion no/' /etc/bind/named.conf.options
+        sed -i '/recursion no/a \\tallow-recursion { none; };' /etc/bind/named.conf.options
+        systemctl restart bind9
+    fi
+fi
+
+# Vulnerabilidade 3: Bloquear ICMP timestamp
+iptables -A INPUT -p icmp --icmp-type timestamp-request -j DROP
+iptables -A INPUT -p icmp --icmp-type timestamp-reply -j DROP
+
+# Vulnerabilidade 4 e 6: Configurar TLS (Apache ou Nginx)
+if command -v apache2 &> /dev/null; then
+    conf_file="/etc/apache2/mods-enabled/ssl.conf"
+    if [ -f "$conf_file" ]; then
+        sed -i 's/SSLProtocol all -SSLv3/SSLProtocol all -SSLv3 -TLSv1 -TLSv1.1/' "$conf_file"
+        sed -i 's/SSLCipherSuite .*/SSLCipherSuite ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:DHE-RSA-AES128-GCM-SHA256:DHE-RSA-AES256-GCM-SHA384:!DSS:!aNULL:!eNULL:!EXPORT:!DES:!MD5:!PSK:!RC4:!3DES/' "$conf_file"
+        systemctl restart apache2
+    fi
+elif command -v nginx &> /dev/null; then
+    conf_file="/etc/nginx/nginx.conf"
+    if [ -f "$conf_file" ]; then
+        sed -i '/ssl_protocols/s/.*/\tssl_protocols TLSv1.2 TLSv1.3;/' "$conf_file"
+        sed -i '/ssl_ciphers/s/.*/\tssl_ciphers "ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:DHE-RSA-AES128-GCM-SHA256:DHE-RSA-AES256-GCM-SHA384:!DSS:!aNULL:!eNULL:!EXPORT:!DES:!MD5:!PSK:!RC4:!3DES";/' "$conf_file"
+        systemctl restart nginx
+    fi
+fi
+
+# Vulnerabilidade 5: Desabilitar renegociação TLS (Apache)
+if command -v apache2 &> /dev/null; then
+    conf_file="/etc/apache2/mods-enabled/ssl.conf"
+    if [ -f "$conf_file" ]; then
+        if ! grep -q "SSLInsecureRenegotiation off" "$conf_file"; then
+            echo "SSLInsecureRenegotiation off" >> "$conf_file"
+            systemctl restart apache2
+        fi
+    fi
+fi
+
+# Vulnerabilidade 7: Desabilitar TCP timestamps
+sysctl -w net.ipv4.tcp_timestamps=0
+grep -qxF 'net.ipv4.tcp_timestamps = 0' /etc/sysctl.conf || echo 'net.ipv4.tcp_timestamps = 0' >> /etc/sysctl.conf

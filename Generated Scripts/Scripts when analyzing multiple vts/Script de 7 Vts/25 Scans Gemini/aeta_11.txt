@@ -1,0 +1,101 @@
+```bash
+#!/bin/bash
+
+# Vulnerability 1: Cleartext Transmission of Sensitive Information via HTTP
+# Solution: Enforce HTTPS redirection. This script assumes Apache web server.
+# Adjust accordingly for other web servers.
+
+# Check if Apache is installed
+if command -v apache2 >/dev/null 2>&1; then
+  # Enable mod_rewrite if not already enabled
+  if ! a2enmod rewrite >/dev/null 2>&1; then
+    echo "Enabling mod_rewrite..."
+    sudo a2enmod rewrite
+  fi
+
+  # Create/modify .htaccess file in the web root to enforce HTTPS redirection
+  echo "
+  RewriteEngine On
+  RewriteCond %{HTTPS} off
+  RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+  " | sudo tee /var/www/html/.htaccess > /dev/null
+
+  # Restart Apache to apply changes
+  echo "Restarting Apache..."
+  sudo systemctl restart apache2
+elif command -v nginx >/dev/null 2>&1; then
+  echo "Nginx detected, configure HTTPS redirection manually in the virtual host configuration."
+  echo "Example:
+  server {
+      listen 80;
+      server_name example.com;
+      return 301 https://\$host\$request_uri;
+  }
+  "
+else
+  echo "No supported web server (Apache or Nginx) found. Please configure HTTPS redirection manually."
+fi
+
+# Vulnerability 2: DNS Cache Snooping Vulnerability (UDP) - Active Check
+# Solution: Disable recursion or restrict access. Disabling recursion is the safest option for most.
+
+echo "Disabling DNS recursion..."
+# This assumes BIND9 DNS server.  Adjust accordingly for other DNS servers.
+sudo sed -i 's/^recursion yes;/recursion no;/' /etc/bind/named.conf.options
+
+# Restart BIND9 to apply changes
+echo "Restarting BIND9..."
+sudo systemctl restart bind9
+
+# Vulnerability 3: ICMP Timestamp Reply Information Disclosure
+# Solution: Disable ICMP timestamp replies.
+
+echo "Disabling ICMP timestamp replies..."
+sudo sysctl -w net.ipv4.icmp_echo_ignore_all=1
+sudo echo "net.ipv4.icmp_echo_ignore_all=1" | sudo tee -a /etc/sysctl.conf
+
+# Vulnerability 4: SSL/TLS: Deprecated TLSv1.0 and TLSv1.1 Protocol Detection
+# Vulnerability 5: SSL/TLS: Renegotiation DoS Vulnerability (CVE-2011-1473, CVE-2011-5094)
+# Vulnerability 6: SSL/TLS: Report Weak Cipher Suites
+# Solution: Disable TLS 1.0 and 1.1, disable renegotiation, and configure strong cipher suites.
+# This assumes OpenSSL configuration. Adjust paths if necessary.
+
+echo "Configuring strong TLS settings..."
+
+# Find OpenSSL configuration file
+OPENSSL_CONFIG=$(find /etc/ssl/ -name openssl.cnf -o -name ssl.conf 2>/dev/null | head -n 1)
+
+if [ -z "$OPENSSL_CONFIG" ]; then
+  echo "OpenSSL configuration file not found. Please configure TLS settings manually."
+else
+  # Disable TLS 1.0 and 1.1, disable renegotiation, and set strong cipher suites
+  sudo sed -i "s/^\#\(SSLProtocol.*\)/\1/" "$OPENSSL_CONFIG" #Uncomment SSLProtocol if commented
+  sudo sed -i "s/SSLProtocol.*/SSLProtocol All -SSLv2 -SSLv3 -TLSv1 -TLSv1.1/g" "$OPENSSL_CONFIG"
+  sudo sed -i "s/^\#\(SSLCipherSuite.*\)/\1/" "$OPENSSL_CONFIG" #Uncomment SSLCipherSuite if commented
+  sudo sed -i "s/SSLCipherSuite.*/SSLCipherSuite ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:DHE-RSA-AES128-GCM-SHA256:DHE-RSA-AES256-GCM-SHA384/g" "$OPENSSL_CONFIG"
+
+  # Restart web server to apply changes
+  if command -v apache2 >/dev/null 2>&1; then
+    echo "Restarting Apache..."
+    sudo systemctl restart apache2
+  elif command -v nginx >/dev/null 2>&1; then
+    echo "Restarting Nginx..."
+    sudo systemctl restart nginx
+  else
+    echo "No supported web server (Apache or Nginx) found.  Restart your web server manually."
+  fi
+
+fi
+
+# Vulnerability 7: TCP Timestamps Information Disclosure
+# Solution: Disable TCP timestamps.
+
+echo "Disabling TCP timestamps..."
+sudo sysctl -w net.ipv4.tcp_timestamps=0
+sudo echo "net.ipv4.tcp_timestamps = 0" | sudo tee -a /etc/sysctl.conf
+
+echo "Applying sysctl settings..."
+sudo sysctl -p
+
+echo "Vulnerability remediation complete."
+```

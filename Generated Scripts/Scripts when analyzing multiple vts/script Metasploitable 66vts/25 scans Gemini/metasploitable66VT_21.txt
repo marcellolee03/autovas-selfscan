@@ -1,0 +1,556 @@
+```bash
+#!/bin/bash
+
+# Script para corrigir vulnerabilidades detectadas
+
+# Variáveis
+OS=$(uname -s)
+ARCH=$(uname -m)
+
+# Funções Auxiliares
+log_message() {
+  echo "$(date '+%Y-%m-%d %H:%M:%S') - $1"
+}
+
+# Vulnerabilidade 1: TWiki XSS and Command Execution Vulnerabilities (CVE-2008-5304, CVE-2008-5305)
+# Solução: Upgrade to version 4.2.4 or later.
+log_message "Iniciando correção para TWiki XSS e Command Execution Vulnerabilities (CVE-2008-5304, CVE-2008-5305)"
+TWIKI_INSTALLED=$(dpkg-query -W -f='${Status}' twiki 2>/dev/null | grep -c "install ok installed")
+
+if [ "$TWIKI_INSTALLED" -gt 0 ]; then
+  log_message "TWiki encontrado. Removendo..."
+  apt-get remove --purge -y twiki
+  log_message "TWiki removido. Instalando versão mais recente..."
+  apt-get update -y
+  apt-get install -y twiki
+  log_message "TWiki atualizado para a versão mais recente."
+else
+  log_message "TWiki não encontrado. Nenhuma ação necessária."
+fi
+log_message "Correção para TWiki XSS e Command Execution Vulnerabilities finalizada."
+
+# Vulnerabilidade 2: Distributed Ruby (dRuby/DRb) Multiple RCE Vulnerabilities
+# Solução: Implementar controles apropriados. Desabilitar se não for necessário.
+log_message "Iniciando mitigação para Distributed Ruby (dRuby/DRb) Multiple RCE Vulnerabilities"
+DRUBY_PROCESS=$(ps aux | grep druby_timeserver.rb | grep -v grep)
+
+if [ -n "$DRUBY_PROCESS" ]; then
+  log_message "Serviço DRb detectado. Parando o serviço..."
+  kill $(ps aux | grep druby_timeserver.rb | grep -v grep | awk '{print $2}')
+  log_message "Serviço DRb parado."
+
+  # Removendo script de inicialização (se existir)
+  if [ -f "/etc/init.d/druby_timeserver" ]; then
+    log_message "Removendo script de inicialização /etc/init.d/druby_timeserver..."
+    rm /etc/init.d/druby_timeserver
+    update-rc.d druby_timeserver remove >/dev/null 2>&1
+    log_message "Script de inicialização removido."
+  elif [ -f "/lib/systemd/system/druby_timeserver.service" ]; then
+    log_message "Removendo systemd service /lib/systemd/system/druby_timeserver.service..."
+    rm /lib/systemd/system/druby_timeserver.service
+    systemctl daemon-reload
+    log_message "Systemd service removido."
+  else
+     log_message "Nenhum script de inicialização conhecido encontrado."
+  fi
+else
+  log_message "Serviço DRb não encontrado. Nenhuma ação necessária."
+fi
+log_message "Mitigação para Distributed Ruby finalizada."
+
+# Vulnerabilidade 3: rlogin Passwordless Login
+# Solução: Disable the rlogin service and use alternatives like SSH instead.
+log_message "Iniciando correção para rlogin Passwordless Login"
+if systemctl is-active rlogin.socket; then
+  log_message "rlogin.socket está ativo. Desativando..."
+  systemctl stop rlogin.socket
+  systemctl disable rlogin.socket
+  log_message "rlogin.socket desativado."
+else
+  log_message "rlogin.socket não está ativo. Nenhuma ação necessária."
+fi
+log_message "Correção para rlogin Passwordless Login finalizada."
+
+# Vulnerabilidade 4: Operating System (OS) End of Life (EOL) Detection
+# Solução: Update the OS on the remote host to a supported version.
+log_message "AVISO: Ubuntu 8.04 está EOL. Atualização do sistema operacional é altamente recomendada. Este script não pode realizar essa atualização automaticamente."
+log_message "Correção para Operating System (OS) End of Life (EOL) Detection pendente. Requer intervenção manual."
+
+# Vulnerabilidade 5: The rexec service is running
+# Solução: Disable the rexec service and use alternatives like SSH instead.
+log_message "Iniciando correção para rexec service"
+if systemctl is-active rexec.socket; then
+  log_message "rexec.socket está ativo. Desativando..."
+  systemctl stop rexec.socket
+  systemctl disable rexec.socket
+  log_message "rexec.socket desativado."
+else
+  log_message "rexec.socket não está ativo. Nenhuma ação necessária."
+fi
+log_message "Correção para rexec service finalizada."
+
+# Vulnerabilidade 6: Possible Backdoor: Ingreslock
+# Solução: A whole cleanup of the infected system is recommended.
+log_message "AVISO: Possível Backdoor Ingreslock detectado. Uma limpeza completa do sistema infectado é recomendada. Este script não pode realizar essa limpeza automaticamente."
+INGRES_PROCESS=$(netstat -antp | grep :1524 | awk '{print $7}' | cut -d'/' -f1)
+
+if [ -n "$INGRES_PROCESS" ]; then
+    log_message "Processo Ingreslock ($INGRES_PROCESS) encontrado. Finalizando processo..."
+    kill -9 $INGRES_PROCESS
+    log_message "Processo Ingreslock finalizado."
+else
+    log_message "Processo Ingreslock não encontrado."
+fi
+
+log_message "Correção para Possible Backdoor: Ingreslock pendente. Requer intervenção manual."
+
+# Vulnerabilidade 7: Apache Tomcat AJP RCE Vulnerability (Ghostcat)
+# Solução: Update Apache Tomcat to version 7.0.100, 8.5.51, 9.0.31 or later.
+log_message "Iniciando correção para Apache Tomcat AJP RCE Vulnerability (Ghostcat) (CVE-2020-1938)"
+TOMCAT_INSTALLED=$(dpkg-query -W -f='${Status}' tomcat7 tomcat8 tomcat9 2>/dev/null | grep -c "install ok installed")
+
+if [ "$TOMCAT_INSTALLED" -gt 0 ]; then
+  log_message "Tomcat encontrado. Verificando versão..."
+
+  TOMCAT_VERSION=$(tomcat version 2>&1 | grep "Apache Tomcat/" | awk '{print $3}')
+  if [ -n "$TOMCAT_VERSION" ]; then
+    log_message "Versão do Tomcat: $TOMCAT_VERSION"
+  else
+     log_message "Não foi possível detectar a versão do tomcat."
+     log_message "Procedendo com atualização genérica para garantir que uma versão mais recente seja utilizada."
+  fi
+  
+  #Desabilitar AJP Connector
+  TOMCAT_CONF_FILE=$(find /etc/tomcat*/server.xml 2>/dev/null | head -n 1)
+
+  if [ -n "$TOMCAT_CONF_FILE" ]; then
+    log_message "Arquivo de configuração do Tomcat encontrado: $TOMCAT_CONF_FILE"
+     
+    # Fazer backup do arquivo de configuração
+    cp "$TOMCAT_CONF_FILE" "${TOMCAT_CONF_FILE}.bak.$(date +%Y%m%d%H%M%S)"
+
+    # Comentar a linha do conector AJP
+    sed -i 's/<Connector port="8009" protocol="AJP\/1.3".*/<!-- & -->/' "$TOMCAT_CONF_FILE"
+   
+    log_message "Conector AJP desativado em $TOMCAT_CONF_FILE."
+
+    # Reiniciar o Tomcat
+    systemctl restart tomcat* 2>/dev/null
+    log_message "Tomcat reiniciado."
+
+  else
+    log_message "Arquivo de configuração do Tomcat não encontrado. Correção manual necessária."
+  fi
+else
+  log_message "Tomcat não encontrado. Nenhuma ação necessária."
+fi
+log_message "Correção para Apache Tomcat AJP RCE Vulnerability finalizada."
+
+# Vulnerabilidade 8: MySQL / MariaDB Default Credentials
+# Solução: Change the password as soon as possible
+log_message "AVISO: MySQL / MariaDB Default Credentials detectado. Alterar a senha do usuário root é altamente recomendado. Este script não pode realizar essa alteração automaticamente."
+log_message "Correção para MySQL / MariaDB Default Credentials pendente. Requer intervenção manual."
+
+# Vulnerabilidade 9: PHP < 5.6.30, 7.x < 7.0.15, 7.1.x < 7.1.1 Multiple Vulnerabilities (CVEs)
+# Solução: Update to version 5.6.30, 7.0.15, 7.1.1 or later.
+log_message "Iniciando correção para PHP Multiple Vulnerabilities (CVEs)"
+PHP_INSTALLED=$(dpkg-query -W -f='${Status}' php5 php7.0 php7.1 php7.2 php7.3 php7.4 php8.0 php8.1 php8.2 php8.3 2>/dev/null | grep -c "install ok installed")
+
+if [ "$PHP_INSTALLED" -gt 0 ]; then
+  log_message "PHP encontrado. Atualizando..."
+  apt-get update -y
+  apt-get install -y php --only-upgrade
+  apt-get install -y php* --only-upgrade
+  log_message "PHP atualizado para a versão mais recente disponível nos repositórios."
+else
+  log_message "PHP não encontrado. Nenhuma ação necessária."
+fi
+log_message "Correção para PHP Multiple Vulnerabilities finalizada."
+
+# Vulnerabilidade 10: PHP < 5.3.13, 5.4.x < 5.4.3 Multiple Vulnerabilities - Active Check
+# Solução: Update to version 5.3.13, 5.4.3 or later
+# (Mesma solução da vulnerabilidade 9, então não repetimos o código)
+log_message "Correção para PHP < 5.3.13, 5.4.x < 5.4.3 Multiple Vulnerabilities - Active Check integrada à correção da vulnerabilidade 9."
+
+# Vulnerabilidade 11 e 12: vsftpd Compromised Source Packages Backdoor Vulnerability (CVE-2011-2523)
+# Solução: The repaired package can be downloaded from the referenced vendor homepage.
+log_message "Iniciando correção para vsftpd Compromised Source Packages Backdoor Vulnerability (CVE-2011-2523)"
+VSFTPD_INSTALLED=$(dpkg-query -W -f='${Status}' vsftpd 2>/dev/null | grep -c "install ok installed")
+
+if [ "$VSFTPD_INSTALLED" -gt 0 ]; then
+  log_message "vsftpd encontrado. Atualizando..."
+  apt-get update -y
+  apt-get install -y --reinstall vsftpd
+  log_message "vsftpd atualizado."
+else
+  log_message "vsftpd não encontrado. Nenhuma ação necessária."
+fi
+log_message "Correção para vsftpd Compromised Source Packages Backdoor Vulnerability finalizada."
+
+# Vulnerabilidade 13: DistCC RCE Vulnerability (CVE-2004-2687)
+# Solução: Vendor updates are available.
+log_message "Iniciando correção para DistCC RCE Vulnerability (CVE-2004-2687)"
+DISTCC_INSTALLED=$(dpkg-query -W -f='${Status}' distcc 2>/dev/null | grep -c "install ok installed")
+
+if [ "$DISTCC_INSTALLED" -gt 0 ]; then
+  log_message "DistCC encontrado. Removendo..."
+  apt-get remove --purge -y distcc
+  log_message "DistCC removido."
+else
+  log_message "DistCC não encontrado. Nenhuma ação necessária."
+fi
+log_message "Correção para DistCC RCE Vulnerability finalizada."
+
+# Vulnerabilidade 14: PostgreSQL Default Credentials
+# Solução: Change the password as soon as possible.
+log_message "AVISO: PostgreSQL Default Credentials detectado. Alterar a senha do usuário postgres é altamente recomendado. Este script não pode realizar essa alteração automaticamente."
+log_message "Correção para PostgreSQL Default Credentials pendente. Requer intervenção manual."
+
+# Vulnerabilidade 15: VNC Brute Force Login
+# Solução: Change the password to something hard to guess or enable password protection at all.
+log_message "AVISO: VNC Brute Force Login detectado. Alterar a senha do VNC para uma senha forte é altamente recomendado. Este script não pode realizar essa alteração automaticamente."
+log_message "Correção para VNC Brute Force Login pendente. Requer intervenção manual."
+
+# Vulnerabilidade 16: Test HTTP dangerous methods
+# Solução: Use access restrictions to these dangerous HTTP methods or disable them completely.
+log_message "Iniciando correção para Test HTTP dangerous methods"
+APACHE_INSTALLED=$(dpkg-query -W -f='${Status}' apache2 2>/dev/null | grep -c "install ok installed")
+
+if [ "$APACHE_INSTALLED" -gt 0 ]; then
+  log_message "Apache encontrado. Desabilitando métodos PUT e DELETE..."
+  
+  # Criar/editar arquivo de configuração
+  echo -e "<LimitExcept GET POST OPTIONS>\n\tOrder deny,allow\n\tDeny from all\n</LimitExcept>" > /etc/apache2/conf-available/limit-http-methods.conf
+
+  # Ativar a configuração
+  a2enconf limit-http-methods
+  
+  # Reiniciar o Apache
+  systemctl restart apache2
+  log_message "Métodos PUT e DELETE desabilitados no Apache. Apache reiniciado."
+else
+  log_message "Apache não encontrado. Nenhuma ação necessária."
+fi
+log_message "Correção para Test HTTP dangerous methods finalizada."
+
+# Vulnerabilidade 17 e 18: FTP Brute Force Logins With Default Credentials Reporting
+# Solução: Change the password as soon as possible.
+log_message "AVISO: FTP Brute Force Logins With Default Credentials Reporting detectado. Alterar as senhas dos usuários msfadmin, postgres, service e user é altamente recomendado. Este script não pode realizar essa alteração automaticamente."
+log_message "Correção para FTP Brute Force Logins With Default Credentials Reporting pendente. Requer intervenção manual."
+
+# Vulnerabilidade 19: The rlogin service is running
+# Solução: Disable the rlogin service and use alternatives like SSH instead.
+# (Mesma solução da vulnerabilidade 3, então não repetimos o código)
+log_message "Correção para The rlogin service is running integrada à correção da vulnerabilidade 3."
+
+# Vulnerabilidade 20: rsh Unencrypted Cleartext Login
+# Solução: Disable the rsh service and use alternatives like SSH instead.
+log_message "Iniciando correção para rsh Unencrypted Cleartext Login"
+if systemctl is-active rsh.socket; then
+  log_message "rsh.socket está ativo. Desativando..."
+  systemctl stop rsh.socket
+  systemctl disable rsh.socket
+  log_message "rsh.socket desativado."
+else
+  log_message "rsh.socket não está ativo. Nenhuma ação necessária."
+fi
+log_message "Correção para rsh Unencrypted Cleartext Login finalizada."
+
+# Vulnerabilidade 21: SSL/TLS: OpenSSL CCS Man in the Middle Security Bypass Vulnerability (CVE-2014-0224)
+# Solução: Updates are available.
+log_message "Iniciando correção para SSL/TLS: OpenSSL CCS Man in the Middle Security Bypass Vulnerability (CVE-2014-0224)"
+OPENSSL_INSTALLED=$(dpkg-query -W -f='${Status}' openssl 2>/dev/null | grep -c "install ok installed")
+
+if [ "$OPENSSL_INSTALLED" -gt 0 ]; then
+  log_message "OpenSSL encontrado. Atualizando..."
+  apt-get update -y
+  apt-get install -y openssl --only-upgrade
+  log_message "OpenSSL atualizado."
+else
+  log_message "OpenSSL não encontrado. Nenhuma ação necessária."
+fi
+log_message "Correção para SSL/TLS: OpenSSL CCS Man in the Middle Security Bypass Vulnerability finalizada."
+
+# Vulnerabilidade 22: Multiple Vendors STARTTLS Implementation Plaintext Arbitrary Command Injection Vulnerability
+# Solução: Updates are available.
+log_message "AVISO: Multiple Vendors STARTTLS Implementation Plaintext Arbitrary Command Injection Vulnerability detectado. Requer atualização manual do software vulnerável (Postfix, Qmail, etc.). Este script não pode realizar essa atualização automaticamente."
+log_message "Correção para Multiple Vendors STARTTLS Implementation Plaintext Arbitrary Command Injection Vulnerability pendente. Requer intervenção manual."
+
+# Vulnerabilidade 23: TWiki Cross-Site Request Forgery Vulnerability (Sep 2010)
+# Solução: Upgrade to TWiki version 4.3.2 or later.
+# (Mesma solução da vulnerabilidade 1, então não repetimos o código)
+log_message "Correção para TWiki Cross-Site Request Forgery Vulnerability (Sep 2010) integrada à correção da vulnerabilidade 1."
+
+# Vulnerabilidade 24: Anonymous FTP Login Reporting
+# Solução: If you do not want to share files, you should disable anonymous logins.
+log_message "Iniciando correção para Anonymous FTP Login Reporting"
+VSFTPD_CONF="/etc/vsftpd.conf"
+
+if [ -f "$VSFTPD_CONF" ]; then
+  log_message "Arquivo de configuração vsftpd.conf encontrado. Desabilitando login anônimo..."
+  
+  # Fazer backup do arquivo de configuração
+  cp "$VSFTPD_CONF" "${VSFTPD_CONF}.bak.$(date +%Y%m%d%H%M%S)"
+  
+  # Desabilitar login anônimo
+  sed -i 's/^anonymous_enable=YES/anonymous_enable=NO/' "$VSFTPD_CONF"
+  
+  # Reiniciar vsftpd
+  systemctl restart vsftpd
+  log_message "Login anônimo desabilitado em $VSFTPD_CONF. vsftpd reiniciado."
+else
+  log_message "Arquivo de configuração vsftpd.conf não encontrado. Correção manual necessária."
+fi
+log_message "Correção para Anonymous FTP Login Reporting finalizada."
+
+# Vulnerabilidade 25 e 55: jQuery < 1.9.0 XSS Vulnerability e jQuery < 1.6.3 XSS Vulnerability
+# Solução: Update to version 1.9.0 or later e Update to version 1.6.3 or later.
+log_message "AVISO: jQuery < 1.9.0 XSS Vulnerability e jQuery < 1.6.3 XSS Vulnerability detectado. A atualização do jQuery deve ser feita manualmente no diretório /mutillidae/javascript/ddsmoothmenu/. Este script não pode realizar essa alteração automaticamente."
+log_message "Correção para jQuery < 1.9.0 XSS Vulnerability e jQuery < 1.6.3 XSS Vulnerability pendente. Requer intervenção manual."
+
+# Vulnerabilidade 26: TWiki < 6.1.0 XSS Vulnerability
+# Solução: Update to version 6.1.0 or later.
+# (Mesma solução da vulnerabilidade 1, então não repetimos o código)
+log_message "Correção para TWiki < 6.1.0 XSS Vulnerability integrada à correção da vulnerabilidade 1."
+
+# Vulnerabilidade 27: TWiki CSRF Vulnerability
+# Solução: Upgrade to version 4.3.1 or later.
+# (Mesma solução da vulnerabilidade 1, então não repetimos o código)
+log_message "Correção para TWiki CSRF Vulnerability integrada à correção da vulnerabilidade 1."
+
+# Vulnerabilidade 28 e 29: SSL/TLS: Deprecated SSLv2 and SSLv3 Protocol Detection
+# Solução: It is recommended to disable the deprecated SSLv2 and/or SSLv3 protocols in favor of the TLSv1.2+ protocols.
+log_message "Iniciando correção para SSL/TLS: Deprecated SSLv2 and SSLv3 Protocol Detection"
+
+# Postfix (Port 25)
+if command -v postconf &> /dev/null; then
+  log_message "Postfix detectado. Desabilitando SSLv2 e SSLv3..."
+  
+  POSTFIX_CONF="/etc/postfix/main.cf"
+  if [ -f "$POSTFIX_CONF" ]; then
+    # Fazer backup do arquivo de configuração
+    cp "$POSTFIX_CONF" "${POSTFIX_CONF}.bak.$(date +%Y%m%d%H%M%S)"
+  
+    # Adicionar/Modificar parâmetros para desabilitar SSLv2 e SSLv3 e habilitar TLSv1.2+
+    postconf -e "smtpd_tls_mandatory_protocols=!SSLv2,!SSLv3,TLSv1.2,TLSv1.3"
+    postconf -e "smtpd_tls_protocols=!SSLv2,!SSLv3,TLSv1.2,TLSv1.3"
+    postconf -e "smtp_tls_mandatory_protocols=!SSLv2,!SSLv3,TLSv1.2,TLSv1.3"
+    postconf -e "smtp_tls_protocols=!SSLv2,!SSLv3,TLSv1.2,TLSv1.3"
+    
+    # Reiniciar Postfix
+    systemctl restart postfix
+    log_message "SSLv2 e SSLv3 desabilitados no Postfix. Postfix reiniciado."
+  else
+    log_message "Arquivo de configuração do Postfix não encontrado. Correção manual necessária."
+  fi
+else
+  log_message "Postfix não detectado."
+fi
+
+# PostgreSQL (Port 5432)
+if command -v psql &> /dev/null; then
+  log_message "PostgreSQL detectado. Desabilitando SSLv2 e SSLv3..."
+  
+  PG_CONF=$(find /etc/postgresql/*/postgresql.conf 2>/dev/null | head -n 1)
+  if [ -f "$PG_CONF" ]; then
+    # Fazer backup do arquivo de configuração
+    cp "$PG_CONF" "${PG_CONF}.bak.$(date +%Y%m%d%H%M%S)"
+
+    # Adicionar/Modificar parâmetros para desabilitar SSLv2 e SSLv3 (necessário verificar a sintaxe correta no postgresql.conf)
+    # NOTA: A sintaxe exata pode variar dependendo da versão do PostgreSQL. Adapte conforme necessário.
+    echo "ssl_min_protocol = 'TLSv1.2'" >> "$PG_CONF" # Exemplo, pode precisar de ajustes
+    
+    # Reiniciar PostgreSQL
+    systemctl restart postgresql
+    log_message "SSLv2 e SSLv3 desabilitados no PostgreSQL. PostgreSQL reiniciado."
+  else
+    log_message "Arquivo de configuração do PostgreSQL não encontrado. Correção manual necessária."
+  fi
+else
+  log_message "PostgreSQL não detectado."
+fi
+
+log_message "Correção para SSL/TLS: Deprecated SSLv2 and SSLv3 Protocol Detection finalizada."
+
+# Vulnerabilidade 30: SSL/TLS: Report Weak Cipher Suites
+# Solução: The configuration of this services should be changed so that it does not accept the listed weak cipher suites anymore.
+log_message "AVISO: SSL/TLS: Report Weak Cipher Suites detectado. Desabilitar cipher suites fracos requer configuração manual dos serviços (Postfix, PostgreSQL). Este script não pode realizar essa alteração automaticamente."
+log_message "Correção para SSL/TLS: Report Weak Cipher Suites pendente. Requer intervenção manual."
+
+# Vulnerabilidade 31: HTTP Debugging Methods (TRACE/TRACK) Enabled
+# Solução: Disable the TRACE and TRACK methods in your web server configuration.
+log_message "Iniciando correção para HTTP Debugging Methods (TRACE/TRACK) Enabled"
+if [ "$APACHE_INSTALLED" -gt 0 ]; then
+  log_message "Apache encontrado. Desabilitando TRACE method..."
+
+  # Editar arquivo de configuração para desabilitar TRACE
+  sed -i 's/TraceEnable On/TraceEnable Off/g' /etc/apache2/apache2.conf
+
+  # Reiniciar Apache
+  systemctl restart apache2
+  log_message "TRACE method desabilitado no Apache. Apache reiniciado."
+else
+  log_message "Apache não encontrado. Nenhuma ação necessária."
+fi
+log_message "Correção para HTTP Debugging Methods (TRACE/TRACK) Enabled finalizada."
+
+# Vulnerabilidade 32 e 33: SSL/TLS: Server Certificate / Certificate in Chain with RSA keys less than 2048 bits
+# Solução: Replace the certificate with a stronger key and reissue the certificates it signed.
+log_message "AVISO: SSL/TLS: Server Certificate / Certificate in Chain with RSA keys less than 2048 bits detectado. Substituir o certificado por um com uma chave mais forte (2048 bits ou superior) é altamente recomendado. Este script não pode realizar essa substituição automaticamente."
+log_message "Correção para SSL/TLS: Server Certificate / Certificate in Chain with RSA keys less than 2048 bits pendente. Requer intervenção manual."
+
+# Vulnerabilidade 34: Weak Key Exchange (KEX) Algorithm(s) Supported (SSH)
+# Solução: Disable the reported weak KEX algorithm(s)
+log_message "Iniciando correção para Weak Key Exchange (KEX) Algorithm(s) Supported (SSH)"
+SSH_CONF="/etc/ssh/sshd_config"
+
+if [ -f "$SSH_CONF" ]; then
+  log_message "Arquivo de configuração SSH encontrado. Removendo algoritmos KEX fracos..."
+  
+  # Fazer backup do arquivo de configuração
+  cp "$SSH_CONF" "${SSH_CONF}.bak.$(date +%Y%m%d%H%M%S)"
+  
+  # Remover algoritmos KEX fracos
+  sed -i '/KexAlgorithms/s/diffie-hellman-group1-sha1,//g' "$SSH_CONF"
+  sed -i '/KexAlgorithms/s/diffie-hellman-group-exchange-sha1,//g' "$SSH_CONF"
+  
+  # Reiniciar SSH
+  systemctl restart sshd
+  log_message "Algoritmos KEX fracos removidos. SSH reiniciado."
+else
+  log_message "Arquivo de configuração SSH não encontrado. Correção manual necessária."
+fi
+log_message "Correção para Weak Key Exchange (KEX) Algorithm(s) Supported (SSH) finalizada."
+
+# Vulnerabilidade 35: phpinfo() Output Reporting (HTTP)
+# Solução: Delete the listed files or restrict access to them.
+log_message "AVISO: phpinfo() Output Reporting (HTTP) detectado. Remover os arquivos phpinfo.php ou restringir o acesso a eles é altamente recomendado. Este script não pode realizar essa alteração automaticamente."
+log_message "Correção para phpinfo() Output Reporting (HTTP) pendente. Requer intervenção manual."
+
+# Vulnerabilidade 36: Weak Host Key Algorithm(s) (SSH)
+# Solução: Disable the reported weak host key algorithm(s).
+log_message "Iniciando correção para Weak Host Key Algorithm(s) (SSH)"
+if [ -f "$SSH_CONF" ]; then
+  log_message "Arquivo de configuração SSH encontrado. Removendo algoritmos de chave de host fracos..."
+  
+  # Fazer backup do arquivo de configuração
+  cp "$SSH_CONF" "${SSH_CONF}.bak.$(date +%Y%m%d%H%M%S)"
+  
+  # Remover algoritmos de chave de host fracos
+  sed -i '/HostKeyAlgorithms/s/ssh-dss,//g' "$SSH_CONF"
+  
+  # Reiniciar SSH
+  systemctl restart sshd
+  log_message "Algoritmos de chave de host fracos removidos. SSH reiniciado."
+else
+  log_message "Arquivo de configuração SSH não encontrado. Correção manual necessária."
+fi
+log_message "Correção para Weak Host Key Algorithm(s) (SSH) finalizada."
+
+# Vulnerabilidade 37: Check if Mailserver answer to VRFY and EXPN requests
+# Solução: Disable VRFY and/or EXPN on your Mailserver.
+log_message "Iniciando correção para Check if Mailserver answer to VRFY and EXPN requests"
+
+# Postfix
+if command -v postconf &> /dev/null; then
+  log_message "Postfix detectado. Desabilitando VRFY command..."
+  
+  POSTFIX_CONF="/etc/postfix/main.cf"
+  if [ -f "$POSTFIX_CONF" ]; then
+    # Fazer backup do arquivo de configuração
+    cp "$POSTFIX_CONF" "${POSTFIX_CONF}.bak.$(date +%Y%m%d%H%M%S)"
+  
+    # Adicionar a opção disable_vrfy_command
+    postconf -e "disable_vrfy_command=yes"
+    
+    # Reiniciar Postfix
+    systemctl restart postfix
+    log_message "VRFY command desabilitado no Postfix. Postfix reiniciado."
+  else
+    log_message "Arquivo de configuração do Postfix não encontrado. Correção manual necessária."
+  fi
+else
+  log_message "Postfix não detectado."
+fi
+log_message "Correção para Check if Mailserver answer to VRFY and EXPN requests finalizada."
+
+# Vulnerabilidade 38 e 39: SSL/TLS: Renegotiation DoS Vulnerability (CVE-2011-1473, CVE-2011-5094)
+# Solução: Users should contact their vendors for specific patch information.
+log_message "AVISO: SSL/TLS: Renegotiation DoS Vulnerability detectado. A remoção/desabilitação do renegotiation capabilities deve ser feita manualmente. Este script não pode realizar essa alteração automaticamente."
+log_message "Correção para SSL/TLS: Renegotiation DoS Vulnerability pendente. Requer intervenção manual."
+
+# Vulnerabilidade 40 e 41: SSL/TLS: Certificate Expired
+# Solução: Replace the SSL/TLS certificate by a new one.
+log_message "AVISO: SSL/TLS: Certificate Expired detectado. A substituição do certificado é altamente recomendada. Este script não pode realizar essa substituição automaticamente."
+log_message "Correção para SSL/TLS: Certificate Expired pendente. Requer intervenção manual."
+
+# Vulnerabilidade 42 e 43: QWikiwiki directory traversal vulnerability e awiki <= 20100125 Multiple LFI Vulnerabilities
+# Solução: No known solution was made available
+log_message "AVISO: QWikiwiki directory traversal vulnerability e awiki <= 20100125 Multiple LFI Vulnerabilities detectados. Remover os arquivos/diretórios QWikiwiki e awiki é altamente recomendado. Este script não pode realizar essa remoção automaticamente."
+log_message "Correção para QWikiwiki directory traversal vulnerability e awiki <= 20100125 Multiple LFI Vulnerabilities pendente. Requer intervenção manual."
+
+# Vulnerabilidade 44: /doc directory browsable
+# Solução: Use access restrictions for the /doc directory.
+log_message "Iniciando correção para /doc directory browsable"
+if [ "$APACHE_INSTALLED" -gt 0 ]; then
+  log_message "Apache encontrado. Restringindo acesso ao diretório /doc..."
+
+  # Adicionar configuração ao arquivo de configuração do Apache
+  echo -e "<Directory /usr/share/doc/>\n\tOptions Indexes FollowSymLinks\n\tAllowOverride None\n\tRequire all denied\n</Directory>" > /etc/apache2/conf-available/no-doc-browsing.conf
+
+  # Ativar configuração
+  a2enconf no-doc-browsing
+
+  # Reiniciar Apache
+  systemctl restart apache2
+  log_message "Acesso ao diretório /doc restrito. Apache reiniciado."
+else
+  log_message "Apache não encontrado. Nenhuma ação necessária."
+fi
+log_message "Correção para /doc directory browsable finalizada."
+
+# Vulnerabilidade 45: Telnet Unencrypted Cleartext Login
+# Solução: Replace Telnet with a protocol like SSH which supports encrypted connections.
+log_message "Iniciando correção para Telnet Unencrypted Cleartext Login"
+if systemctl is-active telnet.socket; then
+  log_message "telnet.socket está ativo. Desativando..."
+  systemctl stop telnet.socket
+  systemctl disable telnet.socket
+  log_message "telnet.socket desativado."
+else
+  log_message "telnet.socket não está ativo. Nenhuma ação necessária."
+fi
+log_message "Correção para Telnet Unencrypted Cleartext Login finalizada."
+
+# Vulnerabilidade 46 e 48: FTP Unencrypted Cleartext Login
+# Solução: Enable FTPS or enforce the connection via the 'AUTH TLS' command.
+log_message "Iniciando correção para FTP Unencrypted Cleartext Login"
+if [ -f "$VSFTPD_CONF" ]; then
+  log_message "Arquivo de configuração vsftpd.conf encontrado. Habilitando FTPS..."
+
+  # Fazer backup do arquivo de configuração
+  cp "$VSFTPD_CONF" "${VSFTPD_CONF}.bak.$(date +%Y%m%d%H%M%S)"
+
+  # Habilitar FTPS (TLS)
+  sed -i 's/^ssl_enable=NO/ssl_enable=YES/' "$VSFTPD_CONF"
+  
+  # Reiniciar vsftpd
+  systemctl restart vsftpd
+  log_message "FTPS habilitado em $VSFTPD_CONF. vsftpd reiniciado."
+else
+  log_message "Arquivo de configuração vsftpd.conf não encontrado. Correção manual necessária."
+fi
+log_message "Correção para FTP Unencrypted Cleartext Login finalizada."
+
+# Vulnerabilidade 47: VNC Server Unencrypted Data Transmission
+# Solução: Run the session over an encrypted channel provided by IPsec or SSH.
+log_message "AVISO: VNC Server Unencrypted Data Transmission detectado. Utilizar SSH tunneling para conexões VNC é altamente recomendado. Este script não pode realizar essa alteração automaticamente."
+log_message "Correção para VNC Server Unencrypted Data Transmission pendente. Requer intervenção manual."
+
+# Vulnerabilidade 49: Cleartext Transmission of Sensitive Information via HTTP
+# Solução: Enforce the transmission of sensitive data via an encrypted SSL/TLS connection.
+log_message "AVISO: Cleartext Transmission of Sensitive Information via HTTP detectado. Configurar HTTPS e redirecionar o tráfego HTTP para HTTPS é altamente recomendado. Este script não pode realizar essa alteração automaticamente."
+log_message "Correção para Cleartext Transmission of Sensitive Information via HTTP pendente. Requer intervenção manual."
+
+# Vulnerabilidade 50 e 54: SSL/TLS: Deprecated TLSv1.0 and TLSv1.1 Protocol Detection
+# Solução: It is recommended to disable the deprecated TLSv1.

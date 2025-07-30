@@ -1,0 +1,71 @@
+```powershell
+if (-not ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) {
+    Start-Process PowerShell -ArgumentList "-ExecutionPolicy Bypass -File `"$($MyInvocation.MyCommand.Definition)`"" -Verb RunAs
+    exit
+}
+
+$ProgressPreference = 'SilentlyContinue'
+$requiredVersions = @{
+    '3.10.16' = @()
+    '3.12.9'  = @()
+}
+
+$is64bit = [Environment]::Is64BitOperatingSystem
+$hives = if ($is64bit) {
+    @(
+        [PSCustomObject]@{Path = 'HKLM:\SOFTWARE\Python\PythonCore'; Arch = '64'}
+        [PSCustomObject]@{Path = 'HKLM:\SOFTWARE\WOW6432Node\Python\PythonCore'; Arch = '32'}
+    )
+} else {
+    @(
+        [PSCustomObject]@{Path = 'HKLM:\SOFTWARE\Python\PythonCore'; Arch = '32'}
+    )
+}
+
+foreach ($hive in $hives) {
+    if (Test-Path $hive.Path) {
+        $branches = Get-ChildItem -Path $hive.Path -Directory -ErrorAction SilentlyContinue | 
+                    Where-Object { $_.PSChildName -match '^3\.(10|12)$' } 
+        foreach ($branch in $branches) {
+            $branchName = $branch.PSChildName
+            $targetVersion = if ($branchName -eq '3.10') { '3.10.16' } else { '3.12.9' }
+            $requiredVersions[$targetVersion] += $hive.Arch
+        }
+    }
+}
+
+foreach ($versionKey in $requiredVersions.Keys) {
+    $architectures = $requiredVersions[$versionKey] | Select-Object -Unique
+    foreach ($arch in $architectures) {
+        $url = if ($versionKey -eq '3.10.16') {
+            if ($arch -eq '64') { "https://www.python.org/ftp/python/3.10.16/python-3.10.16-amd64.exe" }
+            else { "https://www.python.org/ftp/python/3.10.16/python-3.10.16.exe" }
+        } else {
+            if ($arch -eq '64') { "https://www.python.org/ftp/python/3.12.9/python-3.12.9-amd64.exe" }
+            else { "https://www.python.org/ftp/python/3.12.9/python-3.12.9.exe" }
+        }
+        try {
+            $tempFile = Join-Path $env:TEMP "$([System.IO.Path]::GetRandomFileName())_$($versionKey.Replace('.',''))_$arch.exe"
+            Invoke-WebRequest -Uri $url -OutFile $tempFile -UseBasicParsing -ErrorAction Stop
+            $processParams = @{
+                FilePath     = $tempFile
+                ArgumentList = '/quiet'
+                Wait         = $true
+                PassThru     = $true
+                WindowStyle  = 'Hidden'
+                ErrorAction  = 'Stop'
+            }
+            $installer = Start-Process @processParams
+            if ($installer.ExitCode -eq 0) {
+                Write-Host "Updated Python $versionKey ($arch-bit) successfully."
+            } else {
+                Write-Host "Error updating Python $versionKey ($arch-bit). Exit code: $($installer.ExitCode)."
+            }
+        } catch {
+            Write-Host "Error processing Python $versionKey ($arch-bit): $_"
+        } finally {
+            if (Test-Path $tempFile) { Remove-Item $tempFile -Force }
+        }
+    }
+}
+```

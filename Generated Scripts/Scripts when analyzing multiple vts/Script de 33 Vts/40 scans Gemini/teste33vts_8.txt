@@ -1,0 +1,130 @@
+```bash
+#!/bin/bash
+
+# Vulnerability 1: Proxmox VE EOL
+# This script assumes the system is running Proxmox VE and attempts to upgrade it to the latest version.
+# It's crucial to have a backup before running this.
+# This script might not be suitable for all Proxmox setups.  Manual intervention might be required.
+# Backups and testing in a non-production environment are strongly advised before running this.
+# Note: Upgrading Proxmox VE is a complex task and is beyond the scope of a simple script.
+# It is recommended to follow the official Proxmox upgrade documentation.
+echo "Warning: Automatically upgrading Proxmox VE can be risky.  Backup your data and proceed with caution."
+# Commenting out the upgrade command due to the complexity and potential for breakage.
+# apt update && apt dist-upgrade -y
+echo "Proxmox VE upgrade requires careful planning and execution.  Refer to the official Proxmox documentation."
+
+# Vulnerabilities 2-6: jQuery < 1.9.0 XSS Vulnerability
+# Update jQuery to version 1.9.0 or later.
+# The script will download jQuery 1.9.0 and replace the existing vulnerable files.
+# Check if wget is installed and install if it is not
+if ! command -v wget &> /dev/null
+then
+    echo "wget is not installed. Installing..."
+    apt update && apt install wget -y
+fi
+
+JQUERY_VERSION="1.9.0"
+JQUERY_URL="https://code.jquery.com/jquery-${JQUERY_VERSION}.min.js"
+VULNERABLE_FILES=(
+    "/var/www/html/../js/jquery-1.8.3.min.js"
+    "/var/www/html/opscenter/webcommon/framework/../js/jquery-1.8.3.min.js"
+    "/var/www/html/framesets/../js/jquery-1.8.3.min.js"
+    "/var/www/html/frameset/../js/jquery-1.8.3.min.js"
+    "/var/www/html/console/framework/../js/jquery-1.8.3.min.js"
+    "/var/www/html/js/jquery-1.8.3.min.js" # added for completion
+
+)
+
+for FILE in "${VULNERABLE_FILES[@]}"; do
+    if [ -f "$FILE" ]; then
+        echo "Updating jQuery at $FILE to version $JQUERY_VERSION"
+        # Create backup
+        cp "$FILE" "${FILE}.bak"
+        wget -q "$JQUERY_URL" -O "$FILE"
+        echo "jQuery updated at $FILE. Backup created at ${FILE}.bak"
+    else
+        echo "File not found: $FILE"
+    fi
+done
+
+# Vulnerabilities 7-9, 13-16, 19, 21-22: SSH Weak Algorithms
+# Disable weak SSH algorithms by modifying sshd_config.
+# This script modifies /etc/ssh/sshd_config and restarts the SSH service.
+# Backups and careful review are essential before running this.
+
+SSH_CONFIG="/etc/ssh/sshd_config"
+SSH_SERVICE="ssh" # or "sshd" depending on the system
+
+# Backup the original sshd_config file
+if [ -f "$SSH_CONFIG" ]; then
+  cp "$SSH_CONFIG" "$SSH_CONFIG.bak"
+  echo "Backed up $SSH_CONFIG to $SSH_CONFIG.bak"
+else
+  echo "Error: $SSH_CONFIG not found."
+  exit 1
+fi
+
+# Disable weak KEX algorithms
+sed -i '/KexAlgorithms/s/diffie-hellman-group1-sha1,//g' "$SSH_CONFIG"
+
+# Disable weak MAC algorithms
+sed -i '/MACs/s/umac-64-etm@openssh.com,//g' "$SSH_CONFIG"
+sed -i '/MACs/s/umac-64@openssh.com,//g' "$SSH_CONFIG"
+sed -i '/MACs/s/hmac-md5,//g' "$SSH_CONFIG"
+sed -i '/MACs/s/hmac-sha1-96,//g' "$SSH_CONFIG"
+
+# Disable weak Ciphers
+sed -i '/Ciphers/s/3des-cbc,//g' "$SSH_CONFIG"
+sed -i '/Ciphers/s/aes128-cbc,//g' "$SSH_CONFIG"
+sed -i '/Ciphers/s/aes256-cbc,//g' "$SSH_CONFIG"
+sed -i '/Ciphers/s/twofish-cbc,//g' "$SSH_CONFIG"
+sed -i '/Ciphers/s/twofish128-cbc,//g' "$SSH_CONFIG"
+sed -i '/Ciphers/s/twofish256-cbc,//g' "$SSH_CONFIG"
+
+# Disable ssh-dss host key algorithm
+sed -i '/HostKeyAlgorithms/s/ssh-dss,//g' "$SSH_CONFIG"
+
+#Restart SSH service
+if systemctl is-active --quiet "$SSH_SERVICE"; then
+    systemctl restart "$SSH_SERVICE"
+    echo "Restarted $SSH_SERVICE service."
+else
+    echo "$SSH_SERVICE service not active.  Attempting to start."
+    systemctl start "$SSH_SERVICE"
+    if ! systemctl is-active --quiet "$SSH_SERVICE"; then
+      echo "Failed to start $SSH_SERVICE service. Check your system."
+    fi
+fi
+
+# Vulnerabilities 10: DCE/RPC and MSRPC Services Enumeration Reporting
+# Filter incoming traffic to port 135 (and related dynamic ports).
+# This requires a firewall (iptables, firewalld, etc.).  This script provides a basic iptables example.
+# Adjust to your specific firewall setup.
+#iptables -A INPUT -p tcp --dport 135 -j DROP
+#echo "Added iptables rule to drop traffic to port 135. Adjust to your firewall setup."
+
+#Vulnerability 11: Telnet Unencrypted Cleartext Login
+# Remove telnet server and client
+apt remove --purge telnetd telnet -y
+
+# Vulnerability 12: SSL/TLS: Deprecated TLSv1.0 and TLSv1.1 Protocol Detection
+# Disable TLSv1.0 and TLSv1.1. This requires modifying the configuration of the service using TLS.
+# Since the service is not specified, we cannot provide a specific solution.
+echo "Please manually disable TLSv1.0 and TLSv1.1 on the affected service."
+echo "Consult the service's documentation for instructions."
+
+# Vulnerabilities 17-18, 20, 23-25: TCP Timestamps Information Disclosure
+# Disable TCP timestamps.
+echo "Disabling TCP timestamps..."
+echo "net.ipv4.tcp_timestamps = 0" >> /etc/sysctl.conf
+sysctl -p
+echo "TCP timestamps disabled.  Reboot might be required."
+
+# Vulnerabilities 26-32: ICMP Timestamp Reply Information Disclosure
+# Block ICMP timestamp requests using iptables.
+#iptables -A INPUT -p icmp --icmp-type timestamp-request -j DROP
+#iptables -A OUTPUT -p icmp --icmp-type timestamp-reply -j DROP
+#echo "ICMP timestamp requests blocked using iptables. Adjust to your firewall setup."
+
+echo "Script completed.  Please review the changes and consider rebooting the system."
+```

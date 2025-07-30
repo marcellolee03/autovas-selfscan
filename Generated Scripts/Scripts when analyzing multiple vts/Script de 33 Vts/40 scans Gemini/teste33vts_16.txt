@@ -1,0 +1,170 @@
+```bash
+#!/bin/bash
+
+# Vulnerability 1: Proxmox VE EOL
+# This script attempts to update Proxmox VE to a supported version.
+# It's crucial to backup your data before proceeding.
+# Due to the complexity of Proxmox upgrades, this script provides a general outline.
+# Adapt it to your specific environment and consult the official Proxmox documentation.
+
+# Check if the system is Proxmox VE
+if command -v pveversion &> /dev/null; then
+  echo "Proxmox VE detected."
+
+  # Update package lists
+  apt update
+
+  # Attempt a distribution upgrade
+  apt dist-upgrade -y
+
+  # Check current PVE version
+  current_version=$(pveversion | awk '{print $2}')
+  echo "Current Proxmox VE version: $current_version"
+
+  # Suggest upgrading to the latest stable release based on current version
+  echo "Consider upgrading to the latest stable Proxmox VE release. Refer to the official Proxmox documentation for the upgrade procedure."
+  echo "https://pve.proxmox.com/wiki/Upgrade_from_7_to_8"
+
+else
+  echo "Proxmox VE not detected. Skipping Proxmox VE upgrade."
+fi
+
+# Vulnerability 2-6: jQuery < 1.9.0 XSS Vulnerability
+# Define the vulnerable jQuery file paths
+jquery_files=(
+  "/var/www/html/js/jquery-1.8.3.min.js"
+  "/var/www/html/opscenter/webcommon/framework/js/jquery-1.8.3.min.js"
+  "/var/www/html/framesets/js/jquery-1.8.3.min.js"
+  "/var/www/html/frameset/js/jquery-1.8.3.min.js"
+  "/var/www/html/console/framework/js/jquery-1.8.3.min.js"
+)
+
+# Function to download the fixed jQuery version
+download_jquery() {
+  wget https://code.jquery.com/jquery-1.9.0.min.js -O /tmp/jquery-1.9.0.min.js
+  if [ $? -ne 0 ]; then
+    echo "Error downloading jQuery 1.9.0.min.js"
+    return 1
+  fi
+  return 0
+}
+
+# Function to replace the vulnerable jQuery file
+replace_jquery() {
+  local file="$1"
+  if [ -f "$file" ]; then
+    echo "Replacing $file with jQuery 1.9.0"
+    cp /tmp/jquery-1.9.0.min.js "$file"
+    if [ $? -ne 0 ]; then
+      echo "Error replacing $file"
+    else
+      echo "Successfully replaced $file"
+    fi
+  else
+    echo "File $file not found."
+  fi
+}
+
+# Download jQuery 1.9.0
+download_jquery
+
+# Iterate through the vulnerable files and replace them
+if [ -f "/tmp/jquery-1.9.0.min.js" ]; then
+  for file in "${jquery_files[@]}"; do
+    replace_jquery "$file"
+  done
+  rm /tmp/jquery-1.9.0.min.js
+fi
+
+# Vulnerability 7, 8, 9, 13, 14, 15, 16, 19, 21, 22: SSH Weak Algorithms
+# Disable weak SSH algorithms
+ssh_config="/etc/ssh/sshd_config"
+
+# Backup the original SSH config file
+if [ -f "$ssh_config" ]; then
+  cp "$ssh_config" "$ssh_config.bak"
+fi
+
+# Disable weak KEX algorithms
+sed -i 's/^#KexAlgorithms.*/KexAlgorithms curve25519-sha256@libssh.org,ecdh-sha2-nistp256,ecdh-sha2-nistp384,ecdh-sha2-nistp521,diffie-hellman-group-exchange-sha256/g' "$ssh_config"
+
+# Disable weak MAC algorithms
+sed -i 's/^#MACs.*/MACs hmac-sha2-512,hmac-sha2-256/g' "$ssh_config"
+
+# Disable weak Ciphers
+sed -i 's/^#Ciphers.*/Ciphers chacha20-poly1305@openssh.com,aes256-gcm@openssh.com,aes128-gcm@openssh.com,aes256-ctr,aes128-ctr/g' "$ssh_config"
+
+# Remove diffie-hellman-group1-sha1
+sed -i '/diffie-hellman-group1-sha1/d' "$ssh_config"
+
+# Remove umac-64 algorithms
+sed -i '/umac-64/d' "$ssh_config"
+
+# Remove hmac-md5 and hmac-sha1-96
+sed -i '/hmac-md5/d' "$ssh_config"
+sed -i '/hmac-sha1-96/d' "$ssh_config"
+
+#Remove weak encryption algorithms
+sed -i '/3des-cbc/d' "$ssh_config"
+sed -i '/aes128-cbc/d' "$ssh_config"
+sed -i '/aes256-cbc/d' "$ssh_config"
+sed -i '/twofish-cbc/d' "$ssh_config"
+sed -i '/twofish128-cbc/d' "$ssh_config"
+sed -i '/twofish256-cbc/d' "$ssh_config"
+
+#Remove ssh-dss host key algorithm
+sed -i '/ssh-dss/d' "$ssh_config"
+
+
+# Restart SSH service
+systemctl restart sshd
+
+# Vulnerability 10: DCE/RPC and MSRPC Services Enumeration Reporting
+# Solution: Filter incoming traffic to port 135 (and dynamic RPC ports)
+# This requires a firewall configuration and is beyond the scope of an automated script.
+echo "Vulnerability 10: Configure your firewall to block access to DCE/RPC ports (135 and dynamic RPC ports) from untrusted networks."
+
+# Vulnerability 11: Telnet Unencrypted Cleartext Login
+# Solution: Disable Telnet and use SSH
+systemctl stop telnet.socket
+systemctl disable telnet.socket
+
+# Vulnerability 12: SSL/TLS: Deprecated TLSv1.0 and TLSv1.1 Protocol Detection
+# Disable TLS 1.0 and TLS 1.1 in OpenSSL configuration
+
+#Find the openssl.conf path
+openssl_conf=$(find /etc/ssl/ -name openssl.cnf 2>/dev/null)
+
+if [ -z "$openssl_conf" ]; then
+    openssl_conf=$(find /etc/ -name openssl.conf 2>/dev/null)
+fi
+
+if [ -z "$openssl_conf" ]; then
+    echo "OpenSSL configuration file not found. Skipping TLS protocol disabling."
+else
+    echo "OpenSSL configuration file found at: $openssl_conf"
+    # Add/Modify the SSL/TLS settings
+    sed -i '/^ssl_conf = ssl_sect/a \
+[ssl_sect]\n\
+system_default = system_default_sect\n\
+\n\
+[system_default_sect]\n\
+MinProtocol = TLSv1.2\n\
+CipherString = DEFAULT@SECLEVEL=2' "$openssl_conf"
+
+    echo "TLSv1.0 and TLSv1.1 disabled in OpenSSL configuration. Restart applications using SSL/TLS."
+fi
+
+# Vulnerability 17, 18, 20, 23, 24, 25: TCP Timestamps Information Disclosure
+# Disable TCP timestamps
+echo "net.ipv4.tcp_timestamps = 0" >> /etc/sysctl.conf
+sysctl -p
+
+# Vulnerability 26, 27, 28, 29, 30, 31, 32: ICMP Timestamp Reply Information Disclosure
+# Disable ICMP timestamp replies. This varies based on OS.
+# Linux:
+echo "net.ipv4.icmp_echo_ignore_all = 1" >> /etc/sysctl.conf
+sysctl -p
+
+echo "Script completed. Please review the changes and restart necessary services."
+```

@@ -1,0 +1,17 @@
+#!/bin/bash
+sudo apt-get update
+sudo apt-get install -y proxmox-ve
+sudo sed -i 's/^HostKeyAlgorithms.*/HostKeyAlgorithms ssh-ed25519-cert-v01@openssh.com,ssh-rsa-cert-v01@openssh.com,ssh-ed25519,ssh-rsa/' /etc/ssh/sshd_config
+sudo sed -i 's/^KexAlgorithms.*/KexAlgorithms curve25519-sha256@libssh.org,ecdh-sha2-nistp521,ecdh-sha2-nistp384,ecdh-sha2-nistp256,diffie-hellman-group-exchange-sha256/' /etc/ssh/sshd_config
+sudo sed -i 's/^Ciphers.*/Ciphers chacha20-poly1305@openssh.com,aes256-gcm@openssh.com,aes128-gcm@openssh.com,aes256-ctr,aes192-ctr,aes128-ctr/' /etc/ssh/sshd_config
+sudo sed -i 's/^MACs.*/MACs hmac-sha2-512-etm@openssh.com,hmac-sha2-256-etm@openssh.com,hmac-sha2-512,hmac-sha2-256/' /etc/ssh/sshd_config
+sudo systemctl restart sshd
+sudo sed -i 's/net.ipv4.tcp_timestamps = 1/net.ipv4.tcp_timestamps = 0/' /etc/sysctl.conf
+sudo sysctl -p
+sudo iptables -A INPUT -p icmp --icmp-type timestamp-request -j DROP
+sudo iptables -A OUTPUT -p icmp --icmp-type timestamp-reply -j DROP
+sudo ufw allow 3389
+sudo ufw allow 22
+sudo ufw allow 80
+sudo ufw allow 443
+sudo ufw enable

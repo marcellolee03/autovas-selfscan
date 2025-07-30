@@ -1,0 +1,41 @@
+#!/bin/bash
+
+# Script para desabilitar o serviço rexec e removê-lo da inicialização do sistema.
+
+# 1. Parar o serviço rexec (se estiver em execução).
+systemctl stop rexec.socket 2>/dev/null
+systemctl stop rexecd 2>/dev/null
+
+# 2. Desabilitar o serviço rexec para que não inicie na inicialização.
+systemctl disable rexec.socket 2>/dev/null
+systemctl disable rexecd 2>/dev/null
+
+# 3. Remover o pacote rexec (se estiver instalado)
+apt-get remove --purge --auto-remove inetd rexec rsh-server rsh-client 2>/dev/null
+yum remove inetd rexec rsh-server rsh-client 2>/dev/null
+zypper remove inetd rexec rsh-server rsh-client 2>/dev/null
+pacman -Rcs inetd rexec rsh-server rsh-client 2>/dev/null
+
+# 4. Remover entradas rexec do arquivo /etc/inetd.conf (se existir)
+sed -i '/^rexec/d' /etc/inetd.conf 2>/dev/null
+
+# 5. Comentar ou remover linha do rexec em /etc/services (se existir)
+sed -i 's/^rexec/#rexec/g' /etc/services 2>/dev/null
+
+# 6. Garantir que o inetd ou xinetd (super servidores) sejam reiniciados (se aplicável).
+if command -v systemctl &> /dev/null; then
+  systemctl restart inetd 2>/dev/null
+  systemctl restart xinetd 2>/dev/null
+elif [ -f /etc/init.d/inetd ]; then
+  /etc/init.d/inetd restart 2>/dev/null
+elif [ -f /etc/init.d/xinetd ]; then
+  /etc/init.d/xinetd restart 2>/dev/null
+fi
+
+# 7. Remover o serviço rexec dos runlevels (usando update-rc.d se disponível)
+if command -v update-rc.d &> /dev/null; then
+  update-rc.d -f rexec remove 2>/dev/null
+fi
+
+echo "Serviço rexec desabilitado e removido (se instalado)."
+exit 0

@@ -1,0 +1,59 @@
+```bash
+#!/bin/bash
+
+# Arquivo de configuração do SSH
+SSH_CONFIG="/etc/ssh/sshd_config"
+
+# Algoritmo fraco a ser removido
+WEAK_ALGORITHM="ssh-dss"
+
+# Função para verificar se o algoritmo está habilitado
+is_algorithm_enabled() {
+  grep -q "^HostKeyAlgorithms.*$WEAK_ALGORITHM" "$SSH_CONFIG"
+}
+
+# Função para remover o algoritmo fraco
+remove_algorithm() {
+  if is_algorithm_enabled; then
+    # Remove o algoritmo fraco da linha HostKeyAlgorithms
+    sed -i "s/HostKeyAlgorithms\(.*\)$WEAK_ALGORITHM\(.*\)/HostKeyAlgorithms\1\2/g" "$SSH_CONFIG"
+
+    # Remove espaços extras e vírgulas duplicadas
+    sed -i "s/HostKeyAlgorithms  /HostKeyAlgorithms /g" "$SSH_CONFIG"
+    sed -i "s/,,/,/g" "$SSH_CONFIG"
+    sed -i "s/, /,/g" "$SSH_CONFIG"
+
+    # Remove a linha inteira se ficar vazia
+    sed -i "/^HostKeyAlgorithms[[:space:]]*$/d" "$SSH_CONFIG"
+  fi
+}
+
+# Função para adicionar HostKeyAlgorithms se não existir
+add_hostkeyalgorithms() {
+  if ! grep -q "^HostKeyAlgorithms" "$SSH_CONFIG"; then
+    echo "HostKeyAlgorithms ssh-rsa,ecdsa-sha2-nistp256,ecdsa-sha2-nistp384,ecdsa-sha2-nistp521,ssh-ed25519" >> "$SSH_CONFIG"
+  fi
+}
+
+
+# Remover o algoritmo fraco
+remove_algorithm
+
+# Adicionar a linha HostKeyAlgorithms caso não exista (com algoritmos seguros)
+add_hostkeyalgorithms
+
+# Remover o algoritmo fraco da linha KexAlgorithms também.
+if grep -q "^KexAlgorithms.*$WEAK_ALGORITHM" "$SSH_CONFIG"; then
+    sed -i "s/KexAlgorithms\(.*\)$WEAK_ALGORITHM\(.*\)/KexAlgorithms\1\2/g" "$SSH_CONFIG"
+    sed -i "s/KexAlgorithms  /KexAlgorithms /g" "$SSH_CONFIG"
+    sed -i "s/,,/,/g" "$SSH_CONFIG"
+    sed -i "s/, /,/g" "$SSH_CONFIG"
+    sed -i "/^KexAlgorithms[[:space:]]*$/d" "$SSH_CONFIG"
+fi
+
+
+# Reiniciar o serviço SSH
+systemctl restart sshd
+
+echo "Vulnerabilidade corrigida. O serviço SSH foi reiniciado."
+```

@@ -1,0 +1,16 @@
+#!/bin/bash
+CONFIG_FILE="/etc/ssl/openssl.cnf"
+
+if [ ! -f "$CONFIG_FILE" ]; then
+    echo "OpenSSL configuration file not found."
+    exit 1
+fi
+
+sed -i '/^MinProtocol/!s/^\(MinProtocol\s*=\s*\).*$/\1TLSv1.2/' "$CONFIG_FILE"
+sed -i '/^MaxProtocol/!s/^\(MaxProtocol\s*=\s*\).*$/\1TLSv1.3/' "$CONFIG_FILE"
+
+systemctl restart apache2
+systemctl restart nginx
+systemctl restart postgresql
+
+echo "TLSv1.0 and TLSv1.1 protocols have been disabled and services have been restarted."

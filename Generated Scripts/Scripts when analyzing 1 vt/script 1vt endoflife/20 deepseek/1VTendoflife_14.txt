@@ -1,0 +1,9 @@
+#!/bin/bash
+os_version=$(lsb_release -sr)
+if [[ "$os_version" == "8.04" ]]; then
+    echo "Upgrading Ubuntu 8.04 to a supported version..."
+    export DEBIAN_FRONTEND=noninteractive
+    apt-get update -y
+    apt-get install -y update-manager-core
+    do-release-upgrade -f DistUpgradeViewNonInteractive
+fi

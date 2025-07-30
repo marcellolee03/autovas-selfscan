@@ -1,0 +1,85 @@
+#!/bin/bash
+# Disable rlogin service
+systemctl stop rlogin
+systemctl disable rlogin
+
+# Upgrade TWiki to version 4.2.4
+wget https://downloads.sourceforge.net/project/twiki/TWiki%20for%20all%20Platforms/4.2.4/TWiki-4.2.4.tgz
+tar -xzf TWiki-4.2.4.tgz
+cd TWiki-4.2.4
+./configure
+make
+make install
+
+# Disable rexec service
+systemctl stop rexec
+systemctl disable rexec
+
+# Upgrade Apache Tomcat to version 9.0.31
+wget https://downloads.apache.org/tomcat/tomcat-9/v9.0.31/bin/apache-tomcat-9.0.31.tar.gz
+tar -xzf apache-tomcat-9.0.31.tar.gz
+cd apache-tomcat-9.0.31
+./bin/startup.sh
+
+# Disable PHP dangerous methods
+echo "disable_functions = exec,passthru,shell_exec,system,proc_open,popen,curl_exec,curl_multi_exec,parse_ini_file,show_source" >> /etc/php5/php.ini
+
+# Disable anonymous FTP login
+sed -i 's/anonymous_enable=YES/anonymous_enable=NO/' /etc/vsftpd.conf
+systemctl restart vsftpd
+
+# Disable VRFY and EXPN on mail server
+echo "disable_vrfy_command=yes" >> /etc/postfix/main.cf
+systemctl restart postfix
+
+# Disable SSLv3 and TLSv1.0
+sed -i 's/SSLProtocol all -SSLv2/SSLProtocol all -SSLv2 -SSLv3 -TLSv1/' /etc/apache2/mods-available/ssl.conf
+systemctl restart apache2
+
+# Disable weak SSH key exchange algorithms
+echo "KexAlgorithms curve25519-sha256@libssh.org,diffie-hellman-group-exchange-sha256" >> /etc/ssh/sshd_config
+systemctl restart sshd
+
+# Disable weak SSH encryption algorithms
+echo "Ciphers aes128-ctr,aes192-ctr,aes256-ctr" >> /etc/ssh/sshd_config
+systemctl restart sshd
+
+# Disable weak SSH MAC algorithms
+echo "MACs hmac-sha2-256,hmac-sha2-512" >> /etc/ssh/sshd_config
+systemctl restart sshd
+
+# Disable TRACE and TRACK methods in Apache
+echo "TraceEnable off" >> /etc/apache2/apache2.conf
+systemctl restart apache2
+
+# Disable phpinfo() output
+find /var/www/html -name "phpinfo.php" -type f -delete
+
+# Disable dangerous HTTP methods
+echo "<IfModule mod_rewrite.c>
+RewriteEngine On
+RewriteCond %{REQUEST_METHOD} ^(TRACE|TRACK)
+RewriteRule .* - [F]
+</IfModule>" >> /etc/apache2/apache2.conf
+systemctl restart apache2
+
+# Update PHP to version 5.6.30
+add-apt-repository ppa:ondrej/php
+apt-get update
+apt-get install php5.6
+
+# Update jQuery to version 1.9.0
+wget https://code.jquery.com/jquery-1.9.0.min.js -O /var/www/html/mutillidae/javascript/ddsmoothmenu/jquery.min.js
+
+# Disable TCP timestamps
+echo "net.ipv4.tcp_timestamps = 0" >> /etc/sysctl.conf
+sysctl -p
+
+# Disable ICMP timestamp replies
+echo "net.ipv4.icmp_echo_ignore_all = 1" >> /etc/sysctl.conf
+sysctl -p
+
+# Disable SSLv3 and weak ciphers
+sed -i 's/SSLProtocol all -SSLv2/SSLProtocol all -SSLv2 -SSLv3/' /etc/apache2/mods-available/ssl.conf
+sed -i 's/SSLCipherSuite HIGH:!aNULL:!MD5/SSLCipherSuite HIGH:!aNULL:!MD5:!RC4:!3DES/' /etc/apache2/mods-available/ssl.conf
+systemctl restart apache2

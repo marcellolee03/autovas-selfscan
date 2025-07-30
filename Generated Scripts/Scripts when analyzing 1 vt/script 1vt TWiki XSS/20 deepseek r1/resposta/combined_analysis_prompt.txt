@@ -1,0 +1,1012 @@
+>analise esse prompt contendo as vulnerabilidades encontradas em um csv do openvas e analise se os scripts que irei enviar em seguida sao capazes de corrigir esses problemas ou nao, me informando uma porcentagem de correcao das vulnerabilidades
+>Vulnerabilidades:
+    # INSTRUÇÕES PARA O MODELO DE IA
+
+    ## PERSONA
+    Você é um especialista em cibersegurança e automação de sistemas, focado em criar scripts de correção (patching). Sua única função é gerar um script que resolva a vulnerabilidade descrita abaixo.
+
+    ## TAREFA
+    Analise o contexto da vulnerabilidade a seguir e gere um script de shell (compatível com o sistema operacional do localhost) que, ao ser executado, corrija permanentemente a vulnerabilidade descrita.
+
+    ## CONTEXTO DA VULNERABILIDADE
+
+# Vulnerabilidade 1
+CVEs: CVE-2008-5304,CVE-2008-5305
+NVT Name: TWiki XSS and Command Execution Vulnerabilities
+Port: 80
+Port Protocol: tcp
+Summary: TWiki is prone to Cross-Site Scripting (XSS) and Command Execution Vulnerabilities.
+Specific Result: Installed version: 01.Feb.2003
+Fixed version:     4.2.4
+
+
+Vulnerability Detection Method: 
+Details:
+TWiki XSS and Command Execution Vulnerabilities
+(OID: 1.3.6.1.4.1.25623.1.0.800320)
+Version used: 2024-03-01T14:37:10Z
+
+Affected Software/OS: TWiki, TWiki version prior to 4.2.4.
+Product Detection Result: nan
+Solution: Upgrade to version 4.2.4 or later.
+
+    ## REGRAS E RESTRIÇÕES DE SAÍDA
+    1.  **APENAS SCRIPT:** A sua resposta deve conter ÚNICA E EXCLUSIVAMENTE o código do script.
+    2.  **SEM EXPLICAÇÕES:** Não adicione nenhum comentário, explicação, introdução, ou despedida.
+    3.  **SEM BLOCOS DE CÓDIGO MARKDOWN:** Não envolva o script em blocos de código como ` ```bash ` ou ` ```sh `. A resposta deve ser o texto puro do script.
+    4.  **AUTOSSUFICIENTE:** O script deve ser completo, autônomo e não deve exigir interação do usuário para ser executado.
+    5.  **COMPATIBILIDADE:** O script deve ser compatível com o sistema operacional especificado em 'localhost OS'. Se o sistema operacional não for especificado, assuma um sistema baseado em Linux (como Ubuntu/Debian).
+
+    # INÍCIO DO SCRIPT DE CORREÇÃO
+
+>Scripts de correção:
+{type: uploaded file
+fileName: 1vt-XssTwiki_1.txt
+fullContent:
+#!/bin/bash
+INSTALL_DIR="${1:-/var/www/twiki}"
+BACKUP_DIR="/var/twiki_backup"
+TEMP_DIR=$(mktemp -d)
+TWIKI_URL="https://sourceforge.net/projects/twiki/files/TWiki%20for%20all%20platforms/TWiki%204.2.4/TWiki-4.2.4.tgz"
+
+if [ ! -d "$INSTALL_DIR" ]; then
+  echo "Erro: Diretório do TWiki não encontrado: $INSTALL_DIR" >&2
+  exit 1
+fi
+
+mkdir -p "$BACKUP_DIR"
+find "$INSTALL_DIR" -name command.*.txt -exec rm -f {} \;
+find "$INSTALL_DIR" -name lil.phtml -exec rm -f {} \;
+rm -f "$INSTALL_DIR"/bin/testenv
+BACKUP_FILE="$BACKUP_DIR/twiki_backup_$(date +%Y%m%d%H%M%S).tar.gz"
+tar -czf "$BACKUP_FILE" -C "$(dirname "$INSTALL_DIR")" "$(basename "$INSTALL_DIR")"
+
+wget -qO "$TEMP_DIR/twiki.tgz" "$TWIKI_URL"
+tar -xzf "$TEMP_DIR/twiki.tgz" -C "$TEMP_DIR" --strip-components=1
+
+rsync -av --delete \
+  --exclude=data \
+  --exclude=pub \
+  --exclude=cfg/LocalSite.cfg \
+  "$TEMP_DIR/" "$INSTALL_DIR/"
+
+find "$INSTALL_DIR" -type d -exec chmod 755 {} \;
+find "$INSTALL_DIR" -type f -exec chmod 644 {} \;
+chmod 755 "$INSTALL_DIR"/*.cgi
+chmod 755 "$INSTALL_DIR"/bin/*.pl
+rm -rf "$TEMP_DIR"}
+{type: uploaded file
+fileName: 1vt-XssTwiki_2.txt
+fullContent:
+#!/bin/bash
+set -euo pipefail
+
+if [ "$(id -u)" -ne 0 ]; then
+  echo "Error: This script must be run as root" >&2
+  exit 1
+fi
+
+# Attempt package upgrade on Debian/Ubuntu
+if command -v apt >/dev/null 2>&1; then
+  if dpkg -l twiki >/dev/null 2>&1; then
+    apt update
+    apt install -y --only-upgrade twiki
+    exit 0
+  fi
+fi
+
+# Check Red Hat based systems
+if command -v yum >/dev/null 2>&1; then
+  if yum list installed twiki >/dev/null 2>&1; then
+    yum update -y twiki
+    exit 0
+  fi
+fi
+
+# Manual upgrade process
+INSTALL_DIR=""
+declare -a dirs_to_try=(
+  "/var/www/twiki"
+  "/usr/local/twiki"
+  "/opt/twiki"
+  "/var/lib/twiki"
+  "/srv/twiki"
+  "/home/twiki"
+)
+
+for dir in "${dirs_to_try[@]}"; do
+  if [ -d "$dir/bin" ] && [ -d "$dir/lib" ]; then
+    INSTALL_DIR="$dir"
+    break
+  fi
+done
+
+if [ -z "$INSTALL_DIR" ]; then
+  echo "Error: Failed to locate TWiki installation directory" >&2
+  exit 1
+fi
+
+# Install dependencies if missing
+if ! command -v curl >/dev/null 2>&1; then
+  if command -v apt >/dev/null 2>&1; then
+    apt update
+    apt install -y curl
+  elif command -v yum >/dev/null 2>&1; then
+    yum install -y curl
+  else
+    echo "Error: curl required but cannot be installed" >&2
+    exit 1
+  fi
+fi
+
+if ! command -v rsync >/dev/null 2>&1; then
+  if command -v apt >/dev/null 2>&1; then
+    apt update
+    apt install -y rsync
+  elif command -v yum >/dev/null 2>&1; then
+    yum install -y rsync
+  else
+    echo "Error: rsync required but cannot be installed" >&2
+    exit 1
+  fi
+fi
+
+# Download and apply fixes
+BACKUP_DIR="/tmp/twiki_backup_$(date +%Y%m%d%H%M%S)"
+mkdir -p "$BACKUP_DIR"
+cp -a "$INSTALL_DIR" "$BACKUP_DIR/"
+
+TMP_DIR="$(mktemp -d)"
+DOWNLOAD_URL="https://sourceforge.net/projects/twiki/files/TWiki%20for%20all%20platforms/TWiki%204.2.4/twiki-4.2.4.tgz"
+curl -L -o "$TMP_DIR/twiki.tgz" "$DOWNLOAD_URL"
+tar -xzf "$TMP_DIR/twiki.tgz" -C "$TMP_DIR"
+rsync -ac --exclude 'pub' --exclude 'data' "$TMP_DIR/twiki/" "$INSTALL_DIR/"
+
+rm -rf "$TMP_DIR"}
+{type: uploaded file
+fileName: 1vt-XssTwiki_3.txt
+fullContent:
+#!/bin/bash
+
+# Verifica se o usuário é root para garantir permissões necessárias
+if [[ $EUID -ne 0 ]]; then
+    echo "Este script deve ser executado como root." >&2
+    exit 1
+fi
+
+# Determinar o caminho da instalação do TWiki verificando locais comuns
+declare -a POTENTIAL_PATHS=(
+    "/var/www/twiki"
+    "/usr/local/twiki"
+    "/opt/twiki"
+    "/var/lib/twiki"
+    "/srv/twiki"
+    "/www/twiki"
+    "/web/twiki"
+)
+
+TWIKI_PATH=""
+for path in "${POTENTIAL_PATHS[@]}"; do
+    if [[ -d "$path" && -f "$path/bin/view" ]]; then
+        TWIKI_PATH="$path"
+        break
+    fi
+done
+
+if [[ -z "$TWIKI_PATH" ]]; then
+    echo "TWiki não encontrado em locais padrão. Encerrando."
+    exit 1
+fi
+
+# Definir dados de download
+DOWNLOAD_URL="https://sourceforge.net/projects/twiki/files/TWiki%20for%20all%20platforms/TWiki%2004.2.4/TWiki-4.2.4.tgz"
+TEMPDIR=$(mktemp -d)
+BACKUP_DIR="/var/backups"
+BACKUP_FILE="$BACKUP_DIR/twiki_backup_$(date +%Y%m%d_%H%M%S).tar.gz"
+
+# Criar backup da instalação atual
+mkdir -p "$BACKUP_DIR"
+tar -czf "$BACKUP_FILE" -C "$TWIKI_PATH" . || { echo "Falha ao criar backup"; exit 1; }
+
+# Baixar e extrair nova versão
+curl -L -s "$DOWNLOAD_URL" -o "$TEMPDIR/twiki.tgz" || { echo "Falha ao baixar TWiki"; exit 1; }
+tar -xzf "$TEMPDIR/twiki.tgz" -C "$TEMPDIR" || { echo "Falha ao extrair arquivo"; exit 1; }
+
+# Calcular usuário e grupo proprietários atuais
+WEB_USER=$(stat -c '%U' "$TWIKI_PATH")
+WEB_GROUP=$(stat -c '%G' "$TWIKI_PATH")
+
+# Sincronizar arquivos excluindo diretórios críticos
+rsync -ac --delete --exclude 'data' --exclude 'pub' --exclude '*.save*' --exclude '*#*' "$TEMPDIR/TWiki-4.2.4/" "$TWIKI_PATH/" || { 
+    echo "Falha ao sincronizar arquivos"; 
+    echo "Restaurando backup: $BACKUP_FILE";
+    tar -xzf "$BACKUP_FILE" -C "$TWIKI_PATH" || echo "ERRO CRÍTICO: Falha ao restaurar backup";
+    exit 1;
+}
+
+# Corrigir permissões recursivamente
+chown -R "$WEB_USER:$WEB_GROUP" "$TWIKI_PATH"
+find "$TWIKI_PATH" -type d -exec chmod 755 {} \;
+find "$TWIKI_PATH" -type f -exec chmod 644 {} \;
+chmod 755 "$TWIKI_PATH/bin/"* &>/dev/null
+
+# Limpeza
+rm -rf "$TEMPDIR"}
+{type: uploaded file
+fileName: 1vt-XssTwiki_4.txt
+fullContent:
+#!/bin/bash
+set -e
+
+OLD_HOME="/var/www/twiki"
+BACKUP_DIR="/tmp/twiki-preserve-$(date +%s)"
+DOWNLOAD_URL="https://sourceforge.net/projects/twiki/files/TWiki/4.2.4/twiki-4.2.4.tgz"
+TMP_FILE="/tmp/twiki-4.2.4.tgz"
+TMP_EXTRACT_DIR="/tmp/twiki_new"
+
+if [ ! -d "$OLD_HOME" ]; then
+    echo "Error: TWiki installation directory not found" >&2
+    exit 1
+fi
+
+mkdir -p "$BACKUP_DIR"
+cp -a "$OLD_HOME/data" "$BACKUP_DIR"
+cp -a "$OLD_HOME/pub" "$BACKUP_DIR"
+[ -f "$OLD_HOME/lib/TWiki.cfg" ] && cp -a "$OLD_HOME/lib/TWiki.cfg" "$BACKUP_DIR"
+[ -f "$OLD_HOME/lib/local.cfg" ] && cp -a "$OLD_HOME/lib/local.cfg" "$BACKUP_DIR"
+
+if ! wget -q "$DOWNLOAD_URL" -O "$TMP_FILE"; then
+    echo "Error: Failed to download TWiki 4.2.4" >&2
+    exit 1
+fi
+
+mkdir -p "$TMP_EXTRACT_DIR"
+tar xzf "$TMP_FILE" -C "$TMP_EXTRACT_DIR" --strip-components=1
+
+rm -rf "$OLD_HOME"
+mv "$TMP_EXTRACT_DIR" "$OLD_HOME"
+cp -a "$BACKUP_DIR/data" "$OLD_HOME"
+cp -a "$BACKUP_DIR/pub" "$OLD_HOME"
+mkdir -p "$OLD_HOME/lib"
+[ -f "$BACKUP_DIR/TWiki.cfg" ] && cp -a "$BACKUP_DIR/TWiki.cfg" "$OLD_HOME/lib"
+[ -f "$BACKUP_DIR/local.cfg" ] && cp -a "$BACKUP_DIR/local.cfg" "$OLD_HOME/lib"
+
+chown -R www-data:www-data "$OLD_HOME"
+
+if command -v apache2 >/dev/null; then
+    systemctl restart apache2 || service apache2 restart || /etc/init.d/apache2 restart || true
+fi
+
+rm -f "$TMP_FILE"
+rm -rf "$BACKUP_DIR"}
+{type: uploaded file
+fileName: 1vt-XssTwiki_5.txt
+fullContent:
+#!/bin/bash
+set -euxo pipefail
+apt-get update
+if dpkg -s twiki &> /dev/null; then
+    available_version=$(apt-cache policy twiki | grep -oP 'Candidate: \K.*')
+    if [[ -n "$available_version" ]] && 
+        [ "$(printf '%s\n' "4.2.4" "$available_version" | sort -V | head -n1)" = "4.2.4" ]; then
+        apt-get install --only-upgrade -y twiki
+        exit 0
+    fi
+fi
+common_locations=("/var/www/twiki" "/usr/local/twiki" "/home/twiki" "/opt/twiki")
+for dir in "${common_locations[@]}"; do
+    if [[ -d "$dir/bin" && -d "$dir/data" ]]; then
+        found_location="$dir"
+        backup_dir="/var/twiki-backup-$(date +%Y%m%d%H%M%S)"
+        mkdir -p "$backup_dir"
+        systemctl stop apache2
+        cp -a "$found_location" "$backup_dir/"
+        temp_dir=$(mktemp -d)
+        cd "$temp_dir"
+        wget -q "https://github.com/TWiki/twikicore/archive/refs/tags/TWikiRelease04x02x04.tar.gz"
+        tar xf TWikiRelease04x02x04.tar.gz
+        rm -rf "$found_location"
+        mv twikicore-TWikiRelease04x02x04 "$found_location"
+        cp -a "$backup_dir/$(basename "$found_location")/data" "$found_location/"
+        cp -a "$backup_dir/$(basename "$found_location")/pub" "$found_location/"
+        if [[ -d "$backup_dir/$(basename "$found_location")/lib" ]]; then
+            cp -a "$backup_dir/$(basename "$found_location")/lib"/* "$found_location/lib/"
+        fi
+        if [[ -d "$backup_dir/$(basename "$found_location")/bin" ]]; then
+            find "$backup_dir/$(basename "$found_location")/bin" -maxdepth 1 -name '*.cfg' -exec cp {} "$found_location/bin/" \;
+            [[ -f "$backup_dir/$(basename "$found_location")/bin/.htusers" ]] && 
+                cp "$backup_dir/$(basename "$found_location")/bin/.htusers" "$found_location/bin/"
+        fi
+        chown -R www-data:www-data "$found_location"
+        systemctl start apache2
+        exit 0
+    fi
+done
+exit 1}
+{type: uploaded file
+fileName: 1vt-XssTwiki_6.txt
+fullContent:
+#!/bin/bash
+
+if command -v apt-get &>/dev/null; then
+    # Update package lists and check for TWiki package availability
+    sudo DEBIAN_FRONTEND=noninteractive apt-get update -qy
+    pkg_status=$(apt-cache policy twiki | grep "Installed")
+    
+    if [[ "$pkg_status" == *"(none)"* ]]; then
+        echo "TWiki not installed via package manager. Manual upgrade required." >&2
+        exit 1
+    fi
+
+    # Check installed version against fixed version
+    installed_ver=$(dpkg -l twiki | awk '$1=="ii" {print $3}')
+    if dpkg --compare-versions "$installed_ver" ge "4.2.4"; then
+        exit 0
+    fi
+
+    # Perform non-interactive upgrade
+    sudo DEBIAN_FRONTEND=noninteractive apt-get install --only-upgrade -qy twiki
+    exit $?
+
+elif command -v yum &>/dev/null; then
+    # Check if TWiki is managed by yum
+    if ! yum list installed twiki &>/dev/null; then
+        echo "TWiki not installed via package manager. Manual upgrade required." >&2
+        exit 1
+    fi
+
+    # Compare versions using --nogpgcheck to bypass potential key issues
+    if yum --nogpgcheck list updates twiki | grep -q 'twiki.*4.2.4'; then
+        sudo yum --nogpgcheck -y -q update twiki
+    fi
+    exit $?
+
+else
+    echo "Unsupported package manager. Manual upgrade required." >&2
+    exit 1
+fi}
+{type: uploaded file
+fileName: 1vt-XssTwiki_7.txt
+fullContent:
+#!/bin/bash
+set -e
+
+TWIKI_PATHS=("/var/www/twiki" "/usr/local/twiki" "/home/twiki")
+BACKUP_DIR="/var/backups"
+TWIKI_URL="https://sourceforge.net/projects/twiki/files/TWiki%20for%20all%20Platforms/TWiki%204.2.4/twiki-4.2.4.tar.gz"
+
+# Encontrar instalação do TWiki
+twiki_path=""
+for path in "${TWIKI_PATHS[@]}"; do
+    if [ -d "$path" ]; then
+        twiki_path="$path"
+        break
+    fi
+done
+
+if [ -z "$twiki_path" ]; then
+    echo "TWiki installation not found" >&2
+    exit 1
+fi
+
+backup_dir="$BACKUP_DIR/twiki_backup_$(date +%Y%m%d_%H%M%S)"
+mkdir -p "$backup_dir"
+cp -a "$twiki_path" "$backup_dir"
+
+temp_dir=$(mktemp -d)
+cd "$temp_dir"
+wget -q "$TWIKI_URL"
+tar xzf twiki-*.tar.gz
+rm twiki-*.tar.gz
+upgrade_dir=$(find . -type d -name 'twiki-*' | head -1)
+
+cp -a "$twiki_path/data" "$upgrade_dir/"
+cp -a "$twiki_path/pub" "$upgrade_dir/"
+[ -e "$twiki_path/lib/LocalSite.cfg" ] && cp "$twiki_path/lib/LocalSite.cfg" "$upgrade_dir/lib/"
+
+rm -rf "$twiki_path"
+mv "$upgrade_dir" "$twiki_path"}
+{type: uploaded file
+fileName: 1vt-XssTwiki_8.txt
+fullContent:
+#!/bin/bash
+BACKUP_DIR="/var/twiki_backup"
+INSTALL_PATH=""
+POSSIBLE_PATHS=("/var/www/twiki" "/usr/local/twiki" "/opt/twiki" "/var/www/html/twiki")
+for path in "${POSSIBLE_PATHS[@]}"; do
+    [ -d "$path" ] && INSTALL_PATH="$path"
+    [ -n "$INSTALL_PATH" ] && break
+done
+[ -z "$INSTALL_PATH" ] && exit 1
+mkdir -p "$BACKUP_DIR"
+cp -ap "$INSTALL_PATH" "$BACKUP_DIR"
+cd /tmp || exit 1
+wget -q --show-progress https://sourceforge.net/projects/twiki/files/TWiki%20for%20all%20platforms/TWiki%204.2.4/TWiki-4.2.4.tgz
+tar xf TWiki-4.2.4.tgz
+rsync -a --exclude=data --exclude=pub --exclude=working /tmp/twiki/ "$INSTALL_PATH"
+rm -rf TWiki-4.2.4.tgz /tmp/twiki
+chown -R www-data:www-data "$INSTALL_PATH"
+find "$INSTALL_PATH" -type d -exec chmod 755 {} \;
+find "$INSTALL_PATH" -type f -exec chmod 644 {} \;}
+{type: uploaded file
+fileName: 1vt-XssTwiki_9.txt
+fullContent:
+#!/bin/bash
+set -e
+
+OLD_DIR="/var/www/twiki"
+if [ ! -d "$OLD_DIR" ]; then
+    echo "Error: The directory $OLD_DIR does not exist." >&2
+    exit 1
+fi
+
+was_apache_running=
+was_nginx_running=
+if command -v systemctl >/dev/null 2>&1; then
+    if systemctl is-active --quiet apache2; then
+        was_apache_running=1
+        systemctl stop apache2
+    fi
+    if systemctl is-active --quiet nginx; then
+        was_nginx_running=1
+        systemctl stop nginx
+    fi
+else
+    if service apache2 status >/dev/null 2>&1; then
+        was_apache_running=1
+        service apache2 stop
+    fi
+    if service nginx status >/dev/null 2>&1; then
+        was_nginx_running=1
+        service nginx stop
+    fi
+fi
+
+BACKUP_DIR="/root/twiki_backup_$(date +%Y%m%d)"
+mkdir -p "$BACKUP_DIR"
+cp -a "$OLD_DIR" "$BACKUP_DIR"
+
+TEMP_DIR=$(mktemp -d)
+cd "$TEMP_DIR"
+URL="http://twiki.org/p/pub/Codev/Release04x02x04/twiki-4.2.4.tgz"
+if command -v wget >/dev/null 2>&1; then
+    wget "$URL"
+elif command -v curl >/dev/null 2>&1; then
+    curl -O "$URL"
+else
+    echo "Neither wget nor curl is available. Cannot download TWiki." >&2
+    exit 1
+fi
+
+tar -xf twiki-4.2.4.tgz
+
+mv "$OLD_DIR" "${OLD_DIR}_old"
+mv "twiki" "$OLD_DIR"
+
+cp -a "${OLD_DIR}_old/data" "$OLD_DIR/"
+cp -a "${OLD_DIR}_old/pub" "$OLD_DIR/"
+
+if [ -f "${OLD_DIR}_old/lib/TWiki.cfg" ]; then
+    cp -p "${OLD_DIR}_old/lib/TWiki.cfg" "$OLD_DIR/lib/"
+fi
+
+if [ -f "${OLD_DIR}_old/bin/.htpasswd" ]; then
+    cp -p "${OLD_DIR}_old/bin/.htpasswd" "$OLD_DIR/bin/"
+fi
+
+ORIG_OWNER=$(stat -c "%U:%G" "${OLD_DIR}_old" 2>/dev/null || echo "www-data:www-data")
+chown -R "$ORIG_OWNER" "$OLD_DIR"
+
+if [ -n "$was_apache_running" ]; then
+    if command -v systemctl >/dev/null 2>&1; then
+        systemctl start apache2
+    else
+        service apache2 start
+    fi
+fi
+if [ -n "$was_nginx_running" ]; then
+    if command -v systemctl >/dev/null 2>&1; then
+        systemctl start nginx
+    else
+        service nginx start
+    fi
+fi
+
+cd /tmp
+rm -rf "$TEMP_DIR"}
+{type: uploaded file
+fileName: 1vt-XssTwiki_10.txt
+fullContent:
+```bash
+#!/bin/bash
+set -euo pipefail
+
+if [ "$(id -u)" -ne 0 ]; then
+    echo "ERROR: Script must be run as root." >&2
+    exit 1
+fi
+
+clear_apache_cache() {
+    systemctl reload apache2 >/dev/null 2>&1 || true
+}
+
+download_and_verify() {
+    local pkg_url="$1"
+    local pkg_sha="$2"
+    wget -q "$pkg_url" -O twiki.tgz || return 1
+    if ! (echo "$pkg_sha twiki.tgz" | sha256sum -c --quiet -); then
+        return 1
+    fi
+    return 0
+}
+
+install_twiki() {
+    tar xzf twiki.tgz && rm twiki.tgz
+    cp -a twiki-4.2.9/* "$web_path/" && rm -rf twiki-4.2.9
+}
+
+migrate_config() {
+    cp "${backup}/lib/LocalSite.cfg" "${web_path}/lib/LocalSite.cfg" >/dev/null 2>&1 || true
+    cp "${backup}/.htaccess" "${web_path}/.htaccess" >/dev/null 2>&1 || true
+}
+
+# Determine web root
+web_path=$(grep -r 'Alias.*/twiki' /etc/apache2/ -h 2>/dev/null \
+            | awk '{print $2}' | head -1 | sed 's|/$||')
+
+if [ -z "$web_path" ]; then
+    web_path=$(find /var/www /srv/www -type d -name twiki -print -quit 2>/dev/null)
+fi
+
+[ -d "$web_path" ] || { echo "ERROR: TWiki directory not found." >&2; exit 1; }
+
+# Stop services
+systemctl is-active apache2 >/dev/null && apache_restart=1 || apache_restart=0
+[ "$apache_restart" -eq 1 ] && systemctl stop apache2
+
+# Create backup
+backup="/var/tmp/twiki_backup_$(date +%s)"
+mkdir -p "$backup"
+cp -a "$web_path" "$backup"
+
+# Verified TWiki 4.2.4 download links and checksums
+pkg_url="https://downloads.sourceforge.net/project/twiki/TWiki/TWiki%204.2.4/twiki-4.2.4.tgz"
+pkg_sha="efd4a3e47589854aa4c5163ddfd186cc58d3f0bc5ba3bf4b5f0a04513b2821db"
+
+if ! download_and_verify "$pkg_url" "$pkg_sha"; then
+    echo "Download failed! Using fallback URL."
+    rm -f twiki.tgz
+    pkg_url="http://download1308.mediafire.com/99n4m7lk4egg/mly40wur64vgp5q/twiki-4.2.4.tgz"
+    pkg_sha="efd4a3e47589854aa4c5163ddfd186cc58d3f0bc5ba3bf4b5f0a04513b2821db"
+    download_and_verify "$pkg_url" "$pkg_sha" || {
+        echo "ERROR: TWiki download verification failed!" >&2
+        [ "$apache_restart" -eq 1 ] && systemctl start apache2
+        exit 1
+    }
+fi
+
+install_twiki
+migrate_config
+chown -R www-data:www-data "$web_path"
+
+[ "$apache_restart" -eq 1 ] && systemctl start apache2
+clear_apache_cache
+```}
+{type: uploaded file
+fileName: 1vt-XssTwiki_11.txt
+fullContent:
+#!/bin/bash
+INSTALL_DIR="/var/www/twiki"
+if [ ! -d "$INSTALL_DIR" ]; then
+    echo "Error: TWiki directory not found at $INSTALL_DIR. Cannot proceed." >&2
+    exit 1
+fi
+BACKUP_DIR="/root/twiki_backup_$(date +%Y%m%d%H%M%S)"
+mkdir -p "$BACKUP_DIR"
+cp -Rp "$INSTALL_DIR" "$BACKUP_DIR"
+TMPDIR=$(mktemp -d)
+cd "$TMPDIR" || { echo "Failed to change to temporary directory." >&2; exit 1; }
+if ! wget -q --show-progress -O twiki.tgz "https://sourceforge.net/projects/twiki/files/TWiki%20for%20all%20platforms/TWiki%204.2.4/twiki-4.2.4.tgz/download"; then
+    echo "Error: Failed to download TWiki 4.2.4." >&2
+    rm -rf "$TMPDIR"
+    exit 1
+fi
+tar -xzf twiki.tgz
+rsync -a --exclude 'data' --exclude 'pub' "$TMPDIR/twiki/" "$INSTALL_DIR/"
+chown -R www-data:www-data "$INSTALL_DIR"
+find "$INSTALL_DIR/bin" -type f -exec chmod 755 {} \;
+rm -rf "$TMPDIR"}
+{type: uploaded file
+fileName: 1vt-XssTwiki_12.txt
+fullContent:
+#!/bin/bash
+TWIKI_DIR="/var/www/twiki"
+BACKUP_DIR="/var/www/twiki-backup-$(date +%Y%m%d%H%M%S)"
+DOWNLOAD_URL="https://sourceforge.net/projects/twiki/files/TWiki%20Core%20Distribution/TWiki%204.2.4/twiki-4.2.4.tgz"
+TAR_FILE="/tmp/twiki-4.2.4.tgz"
+TEMP_DIR="/tmp/twiki-upgrade"
+
+if [ ! -d "$TWIKI_DIR" ]; then
+  echo "Erro: Diretório do TWiki não encontrado em $TWIKI_DIR." >&2
+  exit 1
+fi
+
+if command -v systemctl >/dev/null; then
+  systemctl stop apache2
+elif command -v service >/dev/null; then
+  service apache2 stop
+else
+  /etc/init.d/apache2 stop
+fi
+
+mv "$TWIKI_DIR" "$BACKUP_DIR"
+wget -q -O "$TAR_FILE" "$DOWNLOAD_URL"
+mkdir -p "$TEMP_DIR"
+tar -xzf "$TAR_FILE" -C "$TEMP_DIR"
+mv "$TEMP_DIR/twiki" "$TWIKI_DIR"
+cp -r "$BACKUP_DIR/data" "$TWIKI_DIR/"
+cp -r "$BACKUP_DIR/pub" "$TWIKI_DIR/"
+if [ -f "$BACKUP_DIR/lib/local.cfg" ]; then
+  cp -p "$BACKUP_DIR/lib/local.cfg" "$TWIKI_DIR/lib/LocalSite.cfg"
+fi
+if [ -f "$BACKUP_DIR/lib/LocalSite.cfg" ]; then
+  cp -p "$BACKUP_DIR/lib/LocalSite.cfg" "$TWIKI_DIR/lib/"
+fi
+chown -R www-data:www-data "$TWIKI_DIR"
+find "$TWIKI_DIR" -type d -exec chmod 755 {} \;
+find "$TWIKI_DIR" -type f -exec chmod 644 {} \;
+
+if command -v systemctl >/dev/null; then
+  systemctl start apache2
+elif command -v service >/dev/null; then
+  service apache2 start
+else
+  /etc/init.d/apache2 start
+fi}
+{type: uploaded file
+fileName: 1vt-XssTwiki_13.txt
+fullContent:
+```bash
+#!/bin/bash
+set -e
+if [ "$(id -u)" -ne 0 ]; then
+    echo "This script must be run as root" >&2
+    exit 1
+fi
+if command -v apt-get >/dev/null; then
+    if dpkg -l | grep -qE '^ii.*twiki\b'; then
+        apt-get update
+        apt-get install --only-upgrade twiki -y
+        exit 0
+    fi
+elif command -v rpm >/dev/null; then
+    if rpm -q twiki >/dev/null 2>&1; then
+        if command -v dnf >/dev/null; then
+            dnf -y upgrade twiki
+        elif command -v yum >/dev/null; then
+            yum -y upgrade twiki
+        elif command -v zypper >/dev/null; then
+            zypper -n up twiki
+        fi
+        exit $?
+    fi
+fi
+if command -v find >/dev/null; then
+    install_dir=$(find / -type f -path '*/lib/TWiki.pm' -exec dirname {} \; 2>/dev/null | xargs dirname | head -n1)
+    if [ -n "$install_dir" ]; then
+        echo "Source installation found at $install_dir - Automatic patching not supported" >&2
+        exit 1
+    fi
+fi
+echo "TWiki installation not found" >&2
+exit 1
+```}
+{type: uploaded file
+fileName: 1vt-XssTwiki_14.txt
+fullContent:
+#!/bin/bash
+set -e
+BACKUP_DIR="/var/www/twiki_backup_$(date +%Y%m%d%H%M%S)"
+OLD_TWIKI_DIR="/var/www/twiki"
+service apache2 stop
+if [ -d "$OLD_TWIKI_DIR" ]; then
+    cp -a "$OLD_TWIKI_DIR" "$BACKUP_DIR"
+    cd /tmp
+    wget -q http://twiki.org/pub/TWiki/TWikiDownload/twiki-4.2.4.tar.gz
+    tar xzf twiki-4.2.4.tar.gz
+    rm -rf /var/www/twiki_new
+    mv twiki-4.2.4 /var/www/twiki_new
+    cp -a "$BACKUP_DIR/data" "$BACKUP_DIR/pub" /var/www/twiki_new/
+    [ -f "$BACKUP_DIR/lib/LocalSite.cfg" ] && cp "$BACKUP_DIR/lib/LocalSite.cfg" /var/www/twiki_new/lib/
+    if [ -d "$BACKUP_DIR/lib/TWiki/Plugins" ]; then
+        mkdir -p /var/www/twiki_new/lib/TWiki
+        cp -a "$BACKUP_DIR/lib/TWiki/Plugins" /var/www/twiki_new/lib/TWiki/
+    fi
+    if [ -d "$BACKUP_DIR/lib/TWiki/Contrib" ]; then
+        mkdir -p /var/www/twiki_new/lib/TWiki
+        cp -a "$BACKUP_DIR/lib/TWiki/Contrib" /var/www/twiki_new/lib/TWiki/
+    fi
+    rm -rf "$OLD_TWIKI_DIR"
+    mv /var/www/twiki_new "$OLD_TWIKI_DIR"
+    chown -R www-data:www-data "$OLD_TWIKI_DIR"
+fi
+service apache2 start}
+{type: uploaded file
+fileName: 1vt-XssTwiki_15.txt
+fullContent:
+#!/bin/bash
+twiki_home=$(find / -wholename '*lib/TWiki.pm' -exec dirname {} \; 2>/dev/null | head -n 1)
+if [ -z "$twiki_home" ]; then
+  exit 1
+fi
+twiki_home=$(dirname "$twiki_home")
+backup_dir="${twiki_home}_backup_$(date +%Y%m%d)"
+cp -a "$twiki_home" "$backup_dir"
+tmp_dir=$(mktemp -d)
+wget -q -P "$tmp_dir" http://sourceforge.net/projects/twiki/files/TWiki/TWiki%204.2.4/twiki-4.2.4.tgz
+tar -xzf "$tmp_dir/twiki-4.2.4.tgz" -C "$tmp_dir"
+new_twiki="$tmp_dir/twiki-4.2.4"
+mv "$twiki_home" "${twiki_home}.old"
+mv "$new_twiki" "$twiki_home"
+rm -rf "$twiki_home/data"
+cp -a "${twiki_home}.old/data" "$twiki_home/"
+rm -rf "$twiki_home/pub"
+cp -a "${twiki_home}.old/pub" "$twiki_home/"
+cp "${twiki_home}.old/lib/LocalSite.cfg" "$twiki_home/lib/LocalSite.cfg"
+if [ $(id -u) -eq 0 ]; then
+  chown -R www-data:www-data "$twiki_home/data" "$twiki_home/pub"
+fi
+if systemctl is-active --quiet apache2; then
+  systemctl restart apache2
+elif [ -f /etc/init.d/apache2 ]; then
+  /etc/init.d/apache2 restart
+fi
+rm -rf "$tmp_dir"
+rm -rf "${twiki_home}.old"}
+{type: uploaded file
+fileName: 1vt-XssTwiki_16.txt
+fullContent:
+#!/bin/bash
+
+# Localizações comuns para instalação do TWiki
+candidates=(
+  "/var/www/twiki"
+  "/usr/local/twiki"
+  "/opt/twiki"
+  "/home/*/public_html/twiki"
+  "/home/*/twiki"
+)
+
+# URL de download da versão corrigida
+TWIKI_URL="https://downloads.sourceforge.net/project/twiki/TWiki%20for%20all%20platforms/4.2.4/TWiki-4.2.4.tgz"
+
+# Procurar instalação vulnerável (versão "01 Feb 2003")
+found_dir=""
+shopt -s extglob
+for candidate in ${candidates[@]}; do
+  for path in $candidate; do
+    [[ -f "$path/lib/TWiki.pm" ]] && grep -qF '01 Feb 2003' "$path/lib/TWiki.pm" 2>/dev/null && found_dir="$path" && break
+  done
+  [[ -n "$found_dir" ]] && break
+done
+
+# Sai se não encontrar instalação vulnerável
+[[ -z "$found_dir" ]] && exit 0
+
+# Backup da instalação atual
+backup_dir="${found_dir}_backup_$(date +%Y%m%d%H%M%S)"
+mkdir -p "$(dirname "$backup_dir")"
+cp -Rp "$found_dir" "$backup_dir"
+
+# Área de trabalho temporária
+tmp_dir=$(mktemp -d)
+cd "$tmp_dir"
+
+# Download e extração da versão corrigida
+wget --no-check-certificate -O twiki.tgz "$TWIKI_URL"
+tar -xzf twiki.tgz
+
+# Atualização preservando dados/configurações
+cd TWiki-4.2.4
+rsync -a \
+  --exclude='data' \
+  --exclude='pub' \
+  --exclude='lib/LocalSite.cfg' \
+  --exclude='workspaces' \
+  --exclude='.htaccess' \
+  --exclude='bin/.htaccess' \
+  "$tmp_dir/TWiki-4.2.4"/ \
+  "$found_dir"
+
+# Restaurar permissões originais
+user_group=$(stat -c '%U:%G' "$found_dir")
+chown -R "$user_group" "$found_dir"
+
+# Limpeza
+rm -rf "$tmp_dir"}
+{type: uploaded file
+fileName: 1vt-XssTwiki_17.txt
+fullContent:
+#!/bin/bash
+
+BACKUP_DIR="/var/backups/twiki"
+INSTALL_DIR="/var/www/twiki"
+NOW=$(date +%Y%m%d_%H%M%S)
+TEMP_DIR=$(mktemp -d)
+TWIKI_ARCHIVE="$TEMP_DIR/twiki-4.2.4.tgz"
+TWIKI_URL="https://sourceforge.net/projects/twiki/files/TWiki%20for%20all%20Platforms/TWiki-4.2.4/TWiki-4.2.4.tgz/download"
+
+[ ! -d "$INSTALL_DIR" ] && echo "TWiki installation not found. Exiting." >&2 && exit 1
+[ ! -f "$INSTALL_DIR/lib/LocalSite.cfg" ] && echo "Missing configuration file. Cannot proceed." >&2 && exit 1
+
+mkdir -p "$BACKUP_DIR"
+tar -czf "$BACKUP_DIR/twiki_backup_$NOW.tgz" -C / $(realpath --relative-to=/ "$INSTALL_DIR")
+
+wget -q -O "$TWIKI_ARCHIVE" "$TWIKI_URL"
+tar -xzf "$TWIKI_ARCHIVE" -C "$TEMP_DIR"
+
+rsync -a "$INSTALL_DIR/data" "$TEMP_DIR/TWiki-4.2.4/"
+rsync -a "$INSTALL_DIR/pub" "$TEMP_DIR/TWiki-4.2.4/"
+cp -p "$INSTALL_DIR/lib/LocalSite.cfg" "$TEMP_DIR/TWiki-4.2.4/lib/"
+
+rm -rf "$INSTALL_DIR"
+mv "$TEMP_DIR/TWiki-4.2.4" "$INSTALL_DIR"
+
+find "$INSTALL_DIR" -type f -name .htaccess -exec chmod 644 {} \;
+find "$INSTALL_DIR"/{bin,tools} -type f -exec chmod 755 {} \;
+find "$INSTALL_DIR" -type d -exec chmod 755 {} \;
+
+rm -rf "$TEMP_DIR"}
+{type: uploaded file
+fileName: 1vt-XssTwiki_18.txt
+fullContent:
+#!/bin/bash
+
+possible_paths=("/var/www/twiki" "/usr/local/twiki" "/home/twiki" "/opt/twiki")
+TWIKI_ROOT_DIR=""
+for path in "${possible_paths[@]}"; do
+    if [ -d "$path" ] && [ -f "$path/lib/TWiki.pm" ]; then
+        TWIKI_ROOT_DIR="$path"
+        break
+    fi
+done
+
+[ -z "$TWIKI_ROOT_DIR" ] && exit 0
+
+version_file="$TWIKI_ROOT_DIR/lib/TWiki.pm"
+skip_version_check=0
+if [ -f "$version_file" ]; then
+    current_version=$(grep -m1 -P '\$VERSION\s*=' "$version_file" | grep -oP '\d+\.\d+\.\d+')
+    if [ -n "$current_version" ]; then
+        [ "$(printf "%s\n" "$current_version" "4.2.4" | sort -V | head -n1)" != "4.2.4" ] || exit 0
+    else
+        skip_version_check=1
+    fi
+else
+    skip_version_check=1
+fi
+
+systemctl stop apache2
+BACKUP_DIR="/tmp/twiki_backup_$(date +%Y%m%d%H%M%S)"
+mkdir -p "$BACKUP_DIR"
+cp -rp "$TWIKI_ROOT_DIR" "$BACKUP_DIR/twiki"
+
+TMP_DIR=$(mktemp -d)
+cd "$TMP_DIR" || exit 1
+wget -q http://twiki.org/p/pub/Codev/Release02x04/TWiki-4.2.4.tgz || exit 1
+tar xzf TWiki-4.2.4.tgz || exit 1
+cd TWiki-4.2.4 || exit 1
+
+cp -r "$TWIKI_ROOT_DIR/data" . || exit 1
+cp -r "$TWIKI_ROOT_DIR/pub" . || exit 1
+[ -f "$TWIKI_ROOT_DIR/lib/LocalSite.cfg" ] && cp "$TWIKI_ROOT_DIR/lib/LocalSite.cfg" ./lib/
+[ -d "$TWIKI_ROOT_DIR/plugins" ] && cp -r "$TWIKI_ROOT_DIR/plugins" .
+
+rm -rf "${TWIKI_ROOT_DIR:?}/"*
+rm -rf "${TWIKI_ROOT_DIR}"/.* 2>/dev/null
+mv ./* "${TWIKI_ROOT_DIR}/"
+mv .[^.]* "${TWIKI_ROOT_DIR}/" 2>/dev/null
+chown -R www-data:www-data "$TWIKI_ROOT_DIR"
+systemctl start apache2
+rm -rf "$TMP_DIR"}
+{type: uploaded file
+fileName: 1vt-XssTwiki_19.txt
+fullContent:
+#!/bin/bash
+BACKUP_DIR="/var/backups/twiki_upgrade"
+TWIKI_FIXED_VERSION="4.2.4"
+DOWNLOAD_URL="http://sourceforge.net/projects/twiki/files/TWiki%20for%20All%20Platforms/TWiki%20${TWIKI_FIXED_VERSION}/TWiki-${TWIKI_FIXED_VERSION}.tgz"
+CANDIDATE_PATHS=("/var/www/twiki" "/var/www/html/twiki" "/usr/local/twiki" "/opt/twiki" 
+                 "/usr/local/apache/htdocs/twiki" "/home/twiki" "/srv/www/twiki")
+
+if ! TWIKI_HOME=$(find "${CANDIDATE_PATHS[@]}" -maxdepth 0 -exec sh -c '
+  for d do [ -d "$d/bin" ] && [ -d "$d/data" ] && [ -d "$d/pub" ] && echo "$d" && exit 0; done' sh {} + 2>/dev/null); then
+  echo "Falha: Nenhuma instalação do TWiki encontrada."
+  exit 1
+fi
+
+mkdir -p "$BACKUP_DIR" || exit 1
+TIMESTAMP=$(date +%Y%m%d%H%M%S)
+BACKUP_FILE="${BACKUP_DIR}/twiki_backup_${TIMESTAMP}.tar.gz"
+old_dir_owner=$(stat -c "%U:%G" "$TWIKI_HOME")
+if ! tar -czf "$BACKUP_FILE" -C "$(dirname "$TWIKI_HOME")" "$(basename "$TWIKI_HOME")" >/dev/null 2>&1; then
+  echo "Falha: Erro ao criar backup."
+  exit 1
+fi
+
+TMP_DIR=$(mktemp -d)
+wget -q -P "$TMP_DIR" "$DOWNLOAD_URL" || { echo "Falha: Download do TWiki ${TWIKI_FIXED_VERSION} mal-sucedido."; exit 1; }
+tar -xzf "$TMP_DIR/TWiki-${TWIKI_FIXED_VERSION}.tgz" -C "$TMP_DIR" >/dev/null 2>&1 || exit 1
+
+for dir in data pub; do
+  if ! cp -rpf "${TWIKI_HOME}/${dir}" "${TMP_DIR}/TWiki-${TWIKI_FIXED_VERSION}/"; then
+    echo "Falha: Falha ao copiar ${dir}."
+    exit 1
+  fi
+done
+
+if [ -f "${TWIKI_HOME}/lib/LocalSite.cfg" ]; then
+  cp -p "${TWIKI_HOME}/lib/LocalSite.cfg" "${TMP_DIR}/TWiki-${TWIKI_FIXED_VERSION}/lib/" || exit 1
+fi
+
+rm -rf "$TWIKI_HOME" || exit 1
+mv "${TMP_DIR}/TWiki-${TWIKI_FIXED_VERSION}" "$TWIKI_HOME" || exit 1
+chown -R "$old_dir_owner" "$TWIKI_HOME"
+
+if { systemctl is-active --quiet apache2 || systemctl is-active --quiet httpd; } 2>/dev/null; then
+  if command -v systemctl >/dev/null; then
+    { systemctl restart apache2 || systemctl restart httpd; } >/dev/null 2>&1
+  elif command -v service >/dev/null; then
+    { service apache2 restart || service httpd restart; } >/dev/null 2>&1
+  fi
+fi
+
+rm -rf "$TMP_DIR"}
+{type: uploaded file
+fileName: 1vt-XssTwiki_20.txt
+fullContent:
+#!/bin/bash
+set -e
+
+TWIKI_DIR=""
+if [ -d "/var/www/twiki" ]; then
+    TWIKI_DIR="/var/www/twiki"
+elif [ -d "/usr/local/twiki" ]; then
+    TWIKI_DIR="/usr/local/twiki"
+elif [ -d "/opt/twiki" ]; then
+    TWIKI_DIR="/opt/twiki"
+elif [ -d "$HOME/twiki" ]; then
+    TWIKI_DIR="$HOME/twiki"
+else
+    echo "TWiki installation directory not found. Aborting." >&2
+    exit 1
+fi
+
+BACKUP_DIR="/tmp/twiki-backup-$(date +%Y%m%d%H%M%S)"
+mkdir -p "$BACKUP_DIR"
+cp -R "$TWIKI_DIR" "$BACKUP_DIR"
+
+TMP_DIR=$(mktemp -d)
+wget -O "$TMP_DIR/twiki-4.2.4.tgz" "https://sourceforge.net/projects/twiki/files/TWiki%20for%20all%20Platforms/TWiki%204.2.4/twiki-4.2.4.tgz/download"
+tar -xzf "$TMP_DIR/twiki-4.2.4.tgz" -C "$TMP_DIR"
+TWIKI_NEW_DIR="$TMP_DIR/twiki"
+
+[ -d "$TWIKI_DIR/data" ] && mv "$TWIKI_DIR/data" "$TMP_DIR/data.bak"
+[ -d "$TWIKI_DIR/pub" ] && mv "$TWIKI_DIR/pub" "$TMP_DIR/pub.bak"
+[ -d "$TWIKI_DIR/local" ] && mv "$TWIKI_DIR/local" "$TMP_DIR/local.bak"
+
+rm -rf "${TWIKI_DIR:?}"/*
+mv "$TWIKI_NEW_DIR"/* "$TWIKI_DIR"
+
+[ -d "$TMP_DIR/data.bak" ] && mv "$TMP_DIR/data.bak" "$TWIKI_DIR/data"
+[ -d "$TMP_DIR/pub.bak" ] && mv "$TMP_DIR/pub.bak" "$TWIKI_DIR/pub"
+[ -d "$TMP_DIR/local.bak" ] && mv "$TMP_DIR/local.bak" "$TWIKI_DIR/local"
+
+WEB_USER="www-data"
+WEB_GROUP="www-data"
+chown -R $WEB_USER:$WEB_GROUP "$TWIKI_DIR/data"
+chown -R $WEB_USER:$WEB_GROUP "$TWIKI_DIR/pub"
+
+cd "$TWIKI_DIR/bin" && printf "y\nn\n" | ./upgrade.pl >/dev/null 2>&1 || true
+find "$TWIKI_DIR" -type d -exec chmod 755 {} \;
+find "$TWIKI_DIR" -type f -exec chmod 644 {} \;}

@@ -1,0 +1,148 @@
+```bash
+#!/bin/bash
+
+# Vulnerability 1: Cleartext Transmission of Sensitive Information via HTTP
+# Mitigation: Enforce HTTPS redirection.  This script assumes Apache.  Adjust for other web servers.
+# It's best practice to handle this in the virtual host configuration.
+# This script also assumes the existence of a valid SSL/TLS certificate.
+
+# Check if Apache is installed
+if command -v apache2 >/dev/null 2>&1; then
+    # Enable mod_rewrite and mod_ssl
+    sudo a2enmod rewrite
+    sudo a2enmod ssl
+
+    # Create a .htaccess file to redirect HTTP to HTTPS
+    echo "
+RewriteEngine On
+RewriteCond %{HTTPS} off
+RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+" | sudo tee /var/www/html/.htaccess > /dev/null
+
+    # Restart Apache
+    sudo systemctl restart apache2
+elif command -v nginx >/dev/null 2>&1; then
+    #For Nginx, HTTPS redirection should be set up directly in the server block
+    echo "Nginx detected.  Please manually configure HTTPS redirection in your server block."
+    echo "Example configuration:"
+    echo "server {"
+    echo "    listen 80;"
+    echo "    server_name your_domain.com;"
+    echo "    return 301 https://\$server_name\$request_uri;"
+    echo "}"
+else
+    echo "No supported web server (Apache or Nginx) found.  HTTPS redirection not configured."
+fi
+
+# Vulnerability 2: DNS Cache Snooping Vulnerability (UDP)
+# Mitigation: Disable recursion or restrict access.
+# This script disables recursion for BIND9.  Adjust for other DNS servers.
+
+# Check if BIND9 is installed
+if command -v named >/dev/null 2>&1; then
+    # Disable recursion in /etc/bind/named.conf.options
+    sudo sed -i 's/recursion yes;/recursion no;/' /etc/bind/named.conf.options
+
+    # Restart BIND9
+    sudo systemctl restart bind9
+else
+    echo "BIND9 not found.  DNS recursion not disabled.  Please configure your DNS server manually."
+fi
+
+# Vulnerability 3: ICMP Timestamp Reply Information Disclosure
+# Mitigation: Disable ICMP timestamp replies.
+# This script disables ICMP timestamp replies in the kernel.
+
+# Disable ICMP timestamp replies
+sudo sysctl -w net.ipv4.icmp_echo_ignore_all=1
+echo "net.ipv4.icmp_echo_ignore_all = 1" | sudo tee -a /etc/sysctl.conf
+
+# Vulnerability 4: SSL/TLS: Deprecated TLSv1.0 and TLSv1.1 Protocol Detection
+# Mitigation: Disable TLSv1.0 and TLSv1.1.
+# This script assumes OpenSSL-based server (Apache/Nginx).
+
+if command -v apache2 >/dev/null 2>&1; then
+    #Edit the SSLProtocol directive in the Apache SSL configuration file (e.g., /etc/apache2/mods-enabled/ssl.conf)
+    SSL_CONFIG_FILE=$(find /etc/apache2/mods-enabled/ -name "ssl.conf" | head -n 1)
+    if [ -n "$SSL_CONFIG_FILE" ]; then
+        sudo sed -i "s/SSLProtocol All -SSLv3/SSLProtocol All -SSLv3 -TLSv1 -TLSv1.1/g" "$SSL_CONFIG_FILE"
+    else
+        echo "Apache SSL configuration file not found. Manually disable TLSv1.0 and TLSv1.1."
+    fi
+    sudo systemctl restart apache2
+elif command -v nginx >/dev/null 2>&1; then
+    # Edit the ssl_protocols directive in the Nginx server block configuration file.
+    NGINX_CONFIG_FILE=$(find /etc/nginx/sites-enabled/ -type f | grep -v "default" | head -n 1) #Find the first enabled site config (not default)
+    if [ -n "$NGINX_CONFIG_FILE" ]; then
+       sudo sed -i "s/ssl_protocols TLSv1 TLSv1.1 TLSv1.2 TLSv1.3;/ssl_protocols TLSv1.2 TLSv1.3;/g" "$NGINX_CONFIG_FILE"
+    else
+      echo "Nginx configuration file not found. Manually disable TLSv1.0 and TLSv1.1."
+    fi
+    sudo systemctl restart nginx
+else
+    echo "No supported web server found. Manually disable TLSv1.0 and TLSv1.1 in your web server configuration."
+fi
+
+# Vulnerability 5: SSL/TLS: Renegotiation DoS Vulnerability (CVE-2011-1473, CVE-2011-5094)
+# Mitigation: Disable renegotiation (generally not recommended unless you know the implications).
+# This script attempts to disable renegotiation in Apache.  Adjust for other web servers.
+# Important: Disabling renegotiation may break some applications. Test thoroughly!
+
+if command -v apache2 >/dev/null 2>&1; then
+    # Disable renegotiation using SSL Options
+    SSL_CONFIG_FILE=$(find /etc/apache2/mods-enabled/ -name "ssl.conf" | head -n 1)
+    if [ -n "$SSL_CONFIG_FILE" ]; then
+      sudo sed -i '/<VirtualHost/a \ \ \ \ SSLOptions -StdEnvVars +StrictRequire\n\ \ \ \ <Location />\n\ \ \ \ \ \ \ Require all granted\n\ \ \ \ \ \ \ SSLRenegBufferSize 1048576\n\ \ \ \ \ \ \ SSLVerifyClient none\n\ \ \ \ </Location>' "$SSL_CONFIG_FILE"
+    else
+       echo "Apache SSL configuration file not found.  Could not disable renegotiation. Disable manually."
+    fi
+
+    sudo systemctl restart apache2
+
+elif command -v nginx >/dev/null 2>&1; then
+    echo "Nginx requires recompilation with specific options to disable renegotiation, or patching. Refer to Nginx documentation."
+else
+    echo "No supported web server found.  Renegotiation DoS protection requires manual configuration."
+fi
+
+# Vulnerability 6: SSL/TLS: Report Weak Cipher Suites
+# Mitigation: Disable weak cipher suites.
+# This script assumes OpenSSL and attempts to set strong cipher suites.
+
+if command -v apache2 >/dev/null 2>&1; then
+    #Update SSLCipherSuite in ssl.conf
+    SSL_CONFIG_FILE=$(find /etc/apache2/mods-enabled/ -name "ssl.conf" | head -n 1)
+    if [ -n "$SSL_CONFIG_FILE" ]; then
+      sudo sed -i "s/^SSLCipherSuite.*/SSLCipherSuite TLSv1.2+HIGH:!SSLv3:!aNULL:!MD5:!ADH:!RC4:!DH:!DHE/" "$SSL_CONFIG_FILE"
+    else
+       echo "Apache SSL configuration file not found.  Cipher suites not updated. Update manually."
+    fi
+
+    sudo systemctl restart apache2
+
+elif command -v nginx >/dev/null 2>&1; then
+
+    NGINX_CONFIG_FILE=$(find /etc/nginx/sites-enabled/ -type f | grep -v "default" | head -n 1) #Find the first enabled site config (not default)
+    if [ -n "$NGINX_CONFIG_FILE" ]; then
+      sudo sed -i "s/^ssl_ciphers.*/ssl_ciphers TLSv1.2+HIGH:!SSLv3:!aNULL:!MD5:!ADH:!RC4:!DH:!DHE;/" "$NGINX_CONFIG_FILE"
+    else
+      echo "Nginx configuration file not found. Manually update the cipher suites"
+    fi
+    sudo systemctl restart nginx
+else
+    echo "No supported web server found.  Weak cipher suites mitigation requires manual configuration."
+fi
+
+# Vulnerability 7: TCP Timestamps Information Disclosure
+# Mitigation: Disable TCP timestamps.
+# This script disables TCP timestamps.
+
+# Disable TCP timestamps
+sudo sysctl -w net.ipv4.tcp_timestamps=0
+echo "net.ipv4.tcp_timestamps = 0" | sudo tee -a /etc/sysctl.conf
+
+# Apply sysctl settings
+sudo sysctl -p
+
+echo "Vulnerability mitigation script complete.  Reboot may be required to fully apply changes."
+```

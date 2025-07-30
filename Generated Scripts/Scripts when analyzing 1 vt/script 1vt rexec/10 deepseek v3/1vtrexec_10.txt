@@ -1,0 +1,21 @@
+#!/bin/bash
+systemctl stop rexec
+systemctl disable rexec
+if grep -q "^rexec" /etc/inetd.conf; then
+    sed -i '/^rexec/d' /etc/inetd.conf
+fi
+if grep -q "^exec" /etc/inetd.conf; then
+    sed -i '/^exec/d' /etc/inetd.conf
+fi
+if grep -q "^512" /etc/services; then
+    sed -i '/^512\/tcp.*rexec/d' /etc/services
+fi
+if [ -f /etc/xinetd.d/rexec ]; then
+    rm -f /etc/xinetd.d/rexec
+fi
+if [ -f /etc/xinetd.d/exec ]; then
+    rm -f /etc/xinetd.d/exec
+fi
+iptables -A INPUT -p tcp --dport 512 -j DROP
+iptables-save > /etc/iptables/rules.v4
+echo "rexec service has been disabled and secured."

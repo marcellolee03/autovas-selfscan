@@ -1,0 +1,27 @@
+Request 1: 32.0871 segundos
+Request 2: 11.3822 segundos
+Request 3: 9.7124 segundos
+Request 4: 23.9623 segundos
+Request 5: 9.2161 segundos
+Request 6: 3.4843 segundos
+Request 7: 12.5918 segundos
+Request 8: 9.1142 segundos
+Request 9: 55.8809 segundos
+Request 10: 12.4205 segundos
+Request 11: 10.3424 segundos
+Request 12: 13.7234 segundos
+Request 13: 20.8880 segundos
+Request 14: 7.6802 segundos
+Request 15: 12.0853 segundos
+Request 16: 16.5867 segundos
+Request 17: 16.0156 segundos
+Request 18: 4.8841 segundos
+Request 19: 12.0729 segundos
+Request 20: 33.3739 segundos
+Request 21: 24.0750 segundos
+Request 22: 9.4512 segundos
+Request 23: 18.6054 segundos
+Request 24: 10.5483 segundos
+Request 25: 17.2048 segundos
+
+A média dos tempos das 25 requisições é aproximadamente 16,30 segundos, e o total acumulado de tempo é 407,39 segundos.

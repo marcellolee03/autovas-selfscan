@@ -1,0 +1,106 @@
+```sh
+#!/bin/bash
+
+# Variáveis para controle de versão
+python3_10_version_installed="3.10.12"
+python3_12_version_installed="3.12.0"
+
+# Funções para atualização do Python
+update_python3_10() {
+  echo "Atualizando Python 3.10..."
+  
+  # Etapa 1: Remover a versão existente do Python 3.10
+  echo "Removendo a versão existente do Python 3.10..."
+  sudo apt remove -y python3.10
+
+  # Etapa 2: Baixar e instalar a versão mais recente do Python 3.10
+  echo "Baixando e instalando a versão mais recente do Python 3.10..."
+  sudo apt update
+  sudo apt install -y python3.10 python3.10-dev python3-pip
+  sudo pip3 install --upgrade pip
+  
+  # Etapa 3: Atualizar para a versão específica recomendada
+  echo "Atualizando para a versão Python 3.10.16..."
+  sudo pip3 install python==3.10.16
+
+  echo "Python 3.10 atualizado para a versão 3.10.16."
+}
+
+update_python3_12() {
+  echo "Atualizando Python 3.12..."
+  
+  # Etapa 1: Remover a versão existente do Python 3.12
+  echo "Removendo a versão existente do Python 3.12..."
+  sudo apt remove -y python3.12
+
+  # Etapa 2: Baixar e instalar a versão mais recente do Python 3.12
+  echo "Baixando e instalando a versão mais recente do Python 3.12..."
+  sudo apt update
+  sudo apt install -y python3.12 python3.12-dev python3-pip
+  sudo pip3 install --upgrade pip
+  
+  # Etapa 3: Atualizar para a versão específica recomendada
+  echo "Atualizando para a versão Python 3.12.9..."
+  sudo pip3 install python==3.12.9
+
+  echo "Python 3.12 atualizado para a versão 3.12.9."
+}
+
+# Função para desabilitar algoritmos MAC fracos no SSH
+disable_weak_ssh_mac_algorithms() {
+  echo "Desabilitando algoritmos MAC fracos no SSH..."
+
+  # Lista de algoritmos MAC a serem desabilitados
+  weak_macs="umac-64-etm@openssh.com,umac-64@openssh.com"
+
+  # Localizar a linha de configuração MAC no arquivo sshd_config
+  mac_line=$(grep -n "MACs" /etc/ssh/sshd_config)
+  mac_line_number=$(echo "$mac_line" | cut -d':' -f1)
+
+  # Verificar se a linha existe
+  if [ -n "$mac_line_number" ]; then
+    echo "Linha 'MACs' encontrada no arquivo sshd_config."
+    
+    # Remover os algoritmos fracos da configuração
+    new_macs=$(echo "$mac_line" | cut -d' ' -f2- | tr ',' '\n' | grep -v -e "$weak_macs" | tr '\n' ',' | sed 's/,$//')
+
+    # Atualizar o arquivo de configuração
+    sudo sed -i "${mac_line_number}s/.*/MACs $new_macs/" /etc/ssh/sshd_config
+    echo "Algoritmos MAC fracos removidos da configuração SSH."
+  else
+    echo "Linha 'MACs' não encontrada no arquivo sshd_config. Adicionando linha."
+    sudo echo "MACs -umac-64-etm@openssh.com,-umac-64@openssh.com" >> /etc/ssh/sshd_config
+  fi
+
+  # Reiniciar o serviço SSH para aplicar as alterações
+  sudo systemctl restart sshd
+  echo "Serviço SSH reiniciado."
+}
+
+# Função para desabilitar ICMP Timestamp Replies
+disable_icmp_timestamp_replies() {
+  echo "Desabilitando ICMP Timestamp Replies..."
+
+  # Verificar se o arquivo sysctl.conf existe
+  if [ -f /etc/sysctl.conf ]; then
+    # Adicionar a configuração para desabilitar ICMP Timestamp Replies
+    sudo echo "net.ipv4.icmp_timestamp = 0" >> /etc/sysctl.conf
+    sudo echo "net.ipv4.icmp_timestamp_reply = 0" >> /etc/sysctl.conf
+
+    # Aplicar as alterações
+    sudo sysctl -p
+    echo "ICMP Timestamp Replies desabilitado."
+  else
+    echo "Arquivo /etc/sysctl.conf não encontrado."
+  fi
+}
+
+
+# Execução das funções de atualização e correção
+update_python3_10
+update_python3_12
+disable_weak_ssh_mac_algorithms
+disable_icmp_timestamp_replies
+
+echo "Script de correção de vulnerabilidades Python concluído."
+```

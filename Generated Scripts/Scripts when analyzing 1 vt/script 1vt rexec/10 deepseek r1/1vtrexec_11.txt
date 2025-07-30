@@ -1,0 +1,34 @@
+#!/bin/bash
+systemctl stop rexec rexecd in.rexecd inetutils-rexecd netkit-rexecd 2>/dev/null
+systemctl disable rexec rexecd in.rexecd inetutils-rexecd netkit-rexecd 2>/dev/null
+update-rc.d -f rexec remove 2>/dev/null
+update-rc.d -f rexecd remove 2>/dev/null
+rm -f /etc/init.d/rexec /etc/init.d/rexecd 2>/dev/null
+
+sed -i '/^rexec[[:space:]]/s/^/#/' /etc/inetd.conf 2>/dev/null
+pkill -HUP inetd 2>/dev/null
+
+if [ -d /etc/xinetd.d ]; then
+    for svc in rexec rexecd rexecd-linux in.rexecd; do
+        if [ -f "/etc/xinetd.d/$svc" ]; then
+            sed -i 's/disable[[:space:]]*=[[:space:]]*no/disable = yes/' "/etc/xinetd.d/$svc"
+            pkill -HUP xinetd 2>/dev/null
+        fi
+    done
+fi
+
+if dpkg -l | grep -q 'inetutils-rexecd'; then
+    apt-get remove -y --purge inetutils-rexecd
+elif dpkg -l | grep -q 'netkit-rexecd'; then
+    apt-get remove -y --purge netkit-rexecd
+elif dpkg -l | grep -q 'rsh-server'; then
+    apt-get remove -y --purge rsh-server
+fi
+
+if rpm -q inetutils-rexecd 2>&1 | grep -q 'not installed'; then
+    yum remove -y inetutils-rexecd 2>/dev/null
+fi
+
+if rpm -q netkit-rexecd 2>&1 | grep -q 'not installed'; then
+    yum remove -y netkit-rexecd 2>/dev/null
+fi

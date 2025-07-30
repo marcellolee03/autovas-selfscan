@@ -1,0 +1,38 @@
+#!/bin/bash
+
+# Define as variáveis
+jquery_path="/console/framework/../js/jquery-1.8.3.min.js"
+backup_path="/tmp/jquery-1.8.3.min.js.bak"
+new_jquery_url="https://code.jquery.com/jquery-1.9.0.min.js"
+target_dir=$(dirname "$jquery_path")
+
+# Faz backup do arquivo existente
+echo "Fazendo backup de $jquery_path para $backup_path"
+cp "$jquery_path" "$backup_path"
+
+# Garante que o diretório existe
+if [ ! -d "$target_dir" ]; then
+  echo "Diretório $target_dir não existe. Criando."
+  mkdir -p "$target_dir"
+fi
+
+# Baixa a nova versão do jQuery
+echo "Baixando jQuery 1.9.0 de $new_jquery_url para $jquery_path"
+wget -q "$new_jquery_url" -O "$jquery_path"
+
+# Verifica se o download foi bem-sucedido
+if [ -f "$jquery_path" ]; then
+  echo "jQuery atualizado com sucesso para a versão 1.9.0."
+else
+  echo "Falha ao baixar o jQuery 1.9.0. Restaurando o backup."
+  cp "$backup_path" "$jquery_path"
+  echo "Backup restaurado."
+  exit 1
+fi
+
+# Remove o arquivo de backup
+rm "$backup_path"
+
+echo "Patch completo."
+
+exit 0

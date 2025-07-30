@@ -1,0 +1,53 @@
+#!/bin/bash
+
+# Script para corrigir a vulnerabilidade CVE-2012-0053 no Apache HTTP Server.
+# Este script atualiza o Apache HTTP Server para a versão 2.2.22 ou posterior.
+
+# Verificar se o sistema é Debian/Ubuntu
+if command -v apt-get &> /dev/null; then
+  # Atualizar o índice de pacotes
+  apt-get update
+
+  # Atualizar o Apache HTTP Server
+  apt-get upgrade apache2 -y
+
+  # Verificar a versão do Apache após a atualização
+  apache2ctl -v
+
+  # Reiniciar o Apache para aplicar as atualizações
+  systemctl restart apache2
+
+  echo "Apache HTTP Server atualizado para a versão mais recente. Reiniciado."
+
+# Verificar se o sistema é Red Hat/CentOS/Fedora
+elif command -v yum &> /dev/null; then
+  # Atualizar o Apache HTTP Server
+  yum update httpd -y
+
+  # Verificar a versão do Apache após a atualização
+  httpd -v
+
+  # Reiniciar o Apache para aplicar as atualizações
+  systemctl restart httpd
+
+  echo "Apache HTTP Server atualizado para a versão mais recente. Reiniciado."
+
+# Verificar se o sistema é SUSE Linux
+elif command -v zypper &> /dev/null; then
+  # Atualizar o Apache HTTP Server
+  zypper update apache2 -y
+
+  # Verificar a versão do Apache após a atualização
+  apache2 -v
+
+  # Reiniciar o Apache para aplicar as atualizações
+  systemctl restart apache2
+
+  echo "Apache HTTP Server atualizado para a versão mais recente. Reiniciado."
+
+else
+  echo "Sistema operacional não suportado. A atualização do Apache HTTP Server deve ser feita manualmente."
+  exit 1
+fi
+
+exit 0

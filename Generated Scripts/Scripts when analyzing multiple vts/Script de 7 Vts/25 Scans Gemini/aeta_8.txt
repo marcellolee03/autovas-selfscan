@@ -1,0 +1,149 @@
+```bash
+#!/bin/bash
+
+# Vulnerability 1: Cleartext Transmission of Sensitive Information via HTTP
+# Mitigation: Redirect HTTP to HTTPS.  This requires a web server (e.g., Apache, Nginx) and a valid SSL/TLS certificate.
+# This script provides a general example for Apache.  Adapt for your specific web server.
+
+# Check if Apache is installed
+if command -v apache2 >/dev/null 2>&1; then
+  # Enable mod_rewrite if not already enabled
+  if ! a2enmod rewrite >/dev/null 2>&1; then
+    echo "Enabling mod_rewrite..."
+    a2enmod rewrite
+  fi
+
+  # Create or modify the default virtual host configuration to redirect HTTP to HTTPS
+  # Adjust the path to your virtual host configuration file if necessary
+  VHOST_FILE="/etc/apache2/sites-available/000-default.conf"
+  
+  # Backup the original file
+  cp "$VHOST_FILE" "${VHOST_FILE}.bak.$(date +%Y%m%d%H%M%S)"
+
+  # Add redirection to the virtual host file
+  echo "<VirtualHost *:80>" >> "$VHOST_FILE"
+  echo "    ServerName \$(hostname -f)" >> "$VHOST_FILE"
+  echo "    Redirect permanent / https://\${SERVER_NAME}/" >> "$VHOST_FILE"
+  echo "</VirtualHost>" >> "$VHOST_FILE"
+
+  # Restart Apache to apply the changes
+  echo "Restarting Apache..."
+  systemctl restart apache2
+elif command -v nginx >/dev/null 2>&1; then
+    # nginx configuration example
+    VHOST_FILE="/etc/nginx/sites-available/default" # Or your server block config
+    
+    #backup
+    cp "$VHOST_FILE" "${VHOST_FILE}.bak.$(date +%Y%m%d%H%M%S)"
+
+    echo "server {" > "$VHOST_FILE"
+    echo "    listen 80;" >> "$VHOST_FILE"
+    echo "    server_name \$(hostname -f);" >> "$VHOST_FILE"
+    echo "    return 301 https://\$host\$request_uri;" >> "$VHOST_FILE"
+    echo "}" >> "$VHOST_FILE"
+
+    echo "Restarting Nginx..."
+    systemctl restart nginx
+
+else
+  echo "Web server (Apache or Nginx) not found.  Please install and configure a web server and SSL/TLS certificate manually."
+fi
+
+
+# Vulnerability 2: DNS Cache Snooping Vulnerability (UDP)
+# Mitigation: Disable recursion or restrict access.  This example disables recursion for BIND9.
+# Adjust the configuration file path if necessary.
+if [ -f "/etc/bind/named.conf.options" ]; then
+  # Backup the original file
+  cp /etc/bind/named.conf.options /etc/bind/named.conf.options.bak.$(date +%Y%m%d%H%M%S)
+  
+  sed -i 's/recursion yes;/recursion no;/' /etc/bind/named.conf.options
+  echo "Disabling DNS recursion..."
+  
+  # Restart Bind9
+  systemctl restart bind9
+  echo "Restarting Bind9..."
+else
+  echo "BIND9 not found. Please configure your DNS server manually."
+fi
+
+# Vulnerability 3: ICMP Timestamp Reply Information Disclosure
+# Mitigation: Disable ICMP timestamp replies.
+echo "Disabling ICMP timestamp replies..."
+echo 1 > /proc/sys/net/ipv4/icmp_echo_ignore_all
+echo "net.ipv4.icmp_echo_ignore_all = 1" >> /etc/sysctl.conf
+sysctl -p
+
+# Vulnerability 4: SSL/TLS: Deprecated TLSv1.0 and TLSv1.1 Protocol Detection
+# Mitigation: Disable TLSv1.0 and TLSv1.1. This is highly dependent on the specific application using TLS.
+# This example shows how to disable it for OpenSSL-based applications (e.g., Apache).
+# Adapt the configuration file path and options for your specific application.
+
+# For Apache, modify the SSLProtocol directive in the SSL virtual host configuration file.
+# This is just an example - adapt for your actual apache config.
+if command -v apache2 >/dev/null 2>&1; then
+  SSL_CONF_FILE="/etc/apache2/mods-available/ssl.conf"
+  #backup
+  cp "$SSL_CONF_FILE" "${SSL_CONF_FILE}.bak.$(date +%Y%m%d%H%M%S)"
+
+  # Find the line starting with "SSLProtocol" and replace it.  If it doesn't exist, add it.
+  if grep -q "^SSLProtocol" "$SSL_CONF_FILE"; then
+    sed -i 's/^SSLProtocol.*/SSLProtocol All -SSLv3 -TLSv1 -TLSv1.1/' "$SSL_CONF_FILE"
+  else
+    echo "SSLProtocol All -SSLv3 -TLSv1 -TLSv1.1" >> "$SSL_CONF_FILE"
+  fi
+  
+  echo "Disabling TLSv1.0 and TLSv1.1 for Apache..."
+  systemctl restart apache2
+  echo "Restarting Apache..."
+fi
+
+# Vulnerability 5: SSL/TLS: Renegotiation DoS Vulnerability (CVE-2011-1473, CVE-2011-5094)
+# Mitigation: Disable renegotiation or limit it. This is also highly dependent on the application.
+# For Apache, disable renegotiation using the SSL options.
+
+if command -v apache2 >/dev/null 2>&1; then
+  SSL_CONF_FILE="/etc/apache2/mods-available/ssl.conf" # or the vhost config
+   #backup
+  cp "$SSL_CONF_FILE" "${SSL_CONF_FILE}.bak.$(date +%Y%m%d%H%M%S)"
+
+  # Find the line starting with "SSLOptions" and add or modify it
+  if grep -q "^SSLOptions" "$SSL_CONF_FILE"; then
+    sed -i 's/^SSLOptions.*/SSLOptions +StrictRequire/' "$SSL_CONF_FILE"
+  else
+    echo "SSLOptions +StrictRequire" >> "$SSL_CONF_FILE"
+  fi
+  
+  echo "Disabling SSL renegotiation for Apache..."
+  systemctl restart apache2
+  echo "Restarting Apache..."
+fi
+
+# Vulnerability 6: SSL/TLS: Report Weak Cipher Suites
+# Mitigation: Configure strong cipher suites.  This example shows how to configure strong ciphers for Apache.
+if command -v apache2 >/dev/null 2>&1; then
+  SSL_CONF_FILE="/etc/apache2/mods-available/ssl.conf"
+  #backup
+  cp "$SSL_CONF_FILE" "${SSL_CONF_FILE}.bak.$(date +%Y%m%d%H%M%S)"
+  
+  # Example strong cipher suite configuration:
+  CIPHERS="ECDHE-RSA-AES256-GCM-SHA384:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-RSA-CHACHA20-POLY1305:DHE-RSA-AES256-GCM-SHA384:DHE-RSA-AES128-GCM-SHA256"
+
+  # Find the line starting with "SSLCipherSuite" and replace it, or add it if it doesn't exist
+  if grep -q "^SSLCipherSuite" "$SSL_CONF_FILE"; then
+    sed -i "s/^SSLCipherSuite.*/SSLCipherSuite $CIPHERS/" "$SSL_CONF_FILE"
+  else
+    echo "SSLCipherSuite $CIPHERS" >> "$SSL_CONF_FILE"
+  fi
+
+  echo "Configuring strong cipher suites for Apache..."
+  systemctl restart apache2
+  echo "Restarting Apache..."
+fi
+
+# Vulnerability 7: TCP Timestamps Information Disclosure
+# Mitigation: Disable TCP timestamps.
+echo "Disabling TCP timestamps..."
+echo "net.ipv4.tcp_timestamps = 0" >> /etc/sysctl.conf
+sysctl -p
+```

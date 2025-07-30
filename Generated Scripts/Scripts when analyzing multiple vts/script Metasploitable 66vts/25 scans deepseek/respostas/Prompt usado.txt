@@ -1,0 +1,2048 @@
+    # INSTRUÇÕES PARA O MODELO DE IA
+
+    ## PERSONA
+    Você é um especialista em cibersegurança e automação de sistemas, focado em criar scripts de correção (patching). Sua única função é gerar um script que resolva a vulnerabilidade descrita abaixo.
+
+    ## TAREFA
+    Analise o contexto da vulnerabilidade a seguir e gere um script de shell (compatível com o sistema operacional do localhost) que, ao ser executado, corrija permanentemente a vulnerabilidade descrita.
+
+    ## CONTEXTO DA VULNERABILIDADE
+
+# Vulnerabilidade 1
+CVEs: CVE-2008-5304,CVE-2008-5305
+NVT Name: TWiki XSS and Command Execution Vulnerabilities
+Port: 80.0
+Port Protocol: tcp
+Summary: TWiki is prone to Cross-Site Scripting (XSS) and Command Execution Vulnerabilities.
+Specific Result: Installed version: 01.Feb.2003
+Fixed version:     4.2.4
+
+
+Vulnerability Detection Method: 
+Details:
+TWiki XSS and Command Execution Vulnerabilities
+(OID: 1.3.6.1.4.1.25623.1.0.800320)
+Version used: 2024-03-01T14:37:10Z
+
+Affected Software/OS: TWiki, TWiki version prior to 4.2.4.
+Product Detection Result: nan
+Solution: Upgrade to version 4.2.4 or later.
+
+# Vulnerabilidade 2
+CVEs: nan
+NVT Name: Distributed Ruby (dRuby/DRb) Multiple RCE Vulnerabilities
+Port: 8787.0
+Port Protocol: tcp
+Summary: Systems using Distributed Ruby (dRuby/DRb), which is available in Ruby versions 1.6
+  and later, may permit unauthorized systems to execute distributed commands.
+Specific Result: The service is running in $SAFE >= 1 mode. However it is still possible to run arbitrary syscall commands on the remote host. Sending an invalid syscall the service returned the following response:
+
+Flo:Errno::ENOSYS:bt["3/usr/lib/ruby/1.8/drb/drb.rb:1555:in `syscall'"0/usr/lib/ruby/1.8/drb/drb.rb:1555:in `send'"4/usr/lib/ruby/1.8/drb/drb.rb:1555:in `__send__'"A/usr/lib/ruby/1.8/drb/drb.rb:1555:in `perform_without_block'"3/usr/lib/ruby/1.8/drb/drb.rb:1515:in `perform'"5/usr/lib/ruby/1.8/drb/drb.rb:1589:in `main_loop'"0/usr/lib/ruby/1.8/drb/drb.rb:1585:in `loop'"5/usr/lib/ruby/1.8/drb/drb.rb:1585:in `main_loop'"1/usr/lib/ruby/1.8/drb/drb.rb:1581:in `start'"5/usr/lib/ruby/1.8/drb/drb.rb:1581:in `main_loop'"//usr/lib/ruby/1.8/drb/drb.rb:1430:in `run'"1/usr/lib/ruby/1.8/drb/drb.rb:1427:in `start'"//usr/lib/ruby/1.8/drb/drb.rb:1427:in `run'"6/usr/lib/ruby/1.8/drb/drb.rb:1347:in `initialize'"//usr/lib/ruby/1.8/drb/drb.rb:1627:in `new'"9/usr/lib/ruby/1.8/drb/drb.rb:1627:in `start_service'"%/usr/sbin/druby_timeserver.rb:12:errnoi+:mesg"Function not implemented
+
+Vulnerability Detection Method: Send a crafted command to the service and check for a remote command execution
+  via the instance_eval or syscall requests.
+Details:
+Distributed Ruby (dRuby/DRb) Multiple RCE Vulnerabilities
+(OID: 1.3.6.1.4.1.25623.1.0.108010)
+Version used: 2024-06-28T05:05:33Z
+
+Affected Software/OS: nan
+Product Detection Result: nan
+Solution: Administrators of environments that rely on Distributed Ruby should ensure that
+  appropriate controls are in place. Code-level controls may include:
+
+  - Implementing taint on untrusted input
+
+  - Setting $SAFE levels appropriately (>=2 is recommended if untrusted hosts are allowed to submit Ruby commands, and >=3 may be appropriate)
+
+  - Including drb/acl.rb to set ACLEntry to restrict access to trusted hosts
+
+# Vulnerabilidade 3
+CVEs: nan
+NVT Name: rlogin Passwordless Login
+Port: 513.0
+Port Protocol: tcp
+Summary: The rlogin service allows root access without a password.
+Specific Result: It was possible to gain root access without a password.
+
+Vulnerability Detection Method: Checks if a vulnerable version is present on the target host.
+Details:
+rlogin Passwordless Login
+(OID: 1.3.6.1.4.1.25623.1.0.113766)
+Version used: 2020-09-30T09:30:12Z
+
+Affected Software/OS: nan
+Product Detection Result: nan
+Solution: Disable the rlogin service and use alternatives like SSH instead.
+
+# Vulnerabilidade 4
+CVEs: nan
+NVT Name: Operating System (OS) End of Life (EOL) Detection
+Port: nan
+Port Protocol: nan
+Summary: The Operating System (OS) on the remote host has reached the end
+  of life (EOL) and should not be used anymore.
+Specific Result: The "Ubuntu" Operating System on the remote host has reached the end of life.
+
+CPE:               cpe:/o:canonical:ubuntu_linux:8.04
+Installed version,
+build or SP:       8.04
+EOL date:          2013-05-09
+EOL info:          https://wiki.ubuntu.com/Releases
+
+Vulnerability Detection Method: Checks if an EOL version of an OS is present on the target
+  host.
+Details:
+Operating System (OS) End of Life (EOL) Detection
+(OID: 1.3.6.1.4.1.25623.1.0.103674)
+Version used: 2025-05-21T05:40:19Z
+
+Affected Software/OS: nan
+Product Detection Result: Product: cpe:/o:canonical:ubuntu_linux:8.04
+Method: OS Detection Consolidation and Reporting
+(OID: 1.3.6.1.4.1.25623.1.0.105937)
+
+Solution: Update the OS on the remote host to a version which is still
+  supported and receiving security updates by the vendor.
+
+  Note / Important: Please create an override for this result if the target host is a:
+
+  - Windows system with Extended Security Updates (ESU)
+
+  - System with additional 3rd-party / non-vendor security updates like e.g. from 'TuxCare',
+  'Freexian Extended LTS' or similar
+
+# Vulnerabilidade 5
+CVEs: CVE-1999-0618
+NVT Name: The rexec service is running
+Port: 512.0
+Port Protocol: tcp
+Summary: This remote host is running a rexec service.
+Specific Result: The rexec service was detected on the target system.
+
+Vulnerability Detection Method: Checks whether an rexec service is exposed on the target
+  host.
+Details:
+The rexec service is running
+(OID: 1.3.6.1.4.1.25623.1.0.100111)
+Version used: 2023-09-12T05:05:19Z
+
+Affected Software/OS: nan
+Product Detection Result: nan
+Solution: Disable the rexec service and use alternatives like SSH
+  instead.
+
+# Vulnerabilidade 6
+CVEs: nan
+NVT Name: Possible Backdoor: Ingreslock
+Port: 1524.0
+Port Protocol: tcp
+Summary: A backdoor is installed on the remote host.
+Specific Result: The service is answering to an 'id;' command with the following response: uid=0(root) gid=0(root)
+
+Vulnerability Detection Method: 
+Details:
+Possible Backdoor: Ingreslock
+(OID: 1.3.6.1.4.1.25623.1.0.103549)
+Version used: 2023-07-25T05:05:58Z
+
+Affected Software/OS: nan
+Product Detection Result: nan
+Solution: A whole cleanup of the infected system is recommended.
+
+# Vulnerabilidade 7
+CVEs: CVE-2020-1938
+NVT Name: Apache Tomcat AJP RCE Vulnerability (Ghostcat)
+Port: 8009.0
+Port Protocol: tcp
+Summary: Apache Tomcat is prone to a remote code execution (RCE)
+  vulnerability (dubbed 'Ghostcat') in the AJP connector.
+Specific Result: It was possible to read the file "/WEB-INF/web.xml" through the AJP connector.
+
+Result:
+
+AB 8\x0004 Ã\x0088 \x0002OK  \x0001 \x000CContent-Type  \x001Ctext/html;charset=ISO-8859-1 AB\x001FÃ¼\x0003\x001FÃ¸<!--
+  Licensed to the Apache Software Foundation (ASF) under one or more
+  contributor license agreements.  See the NOTICE file distributed with
+  this work for additional information regarding copyright ownership.
+  The ASF licenses this file to You under the Apache License, Version 2.0
+  (the "License"); you may not use this file except in compliance with
+  the License.  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+    <head>
+    <title>Apache Tomcat/5.5</title>
+    <style type="text/css">
+    /*<![CDATA[*/
+      body {
+          color: #000000;
+          background-color: #FFFFFF;
+	  font-family: Arial, "Times New Roman", Times, serif;
+          margin: 10px 0px;
+      }
+
+    img {
+       border: none;
+    }
+    
+    a:link, a:visited {
+        color: blue
+    }
+
+    th {
+        font-family: Verdana, "Times New Roman", Times, serif;
+        font-size: 110%;
+        font-weight: normal;
+        font-style: italic;
+        background: #D2A41C;
+        text-align: left;
+    }
+
+    td {
+        color: #000000;
+	font-family: Arial, Helvetica, sans-serif;
+    }
+    
+    td.menu {
+        background: #FFDC75;
+    }
+
+    .center {
+        text-align: center;
+    }
+
+    .code {
+        color: #000000;
+        font-family: "Courier New", Courier, monospace;
+        font-size: 110%;
+        margin-left: 2.5em;
+    }
+    
+     #banner {
+        margin-bottom: 12px;
+     }
+
+     p#congrats {
+         margin-top: 0;
+         font-weight: bold;
+         text-align: center;
+     }
+
+     p#footer {
+         text-align: right;
+         font-size: 80%;
+     }
+     /*]]>*/
+   </style>
+</head>
+
+<body>
+
+<!-- Header -->
+<table id="banner" width="100%">
+    <tr>
+      <td align="left" style="width:130px">
+        <a href="http://tomcat.apache.org/">
+	  <img src="tomcat.gif" height="92" width="130" alt="The Mighty Tomcat - MEOW!"/>
+	</a>
+      </td>
+      <td align="left" valign="top"><b>Apache Tomcat/5.5</b></td>
+      <td align="right">
+        <a href="http://www.apache.org/">
+	  <img src="asf-logo-wide.gif" height="51" width="537" alt="The Apache Software Foundation"/>
+	</a>
+       </td>
+     </tr>
+</table>
+
+<table>
+    <tr>
+
+        <!-- Table of Contents -->
+        <td valign="top">
+            <table width="100%" border="1" cellspacing="0" cellpadding="3">
+                <tr>
+		  <th>Administration</th>
+                </tr>
+                <tr>
+		  <td class="menu">
+		    <a href="manager/status">Status</a><br/>
+                    <a href="admin">Tomcat&nbsp;Administration</a><br/>
+                    <a href="manager/html">Tomcat&nbsp;Manager</a><br/>
+                    &nbsp;
+                  </td>
+                </tr>
+            </table>
+
+	    <br />
+            <table width="100%" border="1" cellspacing="0" cellpadding="3">
+                <tr>
+		  <th>Documentation</th>
+                </tr>
+                <tr>
+                  <td class="menu">
+                    <a href="RELEASE-NOTES.txt">Release&nbsp;Notes</a><br/>
+                    <a href="tomcat-docs/changelog.html">Change&nbsp;Log</a><br/>
+                    <a href="tomcat-docs">Tomcat&nbsp;Documentation</a><br/>                        &nbsp;
+                    &nbsp;
+		    </td>
+                </tr>
+            </table>
+	    
+            <br/>
+            <table width="100%" border="1" cellspacing="0" cellpadding="3">
+                <tr>
+                  <th>Tomcat Online</th>
+                </tr>
+                <tr>
+                  <td class="menu">
+                    <a href="http://tomcat.apache.org/">Home&nbsp;Page</a><br/>
+		    <a href="http://tomcat.apache.org/faq/">FAQ</a><br/>
+                    <a href="http://tomcat.apache.org/bugreport.html">Bug&nbsp;Database</a><br/>
+                    <a href="http://issues.apache.org/bugzilla/buglist.cgi?bug_status=UNCONFIRMED&amp;bug_status=NEW&amp;bug_status=ASSIGNED&amp;bug_status=REOPENED&amp;bug_status=RESOLVED&amp;resolution=LATER&amp;resolution=REMIND&amp;resolution=---&amp;bugidtype=include&amp;product=Tomcat+5&amp;cmdtype=doit&amp;order=Importance">Open Bugs</a><br/>
+                    <a href="http://mail-archives.apache.org/mod_mbox/tomcat-users/">Users&nbsp;Mailing&nbsp;List</a><br/>
+                    <a href="http://mail-archives.apache.org/mod_mbox/tomcat-dev/">Developers&nbsp;Mailing&nbsp;List</a><br/>
+                    <a href="irc://irc.freenode.net/#tomcat">IRC</a><br/>
+		    &nbsp;
+                  </td>
+                </tr>
+            </table>
+	    
+            <br/>
+            <table width="100%" border="1" cellspacing="0" cellpadding="3">
+                <tr>
+                  <th>Examples</th>
+                </tr>
+                <tr>
+                  <td class="menu">
+                    <a href="jsp-examples/">JSP&nbsp;Examples</a><br/>
+                    <a href="servlets-examples/">Servlet&nbsp;Examples</a><br/>
+                    <a href="webdav/">WebDAV&nbsp;capabilities</a><br/>
+     		    &nbsp;
+                  </td>
+                </tr>
+            </table>
+	    
+            <br/>
+            <table width="100%" border="1" cellspacing="0" cellpadding="3">
+                <tr>
+		  <th>Miscellaneous</th>
+                </tr>
+                <tr>
+                  <td class="menu">
+                    <a href="http://java.sun.com/products/jsp">Sun's&nbsp;Java&nbsp;Server&nbsp;Pages&nbsp;Site</a><br/>
+                    <a href="http://java.sun.com/products/servlet">Sun's&nbsp;Servlet&nbsp;Site</a><br/>
+    		    &nbsp;
+                  </td>
+                </tr>
+            </table>
+        </td>
+
+        <td style="width:20px">&nbsp;</td>
+	
+        <!-- Body -->
+        <td align="left" valign="top">
+          <p id="congrats">If you're seeing this page via a web browser, it means you've setup Tomcat successfully. Congratulations!</p>
+ 
+          <p>As you may have guessed by now, this is the default Tomcat home page. It can be found on the local filesystem at:</p>
+          <p class="code">$CATALINA_HOME/webapps/ROOT/index.jsp</p>
+	  
+          <p>where "$CATALINA_HOME" is the root of the Tomcat installation directory. If you're seeing this page, and you don't think you should be, then either you're either a user who has arrived at new installation of Tomcat, or you're an administrator who hasn't got his/her setup quite right. Providing the latter is the case, please refer to the <a href="tomcat-docs">Tomcat Documentation</a> for more detailed setup and administration information than is found in the INSTALL file.</p>
+
+            <p><b>NOTE:</b> This page is precompiled. If you change it, this page will not change since
+                  it was compiled into a servlet at build time.
+                  (See <tt>$CATALINA_HOME/webapps/ROOT/WEB-INF/web.xml</tt> as to how it was mapped.)
+            </p>
+
+            <p><b>NOTE: For security reasons, using the administration webapp
+            is restricted to users with role "admin". The manager webapp
+            is restricted to users with role "manager".</b>
+            Users are defined in <code>$CATALINA_HOME/conf/tomcat-users.xml</code>.</p>
+
+            <p>Included with this release are a host of sample Servlets and JSPs (with associated source code), extensive documentation (including the Servlet 2.4 and JSP 2.0 API JavaDoc), and an introductory guide to developing web applications.</p>
+
+            <p>Tomcat mailing lists are available at the Tomcat project web site:</p>
+
+           <ul>
+               <li><b><a href="mailto:users@tomcat.apache.org">users@tomc
+
+Vulnerability Detection Method: Sends a crafted AJP request and checks the response.
+Details:
+Apache Tomcat AJP RCE Vulnerability (Ghostcat)
+(OID: 1.3.6.1.4.1.25623.1.0.143545)
+Version used: 2025-01-21T05:37:33Z
+
+Affected Software/OS: Apache Tomcat versions prior 7.0.100, 8.5.51 or 9.0.31 when the AJP connector
+  is enabled.
+
+  Other products like JBoss or Wildfly which are using Tomcat might be affected as well.
+Product Detection Result: nan
+Solution: Update Apache Tomcat to version 7.0.100, 8.5.51, 9.0.31 or later. For other products
+  using Tomcat please contact the vendor for more information on fixed versions.
+
+# Vulnerabilidade 8
+CVEs: CVE-2015-4669,CVE-2001-0645,CVE-2002-1809,CVE-2004-1532,CVE-2004-2357,CVE-2006-1451,CVE-2007-2554,CVE-2007-6081,CVE-2009-0919,CVE-2014-3419,CVE-2016-6531,CVE-2018-15719,CVE-2024-22901
+NVT Name: MySQL / MariaDB Default Credentials (MySQL Protocol)
+Port: 3306.0
+Port Protocol: tcp
+Summary: It was possible to login into the remote MySQL using default
+  credentials.
+Specific Result: It was possible to login as user "root" with an empty password.
+
+Vulnerability Detection Method: 
+Details:
+MySQL / MariaDB Default Credentials (MySQL Protocol)
+(OID: 1.3.6.1.4.1.25623.1.0.103551)
+Version used: 2025-03-14T05:38:04Z
+
+Affected Software/OS: The following products are know to use such weak credentials:
+
+  - CVE-2001-0645: Symantec/AXENT NetProwler 3.5.x
+
+  - CVE-2002-1809: Windows binary release of MySQL 3.23.2 through 3.23.52
+
+  - CVE-2004-1532: AppServ 2.5.x and earlier
+
+  - CVE-2004-2357: Proofpoint Protection Server
+
+  - CVE-2006-1451: MySQL Manager in Apple Mac OS X 10.3.9 and 10.4.6
+
+  - CVE-2007-2554: Associated Press (AP) Newspower 4.0.1 and earlier
+
+  - CVE-2007-6081: AdventNet EventLog Analyzer build 4030
+
+  - CVE-2009-0919: XAMPP
+
+  - CVE-2014-3419: Infoblox NetMRI before 6.8.5
+
+  - CVE-2015-4669: Xsuite 2.x
+
+  - CVE-2016-6531, CVE-2018-15719: Open Dental before version 18.4
+
+  - CVE-2024-22901: Vinchin Backup & Recovery 7.2 and prior
+
+  Other products might be affected as well.
+Product Detection Result: Product: cpe:/a:mysql:mysql:5.0.51a
+Method: MariaDB / Oracle MySQL Detection (MySQL Protocol)
+(OID: 1.3.6.1.4.1.25623.1.0.100152)
+
+Solution: '- Change the password as soon as possible
+
+  - Contact the vendor for other possible fixes / updates
+
+# Vulnerabilidade 9
+CVEs: CVE-2017-11147,CVE-2016-10158,CVE-2016-10159,CVE-2016-10160,CVE-2016-10161,CVE-2016-10167,CVE-2016-10168
+NVT Name: PHP < 5.6.30, 7.x < 7.0.15, 7.1.x < 7.1.1 Multiple Vulnerabilities (Jan 2017) - Linux
+Port: 80.0
+Port Protocol: tcp
+Summary: PHP is prone to multiple vulnerabilities.
+Specific Result: Installed version: 5.2.4
+Fixed version:     5.6.30
+Installation
+path / port:       80/tcp
+
+
+Vulnerability Detection Method: Checks if a vulnerable version is present on the target host.
+Details:
+PHP < 5.6.30, 7.x < 7.0.15, 7.1.x < 7.1.1 Multiple Vulnerabilities (Jan 2017...
+(OID: 1.3.6.1.4.1.25623.1.0.108052)
+Version used: 2025-05-21T05:40:19Z
+
+Affected Software/OS: PHP prior to version 5.6.30, 7.x prior to 7.0.15 and 7.1.x
+  prior to 7.1.1.
+Product Detection Result: Product: cpe:/a:php:php:5.2.4
+Method: PHP Detection (HTTP)
+(OID: 1.3.6.1.4.1.25623.1.0.800109)
+
+Solution: Update to version 5.6.30, 7.0.15, 7.1.1 or later.
+
+# Vulnerabilidade 10
+CVEs: CVE-2012-1823,CVE-2012-2311,CVE-2012-2336,CVE-2012-2335
+NVT Name: PHP < 5.3.13, 5.4.x < 5.4.3 Multiple Vulnerabilities - Active Check
+Port: 80.0
+Port Protocol: tcp
+Summary: PHP is prone to multiple vulnerabilities.
+Specific Result: By doing the following HTTP POST request:
+
+"HTTP POST" body : <?php phpinfo();?>
+URL              : http://192.168.100.20/cgi-bin/php?%2D%64+%61%6C%6C%6F%77%5F%75%72%6C%5F%69%6E%63%6C%75%64%65%3D%6F%6E+%2D%64+%73%61%66%65%5F%6D%6F%64%65%3D%6F%66%66+%2D%64+%73%75%68%6F%73%69%6E%2E%73%69%6D%75%6C%61%74%69%6F%6E%3D%6F%6E+%2D%64+%64%69%73%61%62%6C%65%5F%66%75%6E%63%74%69%6F%6E%73%3D%22%22+%2D%64+%6F%70%65%6E%5F%62%61%73%65%64%69%72%3D%6E%6F%6E%65+%2D%64+%61%75%74%6F%5F%70%72%65%70%65%6E%64%5F%66%69%6C%65%3D%70%68%70%3A%2F%2F%69%6E%70%75%74+%2D%64+%63%67%69%2E%66%6F%72%63%65%5F%72%65%64%69%72%65%63%74%3D%30+%2D%64+%63%67%69%2E%72%65%64%69%72%65%63%74%5F%73%74%61%74%75%73%5F%65%6E%76%3D%30+%2D%6E
+
+it was possible to execute the "<?php phpinfo();?>" command.
+
+Result:
+  <title>phpinfo()</title><meta name="ROBOTS" content="NOINDEX,NOFOLLOW,NOARCHIVE" /></head>
+  <tr><td class="e">Configuration File (php.ini) Path </td><td class="v">/etc/php5/cgi </td></tr>
+  <h2>PHP Variables</h2>
+
+Vulnerability Detection Method: Send multiple a crafted HTTP POST requests and checks the
+  responses.
+
+  Note: This script checks for the presence of CVE-2012-1823 which indicates that the system is also
+  affected by the other included CVEs.
+Details:
+PHP < 5.3.13, 5.4.x < 5.4.3 Multiple Vulnerabilities - Active Check
+(OID: 1.3.6.1.4.1.25623.1.0.103482)
+Version used: 2025-04-24T05:40:00Z
+
+Affected Software/OS: PHP versions prior to 5.3.13 and 5.4.x prior to 5.4.3.
+
+  Other products / applications might be affected by the tested CVE-2012-1823 as well.
+Product Detection Result: nan
+Solution: PHP: Update to version 5.3.13, 5.4.3 or later
+
+  - Other products / applications: Please contact the vendor for a solution
+
+# Vulnerabilidade 11
+CVEs: CVE-2011-2523
+NVT Name: vsftpd Compromised Source Packages Backdoor Vulnerability
+Port: 6200.0
+Port Protocol: tcp
+Summary: vsftpd is prone to a backdoor vulnerability.
+Specific Result: Vulnerability was detected according to the Vulnerability Detection Method.
+Vulnerability Detection Method: 
+Details:
+vsftpd Compromised Source Packages Backdoor Vulnerability
+(OID: 1.3.6.1.4.1.25623.1.0.103185)
+Version used: 2023-12-07T05:05:41Z
+
+Affected Software/OS: The vsftpd 2.3.4 source package downloaded between 20110630 and
+  20110703 is affected.
+Product Detection Result: nan
+Solution: The repaired package can be downloaded from the referenced
+  vendor homepage. Please validate the package with its signature.
+
+# Vulnerabilidade 12
+CVEs: CVE-2011-2523
+NVT Name: vsftpd Compromised Source Packages Backdoor Vulnerability
+Port: 21.0
+Port Protocol: tcp
+Summary: vsftpd is prone to a backdoor vulnerability.
+Specific Result: Vulnerability was detected according to the Vulnerability Detection Method.
+Vulnerability Detection Method: 
+Details:
+vsftpd Compromised Source Packages Backdoor Vulnerability
+(OID: 1.3.6.1.4.1.25623.1.0.103185)
+Version used: 2023-12-07T05:05:41Z
+
+Affected Software/OS: The vsftpd 2.3.4 source package downloaded between 20110630 and
+  20110703 is affected.
+Product Detection Result: Product: cpe:/a:beasts:vsftpd:2.3.4
+Method: vsFTPd FTP Server Detection
+(OID: 1.3.6.1.4.1.25623.1.0.111050)
+
+Solution: The repaired package can be downloaded from the referenced
+  vendor homepage. Please validate the package with its signature.
+
+# Vulnerabilidade 13
+CVEs: CVE-2004-2687
+NVT Name: DistCC RCE Vulnerability (CVE-2004-2687)
+Port: 3632.0
+Port Protocol: tcp
+Summary: DistCC is prone to a remote code execution (RCE)
+  vulnerability.
+Specific Result: It was possible to execute the "id" command.
+
+Result: uid=1(daemon) gid=1(daemon)
+
+Vulnerability Detection Method: 
+Details:
+DistCC RCE Vulnerability (CVE-2004-2687)
+(OID: 1.3.6.1.4.1.25623.1.0.103553)
+Version used: 2022-07-07T10:16:06Z
+
+Affected Software/OS: nan
+Product Detection Result: nan
+Solution: Vendor updates are available. Please see the references for
+  more information.
+
+  For more information about DistCC's security see the references.
+
+# Vulnerabilidade 14
+CVEs: nan
+NVT Name: PostgreSQL Default Credentials (PostgreSQL Protocol)
+Port: 5432.0
+Port Protocol: tcp
+Summary: It was possible to login into the remote PostgreSQL as user
+  postgres using weak credentials.
+Specific Result: It was possible to login as user postgres with password "postgres".
+
+
+
+Vulnerability Detection Method: 
+Details:
+PostgreSQL Default Credentials (PostgreSQL Protocol)
+(OID: 1.3.6.1.4.1.25623.1.0.103552)
+Version used: 2024-07-19T15:39:06Z
+
+Affected Software/OS: nan
+Product Detection Result: Product: cpe:/a:postgresql:postgresql:8.3.1
+Method: PostgreSQL Detection Consolidation
+(OID: 1.3.6.1.4.1.25623.1.0.128025)
+
+Solution: Change the password as soon as possible.
+
+# Vulnerabilidade 15
+CVEs: nan
+NVT Name: VNC Brute Force Login
+Port: 5900.0
+Port Protocol: tcp
+Summary: Try to log in with given passwords via VNC protocol.
+Specific Result: It was possible to connect to the VNC server with the password: password
+
+Vulnerability Detection Method: 
+Details:
+VNC Brute Force Login
+(OID: 1.3.6.1.4.1.25623.1.0.106056)
+Version used: 2021-07-23T07:56:26Z
+
+Affected Software/OS: nan
+Product Detection Result: nan
+Solution: Change the password to something hard to guess or enable
+  password protection at all.
+
+# Vulnerabilidade 16
+CVEs: nan
+NVT Name: Test HTTP dangerous methods
+Port: 80.0
+Port Protocol: tcp
+Summary: Misconfigured web servers allows remote clients to perform
+  dangerous HTTP methods such as PUT and DELETE.
+Specific Result: We could upload the following files via the PUT method at this web server:
+
+http://192.168.100.20/dav/puttest537126888.html
+
+We could delete the following files via the DELETE method at this web server:
+
+http://192.168.100.20/dav/puttest537126888.html
+
+
+
+Vulnerability Detection Method: Checks if dangerous HTTP methods such as PUT and DELETE are
+  enabled and can be misused to upload or delete files.
+Details:
+Test HTTP dangerous methods
+(OID: 1.3.6.1.4.1.25623.1.0.10498)
+Version used: 2023-08-01T13:29:10Z
+
+Affected Software/OS: Web servers with enabled PUT and/or DELETE methods.
+Product Detection Result: nan
+Solution: Use access restrictions to these dangerous HTTP methods
+  or disable them completely.
+
+# Vulnerabilidade 17
+CVEs: CVE-1999-0501,CVE-1999-0502,CVE-1999-0507,CVE-1999-0508,CVE-2001-1594,CVE-2013-7404,CVE-2014-9198,CVE-2015-7261,CVE-2016-8731,CVE-2017-8218,CVE-2018-9068,CVE-2018-17771,CVE-2018-19063,CVE-2018-19064
+NVT Name: FTP Brute Force Logins With Default Credentials Reporting
+Port: 21.0
+Port Protocol: tcp
+Summary: It was possible to login into the remote FTP server using
+  weak/known credentials.
+Specific Result: It was possible to login with the following credentials <User>:<Password>
+
+msfadmin:msfadmin
+postgres:postgres
+service:service
+user:user
+
+Vulnerability Detection Method: Reports weak/known credentials detected by the VT
+  'FTP Brute Force Logins With Default Credentials' (OID: 1.3.6.1.4.1.25623.1.0.108717).
+Details:
+FTP Brute Force Logins With Default Credentials Reporting
+(OID: 1.3.6.1.4.1.25623.1.0.108718)
+Version used: 2025-05-13T05:41:39Z
+
+Affected Software/OS: nan
+Product Detection Result: nan
+Solution: Change the password as soon as possible.
+
+# Vulnerabilidade 18
+CVEs: CVE-1999-0501,CVE-1999-0502,CVE-1999-0507,CVE-1999-0508,CVE-2001-1594,CVE-2013-7404,CVE-2014-9198,CVE-2015-7261,CVE-2016-8731,CVE-2017-8218,CVE-2018-9068,CVE-2018-17771,CVE-2018-19063,CVE-2018-19064
+NVT Name: FTP Brute Force Logins With Default Credentials Reporting
+Port: 2121.0
+Port Protocol: tcp
+Summary: It was possible to login into the remote FTP server using
+  weak/known credentials.
+Specific Result: It was possible to login with the following credentials <User>:<Password>
+
+msfadmin:msfadmin
+postgres:postgres
+service:service
+user:user
+
+Vulnerability Detection Method: Reports weak/known credentials detected by the VT
+  'FTP Brute Force Logins With Default Credentials' (OID: 1.3.6.1.4.1.25623.1.0.108717).
+Details:
+FTP Brute Force Logins With Default Credentials Reporting
+(OID: 1.3.6.1.4.1.25623.1.0.108718)
+Version used: 2025-05-13T05:41:39Z
+
+Affected Software/OS: nan
+Product Detection Result: nan
+Solution: Change the password as soon as possible.
+
+# Vulnerabilidade 19
+CVEs: CVE-1999-0651
+NVT Name: The rlogin service is running
+Port: 513.0
+Port Protocol: tcp
+Summary: This remote host is running a rlogin service.
+Specific Result: The rlogin service is running on the target system.
+
+Vulnerability Detection Method: 
+Details:
+The rlogin service is running
+(OID: 1.3.6.1.4.1.25623.1.0.901202)
+Version used: 2025-03-05T05:38:53Z
+
+Affected Software/OS: nan
+Product Detection Result: nan
+Solution: Disable the rlogin service and use alternatives like SSH instead.
+
+# Vulnerabilidade 20
+CVEs: CVE-1999-0651
+NVT Name: rsh Unencrypted Cleartext Login
+Port: 514.0
+Port Protocol: tcp
+Summary: This remote host is running a rsh service.
+Specific Result: The rsh service currently has issues with name resolution and is not allowing connections from this host.
+
+Vulnerability Detection Method: 
+Details:
+rsh Unencrypted Cleartext Login
+(OID: 1.3.6.1.4.1.25623.1.0.100080)
+Version used: 2021-10-20T09:03:29Z
+
+Affected Software/OS: nan
+Product Detection Result: nan
+Solution: Disable the rsh service and use alternatives like SSH
+  instead.
+
+# Vulnerabilidade 21
+CVEs: CVE-2014-0224
+NVT Name: SSL/TLS: OpenSSL CCS Man in the Middle Security Bypass Vulnerability
+Port: 5432.0
+Port Protocol: tcp
+Summary: OpenSSL is prone to a security bypass vulnerability.
+Specific Result: Vulnerability was detected according to the Vulnerability Detection Method.
+Vulnerability Detection Method: Send two SSL ChangeCipherSpec request and check the response.
+Details:
+SSL/TLS: OpenSSL CCS Man in the Middle Security Bypass Vulnerability
+(OID: 1.3.6.1.4.1.25623.1.0.105042)
+Version used: 2025-01-17T15:39:18Z
+
+Affected Software/OS: OpenSSL before 0.9.8za, 1.0.0 before 1.0.0m and 1.0.1 before 1.0.1h.
+Product Detection Result: nan
+Solution: Updates are available. Please see the references for more information.
+
+# Vulnerabilidade 22
+CVEs: CVE-2011-0411,CVE-2011-1430,CVE-2011-1431,CVE-2011-1432,CVE-2011-1506,CVE-2011-1575,CVE-2011-1926,CVE-2011-2165
+NVT Name: Multiple Vendors STARTTLS Implementation Plaintext Arbitrary Command Injection Vulnerability
+Port: 25.0
+Port Protocol: tcp
+Summary: Multiple vendors' implementations of 'STARTTLS' are prone to a
+  vulnerability that lets attackers inject arbitrary commands.
+Specific Result: Vulnerability was detected according to the Vulnerability Detection Method.
+Vulnerability Detection Method: Send a special crafted 'STARTTLS' request and check the
+  response.
+Details:
+Multiple Vendors STARTTLS Implementation Plaintext Arbitrary Command Injecti...
+(OID: 1.3.6.1.4.1.25623.1.0.103935)
+Version used: 2023-10-31T05:06:37Z
+
+Affected Software/OS: The following vendors are known to be affected:
+
+  Ipswitch
+
+  Kerio
+
+  Postfix
+
+  Qmail-TLS
+
+  Oracle
+
+  SCO Group
+
+  spamdyke
+
+  ISC
+Product Detection Result: nan
+Solution: Updates are available. Please see the references for more
+  information.
+
+# Vulnerabilidade 23
+CVEs: CVE-2009-4898
+NVT Name: TWiki Cross-Site Request Forgery Vulnerability (Sep 2010)
+Port: 80.0
+Port Protocol: tcp
+Summary: TWiki is prone to a cross-site request forgery (CSRF) vulnerability.
+Specific Result: Installed version: 01.Feb.2003
+Fixed version:     4.3.2
+
+
+Vulnerability Detection Method: 
+Details:
+TWiki Cross-Site Request Forgery Vulnerability (Sep 2010)
+(OID: 1.3.6.1.4.1.25623.1.0.801281)
+Version used: 2024-03-01T14:37:10Z
+
+Affected Software/OS: TWiki version prior to 4.3.2
+Product Detection Result: nan
+Solution: Upgrade to TWiki version 4.3.2 or later.
+
+# Vulnerabilidade 24
+CVEs: CVE-1999-0497
+NVT Name: Anonymous FTP Login Reporting
+Port: 21.0
+Port Protocol: tcp
+Summary: Reports if the remote FTP Server allows anonymous logins.
+Specific Result: It was possible to login to the remote FTP service with the following anonymous account(s):
+
+anonymous:anonymous@example.com
+ftp:anonymous@example.com
+
+
+Vulnerability Detection Method: 
+Details:
+Anonymous FTP Login Reporting
+(OID: 1.3.6.1.4.1.25623.1.0.900600)
+Version used: 2021-10-20T09:03:29Z
+
+Affected Software/OS: nan
+Product Detection Result: nan
+Solution: If you do not want to share files, you should disable anonymous
+  logins.
+
+# Vulnerabilidade 25
+CVEs: CVE-2012-6708
+NVT Name: jQuery < 1.9.0 XSS Vulnerability
+Port: 80.0
+Port Protocol: tcp
+Summary: jQuery is prone to a cross-site scripting (XSS)
+  vulnerability.
+Specific Result: Installed version: 1.3.2
+Fixed version:     1.9.0
+Installation
+path / port:       /mutillidae/javascript/ddsmoothmenu/jquery.min.js
+
+Detection info (see OID: 1.3.6.1.4.1.25623.1.0.150658 for more info):
+- Identified file: http://192.168.100.20/mutillidae/javascript/ddsmoothmenu/jquery.min.js
+- Referenced at:   http://192.168.100.20/mutillidae/
+
+Vulnerability Detection Method: Checks if a vulnerable version is present on the target host.
+Details:
+jQuery < 1.9.0 XSS Vulnerability
+(OID: 1.3.6.1.4.1.25623.1.0.141636)
+Version used: 2023-07-14T05:06:08Z
+
+Affected Software/OS: jQuery prior to version 1.9.0.
+Product Detection Result: nan
+Solution: Update to version 1.9.0 or later.
+
+# Vulnerabilidade 26
+CVEs: CVE-2018-20212
+NVT Name: TWiki < 6.1.0 XSS Vulnerability
+Port: 80.0
+Port Protocol: tcp
+Summary: bin/statistics in TWiki 6.0.2 allows XSS via the webs parameter.
+Specific Result: Installed version: 01.Feb.2003
+Fixed version:     6.1.0
+
+
+Vulnerability Detection Method: Checks if a vulnerable version is present on the target host.
+Details:
+TWiki < 6.1.0 XSS Vulnerability
+(OID: 1.3.6.1.4.1.25623.1.0.141830)
+Version used: 2023-07-14T16:09:27Z
+
+Affected Software/OS: TWiki version 6.0.2 and probably prior.
+Product Detection Result: nan
+Solution: Update to version 6.1.0 or later.
+
+# Vulnerabilidade 27
+CVEs: CVE-2009-1339
+NVT Name: TWiki CSRF Vulnerability
+Port: 80.0
+Port Protocol: tcp
+Summary: TWiki is prone to a cross-site request forgery (CSRF) vulnerability.
+Specific Result: Installed version: 01.Feb.2003
+Fixed version:     4.3.1
+
+
+Vulnerability Detection Method: 
+Details:
+TWiki CSRF Vulnerability
+(OID: 1.3.6.1.4.1.25623.1.0.800400)
+Version used: 2024-06-28T05:05:33Z
+
+Affected Software/OS: TWiki version prior to 4.3.1
+Product Detection Result: nan
+Solution: Upgrade to version 4.3.1 or later.
+
+# Vulnerabilidade 28
+CVEs: CVE-2016-0800,CVE-2014-3566
+NVT Name: SSL/TLS: Deprecated SSLv2 and SSLv3 Protocol Detection
+Port: 5432.0
+Port Protocol: tcp
+Summary: It was possible to detect the usage of the deprecated SSLv2
+  and/or SSLv3 protocol on this system.
+Specific Result: In addition to TLSv1.0+ the service is also providing the deprecated SSLv3 protocol and supports one or more ciphers. Those supported ciphers can be found in the 'SSL/TLS: Report Supported Cipher Suites' (OID: 1.3.6.1.4.1.25623.1.0.802067) VT.
+
+Vulnerability Detection Method: Checks the used SSL protocols of the services provided by this
+  system.
+Details:
+SSL/TLS: Deprecated SSLv2 and SSLv3 Protocol Detection
+(OID: 1.3.6.1.4.1.25623.1.0.111012)
+Version used: 2025-03-27T05:38:50Z
+
+Affected Software/OS: All services providing an encrypted communication using the
+  SSLv2 and/or SSLv3 protocols.
+Product Detection Result: Product: cpe:/a:ietf:transport_layer_security:1.0
+Method: SSL/TLS: Version Detection
+(OID: 1.3.6.1.4.1.25623.1.0.105782)
+
+Solution: It is recommended to disable the deprecated SSLv2 and/or SSLv3
+  protocols in favor of the TLSv1.2+ protocols.
+
+  Please see the references for more resources supporting you with this task.
+
+# Vulnerabilidade 29
+CVEs: CVE-2016-0800,CVE-2014-3566
+NVT Name: SSL/TLS: Deprecated SSLv2 and SSLv3 Protocol Detection
+Port: 25.0
+Port Protocol: tcp
+Summary: It was possible to detect the usage of the deprecated SSLv2
+  and/or SSLv3 protocol on this system.
+Specific Result: In addition to TLSv1.0+ the service is also providing the deprecated SSLv2 and SSLv3 protocols and supports one or more ciphers. Those supported ciphers can be found in the 'SSL/TLS: Report Supported Cipher Suites' (OID: 1.3.6.1.4.1.25623.1.0.802067) VT.
+
+Vulnerability Detection Method: Checks the used SSL protocols of the services provided by this
+  system.
+Details:
+SSL/TLS: Deprecated SSLv2 and SSLv3 Protocol Detection
+(OID: 1.3.6.1.4.1.25623.1.0.111012)
+Version used: 2025-03-27T05:38:50Z
+
+Affected Software/OS: All services providing an encrypted communication using the
+  SSLv2 and/or SSLv3 protocols.
+Product Detection Result: Product: cpe:/a:ietf:transport_layer_security:1.0
+Method: SSL/TLS: Version Detection
+(OID: 1.3.6.1.4.1.25623.1.0.105782)
+
+Solution: It is recommended to disable the deprecated SSLv2 and/or SSLv3
+  protocols in favor of the TLSv1.2+ protocols.
+
+  Please see the references for more resources supporting you with this task.
+
+# Vulnerabilidade 30
+CVEs: CVE-2013-2566,CVE-2015-2808,CVE-2015-4000
+NVT Name: SSL/TLS: Report Weak Cipher Suites
+Port: 5432.0
+Port Protocol: tcp
+Summary: This routine reports all weak SSL/TLS cipher suites accepted by
+  a service.
+Specific Result: 'Weak' cipher suites accepted by this service via the SSLv3 protocol:
+
+TLS_RSA_WITH_RC4_128_SHA
+
+'Weak' cipher suites accepted by this service via the TLSv1.0 protocol:
+
+TLS_RSA_WITH_RC4_128_SHA
+
+
+
+Vulnerability Detection Method: Checks previous collected cipher suites.
+
+  NOTE: No severity for SMTP services with 'Opportunistic TLS' and weak cipher suites on port 25/tcp
+  is reported. If too strong cipher suites are configured for this service the alternative would be
+  to fall back to an even more insecure cleartext communication.
+Details:
+SSL/TLS: Report Weak Cipher Suites
+(OID: 1.3.6.1.4.1.25623.1.0.103440)
+Version used: 2025-03-27T05:38:50Z
+
+Affected Software/OS: All services providing an encrypted communication using weak
+  SSL/TLS cipher suites.
+Product Detection Result: Product: cpe:/a:ietf:transport_layer_security
+Method: SSL/TLS: Report Supported Cipher Suites
+(OID: 1.3.6.1.4.1.25623.1.0.802067)
+
+Solution: The configuration of this services should be changed so that it
+  does not accept the listed weak cipher suites anymore.
+
+  Please see the references for more resources supporting you with this task.
+
+# Vulnerabilidade 31
+CVEs: CVE-2003-1567,CVE-2004-2320,CVE-2004-2763,CVE-2005-3398,CVE-2006-4683,CVE-2007-3008,CVE-2008-7253,CVE-2009-2823,CVE-2010-0386,CVE-2012-2223,CVE-2014-7883
+NVT Name: HTTP Debugging Methods (TRACE/TRACK) Enabled
+Port: 80.0
+Port Protocol: tcp
+Summary: The remote web server supports the TRACE and/or TRACK
+  methods. TRACE and TRACK are HTTP methods which are used to debug web server connections.
+Specific Result: The web server has the following HTTP methods enabled: TRACE
+
+Vulnerability Detection Method: Checks if HTTP methods such as TRACE and TRACK are
+  enabled and can be used.
+Details:
+HTTP Debugging Methods (TRACE/TRACK) Enabled
+(OID: 1.3.6.1.4.1.25623.1.0.11213)
+Version used: 2023-08-01T13:29:10Z
+
+Affected Software/OS: Web servers with enabled TRACE and/or TRACK methods.
+Product Detection Result: nan
+Solution: Disable the TRACE and TRACK methods in your web server
+  configuration.
+
+  Please see the manual of your web server or the references for more information.
+
+# Vulnerabilidade 32
+CVEs: nan
+NVT Name: SSL/TLS: Server Certificate / Certificate in Chain with RSA keys less than 2048 bits
+Port: 25.0
+Port Protocol: tcp
+Summary: The remote SSL/TLS server certificate and/or any of the
+  certificates in the certificate chain is using a RSA key with less than 2048 bits.
+Specific Result: The remote SSL/TLS server is using the following certificate(s) with a RSA key with less than 2048 bits (public-key-size:public-key-algorithm:serial:issuer):
+
+1024:RSA:00FAF93A4C7FB6B9CC:1.2.840.113549.1.9.1=#726F6F74407562756E74753830342D626173652E6C6F63616C646F6D61696E,CN=ubuntu804-base.localdomain,OU=Office for Complication of Otherwise Simple Affairs,O=OCOSA,L=Everywhere,ST=There is no such thing outside US,C=XX (Server certificate)
+
+Vulnerability Detection Method: Checks the RSA keys size of the server certificate and all
+  certificates in chain for a size < 2048 bit.
+Details:
+SSL/TLS: Server Certificate / Certificate in Chain with RSA keys less than 2...
+(OID: 1.3.6.1.4.1.25623.1.0.150710)
+Version used: 2021-12-10T12:48:00Z
+
+Affected Software/OS: nan
+Product Detection Result: nan
+Solution: Replace the certificate with a stronger key and reissue the
+  certificates it signed.
+
+# Vulnerabilidade 33
+CVEs: nan
+NVT Name: SSL/TLS: Server Certificate / Certificate in Chain with RSA keys less than 2048 bits
+Port: 5432.0
+Port Protocol: tcp
+Summary: The remote SSL/TLS server certificate and/or any of the
+  certificates in the certificate chain is using a RSA key with less than 2048 bits.
+Specific Result: The remote SSL/TLS server is using the following certificate(s) with a RSA key with less than 2048 bits (public-key-size:public-key-algorithm:serial:issuer):
+
+1024:RSA:00FAF93A4C7FB6B9CC:1.2.840.113549.1.9.1=#726F6F74407562756E74753830342D626173652E6C6F63616C646F6D61696E,CN=ubuntu804-base.localdomain,OU=Office for Complication of Otherwise Simple Affairs,O=OCOSA,L=Everywhere,ST=There is no such thing outside US,C=XX (Server certificate)
+
+Vulnerability Detection Method: Checks the RSA keys size of the server certificate and all
+  certificates in chain for a size < 2048 bit.
+Details:
+SSL/TLS: Server Certificate / Certificate in Chain with RSA keys less than 2...
+(OID: 1.3.6.1.4.1.25623.1.0.150710)
+Version used: 2021-12-10T12:48:00Z
+
+Affected Software/OS: nan
+Product Detection Result: nan
+Solution: Replace the certificate with a stronger key and reissue the
+  certificates it signed.
+
+# Vulnerabilidade 34
+CVEs: nan
+NVT Name: Weak Key Exchange (KEX) Algorithm(s) Supported (SSH)
+Port: 22.0
+Port Protocol: tcp
+Summary: The remote SSH server is configured to allow / support weak key
+  exchange (KEX) algorithm(s).
+Specific Result: The remote SSH server supports the following weak KEX algorithm(s):
+
+KEX algorithm                      | Reason
+-------------------------------------------------------------------------------------------
+diffie-hellman-group-exchange-sha1 | Using SHA-1
+diffie-hellman-group1-sha1         | Using Oakley Group 2 (a 1024-bit MODP group) and SHA-1
+
+Vulnerability Detection Method: Checks the supported KEX algorithms of the remote SSH server.
+
+  Currently weak KEX algorithms are defined as the following:
+
+  - non-elliptic-curve Diffie-Hellmann (DH) KEX algorithms with 1024-bit MODP group / prime
+
+  - ephemerally generated key exchange groups uses SHA-1
+
+  - using RSA 1024-bit modulus key
+Details:
+Weak Key Exchange (KEX) Algorithm(s) Supported (SSH)
+(OID: 1.3.6.1.4.1.25623.1.0.150713)
+Version used: 2024-06-14T05:05:48Z
+
+Affected Software/OS: nan
+Product Detection Result: Product: cpe:/a:ietf:secure_shell_protocol
+Method: SSH Protocol Algorithms Supported
+(OID: 1.3.6.1.4.1.25623.1.0.105565)
+
+Solution: Disable the reported weak KEX algorithm(s)
+
+  - 1024-bit MODP group / prime KEX algorithms:
+
+  Alternatively use elliptic-curve Diffie-Hellmann in general, e.g. Curve 25519.
+
+# Vulnerabilidade 35
+CVEs: CVE-2008-0149,CVE-2023-49282,CVE-2023-49283,CVE-2024-10486
+NVT Name: phpinfo() Output Reporting (HTTP)
+Port: 80.0
+Port Protocol: tcp
+Summary: Reporting of files containing the output of the phpinfo() PHP
+  function previously detected via HTTP.
+Specific Result: The following files are calling the function phpinfo() which disclose potentially sensitive information:
+
+http://192.168.100.20/mutillidae/phpinfo.php
+Concluded from:
+  <title>phpinfo()</title><meta name="ROBOTS" content="NOINDEX,NOFOLLOW,NOARCHIVE" /></head>
+  <tr><td class="e">Configuration File (php.ini) Path </td><td class="v">/etc/php5/cgi </td></tr>
+  <h2>PHP Variables</h2>
+http://192.168.100.20/phpinfo.php
+Concluded from:
+  <title>phpinfo()</title><meta name="ROBOTS" content="NOINDEX,NOFOLLOW,NOARCHIVE" /></head>
+  <tr><td class="e">Configuration File (php.ini) Path </td><td class="v">/etc/php5/cgi </td></tr>
+  <h2>PHP Variables</h2>
+
+Vulnerability Detection Method: This script reports files identified by the following separate
+  VT: 'phpinfo() Output Detection (HTTP)' (OID: 1.3.6.1.4.1.25623.1.0.108474).
+Details:
+phpinfo() Output Reporting (HTTP)
+(OID: 1.3.6.1.4.1.25623.1.0.11229)
+Version used: 2025-04-10T05:39:37Z
+
+Affected Software/OS: All systems exposing a file containing the output of the
+  phpinfo() PHP function.
+
+  This VT is also reporting if an affected endpoint for the following products have been identified:
+
+  - CVE-2008-0149: TUTOS
+
+  - CVE-2023-49282, CVE-2023-49283: Microsoft Graph PHP SDK
+
+  - CVE-2024-10486: Google for WooCommerce plugin for WordPress
+Product Detection Result: nan
+Solution: Delete the listed files or restrict access to them.
+
+# Vulnerabilidade 36
+CVEs: nan
+NVT Name: Weak Host Key Algorithm(s) (SSH)
+Port: 22.0
+Port Protocol: tcp
+Summary: The remote SSH server is configured to allow / support weak host
+  key algorithm(s).
+Specific Result: The remote SSH server supports the following weak host key algorithm(s):
+
+host key algorithm | Description
+-----------------------------------------------------------------------------------------
+ssh-dss            | Digital Signature Algorithm (DSA) / Digital Signature Standard (DSS)
+
+Vulnerability Detection Method: Checks the supported host key algorithms of the remote SSH
+  server.
+
+  Currently weak host key algorithms are defined as the following:
+
+  - ssh-dss: Digital Signature Algorithm (DSA) / Digital Signature Standard (DSS)
+Details:
+Weak Host Key Algorithm(s) (SSH)
+(OID: 1.3.6.1.4.1.25623.1.0.117687)
+Version used: 2024-06-14T05:05:48Z
+
+Affected Software/OS: nan
+Product Detection Result: Product: cpe:/a:ietf:secure_shell_protocol
+Method: SSH Protocol Algorithms Supported
+(OID: 1.3.6.1.4.1.25623.1.0.105565)
+
+Solution: Disable the reported weak host key algorithm(s).
+
+# Vulnerabilidade 37
+CVEs: nan
+NVT Name: Check if Mailserver answer to VRFY and EXPN requests
+Port: 25.0
+Port Protocol: tcp
+Summary: The Mailserver on this host answers to VRFY and/or EXPN requests.
+Specific Result: 'VRFY root' produces the following answer: 252 2.0.0 root
+
+
+
+Vulnerability Detection Method: 
+Details:
+Check if Mailserver answer to VRFY and EXPN requests
+(OID: 1.3.6.1.4.1.25623.1.0.100072)
+Version used: 2023-10-31T05:06:37Z
+
+Affected Software/OS: nan
+Product Detection Result: nan
+Solution: Disable VRFY and/or EXPN on your Mailserver.
+
+  For postfix add 'disable_vrfy_command=yes' in 'main.cf'.
+
+  For Sendmail add the option 'O PrivacyOptions=goaway'.
+
+  It is suggested that, if you really want to publish this type of information, you use a mechanism
+  that legitimate users actually know about, such as Finger or HTTP.
+
+# Vulnerabilidade 38
+CVEs: CVE-2011-1473,CVE-2011-5094
+NVT Name: SSL/TLS: Renegotiation DoS Vulnerability (CVE-2011-1473, CVE-2011-5094)
+Port: 25.0
+Port Protocol: tcp
+Summary: The remote SSL/TLS service is prone to a denial of service (DoS)
+  vulnerability.
+Specific Result: The following indicates that the remote SSL/TLS service is affected:
+
+Protocol Version | Successful re-done SSL/TLS handshakes (Renegotiation) over an existing / already established SSL/TLS connection
+----------------------------------------------------------------------------------------------------------------------------------
+TLSv1.0          | 10
+
+Vulnerability Detection Method: Checks if the remote service allows to re-do the same SSL/TLS
+  handshake (Renegotiation) over an existing / already established SSL/TLS connection.
+Details:
+SSL/TLS: Renegotiation DoS Vulnerability (CVE-2011-1473, CVE-2011-5094)
+(OID: 1.3.6.1.4.1.25623.1.0.117761)
+Version used: 2024-09-27T05:05:23Z
+
+Affected Software/OS: Every SSL/TLS service which does not properly restrict
+  client-initiated renegotiation.
+Product Detection Result: nan
+Solution: Users should contact their vendors for specific patch information.
+
+  A general solution is to remove/disable renegotiation capabilities altogether from/in the affected
+  SSL/TLS service.
+
+# Vulnerabilidade 39
+CVEs: CVE-2011-1473,CVE-2011-5094
+NVT Name: SSL/TLS: Renegotiation DoS Vulnerability (CVE-2011-1473, CVE-2011-5094)
+Port: 5432.0
+Port Protocol: tcp
+Summary: The remote SSL/TLS service is prone to a denial of service (DoS)
+  vulnerability.
+Specific Result: The following indicates that the remote SSL/TLS service is affected:
+
+Protocol Version | Successful re-done SSL/TLS handshakes (Renegotiation) over an existing / already established SSL/TLS connection
+----------------------------------------------------------------------------------------------------------------------------------
+TLSv1.0          | 10
+
+Vulnerability Detection Method: Checks if the remote service allows to re-do the same SSL/TLS
+  handshake (Renegotiation) over an existing / already established SSL/TLS connection.
+Details:
+SSL/TLS: Renegotiation DoS Vulnerability (CVE-2011-1473, CVE-2011-5094)
+(OID: 1.3.6.1.4.1.25623.1.0.117761)
+Version used: 2024-09-27T05:05:23Z
+
+Affected Software/OS: Every SSL/TLS service which does not properly restrict
+  client-initiated renegotiation.
+Product Detection Result: nan
+Solution: Users should contact their vendors for specific patch information.
+
+  A general solution is to remove/disable renegotiation capabilities altogether from/in the affected
+  SSL/TLS service.
+
+# Vulnerabilidade 40
+CVEs: nan
+NVT Name: SSL/TLS: Certificate Expired
+Port: 25.0
+Port Protocol: tcp
+Summary: The remote server's SSL/TLS certificate has already expired.
+Specific Result: The certificate of the remote service expired on 2010-04-16 14:07:45.
+
+Certificate details:
+fingerprint (SHA-1)             | ED093088706603BFD5DC237399B498DA2D4D31C6
+fingerprint (SHA-256)           | E7A7FA0D63E457C7C4A59B38B70849C6A70BDA6F830C7AF1E32DEE436DE813CC
+issued by                       | 1.2.840.113549.1.9.1=#726F6F74407562756E74753830342D626173652E6C6F63616C646F6D61696E,CN=ubuntu804-base.localdomain,OU=Office for Complication of Otherwise Simple Affairs,O=OCOSA,L=Everywhere,ST=There is no such thing outside US,C=XX
+public key algorithm            | RSA
+public key size (bits)          | 1024
+serial                          | 00FAF93A4C7FB6B9CC
+signature algorithm             | sha1WithRSAEncryption
+subject                         | 1.2.840.113549.1.9.1=#726F6F74407562756E74753830342D626173652E6C6F63616C646F6D61696E,CN=ubuntu804-base.localdomain,OU=Office for Complication of Otherwise Simple Affairs,O=OCOSA,L=Everywhere,ST=There is no such thing outside US,C=XX
+subject alternative names (SAN) | None
+valid from                      | 2010-03-17 14:07:45 UTC
+valid until                     | 2010-04-16 14:07:45 UTC
+
+Vulnerability Detection Method: 
+Details:
+SSL/TLS: Certificate Expired
+(OID: 1.3.6.1.4.1.25623.1.0.103955)
+Version used: 2024-06-14T05:05:48Z
+
+Affected Software/OS: nan
+Product Detection Result: Product: cpe:/a:ietf:transport_layer_security
+Method: SSL/TLS: Collect and Report Certificate Details
+(OID: 1.3.6.1.4.1.25623.1.0.103692)
+
+Solution: Replace the SSL/TLS certificate by a new one.
+
+# Vulnerabilidade 41
+CVEs: nan
+NVT Name: SSL/TLS: Certificate Expired
+Port: 5432.0
+Port Protocol: tcp
+Summary: The remote server's SSL/TLS certificate has already expired.
+Specific Result: The certificate of the remote service expired on 2010-04-16 14:07:45.
+
+Certificate details:
+fingerprint (SHA-1)             | ED093088706603BFD5DC237399B498DA2D4D31C6
+fingerprint (SHA-256)           | E7A7FA0D63E457C7C4A59B38B70849C6A70BDA6F830C7AF1E32DEE436DE813CC
+issued by                       | 1.2.840.113549.1.9.1=#726F6F74407562756E74753830342D626173652E6C6F63616C646F6D61696E,CN=ubuntu804-base.localdomain,OU=Office for Complication of Otherwise Simple Affairs,O=OCOSA,L=Everywhere,ST=There is no such thing outside US,C=XX
+public key algorithm            | RSA
+public key size (bits)          | 1024
+serial                          | 00FAF93A4C7FB6B9CC
+signature algorithm             | sha1WithRSAEncryption
+subject                         | 1.2.840.113549.1.9.1=#726F6F74407562756E74753830342D626173652E6C6F63616C646F6D61696E,CN=ubuntu804-base.localdomain,OU=Office for Complication of Otherwise Simple Affairs,O=OCOSA,L=Everywhere,ST=There is no such thing outside US,C=XX
+subject alternative names (SAN) | None
+valid from                      | 2010-03-17 14:07:45 UTC
+valid until                     | 2010-04-16 14:07:45 UTC
+
+Vulnerability Detection Method: 
+Details:
+SSL/TLS: Certificate Expired
+(OID: 1.3.6.1.4.1.25623.1.0.103955)
+Version used: 2024-06-14T05:05:48Z
+
+Affected Software/OS: nan
+Product Detection Result: Product: cpe:/a:ietf:transport_layer_security
+Method: SSL/TLS: Collect and Report Certificate Details
+(OID: 1.3.6.1.4.1.25623.1.0.103692)
+
+Solution: Replace the SSL/TLS certificate by a new one.
+
+# Vulnerabilidade 42
+CVEs: CVE-2005-0283
+NVT Name: QWikiwiki directory traversal vulnerability
+Port: 80.0
+Port Protocol: tcp
+Summary: The remote host is running QWikiwiki, a Wiki application written in PHP.
+
+  The remote version of this software contains a validation input flaw which may allow an attacker
+  to use it to read arbitrary files on the remote host with the privileges of the web server.
+Specific Result: Vulnerable URL: http://192.168.100.20/mutillidae/index.php?page=../../../../../../../../../../../etc/passwd%00
+
+Vulnerability Detection Method: 
+Details:
+QWikiwiki directory traversal vulnerability
+(OID: 1.3.6.1.4.1.25623.1.0.16100)
+Version used: 2025-04-15T05:54:49Z
+
+Affected Software/OS: nan
+Product Detection Result: nan
+Solution: No known solution was made available for at least one year since the disclosure
+  of this vulnerability. Likely none will be provided anymore. General solution options are to upgrade to a newer
+  release, disable respective features, remove the product or replace the product by another one.
+
+# Vulnerabilidade 43
+CVEs: nan
+NVT Name: awiki <= 20100125 Multiple LFI Vulnerabilities - Active Check
+Port: 80.0
+Port Protocol: tcp
+Summary: awiki is prone to multiple local file include (LFI)
+  vulnerabilities because it fails to properly sanitize user-supplied input.
+Specific Result: Vulnerable URL: http://192.168.100.20/mutillidae/index.php?page=/etc/passwd
+
+Vulnerability Detection Method: Sends a crafted HTTP GET request and checks the response.
+Details:
+awiki <= 20100125 Multiple LFI Vulnerabilities - Active Check
+(OID: 1.3.6.1.4.1.25623.1.0.103210)
+Version used: 2025-04-15T05:54:49Z
+
+Affected Software/OS: awiki version 20100125 and prior.
+Product Detection Result: nan
+Solution: No known solution was made available for at least one year
+  since the disclosure of this vulnerability. Likely none will be provided anymore. General
+  solution options are to upgrade to a newer release, disable respective features, remove the
+  product or replace the product by another one.
+
+# Vulnerabilidade 44
+CVEs: CVE-1999-0678
+NVT Name: /doc directory browsable
+Port: 80.0
+Port Protocol: tcp
+Summary: The /doc directory is browsable.
+  /doc shows the content of the /usr/doc directory and therefore it shows which programs and - important! - the version of the installed programs.
+Specific Result: Vulnerable URL: http://192.168.100.20/doc/
+
+Vulnerability Detection Method: 
+Details:
+/doc directory browsable
+(OID: 1.3.6.1.4.1.25623.1.0.10056)
+Version used: 2023-08-01T13:29:10Z
+
+Affected Software/OS: nan
+Product Detection Result: nan
+Solution: Use access restrictions for the /doc directory.
+  If you use Apache you might use this in your access.conf:
+
+  <Directory /usr/doc>
+  AllowOverride None
+  order deny, allow
+  deny from all
+  allow from localhost
+  </Directory>
+
+# Vulnerabilidade 45
+CVEs: nan
+NVT Name: Telnet Unencrypted Cleartext Login
+Port: 23.0
+Port Protocol: tcp
+Summary: The remote host is running a Telnet service that allows cleartext logins over
+  unencrypted connections.
+Specific Result: Vulnerability was detected according to the Vulnerability Detection Method.
+Vulnerability Detection Method: 
+Details:
+Telnet Unencrypted Cleartext Login
+(OID: 1.3.6.1.4.1.25623.1.0.108522)
+Version used: 2023-10-13T05:06:09Z
+
+Affected Software/OS: nan
+Product Detection Result: nan
+Solution: Replace Telnet with a protocol like SSH which supports encrypted connections.
+
+# Vulnerabilidade 46
+CVEs: nan
+NVT Name: FTP Unencrypted Cleartext Login
+Port: 2121.0
+Port Protocol: tcp
+Summary: The remote host is running a FTP service that allows cleartext logins over
+  unencrypted connections.
+Specific Result: The remote FTP service accepts logins without a previous sent 'AUTH TLS' command. Response(s):
+
+Non-anonymous sessions: 331 Password required for openvasvt
+Anonymous sessions:     331 Password required for anonymous
+
+Vulnerability Detection Method: Tries to login to a non FTPS enabled FTP service without sending a
+  'AUTH TLS' command first and checks if the service is accepting the login without enforcing the use of
+  the 'AUTH TLS' command.
+Details:
+FTP Unencrypted Cleartext Login
+(OID: 1.3.6.1.4.1.25623.1.0.108528)
+Version used: 2023-12-20T05:05:58Z
+
+Affected Software/OS: nan
+Product Detection Result: nan
+Solution: Enable FTPS or enforce the connection via the 'AUTH TLS' command. Please see
+  the manual of the FTP service for more information.
+
+# Vulnerabilidade 47
+CVEs: nan
+NVT Name: VNC Server Unencrypted Data Transmission
+Port: 5900.0
+Port Protocol: tcp
+Summary: The remote host is running a VNC server providing one or more insecure or
+  cryptographically weak Security Type(s) not intended for use on untrusted networks.
+Specific Result: The VNC server provides the following insecure or cryptographically weak Security Type(s):
+
+2 (VNC authentication)
+
+Vulnerability Detection Method: 
+Details:
+VNC Server Unencrypted Data Transmission
+(OID: 1.3.6.1.4.1.25623.1.0.108529)
+Version used: 2023-07-12T05:05:04Z
+
+Affected Software/OS: nan
+Product Detection Result: nan
+Solution: Run the session over an encrypted channel provided by IPsec [RFC4301] or SSH [RFC4254].
+  Some VNC server vendors are also providing more secure Security Types within their products.
+
+# Vulnerabilidade 48
+CVEs: nan
+NVT Name: FTP Unencrypted Cleartext Login
+Port: 21.0
+Port Protocol: tcp
+Summary: The remote host is running a FTP service that allows cleartext logins over
+  unencrypted connections.
+Specific Result: The remote FTP service accepts logins without a previous sent 'AUTH TLS' command. Response(s):
+
+Non-anonymous sessions: 331 Please specify the password.
+Anonymous sessions:     331 Please specify the password.
+
+Vulnerability Detection Method: Tries to login to a non FTPS enabled FTP service without sending a
+  'AUTH TLS' command first and checks if the service is accepting the login without enforcing the use of
+  the 'AUTH TLS' command.
+Details:
+FTP Unencrypted Cleartext Login
+(OID: 1.3.6.1.4.1.25623.1.0.108528)
+Version used: 2023-12-20T05:05:58Z
+
+Affected Software/OS: nan
+Product Detection Result: nan
+Solution: Enable FTPS or enforce the connection via the 'AUTH TLS' command. Please see
+  the manual of the FTP service for more information.
+
+# Vulnerabilidade 49
+CVEs: nan
+NVT Name: Cleartext Transmission of Sensitive Information via HTTP
+Port: 80.0
+Port Protocol: tcp
+Summary: The host / application transmits sensitive information (username, passwords) in
+  cleartext via HTTP.
+Specific Result: The following input fields were identified (URL:input name):
+
+http://192.168.100.20/dvwa/login.php:password
+http://192.168.100.20/phpMyAdmin/:pma_password
+http://192.168.100.20/phpMyAdmin/?D=A:pma_password
+http://192.168.100.20/tikiwiki/tiki-install.php:pass
+http://192.168.100.20/twiki/bin/view/TWiki/TWikiUserAuthentication:oldpassword
+
+Vulnerability Detection Method: Evaluate previous collected information and check if the host / application is not
+  enforcing the transmission of sensitive data via an encrypted SSL/TLS connection.
+
+  The script is currently checking the following:
+
+  - HTTP Basic Authentication (Basic Auth)
+
+  - HTTP Forms (e.g. Login) with input field of type 'password'
+Details:
+Cleartext Transmission of Sensitive Information via HTTP
+(OID: 1.3.6.1.4.1.25623.1.0.108440)
+Version used: 2023-09-07T05:05:21Z
+
+Affected Software/OS: Hosts / applications which doesn't enforce the transmission of sensitive data via an
+  encrypted SSL/TLS connection.
+Product Detection Result: nan
+Solution: Enforce the transmission of sensitive data via an encrypted SSL/TLS connection.
+  Additionally make sure the host / application is redirecting all users to the secured SSL/TLS connection before
+  allowing to input sensitive data into the mentioned functions.
+
+# Vulnerabilidade 50
+CVEs: CVE-2011-3389,CVE-2015-0204,CVE-2023-41928,CVE-2024-41270,CVE-2025-3200
+NVT Name: SSL/TLS: Deprecated TLSv1.0 and TLSv1.1 Protocol Detection
+Port: 5432.0
+Port Protocol: tcp
+Summary: It was possible to detect the usage of the deprecated TLSv1.0
+  and/or TLSv1.1 protocol on this system.
+Specific Result: The service is only providing the deprecated TLSv1.0 protocol and supports one or more ciphers. Those supported ciphers can be found in the 'SSL/TLS: Report Supported Cipher Suites' (OID: 1.3.6.1.4.1.25623.1.0.802067) VT.
+
+Vulnerability Detection Method: Checks the used TLS protocols of the services provided by this
+  system.
+Details:
+SSL/TLS: Deprecated TLSv1.0 and TLSv1.1 Protocol Detection
+(OID: 1.3.6.1.4.1.25623.1.0.117274)
+Version used: 2025-04-30T05:39:51Z
+
+Affected Software/OS: '- All services providing an encrypted communication using the
+  TLSv1.0 and/or TLSv1.1 protocols
+
+  - CVE-2023-41928: Kiloview P1 4G and P2 4G Video Encoder
+
+  - CVE-2024-41270: Gorush v1.18.4
+
+  - CVE-2025-3200: Multiple products from Wiesemann & Theis
+Product Detection Result: Product: cpe:/a:ietf:transport_layer_security:1.0
+Method: SSL/TLS: Version Detection
+(OID: 1.3.6.1.4.1.25623.1.0.105782)
+
+Solution: It is recommended to disable the deprecated TLSv1.0 and/or
+  TLSv1.1 protocols in favor of the TLSv1.2+ protocols.
+
+  Please see the references for more resources supporting you with this task.
+
+# Vulnerabilidade 51
+CVEs: nan
+NVT Name: Weak Encryption Algorithm(s) Supported (SSH)
+Port: 22.0
+Port Protocol: tcp
+Summary: The remote SSH server is configured to allow / support weak
+  encryption algorithm(s).
+Specific Result: The remote SSH server supports the following weak client-to-server encryption algorithm(s):
+
+3des-cbc
+aes128-cbc
+aes192-cbc
+aes256-cbc
+arcfour
+arcfour128
+arcfour256
+blowfish-cbc
+cast128-cbc
+rijndael-cbc@lysator.liu.se
+
+
+The remote SSH server supports the following weak server-to-client encryption algorithm(s):
+
+3des-cbc
+aes128-cbc
+aes192-cbc
+aes256-cbc
+arcfour
+arcfour128
+arcfour256
+blowfish-cbc
+cast128-cbc
+rijndael-cbc@lysator.liu.se
+
+Vulnerability Detection Method: Checks the supported encryption algorithms (client-to-server
+  and server-to-client) of the remote SSH server.
+
+  Currently weak encryption algorithms are defined as the following:
+
+  - Arcfour (RC4) cipher based algorithms
+
+  - 'none' algorithm
+
+  - CBC mode cipher based algorithms
+Details:
+Weak Encryption Algorithm(s) Supported (SSH)
+(OID: 1.3.6.1.4.1.25623.1.0.105611)
+Version used: 2024-06-14T05:05:48Z
+
+Affected Software/OS: nan
+Product Detection Result: Product: cpe:/a:ietf:secure_shell_protocol
+Method: SSH Protocol Algorithms Supported
+(OID: 1.3.6.1.4.1.25623.1.0.105565)
+
+Solution: Disable the reported weak encryption algorithm(s).
+
+# Vulnerabilidade 52
+CVEs: CVE-2012-0053
+NVT Name: Apache HTTP Server httpOnly Cookie Information Disclosure Vulnerability
+Port: 80.0
+Port Protocol: tcp
+Summary: Apache HTTP Server is prone to a cookie information disclosure vulnerability.
+Specific Result: Vulnerability was detected according to the Vulnerability Detection Method.
+Vulnerability Detection Method: 
+Details:
+Apache HTTP Server 'httpOnly' Cookie Information Disclosure Vulnerability
+(OID: 1.3.6.1.4.1.25623.1.0.902830)
+Version used: 2025-03-05T05:38:53Z
+
+Affected Software/OS: Apache HTTP Server versions 2.2.0 through 2.2.21.
+Product Detection Result: Product: cpe:/a:apache:http_server:2.2.8
+Method: Apache HTTP Server Detection Consolidation
+(OID: 1.3.6.1.4.1.25623.1.0.117232)
+
+Solution: Update to Apache HTTP Server version 2.2.22 or later.
+
+# Vulnerabilidade 53
+CVEs: CVE-2010-4480
+NVT Name: phpMyAdmin error.php Cross Site Scripting Vulnerability
+Port: 80.0
+Port Protocol: tcp
+Summary: phpMyAdmin is prone to a cross-site scripting (XSS) vulnerability.
+Specific Result: Vulnerability was detected according to the Vulnerability Detection Method.
+Vulnerability Detection Method: 
+Details:
+phpMyAdmin 'error.php' Cross Site Scripting Vulnerability
+(OID: 1.3.6.1.4.1.25623.1.0.801660)
+Version used: 2023-10-17T05:05:34Z
+
+Affected Software/OS: phpMyAdmin version 3.3.8.1 and prior.
+Product Detection Result: nan
+Solution: No known solution was made available for at least one year since the disclosure
+  of this vulnerability. Likely none will be provided anymore. General solution options are to upgrade to a newer
+  release, disable respective features, remove the product or replace the product by another one.
+
+# Vulnerabilidade 54
+CVEs: CVE-2011-3389,CVE-2015-0204,CVE-2023-41928,CVE-2024-41270,CVE-2025-3200
+NVT Name: SSL/TLS: Deprecated TLSv1.0 and TLSv1.1 Protocol Detection
+Port: 25.0
+Port Protocol: tcp
+Summary: It was possible to detect the usage of the deprecated TLSv1.0
+  and/or TLSv1.1 protocol on this system.
+Specific Result: The service is only providing the deprecated TLSv1.0 protocol and supports one or more ciphers. Those supported ciphers can be found in the 'SSL/TLS: Report Supported Cipher Suites' (OID: 1.3.6.1.4.1.25623.1.0.802067) VT.
+
+Vulnerability Detection Method: Checks the used TLS protocols of the services provided by this
+  system.
+Details:
+SSL/TLS: Deprecated TLSv1.0 and TLSv1.1 Protocol Detection
+(OID: 1.3.6.1.4.1.25623.1.0.117274)
+Version used: 2025-04-30T05:39:51Z
+
+Affected Software/OS: '- All services providing an encrypted communication using the
+  TLSv1.0 and/or TLSv1.1 protocols
+
+  - CVE-2023-41928: Kiloview P1 4G and P2 4G Video Encoder
+
+  - CVE-2024-41270: Gorush v1.18.4
+
+  - CVE-2025-3200: Multiple products from Wiesemann & Theis
+Product Detection Result: Product: cpe:/a:ietf:transport_layer_security:1.0
+Method: SSL/TLS: Version Detection
+(OID: 1.3.6.1.4.1.25623.1.0.105782)
+
+Solution: It is recommended to disable the deprecated TLSv1.0 and/or
+  TLSv1.1 protocols in favor of the TLSv1.2+ protocols.
+
+  Please see the references for more resources supporting you with this task.
+
+# Vulnerabilidade 55
+CVEs: CVE-2011-4969
+NVT Name: jQuery < 1.6.3 XSS Vulnerability
+Port: 80.0
+Port Protocol: tcp
+Summary: jQuery is prone to a cross-site scripting (XSS)
+  vulnerability.
+Specific Result: Installed version: 1.3.2
+Fixed version:     1.6.3
+Installation
+path / port:       /mutillidae/javascript/ddsmoothmenu/jquery.min.js
+
+Detection info (see OID: 1.3.6.1.4.1.25623.1.0.150658 for more info):
+- Identified file: http://192.168.100.20/mutillidae/javascript/ddsmoothmenu/jquery.min.js
+- Referenced at:   http://192.168.100.20/mutillidae/
+
+Vulnerability Detection Method: Checks if a vulnerable version is present on the target host.
+Details:
+jQuery < 1.6.3 XSS Vulnerability
+(OID: 1.3.6.1.4.1.25623.1.0.141637)
+Version used: 2023-07-14T05:06:08Z
+
+Affected Software/OS: jQuery prior to version 1.6.3.
+Product Detection Result: nan
+Solution: Update to version 1.6.3 or later.
+
+# Vulnerabilidade 56
+CVEs: CVE-2015-0204
+NVT Name: SSL/TLS: RSA Temporary Key Handling RSA_EXPORT Downgrade Issue (FREAK)
+Port: 25.0
+Port Protocol: tcp
+Summary: This host is accepting 'RSA_EXPORT' cipher suites and is prone
+  to a man-in-the-middle (MITM) vulnerability.
+Specific Result: 'RSA_EXPORT' cipher suites accepted by this service via the SSLv3 protocol:
+
+TLS_DHE_RSA_EXPORT_WITH_DES40_CBC_SHA
+TLS_RSA_EXPORT_WITH_DES40_CBC_SHA
+TLS_RSA_EXPORT_WITH_RC2_CBC_40_MD5
+TLS_RSA_EXPORT_WITH_RC4_40_MD5
+
+'RSA_EXPORT' cipher suites accepted by this service via the TLSv1.0 protocol:
+
+TLS_DHE_RSA_EXPORT_WITH_DES40_CBC_SHA
+TLS_RSA_EXPORT_WITH_DES40_CBC_SHA
+TLS_RSA_EXPORT_WITH_RC2_CBC_40_MD5
+TLS_RSA_EXPORT_WITH_RC4_40_MD5
+
+
+
+Vulnerability Detection Method: Checks previous collected cipher suites.
+Details:
+SSL/TLS: RSA Temporary Key Handling 'RSA_EXPORT' Downgrade Issue (FREAK)
+(OID: 1.3.6.1.4.1.25623.1.0.805142)
+Version used: 2025-03-27T05:38:50Z
+
+Affected Software/OS: '- Hosts accepting 'RSA_EXPORT' cipher suites.
+
+  - OpenSSL versions prior to 0.9.8zd, 1.0.0 prior to 1.0.0p and 1.0.1 prior to 1.0.1k.
+Product Detection Result: Product: cpe:/a:ietf:transport_layer_security
+Method: SSL/TLS: Report Supported Cipher Suites
+(OID: 1.3.6.1.4.1.25623.1.0.802067)
+
+Solution: '- Remove support for 'RSA_EXPORT' cipher suites from the
+  service. Please see the references for more resources supporting you with this task.
+
+  - If the service is using OpenSSL: Update to version 0.9.8zd, 1.0.0p, 1.0.1k or later.
+
+# Vulnerabilidade 57
+CVEs: nan
+NVT Name: SSL/TLS: Certificate Signed Using A Weak Signature Algorithm
+Port: 5432.0
+Port Protocol: tcp
+Summary: The remote service is using a SSL/TLS certificate in the certificate chain that has been signed using a
+  cryptographically weak hashing algorithm.
+Specific Result: The following certificates are part of the certificate chain but using insecure signature algorithms:
+
+Subject:              1.2.840.113549.1.9.1=#726F6F74407562756E74753830342D626173652E6C6F63616C646F6D61696E,CN=ubuntu804-base.localdomain,OU=Office for Complication of Otherwise Simple Affairs,O=OCOSA,L=Everywhere,ST=There is no such thing outside US,C=XX
+Signature Algorithm:  sha1WithRSAEncryption
+
+
+
+Vulnerability Detection Method: Check which hashing algorithm was used to sign the remote SSL/TLS certificate.
+Details:
+SSL/TLS: Certificate Signed Using A Weak Signature Algorithm
+(OID: 1.3.6.1.4.1.25623.1.0.105880)
+Version used: 2021-10-15T11:13:32Z
+
+Affected Software/OS: nan
+Product Detection Result: nan
+Solution: Servers that use SSL/TLS certificates signed with a weak SHA-1, MD5, MD4 or MD2 hashing algorithm will need to obtain new
+  SHA-2 signed SSL/TLS certificates to avoid web browser SSL/TLS certificate warnings.
+
+# Vulnerabilidade 58
+CVEs: nan
+NVT Name: SSL/TLS: Diffie-Hellman Key Exchange Insufficient DH Group Strength Vulnerability
+Port: 5432.0
+Port Protocol: tcp
+Summary: The SSL/TLS service uses Diffie-Hellman groups with insufficient
+  strength (key size < 2048).
+Specific Result: Server Temporary Key Size: 1024 bits
+
+
+Vulnerability Detection Method: Checks the DHE temporary public key size.
+Details:
+SSL/TLS: Diffie-Hellman Key Exchange Insufficient DH Group Strength Vulnerab...
+(OID: 1.3.6.1.4.1.25623.1.0.106223)
+Version used: 2025-03-27T05:38:50Z
+
+Affected Software/OS: All services providing an encrypted communication using
+  Diffie-Hellman groups with insufficient strength.
+Product Detection Result: nan
+Solution: '- Deploy (Ephemeral) Elliptic-Curve Diffie-Hellman (ECDHE) or use
+  a 2048-bit or stronger Diffie-Hellman group. Please see the references for more resources
+  supporting you with this task.
+
+  - For Apache Web Servers: Beginning with version 2.4.7, mod_ssl will use DH parameters which
+  include primes with lengths of more than 1024 bits.
+
+# Vulnerabilidade 59
+CVEs: nan
+NVT Name: SSL/TLS: Diffie-Hellman Key Exchange Insufficient DH Group Strength Vulnerability
+Port: 25.0
+Port Protocol: tcp
+Summary: The SSL/TLS service uses Diffie-Hellman groups with insufficient
+  strength (key size < 2048).
+Specific Result: Server Temporary Key Size: 1024 bits
+
+
+Vulnerability Detection Method: Checks the DHE temporary public key size.
+Details:
+SSL/TLS: Diffie-Hellman Key Exchange Insufficient DH Group Strength Vulnerab...
+(OID: 1.3.6.1.4.1.25623.1.0.106223)
+Version used: 2025-03-27T05:38:50Z
+
+Affected Software/OS: All services providing an encrypted communication using
+  Diffie-Hellman groups with insufficient strength.
+Product Detection Result: nan
+Solution: '- Deploy (Ephemeral) Elliptic-Curve Diffie-Hellman (ECDHE) or use
+  a 2048-bit or stronger Diffie-Hellman group. Please see the references for more resources
+  supporting you with this task.
+
+  - For Apache Web Servers: Beginning with version 2.4.7, mod_ssl will use DH parameters which
+  include primes with lengths of more than 1024 bits.
+
+# Vulnerabilidade 60
+CVEs: nan
+NVT Name: SSL/TLS: Certificate Signed Using A Weak Signature Algorithm
+Port: 25.0
+Port Protocol: tcp
+Summary: The remote service is using a SSL/TLS certificate in the certificate chain that has been signed using a
+  cryptographically weak hashing algorithm.
+Specific Result: The following certificates are part of the certificate chain but using insecure signature algorithms:
+
+Subject:              1.2.840.113549.1.9.1=#726F6F74407562756E74753830342D626173652E6C6F63616C646F6D61696E,CN=ubuntu804-base.localdomain,OU=Office for Complication of Otherwise Simple Affairs,O=OCOSA,L=Everywhere,ST=There is no such thing outside US,C=XX
+Signature Algorithm:  sha1WithRSAEncryption
+
+
+
+Vulnerability Detection Method: Check which hashing algorithm was used to sign the remote SSL/TLS certificate.
+Details:
+SSL/TLS: Certificate Signed Using A Weak Signature Algorithm
+(OID: 1.3.6.1.4.1.25623.1.0.105880)
+Version used: 2021-10-15T11:13:32Z
+
+Affected Software/OS: nan
+Product Detection Result: nan
+Solution: Servers that use SSL/TLS certificates signed with a weak SHA-1, MD5, MD4 or MD2 hashing algorithm will need to obtain new
+  SHA-2 signed SSL/TLS certificates to avoid web browser SSL/TLS certificate warnings.
+
+# Vulnerabilidade 61
+CVEs: CVE-2015-4000
+NVT Name: SSL/TLS: DHE_EXPORT MITM Security Bypass Vulnerability (LogJam)
+Port: 25.0
+Port Protocol: tcp
+Summary: This host is accepting 'DHE_EXPORT' cipher suites and is prone
+  to a man-in-the-middle (MITM) vulnerability.
+Specific Result: 'DHE_EXPORT' cipher suites accepted by this service via the SSLv3 protocol:
+
+TLS_DHE_RSA_EXPORT_WITH_DES40_CBC_SHA
+TLS_DH_anon_EXPORT_WITH_DES40_CBC_SHA
+TLS_DH_anon_EXPORT_WITH_RC4_40_MD5
+
+'DHE_EXPORT' cipher suites accepted by this service via the TLSv1.0 protocol:
+
+TLS_DHE_RSA_EXPORT_WITH_DES40_CBC_SHA
+TLS_DH_anon_EXPORT_WITH_DES40_CBC_SHA
+TLS_DH_anon_EXPORT_WITH_RC4_40_MD5
+
+
+
+Vulnerability Detection Method: Checks previous collected cipher suites.
+Details:
+SSL/TLS: 'DHE_EXPORT' MITM Security Bypass Vulnerability (LogJam)
+(OID: 1.3.6.1.4.1.25623.1.0.805188)
+Version used: 2025-03-27T05:38:50Z
+
+Affected Software/OS: '- Hosts accepting 'DHE_EXPORT' cipher suites.
+
+  - OpenSSL versions prior to 1.0.1n and 1.0.2 prior to 1.0.2b.
+Product Detection Result: Product: cpe:/a:ietf:transport_layer_security
+Method: SSL/TLS: Report Supported Cipher Suites
+(OID: 1.3.6.1.4.1.25623.1.0.802067)
+
+Solution: '- Remove support for 'DHE_EXPORT' cipher
+  suites from the service. Please see the references for more resources supporting you with this
+  task.
+
+  - If the service is using OpenSSL: Update to version 1.0.1n, 1.0.2b or later.
+
+# Vulnerabilidade 62
+CVEs: CVE-2014-3566
+NVT Name: SSL/TLS: SSLv3 Protocol CBC Cipher Suites Information Disclosure Vulnerability (POODLE)
+Port: 25.0
+Port Protocol: tcp
+Summary: This host is prone to an information disclosure vulnerability.
+Specific Result: Vulnerability was detected according to the Vulnerability Detection Method.
+Vulnerability Detection Method: Evaluate previous collected information about this service.
+Details:
+SSL/TLS: SSLv3 Protocol CBC Cipher Suites Information Disclosure Vulnerabili...
+(OID: 1.3.6.1.4.1.25623.1.0.802087)
+Version used: 2024-09-30T08:38:05Z
+
+Affected Software/OS: nan
+Product Detection Result: Product: cpe:/a:ietf:transport_layer_security
+Method: SSL/TLS: Report Supported Cipher Suites
+(OID: 1.3.6.1.4.1.25623.1.0.802067)
+
+Solution: Possible Mitigations are:
+
+  - Disable SSLv3
+
+  - Disable cipher suites supporting CBC cipher modes
+
+  - Enable TLS_FALLBACK_SCSV if the service is providing TLSv1.0+
+
+# Vulnerabilidade 63
+CVEs: CVE-2014-3566
+NVT Name: SSL/TLS: SSLv3 Protocol CBC Cipher Suites Information Disclosure Vulnerability (POODLE)
+Port: 5432.0
+Port Protocol: tcp
+Summary: This host is prone to an information disclosure vulnerability.
+Specific Result: Vulnerability was detected according to the Vulnerability Detection Method.
+Vulnerability Detection Method: Evaluate previous collected information about this service.
+Details:
+SSL/TLS: SSLv3 Protocol CBC Cipher Suites Information Disclosure Vulnerabili...
+(OID: 1.3.6.1.4.1.25623.1.0.802087)
+Version used: 2024-09-30T08:38:05Z
+
+Affected Software/OS: nan
+Product Detection Result: Product: cpe:/a:ietf:transport_layer_security
+Method: SSL/TLS: Report Supported Cipher Suites
+(OID: 1.3.6.1.4.1.25623.1.0.802067)
+
+Solution: Possible Mitigations are:
+
+  - Disable SSLv3
+
+  - Disable cipher suites supporting CBC cipher modes
+
+  - Enable TLS_FALLBACK_SCSV if the service is providing TLSv1.0+
+
+# Vulnerabilidade 64
+CVEs: nan
+NVT Name: Weak MAC Algorithm(s) Supported (SSH)
+Port: 22.0
+Port Protocol: tcp
+Summary: The remote SSH server is configured to allow / support weak MAC
+  algorithm(s).
+Specific Result: The remote SSH server supports the following weak client-to-server MAC algorithm(s):
+
+hmac-md5
+hmac-md5-96
+hmac-sha1-96
+umac-64@openssh.com
+
+
+The remote SSH server supports the following weak server-to-client MAC algorithm(s):
+
+hmac-md5
+hmac-md5-96
+hmac-sha1-96
+umac-64@openssh.com
+
+Vulnerability Detection Method: Checks the supported MAC algorithms (client-to-server and
+  server-to-client) of the remote SSH server.
+
+  Currently weak MAC algorithms are defined as the following:
+
+  - MD5 based algorithms
+
+  - 96-bit based algorithms
+
+  - 64-bit based algorithms
+
+  - 'none' algorithm
+Details:
+Weak MAC Algorithm(s) Supported (SSH)
+(OID: 1.3.6.1.4.1.25623.1.0.105610)
+Version used: 2024-06-14T05:05:48Z
+
+Affected Software/OS: nan
+Product Detection Result: Product: cpe:/a:ietf:secure_shell_protocol
+Method: SSH Protocol Algorithms Supported
+(OID: 1.3.6.1.4.1.25623.1.0.105565)
+
+Solution: Disable the reported weak MAC algorithm(s).
+
+# Vulnerabilidade 65
+CVEs: nan
+NVT Name: TCP Timestamps Information Disclosure
+Port: nan
+Port Protocol: nan
+Summary: The remote host implements TCP timestamps and therefore allows
+  to compute the uptime.
+Specific Result: It was detected that the host implements RFC1323/RFC7323.
+
+The following timestamps were retrieved with a delay of 1 seconds in-between:
+Packet 1: 95834
+Packet 2: 95943
+
+Vulnerability Detection Method: Special IP packets are forged and sent with a little delay in
+  between to the target IP. The responses are searched for a timestamps. If found, the timestamps
+  are reported.
+Details:
+TCP Timestamps Information Disclosure
+(OID: 1.3.6.1.4.1.25623.1.0.80091)
+Version used: 2023-12-15T16:10:08Z
+
+Affected Software/OS: TCP implementations that implement RFC1323/RFC7323.
+Product Detection Result: nan
+Solution: To disable TCP timestamps on linux add the line
+  'net.ipv4.tcp_timestamps = 0' to /etc/sysctl.conf. Execute 'sysctl -p' to apply the settings at
+  runtime.
+
+  To disable TCP timestamps on Windows execute 'netsh int tcp set global timestamps=disabled'
+
+  Starting with Windows Server 2008 and Vista, the timestamp can not be completely disabled.
+
+  The default behavior of the TCP/IP stack on this Systems is to not use the Timestamp options when
+  initiating TCP connections, but use them if the TCP peer that is initiating communication includes
+  them in their synchronize (SYN) segment.
+
+  See the references for more information.
+
+# Vulnerabilidade 66
+CVEs: CVE-1999-0524
+NVT Name: ICMP Timestamp Reply Information Disclosure
+Port: nan
+Port Protocol: nan
+Summary: The remote host responded to an ICMP timestamp request.
+Specific Result: The following response / ICMP packet has been received:
+- ICMP Type: 14
+- ICMP Code: 0
+
+Vulnerability Detection Method: Sends an ICMP Timestamp (Type 13) request and checks if a
+  Timestamp Reply (Type 14) is received.
+Details:
+ICMP Timestamp Reply Information Disclosure
+(OID: 1.3.6.1.4.1.25623.1.0.103190)
+Version used: 2025-01-21T05:37:33Z
+
+Affected Software/OS: nan
+Product Detection Result: nan
+Solution: Various mitigations are possible:
+
+  - Disable the support for ICMP timestamp on the remote host completely
+
+  - Protect the remote host by a firewall, and block ICMP packets passing through the firewall in
+  either direction (either completely or only for untrusted networks)
+
+    ## REGRAS E RESTRIÇÕES DE SAÍDA
+    1.  **APENAS SCRIPT:** A sua resposta deve conter ÚNICA E EXCLUSIVAMENTE o código do script.
+    2.  **SEM EXPLICAÇÕES:** Não adicione nenhum comentário, explicação, introdução, ou despedida.
+    3.  **SEM BLOCOS DE CÓDIGO MARKDOWN:** Não envolva o script em blocos de código como ` ```bash ` ou ` ```sh `. A resposta deve ser o texto puro do script.
+    4.  **AUTOSSUFICIENTE:** O script deve ser completo, autônomo e não deve exigir interação do usuário para ser executado.
+    5.  **COMPATIBILIDADE:** O script deve ser compatível com o sistema operacional especificado em 'localhost OS'. Se o sistema operacional não for especificado, assuma um sistema baseado em Linux (como Ubuntu/Debian).

@@ -1,0 +1,60 @@
+```bash
+#!/bin/bash
+
+# Vulnerabilidade 1: Cleartext Transmission of Sensitive Information via HTTP
+# A correção desta vulnerabilidade depende da aplicação. Este script apenas oferece
+# um exemplo genérico para redirecionar HTTP para HTTPS usando iptables.
+# Adapte este script para sua aplicação específica.
+# É crucial configurar o servidor web (ex: Apache, Nginx) para redirecionar HTTP para HTTPS.
+# Além disso, configure o servidor web para usar um certificado SSL/TLS válido.
+# Este script assume que você já configurou um servidor HTTPS na porta 443.
+iptables -t nat -A PREROUTING -p tcp --dport 80 -j REDIRECT --to-ports 443
+
+# Salvar as regras do iptables (específico para Debian/Ubuntu)
+iptables-save > /etc/iptables/rules.v4
+
+# Vulnerabilidade 2: DNS Cache Snooping Vulnerability (UDP)
+# Desabilitar recursão no servidor DNS (BIND9 example).
+# Execute este comando apenas se você entender as implicações de desabilitar a recursão.
+# Se este servidor DNS precisa resolver nomes externos para clientes, não desabilite a recursão.
+#sed -i 's/^recursion yes;/recursion no;/g' /etc/bind/named.conf.options
+#systemctl restart bind9
+
+# Vulnerabilidade 3: ICMP Timestamp Reply Information Disclosure
+# Desabilitar ICMP timestamps no sistema.
+echo 1 > /proc/sys/net/ipv4/icmp_echo_ignore_all
+
+# Adicionar a configuração para desabilitar ICMP timestamps permanentemente.
+echo "net.ipv4.icmp_echo_ignore_all = 1" >> /etc/sysctl.conf
+sysctl -p
+
+# Vulnerabilidade 4: SSL/TLS: Deprecated TLSv1.0 and TLSv1.1 Protocol Detection
+# Desabilitar TLSv1.0 e TLSv1.1 no servidor web (Nginx example).
+# Este exemplo configura Nginx para usar apenas TLSv1.2 e TLSv1.3.
+# Adapte este script para a configuração do seu servidor web específico (Apache, etc.).
+#sed -i 's/ssl_protocols TLSv1 TLSv1.1 TLSv1.2 TLSv1.3;/ssl_protocols TLSv1.2 TLSv1.3;/g' /etc/nginx/nginx.conf
+#systemctl restart nginx
+
+# Vulnerabilidade 5: SSL/TLS: Renegotiation DoS Vulnerability (CVE-2011-1473, CVE-2011-5094)
+# Desabilitar renegotiation no Nginx (exemplo).
+# Note: Desabilitar renegotiation pode afetar a compatibilidade com alguns clientes antigos.
+# Adapte este script para a configuração do seu servidor web específico (Apache, etc.).
+#sed -i 's/ssl_session_cache shared:SSL:10m;/ssl_session_cache shared:SSL:10m;\n    ssl_prefer_server_ciphers on;/' /etc/nginx/nginx.conf
+#systemctl restart nginx
+
+# Vulnerabilidade 6: SSL/TLS: Report Weak Cipher Suites
+# Configurar cipher suites fortes no Nginx (exemplo).
+# Adapte esta lista de cipher suites para suas necessidades de segurança e compatibilidade.
+#sed -i 's/ssl_ciphers HIGH:!aNULL:!MD5;/ssl_ciphers TLSv1.2+HIGH:!TLSv1.3+MEDIUM:!aNULL:!MD5;/g' /etc/nginx/nginx.conf
+#systemctl restart nginx
+
+# Vulnerabilidade 7: TCP Timestamps Information Disclosure
+# Desabilitar TCP timestamps no sistema.
+echo 0 > /proc/sys/net/ipv4/tcp_timestamps
+
+# Adicionar a configuração para desabilitar TCP timestamps permanentemente.
+echo "net.ipv4.tcp_timestamps = 0" >> /etc/sysctl.conf
+sysctl -p
+
+echo "Correções aplicadas. Reinicie os serviços afetados para que as mudanças tenham efeito."
+```

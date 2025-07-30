@@ -1,0 +1,36 @@
+```bash
+#!/bin/bash
+
+# Description: This script disables TLSv1.0 and TLSv1.1 for PostgreSQL (port 5432) to mitigate CVE-2011-3389, CVE-2015-0204, CVE-2023-41928, CVE-2024-41270, CVE-2025-3200.
+
+# Stop the PostgreSQL service
+systemctl stop postgresql.service
+
+# Find the PostgreSQL configuration file
+PG_CONFIG_FILE=$(find /etc/postgresql/ -name postgresql.conf | head -n 1)
+
+# Check if the configuration file exists
+if [ -z "$PG_CONFIG_FILE" ]; then
+  echo "Error: PostgreSQL configuration file not found. Please locate it manually."
+  exit 1
+fi
+
+# Backup the original configuration file
+cp "$PG_CONFIG_FILE" "$PG_CONFIG_FILE.bak"
+
+# Disable TLSv1.0 and TLSv1.1 by setting ssl_min_protocol to TLSv1.2
+# Use sed to find and replace or append the line
+if grep -q "^ssl_min_protocol" "$PG_CONFIG_FILE"; then
+  sed -i "s/^ssl_min_protocol.*/ssl_min_protocol = 'TLSv1.2'/g" "$PG_CONFIG_FILE"
+else
+  echo "ssl_min_protocol = 'TLSv1.2'" >> "$PG_CONFIG_FILE"
+fi
+
+# Restart the PostgreSQL service
+systemctl start postgresql.service
+
+# Enable the PostgreSQL service to start on boot
+systemctl enable postgresql.service
+
+echo "TLSv1.0 and TLSv1.1 have been disabled for PostgreSQL.  Configuration file backed up to $PG_CONFIG_FILE.bak"
+```

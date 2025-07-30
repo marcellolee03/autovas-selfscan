@@ -1,0 +1,23 @@
+Com base na análise da vulnerabilidade de múltiplas versões do PHP  e dos scripts de correção fornecidos, apresento a avaliação de cada script e a porcentagem geral de correção.
+
+A vulnerabilidade afeta o PHP em versões anteriores à 5.3.13 e versões 5.4.x anteriores à 5.4.3. A solução recomendada é a atualização para uma versão mais recente e segura do PHP. A análise dos scripts considera se eles executam os passos essenciais para a correção em um sistema baseado em Debian/Ubuntu (como sugerido pelo uso de apt-get e php5), que são: atualizar a lista de pacotes, atualizar o(s) pacote(s) do PHP para uma versão corrigida e reiniciar o servidor web para aplicar as alterações.
+
+Análise Individual dos Scripts
+
+    Script 1 (1vtphp_1.txt): Sim. O script atualiza os pacotes, tenta instalar/atualizar o php5 e múltiplos módulos, e reinicia o serviço Apache.
+
+Script 2 (1vtphp_2.txt): Não. Embora verifique a versão do PHP, ele tenta atualizar o pacote php em vez do php5 (que é o pacote vulnerável indicado) e, crucialmente, não reinicia o servidor Apache para aplicar as mudanças.
+Script 3 (1vtphp_3.txt): Sim. Este script atualiza de forma eficaz tanto o pacote php5 quanto o módulo do Apache (libapache2-mod-php5) e reinicia o servidor.
+Script 4 (1vtphp_4.txt): Sim. O script executa os comandos essenciais para atualizar o pacote php5 e reiniciar o Apache.
+Script 5 (1vtphp_5.txt): Sim. O script instala/atualiza os pacotes base do php5 e reinicia o servidor Apache.
+Script 6 (1vtphp_6.txt): Não. O script contém uma lista excessiva e repetida de pacotes para instalar e é finalizado com um erro de sintaxe (} no final). Além disso, não reinicia o servidor Apache.
+Script 7 (1vtphp_7.txt): Sim. O script atualiza os pacotes php5 e php5-cgi (o último sendo relevante conforme o relatório da vulnerabilidade ) e reinicia o servidor.
+Script 8 (1vtphp_8.txt): Sim. O script executa os comandos essenciais para atualizar o php5 e reiniciar o Apache de forma direta e eficaz.
+Script 9 (1vtphp_9.txt): Não. Apesar de ter uma lógica avançada para checagem de versão e compatibilidade com múltiplos sistemas operacionais, ele falha ao usar o nome de pacote genérico php e não reinicia o servidor web.
+Script 10 (1vtphp_10.txt): Não. A lógica de comparação de versões do script é falha, pois utiliza comparação de strings em vez de comparação numérica, o que pode levar a resultados incorretos (ex: "5.4.10" é menor que "5.4.3" em uma comparação de texto). Isso torna o script não confiável para aplicar a correção quando necessário.
+
+Média Geral de Correção
+
+Com base na análise, 6 dos 10 scripts fornecidos são capazes de corrigir a vulnerabilidade.
+
+Média de porcentagem geral de correção: 60%

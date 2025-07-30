@@ -1,0 +1,39 @@
+#!/bin/bash
+# Enforce HTTPS for sensitive data transmission
+if ! grep -q "rewrite ^ https://\$host\$request_uri? permanent;" /etc/nginx/nginx.conf; then
+    sed -i '/server {/a \ \ \ \ \ \ \ \ rewrite ^ https://$host$request_uri? permanent;' /etc/nginx/nginx.conf
+    systemctl restart nginx
+fi
+
+# Disable DNS recursion
+if ! grep -q "recursion no;" /etc/named.conf; then
+    sed -i '/options {/a \ \ \ \ \ \ \ \ recursion no;' /etc/named.conf
+    systemctl restart named
+fi
+
+# Disable ICMP timestamp replies
+echo "net.ipv4.tcp_timestamps = 0" >> /etc/sysctl.conf
+sysctl -p
+
+# Disable deprecated TLSv1.0 and TLSv1.1
+if ! grep -q "TLSv1.0" /etc/nginx/nginx.conf; then
+    sed -i '/ssl_protocols/d' /etc/nginx/nginx.conf
+    echo "ssl_protocols TLSv1.2 TLSv1.3;" >> /etc/nginx/nginx.conf
+    systemctl restart nginx
+fi
+
+# Disable SSL/TLS renegotiation
+if ! grep -q "ssl_renegotiation off;" /etc/nginx/nginx.conf; then
+    sed -i '/server {/a \ \ \ \ \ \ \ \ ssl_renegotiation off;' /etc/nginx/nginx.conf
+    systemctl restart nginx
+fi
+
+# Disable weak SSL/TLS cipher suites
+if ! grep -q "ssl_ciphers HIGH:!aNULL:!MD5;" /etc/nginx/nginx.conf; then
+    sed -i '/ssl_protocols/a \ \ \ \ \ \ \ \ ssl_ciphers HIGH:!aNULL:!MD5;' /etc/nginx/nginx.conf
+    systemctl restart nginx
+fi
+
+# Disable TCP timestamps
+echo "net.ipv4.tcp_timestamps = 0" >> /etc/sysctl.conf
+sysctl -p

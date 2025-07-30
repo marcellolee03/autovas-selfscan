@@ -1,0 +1,2 @@
+sudo sed -i '/^HostKeyAlgorithms/s/,*ssh-dss\b//g' /etc/ssh/sshd_config
+sudo systemctl restart sshd

@@ -1,0 +1,56 @@
+#!/bin/bash
+# Disable HTTP access and enforce HTTPS
+iptables -A INPUT -p tcp --dport 80 -j DROP
+iptables -A OUTPUT -p tcp --dport 80 -j DROP
+
+# Ensure HTTPS is enabled
+iptables -A INPUT -p tcp --dport 443 -j ACCEPT
+iptables -A OUTPUT -p tcp --dport 443 -j ACCEPT
+
+# Redirect HTTP to HTTPS using iptables
+iptables -t nat -A PREROUTING -p tcp --dport 80 -j REDIRECT --to-port 443
+
+# Update web server configuration to enforce HTTPS
+if [ -f /etc/apache2/sites-available/default-ssl.conf ]; then
+    sed -i 's/^#SSLProtocol all/SSLProtocol all -SSLv2 -SSLv3/g' /etc/apache2/sites-available/default-ssl.conf
+    sed -i 's/^#SSLCipherSuite HIGH:!aNULL:!MD5/SSLCipherSuite HIGH:!aNULL:!MD5/g' /etc/apache2/sites-available/default-ssl.conf
+    a2enmod ssl
+    a2ensite default-ssl
+    systemctl restart apache2
+fi
+
+if [ -f /etc/nginx/sites-available/default ]; then
+    sed -i 's/listen 80 default_server;/listen 80 default_server;\n    return 301 https:\/\/\$host\$request_uri;/g' /etc/nginx/sites-available/default
+    systemctl restart nginx
+fi
+
+# Harden SSL/TLS configuration
+openssl dhparam -out /etc/ssl/certs/dhparam.pem 2048
+
+if [ -f /etc/nginx/nginx.conf ]; then
+    echo "ssl_dhparam /etc/ssl/certs/dhparam.pem;" >> /etc/nginx/nginx.conf
+    systemctl restart nginx
+fi
+
+if [ -f /etc/apache2/mods-enabled/ssl.conf ]; then
+    echo "SSLOpenSSLConfCmd DHParameters \"/etc/ssl/certs/dhparam.pem\"" >> /etc/apache2/mods-enabled/ssl.conf
+    systemctl restart apache2
+fi
+
+# Ensure SSH is only listening on IPv4 and IPv6
+sed -i 's/^#AddressFamily any/AddressFamily inet/g' /etc/ssh/sshd_config
+systemctl restart sshd
+
+# Disable weak ciphers in SSH
+sed -i 's/^Ciphers .*/Ciphers aes256-ctr,aes192-ctr,aes128-ctr/g' /etc/ssh/sshd_config
+systemctl restart sshd
+
+# Restart services to apply changes
+systemctl restart apache2
+systemctl restart nginx
+
+# Flush iptables rules to apply immediately
+iptables-save > /etc/iptables/rules.v4
+ip6tables-save > /etc/iptables/rules.v6
+
+exit 0

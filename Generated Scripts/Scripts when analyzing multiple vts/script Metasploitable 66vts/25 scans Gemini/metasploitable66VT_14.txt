@@ -1,0 +1,589 @@
+```bash
+#!/bin/bash
+
+# Variáveis globais
+OS=$(uname -s)
+
+# Funções de utilidade
+log_info() {
+  echo "[INFO] $@"
+}
+
+log_error() {
+  echo "[ERROR] $@"
+}
+
+apply_sysctl_conf() {
+  if [ -f /etc/sysctl.conf ]; then
+    sysctl -p
+  else
+    log_error "Arquivo /etc/sysctl.conf não encontrado."
+  fi
+}
+
+# Correção para vulnerabilidades TWiki (CVE-2008-5304, CVE-2008-5305, CVE-2009-4898, CVE-2018-20212, CVE-2009-1339)
+# Como a versão instalada é muito antiga (01.Feb.2003) e as versões fixas são 4.2.4, 4.3.1, 4.3.2 e 6.1.0,
+# a solução mais apropriada é remover o TWiki.
+remove_twiki() {
+  log_info "Removendo TWiki devido a múltiplas vulnerabilidades antigas."
+  if [ -d /var/www/twiki ]; then
+    rm -rf /var/www/twiki
+    log_info "Diretório TWiki removido."
+  elif [ -d /opt/twiki ]; then
+    rm -rf /opt/twiki
+    log_info "Diretório TWiki removido."
+  else
+    log_info "TWiki não encontrado nos locais comuns (/var/www/twiki, /opt/twiki). Verifique a instalação e remova manualmente se necessário."
+  fi
+}
+
+# Correção para Distributed Ruby (dRuby/DRb) Multiple RCE Vulnerabilities
+# Como a solução envolve configurações no código, e não é possível alterar o código remotamente,
+# o script irá desabilitar o serviço DRb.
+disable_drb() {
+  log_info "Desabilitando o serviço Distributed Ruby (DRb)."
+  kill $(lsof -t -i:8787) 2>/dev/null  # Tenta matar o processo que usa a porta 8787
+  update-rc.d -f drb remove 2>/dev/null # Remove os links de inicialização (se aplicável)
+  
+  # Garante que o serviço não reinicie
+  if [ -f /etc/init.d/drb ]; then
+    chmod -x /etc/init.d/drb
+    log_info "Permissões de execução removidas do script de inicialização DRb."
+  fi
+
+  log_info "Serviço DRb desabilitado.  Verifique e remova qualquer script de inicialização personalizado."
+}
+
+# Correção para rlogin Passwordless Login e rexec service (CVE-1999-0618) e rsh Unencrypted Cleartext Login (CVE-1999-0651)
+# Desabilitando rlogin, rexec e rsh
+disable_rlogin_rexec_rsh() {
+  log_info "Desabilitando rlogin, rexec e rsh."
+  
+  # Desabilita rlogin
+  if systemctl is-active rlogin.socket 2>/dev/null; then
+    systemctl stop rlogin.socket
+    systemctl disable rlogin.socket
+    log_info "rlogin desabilitado via systemctl."
+  elif [ -f /etc/init.d/rlogin ]; then
+    service rlogin stop 2>/dev/null
+    update-rc.d -f rlogin remove 2>/dev/null
+    log_info "rlogin desabilitado via init.d."
+  else
+    log_info "rlogin não encontrado para desabilitar."
+  fi
+
+  # Desabilita rexec
+  if systemctl is-active rexec.socket 2>/dev/null; then
+    systemctl stop rexec.socket
+    systemctl disable rexec.socket
+    log_info "rexec desabilitado via systemctl."
+  elif [ -f /etc/init.d/rexec ]; then
+    service rexec stop 2>/dev/null
+    update-rc.d -f rexec remove 2>/dev/null
+    log_info "rexec desabilitado via init.d."
+  else
+    log_info "rexec não encontrado para desabilitar."
+  fi
+  
+  # Desabilita rsh
+    if systemctl is-active rsh.socket 2>/dev/null; then
+    systemctl stop rsh.socket
+    systemctl disable rsh.socket
+    log_info "rsh desabilitado via systemctl."
+  elif [ -f /etc/init.d/rsh ]; then
+    service rsh stop 2>/dev/null
+    update-rc.d -f rsh remove 2>/dev/null
+    log_info "rsh desabilitado via init.d."
+  else
+    log_info "rsh não encontrado para desabilitar."
+  fi
+
+  log_info "rlogin, rexec e rsh desabilitados."
+}
+
+# Correção para Operating System (OS) End of Life (EOL) Detection
+# Impossível corrigir via script, apenas notifica
+eol_notification() {
+  log_error "O sistema operacional Ubuntu 8.04 atingiu o fim da vida útil.  Atualize para uma versão suportada o mais rápido possível!"
+}
+
+# Correção para Possible Backdoor: Ingreslock
+# Como a solução é uma limpeza completa do sistema, o script apenas notifica.
+ingreslock_notification() {
+  log_error "Possível backdoor Ingreslock detectado. Recomenda-se uma limpeza completa do sistema."
+}
+
+# Correção para Apache Tomcat AJP RCE Vulnerability (Ghostcat)
+# Desabilita o conector AJP
+disable_ajp() {
+  log_info "Desabilitando o conector AJP no Apache Tomcat."
+  
+  # Tenta encontrar o arquivo server.xml
+  SERVER_XML=$(find /opt/tomcat* /usr/local/tomcat* /var/lib/tomcat*/conf -name server.xml 2>/dev/null | head -n 1)
+
+  if [ -n "$SERVER_XML" ] && [ -f "$SERVER_XML" ]; then
+    # Comenta o conector AJP no server.xml
+    sed -i "s/<Connector port=\"8009\" protocol=\"AJP\/1.3\"/<-- Connector port=\"8009\" protocol=\"AJP\/1.3\"/" "$SERVER_XML"
+    sed -i "s/<\/Connector>/<\/Connector> -->/" "$SERVER_XML"
+    log_info "Conector AJP comentado em $SERVER_XML. Reinicie o Tomcat para aplicar as mudanças."
+
+  else
+    log_error "Arquivo server.xml do Tomcat não encontrado.  Desabilite o conector AJP manualmente."
+  fi
+}
+
+# Correção para MySQL / MariaDB Default Credentials (MySQL Protocol) e PostgreSQL Default Credentials (PostgreSQL Protocol)
+# O script irá alterar as senhas padrão.
+change_default_db_passwords() {
+  log_info "Alterando as senhas padrão do MySQL/MariaDB e PostgreSQL."
+
+  # MySQL/MariaDB
+  mysql -u root -e "ALTER USER 'root'@'localhost' IDENTIFIED BY 'SecurePassword123!';" 2>/dev/null
+  mysql -u root -e "ALTER USER 'root'@'127.0.0.1' IDENTIFIED BY 'SecurePassword123!';" 2>/dev/null
+  mysql -u root -e "ALTER USER 'root'@'::1' IDENTIFIED BY 'SecurePassword123!';" 2>/dev/null
+  log_info "Senha do usuário root do MySQL/MariaDB alterada para 'SecurePassword123!'."
+
+  # PostgreSQL
+  PGPASSWORD=postgres psql -U postgres -d postgres -c "ALTER USER postgres WITH PASSWORD 'SecurePassword123!';" 2>/dev/null
+  log_info "Senha do usuário postgres do PostgreSQL alterada para 'SecurePassword123!'."
+
+  log_info "Senhas padrão do MySQL/MariaDB e PostgreSQL alteradas.  Certifique-se de alterar quaisquer outras senhas padrão."
+}
+
+# Correção para PHP < 5.6.30, 7.x < 7.0.15, 7.1.x < 7.1.1 Multiple Vulnerabilities (Jan 2017)
+# Como a versão instalada (5.2.4) é extremamente antiga, o script tentará atualizar para uma versão mais recente suportada pelo sistema.
+update_php() {
+  log_info "Atualizando a versão do PHP."
+  
+  if [[ "$OS" == "Debian" ]] || [[ "$OS" == "Ubuntu" ]]; then
+    apt-get update
+    apt-get install -y php
+    if command -v php7.4 >/dev/null 2>&1; then
+      apt-get install -y php7.4
+      update-alternatives --set php /usr/bin/php7.4
+    elif command -v php8.1 >/dev/null 2>&1; then
+      apt-get install -y php8.1
+      update-alternatives --set php /usr/bin/php8.1
+    else
+       log_error "Nenhuma versão do PHP encontrada para atualizar automaticamente.  Considere uma atualização manual."
+    fi
+    
+    log_info "PHP atualizado. Verifique a versão com 'php -v'."
+  else
+    log_error "Atualização automática do PHP não suportada neste sistema operacional.  Realize a atualização manualmente."
+  fi
+}
+
+# Correção para PHP < 5.3.13, 5.4.x < 5.4.3 Multiple Vulnerabilities - Active Check e phpinfo() Output Reporting (HTTP) (CVE-2008-0149, CVE-2023-49282, CVE-2023-49283, CVE-2024-10486)
+# Remove arquivos phpinfo.php e restringe acesso a cgi-bin
+remove_phpinfo_restrict_cgi() {
+  log_info "Removendo arquivos phpinfo.php e restringindo acesso ao diretório cgi-bin."
+
+  # Remove arquivos phpinfo.php
+  find /var/www /var/www/html /opt -name "phpinfo.php" -print0 | xargs -0 rm -f 2>/dev/null
+  log_info "Arquivos phpinfo.php removidos."
+
+  # Restringe acesso ao diretório cgi-bin
+  if [ -f /etc/apache2/apache2.conf ]; then
+    sed -i 's/<Directory "\/usr\/lib\/cgi-bin">/<Directory "\/usr\/lib\/cgi-bin">\n\tRequire all denied/' /etc/apache2/apache2.conf
+    log_info "Acesso ao diretório cgi-bin restrito no arquivo de configuração do Apache."
+  elif [ -f /etc/httpd/conf/httpd.conf ]; then
+    sed -i 's/<Directory "\/var\/www\/cgi-bin">/<Directory "\/var\/www\/cgi-bin">\n\tRequire all denied/' /etc/httpd/conf/httpd.conf
+    log_info "Acesso ao diretório cgi-bin restrito no arquivo de configuração do Apache."
+  else
+    log_error "Arquivo de configuração do Apache não encontrado.  Restrinja o acesso ao diretório cgi-bin manualmente."
+  fi
+}
+
+# Correção para vsftpd Compromised Source Packages Backdoor Vulnerability (CVE-2011-2523)
+# Remove e reinstala o vsftpd
+reinstall_vsftpd() {
+  log_info "Removendo e reinstalando o vsftpd para corrigir a vulnerabilidade de backdoor."
+  if [[ "$OS" == "Debian" ]] || [[ "$OS" == "Ubuntu" ]]; then
+    apt-get remove --purge -y vsftpd
+    apt-get update
+    apt-get install -y vsftpd
+    log_info "vsftpd removido e reinstalado."
+  else
+    log_error "Remoção e reinstalação automática do vsftpd não suportada neste sistema operacional.  Realize a reinstalação manualmente."
+  fi
+}
+
+# Correção para DistCC RCE Vulnerability (CVE-2004-2687)
+# Desabilita ou remove o distcc
+disable_distcc() {
+  log_info "Desabilitando ou removendo o distcc."
+  if systemctl is-active distccd 2>/dev/null; then
+    systemctl stop distccd
+    systemctl disable distccd
+    log_info "distccd desabilitado via systemctl."
+  elif [ -f /etc/init.d/distccd ]; then
+    service distccd stop 2>/dev/null
+    update-rc.d -f distccd remove 2>/dev/null
+    log_info "distccd desabilitado via init.d."
+  elif dpkg -s distcc 2>/dev/null | grep -q "Status: install ok installed"; then
+    apt-get remove --purge -y distcc
+    log_info "distcc removido."
+  else
+    log_info "distcc não encontrado para desabilitar ou remover."
+  fi
+}
+
+# Correção para VNC Brute Force Login e VNC Server Unencrypted Data Transmission
+# Define uma senha forte e configura para usar túnel SSH
+configure_vnc() {
+  log_info "Configurando o VNC para usar uma senha forte e túnel SSH."
+
+  # Define uma senha forte (substitua 'SecurePassword123!' por uma senha real)
+  vncpasswd <<< "SecurePassword123!\nSecurePassword123!\n"
+
+  # Instruções para configurar túnel SSH
+  log_info "Configure o acesso VNC através de um túnel SSH para maior segurança.  Consulte a documentação do VNC para detalhes."
+}
+
+# Correção para Test HTTP dangerous methods
+# Desabilita os métodos HTTP PUT e DELETE
+disable_http_methods() {
+  log_info "Desabilitando os métodos HTTP PUT e DELETE."
+
+  # Apache
+  if [ -f /etc/apache2/apache2.conf ]; then
+    sed -i '
+      <LimitExcept GET POST OPTIONS>
+        Require all denied
+      </LimitExcept>
+    ' /etc/apache2/apache2.conf
+    log_info "Métodos PUT e DELETE desabilitados no arquivo de configuração do Apache."
+  elif [ -f /etc/httpd/conf/httpd.conf ]; then
+    sed -i '
+      <LimitExcept GET POST OPTIONS>
+        Require all denied
+      </LimitExcept>
+    ' /etc/httpd/conf/httpd.conf
+    log_info "Métodos PUT e DELETE desabilitados no arquivo de configuração do Apache."
+  else
+    log_error "Arquivo de configuração do Apache não encontrado.  Desabilite os métodos PUT e DELETE manualmente."
+  fi
+}
+
+# Correção para FTP Brute Force Logins With Default Credentials Reporting e Anonymous FTP Login Reporting e FTP Unencrypted Cleartext Login
+# Desabilita logins anônimos e altera as senhas padrão, e força o uso de TLS
+configure_ftp() {
+  log_info "Configurando o FTP para desabilitar logins anônimos, alterar senhas padrão e forçar TLS."
+
+  # vsftpd
+  if [ -f /etc/vsftpd.conf ]; then
+    # Desabilita logins anônimos
+    sed -i 's/anonymous_enable=YES/anonymous_enable=NO/' /etc/vsftpd.conf
+    log_info "Logins anônimos desabilitados no vsftpd."
+
+    # Força o uso de TLS
+    sed -i 's/^ssl_enable=NO/ssl_enable=YES/' /etc/vsftpd.conf
+    sed -i 's/^force_local_data_ssl=NO/force_local_data_ssl=YES/' /etc/vsftpd.conf
+    sed -i 's/^force_local_logins_ssl=NO/force_local_logins_ssl=YES/' /etc/vsftpd.conf
+    
+    # Adiciona linha caso não exista
+    grep -q "^force_local_data_ssl=YES" /etc/vsftpd.conf || echo "force_local_data_ssl=YES" >> /etc/vsftpd.conf
+    grep -q "^force_local_logins_ssl=YES" /etc/vsftpd.conf || echo "force_local_logins_ssl=YES" >> /etc/vsftpd.conf
+    
+    log_info "FTP configurado para forçar TLS. Reinicie o vsftpd para aplicar as mudanças."
+  else
+    log_error "Arquivo de configuração do vsftpd não encontrado. Configure o FTP manualmente."
+  fi
+
+  # Alterar senhas de usuários FTP conhecidos (user, service, msfadmin, postgres)
+  if id user >/dev/null 2>&1; then
+      chpasswd <<< "user:SecurePassword123!"
+      log_info "Senha do usuário 'user' alterada."
+  fi
+    
+  if id service >/dev/null 2>&1; then
+      chpasswd <<< "service:SecurePassword123!"
+      log_info "Senha do usuário 'service' alterada."
+  fi
+
+  if id msfadmin >/dev/null 2>&1; then
+      chpasswd <<< "msfadmin:SecurePassword123!"
+      log_info "Senha do usuário 'msfadmin' alterada."
+  fi
+  
+  if id postgres >/dev/null 2>&1; then
+      chpasswd <<< "postgres:SecurePassword123!"
+      log_info "Senha do usuário 'postgres' alterada."
+  fi
+}
+
+# Correção para Cleartext Transmission of Sensitive Information via HTTP
+# Apenas notifica, pois a correção envolve configurar o servidor web para usar HTTPS.
+cleartext_http_notification() {
+  log_error "Transmissão de informações confidenciais via HTTP detectada. Configure o servidor web para usar HTTPS e redirecione todo o tráfego para HTTPS."
+}
+
+# Correção para SSL/TLS: Deprecated SSLv2 and SSLv3 Protocol Detection e SSL/TLS: Deprecated TLSv1.0 and TLSv1.1 Protocol Detection e SSL/TLS: Renegotiation DoS Vulnerability (CVE-2011-1473, CVE-2011-5094) e SSL/TLS: DHE_EXPORT MITM Security Bypass Vulnerability (LogJam) (CVE-2015-4000) e SSL/TLS: RSA Temporary Key Handling RSA_EXPORT Downgrade Issue (FREAK) (CVE-2015-0204) e SSL/TLS: SSLv3 Protocol CBC Cipher Suites Information Disclosure Vulnerability (POODLE) (CVE-2014-3566) e SSL/TLS: OpenSSL CCS Man in the Middle Security Bypass Vulnerability (CVE-2014-0224)
+# Desabilita SSLv2, SSLv3, TLSv1.0 e TLSv1.1 e renegotiation e cipher suites fracas no OpenSSL
+disable_weak_ssl_tls() {
+  log_info "Desabilitando SSLv2, SSLv3, TLSv1.0 e TLSv1.1 e renegotiation e cipher suites fracas no OpenSSL."
+
+  # Edita o arquivo openssl.cnf
+  if [ -f /etc/ssl/openssl.cnf ]; then
+    sed -i 's/Options = Require/Options = -SSLv2 -SSLv3 -TLSv1 -TLSv1_1/' /etc/ssl/openssl.cnf
+    log_info "SSLv2, SSLv3, TLSv1.0 e TLSv1.1 desabilitados no openssl.cnf."
+    sed -i 's/CipherString = DEFAULT@SECLEVEL=2/CipherString = HIGH@SECLEVEL=2/' /etc/ssl/openssl.cnf
+    log_info "Cipher suites fracas desabilitadas."    
+  else
+    log_error "Arquivo openssl.cnf não encontrado. Desabilite SSLv2, SSLv3, TLSv1.0 e TLSv1.1 e cipher suites fracas manualmente."
+  fi
+
+  # Reinicia serviços afetados (Apache, etc.)
+  if systemctl is-active apache2 2>/dev/null; then
+    systemctl restart apache2
+    log_info "Apache reiniciado."
+  elif [ -f /etc/init.d/apache2 ]; then
+    service apache2 restart
+    log_info "Apache reiniciado."
+  fi
+}
+
+# Correção para SSL/TLS: Server Certificate / Certificate in Chain with RSA keys less than 2048 bits e SSL/TLS: Certificate Signed Using A Weak Signature Algorithm e SSL/TLS: Diffie-Hellman Key Exchange Insufficient DH Group Strength Vulnerability e SSL/TLS: Certificate Expired
+# Apenas notifica, pois a correção envolve substituir o certificado.
+certificate_notification() {
+  log_error "O certificado SSL/TLS está expirado, usa uma chave RSA menor que 2048 bits, foi assinado com um algoritmo fraco ou usa Diffie-Hellman com força insuficiente. Substitua o certificado por um mais forte e válido."
+}
+
+# Correção para Multiple Vendors STARTTLS Implementation Plaintext Arbitrary Command Injection Vulnerability
+# A correção depende do vendor, então apenas notifica.
+starttls_notification() {
+  log_error "Vulnerabilidade no STARTTLS detectada. Consulte o vendor para uma correção."
+}
+
+# Correção para HTTP Debugging Methods (TRACE/TRACK) Enabled
+# Desabilita os métodos TRACE e TRACK
+disable_trace_track() {
+  log_info "Desabilitando os métodos HTTP TRACE e TRACK."
+
+  # Apache
+  if [ -f /etc/apache2/apache2.conf ]; then
+    sed -i 's/TraceEnable On/TraceEnable Off/' /etc/apache2/apache2.conf
+    log_info "Métodos TRACE e TRACK desabilitados no arquivo de configuração do Apache."
+  elif [ -f /etc/httpd/conf/httpd.conf ]; then
+    sed -i 's/TraceEnable On/TraceEnable Off/' /etc/httpd/conf/httpd.conf
+    log_info "Métodos TRACE e TRACK desabilitados no arquivo de configuração do Apache."
+  else
+    log_error "Arquivo de configuração do Apache não encontrado. Desabilite os métodos TRACE e TRACK manualmente."
+  fi
+}
+
+# Correção para Weak Key Exchange (KEX) Algorithm(s) Supported (SSH) e Weak Host Key Algorithm(s) (SSH) e Weak Encryption Algorithm(s) Supported (SSH) e Weak MAC Algorithm(s) Supported (SSH)
+# Desabilita algoritmos fracos no SSH
+disable_weak_ssh_algorithms() {
+  log_info "Desabilitando algoritmos fracos no SSH."
+
+  if [ -f /etc/ssh/sshd_config ]; then
+      # Desabilita algoritmos fracos de KEX
+      sed -i '/KexAlgorithms/s/diffie-hellman-group1-sha1,diffie-hellman-group-exchange-sha1,//g' /etc/ssh/sshd_config
+      # Desabilita algoritmos fracos de HostKey
+      sed -i '/HostKeyAlgorithms/s/ssh-dss,//g' /etc/ssh/sshd_config
+      # Desabilita algoritmos fracos de Ciphers
+      sed -i '/Ciphers/s/3des-cbc,aes128-cbc,aes192-cbc,aes256-cbc,arcfour,arcfour128,arcfour256,blowfish-cbc,cast128-cbc,rijndael-cbc@lysator.liu.se,//g' /etc/ssh/sshd_config
+      # Desabilita algoritmos fracos de MACs
+      sed -i '/MACs/s/hmac-md5,hmac-md5-96,hmac-sha1-96,umac-64@openssh.com,//g' /etc/ssh/sshd_config
+
+    log_info "Algoritmos fracos no SSH desabilitados. Reinicie o SSH para aplicar as mudanças."
+
+    if systemctl is-active sshd 2>/dev/null; then
+      systemctl restart sshd
+      log_info "SSH reiniciado."
+    elif [ -f /etc/init.d/ssh ]; then
+      service ssh restart
+      log_info "SSH reiniciado."
+    fi
+  else
+    log_error "Arquivo sshd_config não encontrado. Desabilite os algoritmos fracos manualmente."
+  fi
+}
+
+# Correção para Check if Mailserver answer to VRFY and EXPN requests
+# Desabilita VRFY e EXPN
+disable_vrfy_expn() {
+  log_info "Desabilitando VRFY e EXPN no servidor de email."
+
+  # Postfix
+  if [ -f /etc/postfix/main.cf ]; then
+    grep -q "^disable_vrfy_command = yes" /etc/postfix/main.cf || echo "disable_vrfy_command = yes" >> /etc/postfix/main.cf
+    log_info "VRFY desabilitado no Postfix. Reinicie o Postfix para aplicar as mudanças."
+    
+    if systemctl is-active postfix 2>/dev/null; then
+      systemctl restart postfix
+      log_info "Postfix reiniciado."
+    elif [ -f /etc/init.d/postfix ]; then
+      service postfix restart
+      log_info "Postfix reiniciado."
+    fi
+  # Sendmail
+  elif [ -f /etc/mail/sendmail.cf ]; then
+    sed -i 's/^O PrivacyOptions=authwarnings/O PrivacyOptions=goaway,authwarnings/' /etc/mail/sendmail.cf
+    log_info "VRFY e EXPN desabilitados no Sendmail. Reinicie o Sendmail para aplicar as mudanças."
+    
+      if systemctl is-active sendmail 2>/dev/null; then
+      systemctl restart sendmail
+      log_info "Sendmail reiniciado."
+    elif [ -f /etc/init.d/sendmail ]; then
+      service sendmail restart
+      log_info "Sendmail reiniciado."
+    fi  
+  else
+    log_error "Arquivo de configuração do servidor de email não encontrado. Desabilite VRFY e EXPN manualmente."
+  fi
+}
+
+# Correção para TCP Timestamps Information Disclosure e ICMP Timestamp Reply Information Disclosure
+# Desabilita TCP timestamps e ICMP timestamp reply
+disable_icmp_tcp_timestamps() {
+  log_info "Desabilitando TCP timestamps e ICMP timestamp reply."
+
+  # Desabilita TCP timestamps
+  echo "net.ipv4.tcp_timestamps = 0" >> /etc/sysctl.conf
+  log_info "TCP timestamps desabilitados no /etc/sysctl.conf."
+  apply_sysctl_conf
+
+  # Desabilita ICMP timestamp reply (requer firewall)
+  log_info "Desabilite ICMP timestamp reply no firewall (ex: iptables) para maior segurança."
+  
+    # Exemplo de regra iptables (adapte conforme necessário)
+  # iptables -A INPUT -p icmp --icmp-type timestamp-request -j DROP
+}
+
+# Correção para jQuery < 1.9.0 XSS Vulnerability e jQuery < 1.6.3 XSS Vulnerability
+# A correção envolve a atualização do jQuery. Como não é possível atualizar diretamente o arquivo, o script exibirá uma notificação.
+jquery_notification() {
+  log_error "A versão do jQuery é vulnerável. Atualize para a versão 1.9.0 ou superior no arquivo /mutillidae/javascript/ddsmoothmenu/jquery.min.js"
+}
+
+# Correção para Apache HTTP Server httpOnly Cookie Information Disclosure Vulnerability
+update_apache() {
+   log_info "Atualizando o Apache HTTP Server."
+   
+  if [[ "$OS" == "Debian" ]] || [[ "$OS" == "Ubuntu" ]]; then
+      apt-get update
+      apt-get upgrade -y apache2
+      log_info "Apache HTTP Server atualizado.  Verifique a versão."
+  elif [[ "$OS" == "CentOS" ]] || [[ "$OS" == "RedHat" ]]; then
+      yum update httpd
+      log_info "Apache HTTP Server atualizado.  Verifique a versão."
+  else
+    log_error "Atualização automática do Apache HTTP Server não suportada neste sistema operacional.  Realize a atualização manualmente."
+  fi
+}
+
+# Correção para phpMyAdmin error.php Cross Site Scripting Vulnerability
+phpmyadmin_notification() {
+  log_error "A versão do phpMyAdmin é vulnerável. Atualize para uma versão superior à 3.3.8.1."
+}
+
+#Correção para QWikiwiki directory traversal vulnerability e awiki <= 20100125 Multiple LFI Vulnerabilities - Active Check
+#A correção é remover as aplicações
+remove_qwiki_awiki() {
+ log_info "Removendo QWikiwiki e awiki devido a múltiplas vulnerabilidades."
+  if [ -d /var/www/qwikiwiki ]; then
+    rm -rf /var/www/qwikiwiki
+    log_info "Diretório QWikiwiki removido."
+  elif [ -d /opt/qwikiwiki ]; then
+    rm -rf /opt/qwikiwiki
+    log_info "Diretório QWikiwiki removido."
+  else
+    log_info "QWikiwiki não encontrado nos locais comuns (/var/www/qwikiwiki, /opt/qwikiwiki). Verifique a instalação e remova manualmente se necessário."
+  fi
+  
+  if [ -d /var/www/awiki ]; then
+    rm -rf /var/www/awiki
+    log_info "Diretório awiki removido."
+  elif [ -d /opt/awiki ]; then
+    rm -rf /opt/awiki
+    log_info "Diretório awiki removido."
+  else
+    log_info "awiki não encontrado nos locais comuns (/var/www/awiki, /opt/awiki). Verifique a instalação e remova manualmente se necessário."
+  fi 
+}
+
+#Correção para /doc directory browsable
+#Desabilita listagem de diretório no apache
+disable_doc_browsing() {
+  log_info "Desabilitando a listagem do diretório /doc/."
+  if [ -f /etc/apache2/apache2.conf ]; then
+    sed -i 's/<Directory \/usr\/share\/doc\/>/<Directory \/usr\/share\/doc\/>\n\tOptions -Indexes/' /etc/apache2/apache2.conf
+    log_info "Listagem de diretório desabilitada no arquivo de configuração do Apache."
+    
+    if systemctl is-active apache2 2>/dev/null; then
+      systemctl restart apache2
+      log_info "Apache reiniciado."
+    elif [ -f /etc/init.d/apache2 ]; then
+      service apache2 restart
+      log_info "Apache reiniciado."
+    fi
+  elif [ -f /etc/httpd/conf/httpd.conf ]; then
+    sed -i 's/<Directory \/usr\/share\/doc\/>/<Directory \/usr\/share\/doc\/>\n\tOptions -Indexes/' /etc/httpd/conf/httpd.conf
+    log_info "Listagem de diretório desabilitada no arquivo de configuração do Apache."
+        if systemctl is-active httpd 2>/dev/null; then
+      systemctl restart httpd
+      log_info "Apache reiniciado."
+    elif [ -f /etc/init.d/httpd ]; then
+      service httpd restart
+      log_info "Apache reiniciado."
+    fi
+  else
+    log_error "Arquivo de configuração do Apache não encontrado. Desabilite a listagem do diretório /doc/ manualmente."
+  fi
+}
+
+#Correção para Telnet Unencrypted Cleartext Login
+#Desabilita o telnet
+disable_telnet() {
+  log_info "Desabilitando o serviço Telnet."
+   if systemctl is-active telnet.socket 2>/dev/null; then
+    systemctl stop telnet.socket
+    systemctl disable telnet.socket
+    log_info "telnet desabilitado via systemctl."
+  elif [ -f /etc/init.d/telnetd ]; then
+    service telnetd stop 2>/dev/null
+    update-rc.d -f telnetd remove 2>/dev/null
+    log_info "telnet desabilitado via init.d."
+  else
+    log_info "telnet não encontrado para desabilitar."
+  fi
+}
+
+# #####################################
+# Início da execução das correções    #
+# #####################################
+
+remove_twiki
+disable_drb
+disable_rlogin_rexec_rsh
+eol_notification
+ingreslock_notification
+disable_ajp
+change_default_db_passwords
+update_php
+remove_phpinfo_restrict_cgi
+reinstall_vsftpd
+disable_distcc
+configure_vnc
+disable_http_methods
+configure_ftp
+cleartext_http_notification
+disable_weak_ssl_tls
+certificate_notification
+starttls_notification
+disable_trace_track
+disable_weak_ssh_algorithms
+disable_vrfy_expn
+disable_icmp_tcp_timestamps
+jquery_notification
+update_apache
+phpmyadmin_notification
+remove_qwiki_awiki
+disable_doc_browsing
+disable_telnet
+
+log_info "Script de correção finalizado."
+```

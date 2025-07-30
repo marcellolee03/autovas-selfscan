@@ -1,0 +1,38 @@
+#!/bin/bash
+# Ensure the script runs with root privileges
+if [ "$(id -u)" != "0" ]; then
+    echo "This script must be run as root. Use sudo or run as root user." >&2
+    exit 1
+fi
+
+# Update package lists
+apt-get update -qq
+
+# Upgrade all installed PHP packages and related modules
+# Priority: Attempt to upgrade all php-related packages, including cgi and apache modules
+PKGS=$(dpkg-query -W -f='${Package}\n' | grep -E '^php|php[0-9.-]*(cgi|apachemodule|fpm)?' | grep -P '^php[0-9.-]?(cgi|apache|fpm|common|cli|dev|mysql|curl|gd|mbstring|xml|zip)?')
+if [ -n "$PKGS" ]; then
+    apt-get install --only-upgrade -y $PKGS
+else
+    echo "No PHP packages found for upgrade. Either PHP is not installed or no vulnerabilities present."
+fi
+
+# Restart necessary services to apply PHP updates
+declare -a SERVICES=("apache2" "httpd" "nginx" "php*-fpm")
+
+for service in "${SERVICES[@]}"; do
+    if command -v systemctl >/dev/null && systemctl list-units --all --type=service | grep -q "$service"; then
+        echo "Restarting $service using systemctl"
+        systemctl restart $service || true  # Force restart even if partially matched service
+    elif service --status-all | grep -q "$service"; then
+        echo "Restarting $service using service command"
+        service $service restart || true
+    fi
+done
+
+# Ensure CGI handler for PHP is removed or disabled if present/vulnerable
+if [ -f "/etc/init.d/php-cgi" ]; then
+    systemctl stop php-cgi 2>/dev/null || service php-cgi stop 2>/dev/null
+    systemctl disable php-cgi 2>/dev/null || update-rc.d php-cgi disable
+    echo "PHP CGI service disabled"
+fi

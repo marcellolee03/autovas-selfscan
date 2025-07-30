@@ -1,0 +1,32 @@
+#!/bin/bash
+
+base_dirs=("/var/www" "/srv/www" "/usr/share/nginx" "/var/www/html")
+target_path="console/js/jquery-1.8.3.min.js"
+download_url="https://code.jquery.com/jquery-1.12.4.min.js"
+found=0
+
+for base in "${base_dirs[@]}"; do
+    full_path="${base}/${target_path}"
+    if [[ -f "$full_path" ]]; then
+        found=1
+        backup_path="${full_path}.bak"
+        cp -p "$full_path" "$backup_path"
+        temp_file=$(mktemp)
+        wget -q -O "$temp_file" "$download_url"
+        if [[ $? -eq 0 ]]; then
+            mv "$temp_file" "$full_path"
+            orig_perms=$(stat -c "%a" "$backup_path")
+            chmod "$orig_perms" "$full_path"
+        else
+            echo "Download falhou. Restaurando backup." >&2
+            cp -p "$backup_path" "$full_path"
+            rm -f "$temp_file"
+            exit 1
+        fi
+    fi
+done
+
+if [[ $found -eq 0 ]]; then
+    echo "Arquivo vulnerável não encontrado." >&2
+    exit 1
+fi

@@ -1,0 +1,44 @@
+#!/bin/bash
+
+# Define as variáveis
+JQUERY_FILE="/console/framework/../js/jquery-1.8.3.min.js"
+BACKUP_DIR="/tmp/jquery_backup"
+SERVER_ROOT="/var/www/html" # Altere se a raiz do servidor web for diferente
+FULL_PATH="$SERVER_ROOT$JQUERY_FILE" # Constrói o caminho completo
+NEW_VERSION="1.9.0"
+JQUERY_URL="https://code.jquery.com/jquery-$NEW_VERSION.min.js"
+
+# Cria o diretório de backup se não existir
+mkdir -p "$BACKUP_DIR"
+
+# Para se o arquivo não existir
+if [ ! -f "$FULL_PATH" ]; then
+  echo "Arquivo jQuery não encontrado em $FULL_PATH. Verifique o caminho e tente novamente."
+  exit 1
+fi
+
+# Faz backup do arquivo jQuery existente
+cp "$FULL_PATH" "$BACKUP_DIR/jquery-1.8.3.min.js.bak"
+
+# Baixa a nova versão do jQuery
+echo "Baixando jQuery $NEW_VERSION..."
+wget -q "$JQUERY_URL" -O "$FULL_PATH"
+
+# Verifica se o download foi bem-sucedido
+if [ -f "$FULL_PATH" ]; then
+  echo "jQuery atualizado para a versão $NEW_VERSION em $FULL_PATH"
+else
+  echo "Falha ao baixar jQuery $NEW_VERSION. Restaurando o backup..."
+  cp "$BACKUP_DIR/jquery-1.8.3.min.js.bak" "$FULL_PATH"
+  echo "Backup restaurado."
+  exit 1
+fi
+
+# Opcional: Limpar o cache do navegador (se aplicável e se souber como fazer para o seu servidor)
+# Exemplo (para Apache):
+# apachectl graceful
+# Ou reiniciar o serviço web
+# systemctl restart apache2 (ou o serviço correspondente)
+
+echo "Script de correção concluído."
+exit 0

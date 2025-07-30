@@ -1,0 +1,13 @@
+#!/bin/bash
+if systemctl is-active --quiet rexec; then
+    systemctl stop rexec
+    systemctl disable rexec
+fi
+if [ -f /etc/xinetd.d/rexec ]; then
+    sed -i 's/disable = no/disable = yes/' /etc/xinetd.d/rexec
+    service xinetd restart
+fi
+if grep -q "rexec" /etc/inetd.conf; then
+    sed -i '/^rexec/d' /etc/inetd.conf
+    killall -HUP inetd
+fi

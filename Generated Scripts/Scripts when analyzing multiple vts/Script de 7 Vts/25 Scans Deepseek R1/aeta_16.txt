@@ -1,0 +1,77 @@
+#!/bin/bash
+
+cleanup() {
+    echo "Error occurred in script execution. Exiting..." >&2
+    exit 1
+}
+
+trap cleanup ERR
+
+if [[ $EUID -ne 0 ]]; then
+    echo "This script must be run as root" >&2
+    exit 1
+fi
+
+# Backup important configuration files
+cp /etc/sysctl.conf /etc/sysctl.conf.bak
+if [[ -f /etc/apache2/sites-enabled/000-default.conf ]]; then
+    cp /etc/apache2/sites-enabled/000-default.conf /etc/apache2/sites-enabled/000-default.conf.bak
+fi
+if [[ -f /etc/nginx/sites-enabled/default ]]; then
+    cp /etc/nginx/sites-enabled/default /etc/nginx/sites-enabled/default.bak
+fi
+if [[ -f /etc/bind/named.conf.options ]]; then
+    cp /etc/bind/named.conf.options /etc/bind/named.conf.options.bak
+fi
+
+# Disable TCP timestamps
+echo "net.ipv4.tcp_timestamps = 0" >> /etc/sysctl.conf
+sysctl -p
+
+# Block ICMP timestamp requests/replies with iptables
+iptables -A INPUT -p icmp --icmp-type timestamp-request -j DROP
+iptables -A OUTPUT -p icmp --icmp-type timestamp-reply -j DROP
+iptables-save > /etc/iptables.rules
+
+# Configure DNS server to disable recursion if BIND is present
+if [[ -f /etc/bind/named.conf.options ]]; then
+    if ! grep -q "recursion no;" /etc/bind/named.conf.options; then
+        sed -i '/options {/a \ \tallow-recursion { none; };\n\tallow-query-cache { none; };\n\trecursion no;' /etc/bind/named.conf.options
+        systemctl restart bind9
+    fi
+fi
+
+# Configure web servers for HTTPS redirect and TLS hardening
+disable_weak_ssl() {
+    # Apache modifications
+    if [[ -f /etc/apache2/sites-enabled/000-default.conf ]]; then
+        sed -i '/<\/VirtualHost>/i \\n\tRewriteEngine On\n\tRewriteCond %{HTTPS} off\n\tRewriteRule (.*) https://%{HTTP_HOST}%{REQUEST_URI} [R=301,L]' /etc/apache2/sites-enabled/000-default.conf
+        a2enmod rewrite ssl
+        
+        # Configure TLS settings
+        for conf in /etc/apache2/sites-enabled/*; do
+            if [[ -f "$conf" ]]; then
+                sed -i '/<VirtualHost.*:443>/a \\n\tSSLProtocol all -SSLv3 -TLSv1 -TLSv1.1\n\tSSLHonorCipherOrder on\n\tSSLCipherSuite "EECDH+ECDSA+AESGCM EECDH+aRSA+AESGCM EECDH+ECDSA+SHA384 EECDH+ECDSA+SHA256 EECDH+aRSA+SHA384 EECDH+aRSA+SHA256 EECDH+aRSA+RC4 EECDH EDH+aRSA !RC4 !aNULL !eNULL !LOW !3DES !MD5 !EXP !PSK !SRP !DSS"\n\tSSLInsecureRenegotiation off' "$conf"
+            fi
+        done
+        systemctl restart apache2
+    fi
+
+    # Nginx modifications
+    if [[ -f /etc/nginx/sites-enabled/default ]]; then
+        sed -i '/server {/a \\n\tif ($ssl_protocol = "") {\n\t\treturn 301 https://$host$request_uri;\n\t}' /etc/nginx/sites-enabled/default
+        
+        # Configure TLS settings
+        for conf in /etc/nginx/sites-enabled/*; do
+            if [[ -f "$conf" ]]; then
+                sed -i '/listen .*ssl;/a \\n\tssl_protocols TLSv1.2 TLSv1.3;\n\tssl_ciphers "EECDH+ECDSA+AESGCM:EECDH+aRSA+AESGCM:EECDH+ECDSA+SHA384:EECDH+ECDSA+SHA256:EECDH+aRSA+SHA384:EECDH+aRSA+SHA256:EECDH:EDH+aRSA:!RC4:!aNULL:!eNULL:!LOW:!3DES:!MD5:!EXP:!PSK:!SRP:!DSS";\n\tssl_prefer_server_ciphers on;\n\tssl_session_cache off;\n\tssl_session_tickets off;' "$conf"
+            fi
+        done
+        systemctl restart nginx
+    fi
+}
+
+disable_weak_ssl
+
+echo "System vulnerabilities patched successfully"
+exit 0

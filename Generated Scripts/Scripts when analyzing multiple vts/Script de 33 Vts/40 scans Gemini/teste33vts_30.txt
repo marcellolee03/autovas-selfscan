@@ -1,0 +1,100 @@
+```bash
+#!/bin/bash
+
+# Vulnerability 1: Proxmox VE EOL
+# Solution: Update Proxmox VE to a supported version.
+# This script only suggests the action, as the actual update process varies and may require specific steps.
+echo "Please update Proxmox VE to a supported version (e.g., 8.x) using the official Proxmox update guide."
+echo "Refer to the Proxmox documentation for detailed instructions."
+
+# Vulnerability 2-6: jQuery < 1.9.0 XSS Vulnerability
+# Solution: Replace vulnerable jQuery files with version 1.9.0 or later.
+# Define the vulnerable file paths and the URL to download jQuery 1.9.0
+declare -a jquery_paths=(
+    "/var/www/html/../js/jquery-1.8.3.min.js"
+    "/var/www/html/opscenter/webcommon/framework/../js/jquery-1.8.3.min.js"
+    "/var/www/html/framesets/../js/jquery-1.8.3.min.js"
+    "/var/www/html/frameset/../js/jquery-1.8.3.min.js"
+    "/var/www/html/console/framework/../js/jquery-1.8.3.min.js"
+)
+new_jquery_url="https://code.jquery.com/jquery-1.9.0.min.js"
+
+# Function to update jQuery file
+update_jquery() {
+    local file_path="$1"
+    if [ -f "$file_path" ]; then
+        echo "Backing up $file_path to ${file_path}.bak"
+        mv "$file_path" "${file_path}.bak"
+        echo "Downloading jQuery 1.9.0 to $file_path"
+        wget -q "$new_jquery_url" -O "$file_path"
+        if [ $? -eq 0 ]; then
+            echo "Successfully updated $file_path"
+        else
+            echo "Failed to download jQuery 1.9.0 for $file_path. Restoring backup."
+            mv "${file_path}.bak" "$file_path"
+        fi
+    else
+        echo "File not found: $file_path"
+    fi
+}
+
+# Loop through each vulnerable file path and update jQuery
+for path in "${jquery_paths[@]}"; do
+    update_jquery "$path"
+done
+
+# Vulnerability 7, 8, 9, 13, 14, 15, 16, 19, 21, 22: Weak SSH Algorithms
+# Solution: Disable weak SSH algorithms by modifying sshd_config.
+sshd_config="/etc/ssh/sshd_config"
+sshd_config_backup="${sshd_config}.bak"
+
+# Backup sshd_config
+if [ ! -f "${sshd_config_backup}" ]; then
+    echo "Backing up $sshd_config to $sshd_config_backup"
+    cp "$sshd_config" "$sshd_config_backup"
+fi
+
+# Disable weak algorithms
+echo "Disabling weak SSH algorithms in $sshd_config"
+sed -i '/HostKeyAlgorithms/s/ssh-dss/,/' "$sshd_config"
+sed -i '/KexAlgorithms/s/diffie-hellman-group1-sha1/,/' "$sshd_config"
+sed -i '/Ciphers/s/3des-cbc.*aes128-cbc.*aes256-cbc.*twofish-cbc.*twofish128-cbc.*twofish256-cbc/,/g' "$sshd_config"
+sed -i '/MACs/s/umac-64-etm@openssh.com.*umac-64@openssh.com/,/g' "$sshd_config"
+sed -i '/MACs/s/hmac-md5.*hmac-sha1-96/,/g' "$sshd_config"
+
+#Restart SSH service
+echo "Restarting SSH service"
+systemctl restart sshd
+
+# Vulnerability 10: DCE/RPC and MSRPC Services Enumeration Reporting
+# Solution: Filter incoming traffic to port 135.
+echo "Please configure your firewall to block incoming traffic to port 135 (TCP) to mitigate DCE/RPC and MSRPC enumeration."
+echo "Example (iptables): iptables -A INPUT -p tcp --dport 135 -j DROP"
+
+# Vulnerability 11: Telnet Unencrypted Cleartext Login
+# Solution: Disable Telnet and use SSH.
+echo "Disabling Telnet service"
+systemctl stop telnet.socket
+systemctl disable telnet.socket
+systemctl stop telnet.service
+systemctl disable telnet.service
+
+# Vulnerability 12: SSL/TLS: Deprecated TLSv1.0 and TLSv1.1 Protocol Detection
+# Solution: Disable TLSv1.0 and TLSv1.1. The implementation varies depending on the service.
+echo "Please disable TLSv1.0 and TLSv1.1 for the affected service (port 3389). Consult the service's documentation for specific instructions."
+
+# Vulnerability 17, 18, 20, 23, 24, 25: TCP Timestamps Information Disclosure
+# Solution: Disable TCP timestamps.
+echo "Disabling TCP timestamps"
+echo "net.ipv4.tcp_timestamps = 0" >> /etc/sysctl.conf
+sysctl -p
+
+# Vulnerability 26, 27, 28, 29, 30, 31, 32: ICMP Timestamp Reply Information Disclosure
+# Solution: Disable ICMP timestamp replies.
+echo "Disabling ICMP timestamp replies"
+echo "net.ipv4.icmp_echo_ignore_all = 1" >> /etc/sysctl.conf
+echo "net.ipv4.icmp_ignore_bogus_error_responses = 1" >> /etc/sysctl.conf
+sysctl -p
+
+echo "Vulnerability remediation script completed. Please review the output and take any manual steps indicated."
+```

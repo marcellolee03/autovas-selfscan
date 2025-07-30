@@ -1,0 +1,61 @@
+```sh
+#!/bin/bash
+
+# Variáveis
+TWIKI_INSTALL_DIR="/var/www/twiki"  # Ajuste este caminho se a instalação do TWiki estiver em outro diretório
+BACKUP_DIR="${TWIKI_INSTALL_DIR}/backup_$(date +%Y%m%d_%H%M%S)"
+DOWNLOAD_URL="https://sourceforge.net/projects/twiki/files/TWiki%204.2.4/TWiki-4.2.4.zip/download"
+TEMP_FILE="/tmp/TWiki-4.2.4.zip"
+
+# 1. Cria um backup do diretório TWiki
+echo "Criando backup do diretório TWiki em ${BACKUP_DIR}..."
+mkdir -p "${BACKUP_DIR}"
+cp -R "${TWIKI_INSTALL_DIR}"/* "${BACKUP_DIR}"/
+echo "Backup concluído."
+
+# 2. Faz o download do TWiki 4.2.4
+echo "Baixando TWiki 4.2.4 de ${DOWNLOAD_URL} para ${TEMP_FILE}..."
+wget -O "${TEMP_FILE}" "${DOWNLOAD_URL}"
+if [ $? -ne 0 ]; then
+  echo "Erro ao baixar o arquivo. Verifique a URL e a conexão com a internet."
+  exit 1
+fi
+echo "Download concluído."
+
+# 3. Descompacta o arquivo
+echo "Descompactando ${TEMP_FILE} para /tmp/twiki_update..."
+mkdir -p /tmp/twiki_update
+unzip "${TEMP_FILE}" -d /tmp/twiki_update
+if [ $? -ne 0 ]; then
+  echo "Erro ao descompactar o arquivo."
+  exit 1
+fi
+echo "Descompactação concluída."
+
+# 4. Copia os arquivos atualizados para o diretório de instalação
+echo "Copiando arquivos atualizados para ${TWIKI_INSTALL_DIR}..."
+rsync -avz /tmp/twiki_update/TWiki-4.2.4/ "${TWIKI_INSTALL_DIR}/"
+if [ $? -ne 0 ]; then
+  echo "Erro ao copiar os arquivos.  Verifique as permissões do diretório."
+  exit 1
+fi
+echo "Cópia dos arquivos concluída."
+
+# 5. Define as permissões adequadas (ajuste conforme necessário)
+echo "Definindo as permissões..."
+chown -R www-data:www-data "${TWIKI_INSTALL_DIR}"  # Adapte o usuário e grupo do servidor web
+chmod -R 755 "${TWIKI_INSTALL_DIR}/bin"
+chmod -R 777 "${TWIKI_INSTALL_DIR}/data"
+chmod -R 777 "${TWIKI_INSTALL_DIR}/templates"
+chmod -R 777 "${TWIKI_INSTALL_DIR}/pub"
+
+echo "Permissões definidas."
+
+# 6. Limpa os arquivos temporários
+echo "Limpando arquivos temporários..."
+rm -rf "${TEMP_FILE}" /tmp/twiki_update
+echo "Limpeza concluída."
+
+echo "Atualização do TWiki para a versão 4.2.4 concluída."
+echo "Verifique o TWiki para garantir que a atualização foi bem-sucedida."
+```

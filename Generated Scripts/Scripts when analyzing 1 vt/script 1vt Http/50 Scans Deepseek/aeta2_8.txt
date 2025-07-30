@@ -1,0 +1,19 @@
+#!/bin/bash
+# Configurar o Apache para redirecionar HTTP para HTTPS
+if [ -f /etc/apache2/sites-available/default-ssl.conf ] && [ -f /etc/apache2/sites-available/000-default.conf ]; then
+    sed -i 's/<VirtualHost *:80>/<VirtualHost *:80>\n    RewriteEngine On\n    RewriteCond %{HTTPS} !=on\n    RewriteRule ^\/?(.*) https:\/\/%{SERVER_NAME}\/$1 [R,L]/' /etc/apache2/sites-available/000-default.conf
+    a2enmod ssl
+    a2ensite default-ssl
+    systemctl restart apache2
+fi
+
+# Configurar o Nginx para redirecionar HTTP para HTTPS
+if [ -f /etc/nginx/sites-available/default ]; then
+    sed -i 's/listen 80 default_server;/listen 80 default_server;\n    return 301 https:\/\/$host$request_uri;/' /etc/nginx/sites-available/default
+    systemctl restart nginx
+fi
+
+# Verificar se o certificado SSL está configurado e, caso não esteja, gerar um self-signed (apenas para desenvolvimento)
+if ! [ -f /etc/ssl/certs/ssl-cert-snakeoil.pem ] && ! [ -f /etc/ssl/private/ssl-cert-snakeoil.key ]; then
+    openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout /etc/ssl/private/ssl-cert-snakeoil.key -out /etc/ssl/certs/ssl-cert-snakeoil.pem -subj "/CN=localhost"
+fi

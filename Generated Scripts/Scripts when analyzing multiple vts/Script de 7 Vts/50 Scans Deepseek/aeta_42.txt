@@ -1,0 +1,51 @@
+#!/bin/bash
+
+# Corrigindo a vulnerabilidade de transmissão de dados sensíveis via HTTP
+if [ -f /etc/apache2/sites-available/default-ssl.conf ]; then
+    sed -i 's/<\/VirtualHost>/\tRedirect permanent \/ https:\/\/$SERVER_NAME\/\n<\/VirtualHost>/' /etc/apache2/sites-available/000-default.conf
+    a2enmod ssl
+    a2ensite default-ssl
+    systemctl restart apache2
+fi
+
+# Corrigindo a vulnerabilidade de DNS Cache Snooping
+if [ -f /etc/bind/named.conf.options ]; then
+    sed -i 's/recursion yes;/recursion no;/' /etc/bind/named.conf.options
+    systemctl restart bind9
+fi
+
+# Corrigindo a vulnerabilidade de ICMP Timestamp Reply
+echo "net.ipv4.icmp_echo_ignore_all = 1" >> /etc/sysctl.conf
+sysctl -p
+
+# Corrigindo a vulnerabilidade de uso de TLS depreciados
+if [ -f /etc/nginx/nginx.conf ]; then
+    sed -i 's/TLSv1 TLSv1.1/TLSv1.2 TLSv1.3/' /etc/nginx/nginx.conf
+    systemctl restart nginx
+fi
+
+if [ -f /etc/apache2/mods-available/ssl.conf ]; then
+    sed -i 's/SSLProtocol all -SSLv3/SSLProtocol +TLSv1.2 +TLSv1.3/' /etc/apache2/mods-available/ssl.conf
+    systemctl restart apache2
+fi
+
+# Corrigindo a vulnerabilidade de Renegotiation DoS
+if [ -f /etc/apache2/mods-available/ssl.conf ]; then
+    echo "SSLInsecureRenegotiation off" >> /etc/apache2/mods-available/ssl.conf
+    systemctl restart apache2
+fi
+
+# Corrigindo a vulnerabilidade de cifras SSL/TLS fracas
+if [ -f /etc/apache2/mods-available/ssl.conf ]; then
+    sed -i 's/SSLCipherSuite HIGH:!aNULL:!MD5/SSLCipherSuite ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:DHE-RSA-AES128-GCM-SHA256:DHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:DHE-RSA-CHACHA20-POLY1305/' /etc/apache2/mods-available/ssl.conf
+    systemctl restart apache2
+fi
+
+if [ -f /etc/nginx/nginx.conf ]; then
+    sed -i 's/ssl_ciphers HIGH:!aNULL:!MD5/ssl_ciphers ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:DHE-RSA-AES128-GCM-SHA256:DHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:DHE-RSA-CHACHA20-POLY1305/' /etc/nginx/nginx.conf
+    systemctl restart nginx
+fi
+
+# Corrigindo a vulnerabilidade de TCP Timestamps
+echo "net.ipv4.tcp_timestamps = 0" >> /etc/sysctl.conf
+sysctl -p

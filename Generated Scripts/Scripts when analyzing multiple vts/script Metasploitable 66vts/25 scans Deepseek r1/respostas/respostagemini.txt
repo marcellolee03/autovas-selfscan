@@ -1,0 +1,30 @@
+
+Análise de Resolução de Vulnerabilidades por Script
+Abaixo está uma avaliação breve da capacidade de cada script em resolver as vulnerabilidades apresentadas, seguida pela média de porcentagem geral de todos os scripts.
+
+Script 1: Consegue resolver uma boa parte das vulnerabilidades.
+Script 2: Aborda diversas vulnerabilidades, com foco em desativação de serviços e hardening.
+Script 3: Apresenta uma abordagem abrangente para correção de vulnerabilidades em vários serviços.
+Script 4: Resolve várias vulnerabilidades, incluindo remoção de serviços e hardening de configurações.
+Script 5: Implementa uma série de correções para serviços e configurações.
+Script 6: Realiza atualizações e hardening em diversos componentes do sistema.
+Script 7: Direciona a correção de múltiplos serviços e configurações de segurança.
+Script 8: Oferece soluções para diversas vulnerabilidades, incluindo senhas e configurações de serviços.
+Script 9: Executa remoção de serviços, atualização de pacotes e hardening de rede e configurações.
+Script 10: Foca na redefinição de senhas, desativação de serviços e hardening de SSH e Apache.
+Script 11: Desativa e remove serviços, além de configurar iptables e senhas de banco de dados.
+Script 12: Remove pacotes inseguros, configura iptables e realiza hardening em vários serviços.
+Script 13: Desativa serviços, altera senhas e reforça configurações de SSH e web server.
+Script 14: Atualiza o sistema, remove serviços e aplica hardening em várias áreas.
+Script 15: Desativa serviços, remove software vulnerável e configura SSH e TLS.
+Script 16: Realiza atualizações, desativa serviços e aplica hardening em MySQL, PostgreSQL e SSH.
+Script 17: Atualiza pacotes, desabilita serviços e configura firewall e SSH.
+Script 18: Para e remove serviços, bloqueia portas e implementa hardening em SSH e Apache.
+Script 19: Corrige vulnerabilidades em serviços, protocolos SSH e remove backdoors.
+Script 20: Desativa serviços, remove pacotes e realiza hardening de senhas e configurações.
+Script 21: Remove e desativa serviços, altera credenciais e aplica hardening em SSL/TLS e SSH.
+Script 22: Corrige serviços desnecessários, remove backdoors e atualiza pacotes.
+Script 23: Corrige serviços, define senhas fortes e configura PHP, Apache, TLS e SSH.
+Script 24: Desabilita serviços, remove software vulnerável e protege configurações de SSH e MySQL.
+Script 25: Atualiza o sistema, remove serviços, configura firewall e corrige vulnerabilidades específicas.
+Média de Porcentagem Geral de Todos os Scripts: Aproximadamente 85%

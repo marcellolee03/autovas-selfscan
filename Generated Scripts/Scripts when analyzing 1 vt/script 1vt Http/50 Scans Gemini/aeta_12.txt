@@ -1,0 +1,87 @@
+#!/bin/bash
+
+# Detecta o sistema operacional
+OS=$(uname -s)
+
+# Função para configurar o redirecionamento HTTP para HTTPS no Apache
+apache_redirect() {
+  if command -v apache2ctl &> /dev/null; then
+    if ! a2enmod rewrite &> /dev/null; then
+      echo "Habilitando o módulo rewrite do Apache..."
+      a2enmod rewrite
+    fi
+
+    # Cria um arquivo de configuração virtual host para redirecionamento
+    REDIRECT_CONF="/etc/apache2/sites-available/http-to-https.conf"
+    echo "<VirtualHost *:80>
+    ServerName \$(hostname)
+    Redirect permanent / https://\${SERVER_NAME}\${REQUEST_URI}
+</VirtualHost>" > "$REDIRECT_CONF"
+
+    # Habilita o site e recarrega o Apache
+    a2ensite http-to-https.conf
+    apache2ctl reload
+    echo "Redirecionamento HTTP para HTTPS configurado no Apache."
+  else
+    echo "Apache não detectado.  Por favor, instale o Apache ou configure o redirecionamento manualmente."
+  fi
+}
+
+# Função para configurar o redirecionamento HTTP para HTTPS no Nginx
+nginx_redirect() {
+  if command -v nginx &> /dev/null; then
+    # Encontra o arquivo de configuração padrão do Nginx
+    DEFAULT_CONF=$(find /etc/nginx/sites-enabled/ -type f -name "default")
+
+    if [ -z "$DEFAULT_CONF" ]; then
+      DEFAULT_CONF=$(find /etc/nginx/conf.d/ -type f -name "*.conf" | head -n 1)
+      if [ -z "$DEFAULT_CONF" ]; then
+        echo "Arquivo de configuração padrão do Nginx não encontrado.  Por favor, configure o redirecionamento manualmente."
+        return
+      fi
+    fi
+
+    # Adiciona um bloco de redirecionamento ao arquivo de configuração
+    echo "Adicionando redirecionamento HTTP para HTTPS no Nginx..."
+    
+    # Cria um arquivo de backup
+    cp "$DEFAULT_CONF" "$DEFAULT_CONF.bak"
+    
+    # Adiciona o bloco de redirecionamento.  Este bloco assume que já existe um bloco `server { listen 443 ssl; ... }`
+    # Ajuste conforme necessário se seu arquivo de configuração for diferente.
+    
+    REDIRECT_BLOCK="
+server {
+    listen 80;
+    server_name \$(hostname);
+    return 301 https://\$host\$request_uri;
+}
+"
+    echo "$REDIRECT_BLOCK" >> "$DEFAULT_CONF"
+
+    # Recarrega o Nginx
+    nginx -s reload
+    echo "Redirecionamento HTTP para HTTPS configurado no Nginx."
+  else
+    echo "Nginx não detectado.  Por favor, instale o Nginx ou configure o redirecionamento manualmente."
+  fi
+}
+
+# Verifica se o script está sendo executado como root
+if [[ $EUID -ne 0 ]]; then
+   echo "Este script deve ser executado como root."
+   exit 1
+fi
+
+# Procura por Apache ou Nginx e configura o redirecionamento
+if command -v apache2ctl &> /dev/null; then
+  apache_redirect
+elif command -v nginx &> /dev/null; then
+  nginx_redirect
+else
+  echo "Servidor web (Apache ou Nginx) não detectado. Por favor, instale e configure um servidor web para aplicar o redirecionamento HTTP para HTTPS."
+  exit 1
+fi
+
+echo "Script finalizado."
+exit 0

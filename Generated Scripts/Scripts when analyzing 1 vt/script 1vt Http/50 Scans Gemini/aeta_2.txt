@@ -1,0 +1,104 @@
+```bash
+#!/bin/bash
+
+# Este script habilita o redirecionamento HTTP para HTTPS e desabilita o HTTP para evitar a transmissão de informações em texto puro.
+# Assume-se um servidor Apache como o servidor web principal.
+# Ajuste os caminhos e nomes dos arquivos de configuração conforme necessário para o seu ambiente.
+
+# 1. Detectar o sistema operacional.
+OS=$(uname -s)
+
+# 2. Detectar e configurar o servidor web.
+if command -v apache2 &> /dev/null; then
+  WEB_SERVER="apache2"
+  CONFIG_DIR="/etc/apache2/sites-available"
+elif command -v nginx &> /dev/null; then
+  WEB_SERVER="nginx"
+  CONFIG_DIR="/etc/nginx/sites-available"
+else
+  echo "Servidor web não detectado. Por favor, configure manualmente o redirecionamento HTTP para HTTPS."
+  exit 1
+fi
+
+# 3. Configuração para Apache.
+if [ "$WEB_SERVER" = "apache2" ]; then
+  # 3.1. Habilitar mod_rewrite e mod_ssl se não estiverem habilitados.
+  if ! apache2ctl -M | grep -q "rewrite_module"; then
+    sudo a2enmod rewrite
+  fi
+  if ! apache2ctl -M | grep -q "ssl_module"; then
+    sudo a2enmod ssl
+  fi
+
+  # 3.2. Criar um arquivo de configuração virtualhost para redirecionar HTTP para HTTPS.
+  HTTP_CONF="$CONFIG_DIR/000-default.conf" # Adapte para o seu arquivo de configuração HTTP padrão.
+  HTTPS_CONF="$CONFIG_DIR/default-ssl.conf"   #Adapte para o seu arquivo de configuração HTTPS padrão.
+  TEMP_HTTP_CONF="/tmp/http_redirect.conf"
+
+  #3.3  Verifica se o arquivo existe e se pode ser lido.
+  if [ ! -r "$HTTP_CONF" ]; then
+        echo "Arquivo de configuração HTTP não encontrado ou sem permissão de leitura: $HTTP_CONF"
+        exit 1
+  fi
+
+  #3.4 Cria um arquivo temporario com a configuração de redirecionamento
+  echo "<VirtualHost *:80>
+        ServerName \$(hostname)
+        Redirect permanent / https://\${SERVER_NAME}\${REQUEST_URI}
+  </VirtualHost>" | sudo tee "$TEMP_HTTP_CONF" > /dev/null
+  
+  #3.5 Desabilita o site default e habilita o arquivo de redirecionamento
+  sudo a2dissite 000-default.conf
+  sudo mv "$TEMP_HTTP_CONF" "$HTTP_CONF"
+  sudo a2ensite 000-default.conf
+  
+  # 3.6. Forçar HTTPS (opcional - adicione ao VirtualHost HTTPS).
+  # Adicione o seguinte bloco ao arquivo VirtualHost HTTPS (ex: /etc/apache2/sites-available/default-ssl.conf)
+  # <IfModule mod_headers.c>
+  #   Header always set Strict-Transport-Security "max-age=31536000"
+  # </IfModule>
+  # Edite o arquivo default-ssl.conf para adicionar o HSTS.
+  if [ -r "$HTTPS_CONF" ]; then
+    sudo sed -i '
+    /<\/VirtualHost>/i\
+        <IfModule mod_headers.c>\n\t\tHeader always set Strict-Transport-Security "max-age=31536000"\n\t</IfModule>
+    ' "$HTTPS_CONF"
+  else
+    echo "Arquivo de configuração HTTPS não encontrado: $HTTPS_CONF. HSTS não configurado."
+  fi
+
+  # 3.7. Reiniciar o Apache.
+  sudo systemctl restart apache2
+  echo "Apache configurado para redirecionar HTTP para HTTPS."
+
+# 4. Configuração para Nginx.
+elif [ "$WEB_SERVER" = "nginx" ]; then
+  # 4.1. Criar um arquivo de configuração para redirecionar HTTP para HTTPS.
+  HTTP_CONF="$CONFIG_DIR/default"  # Adapte para o seu arquivo de configuração HTTP padrão.
+  TEMP_HTTP_CONF="/tmp/http_redirect.conf"
+
+  #4.2 Verifica se o arquivo existe e se pode ser lido.
+  if [ ! -r "$HTTP_CONF" ]; then
+        echo "Arquivo de configuração HTTP não encontrado ou sem permissão de leitura: $HTTP_CONF"
+        exit 1
+  fi
+
+  #4.3 Cria o arquivo temporario com a configuração de redirecionamento
+  echo "server {
+      listen 80 default_server;
+      listen [::]:80 default_server;
+      server_name \$(hostname);
+      return 301 https://\$host\$request_uri;
+  }" | sudo tee "$TEMP_HTTP_CONF" > /dev/null
+
+  #4.4 Desabilita o site default e habilita o arquivo de redirecionamento.
+  sudo rm /etc/nginx/sites-enabled/default
+  sudo mv "$TEMP_HTTP_CONF" "$HTTP_CONF"
+
+  # 4.5. Reiniciar o Nginx.
+  sudo systemctl restart nginx
+  echo "Nginx configurado para redirecionar HTTP para HTTPS."
+fi
+
+echo "Redirecionamento HTTP para HTTPS configurado.  Verifique o funcionamento acessando o site via HTTP."
+```

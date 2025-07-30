@@ -1,0 +1,1 @@
+Erro ao buscar resposta: 'NoneType' object is not subscriptable

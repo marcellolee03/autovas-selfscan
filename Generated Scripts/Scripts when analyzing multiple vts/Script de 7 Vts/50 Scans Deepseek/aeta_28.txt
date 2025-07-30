@@ -1,0 +1,56 @@
+#!/bin/bash
+
+# Corrigir Vulnerabilidade 1: Enforce TLS
+echo "Configuring web server to enforce TLS..."
+if [ -f /etc/apache2/apache2.conf ]; then
+    sed -i 's/^#*\(SSLProtocol\s\+.*\)/\1 -ALL +TLSv1.2 +TLSv1.3/' /etc/apache2/mods-enabled/ssl.conf
+    sed -i 's/^#*\(SSLCipherSuite\s\+.*\)/\1 HIGH:!aNULL:!MD5/' /etc/apache2/mods-enabled/ssl.conf
+    systemctl restart apache2
+fi
+
+# Corrigir Vulnerabilidade 2: Disable DNS Recursion
+echo "Disabling DNS recursion..."
+if [ -f /etc/bind/named.conf.options ]; then
+    sed -i 's/\(recursion\s\+\)yes/\1no/' /etc/bind/named.conf.options
+    systemctl restart bind9
+fi
+
+# Corrigir Vulnerabilidade 3: Disable ICMP Timestamps
+echo "Disabling ICMP timestamp responses..."
+sysctl -w net.ipv4.icmp_echo_ignore_all=1
+sysctl -w net.ipv4.icmp_echo_ignore_broadcasts=1
+sysctl -p
+
+# Corrigir Vulnerabilidade 4: Disable TLS 1.0 and 1.1
+echo "Disabling deprecated TLS 1.0 and 1.1..."
+if [ -f /etc/apache2/mods-enabled/ssl.conf ]; then
+    sed -i 's/^#*\(SSLProtocol\s\+.*\)/\1 -ALL +TLSv1.2 +TLSv1.3/' /etc/apache2/mods-enabled/ssl.conf
+    systemctl restart apache2
+fi
+if [ -f /etc/nginx/nginx.conf ]; then
+    sed -i 's/^#*\(ssl_protocols\s\+.*\)/\1 TLSv1.2 TLSv1.3;/' /etc/nginx/nginx.conf
+    systemctl restart nginx
+fi
+
+# Corrigir Vulnerabilidade 5: Disable SSL Renegotiation
+echo "Disabling SSL renegotiation..."
+if [ -f /etc/apache2/mods-enabled/ssl.conf ]; then
+    sed -i 's/^#*\(SSLInsecureRenegotiation\s\+.*\)/\1 off/' /etc/apache2/mods-enabled/ssl.conf
+    systemctl restart apache2
+fi
+
+# Corrigir Vulnerabilidade 6: Disable Weak Cipher Suites
+echo "Disabling weak cipher suites..."
+if [ -f /etc/apache2/mods-enabled/ssl.conf ]; then
+    sed -i 's/^#*\(SSLCipherSuite\s\+.*\)/\1 HIGH:!aNULL:!MD5:!3DES/' /etc/apache2/mods-enabled/ssl.conf
+    systemctl restart apache2
+fi
+if [ -f /etc/nginx/nginx.conf ]; then
+    sed -i 's/^#*\(ssl_ciphers\s\+.*\)/\1 HIGH:!aNULL:!MD5:!3DES;/' /etc/nginx/nginx.conf
+    systemctl restart nginx
+fi
+
+# Corrigir Vulnerabilidade 7: Disable TCP Timestamps
+echo "Disabling TCP timestamps..."
+sysctl -w net.ipv4.tcp_timestamps=0
+sysctl -p

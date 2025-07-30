@@ -1,0 +1,116 @@
+```bash
+#!/bin/bash
+
+# Vulnerability 1: Proxmox VE EOL
+# This script assumes you want to upgrade to the latest supported version.
+# It's crucial to have backups before proceeding.
+# Adjust the upgrade commands according to the specific Proxmox version you're targeting.
+# This script might not work directly and needs proper adjustment for Proxmox upgrade.
+
+# Update package lists
+apt update
+
+# Perform a full upgrade (use with caution, test in a non-production environment first)
+apt dist-upgrade -y
+
+# Clean up old packages
+apt autoremove -y
+apt clean
+
+# Vulnerability 2-6: jQuery < 1.9.0 XSS Vulnerability
+# Define jQuery 1.9.0 download URL
+JQUERY_URL="https://code.jquery.com/jquery-1.9.0.min.js"
+
+# Locations of vulnerable jQuery files
+JQUERY_FILES=(
+    "/var/www/html/js/jquery-1.8.3.min.js" #Vulnerability 2 example path (adjust if it's different on your system)
+    "/var/www/html/opscenter/webcommon/framework/js/jquery-1.8.3.min.js" #Vulnerability 3 example path (adjust if it's different on your system)
+    "/var/www/html/framesets/js/jquery-1.8.3.min.js" #Vulnerability 4 example path (adjust if it's different on your system)
+    "/var/www/html/frameset/js/jquery-1.8.3.min.js" #Vulnerability 5 example path (adjust if it's different on your system)
+    "/var/www/html/console/framework/js/jquery-1.8.3.min.js" #Vulnerability 6 example path (adjust if it's different on your system)
+)
+
+# Loop through each jQuery file
+for file in "${JQUERY_FILES[@]}"; do
+    # Check if the file exists
+    if [ -f "$file" ]; then
+        # Backup the old file
+        cp "$file" "${file}.bak"
+        echo "Backed up $file to ${file}.bak"
+
+        # Download the new jQuery version
+        wget -q "$JQUERY_URL" -O "$file"
+        echo "Updated $file with jQuery 1.9.0"
+    else
+        echo "File not found: $file"
+    fi
+done
+
+# Vulnerability 7, 8, 9, 13, 14, 15, 16, 19, 21, 22: Weak SSH Algorithms
+# Edit the SSH configuration file
+SSH_CONFIG="/etc/ssh/sshd_config"
+
+# Backup the original SSH configuration
+cp "$SSH_CONFIG" "${SSH_CONFIG}.bak"
+echo "Backed up $SSH_CONFIG to ${SSH_CONFIG}.bak"
+
+# Disable weak KEX algorithms
+sed -i 's/^#KexAlgorithms.*/KexAlgorithms curve25519-sha256@libssh.org,ecdh-sha2-nistp256,ecdh-sha2-nistp384,ecdh-sha2-nistp521,diffie-hellman-group-exchange-sha256/g' "$SSH_CONFIG"
+echo "Disabled weak KEX algorithms"
+
+# Disable weak MAC algorithms
+sed -i 's/^#MACs.*/MACs hmac-sha2-512,hmac-sha2-256/g' "$SSH_CONFIG"
+echo "Disabled weak MAC algorithms"
+
+# Disable weak Ciphers
+sed -i 's/^#Ciphers.*/Ciphers chacha20-poly1305@openssh.com,aes256-gcm@openssh.com,aes128-gcm@openssh.com,aes256-ctr,aes128-ctr/g' "$SSH_CONFIG"
+echo "Disabled weak Ciphers"
+
+# Remove ssh-dss host key algorithm support
+sed -i '/HostKey \/etc\/ssh\/ssh_host_dsa_key/d' "$SSH_CONFIG"
+sed -i '/HostKey \/etc\/ssh\/ssh_host_dsa_key.pub/d' "$SSH_CONFIG"
+
+
+#Restart SSH Service
+systemctl restart sshd
+echo "Restarted SSH service"
+
+# Vulnerability 10: DCE/RPC and MSRPC Services Enumeration Reporting
+# This vulnerability requires firewall configuration. Example using iptables:
+
+#iptables -A INPUT -p tcp --dport 135 -j DROP #Commented out for safety - enable only if needed.
+#iptables -A INPUT -p tcp --dport 49664:49670 -j DROP #Commented out for safety - enable only if needed.
+#iptables -A INPUT -p tcp --dport 7832 -j DROP #Commented out for safety - enable only if needed.
+#iptables -A INPUT -p tcp --dport 39710 -j DROP #Commented out for safety - enable only if needed.
+echo "Please configure your firewall (e.g., iptables) to block access to ports 135, 49664-49670, 7832 and 39710. Check commands commented out in script for example, but consider your actual server environment needs."
+
+# Vulnerability 11: Telnet Unencrypted Cleartext Login
+# Remove Telnet package
+apt remove --purge telnetd -y
+echo "Removed Telnet server"
+
+# Vulnerability 12: SSL/TLS: Deprecated TLSv1.0 and TLSv1.1 Protocol Detection
+# This fix depends on the service running on port 3389 (likely RDP).
+# The method to disable TLS 1.0/1.1 varies depending on the service.  A general example is provided, but adapt for your specific service.
+
+# Example for OpenSSL-based services (Apache, etc.) - adapt for your specific service.
+# In /etc/ssl/openssl.cnf or the service-specific config, add or modify:
+# SSLProtocol = -TLSv1 -TLSv1.1 +TLSv1.2 +TLSv1.3
+echo "Please configure your TLS service (likely RDP in this case) to disable TLSv1.0 and TLSv1.1. Instructions will vary on what is hosting the service on port 3389."
+
+# Vulnerability 17, 18, 20, 23, 24, 25: TCP Timestamps Information Disclosure
+# Disable TCP timestamps
+echo "net.ipv4.tcp_timestamps = 0" >> /etc/sysctl.conf
+sysctl -p
+echo "Disabled TCP timestamps"
+
+# Vulnerability 26, 27, 28, 29, 30, 31, 32: ICMP Timestamp Reply Information Disclosure
+
+#Disable ICMP Timestamp Replies
+echo "net.ipv4.icmp_echo_ignore_all=1" >> /etc/sysctl.conf
+sysctl -p
+
+echo "Disabled ICMP Timestamp Replies"
+
+echo "Script completed. Please review all steps and ensure they are appropriate for your environment.  Rebooting the server may be needed for some changes to take effect. VERY IMPORTANT: Test in non-production before running in production!"
+```

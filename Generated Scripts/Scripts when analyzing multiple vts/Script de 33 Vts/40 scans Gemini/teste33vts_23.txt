@@ -1,0 +1,140 @@
+```bash
+#!/bin/bash
+
+# Vulnerability 1: Proxmox VE EOL
+# This script assumes that you want to upgrade to the latest stable version of Proxmox VE.
+# Adjust the target version accordingly.
+# Due to the complexity of Proxmox upgrades and the potential for system instability,
+# this script provides only the commands required and DOES NOT automate the entire process.
+# It is crucial to consult the official Proxmox documentation before proceeding.
+
+echo "## Proxmox VE Upgrade - Please read carefully!"
+echo "This script only provides the necessary commands.  Refer to the Proxmox documentation:"
+echo "https://pve.proxmox.com/wiki/Upgrade_from_7_to_8"
+echo "for detailed instructions and pre/post upgrade tasks."
+
+echo "1. Update package lists:"
+echo "apt update"
+
+echo "2. Upgrade installed packages:"
+echo "apt dist-upgrade"
+
+echo "3. Reboot the system:"
+echo "reboot"
+
+echo "4. Verify the upgrade. (Check /etc/apt/sources.list.d/proxmox-ve.list and /etc/apt/sources.list)"
+echo "   After the reboot and upgrade, follow the official Proxmox upgrade guide to ensure all steps"
+echo "   are completed successfully.  Manually check configurations and perform necessary adjustments."
+
+echo "IMPORTANT: This script does NOT fully automate the Proxmox upgrade process. "
+echo "          Manual intervention and review of the official documentation are REQUIRED."
+
+# Vulnerabilities 2-6: jQuery XSS
+# Overwrite vulnerable jQuery files with version 1.9.0
+
+JQUERY_VERSION="1.9.0"
+JQUERY_URL="https://code.jquery.com/jquery-$JQUERY_VERSION.min.js"
+
+VULNERABLE_FILES=(
+    "/var/www/html/../js/jquery-1.8.3.min.js"
+    "/var/www/html/opscenter/webcommon/framework/../js/jquery-1.8.3.min.js"
+    "/var/www/html/framesets/../js/jquery-1.8.3.min.js"
+    "/var/www/html/frameset/../js/jquery-1.8.3.min.js"
+    "/var/www/html/console/framework/../js/jquery-1.8.3.min.js"
+)
+
+for file in "${VULNERABLE_FILES[@]}"; do
+    if [ -f "$file" ]; then
+        echo "Replacing $file with jQuery $JQUERY_VERSION"
+        # Create backup
+        cp "$file" "$file.bak"
+        #Download jquery 1.9.0
+        wget -q "$JQUERY_URL" -O "$file"
+        echo "Successfully replaced $file"
+    else
+        echo "File not found: $file"
+    fi
+done
+
+# Vulnerabilities 7, 8, 9, 13, 14, 15, 16, 19, 21, 22: SSH Weak Algorithms
+# Disable weak SSH algorithms
+SSH_CONFIG="/etc/ssh/sshd_config"
+SSH_CONFIG_TEMP="/tmp/sshd_config.tmp"
+
+# Create a backup of the SSH configuration
+cp "$SSH_CONFIG" "$SSH_CONFIG.bak"
+
+echo "Disabling weak SSH algorithms..."
+
+# Define weak algorithms to disable
+WEAK_HOST_KEY_ALGORITHMS="ssh-dss"
+WEAK_KEX_ALGORITHMS="diffie-hellman-group1-sha1"
+WEAK_CIPHERS="3des-cbc,aes128-cbc,aes256-cbc,twofish-cbc,twofish128-cbc,twofish256-cbc"
+WEAK_MACS="umac-64-etm@openssh.com,umac-64@openssh.com,hmac-md5,hmac-sha1-96"
+
+# Build the configuration lines
+HOST_KEY_LINE="HostKeyAlgorithms -$WEAK_HOST_KEY_ALGORITHMS"
+KEX_LINE="KexAlgorithms -$WEAK_KEX_ALGORITHMS"
+CIPHERS_LINE="Ciphers -$WEAK_CIPHERS"
+MACS_LINE="MACs -$WEAK_MACS"
+
+# Apply the changes, skipping any existing similar lines
+{
+    cat "$SSH_CONFIG"
+    echo "$HOST_KEY_LINE"
+    echo "$KEX_LINE"
+    echo "$CIPHERS_LINE"
+    echo "$MACS_LINE"
+} | grep -v -E "^(HostKeyAlgorithms|KexAlgorithms|Ciphers|MACs)\s+-$WEAK_HOST_KEY_ALGORITHMS" | grep -v -E "^(HostKeyAlgorithms|KexAlgorithms|Ciphers|MACs)\s+-$WEAK_KEX_ALGORITHMS" | grep -v -E "^(HostKeyAlgorithms|KexAlgorithms|Ciphers|MACs)\s+-$WEAK_CIPHERS" | grep -v -E "^(HostKeyAlgorithms|KexAlgorithms|Ciphers|MACs)\s+-$WEAK_MACS" > "$SSH_CONFIG_TEMP"
+
+# Move the new config to the original location.
+mv "$SSH_CONFIG_TEMP" "$SSH_CONFIG"
+
+echo "Weak SSH algorithms disabled. Restarting SSH service..."
+systemctl restart ssh
+echo "SSH service restarted."
+
+# Vulnerabilities 10: DCE/RPC and MSRPC Services Enumeration Reporting
+# The best solution is to filter traffic to port 135 with a firewall.
+echo "Vulnerability 10: DCE/RPC and MSRPC Services Enumeration Reporting"
+echo "The best solution is to filter incoming traffic to port 135 with a firewall."
+echo "Please configure your firewall to block access to port 135 from untrusted networks."
+
+# Vulnerability 11: Telnet Unencrypted Cleartext Login
+# Disable Telnet and suggest using SSH
+echo "Vulnerability 11: Telnet Unencrypted Cleartext Login"
+echo "Disabling Telnet service..."
+systemctl stop telnet.socket
+systemctl disable telnet.socket
+echo "Telnet disabled.  Please use SSH for secure remote access."
+
+# Vulnerability 12: SSL/TLS: Deprecated TLSv1.0 and TLSv1.1 Protocol Detection
+# Disable TLS 1.0 and TLS 1.1 (Assuming OpenSSL is used)
+echo "Vulnerability 12: Disabling TLS 1.0 and TLS 1.1"
+# Check if the file exists
+if [ -f "/etc/ssl/openssl.cnf" ]; then
+    # Backup the original file
+    sudo cp /etc/ssl/openssl.cnf /etc/ssl/openssl.cnf.bak
+    # Add -TLSv1 -TLSv1.1 to the CipherString
+    sudo sed -i "s/CipherString = DEFAULT@SECLEVEL=2/CipherString = DEFAULT@SECLEVEL=2:-TLSv1:-TLSv1.1/g" /etc/ssl/openssl.cnf
+    echo "TLSv1 and TLSv1.1 disabled in /etc/ssl/openssl.cnf.  Restart services using SSL/TLS to apply the changes."
+else
+    echo "OpenSSL configuration file not found at /etc/ssl/openssl.cnf.  Please manually disable TLS 1.0 and 1.1 for all services."
+fi
+
+# Vulnerabilities 17, 18, 20, 23, 24, 25: TCP Timestamps Information Disclosure
+# Disable TCP timestamps
+echo "Disabling TCP timestamps..."
+echo "net.ipv4.tcp_timestamps = 0" >> /etc/sysctl.conf
+sysctl -p
+echo "TCP timestamps disabled.  This setting will persist after reboot."
+
+# Vulnerabilities 26, 27, 28, 29, 30, 31, 32: ICMP Timestamp Reply Information Disclosure
+# Disable ICMP timestamp replies
+echo "Disabling ICMP timestamp replies..."
+echo "net.ipv4.icmp_echo_ignore_all = 1" >> /etc/sysctl.conf
+sysctl -p
+echo "ICMP timestamp replies disabled. This setting will persist after reboot."
+
+echo "Script completed."
+```

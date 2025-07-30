@@ -1,0 +1,46 @@
+```bash
+#!/bin/bash
+
+# Este script atualiza o sistema operacional Ubuntu para uma versão suportada.
+# Este script é fornecido sem garantias. Use por sua conta e risco.
+
+# Verifica se o usuário é root
+if [[ $EUID -ne 0 ]]; then
+  echo "Este script precisa ser executado como root."
+  exit 1
+fi
+
+# Variáveis
+release_codename=$(lsb_release -cs)
+
+# Define a versão mínima suportada (LTS mais recente).  Este script tentará atualizar para esta versão.
+# Ajuste esta variável conforme necessário.
+latest_lts="ubuntu2204" #Ubuntu 22.04 Jammy Jellyfish
+
+# Função para verificar se um pacote está instalado
+is_package_installed() {
+  dpkg -s "$1" >/dev/null 2>&1
+}
+
+# Atualiza a lista de pacotes e atualiza o sistema
+apt-get update
+apt-get dist-upgrade -y
+
+# Verifica se o 'update-manager-core' está instalado e, se não, instala
+if ! is_package_installed "update-manager-core"; then
+  apt-get install update-manager-core -y
+fi
+
+# Atualiza para a versão mais recente (LTS)
+do-release-upgrade -f DistUpgradeViewNonInteractive
+
+# Limpa pacotes obsoletos
+apt-get autoremove -y
+apt-get autoclean -y
+
+# Reinicia o sistema
+echo "Atualização completa. Reiniciando o sistema..."
+reboot
+
+exit 0
+```

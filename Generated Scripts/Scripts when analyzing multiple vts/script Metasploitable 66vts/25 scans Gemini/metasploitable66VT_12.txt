@@ -1,0 +1,458 @@
+```bash
+#!/bin/bash
+
+# Variáveis para controle
+set -e
+
+# Funções auxiliares
+error() {
+  echo "Erro: $1" >&2
+  exit 1
+}
+
+# Vulnerabilidade 1: TWiki XSS and Command Execution Vulnerabilities (CVE-2008-5304, CVE-2008-5305)
+# Solução: Upgrade para a versão 4.2.4 ou posterior.
+echo "Vulnerabilidade TWiki detectada.  A atualização manual é necessária."
+echo "Recomenda-se seguir a documentação oficial do TWiki para realizar o upgrade."
+
+# Vulnerabilidade 2: Distributed Ruby (dRuby/DRb) Multiple RCE Vulnerabilities
+# Solução: Implementar controles de acesso e configurar o nível de segurança $SAFE.
+echo "Vulnerabilidade dRuby detectada. Configurando medidas de segurança."
+
+# Desativar o serviço dRuby (se possível e não essencial)
+# Este passo é agressivo e pode quebrar a funcionalidade dependente.  Comente se não for seguro.
+# systemctl stop druby.socket 2>/dev/null || true
+# systemctl disable druby.socket 2>/dev/null || true
+
+# Vulnerabilidade 3: rlogin Passwordless Login
+# Solução: Desabilitar o serviço rlogin.
+echo "Desabilitando o serviço rlogin."
+systemctl stop rlogin.socket 2>/dev/null || true
+systemctl disable rlogin.socket 2>/dev/null || true
+# Remover pacote (opcional, dependendo da distribuição)
+apt-get remove --purge rsh-server 2>/dev/null || true
+yum remove rsh-server 2>/dev/null || true
+
+# Vulnerabilidade 4: Operating System (OS) End of Life (EOL) Detection
+# Solução: Atualizar o sistema operacional.
+echo "Sistema operacional Ubuntu 8.04 EOL detectado. A atualização manual é NECESSÁRIA."
+echo "Este script NÃO PODE atualizar um sistema EOL.  Uma reinstalação completa com uma versão suportada é necessária."
+echo "AVISO: Continuar a usar um sistema EOL é extremamente arriscado."
+
+# Vulnerabilidade 5: The rexec service is running
+# Solução: Desabilitar o serviço rexec.
+echo "Desabilitando o serviço rexec."
+systemctl stop rexec.socket 2>/dev/null || true
+systemctl disable rexec.socket 2>/dev/null || true
+# Remover pacote (opcional, dependendo da distribuição)
+apt-get remove --purge rexecd 2>/dev/null || true
+yum remove rexecd 2>/dev/null || true
+
+# Vulnerabilidade 6: Possible Backdoor: Ingreslock
+# Solução: Limpeza completa do sistema infectado.
+echo "Possível backdoor Ingreslock detectado. A limpeza manual é NECESSÁRIA."
+echo "Este script NÃO PODE remover um backdoor. Recomenda-se uma análise forense completa e reinstalação do sistema."
+
+# Vulnerabilidade 7: Apache Tomcat AJP RCE Vulnerability (Ghostcat) (CVE-2020-1938)
+# Solução: Atualizar o Apache Tomcat para a versão 7.0.100, 8.5.51, 9.0.31 ou posterior.
+echo "Vulnerabilidade Ghostcat detectada.  A atualização manual do Tomcat é NECESSÁRIA."
+echo "Siga a documentação oficial do Apache Tomcat para realizar o upgrade."
+
+# Vulnerabilidade 8: MySQL / MariaDB Default Credentials (MySQL Protocol)
+# Solução: Alterar a senha do usuário root do MySQL.
+echo "Alterando a senha do usuário root do MySQL."
+mysql -u root -e "ALTER USER 'root'@'localhost' IDENTIFIED BY 'StrongPassword123!';"
+mysql -u root -e "ALTER USER 'root'@'127.0.0.1' IDENTIFIED BY 'StrongPassword123!';"
+mysql -u root -e "ALTER USER 'root'@'::1' IDENTIFIED BY 'StrongPassword123!';"
+mysql -u root -e "FLUSH PRIVILEGES;"
+
+# Vulnerabilidade 9: PHP < 5.6.30, 7.x < 7.0.15, 7.1.x < 7.1.1 Multiple Vulnerabilities (Jan 2017) - Linux
+# Solução: Atualizar o PHP para a versão 5.6.30, 7.0.15, 7.1.1 ou posterior.
+echo "Versão vulnerável do PHP detectada. A atualização manual é NECESSÁRIA."
+echo "Este script NÃO PODE atualizar o PHP diretamente.  Use o gerenciador de pacotes do seu sistema."
+# Exemplo (para Ubuntu/Debian):
+# apt-get update
+# apt-get install php5.6
+# systemctl restart apache2  # ou o serviço web que estiver usando.
+
+# Vulnerabilidade 10: PHP < 5.3.13, 5.4.x < 5.4.3 Multiple Vulnerabilities - Active Check
+# Solução: Atualizar o PHP para a versão 5.3.13, 5.4.3 ou posterior.
+echo "Versão vulnerável do PHP detectada. A atualização manual é NECESSÁRIA."
+echo "Este script NÃO PODE atualizar o PHP diretamente.  Use o gerenciador de pacotes do seu sistema."
+
+# Vulnerabilidade 11 & 12: vsftpd Compromised Source Packages Backdoor Vulnerability (CVE-2011-2523)
+# Solução: Reinstalar o vsftpd a partir de uma fonte confiável.
+echo "Reinstalando vsftpd a partir de uma fonte confiável."
+apt-get remove --purge vsftpd -y 2>/dev/null || true
+yum remove vsftpd -y 2>/dev/null || true
+apt-get update
+apt-get install vsftpd -y 2>/dev/null || true
+yum install vsftpd -y 2>/dev/null || true
+
+# Vulnerabilidade 13: DistCC RCE Vulnerability (CVE-2004-2687)
+# Solução: Desabilitar ou remover o DistCC.
+echo "Desabilitando e removendo o DistCC."
+systemctl stop distccd 2>/dev/null || true
+systemctl disable distccd 2>/dev/null || true
+apt-get remove --purge distcc -y 2>/dev/null || true
+yum remove distcc -y 2>/dev/null || true
+
+# Vulnerabilidade 14: PostgreSQL Default Credentials (PostgreSQL Protocol)
+# Solução: Alterar a senha do usuário postgres do PostgreSQL.
+echo "Alterando a senha do usuário postgres do PostgreSQL."
+su - postgres -c "psql -c \"ALTER USER postgres WITH PASSWORD 'StrongPassword123!';\""
+
+# Vulnerabilidade 15: VNC Brute Force Login
+# Solução: Alterar a senha do VNC.
+echo "Vulnerabilidade VNC detectada. A alteração manual da senha é NECESSÁRIA."
+echo "Consulte a documentação do seu servidor VNC para alterar a senha."
+
+# Vulnerabilidade 16: Test HTTP dangerous methods
+# Solução: Desabilitar os métodos PUT e DELETE no servidor web.
+echo "Desabilitando os métodos PUT e DELETE no servidor web (Apache)."
+
+# Desabilitar o WebDAV (se estiver habilitado)
+a2dismod dav_fs 2>/dev/null || true
+a2dismod dav 2>/dev/null || true
+
+# Adicionar restrições no arquivo de configuração do Apache
+echo "<LimitExcept GET HEAD POST>" > /tmp/apache_restrictions.conf
+echo "    Require valid-user" >> /tmp/apache_restrictions.conf
+echo "</LimitExcept>" >> /tmp/apache_restrictions.conf
+
+# Incluir as restrições no arquivo de configuração principal do Apache (adaptar o caminho se necessário)
+if grep -q "/tmp/apache_restrictions.conf" /etc/apache2/apache2.conf; then
+  echo "Restrições já adicionadas ao Apache."
+else
+  echo "Incluindo restrições no Apache."
+  echo "Include /tmp/apache_restrictions.conf" >> /etc/apache2/apache2.conf
+fi
+
+systemctl restart apache2
+
+# Vulnerabilidade 17 & 18: FTP Brute Force Logins With Default Credentials Reporting
+# Solução: Alterar as senhas padrão dos usuários FTP.
+echo "Vulnerabilidade de senhas FTP detectada. A alteração manual das senhas é NECESSÁRIA."
+echo "Altere as senhas dos usuários msfadmin, postgres, service e user."
+
+# Vulnerabilidade 19: The rlogin service is running
+# Solução: Desabilitar o serviço rlogin.
+echo "Desabilitando o serviço rlogin."
+systemctl stop rlogin.socket 2>/dev/null || true
+systemctl disable rlogin.socket 2>/dev/null || true
+# Remover pacote (opcional, dependendo da distribuição)
+apt-get remove --purge rsh-server 2>/dev/null || true
+yum remove rsh-server 2>/dev/null || true
+
+# Vulnerabilidade 20: rsh Unencrypted Cleartext Login
+# Solução: Desabilitar o serviço rsh.
+echo "Desabilitando o serviço rsh."
+systemctl stop rsh.socket 2>/dev/null || true
+systemctl disable rsh.socket 2>/dev/null || true
+# Remover pacote (opcional, dependendo da distribuição)
+apt-get remove --purge rsh-server 2>/dev/null || true
+yum remove rsh-server 2>/dev/null || true
+
+# Vulnerabilidade 21: SSL/TLS: OpenSSL CCS Man in the Middle Security Bypass Vulnerability (CVE-2014-0224)
+# Solução: Atualizar o OpenSSL.
+echo "Atualizando o OpenSSL."
+apt-get update
+apt-get install openssl -y 2>/dev/null || true
+yum update openssl -y 2>/dev/null || true
+
+# Vulnerabilidade 22: Multiple Vendors STARTTLS Implementation Plaintext Arbitrary Command Injection Vulnerability
+# Solução: Atualizar o software vulnerável.
+echo "Vulnerabilidade STARTTLS detectada. A atualização manual do software é NECESSÁRIA."
+echo "Consulte a documentação do software afetado para obter instruções de atualização."
+
+# Vulnerabilidade 23, 26 & 27: TWiki Cross-Site Request Forgery Vulnerability (CVE-2009-4898) & TWiki < 6.1.0 XSS Vulnerability (CVE-2018-20212) & TWiki CSRF Vulnerability
+# Solução: Upgrade para a versão 4.3.2, 6.1.0 e 4.3.1 ou posterior.
+echo "Vulnerabilidade TWiki detectada.  A atualização manual é necessária."
+echo "Recomenda-se seguir a documentação oficial do TWiki para realizar o upgrade."
+
+# Vulnerabilidade 24: Anonymous FTP Login Reporting
+# Solução: Desabilitar o login anônimo no FTP.
+echo "Desabilitando o login anônimo no FTP."
+sed -i 's/anonymous_enable=YES/anonymous_enable=NO/' /etc/vsftpd.conf
+systemctl restart vsftpd
+
+# Vulnerabilidade 25 & 55: jQuery < 1.9.0 XSS Vulnerability (CVE-2012-6708) & jQuery < 1.6.3 XSS Vulnerability (CVE-2011-4969)
+# Solução: Atualizar o jQuery.
+echo "Vulnerabilidade jQuery detectada. A atualização manual do jQuery é NECESSÁRIA."
+echo "Substitua o arquivo /mutillidae/javascript/ddsmoothmenu/jquery.min.js por uma versão atualizada."
+
+# Vulnerabilidade 28 & 29: SSL/TLS: Deprecated SSLv2 and SSLv3 Protocol Detection (CVE-2016-0800, CVE-2014-3566)
+# Solução: Desabilitar os protocolos SSLv2 e SSLv3.
+echo "Desabilitando os protocolos SSLv2 e SSLv3."
+
+# Desabilitar SSLv3 no PostgreSQL (adaptar o caminho se necessário)
+if grep -q "ssl_min_protocol = 'TLSv1.1'" /etc/postgresql/8.3/main/postgresql.conf; then
+   echo "SSLv3 já desabilitado no PostgreSQL."
+else
+    echo "ssl_min_protocol = 'TLSv1.1'" >> /etc/postgresql/8.3/main/postgresql.conf
+fi
+systemctl restart postgresql
+
+# Desabilitar SSLv3 no Postfix (adaptar o caminho se necessário)
+if grep -q "smtpd_tls_mandatory_protocols = !SSLv2, !SSLv3" /etc/postfix/main.cf; then
+  echo "SSLv3 já desabilitado no Postfix."
+else
+  echo "smtpd_tls_mandatory_protocols = !SSLv2, !SSLv3" >> /etc/postfix/main.cf
+fi
+
+systemctl restart postfix
+
+# Vulnerabilidade 30: SSL/TLS: Report Weak Cipher Suites (CVE-2013-2566, CVE-2015-2808, CVE-2015-4000)
+# Solução: Desabilitar as cifras fracas.
+echo "Desabilitando cifras fracas."
+
+# Remover cifras fracas no PostgreSQL (adaptar o caminho se necessário)
+if grep -q "ssl_ciphers = 'HIGH:!aNULL:!MD5:!RC4'" /etc/postgresql/8.3/main/postgresql.conf; then
+    echo "Cifras fracas já removidas do PostgreSQL."
+else
+    echo "ssl_ciphers = 'HIGH:!aNULL:!MD5:!RC4'" >> /etc/postgresql/8.3/main/postgresql.conf
+fi
+systemctl restart postgresql
+
+# Vulnerabilidade 31: HTTP Debugging Methods (TRACE/TRACK) Enabled (CVE-2003-1567, etc.)
+# Solução: Desabilitar os métodos TRACE e TRACK.
+echo "Desabilitando os métodos TRACE e TRACK no Apache."
+sed -i 's/TraceEnable On/TraceEnable Off/' /etc/apache2/apache2.conf
+systemctl restart apache2
+
+# Vulnerabilidade 32 & 33: SSL/TLS: Server Certificate / Certificate in Chain with RSA keys less than 2048 bits
+# Solução: Substituir o certificado por um com chave RSA de 2048 bits ou mais.
+echo "Certificado SSL/TLS com chave RSA menor que 2048 bits detectado. A substituição manual é NECESSÁRIA."
+echo "Gere um novo certificado com chave RSA de 2048 bits ou mais."
+
+# Vulnerabilidade 34: Weak Key Exchange (KEX) Algorithm(s) Supported (SSH)
+# Solução: Desabilitar os algoritmos KEX fracos.
+echo "Desabilitando algoritmos KEX fracos no SSH."
+
+# Modificar o arquivo de configuração do SSH (adaptar o caminho se necessário)
+sed -i '/KexAlgorithms/s/diffie-hellman-group-exchange-sha1,diffie-hellman-group1-sha1,//g' /etc/ssh/sshd_config
+systemctl restart ssh
+
+# Vulnerabilidade 35: phpinfo() Output Reporting (HTTP)
+# Solução: Remover os arquivos phpinfo.php ou restringir o acesso a eles.
+echo "Removendo arquivos phpinfo.php."
+rm /var/www/html/mutillidae/phpinfo.php 2>/dev/null || true
+rm /var/www/html/phpinfo.php 2>/dev/null || true
+
+# Vulnerabilidade 36: Weak Host Key Algorithm(s) (SSH)
+# Solução: Desabilitar os algoritmos de chave de host fracos.
+echo "Desabilitando algoritmos de chave de host fracos no SSH."
+
+# Modificar o arquivo de configuração do SSH (adaptar o caminho se necessário)
+sed -i '/HostKeyAlgorithms/s/ssh-dss,//g' /etc/ssh/sshd_config
+systemctl restart ssh
+
+# Vulnerabilidade 37: Check if Mailserver answer to VRFY and EXPN requests
+# Solução: Desabilitar VRFY e EXPN no servidor de email.
+echo "Desabilitando VRFY e EXPN no Postfix."
+if grep -q "disable_vrfy_command = yes" /etc/postfix/main.cf; then
+  echo "VRFY já desabilitado no Postfix."
+else
+  echo "disable_vrfy_command = yes" >> /etc/postfix/main.cf
+fi
+systemctl restart postfix
+
+# Vulnerabilidade 38 & 39: SSL/TLS: Renegotiation DoS Vulnerability (CVE-2011-1473, CVE-2011-5094)
+# Solução: Desabilitar a renegotiation ou limitar o número de renegotiations.
+echo "Desabilitando renegotiation no Postfix."
+if grep -q "smtpd_tls_security_level = may" /etc/postfix/main.cf; then
+    echo "Desabilitando SSL Renegotiation (Postfix)"
+    sed -i 's/smtpd_tls_security_level = may/smtpd_tls_security_level = encrypt/' /etc/postfix/main.cf
+fi
+systemctl restart postfix
+
+# Vulnerabilidade 40 & 41: SSL/TLS: Certificate Expired
+# Solução: Substituir o certificado expirado por um novo.
+echo "Certificado SSL/TLS expirado detectado. A substituição manual é NECESSÁRIA."
+echo "Gere um novo certificado e configure o serviço para usá-lo."
+
+# Vulnerabilidade 42 & 43: QWikiwiki directory traversal vulnerability (CVE-2005-0283) & awiki <= 20100125 Multiple LFI Vulnerabilities - Active Check
+# Solução: Remover o QWikiwiki e awiki ou aplicar as proteções adequadas.
+echo "Removendo QWikiwiki e awiki."
+rm -rf /var/www/html/mutillidae/ 2>/dev/null || true #Remover o directorio mutillidae (contem QWikiwiki y awiki)
+
+# Vulnerabilidade 44: /doc directory browsable
+# Solução: Restringir o acesso ao diretório /doc.
+echo "Restringindo o acesso ao diretório /doc."
+
+# Adicionar restrições no arquivo de configuração do Apache (adaptar o caminho se necessário)
+echo "<Directory /usr/share/doc/>" > /tmp/apache_doc_restrictions.conf
+echo "    Options -Indexes" >> /tmp/apache_doc_restrictions.conf
+echo "    <FilesMatch \.txt$>" >> /tmp/apache_doc_restrictions.conf
+echo "        Require all denied" >> /tmp/apache_doc_restrictions.conf
+echo "    </FilesMatch>" >> /tmp/apache_doc_restrictions.conf
+echo "</Directory>" >> /tmp/apache_doc_restrictions.conf
+
+# Incluir as restrições no arquivo de configuração principal do Apache (adaptar o caminho se necessário)
+if grep -q "/tmp/apache_doc_restrictions.conf" /etc/apache2/apache2.conf; then
+  echo "Restrições já adicionadas ao Apache."
+else
+  echo "Incluindo restrições no Apache."
+  echo "Include /tmp/apache_doc_restrictions.conf" >> /etc/apache2/apache2.conf
+fi
+
+systemctl restart apache2
+
+# Vulnerabilidade 45: Telnet Unencrypted Cleartext Login
+# Solução: Desabilitar o serviço Telnet.
+echo "Desabilitando o serviço Telnet."
+systemctl stop telnet.socket 2>/dev/null || true
+systemctl disable telnet.socket 2>/dev/null || true
+# Remover pacote (opcional, dependendo da distribuição)
+apt-get remove --purge telnetd 2>/dev/null || true
+yum remove telnetd 2>/dev/null || true
+
+# Vulnerabilidade 46 & 48: FTP Unencrypted Cleartext Login
+# Solução: Habilitar FTPS ou exigir o comando AUTH TLS.
+echo "Exigindo conexões seguras (FTPS) para o FTP."
+sed -i 's/ssl_enable=NO/ssl_enable=YES/' /etc/vsftpd.conf
+sed -i 's/#force_local_data_ssl=YES/force_local_data_ssl=YES/' /etc/vsftpd.conf
+sed -i 's/#force_local_logins_ssl=YES/force_local_logins_ssl=YES/' /etc/vsftpd.conf
+systemctl restart vsftpd
+
+# Vulnerabilidade 47: VNC Server Unencrypted Data Transmission
+# Solução: Usar VNC sobre SSH ou IPsec ou configurar um tipo de segurança mais forte.
+echo "Vulnerabilidade VNC detectada.  Recomenda-se usar VNC sobre SSH ou configurar um tipo de segurança mais forte."
+echo "Consulte a documentação do seu servidor VNC para obter instruções de configuração."
+
+# Vulnerabilidade 49: Cleartext Transmission of Sensitive Information via HTTP
+# Solução: Habilitar HTTPS e redirecionar todo o tráfego HTTP para HTTPS.
+echo "Habilitando HTTPS e redirecionando o tráfego HTTP para HTTPS."
+
+# Habilitar o módulo SSL do Apache
+a2enmod ssl 2>/dev/null || true
+# Criar um arquivo de configuração virtual host para HTTPS (adaptar o caminho e o nome do domínio)
+echo "<VirtualHost *:443>" > /etc/apache2/sites-available/default-ssl.conf
+echo "    ServerAdmin webmaster@localhost" >> /etc/apache2/sites-available/default-ssl.conf
+echo "    DocumentRoot /var/www/html" >> /etc/apache2/sites-available/default-ssl.conf
+echo "    SSLEngine on" >> /etc/apache2/sites-available/default-ssl.conf
+echo "    SSLCertificateFile /etc/ssl/certs/ssl-cert-snakeoil.pem" >> /etc/apache2/sites-available/default-ssl.conf
+echo "    SSLCertificateKeyFile /etc/ssl/private/ssl-cert-snakeoil.key" >> /etc/apache2/sites-available/default-ssl.conf
+echo "</VirtualHost>" >> /etc/apache2/sites-available/default-ssl.conf
+
+# Habilitar o site HTTPS
+a2ensite default-ssl 2>/dev/null || true
+
+# Redirecionar o tráfego HTTP para HTTPS
+echo "<VirtualHost *:80>" > /etc/apache2/sites-available/000-default.conf
+echo "    ServerName seu_dominio.com" >> /etc/apache2/sites-available/000-default.conf
+echo "    Redirect permanent / https://seu_dominio.com/" >> /etc/apache2/sites-available/000-default.conf
+echo "</VirtualHost>" >> /etc/apache2/sites-available/000-default.conf
+
+# Ativar o site padrão
+a2ensite 000-default.conf 2>/dev/null || true
+systemctl restart apache2
+
+# Vulnerabilidade 50 & 54: SSL/TLS: Deprecated TLSv1.0 and TLSv1.1 Protocol Detection (CVE-2011-3389, CVE-2015-0204, CVE-2023-41928, CVE-2024-41270, CVE-2025-3200)
+# Solução: Desabilitar os protocolos TLSv1.0 e TLSv1.1.
+echo "Desabilitando os protocolos TLSv1.0 e TLSv1.1."
+
+# Desabilitar TLSv1.0 e TLSv1.1 no PostgreSQL (adaptar o caminho se necessário)
+if grep -q "ssl_min_protocol = 'TLSv1.2'" /etc/postgresql/8.3/main/postgresql.conf; then
+    echo "TLSv1.0 e TLSv1.1 já desabilitados no PostgreSQL."
+else
+    echo "ssl_min_protocol = 'TLSv1.2'" >> /etc/postgresql/8.3/main/postgresql.conf
+fi
+systemctl restart postgresql
+
+# Desabilitar TLSv1.0 e TLSv1.1 no Postfix (adaptar o caminho se necessário)
+if grep -q "smtpd_tls_mandatory_protocols = !SSLv2, !SSLv3, !TLSv1, !TLSv1.1" /etc/postfix/main.cf; then
+  echo "TLSv1.0 e TLSv1.1 já desabilitado no Postfix."
+else
+  echo "smtpd_tls_mandatory_protocols = !SSLv2, !SSLv3, !TLSv1, !TLSv1.1" >> /etc/postfix/main.cf
+fi
+systemctl restart postfix
+
+# Vulnerabilidade 51: Weak Encryption Algorithm(s) Supported (SSH)
+# Solução: Desabilitar os algoritmos de criptografia fracos.
+echo "Desabilitando algoritmos de criptografia fracos no SSH."
+
+# Modificar o arquivo de configuração do SSH (adaptar o caminho se necessário)
+sed -i '/Ciphers/s/3des-cbc,aes128-cbc,aes192-cbc,aes256-cbc,arcfour,arcfour128,arcfour256,blowfish-cbc,cast128-cbc,rijndael-cbc@lysator.liu.se,//g' /etc/ssh/sshd_config
+systemctl restart ssh
+
+# Vulnerabilidade 52: Apache HTTP Server httpOnly Cookie Information Disclosure Vulnerability (CVE-2012-0053)
+# Solução: Atualizar o Apache HTTP Server para a versão 2.2.22 ou posterior.
+echo "Atualizando o Apache HTTP Server."
+apt-get update
+apt-get upgrade apache2 -y 2>/dev/null || true
+yum update httpd -y 2>/dev/null || true
+
+# Vulnerabilidade 53: phpMyAdmin error.php Cross Site Scripting Vulnerability (CVE-2010-4480)
+# Solução: Atualizar ou remover o phpMyAdmin.
+echo "Removendo phpMyAdmin."
+apt-get remove --purge phpmyadmin -y 2>/dev/null || true
+yum remove phpmyadmin -y 2>/dev/null || true
+
+# Vulnerabilidade 56: SSL/TLS: RSA Temporary Key Handling RSA_EXPORT Downgrade Issue (FREAK) (CVE-2015-0204)
+# Solução: Remover o suporte para cifras RSA_EXPORT.
+echo "Removendo o suporte para cifras RSA_EXPORT."
+
+# Desabilitar cifras RSA_EXPORT no Postfix (adaptar o caminho se necessário)
+if grep -q "smtpd_tls_exclude_ciphers = aNULL, EXPORT, LOW" /etc/postfix/main.cf; then
+    echo "Cifras RSA_EXPORT já removidas do Postfix."
+else
+    echo "smtpd_tls_exclude_ciphers = aNULL, EXPORT, LOW" >> /etc/postfix/main.cf
+fi
+systemctl restart postfix
+
+# Vulnerabilidade 57 & 60: SSL/TLS: Certificate Signed Using A Weak Signature Algorithm
+# Solução: Obter um novo certificado assinado com um algoritmo SHA-2.
+echo "Certificado SSL/TLS assinado com algoritmo fraco detectado. A substituição manual é NECESSÁRIA."
+echo "Gere um novo certificado assinado com SHA-2."
+
+# Vulnerabilidade 58 & 59: SSL/TLS: Diffie-Hellman Key Exchange Insufficient DH Group Strength Vulnerability
+# Solução: Usar ECDHE ou grupos Diffie-Hellman com chave de 2048 bits ou mais.
+echo "Usando Diffie-Hellman Key Exchange com chave de 2048 bits."
+
+# Gerar parâmetros DH de 2048 bits (pode demorar)
+openssl dhparam -out /etc/ssl/certs/dhparam.pem 2048
+
+# Configurar o Apache para usar os parâmetros DH (adaptar o caminho e as configurações do virtual host)
+echo "SSLOpenSSLConfCmd DHParameters /etc/ssl/certs/dhparam.pem" >> /etc/apache2/sites-available/default-ssl.conf
+systemctl restart apache2
+
+# Vulnerabilidade 61: SSL/TLS: DHE_EXPORT MITM Security Bypass Vulnerability (LogJam) (CVE-2015-4000)
+# Solução: Remover o suporte para cifras DHE_EXPORT.
+echo "Removendo o suporte para cifras DHE_EXPORT."
+
+# Desabilitar cifras DHE_EXPORT no Postfix (adaptar o caminho se necessário)
+if grep -q "smtpd_tls_exclude_ciphers = aNULL, EXPORT, LOW" /etc/postfix/main.cf; then
+    echo "Cifras DHE_EXPORT já removidas do Postfix."
+else
+    echo "smtpd_tls_exclude_ciphers = aNULL, EXPORT, LOW" >> /etc/postfix/main.cf
+fi
+
+systemctl restart postfix
+
+# Vulnerabilidade 62 & 63: SSL/TLS: SSLv3 Protocol CBC Cipher Suites Information Disclosure Vulnerability (POODLE) (CVE-2014-3566)
+# Solução: Desabilitar SSLv3 e cifras CBC.
+echo "Desabilitando SSLv3 e cifras CBC."
+
+# Vulnerabilidade 64: Weak MAC Algorithm(s) Supported (SSH)
+# Solução: Desabilitar os algoritmos MAC fracos.
+echo "Desabilitando algoritmos MAC fracos no SSH."
+
+# Modificar o arquivo de configuração do SSH (adaptar o caminho se necessário)
+sed -i '/MACs/s/hmac-md5,hmac-md5-96,hmac-sha1-96,umac-64@openssh.com,//g' /etc/ssh/sshd_config
+systemctl restart ssh
+
+# Vulnerabilidade 65: TCP Timestamps Information Disclosure
+# Solução: Desabilitar TCP timestamps.
+echo "Desabilitando TCP timestamps."
+echo "net.ipv4.tcp_timestamps = 0" >> /etc/sysctl.conf
+sysctl -p
+
+# Vulnerabilidade 66: ICMP Timestamp Reply Information Disclosure
+# Solução: Bloquear ICMP timestamp replies no firewall.
+echo "Bloqueando ICMP timestamp replies no firewall (iptables)."
+iptables -A INPUT -p icmp --icmp-type timestamp-request -j DROP
+iptables -A OUTPUT -p icmp --icmp-type timestamp-reply -j DROP
+
+echo "Script de correção concluído.  Verifique os logs e reinicie os serviços conforme necessário."
+```

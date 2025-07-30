@@ -1,0 +1,84 @@
+```bash
+#!/bin/bash
+
+# Verifica se o TWiki está instalado (método básico, pode precisar ser adaptado)
+if [ -d /var/www/twiki ]; then
+  TWIKI_DIR=/var/www/twiki
+elif [ -d /opt/twiki ]; then
+  TWIKI_DIR=/opt/twiki
+elif [ -d /usr/local/twiki ]; then
+  TWIKI_DIR=/usr/local/twiki
+else
+  echo "TWiki não encontrado. Verifique se o TWiki está instalado e o script está sendo executado no servidor correto."
+  exit 1
+fi
+
+# Define a versão alvo
+TARGET_VERSION="4.2.4"
+
+# Cria um diretório temporário para o backup e download
+TMP_DIR=$(mktemp -d)
+
+# Backup do diretório TWiki
+echo "Fazendo backup do diretório TWiki em $TMP_DIR/twiki_backup.tar.gz"
+tar -czvf "$TMP_DIR/twiki_backup.tar.gz" "$TWIKI_DIR"
+
+# Baixa a versão 4.2.4 do TWiki (substitua por um link de download estável, se possível)
+echo "Baixando TWiki versão $TARGET_VERSION"
+wget -q "https://sourceforge.net/projects/twiki/files/TWiki%204.2.4/TWiki-4.2.4.tgz/download" -O "$TMP_DIR/TWiki-4.2.4.tgz"
+
+# Extrai o arquivo baixado
+echo "Extraindo o arquivo TWiki"
+tar -xzvf "$TMP_DIR/TWiki-4.2.4.tgz" -C "$TMP_DIR"
+
+# Para a o servidor web
+echo "Parando o servidor web"
+if systemctl is-active apache2; then
+  systemctl stop apache2
+elif systemctl is-active httpd; then
+  systemctl stop httpd
+else
+  echo "Servidor web não encontrado. Tente parar manualmente."
+fi
+
+# Remove o diretório TWiki antigo
+echo "Removendo o diretório TWiki antigo"
+rm -rf "$TWIKI_DIR"
+
+# Move a nova versão para o local correto
+echo "Movendo a nova versão do TWiki para $TWIKI_DIR"
+mv "$TMP_DIR/twiki" "$TWIKI_DIR"
+
+# Restaura as configurações locais (adaptar conforme necessário - este é um exemplo genérico)
+if [ -f "$TMP_DIR/twiki_backup.tar.gz" ]; then
+    echo "Restaurando as configurações locais (twiki_backup)"
+    # Exemplo: Extrai apenas LocalSettings.cfg do backup
+    tar -xzvf "$TMP_DIR/twiki_backup.tar.gz" -C "$TMP_DIR" ./twiki/LocalSettings.cfg
+    if [ -f "$TMP_DIR/twiki/LocalSettings.cfg" ]; then
+        cp "$TMP_DIR/twiki/LocalSettings.cfg" "$TWIKI_DIR/LocalSettings.cfg"
+    fi
+    echo "Restaure as configurações adicionais manualmente do backup em $TMP_DIR/twiki_backup.tar.gz, se necessário."
+fi
+
+# Define as permissões corretas (adaptar conforme necessário)
+echo "Definindo as permissões corretas"
+chown -R www-data:www-data "$TWIKI_DIR" # Adapte o usuário/grupo
+chmod -R 755 "$TWIKI_DIR"
+
+# Inicia o servidor web
+echo "Iniciando o servidor web"
+if systemctl is-active apache2; then
+  systemctl start apache2
+elif systemctl is-active httpd; then
+  systemctl start httpd
+else
+  echo "Servidor web não encontrado. Tente iniciar manualmente."
+fi
+
+# Limpa o diretório temporário
+echo "Limpando o diretório temporário"
+rm -rf "$TMP_DIR"
+
+echo "Atualização do TWiki para a versão $TARGET_VERSION concluída."
+echo "Verifique o funcionamento do TWiki."
+```

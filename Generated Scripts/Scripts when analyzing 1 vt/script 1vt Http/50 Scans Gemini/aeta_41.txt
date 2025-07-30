@@ -1,0 +1,66 @@
+```bash
+#!/bin/bash
+
+# Este script corrige a vulnerabilidade de transmissão de informações sensíveis em texto claro via HTTP.
+# Ele configura o redirecionamento de HTTP para HTTPS usando Apache ou Nginx.
+
+# Detecta o servidor web (Apache ou Nginx)
+if command -v apache2ctl &> /dev/null; then
+  SERVER="apache"
+elif command -v nginx &> /dev/null; then
+  SERVER="nginx"
+else
+  echo "Servidor web Apache ou Nginx não detectado. Impossível configurar o redirecionamento automático."
+  exit 1
+fi
+
+# Configuração para Apache
+if [ "$SERVER" == "apache" ]; then
+  # 1. Habilita o módulo rewrite
+  sudo a2enmod rewrite
+
+  # 2. Configura o Virtual Host para redirecionar HTTP para HTTPS
+  VHOST_FILE="/etc/apache2/sites-available/000-default.conf" # ou default-ssl.conf se HTTPS já estiver configurado
+
+  if [ -f "$VHOST_FILE" ]; then
+    # Cria um backup do arquivo de configuração original
+    sudo cp "$VHOST_FILE" "$VHOST_FILE.bak"
+
+    # Adiciona a regra de redirecionamento ao Virtual Host
+    sudo sed -i "s|<VirtualHost \*:80>|<VirtualHost *:80>\n\tRewriteEngine On\n\tRewriteCond %{HTTPS} !=on\n\tRewriteRule ^/(.*) https://%{HTTP_HOST}/\$1 [R=301,L]|g" "$VHOST_FILE"
+
+    # Reinicia o Apache
+    sudo systemctl restart apache2
+    echo "Apache configurado para redirecionar HTTP para HTTPS. Arquivo de configuração original salvo como $VHOST_FILE.bak"
+
+  else
+    echo "Arquivo de Virtual Host padrão do Apache não encontrado. Verifique o caminho e execute o script novamente."
+    exit 1
+  fi
+fi
+
+# Configuração para Nginx
+if [ "$SERVER" == "nginx" ]; then
+  # 1. Localiza o arquivo de configuração do site
+  CONFIG_FILE="/etc/nginx/sites-available/default" # Adapte para o seu arquivo de configuração
+
+  if [ -f "$CONFIG_FILE" ]; then
+      # Cria um backup do arquivo de configuração original
+      sudo cp "$CONFIG_FILE" "$CONFIG_FILE.bak"
+
+      # 2. Adiciona o redirecionamento para HTTPS
+      sudo sed -i "s/listen 80 default_server;/listen 80 default_server;\n\trewrite ^(.*)\$ https://\$host\$1 permanent;/g" "$CONFIG_FILE"
+      sudo sed -i "s/listen \[::\]:80 default_server;/listen \[::\]:80 default_server;\n\trewrite ^(.*)\$ https://\$host\$1 permanent;/g" "$CONFIG_FILE"
+
+      # 3. Reinicia o Nginx
+      sudo systemctl restart nginx
+      echo "Nginx configurado para redirecionar HTTP para HTTPS. Arquivo de configuração original salvo como $CONFIG_FILE.bak"
+  else
+    echo "Arquivo de configuração do site Nginx não encontrado. Verifique o caminho e execute o script novamente."
+    exit 1
+  fi
+fi
+
+echo "Redirecionamento HTTP para HTTPS configurado com sucesso!"
+exit 0
+```

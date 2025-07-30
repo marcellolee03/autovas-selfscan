@@ -1,0 +1,2625 @@
+>analise esse prompt contendo as vulnerabilidades encontradas em um csv do openvas e analise se os scripts que irei enviar em seguida sao capazes de corrigir esses problemas ou nao, me informando uma porcentagem de correcao das vulnerabilidades
+>Vulnerabilidades:
+    # INSTRUÇÕES PARA O MODELO DE IA
+
+    ## PERSONA
+    Você é um especialista em cibersegurança e automação de sistemas, focado em criar scripts de correção (patching). Sua única função é gerar um script que resolva a vulnerabilidade descrita abaixo.
+
+    ## TAREFA
+    Analise o contexto da vulnerabilidade a seguir e gere um script de shell (compatível com o sistema operacional do localhost) que, ao ser executado, corrija permanentemente a vulnerabilidade descrita.
+
+    ## CONTEXTO DA VULNERABILIDADE
+
+# Vulnerabilidade 1
+CVEs: nan
+NVT Name: Proxmox Virtual Environment (VE, PVE) End of Life (EOL) Detection
+Port: nan
+Port Protocol: nan
+Summary: The Proxmox Virtual Environment (VE, PVE) version on
+  the remote host has reached the end of life (EOL) and should not be used anymore.
+Specific Result: The "Proxmox Virtual Environment (VE, PVE)" version on the remote host has reached the end of life.
+
+CPE:               cpe:/a:proxmox:virtual_environment:7.3-3
+Installed version: 7.3-3
+EOL version:       7
+EOL date:          2024-07-01
+
+Vulnerability Detection Method: Checks if an EOL version is present on the
+  target host.
+Details:
+Proxmox Virtual Environment (VE, PVE) End of Life (EOL) Detection
+(OID: 1.3.6.1.4.1.25623.1.0.108283)
+Version used: 2025-04-15T05:54:49Z
+
+Affected Software/OS: nan
+Product Detection Result: Product: cpe:/a:proxmox:virtual_environment:7.3-3
+Method: Proxmox Virtual Environment (VE, PVE) Detection Consolidation
+(OID: 1.3.6.1.4.1.25623.1.0.117270)
+
+Solution: Update the PVE version on the remote host to a still
+  supported version.
+
+# Vulnerabilidade 2
+CVEs: CVE-2012-6708
+NVT Name: jQuery < 1.9.0 XSS Vulnerability
+Port: 80.0
+Port Protocol: tcp
+Summary: jQuery is prone to a cross-site scripting (XSS)
+  vulnerability.
+Specific Result: Installed version: 1.8.3
+Fixed version:     1.9.0
+Installation
+path / port:       /../js/jquery-1.8.3.min.js
+
+Detection info (see OID: 1.3.6.1.4.1.25623.1.0.150658 for more info):
+- Identified file: http://10.129.4.254/../js/jquery-1.8.3.min.js
+- Referenced at:   http://10.129.4.254/
+
+Vulnerability Detection Method: Checks if a vulnerable version is present on the target host.
+Details:
+jQuery < 1.9.0 XSS Vulnerability
+(OID: 1.3.6.1.4.1.25623.1.0.141636)
+Version used: 2023-07-14T05:06:08Z
+
+Affected Software/OS: jQuery prior to version 1.9.0.
+Product Detection Result: nan
+Solution: Update to version 1.9.0 or later.
+
+# Vulnerabilidade 3
+CVEs: CVE-2012-6708
+NVT Name: jQuery < 1.9.0 XSS Vulnerability
+Port: 80.0
+Port Protocol: tcp
+Summary: jQuery is prone to a cross-site scripting (XSS)
+  vulnerability.
+Specific Result: Installed version: 1.8.3
+Fixed version:     1.9.0
+Installation
+path / port:       /opscenter/webcommon/framework/../js/jquery-1.8.3.min.js
+
+Detection info (see OID: 1.3.6.1.4.1.25623.1.0.150658 for more info):
+- Identified file: http://10.129.4.254/opscenter/webcommon/framework/../js/jquery-1.8.3.min.js
+- Referenced at:   http://10.129.4.254/opscenter/webcommon/framework/
+
+Vulnerability Detection Method: Checks if a vulnerable version is present on the target host.
+Details:
+jQuery < 1.9.0 XSS Vulnerability
+(OID: 1.3.6.1.4.1.25623.1.0.141636)
+Version used: 2023-07-14T05:06:08Z
+
+Affected Software/OS: jQuery prior to version 1.9.0.
+Product Detection Result: nan
+Solution: Update to version 1.9.0 or later.
+
+# Vulnerabilidade 4
+CVEs: CVE-2012-6708
+NVT Name: jQuery < 1.9.0 XSS Vulnerability
+Port: 80.0
+Port Protocol: tcp
+Summary: jQuery is prone to a cross-site scripting (XSS)
+  vulnerability.
+Specific Result: Installed version: 1.8.3
+Fixed version:     1.9.0
+Installation
+path / port:       /framesets/../js/jquery-1.8.3.min.js
+
+Detection info (see OID: 1.3.6.1.4.1.25623.1.0.150658 for more info):
+- Identified file: http://10.129.4.254/framesets/../js/jquery-1.8.3.min.js
+- Referenced at:   http://10.129.4.254/framesets/
+
+Vulnerability Detection Method: Checks if a vulnerable version is present on the target host.
+Details:
+jQuery < 1.9.0 XSS Vulnerability
+(OID: 1.3.6.1.4.1.25623.1.0.141636)
+Version used: 2023-07-14T05:06:08Z
+
+Affected Software/OS: jQuery prior to version 1.9.0.
+Product Detection Result: nan
+Solution: Update to version 1.9.0 or later.
+
+# Vulnerabilidade 5
+CVEs: CVE-2012-6708
+NVT Name: jQuery < 1.9.0 XSS Vulnerability
+Port: 80.0
+Port Protocol: tcp
+Summary: jQuery is prone to a cross-site scripting (XSS)
+  vulnerability.
+Specific Result: Installed version: 1.8.3
+Fixed version:     1.9.0
+Installation
+path / port:       /frameset/../js/jquery-1.8.3.min.js
+
+Detection info (see OID: 1.3.6.1.4.1.25623.1.0.150658 for more info):
+- Identified file: http://10.129.4.254/frameset/../js/jquery-1.8.3.min.js
+- Referenced at:   http://10.129.4.254/frameset/
+
+Vulnerability Detection Method: Checks if a vulnerable version is present on the target host.
+Details:
+jQuery < 1.9.0 XSS Vulnerability
+(OID: 1.3.6.1.4.1.25623.1.0.141636)
+Version used: 2023-07-14T05:06:08Z
+
+Affected Software/OS: jQuery prior to version 1.9.0.
+Product Detection Result: nan
+Solution: Update to version 1.9.0 or later.
+
+# Vulnerabilidade 6
+CVEs: CVE-2012-6708
+NVT Name: jQuery < 1.9.0 XSS Vulnerability
+Port: 80.0
+Port Protocol: tcp
+Summary: jQuery is prone to a cross-site scripting (XSS)
+  vulnerability.
+Specific Result: Installed version: 1.8.3
+Fixed version:     1.9.0
+Installation
+path / port:       /console/framework/../js/jquery-1.8.3.min.js
+
+Detection info (see OID: 1.3.6.1.4.1.25623.1.0.150658 for more info):
+- Identified file: http://10.129.4.254/console/framework/../js/jquery-1.8.3.min.js
+- Referenced at:   http://10.129.4.254/console/framework/
+
+Vulnerability Detection Method: Checks if a vulnerable version is present on the target host.
+Details:
+jQuery < 1.9.0 XSS Vulnerability
+(OID: 1.3.6.1.4.1.25623.1.0.141636)
+Version used: 2023-07-14T05:06:08Z
+
+Affected Software/OS: jQuery prior to version 1.9.0.
+Product Detection Result: nan
+Solution: Update to version 1.9.0 or later.
+
+# Vulnerabilidade 7
+CVEs: nan
+NVT Name: Weak Host Key Algorithm(s) (SSH)
+Port: 22.0
+Port Protocol: tcp
+Summary: The remote SSH server is configured to allow / support weak host
+  key algorithm(s).
+Specific Result: The remote SSH server supports the following weak host key algorithm(s):
+
+host key algorithm | Description
+-----------------------------------------------------------------------------------------
+ssh-dss            | Digital Signature Algorithm (DSA) / Digital Signature Standard (DSS)
+
+Vulnerability Detection Method: Checks the supported host key algorithms of the remote SSH
+  server.
+
+  Currently weak host key algorithms are defined as the following:
+
+  - ssh-dss: Digital Signature Algorithm (DSA) / Digital Signature Standard (DSS)
+Details:
+Weak Host Key Algorithm(s) (SSH)
+(OID: 1.3.6.1.4.1.25623.1.0.117687)
+Version used: 2024-06-14T05:05:48Z
+
+Affected Software/OS: nan
+Product Detection Result: Product: cpe:/a:ietf:secure_shell_protocol
+Method: SSH Protocol Algorithms Supported
+(OID: 1.3.6.1.4.1.25623.1.0.105565)
+
+Solution: Disable the reported weak host key algorithm(s).
+
+
+# Vulnerabilidade 8
+CVEs: nan
+NVT Name: Weak Key Exchange (KEX) Algorithm(s) Supported (SSH)
+Port: 22.0
+Port Protocol: tcp
+Summary: The remote SSH server is configured to allow / support weak key
+  exchange (KEX) algorithm(s).
+Specific Result: The remote SSH server supports the following weak KEX algorithm(s):
+
+KEX algorithm              | Reason
+-----------------------------------------------------------------------------------
+diffie-hellman-group1-sha1 | Using Oakley Group 2 (a 1024-bit MODP group) and SHA-1
+
+Vulnerability Detection Method: Checks the supported KEX algorithms of the remote SSH server.
+
+  Currently weak KEX algorithms are defined as the following:
+
+  - non-elliptic-curve Diffie-Hellmann (DH) KEX algorithms with 1024-bit MODP group / prime
+
+  - ephemerally generated key exchange groups uses SHA-1
+
+  - using RSA 1024-bit modulus key
+Details:
+Weak Key Exchange (KEX) Algorithm(s) Supported (SSH)
+(OID: 1.3.6.1.4.1.25623.1.0.150713)
+Version used: 2024-06-14T05:05:48Z
+
+Affected Software/OS: nan
+Product Detection Result: Product: cpe:/a:ietf:secure_shell_protocol
+Method: SSH Protocol Algorithms Supported
+(OID: 1.3.6.1.4.1.25623.1.0.105565)
+
+Solution: Disable the reported weak KEX algorithm(s)
+
+  - 1024-bit MODP group / prime KEX algorithms:
+
+  Alternatively use elliptic-curve Diffie-Hellmann in general, e.g. Curve 25519.
+
+# Vulnerabilidade 9
+CVEs: nan
+NVT Name: Weak Key Exchange (KEX) Algorithm(s) Supported (SSH)
+Port: 22.0
+Port Protocol: tcp
+Summary: The remote SSH server is configured to allow / support weak key
+  exchange (KEX) algorithm(s).
+Specific Result: The remote SSH server supports the following weak KEX algorithm(s):
+
+KEX algorithm              | Reason
+-----------------------------------------------------------------------------------
+diffie-hellman-group1-sha1 | Using Oakley Group 2 (a 1024-bit MODP group) and SHA-1
+
+Vulnerability Detection Method: Checks the supported KEX algorithms of the remote SSH server.
+
+  Currently weak KEX algorithms are defined as the following:
+
+  - non-elliptic-curve Diffie-Hellmann (DH) KEX algorithms with 1024-bit MODP group / prime
+
+  - ephemerally generated key exchange groups uses SHA-1
+
+  - using RSA 1024-bit modulus key
+Details:
+Weak Key Exchange (KEX) Algorithm(s) Supported (SSH)
+(OID: 1.3.6.1.4.1.25623.1.0.150713)
+Version used: 2024-06-14T05:05:48Z
+
+Affected Software/OS: nan
+Product Detection Result: Product: cpe:/a:ietf:secure_shell_protocol
+Method: SSH Protocol Algorithms Supported
+(OID: 1.3.6.1.4.1.25623.1.0.105565)
+
+Solution: Disable the reported weak KEX algorithm(s)
+
+  - 1024-bit MODP group / prime KEX algorithms:
+
+  Alternatively use elliptic-curve Diffie-Hellmann in general, e.g. Curve 25519.
+
+# Vulnerabilidade 10
+CVEs: nan
+NVT Name: DCE/RPC and MSRPC Services Enumeration Reporting
+Port: 135.0
+Port Protocol: tcp
+Summary: Distributed Computing Environment / Remote Procedure Calls (DCE/RPC) or MSRPC services running
+  on the remote host can be enumerated by connecting on port 135 and doing the appropriate queries.
+Specific Result: Here is the list of DCE/RPC or MSRPC services running on this host via the TCP protocol:
+
+Port: 39710/tcp
+
+     UUID: 367abb81-9844-35f1-ad32-98f038001003, version 2
+     Endpoint: ncacn_ip_tcp:10.129.4.125[39710]
+
+Port: 49664/tcp
+
+     UUID: 12345778-1234-abcd-ef00-0123456789ac, version 1
+     Endpoint: ncacn_ip_tcp:10.129.4.125[49664]
+     Named pipe : lsass
+     Win32 service or process : lsass.exe
+     Description : SAM access
+
+     UUID: 51a227ae-825b-41f2-b4a9-1ac9557a1018, version 1
+     Endpoint: ncacn_ip_tcp:10.129.4.125[49664]
+     Annotation: Ngc Pop Key Service
+
+     UUID: 8fb74744-b2ff-4c00-be0d-9ef9a191fe1b, version 1
+     Endpoint: ncacn_ip_tcp:10.129.4.125[49664]
+     Annotation: Ngc Pop Key Service
+
+     UUID: b25a52bf-e5dd-4f4a-aea6-8ca7272a0e86, version 2
+     Endpoint: ncacn_ip_tcp:10.129.4.125[49664]
+     Annotation: KeyIso
+
+Port: 49665/tcp
+
+     UUID: d95afe70-a6d5-4259-822e-2c84da1ddb0d, version 1
+     Endpoint: ncacn_ip_tcp:10.129.4.125[49665]
+
+Port: 49666/tcp
+
+     UUID: f6beaff7-1e19-4fbb-9f8f-b89e2018337c, version 1
+     Endpoint: ncacn_ip_tcp:10.129.4.125[49666]
+     Annotation: Event log TCPIP
+
+Port: 49667/tcp
+
+     UUID: 3a9ef155-691d-4449-8d05-09ad57031823, version 1
+     Endpoint: ncacn_ip_tcp:10.129.4.125[49667]
+
+     UUID: 86d35949-83c9-4044-b424-db363231fd0c, version 1
+     Endpoint: ncacn_ip_tcp:10.129.4.125[49667]
+
+Port: 49668/tcp
+
+     UUID: 0b6edbfa-4a24-4fc6-8a23-942b1eca65d1, version 1
+     Endpoint: ncacn_ip_tcp:10.129.4.125[49668]
+
+     UUID: 12345678-1234-abcd-ef00-0123456789ab, version 1
+     Endpoint: ncacn_ip_tcp:10.129.4.125[49668]
+     Named pipe : spoolss
+     Win32 service or process : spoolsv.exe
+     Description : Spooler service
+
+     UUID: 4a452661-8290-4b36-8fbe-7f4093a94978, version 1
+     Endpoint: ncacn_ip_tcp:10.129.4.125[49668]
+
+     UUID: 76f03f96-cdfd-44fc-a22c-64950a001209, version 1
+     Endpoint: ncacn_ip_tcp:10.129.4.125[49668]
+
+     UUID: ae33069b-a2a8-46ee-a235-ddfd339be281, version 1
+     Endpoint: ncacn_ip_tcp:10.129.4.125[49668]
+
+Port: 49670/tcp
+
+     UUID: 29770a8f-829b-4158-90a2-78cd488501f7, version 1
+     Endpoint: ncacn_ip_tcp:10.129.4.125[49670]
+
+Port: 7832/tcp
+
+     UUID: 6b5bdd1e-528c-422c-af8c-a4079be4fe48, version 1
+     Endpoint: ncacn_ip_tcp:10.129.4.125[7832]
+     Annotation: Remote Fw APIs
+
+Note: DCE/RPC or MSRPC services running on this host locally were identified. Reporting this list is not enabled by default due to the possible large size of this list. See the script preferences to enable this reporting.
+
+Vulnerability Detection Method: 
+Details:
+DCE/RPC and MSRPC Services Enumeration Reporting
+(OID: 1.3.6.1.4.1.25623.1.0.10736)
+Version used: 2022-06-03T10:17:07Z
+
+Affected Software/OS: nan
+Product Detection Result: nan
+Solution: Filter incoming traffic to this ports.
+
+# Vulnerabilidade 11
+CVEs: nan
+NVT Name: Telnet Unencrypted Cleartext Login
+Port: 23.0
+Port Protocol: tcp
+Summary: The remote host is running a Telnet service that allows cleartext logins over
+  unencrypted connections.
+Specific Result: Vulnerability was detected according to the Vulnerability Detection Method.
+Vulnerability Detection Method: 
+Details:
+Telnet Unencrypted Cleartext Login
+(OID: 1.3.6.1.4.1.25623.1.0.108522)
+Version used: 2023-10-13T05:06:09Z
+
+Affected Software/OS: nan
+Product Detection Result: nan
+Solution: Replace Telnet with a protocol like SSH which supports encrypted connections.
+
+# Vulnerabilidade 12
+CVEs: CVE-2011-3389,CVE-2015-0204,CVE-2025-3200
+NVT Name: SSL/TLS: Deprecated TLSv1.0 and TLSv1.1 Protocol Detection
+Port: 3389.0
+Port Protocol: tcp
+Summary: It was possible to detect the usage of the deprecated TLSv1.0
+  and/or TLSv1.1 protocol on this system.
+Specific Result: In addition to TLSv1.2+ the service is also providing the deprecated TLSv1.0 and TLSv1.1 protocols and supports one or more ciphers. Those supported ciphers can be found in the 'SSL/TLS: Report Supported Cipher Suites' (OID: 1.3.6.1.4.1.25623.1.0.802067) VT.
+
+Vulnerability Detection Method: Checks the used TLS protocols of the services provided by this
+  system.
+Details:
+SSL/TLS: Deprecated TLSv1.0 and TLSv1.1 Protocol Detection
+(OID: 1.3.6.1.4.1.25623.1.0.117274)
+Version used: 2025-04-29T05:39:55Z
+
+Affected Software/OS: '- All services providing an encrypted communication using the
+  TLSv1.0 and/or TLSv1.1 protocols
+
+  - CVE-2025-3200: Multiple products from Wiesemann & Theis
+Product Detection Result: Product: cpe:/a:ietf:transport_layer_security:1.0
+Method: SSL/TLS: Version Detection
+(OID: 1.3.6.1.4.1.25623.1.0.105782)
+
+Solution: It is recommended to disable the deprecated TLSv1.0 and/or
+  TLSv1.1 protocols in favor of the TLSv1.2+ protocols.
+
+  Please see the references for more resources supporting you with this task.
+
+# Vulnerabilidade 13
+CVEs: nan
+NVT Name: Weak Encryption Algorithm(s) Supported (SSH)
+Port: 22.0
+Port Protocol: tcp
+Summary: The remote SSH server is configured to allow / support weak
+  encryption algorithm(s).
+Specific Result: The remote SSH server supports the following weak client-to-server encryption algorithm(s):
+
+3des-cbc
+aes128-cbc
+aes256-cbc
+twofish-cbc
+twofish128-cbc
+twofish256-cbc
+
+
+The remote SSH server supports the following weak server-to-client encryption algorithm(s):
+
+3des-cbc
+aes128-cbc
+aes256-cbc
+twofish-cbc
+twofish128-cbc
+twofish256-cbc
+
+Vulnerability Detection Method: Checks the supported encryption algorithms (client-to-server
+  and server-to-client) of the remote SSH server.
+
+  Currently weak encryption algorithms are defined as the following:
+
+  - Arcfour (RC4) cipher based algorithms
+
+  - 'none' algorithm
+
+  - CBC mode cipher based algorithms
+Details:
+Weak Encryption Algorithm(s) Supported (SSH)
+(OID: 1.3.6.1.4.1.25623.1.0.105611)
+Version used: 2024-06-14T05:05:48Z
+
+Affected Software/OS: nan
+Product Detection Result: Product: cpe:/a:ietf:secure_shell_protocol
+Method: SSH Protocol Algorithms Supported
+(OID: 1.3.6.1.4.1.25623.1.0.105565)
+
+Solution: Disable the reported weak encryption algorithm(s).
+
+# Vulnerabilidade 14
+CVEs: nan
+NVT Name: Weak Encryption Algorithm(s) Supported (SSH)
+Port: 22.0
+Port Protocol: tcp
+Summary: The remote SSH server is configured to allow / support weak
+  encryption algorithm(s).
+Specific Result: The remote SSH server supports the following weak client-to-server encryption algorithm(s):
+
+3des-cbc
+aes128-cbc
+aes256-cbc
+twofish-cbc
+twofish128-cbc
+twofish256-cbc
+
+
+The remote SSH server supports the following weak server-to-client encryption algorithm(s):
+
+3des-cbc
+aes128-cbc
+aes256-cbc
+twofish-cbc
+twofish128-cbc
+twofish256-cbc
+
+Vulnerability Detection Method: Checks the supported encryption algorithms (client-to-server
+  and server-to-client) of the remote SSH server.
+
+  Currently weak encryption algorithms are defined as the following:
+
+  - Arcfour (RC4) cipher based algorithms
+
+  - 'none' algorithm
+
+  - CBC mode cipher based algorithms
+Details:
+Weak Encryption Algorithm(s) Supported (SSH)
+(OID: 1.3.6.1.4.1.25623.1.0.105611)
+Version used: 2024-06-14T05:05:48Z
+
+Affected Software/OS: nan
+Product Detection Result: Product: cpe:/a:ietf:secure_shell_protocol
+Method: SSH Protocol Algorithms Supported
+(OID: 1.3.6.1.4.1.25623.1.0.105565)
+
+Solution: Disable the reported weak encryption algorithm(s).
+
+# Vulnerabilidade 15
+CVEs: nan
+NVT Name: Weak MAC Algorithm(s) Supported (SSH)
+Port: 22.0
+Port Protocol: tcp
+Summary: The remote SSH server is configured to allow / support weak MAC
+  algorithm(s).
+Specific Result: The remote SSH server supports the following weak client-to-server MAC algorithm(s):
+
+umac-64-etm@openssh.com
+umac-64@openssh.com
+
+
+The remote SSH server supports the following weak server-to-client MAC algorithm(s):
+
+umac-64-etm@openssh.com
+umac-64@openssh.com
+
+Vulnerability Detection Method: Checks the supported MAC algorithms (client-to-server and
+  server-to-client) of the remote SSH server.
+
+  Currently weak MAC algorithms are defined as the following:
+
+  - MD5 based algorithms
+
+  - 96-bit based algorithms
+
+  - 64-bit based algorithms
+
+  - 'none' algorithm
+Details:
+Weak MAC Algorithm(s) Supported (SSH)
+(OID: 1.3.6.1.4.1.25623.1.0.105610)
+Version used: 2024-06-14T05:05:48Z
+
+Affected Software/OS: nan
+Product Detection Result: Product: cpe:/a:ietf:secure_shell_protocol
+Method: SSH Protocol Algorithms Supported
+(OID: 1.3.6.1.4.1.25623.1.0.105565)
+
+Solution: Disable the reported weak MAC algorithm(s).
+
+# Vulnerabilidade 16
+CVEs: nan
+NVT Name: Weak MAC Algorithm(s) Supported (SSH)
+Port: 22.0
+Port Protocol: tcp
+Summary: The remote SSH server is configured to allow / support weak MAC
+  algorithm(s).
+Specific Result: The remote SSH server supports the following weak client-to-server MAC algorithm(s):
+
+umac-64-etm@openssh.com
+umac-64@openssh.com
+
+
+The remote SSH server supports the following weak server-to-client MAC algorithm(s):
+
+umac-64-etm@openssh.com
+umac-64@openssh.com
+
+Vulnerability Detection Method: Checks the supported MAC algorithms (client-to-server and
+  server-to-client) of the remote SSH server.
+
+  Currently weak MAC algorithms are defined as the following:
+
+  - MD5 based algorithms
+
+  - 96-bit based algorithms
+
+  - 64-bit based algorithms
+
+  - 'none' algorithm
+Details:
+Weak MAC Algorithm(s) Supported (SSH)
+(OID: 1.3.6.1.4.1.25623.1.0.105610)
+Version used: 2024-06-14T05:05:48Z
+
+Affected Software/OS: nan
+Product Detection Result: Product: cpe:/a:ietf:secure_shell_protocol
+Method: SSH Protocol Algorithms Supported
+(OID: 1.3.6.1.4.1.25623.1.0.105565)
+
+Solution: Disable the reported weak MAC algorithm(s).
+
+# Vulnerabilidade 17
+CVEs: nan
+NVT Name: TCP Timestamps Information Disclosure
+Port: nan
+Port Protocol: nan
+Summary: The remote host implements TCP timestamps and therefore allows
+  to compute the uptime.
+Specific Result: It was detected that the host implements RFC1323/RFC7323.
+
+The following timestamps were retrieved with a delay of 1 seconds in-between:
+Packet 1: 1641193698
+Packet 2: 1641194750
+
+Vulnerability Detection Method: Special IP packets are forged and sent with a little delay in
+  between to the target IP. The responses are searched for a timestamps. If found, the timestamps
+  are reported.
+Details:
+TCP Timestamps Information Disclosure
+(OID: 1.3.6.1.4.1.25623.1.0.80091)
+Version used: 2023-12-15T16:10:08Z
+
+Affected Software/OS: TCP implementations that implement RFC1323/RFC7323.
+Product Detection Result: nan
+Solution: To disable TCP timestamps on linux add the line
+  'net.ipv4.tcp_timestamps = 0' to /etc/sysctl.conf. Execute 'sysctl -p' to apply the settings at
+  runtime.
+
+  To disable TCP timestamps on Windows execute 'netsh int tcp set global timestamps=disabled'
+
+  Starting with Windows Server 2008 and Vista, the timestamp can not be completely disabled.
+
+  The default behavior of the TCP/IP stack on this Systems is to not use the Timestamp options when
+  initiating TCP connections, but use them if the TCP peer that is initiating communication includes
+  them in their synchronize (SYN) segment.
+
+  See the references for more information.
+
+# Vulnerabilidade 18
+CVEs: nan
+NVT Name: TCP Timestamps Information Disclosure
+Port: nan
+Port Protocol: nan
+Summary: The remote host implements TCP timestamps and therefore allows
+  to compute the uptime.
+Specific Result: It was detected that the host implements RFC1323/RFC7323.
+
+The following timestamps were retrieved with a delay of 1 seconds in-between:
+Packet 1: 221041394
+Packet 2: 221041503
+
+Vulnerability Detection Method: Special IP packets are forged and sent with a little delay in
+  between to the target IP. The responses are searched for a timestamps. If found, the timestamps
+  are reported.
+Details:
+TCP Timestamps Information Disclosure
+(OID: 1.3.6.1.4.1.25623.1.0.80091)
+Version used: 2023-12-15T16:10:08Z
+
+Affected Software/OS: TCP implementations that implement RFC1323/RFC7323.
+Product Detection Result: nan
+Solution: To disable TCP timestamps on linux add the line
+  'net.ipv4.tcp_timestamps = 0' to /etc/sysctl.conf. Execute 'sysctl -p' to apply the settings at
+  runtime.
+
+  To disable TCP timestamps on Windows execute 'netsh int tcp set global timestamps=disabled'
+
+  Starting with Windows Server 2008 and Vista, the timestamp can not be completely disabled.
+
+  The default behavior of the TCP/IP stack on this Systems is to not use the Timestamp options when
+  initiating TCP connections, but use them if the TCP peer that is initiating communication includes
+  them in their synchronize (SYN) segment.
+
+  See the references for more information.
+
+# Vulnerabilidade 19
+CVEs: nan
+NVT Name: Weak MAC Algorithm(s) Supported (SSH)
+Port: 22.0
+Port Protocol: tcp
+Summary: The remote SSH server is configured to allow / support weak MAC
+  algorithm(s).
+Specific Result: The remote SSH server supports the following weak client-to-server MAC algorithm(s):
+
+umac-64-etm@openssh.com
+umac-64@openssh.com
+
+
+The remote SSH server supports the following weak server-to-client MAC algorithm(s):
+
+umac-64-etm@openssh.com
+umac-64@openssh.com
+
+Vulnerability Detection Method: Checks the supported MAC algorithms (client-to-server and
+  server-to-client) of the remote SSH server.
+
+  Currently weak MAC algorithms are defined as the following:
+
+  - MD5 based algorithms
+
+  - 96-bit based algorithms
+
+  - 64-bit based algorithms
+
+  - 'none' algorithm
+Details:
+Weak MAC Algorithm(s) Supported (SSH)
+(OID: 1.3.6.1.4.1.25623.1.0.105610)
+Version used: 2024-06-14T05:05:48Z
+
+Affected Software/OS: nan
+Product Detection Result: Product: cpe:/a:ietf:secure_shell_protocol
+Method: SSH Protocol Algorithms Supported
+(OID: 1.3.6.1.4.1.25623.1.0.105565)
+
+Solution: Disable the reported weak MAC algorithm(s).
+
+# Vulnerabilidade 20
+CVEs: nan
+NVT Name: TCP Timestamps Information Disclosure
+Port: nan
+Port Protocol: nan
+Summary: The remote host implements TCP timestamps and therefore allows
+  to compute the uptime.
+Specific Result: It was detected that the host implements RFC1323/RFC7323.
+
+The following timestamps were retrieved with a delay of 1 seconds in-between:
+Packet 1: 367942076
+Packet 2: 367942336
+
+Vulnerability Detection Method: Special IP packets are forged and sent with a little delay in
+  between to the target IP. The responses are searched for a timestamps. If found, the timestamps
+  are reported.
+Details:
+TCP Timestamps Information Disclosure
+(OID: 1.3.6.1.4.1.25623.1.0.80091)
+Version used: 2023-12-15T16:10:08Z
+
+Affected Software/OS: TCP implementations that implement RFC1323/RFC7323.
+Product Detection Result: nan
+Solution: To disable TCP timestamps on linux add the line
+  'net.ipv4.tcp_timestamps = 0' to /etc/sysctl.conf. Execute 'sysctl -p' to apply the settings at
+  runtime.
+
+  To disable TCP timestamps on Windows execute 'netsh int tcp set global timestamps=disabled'
+
+  Starting with Windows Server 2008 and Vista, the timestamp can not be completely disabled.
+
+  The default behavior of the TCP/IP stack on this Systems is to not use the Timestamp options when
+  initiating TCP connections, but use them if the TCP peer that is initiating communication includes
+  them in their synchronize (SYN) segment.
+
+  See the references for more information.
+
+# Vulnerabilidade 21
+CVEs: nan
+NVT Name: Weak MAC Algorithm(s) Supported (SSH)
+Port: 22.0
+Port Protocol: tcp
+Summary: The remote SSH server is configured to allow / support weak MAC
+  algorithm(s).
+Specific Result: The remote SSH server supports the following weak client-to-server MAC algorithm(s):
+
+hmac-md5
+hmac-sha1-96
+
+
+The remote SSH server supports the following weak server-to-client MAC algorithm(s):
+
+hmac-md5
+hmac-sha1-96
+
+Vulnerability Detection Method: Checks the supported MAC algorithms (client-to-server and
+  server-to-client) of the remote SSH server.
+
+  Currently weak MAC algorithms are defined as the following:
+
+  - MD5 based algorithms
+
+  - 96-bit based algorithms
+
+  - 64-bit based algorithms
+
+  - 'none' algorithm
+Details:
+Weak MAC Algorithm(s) Supported (SSH)
+(OID: 1.3.6.1.4.1.25623.1.0.105610)
+Version used: 2024-06-14T05:05:48Z
+
+Affected Software/OS: nan
+Product Detection Result: Product: cpe:/a:ietf:secure_shell_protocol
+Method: SSH Protocol Algorithms Supported
+(OID: 1.3.6.1.4.1.25623.1.0.105565)
+
+Solution: Disable the reported weak MAC algorithm(s).
+
+# Vulnerabilidade 22
+CVEs: nan
+NVT Name: Weak MAC Algorithm(s) Supported (SSH)
+Port: 22.0
+Port Protocol: tcp
+Summary: The remote SSH server is configured to allow / support weak MAC
+  algorithm(s).
+Specific Result: The remote SSH server supports the following weak client-to-server MAC algorithm(s):
+
+hmac-md5
+hmac-sha1-96
+
+
+The remote SSH server supports the following weak server-to-client MAC algorithm(s):
+
+hmac-md5
+hmac-sha1-96
+
+Vulnerability Detection Method: Checks the supported MAC algorithms (client-to-server and
+  server-to-client) of the remote SSH server.
+
+  Currently weak MAC algorithms are defined as the following:
+
+  - MD5 based algorithms
+
+  - 96-bit based algorithms
+
+  - 64-bit based algorithms
+
+  - 'none' algorithm
+Details:
+Weak MAC Algorithm(s) Supported (SSH)
+(OID: 1.3.6.1.4.1.25623.1.0.105610)
+Version used: 2024-06-14T05:05:48Z
+
+Affected Software/OS: nan
+Product Detection Result: Product: cpe:/a:ietf:secure_shell_protocol
+Method: SSH Protocol Algorithms Supported
+(OID: 1.3.6.1.4.1.25623.1.0.105565)
+
+Solution: Disable the reported weak MAC algorithm(s).
+
+# Vulnerabilidade 23
+CVEs: nan
+NVT Name: TCP Timestamps Information Disclosure
+Port: nan
+Port Protocol: nan
+Summary: The remote host implements TCP timestamps and therefore allows
+  to compute the uptime.
+Specific Result: It was detected that the host implements RFC1323/RFC7323.
+
+The following timestamps were retrieved with a delay of 1 seconds in-between:
+Packet 1: 4200952942
+Packet 2: 4253954641
+
+Vulnerability Detection Method: Special IP packets are forged and sent with a little delay in
+  between to the target IP. The responses are searched for a timestamps. If found, the timestamps
+  are reported.
+Details:
+TCP Timestamps Information Disclosure
+(OID: 1.3.6.1.4.1.25623.1.0.80091)
+Version used: 2023-12-15T16:10:08Z
+
+Affected Software/OS: TCP implementations that implement RFC1323/RFC7323.
+Product Detection Result: nan
+Solution: To disable TCP timestamps on linux add the line
+  'net.ipv4.tcp_timestamps = 0' to /etc/sysctl.conf. Execute 'sysctl -p' to apply the settings at
+  runtime.
+
+  To disable TCP timestamps on Windows execute 'netsh int tcp set global timestamps=disabled'
+
+  Starting with Windows Server 2008 and Vista, the timestamp can not be completely disabled.
+
+  The default behavior of the TCP/IP stack on this Systems is to not use the Timestamp options when
+  initiating TCP connections, but use them if the TCP peer that is initiating communication includes
+  them in their synchronize (SYN) segment.
+
+  See the references for more information.
+
+# Vulnerabilidade 24
+CVEs: nan
+NVT Name: TCP Timestamps Information Disclosure
+Port: nan
+Port Protocol: nan
+Summary: The remote host implements TCP timestamps and therefore allows
+  to compute the uptime.
+Specific Result: It was detected that the host implements RFC1323/RFC7323.
+
+The following timestamps were retrieved with a delay of 1 seconds in-between:
+Packet 1: 311232842
+Packet 2: 311232946
+
+Vulnerability Detection Method: Special IP packets are forged and sent with a little delay in
+  between to the target IP. The responses are searched for a timestamps. If found, the timestamps
+  are reported.
+Details:
+TCP Timestamps Information Disclosure
+(OID: 1.3.6.1.4.1.25623.1.0.80091)
+Version used: 2023-12-15T16:10:08Z
+
+Affected Software/OS: TCP implementations that implement RFC1323/RFC7323.
+Product Detection Result: nan
+Solution: To disable TCP timestamps on linux add the line
+  'net.ipv4.tcp_timestamps = 0' to /etc/sysctl.conf. Execute 'sysctl -p' to apply the settings at
+  runtime.
+
+  To disable TCP timestamps on Windows execute 'netsh int tcp set global timestamps=disabled'
+
+  Starting with Windows Server 2008 and Vista, the timestamp can not be completely disabled.
+
+  The default behavior of the TCP/IP stack on this Systems is to not use the Timestamp options when
+  initiating TCP connections, but use them if the TCP peer that is initiating communication includes
+  them in their synchronize (SYN) segment.
+
+  See the references for more information.
+
+# Vulnerabilidade 25
+CVEs: nan
+NVT Name: TCP Timestamps Information Disclosure
+Port: nan
+Port Protocol: nan
+Summary: The remote host implements TCP timestamps and therefore allows
+  to compute the uptime.
+Specific Result: It was detected that the host implements RFC1323/RFC7323.
+
+The following timestamps were retrieved with a delay of 1 seconds in-between:
+Packet 1: 1831935723
+Packet 2: 1831936805
+
+Vulnerability Detection Method: Special IP packets are forged and sent with a little delay in
+  between to the target IP. The responses are searched for a timestamps. If found, the timestamps
+  are reported.
+Details:
+TCP Timestamps Information Disclosure
+(OID: 1.3.6.1.4.1.25623.1.0.80091)
+Version used: 2023-12-15T16:10:08Z
+
+Affected Software/OS: TCP implementations that implement RFC1323/RFC7323.
+Product Detection Result: nan
+Solution: To disable TCP timestamps on linux add the line
+  'net.ipv4.tcp_timestamps = 0' to /etc/sysctl.conf. Execute 'sysctl -p' to apply the settings at
+  runtime.
+
+  To disable TCP timestamps on Windows execute 'netsh int tcp set global timestamps=disabled'
+
+  Starting with Windows Server 2008 and Vista, the timestamp can not be completely disabled.
+
+  The default behavior of the TCP/IP stack on this Systems is to not use the Timestamp options when
+  initiating TCP connections, but use them if the TCP peer that is initiating communication includes
+  them in their synchronize (SYN) segment.
+
+  See the references for more information.
+
+# Vulnerabilidade 26
+CVEs: CVE-1999-0524
+NVT Name: ICMP Timestamp Reply Information Disclosure
+Port: nan
+Port Protocol: nan
+Summary: The remote host responded to an ICMP timestamp request.
+Specific Result: The following response / ICMP packet has been received:
+- ICMP Type: 14
+- ICMP Code: 0
+
+Vulnerability Detection Method: Sends an ICMP Timestamp (Type 13) request and checks if a
+  Timestamp Reply (Type 14) is received.
+Details:
+ICMP Timestamp Reply Information Disclosure
+(OID: 1.3.6.1.4.1.25623.1.0.103190)
+Version used: 2025-01-21T05:37:33Z
+
+Affected Software/OS: nan
+Product Detection Result: nan
+Solution: Various mitigations are possible:
+
+  - Disable the support for ICMP timestamp on the remote host completely
+
+  - Protect the remote host by a firewall, and block ICMP packets passing through the firewall in
+  either direction (either completely or only for untrusted networks)
+
+# Vulnerabilidade 27
+CVEs: CVE-1999-0524
+NVT Name: ICMP Timestamp Reply Information Disclosure
+Port: nan
+Port Protocol: nan
+Summary: The remote host responded to an ICMP timestamp request.
+Specific Result: The following response / ICMP packet has been received:
+- ICMP Type: 14
+- ICMP Code: 0
+
+Vulnerability Detection Method: Sends an ICMP Timestamp (Type 13) request and checks if a
+  Timestamp Reply (Type 14) is received.
+Details:
+ICMP Timestamp Reply Information Disclosure
+(OID: 1.3.6.1.4.1.25623.1.0.103190)
+Version used: 2025-01-21T05:37:33Z
+
+Affected Software/OS: nan
+Product Detection Result: nan
+Solution: Various mitigations are possible:
+
+  - Disable the support for ICMP timestamp on the remote host completely
+
+  - Protect the remote host by a firewall, and block ICMP packets passing through the firewall in
+  either direction (either completely or only for untrusted networks)
+
+# Vulnerabilidade 28
+CVEs: CVE-1999-0524
+NVT Name: ICMP Timestamp Reply Information Disclosure
+Port: nan
+Port Protocol: nan
+Summary: The remote host responded to an ICMP timestamp request.
+Specific Result: The following response / ICMP packet has been received:
+- ICMP Type: 14
+- ICMP Code: 0
+
+Vulnerability Detection Method: Sends an ICMP Timestamp (Type 13) request and checks if a
+  Timestamp Reply (Type 14) is received.
+Details:
+ICMP Timestamp Reply Information Disclosure
+(OID: 1.3.6.1.4.1.25623.1.0.103190)
+Version used: 2025-01-21T05:37:33Z
+
+Affected Software/OS: nan
+Product Detection Result: nan
+Solution: Various mitigations are possible:
+
+  - Disable the support for ICMP timestamp on the remote host completely
+
+  - Protect the remote host by a firewall, and block ICMP packets passing through the firewall in
+  either direction (either completely or only for untrusted networks)
+
+# Vulnerabilidade 29
+CVEs: CVE-1999-0524
+NVT Name: ICMP Timestamp Reply Information Disclosure
+Port: nan
+Port Protocol: nan
+Summary: The remote host responded to an ICMP timestamp request.
+Specific Result: The following response / ICMP packet has been received:
+- ICMP Type: 14
+- ICMP Code: 0
+
+Vulnerability Detection Method: Sends an ICMP Timestamp (Type 13) request and checks if a
+  Timestamp Reply (Type 14) is received.
+Details:
+ICMP Timestamp Reply Information Disclosure
+(OID: 1.3.6.1.4.1.25623.1.0.103190)
+Version used: 2025-01-21T05:37:33Z
+
+Affected Software/OS: nan
+Product Detection Result: nan
+Solution: Various mitigations are possible:
+
+  - Disable the support for ICMP timestamp on the remote host completely
+
+  - Protect the remote host by a firewall, and block ICMP packets passing through the firewall in
+  either direction (either completely or only for untrusted networks)
+
+# Vulnerabilidade 30
+CVEs: CVE-1999-0524
+NVT Name: ICMP Timestamp Reply Information Disclosure
+Port: nan
+Port Protocol: nan
+Summary: The remote host responded to an ICMP timestamp request.
+Specific Result: The following response / ICMP packet has been received:
+- ICMP Type: 14
+- ICMP Code: 0
+
+Vulnerability Detection Method: Sends an ICMP Timestamp (Type 13) request and checks if a
+  Timestamp Reply (Type 14) is received.
+Details:
+ICMP Timestamp Reply Information Disclosure
+(OID: 1.3.6.1.4.1.25623.1.0.103190)
+Version used: 2025-01-21T05:37:33Z
+
+Affected Software/OS: nan
+Product Detection Result: nan
+Solution: Various mitigations are possible:
+
+  - Disable the support for ICMP timestamp on the remote host completely
+
+  - Protect the remote host by a firewall, and block ICMP packets passing through the firewall in
+  either direction (either completely or only for untrusted networks)
+
+# Vulnerabilidade 31
+CVEs: CVE-1999-0524
+NVT Name: ICMP Timestamp Reply Information Disclosure
+Port: nan
+Port Protocol: nan
+Summary: The remote host responded to an ICMP timestamp request.
+Specific Result: The following response / ICMP packet has been received:
+- ICMP Type: 14
+- ICMP Code: 0
+
+Vulnerability Detection Method: Sends an ICMP Timestamp (Type 13) request and checks if a
+  Timestamp Reply (Type 14) is received.
+Details:
+ICMP Timestamp Reply Information Disclosure
+(OID: 1.3.6.1.4.1.25623.1.0.103190)
+Version used: 2025-01-21T05:37:33Z
+
+Affected Software/OS: nan
+Product Detection Result: nan
+Solution: Various mitigations are possible:
+
+  - Disable the support for ICMP timestamp on the remote host completely
+
+  - Protect the remote host by a firewall, and block ICMP packets passing through the firewall in
+  either direction (either completely or only for untrusted networks)
+
+# Vulnerabilidade 32
+CVEs: CVE-1999-0524
+NVT Name: ICMP Timestamp Reply Information Disclosure
+Port: nan
+Port Protocol: nan
+Summary: The remote host responded to an ICMP timestamp request.
+Specific Result: The following response / ICMP packet has been received:
+- ICMP Type: 14
+- ICMP Code: 0
+
+Vulnerability Detection Method: Sends an ICMP Timestamp (Type 13) request and checks if a
+  Timestamp Reply (Type 14) is received.
+Details:
+ICMP Timestamp Reply Information Disclosure
+(OID: 1.3.6.1.4.1.25623.1.0.103190)
+Version used: 2025-01-21T05:37:33Z
+
+Affected Software/OS: nan
+Product Detection Result: nan
+Solution: Various mitigations are possible:
+
+  - Disable the support for ICMP timestamp on the remote host completely
+
+  - Protect the remote host by a firewall, and block ICMP packets passing through the firewall in
+  either direction (either completely or only for untrusted networks)
+
+    ## REGRAS E RESTRIÇÕES DE SAÍDA
+    1.  **APENAS SCRIPT:** A sua resposta deve conter ÚNICA E EXCLUSIVAMENTE o código do script.
+    2.  **SEM EXPLICAÇÕES:** Não adicione nenhum comentário, explicação, introdução, ou despedida.
+    3.  **SEM BLOCOS DE CÓDIGO MARKDOWN:** Não envolva o script em blocos de código como ` ```bash ` ou ` ```sh `. A resposta deve ser o texto puro do script.
+    4.  **AUTOSSUFICIENTE:** O script deve ser completo, autônomo e não deve exigir interação do usuário para ser executado.
+    5.  **COMPATIBILIDADE:** O script deve ser compatível com o sistema operacional especificado em 'localhost OS'. Se o sistema operacional não for especificado, assuma um sistema baseado em Linux (como Ubuntu/Debian).
+
+    # INÍCIO DO SCRIPT DE CORREÇÃO
+
+>Scripts de correção:
+{type: uploaded file
+fileName: teste33vts_1.txt
+fullContent:
+```bash
+#!/bin/bash
+set -euo pipefail
+
+# Fix for Proxmox VE EOL
+if grep -qi "proxmox" /etc/apt/sources.list /etc/apt/sources.list.d/*; then
+    apt-get update
+    apt-get -y dist-upgrade
+fi
+
+# Replace vulnerable jQuery files
+jquery_url="https://code.jquery.com/jquery-3.7.1.min.js"
+jquery_files=(
+    "/var/www/html/js/jquery-1.8.3.min.js"
+    "/var/www/html/opscenter/webcommon/js/jquery-1.8.3.min.js"
+    "/var/www/html/frameset/js/jquery-1.8.3.min.js"
+    "/var/www/html/framesets/js/jquery-1.8.3.min.js"
+    "/var/www/html/console/framework/js/jquery-1.8.3.min.js"
+)
+for file in "${jquery_files[@]}"; do
+    if [ -f "$file" ]; then
+        if wget -q "$jquery_url" -O "$file.secure"; then
+            chown --reference="$file" "$file.secure"
+            chmod --reference="$file" "$file.secure"
+            mv -f "$file.secure" "$file"
+        fi
+    fi
+done
+
+# SSH security hardening
+sshd_config="/etc/ssh/sshd_config"
+if [ -f "$sshd_config" ]; then
+    backup_time=$(date +%Y%m%d%H%M%S)
+    cp "$sshd_config" "$sshd_config.bak$backup_time"
+    
+    sed -i '/^HostKeyAlgorithms/d;/^KexAlgorithms/d;/^Ciphers/d;/^MACs/d' "$sshd_config"
+    
+    echo 'HostKeyAlgorithms ecdsa-sha2-nistp256-cert-v01@openssh.com,ecdsa-sha2-nistp384-cert-v01@openssh.com,ecdsa-sha2-nistp521-cert-v01@openssh.com,rsa-sha2-512-cert-v01@openssh.com,rsa-sha2-256-cert-v01@openssh.com,ssh-ed25519-cert-v01@openssh.com,ecdsa-sha2-nistp256,ecdsa-sha2-nistp384,ecdsa-sha2-nistp521,rsa-sha2-512,rsa-sha2-256,ssh-ed25519' >> "$sshd_config"
+    echo 'KexAlgorithms curve25519-sha256@libssh.org,diffie-hellman-group-exchange-sha256' >> "$sshd_config"
+    echo 'Ciphers chacha20-poly1305@openssh.com,aes256-gcm@openssh.com,aes128-gcm@openssh.com,aes256-ctr,aes192-ctr,aes128-ctr' >> "$sshd_config"
+    echo 'MACs hmac-sha2-512-etm@openssh.com,hmac-sha2-256-etm@openssh.com,hmac-sha2-512,hmac-sha2-256' >> "$sshd_config"
+
+    systemctl restart sshd
+fi
+
+# Remove Telnet service
+if systemctl is-enabled telnet.socket &>/dev/null || dpkg -l | grep -q "telnetd"; then
+    systemctl stop telnet.socket
+    apt-get purge -y telnetd
+fi
+
+# TCP and ICMP hardening
+sysctl_file="/etc/sysctl.d/99-hardening.conf"
+echo "net.ipv4.tcp_timestamps = 0" > "$sysctl_file"
+echo "net.ipv4.icmp_echo_ignore_all = 1" >> "$sysctl_file"
+sysctl -p "$sysctl_file"
+
+# Add iptables rule for ICMP timestamp requests
+if command -v iptables &>/dev/null; then
+    iptables -A INPUT -p icmp --icmp-type timestamp-request -j DROP
+    iptables-save > /etc/iptables/rules.v4
+fi
+```}
+{type: uploaded file
+fileName: teste33vts_2.txt
+fullContent:
+#!/bin/bash
+
+# Backup original SSH configuration
+cp /etc/ssh/sshd_config /etc/ssh/sshd_config.bak
+
+# Update HostKeyAlgorithms to disable ssh-dss
+sed -i '/^HostKeyAlgorithms/d' /etc/ssh/sshd_config
+echo "HostKeyAlgorithms ecdsa-sha2-nistp256,ecdsa-sha2-nistp384,ecdsa-sha2-nistp521,ssh-ed25519,rsa-sha2-256,rsa-sha2-512" >> /etc/ssh/sshd_config
+
+# Update KexAlgorithms to disable diffie-hellman-group1-sha1
+sed -i '/^KexAlgorithms/d' /etc/ssh/sshd_config
+echo "KexAlgorithms curve25519-sha256,curve25519-sha256@libssh.org,diffie-hellman-group14-sha256,diffie-hellman-group16-sha512,diffie-hellman-group18-sha512,ecdh-sha2-nistp256,ecdh-sha2-nistp384,ecdh-sha2-nistp521" >> /etc/ssh/sshd_config
+
+# Update Ciphers to disable weak encryption algorithms
+sed -i '/^Ciphers/d' /etc/ssh/sshd_config
+echo "Ciphers chacha20-poly1305@openssh.com,aes256-gcm@openssh.com,aes128-gcm@openssh.com" >> /etc/ssh/sshd_config
+
+# Update MACs to disable weak MAC algorithms
+sed -i '/^MACs/d' /etc/ssh/sshd_config
+echo "MACs hmac-sha2-512-etm@openssh.com,hmac-sha2-256-etm@openssh.com,umac-128-etm@openssh.com" >> /etc/ssh/sshd_config
+
+# Restart SSH service
+systemctl restart sshd
+
+# Disable telnet service
+systemctl stop telnet.socket >/dev/null 2>&1
+systemctl disable telnet.socket >/dev/null 2>&1
+apt-get remove --purge telnetd -y >/dev/null 2>&1
+
+# Disable TCP timestamps
+echo "net.ipv4.tcp_timestamps = 0" >> /etc/sysctl.conf
+sysctl -p >/dev/null
+
+# Block ICMP timestamp requests
+if ! iptables -C INPUT -p icmp --icmp-type timestamp-request -j DROP 2>/dev/null; then
+    iptables -A INPUT -p icmp --icmp-type timestamp-request -j DROP
+    apt-get install iptables-persistent -y >/dev/null 2>&1
+    netfilter-persistent save >/dev/null
+fi}
+{type: uploaded file
+fileName: teste33vts_3.txt
+fullContent:
+#!/bin/bash
+
+# Vulnerabilidade 1: Atualizar Proxmox VE para versão suportada
+apt update
+apt install -y curl
+cat <<EOF > /etc/apt/sources.list.d/pve-no-subscription.list
+deb http://download.proxmox.com/debian/pve bookworm pve-no-subscription
+EOF
+apt update
+apt full-upgrade -y --auto-remove
+
+# Vulnerabilidades jQuery (2-6): Atualizar arquivos vulneráveis
+jquery_replace() {
+    local file="$1"
+    backup="${file}.bak-$(date +%s)"
+    cp "$file" "$backup"
+    wget -q -O "$file" https://code.jquery.com/jquery-3.7.1.min.js
+}
+export -f jquery_replace
+find / -name 'jquery-1.8.3.min.js' ! -path "/run*" -exec bash -c 'for f; do jquery_replace "$f"; done' _ {} +
+
+# Vulnerabilidades SSH (7-9,13,14,15,16,19,21,22): Ajustes de configuração
+sed -i '/^KexAlgorithms/d' /etc/ssh/sshd_config
+sed -i '/^Ciphers/d' /etc/ssh/sshd_config
+sed -i '/^MACs/d' /etc/ssh/sshd_config
+sed -i '/^HostKeyAlgorithms/d' /etc/ssh/sshd_config
+echo -e "KexAlgorithms curve25519-sha256,ecdh-sha2-nistp521,ecdh-sha2-nistp384
+Ciphers chacha20-poly1305@openssh.com,aes256-gcm@openssh.com
+MACs hmac-sha2-512-etm@openssh.com,hmac-sha2-256-etm@openssh.com
+HostKeyAlgorithms ecdsa-sha2-nistp256,rsa-sha2-512" >> /etc/ssh/sshd_config
+systemctl restart sshd
+
+# Vulnerabilidade 11: Remover Telnet
+{ systemctl disable --now telnet.socket telnet.service; } &>/dev/null
+{ apt purge -y telnetd; } &>/dev/null
+
+# Vulnerabilidade 12: Configurar TLS para RDP (assumindo xrdp)
+sed -i 's/ssl_protocols=.*/ssl_protocols=TLSv1.2/' /etc/xrdp/xrdp.ini
+systemctl restart xrdp
+
+# Vulnerabilidades TCP/ICMP (17,18,20,23-25,26-32): Configurações de rede
+echo "net.ipv4.tcp_timestamps=0" >> /etc/sysctl.conf
+sysctl -p
+iptables -I INPUT -p icmp --icmp-type timestamp-request -j DROP
+iptables -I INPUT -p icmp --icmp-type timestamp-reply -j DROP
+iptables-save > /etc/iptables/rules.v4}
+{type: uploaded file
+fileName: teste33vts_4.txt
+fullContent:
+#!/bin/bash
+
+# Fix Proxmox EOL upgrade
+if grep -q "proxmox" /etc/issue; then
+    cp /etc/apt/sources.list /etc/apt/sources.list.bak
+    sed -i 's/bullseye/bookworm/g' /etc/apt/sources.list
+    echo "deb http://download.proxmox.com/debian/pve bookworm pve-no-subscription" > /etc/apt/sources.list.d/pve-no-subscription.list
+    apt update
+    DEBIAN_FRONTEND=noninteractive apt full-upgrade -yq
+fi
+
+# Download updated jQuery
+TMP_JS=$(mktemp)
+wget -qO "$TMP_JS" https://code.jquery.com/jquery-3.6.4.min.js
+
+# Replace vulnerable jQuery files
+find /var/www /usr/share -type f -name 'jquery-1.8.3.min.js' -print0 | while IFS= read -r -d $'\0' file; do
+    cp "$TMP_JS" "$file"
+done
+rm "$TMP_JS"
+
+# Configure secure SSH settings
+SSHD_CONFIG="/etc/ssh/sshd_config"
+cp "$SSHD_CONFIG" "${SSHD_CONFIG}.bak"
+sed -i '/^KexAlgorithms/d; /^Ciphers/d; /^MACs/d; /^HostKeyAlgorithms/d; /^HostKey/d' "$SSHD_CONFIG"
+
+echo -e "KexAlgorithms curve25519-sha256@libssh.org,diffie-hellman-group-exchange-sha256
+Ciphers chacha20-poly1305@openssh.com,aes256-gcm@openssh.com,aes128-gcm@openssh.com
+MACs hmac-sha2-512-etm@openssh.com,hmac-sha2-256-etm@openssh.com
+HostKeyAlgorithms ssh-ed25519,rsa-sha2-512,rsa-sha2-256" >> "$SSHD_CONFIG"
+
+# Disable Telnet service
+systemctl stop telnet.socket 2>/dev/null
+systemctl disable telnet.socket 2>/dev/null
+apt purge -y telnetd 2>/dev/null
+
+# Configure firewall rules for ICMP
+iptables -A INPUT -p icmp --icmp-type timestamp-request -j DROP
+iptables -A OUTPUT -p icmp --icmp-type timestamp-reply -j DROP
+
+# Apply TCP hardening
+echo -e "net.ipv4.tcp_timestamps = 0" >> /etc/sysctl.conf
+sysctl -p
+
+# Restart services
+systemctl restart sshd.service}
+{type: uploaded file
+fileName: teste33vts_5.txt
+fullContent:
+```sh
+#!/bin/sh
+
+if [ "$(id -u)" -ne 0 ]; then
+   echo "Este script deve ser executado como root" >&2
+   exit 1
+fi
+
+# Atualiza o sistema (corrige vulnerabilidades de EoL e outras)
+apt-get update
+apt-get upgrade -y
+
+# Configurações seguras para SSH
+sed -i '/^HostKeyAlgorithms/d' /etc/ssh/sshd_config
+sed -i '/^KexAlgorithms/d' /etc/ssh/sshd_config
+sed -i '/^Ciphers/d' /etc/ssh/sshd_config
+sed -i '/^MACs/d' /etc/ssh/sshd_config
+
+echo "HostKeyAlgorithms -ssh-dss" >> /etc/ssh/sshd_config
+echo "KexAlgorithms curve25519-sha256@libssh.org,ecdh-sha2-nistp256,ecdh-sha2-nistp384,ecdh-sha2-nistp521,diffie-hellman-group-exchange-sha256,diffie-hellman-group16-sha512,diffie-hellman-group18-sha512,diffie-hellman-group14-sha256" >> /etc/ssh/sshd_config
+echo "Ciphers chacha20-poly1305@openssh.com,aes256-gcm@openssh.com,aes128-gcm@openssh.com,aes256-ctr,aes192-ctr,aes128-ctr" >> /etc/ssh/sshd_config
+echo "MACs hmac-sha2-256-etm@openssh.com,hmac-sha2-256,hmac-sha2-512-etm@openssh.com,hmac-sha2-512" >> /etc/ssh/sshd_config
+systemctl restart sshd
+
+# Bloqueia ICMP Timestamp e portas não seguras
+iptables -A INPUT -p icmp --icmp-type timestamp-request -j DROP
+iptables -A INPUT -p tcp -m multiport --dports 39710,49664,49665,49666,49667,49668,49670,7832,23 -j DROP
+ip6tables -A INPUT -p icmpv6 --icmpv6-type 13 -j DROP
+ip6tables -A INPUT -p tcp -m multiport --dports 39710,49664,49665,49666,49667,49668,49670,7832,23 -j DROP
+iptables-save > /etc/iptables/rules.v4
+ip6tables-save > /etc/iptables/rules.v6
+
+# Atualizar regras persistentes de firewall
+if command -v netfilter-persistent >/dev/null; then
+    netfilter-persistent save
+elif command -v iptables-persistent >/dev/null; then
+    service iptables-persistent save
+fi
+
+# Desativa carimbos TCP
+echo "net.ipv4.tcp_timestamps = 0" >> /etc/sysctl.conf
+sysctl -p
+
+# Remove Telnet
+apt-get remove -y telnetd
+
+# Configura versões TLS seguras para RDP/xRDP
+if [ -f /etc/xrdp/xrdp.ini ]; then
+    if grep -q '^ssl_protocols' /etc/xrdp/xrdp.ini; then
+        sed -i 's/^ssl_protocols.*/ssl_protocols=TLSv1.2,TLSv1.3/' /etc/xrdp/xrdp.ini
+    else
+        sed -i '/^\[globals\]/a ssl_protocols=TLSv1.2,TLSv1.3' /etc/xrdp/xrdp.ini
+    fi
+    systemctl restart xrdp
+fi
+```}
+{type: uploaded file
+fileName: teste33vts_6.txt
+fullContent:
+#!/bin/bash
+
+# Atualização completa do sistema
+apt-get update
+apt-get dist-upgrade -y
+
+# Backup da configuração do SSH
+cp /etc/ssh/sshd_config /etc/ssh/sshd_config.bak
+
+# Remove antigas configurações de algoritmos
+for directive in KexAlgorithms HostKeyAlgorithms Ciphers MACs; do
+    sed -i "/^[[:space:]]*${directive}[[:space:]]\+/d" /etc/ssh/sshd_config
+done
+
+# Configurações seguras para SSH
+echo "KexAlgorithms curve25519-sha256,curve25519-sha256@libssh.org,diffie-hellman-group-exchange-sha256" >> /etc/ssh/sshd_config
+echo "HostKeyAlgorithms ecdsa-sha2-nistp256-cert-v01@openssh.com,ecdsa-sha2-nistp384-cert-v01@openssh.com,ecdsa-sha2-nistp521-cert-v01@openssh.com,sk-ecdsa-sha2-nistp256-cert-v01@openssh.com,ssh-ed25519-cert-v01@openssh.com,sk-ssh-ed25519-cert-v01@openssh.com,rsa-sha2-512-cert-v01@openssh.com,rsa-sha2-256-cert-v01@openssh.com,ssh-rsa-cert-v01@openssh.com,ecdsa-sha2-nistp256,ecdsa-sha2-nistp384,ecdsa-sha2-nistp521,sk-ecdsa-sha2-nistp256@openssh.com,ssh-ed25519,sk-ssh-ed25519@openssh.com,rsa-sha2-512,rsa-sha2-256,ssh-rsa" >> /etc/ssh/sshd_config
+echo "Ciphers chacha20-poly1305@openssh.com,aes256-gcm@openssh.com,aes128-gcm@openssh.com,aes256-ctr,aes192-ctr,aes128-ctr" >> /etc/ssh/sshd_config
+echo "MACs hmac-sha2-512-etm@openssh.com,hmac-sha2-256-etm@openssh.com,umac-128-etm@openssh.com,hmac-sha2-512,hmac-sha2-256,umac-128@openssh.com" >> /etc/ssh/sshd_config
+
+# Reinicia o serviço SSH
+systemctl restart sshd
+
+# Remove servico Telnet
+apt-get remove -y telnet telnetd > /dev/null
+
+# Desabilita TCP Timestamps (RFC1323)
+echo "net.ipv4.tcp_timestamps = 0" >> /etc/sysctl.conf
+sysctl -p > /dev/null
+
+# Bloqueia requisições ICMP timestamp
+iptables -A INPUT -p icmp --icmp-type timestamp-request -j DROP > /dev/null
+
+# Persiste regras do iptables
+if [ ! -d /etc/iptables ]; then
+    mkdir -p /etc/iptables
+fi
+iptables-save > /etc/iptables/rules.v4
+
+# Habilita kernel para ignorar ICMP timestamp se suportado
+if sysctl -a 2>/dev/null | grep -q 'net.ipv4.icmp_echo_ignore_timestamp'; then
+    sysctl -w net.ipv4.icmp_echo_ignore_timestamp=1
+    sed -i '/net.ipv4.icmp_echo_ignore_timestamp/d' /etc/sysctl.conf
+    echo "net.ipv4.icmp_echo_ignore_timestamp=1" >> /etc/sysctl.conf
+    sysctl -p > /dev/null
+fi}
+{type: uploaded file
+fileName: teste33vts_7.txt
+fullContent:
+#!/bin/bash
+
+set -euo pipefail
+
+[ $(id -u) -ne 0 ] && { echo "Root required" >&2; exit 1; }
+
+if command -v pveversion &>/dev/null; then
+    major=$(pveversion | grep -oP 'pve-manager/\K\d+')
+    if [ "$major" -eq 7 ]; then
+        sed -i 's/bullseye/bookworm/g' /etc/apt/sources.list
+        sed -i 's/bullseye/bookworm/g' /etc/apt/sources.list.d/*.list 2>/dev/null || true
+        apt update
+        DEBIAN_FRONTEND=noninteractive apt -o Dpkg::Options::="--force-confold" full-upgrade -y
+    fi
+fi
+
+tmp_js=$(mktemp)
+curl -sSf -o "$tmp_js" https://code.jquery.com/jquery-3.7.1.min.js
+find /var/www /usr/share/nginx /usr/share/apache2 -name jquery-1.8.3.min.js 2>/dev/null | while read -r file; do
+    cp "$tmp_js" "$file"
+done
+rm -f "$tmp_js"
+
+cp /etc/ssh/sshd_config /etc/ssh/sshd_config.bak
+sed -i '/^HostKeyAlgorithms/d;/^KexAlgorithms/d;/^Ciphers/d;/^MACs/d' /etc/ssh/sshd_config
+echo -e "HostKeyAlgorithms ecdsa-sha2-nistp521,rsa-sha2-512,ssh-ed25519\nKexAlgorithms curve25519-sha256\nCiphers aes256-gcm@openssh.com\nMACs hmac-sha2-512" >> /etc/ssh/sshd_config
+systemctl restart ssh
+
+if dpkg -s telnetd &>/dev/null; then
+    systemctl disable --now telnet.socket 2>/dev/null || true
+    apt purge -y telnetd
+fi
+
+if command -v xrdp &>/dev/null && [ -f /etc/xrdp/xrdp.ini ]; then
+    sed -i 's/^tls_protocols=.*/tls_protocols=1.2/' /etc/xrdp/xrdp.ini
+    systemctl restart xrdp
+fi
+
+echo "net.ipv4.tcp_timestamps = 0" >> /etc/sysctl.d/60-hardening.conf
+sysctl -p /etc/sysctl.d/60-hardening.conf &>/dev/null
+
+iptables -A INPUT -p icmp --icmp-type timestamp-request -j DROP
+iptables -A INPUT -p icmp --icmp-type timestamp-reply -j DROP
+if command -v netfilter-persistent &>/dev/null; then
+    iptables-save > /etc/iptables/rules.v4
+    netfilter-persistent save
+elif command -v iptables-save &>/dev/null; then
+    iptables-save > /etc/iptables/rules.v4
+fi}
+{type: uploaded file
+fileName: teste33vts_8.txt
+fullContent:
+#!/bin/bash
+
+# Atualizar Proxmox VE para versão suportada
+if [ -f /etc/debian_version ] && grep -qi 'proxmox' /etc/issue; then
+  # Adicionar repositório do Proxmox VE 8.x
+  echo "deb http://download.proxmox.com/debian/pve bookworm pve-no-subscription" > /etc/apt/sources.list.d/pve-enterprise.list
+
+  # Atualizar e instalar pacotes mais recentes
+  apt-get update
+  DEBIAN_FRONTEND=noninteractive apt-get -o Dpkg::Options::="--force-confnew" dist-upgrade -y
+fi
+
+# Atualizar arquivos jQuery vulneráveis
+replace_jquery() {
+  local path="$1"
+  local jquery_new_url="https://code.jquery.com/jquery-3.6.0.min.js"
+  local temp_file="/tmp/jquery-3.6.0.min.js"
+
+  # Baixar nova versão do jQuery
+  wget --quiet -O "$temp_file" "$jquery_new_url"
+
+  # Procurar e substituir arquivos jQuery
+  find "$path" -type f -name 'jquery-1.8.3.min.js' -print0 | while IFS= read -r -d $'\0' file; do
+    if [ -f "$file" ]; then
+      cp "$temp_file" "$file"
+      echo "Atualizado: $file"
+    fi
+  done
+}
+
+# Locais comuns do servidor web/www
+replace_jquery "/var/www"
+replace_jquery "/usr/share/nginx"
+
+# Configurar SSH (remover algoritmos inseguros)
+sshd_config="/etc/ssh/sshd_config"
+cp "$sshd_config" "${sshd_config}.bak"
+
+sed -i '/^HostKeyAlgorithms/d' "$sshd_config"
+sed -i '/^KexAlgorithms/d' "$sshd_config"
+sed -i '/^Ciphers/d' "$sshd_config"
+sed -i '/^MACs/d' "$sshd_config"
+
+echo "HostKeyAlgorithms ecdsa-sha2-nistp256,ecdsa-sha2-nistp384,ecdsa-sha2-nistp521,ssh-ed25519,rsa-sha2-512,rsa-sha2-256" >> "$sshd_config"
+echo "KexAlgorithms curve25519-sha256,curve25519-sha256@libssh.org,diffie-hellman-group-exchange-sha256,diffie-hellman-group14-sha256,diffie-hellman-group16-sha512,diffie-hellman-group18-sha512" >> "$sshd_config"
+echo "Ciphers chacha20-poly1305@openssh.com,aes256-gcm@openssh.com,aes128-gcm@openssh.com,aes256-ctr,aes192-ctr,aes128-ctr" >> "$sshd_config"
+echo "MACs hmac-sha2-256-etm@openssh.com,hmac-sha2-512-etm@openssh.com,umac-128-etm@openssh.com" >> "$sshd_config"
+
+# Desativar Telnet
+systemctl disable --now telnet.socket 2>/dev/null
+systemctl disable --now telnet.service 2>/dev/null
+apt-get purge telnetd -y 2>/dev/null
+
+# Configurar TCP timestamps
+echo "net.ipv4.tcp_timestamps = 0" >> /etc/sysctl.conf
+sysctl -p
+
+# Reiniciar SSH para aplicar mudanças
+sshd -t && systemctl restart sshd}
+{type: uploaded file
+fileName: teste33vts_9.txt
+fullContent:
+```bash
+#!/bin/bash
+
+# Vulnerabilidad 1: Actualizar Proxmox VE
+if grep -q "proxmox" /etc/os-release; then
+    echo "Actualizando Proxmox VE"
+    sed -i 's/bullseye/bookworm/g' /etc/apt/sources.list
+    sed -i 's/bullseye/bookworm/g' /etc/apt/sources.list.d/pve-enterprise.list 2>/dev/null
+    sed -i 's/bullseye/bookworm/g' /etc/apt/sources.list.d/pve-no-subscription.list 2>/dev/null
+    apt-get update -qq
+    DEBIAN_FRONTEND=noninteractive apt-get dist-upgrade -y -qq
+    apt-get --purge autoremove -y -qq
+    systemctl restart pve-cluster pvedaemon pveproxy pve-firewall
+fi
+
+# Vulnerabilidades 2-6: Parchear archivos jQuery vulnerables
+wget -O /tmp/jquery-1.12.4.min.js https://code.jquery.com/jquery-1.12.4.min.gz --quiet >/dev/null 2>&1 || wget -O /tmp/jquery-1.12.4.min.js https://code.jquery.com/jquery-1.12.4.min.js --quiet
+declare -a jquery_paths=(
+    "/var/www/html/js/jquery-1.8.3.min.js"
+    "/var/www/html/opscenter/webcommon/js/jquery-1.8.3.min.js"
+    "/var/www/html/framesets/js/jquery-1.8.3.min.js"
+    "/var/www/html/frameset/js/jquery-1.8.3.min.js"
+    "/var/www/html/console/framework/js/jquery-1.8.3.min.js"
+)
+for path in "${jquery_paths[@]}"; do
+    if [ -f "$path" ]; then
+        cp /tmp/jquery-1.12.4.min.js "$path"
+        chown www-data:www-data "$path"
+    fi
+done
+
+# Vulnerabilidades relacionadas con SSH (7,8,9,13,14,15,16,19,21,22)
+if [ -f /etc/ssh/sshd_config ]; then
+    cp /etc/ssh/sshd_config /etc/ssh/sshd_config.backup
+    # Ajustes de configuración SSH
+    sed -i '/^HostKeyAlgorithms/d' /etc/ssh/sshd_config
+    sed -i '/^KexAlgorithms/d' /etc/ssh/sshd_config
+    sed -i '/^Ciphers/d' /etc/ssh/sshd_config
+    sed -i '/^MACs/d' /etc/ssh/sshd_config
+    
+    echo "HostKeyAlgorithms ecdsa-sha2-nistp256,ecdsa-sha2-nistp384,ssh-ed25519,rsa-sha2-512,rsa-sha2-256,ssh-rsa" >> /etc/ssh/sshd_config
+    echo "KexAlgorithms curve25519-sha256,ecdh-sha2-nistp256,diffie-hellman-group16-sha512,diffie-hellman-group18-sha512" >> /etc/ssh/sshd_config
+    echo "Ciphers chacha20-poly1305@openssh.com,aes256-gcm@openssh.com,aes128-gcm@openssh.com" >> /etc/ssh/sshd_config
+    echo "MACs umac-128-etm@openssh.com,hmac-sha2-256-etm@openssh.com,hmac-sha2-512-etm@openssh.com" >> /etc/ssh/sshd_config
+    
+    systemctl restart sshd
+fi
+
+# Vulnerabilidad 10: Bloquear puertos DCE/RPC usando UFW
+which ufw >/dev/null && for port in 39710 49664 49665 49666 49667 49668 49670 7832; do
+    ufw deny "$port/tcp" >/dev/null
+done || for port in 39710 49664 49665 49666 49667 49668 49670 7832; do
+    iptables -A INPUT -p tcp --dport $port -j DROP
+    ip6tables -A INPUT -p tcp --dport $port -j DROP >/dev/null 2>&1
+done
+
+# Vulnerabilidad 11: Desinstalar telnetd
+apt-get purge -y telnetd inetutils-telnetd >/dev/null 2>&1 || yum remove -y telnet-server >/dev/null 2>&1
+
+# Vulnerabilidad 12: Desactivar TLSv1.0 y TLSv1.1 para aplicaciones comunes
+# Apache
+find /etc/apache2/sites-enabled /etc/apache2/mods-enabled /etc/apache2/apache2.conf -type f -exec sed -i 's/SSLProtocol .*/SSLProtocol +TLSv1.2 +TLSv1.3/' {} 2>/dev/null \;
+# Nginx
+find /etc/nginx/sites-enabled /etc/nginx/conf.d /etc/nginx/nginx.conf -type f -exec sed -i 's/ssl_protocols .*/ssl_protocols TLSv1.2 TLSv1.3;/' {} 2>/dev/null \;
+# xrdp (RDP)
+[ -f /etc/xrdp/xrdp.ini ] && sed -i 's/^ssl_protocols=.*/ssl_protocols=TLSv1.2,TLSv1.3/' /etc/xrdp/xrdp.ini
+# Reinicios condicionales
+[ -d /etc/apache2 ] && systemctl restart apache2 >/dev/null 2>&1
+[ -d /etc/nginx ] && systemctl restart nginx >/dev/null 2>&1
+[ -f /etc/xrdp/xrdp.ini ] && systemctl restart xrdp >/dev/null 2>&1
+
+# Vulnerabilidades 17,18,20,23,24,25: Deshabilitar marcas de tiempo TCP
+echo "net.ipv4.tcp_timestamps = 0" >> /etc/sysctl.conf
+sysctl -p >/dev/null
+
+# Vulnerabilidades 26-32: Bloquear solicitudes ICMP de marca de tiempo
+iptables -A INPUT -p icmp --icmp-type timestamp-request -j DROP
+ip6tables -A INPUT -p icmpv6 --icmpv6-type 13 -j DROP >/dev/null 2>&1
+```}
+{type: uploaded file
+fileName: teste33vts_10.txt
+fullContent:
+```bash
+#!/bin/bash
+
+# Vulnerabilidade 1: Update Proxmox VE to a supported version
+if [ -f /etc/pve/version ]; then
+    sed -i 's/bullseye/bookworm/' /etc/apt/sources.list
+    sed -i 's/bullseye/bookworm/' /etc/apt/sources.list.d/pve-enterprise.list 2>/dev/null
+    sed -i 's/bullseye/bookworm/' /etc/apt/sources.list.d/pve-no-subscription.list 2>/dev/null
+    apt-get update && DEBIAN_FRONTEND=noninteractive apt-get dist-upgrade -y
+fi
+
+# Vulnerabilidades 2-6: Update vulnerable jQuery files
+declare -a jquery_files=(
+    "/var/www/html/js/jquery-1.8.3.min.js"
+    "/var/www/html/opscenter/webcommon/js/jquery-1.8.3.min.js"
+    "/var/www/html/console/js/jquery-1.8.3.min.js"
+)
+for file in "${jquery_files[@]}"; do
+    if [ -f "$file" ]; then
+        wget -q --no-check-certificate -O "$file" https://code.jquery.com/jquery-1.9.1.min.js
+    fi
+done
+
+# Vulnerabilidades SSH (7,8,9,13,14,15,16,19,21,22): Secure SSH configuration
+backup_timestamp=$(date +%Y%m%d%H%M)
+cp /etc/ssh/sshd_config /etc/ssh/sshd_config.backup_$backup_timestamp
+
+declare -A ssh_settings=(
+    ["KexAlgorithms"]="curve25519-sha256,curve25519-sha256@libssh.org,ecdh-sha2-nistp256,ecdh-sha2-nistp384,ecdh-sha2-nistp521,diffie-hellman-group-exchange-sha256,diffie-hellman-group16-sha512,diffie-hellman-group18-sha512,diffie-hellman-group14-sha256"
+    ["HostKeyAlgorithms"]="rsa-sha2-512,rsa-sha2-256,ecdsa-sha2-nistp256,ssh-ed25519"
+    ["Ciphers"]="chacha20-poly1305@openssh.com,aes256-gcm@openssh.com,aes128-gcm@openssh.com,aes256-ctr,aes192-ctr,aes128-ctr"
+    ["MACs"]="hmac-sha2-256-etm@openssh.com,hmac-sha2-512-etm@openssh.com,umac-128-etm@openssh.com"
+)
+
+for setting in "${!ssh_settings[@]}"; do
+    if grep -q "^$setting" /etc/ssh/sshd_config; then
+        sed -i "s/^$setting.*/$setting ${ssh_settings[$setting]}/" /etc/ssh/sshd_config
+    else
+        echo "$setting ${ssh_settings[$setting]}" >> /etc/ssh/sshd_config
+    fi
+done
+
+# Vulnerabilidade 10: Block RPC ports
+declare -a ports=(39710 49664 49665 49666 49667 49668 49670 7832)
+for port in "${ports[@]}"; do
+    iptables -A INPUT -p tcp --dport $port -j DROP
+done
+
+# Vulnerabilidade 11: Remove Telnet service
+systemctl stop telnet.socket 2>/dev/null
+systemctl disable telnet.socket 2>/dev/null
+apt-get remove --purge -y telnetd
+
+# Vulnerabilidade 12: Secure xRDP configuration (TLS)
+if systemctl is-enabled xrdp >/dev/null 2>&1; then
+    sed -i '/ssl_protocols/s/^#//g;/ssl_protocols/d' /etc/xrdp/xrdp.ini
+    echo "ssl_protocols=TLSv1.2" >> /etc/xrdp/xrdp.ini
+    systemctl restart xrdp
+fi
+
+# Vulnerabilidades 17-25: Disable TCP Timestamps
+sysctl_file="/etc/sysctl.conf"
+grep -q "net.ipv4.tcp_timestamps" $sysctl_file && \
+    sed -i 's/\(net.ipv4.tcp_timestamps.*\)/# \1\nnet.ipv4.tcp_timestamps=0/' $sysctl_file || \
+    echo "net.ipv4.tcp_timestamps=0" >> $sysctl_file
+sysctl -p >/dev/null
+
+# Vulnerabilidades 26-32: Block ICMP timestamp requests
+iptables -D INPUT -p icmp --icmp-type timestamp-request -j DROP 2>/dev/null
+iptables -A INPUT -p icmp --icmp-type timestamp-request -j DROP
+iptables -A INPUT -p icmp --icmp-type timestamp-reply -j DROP
+
+# Save iptables and restart necessary services
+if command -v netfilter-persistent >/dev/null; then
+    netfilter-persistent save >/dev/null
+else
+    iptables-save >/etc/iptables/rules.v4
+fi
+systemctl restart ssh
+```}
+{type: uploaded file
+fileName: teste33vts_11.txt
+fullContent:
+```bash
+#!/bin/bash
+if [ "$(id -u)" -ne 0 ]; then
+    echo "Script must be run as root"
+    exit 1
+fi
+
+# Remediate jQuery vulnerabilities
+wget -qO /tmp/jquery-1.12.4.min.js https://code.jquery.com/jquery-1.12.4.min.js
+find /var/www /usr/share /srv /opt -name 'jquery-1.8.3.min.js' 2>/dev/null | while read -r file; do
+    cp "$file" "${file}.bak"
+    cp /tmp/jquery-1.12.4.min.js "$file"
+done
+rm -f /tmp/jquery-1.12.4.min.js
+
+# Configure SSH security
+cp /etc/ssh/sshd_config /etc/ssh/sshd_config.bak
+sed -i '/^\s*KexAlgorithms/d;/^\s*HostKeyAlgorithms/d;/^\s*Ciphers/d;/^\s*MACs/d' /etc/ssh/sshd_config
+echo "KexAlgorithms curve25519-sha256,ecdh-sha2-nistp256,ecdh-sha2-nistp384,ecdh-sha2-nistp521,diffie-hellman-group-exchange-sha256" >> /etc/ssh/sshd_config
+echo "HostKeyAlgorithms ssh-ed25519,ssh-ed25519-cert-v01@openssh.com,ecdsa-sha2-nistp256,ecdsa-sha2-nistp256-cert-v01@openssh.com,rsa-sha2-512,rsa-sha2-512-cert-v01@openssh.com,rsa-sha2-256,rsa-sha2-256-cert-v01@openssh.com" >> /etc/ssh/sshd_config
+echo "Ciphers chacha20-poly1305@openssh.com,aes256-gcm@openssh.com,aes128-gcm@openssh.com,aes256-ctr,aes192-ctr,aes128-ctr" >> /etc/ssh/sshd_config
+echo "MACs hmac-sha2-512-etm@openssh.com,hmac-sha2-256-etm@openssh.com,hmac-sha2-512,hmac-sha2-256" >> /etc/ssh/sshd_config
+systemctl restart sshd
+
+# Remove Telnet and enable SSH
+systemctl stop telnet.socket 2>/dev/null
+systemctl disable telnet.socket 2>/dev/null
+apt-get remove --purge -y telnetd
+apt-get update
+apt-get install --no-install-recommends -y openssh-server
+systemctl enable ssh
+systemctl start ssh
+
+# Disable TCP timestamps
+echo "net.ipv4.tcp_timestamps = 0" >> /etc/sysctl.conf
+sysctl -p
+
+# Block ICMP timestamp requests
+iptables -A INPUT -p icmp --icmp-type timestamp-request -j DROP
+apt-get install -y iptables-persistent
+iptables-save > /etc/iptables/rules.v4
+netfilter-persistent save
+```}
+{type: uploaded file
+fileName: teste33vts_12.txt
+fullContent:
+#!/bin/bash
+apt update && apt upgrade -y
+mkdir -p /var/www/html/js /var/www/html/opscenter/webcommon/js /var/www/html/framesets/js /var/www/html/frameset/js /var/www/html/console/framework/js
+wget -O /var/www/html/js/jquery-1.9.1.min.js https://code.jquery.com/jquery-1.9.1.min.js
+[ -f /var/www/html/js/jquery-1.8.3.min.js ] && rm /var/www/html/js/jquery-1.8.3.min.js
+ln -s /var/www/html/js/jquery-1.9.1.min.js /var/www/html/js/jquery-1.8.3.min.js
+wget -O /var/www/html/opscenter/webcommon/js/jquery-1.9.1.min.js https://code.jquery.com/jquery-1.9.1.min.js
+[ -f /var/www/html/opscenter/webcommon/js/jquery-1.8.3.min.js ] && rm /var/www/html/opscenter/webcommon/js/jquery-1.8.3.min.js
+ln -s /var/www/html/opscenter/webcommon/js/jquery-1.9.1.min.js /var/www/html/opscenter/webcommon/js/jquery-1.8.3.min.js
+wget -O /var/www/html/framesets/js/jquery-1.9.1.min.js https://code.jquery.com/jquery-1.9.1.min.js
+[ -f /var/www/html/framesets/js/jquery-1.8.3.min.js ] && rm /var/www/html/framesets/js/jquery-1.8.3.min.js
+ln -s /var/www/html/framesets/js/jquery-1.9.1.min.js /var/www/html/framesets/js/jquery-1.8.3.min.js
+wget -O /var/www/html/frameset/js/jquery-1.9.1.min.js https://code.jquery.com/jquery-1.9.1.min.js
+[ -f /var/www/html/frameset/js/jquery-1.8.3.min.js ] && rm /var/www/html/frameset/js/jquery-1.8.3.min.js
+ln -s /var/www/html/frameset/js/jquery-1.9.1.min.js /var/www/html/frameset/js/jquery-1.8.3.min.js
+wget -O /var/www/html/console/framework/js/jquery-1.9.1.min.js https://code.jquery.com/jquery-1.9.1.min.js
+[ -f /var/www/html/console/framework/js/jquery-1.8.3.min.js ] && rm /var/www/html/console/framework/js/jquery-1.8.3.min.js
+ln -s /var/www/html/console/framework/js/jquery-1.9.1.min.js /var/www/html/console/framework/js/jquery-1.8.3.min.js
+cp /etc/ssh/sshd_config /etc/ssh/sshd_config.bak
+sed -i '/HostKeyAlgorithms/s/.*/HostKeyAlgorithms ecdsa-sha2-nistp256-cert-v01@openssh.com,ecdsa-sha2-nistp384-cert-v01@openssh.com,ecdsa-sha2-nistp521-cert-v01@openssh.com,ssh-ed25519-cert-v01@openssh.com,rsa-sha2-512-cert-v01@openssh.com,rsa-sha2-256-cert-v01@openssh.com,ssh-rsa-cert-v01@openssh.com,ecdsa-sha2-nistp256,ecdsa-sha2-nistp384,ecdsa-sha2-nistp521,ssh-ed25519,rsa-sha2-512,rsa-sha2-256,ssh-rsa/' /etc/ssh/sshd_config
+sed -i '/KexAlgorithms/s/.*/KexAlgorithms curve25519-sha256,curve25519-sha256@libssh.org,ecdh-sha2-nistp256,ecdh-sha2-nistp384,ecdh-sha2-nistp521,diffie-hellman-group-exchange-sha256,diffie-hellman-group16-sha512,diffie-hellman-group18-sha512,diffie-hellman-group14-sha256/' /etc/ssh/sshd_config
+sed -i '/Ciphers/s/.*/Ciphers chacha20-poly1305@openssh.com,aes256-gcm@openssh.com,aes128-gcm@openssh.com,aes256-ctr,aes192-ctr,aes128-ctr/' /etc/ssh/sshd_config
+sed -i '/MACs/s/.*/MACs hmac-sha2-256-etm@openssh.com,hmac-sha2-512-etm@openssh.com,umac-128-etm@openssh.com/' /etc/ssh/sshd_config
+systemctl stop telnet.socket
+systemctl disable telnet.socket
+grep "net.ipv4.tcp_timestamps" /etc/sysctl.conf || echo "net.ipv4.tcp_timestamps = 0" >> /etc/sysctl.conf
+grep "net.ipv4.icmp_echo_ignore_all" /etc/sysctl.conf || echo "net.ipv4.icmp_echo_ignore_all = 1" >> /etc/sysctl.conf
+sysctl -p
+service ssh restart}
+{type: uploaded file
+fileName: teste33vts_13.txt
+fullContent:
+#!/bin/bash
+
+# Atualização do Proxmox VE para uma versão suportada
+apt update
+apt -y full-upgrade
+
+# Substituição do jQuery vulnerável por 3.7.1
+replace_jquery() {
+  local path="$1"
+  local jquery_url="https://code.jquery.com/jquery-3.7.1.min.js"
+  local jquery_tmp="$(mktemp)"
+  
+  wget -q "$jquery_url" -O "$jquery_tmp"
+  if [ $? -eq 0 ]; then
+    cp "$jquery_tmp" "$path"
+    chmod 644 "$path"
+    echo "Atualizado: $path"
+  else
+    echo "Falha ao baixar jQuery para $path" >&2
+  fi
+  rm -f "$jquery_tmp"
+}
+
+while read -r jquery_path; do
+  if [ -f "$jquery_path" ]; then
+    replace_jquery "$jquery_path"
+  fi
+done << PATHS
+/var/www/html/js/jquery-1.8.3.min.js
+/var/www/html/opscenter/webcommon/framework/js/jquery-1.8.3.min.js
+/var/www/html/framesets/js/jquery-1.8.3.min.js
+/var/www/html/frameset/js/jquery-1.8.3.min.js
+/var/www/html/console/framework/js/jquery-1.8.3.min.js
+PATHS
+
+# Configurações SSH
+SSHD_CONFIG="/etc/ssh/sshd_config"
+sed -i '/^\s*HostKeyAlgorithms/d' "$SSHD_CONFIG"
+sed -i '/^\s*KexAlgorithms/d' "$SSHD_CONFIG"
+sed -i '/^\s*Ciphers/d' "$SSHD_CONFIG"
+sed -i '/^\s*MACs/d' "$SSHD_CONFIG"
+
+echo "HostKeyAlgorithms ssh-ed25519,rsa-sha2-256,rsa-sha2-512" >> "$SSHD_CONFIG"
+echo "KexAlgorithms curve25519-sha256,curve25519-sha256@libssh.org,diffie-hellman-group-exchange-sha256" >> "$SSHD_CONFIG"
+echo "Ciphers chacha20-poly1305@openssh.com,aes256-gcm@openssh.com,aes128-gcm@openssh.com,aes256-ctr,aes192-ctr,aes128-ctr" >> "$SSHD_CONFIG"
+echo "MACs hmac-sha2-512-etm@openssh.com,hmac-sha2-256-etm@openssh.com,umac-128-etm@openssh.com" >> "$SSHD_CONFIG"
+
+systemctl restart ssh.service
+
+# Configuração de firewall para bloquear portas específicas
+block_ports() {
+  for port in "$@"; do
+    iptables -A INPUT -p tcp --dport "$port" -j DROP
+    echo "Porta $port bloqueada"
+  done
+}
+
+block_ports 39710 49664 49665 49666 49667 49668 49670 7832
+
+# Bloqueio de respostas ICMP timestamp
+iptables -A INPUT -p icmp --icmp-type timestamp-request -j DROP
+echo "Respostas ICMP timestamp bloqueadas"
+
+# Desativação do serviço Telnet
+if command -v telnetd &>/dev/null; then
+  systemctl stop telnet.socket > /dev/null 2>&1
+  systemctl stop telnettelnet.socket > /dev/null 2>&1
+  apt -y purge telnetd > /dev/null 2>&1
+  echo "Serviço Telnet desativado"
+fi
+
+# Configuração sysctl para desativar TCP timestamps
+echo "net.ipv4.tcp_timestamps = 0" >> /etc/sysctl.conf
+sysctl -p}
+{type: uploaded file
+fileName: teste33vts_14.txt
+fullContent:
+#!/bin/bash
+
+# Atualizar o Proxmox VE
+apt update
+apt -y full-upgrade
+
+# Substituir arquivos vulneráveis do jQuery
+JQUERY_URL="https://code.jquery.com/jquery-3.7.1.min.js"
+VULNERABLE_PATHS=(
+    "/var/www/html/js/jquery-1.8.3.min.js"
+    "/var/www/html/opscenter/webcommon/js/jquery-1.8.3.min.js"
+    "/var/www/html/console/js/jquery-1.8.3.min.js"
+)
+
+for path in "${VULNERABLE_PATHS[@]}"; do
+    if [[ -f "$path" ]]; then
+        wget -O "$path" "$JQUERY_URL"
+    fi
+done
+
+# Hardening SSH
+SSHD_CONFIG="/etc/ssh/sshd_config"
+cp "$SSHD_CONFIG" "$SSHD_CONFIG.bak"
+
+cat << EOF > "$SSHD_CONFIG"
+HostKeyAlgorithms ecdsa-sha2-nistp256,ecdsa-sha2-nistp384,ecdsa-sha2-nistp521,ssh-ed25519,rsa-sha2-512,rsa-sha2-256
+KexAlgorithms curve25519-sha256,curve25519-sha256@libssh.org,ecdh-sha2-nistp256,ecdh-sha2-nistp384,ecdh-sha2-nistp521,diffie-hellman-group16-sha512,diffie-hellman-group18-sha512
+Ciphers chacha20-poly1305@openssh.com,aes256-gcm@openssh.com,aes128-gcm@openssh.com,aes256-ctr,aes192-ctr,aes128-ctr
+MACs hmac-sha2-512-etm@openssh.com,hmac-sha2-256-etm@openssh.com,umac-128-etm@openssh.com
+EOF
+
+systemctl restart sshd
+
+# Desativar Telnet
+systemctl stop telnet.socket
+systemctl disable telnet.socket
+
+# Configurar TCP Timestamps
+echo "net.ipv4.tcp_timestamps=0" >> /etc/sysctl.conf
+sysctl -p
+
+# Bloquear ICMP Timestamp
+iptables -A INPUT -p icmp --icmp-type timestamp-request -j DROP
+iptables -A OUTPUT -p icmp --icmp-type timestamp-reply -j DROP
+iptables-save > /etc/iptables/rules.v4
+
+# Configurar TLS (caso seja xrdp)
+if command -v xrdp &>/dev/null; then
+    sed -i 's/^tls_protocols=.*/tls_protocols=TLSv1.2,TLSv1.3/' /etc/xrdp/xrdp.ini
+    sed -i 's/^tls_ciphers=.*/tls_ciphers=HIGH/' /etc/xrdp/xrdp.ini
+    systemctl restart xrdp
+fi}
+{type: uploaded file
+fileName: teste33vts_15.txt
+fullContent:
+```bash
+#!/bin/bash
+
+# Fix Proxmox EOL (update system)
+apt-get update -y
+apt-get dist-upgrade -y --with-new-pkgs -o Dpkg::Options::="--force-confold"
+
+# Fix SSH vulnerabilities (host keys, KEX, ciphers, MACs)
+cat << EOF >> /etc/ssh/sshd_config
+HostKeyAlgorithms *,-ssh-dss
+KexAlgorithms *,-diffie-hellman-group1-sha1,-diffie-hellman-group14-sha1
+Ciphers *,-3des-cbc,-aes128-cbc,-aes256-cbc,-twofish-cbc,-twofish128-cbc,-twofish256-cbc
+MACs *,-umac-64@openssh.com,-umac-64-etm@openssh.com,-hmac-md5,-hmac-sha1-96
+EOF
+systemctl restart sshd
+
+# Disable telnet
+systemctl unmask telnet.socket
+systemctl stop telnet.socket
+systemctl disable telnet.socket
+systemctl stop telnet.service
+systemctl disable telnet.service
+apt-get purge telnetd -y
+
+# Disable TCP timestamps
+grep -q "net.ipv4.tcp_timestamps" /etc/sysctl.conf && \
+sed -i '/net.ipv4.tcp_timestamps/d' /etc/sysctl.conf
+echo "net.ipv4.tcp_timestamps = 0" >> /etc/sysctl.conf
+sysctl -p
+
+echo "Cibernex relatório: Vulnerabilidades corrigidas."
+```}
+{type: uploaded file
+fileName: teste33vts_16.txt
+fullContent:
+#!/bin/sh
+
+command -v pveversion >/dev/null && {
+  grep -q "pve-no-subscription" /etc/apt/sources.list || \
+    echo "deb http://download.proxmox.com/debian/pve bookworm pve-no-subscription" >>/etc/apt/sources.list
+  apt-get update
+  DEBIAN_FRONTEND=noninteractive apt-get -y dist-upgrade
+}
+
+paths="/js/jquery-1.8.3.min.js /opscenter/js/jquery-1.8.3.min.js /console/js/jquery-1.8.3.min.js"
+for path in $paths; do
+  [ -f "$path" ] && {
+    wget -O "$path" https://code.jquery.com/jquery-1.12.4.min.js
+  }
+done
+
+SSH_CONFIG="/etc/ssh/sshd_config"
+[ -f "$SSH_CONFIG" ] && {
+  sed -i '/ssh-dss/d' "$SSH_CONFIG"
+  sed -i '/diffie-hellman-group1-sha1/d' "$SSH_CONFIG"
+  sed -i '/3des-cbc\|aes128-cbc\|aes256-cbc\|twofish-cbc\|arcfour\|arcfour128\|arcfour256/d' "$SSH_CONFIG"
+  sed -i '/umac-64\|hmac-md5\|hmac-sha1-96/d' "$SSH_CONFIG"
+  
+  grep -q "^KexAlgorithms" "$SSH_CONFIG" && \
+    sed -i "s/^KexAlgorithms.*/KexAlgorithms curve25519-sha256@libssh.org,ecdh-sha2-nistp521,ecdh-sha2-nistp384,ecdh-sha2-nistp256,diffie-hellman-group-exchange-sha256/" "$SSH_CONFIG" || \
+    echo "KexAlgorithms curve25519-sha256@libssh.org,ecdh-sha2-nistp521,ecdh-sha2-nistp384,ecdh-sha2-nistp256,diffie-hellman-group-exchange-sha256" >> "$SSH_CONFIG"
+  
+  grep -q "^Ciphers" "$SSH_CONFIG" && \
+    sed -i "s/^Ciphers.*/Ciphers chacha20-poly1305@openssh.com,aes256-gcm@openssh.com,aes128-gcm@openssh.com,aes256-ctr,aes192-ctr,aes128-ctr/" "$SSH_CONFIG" || \
+    echo "Ciphers chacha20-poly1305@openssh.com,aes256-gcm@openssh.com,aes128-gcm@openssh.com,aes256-ctr,aes192-ctr,aes128-ctr" >> "$SSH_CONFIG"
+  
+  grep -q "^MACs" "$SSH_CONFIG" && \
+    sed -i "s/^MACs.*/MACs hmac-sha2-512-etm@openssh.com,hmac-sha2-256-etm@openssh.com/" "$SSH_CONFIG" || \
+    echo "MACs hmac-sha2-512-etm@openssh.com,hmac-sha2-256-etm@openssh.com" >> "$SSH_CONFIG"
+    
+  systemctl restart ssh
+}
+
+apt-get purge -y telnetd
+
+grep -q "net.ipv4.tcp_timestamps" /etc/sysctl.conf && \
+  sed -i "s/^net.ipv4.tcp_timestamps.*/net.ipv4.tcp_timestamps=0/" /etc/sysctl.conf || \
+  echo "net.ipv4.tcp_timestamps=0" >> /etc/sysctl.conf
+sysctl -p
+
+command -v iptables >/dev/null && {
+  iptables -A INPUT -p icmp --icmp-type timestamp-request -j DROP
+  iptables -A INPUT -p icmp --icmp-type timestamp-reply -j DROP
+  [ -x /usr/sbin/iptables-save ] && iptables-save > /etc/iptables/rules.v4
+}}
+{type: uploaded file
+fileName: teste33vts_17.txt
+fullContent:
+#!/bin/bash
+set -e
+
+if [ -f /etc/os-release ]; then
+    . /etc/os-release
+    if [ "$VERSION_ID" = "11" ]; then
+        sed -i 's/bullseye/bookworm/g' /etc/apt/sources.list
+        [ -f /etc/apt/sources.list.d/pve-enterprise.list ] && sed -i 's/bullseye/bookworm/g' /etc/apt/sources.list.d/pve-enterprise.list
+        [ -f /etc/apt/sources.list.d/ceph.list ] && sed -i 's/bullseye/bookworm/g' /etc/apt/sources.list.d/ceph.list
+        apt-get update -y
+        apt-get upgrade -y
+        apt-get dist-upgrade -y
+        apt-get autoremove -y
+    fi
+fi
+
+cp /etc/ssh/sshd_config /etc/ssh/sshd_config.bak
+settings=(
+    "KexAlgorithms curve25519-sha256,curve25519-sha256@libssh.org,diffie-hellman-group18-sha512,ecdh-sha2-nistp521,ecdh-sha2-nistp384,ecdh-sha2-nistp256"
+    "Ciphers chacha20-poly1305@openssh.com,aes256-gcm@openssh.com,aes128-gcm@openssh.com,aes256-ctr,aes192-ctr,aes128-ctr"
+    "MACs hmac-sha2-512-etm@openssh.com,hmac-sha2-256-etm@openssh.com,umac-128-etm@openssh.com"
+    "HostKeyAlgorithms ssh-ed25519,ssh-ed25519-cert-v01@openssh.com,rsa-sha2-256,rsa-sha2-512,rsa-sha2-256-cert-v01@openssh.com,rsa-sha2-512-cert-v01@openssh.com"
+)
+for param_val in "${settings[@]}"; do
+    param=$(echo "$param_val" | awk '{print $1}')
+    sed -i "/^${param}/Id" /etc/ssh/sshd_config
+    sed -i "/^#\s*${param}/Id" /etc/ssh/sshd_config
+    echo "$param_val" >> /etc/ssh/sshd_config
+done
+systemctl restart ssh
+
+apt-get remove -y --purge telnetd
+
+echo "net.ipv4.tcp_timestamps = 0" >> /etc/sysctl.conf
+sysctl -p
+
+iptables -A INPUT -p icmp --icmp-type 13 -j DROP
+if command -v netfilter-persistent &> /dev/null; then
+    netfilter-persistent save
+else
+    mkdir -p /etc/iptables
+    iptables-save > /etc/iptables/rules.v4
+fi}
+{type: uploaded file
+fileName: teste33vts_18.txt
+fullContent:
+#!/bin/bash
+
+# Atualizar Proxmox VE para versão compatível (se instalado)
+if grep -qi "proxmox" /etc/issue || grep -qi "pve-manager" /etc/pve/version; then
+    echo "Atualizando Proxmox VE para versão compatível..."
+    apt-get update
+    apt-get dist-upgrade -y
+    apt-get --only-upgrade install pve-manager -y
+    pveam update
+    systemctl restart pveproxy pvestatd pvedaemon
+fi
+
+# Atualizar arquivos jQuery vulneráveis
+jquery_paths=(
+    "/var/www/html/js/jquery-1.8.3.min.js"
+    "/var/www/html/opscenter/webcommon/framework/../js/jquery-1.8.3.min.js"
+    "/var/www/html/opscenter/webcommon/js/jquery-1.8.3.min.js"
+    "/var/www/html/framesets/../js/jquery-1.8.3.min.js"
+    "/var/www/html/frameset/../js/jquery-1.8.3.min.js"
+    "/var/www/html/console/framework/../js/jquery-1.8.3.min.js"
+    "/var/www/html/console/js/jquery-1.8.3.min.js"
+)
+
+for path in "${jquery_paths[@]}"; do
+    resolved_path=$(realpath -m "$path")
+    if [ -f "$resolved_path" ]; then
+        echo "Atualizando jQuery em $resolved_path"
+        wget -qO "$resolved_path" "https://code.jquery.com/jquery-1.12.4.min.js"
+        chown --reference="$resolved_path" "$resolved_path" 2>/dev/null
+    fi
+done
+
+# Configurar SSH para desativar algoritmos vulneráveis
+backup_sshd_config() {
+    cp /etc/ssh/sshd_config /etc/ssh/sshd_config.bak
+}
+
+update_sshd_config() {
+    sed -i '/KexAlgorithms\|HostKeyAlgorithms\|Ciphers\|MACs/d' /etc/ssh/sshd_config
+    echo "KexAlgorithms curve25519-sha256@libssh.org,ecdh-sha2-nistp256,ecdh-sha2-nistp384,ecdh-sha2-nistp521,diffie-hellman-group-exchange-sha256" >> /etc/ssh/sshd_config
+    echo "HostKeyAlgorithms ssh-ed25519,ssh-ed25519-cert-v01@openssh.com,ecdsa-sha2-nistp256,ecdsa-sha2-nistp256-cert-v01@openssh.com,ecdsa-sha2-nistp384,ecdsa-sha2-nistp384-cert-v01@openssh.com,ecdsa-sha2-nistp521,ecdsa-sha2-nistp521-cert-v01@openssh.com,rsa-sha2-512,rsa-sha2-512-cert-v01@openssh.com,rsa-sha2-256,rsa-sha2-256-cert-v01@openssh.com" >> /etc/ssh/sshd_config
+    echo "Ciphers chacha20-poly1305@openssh.com,aes256-gcm@openssh.com,aes128-gcm@openssh.com,aes256-ctr,aes192-ctr,aes128-ctr" >> /etc/ssh/sshd_config
+    echo "MACs hmac-sha2-512-etm@openssh.com,hmac-sha2-256-etm@openssh.com,umac-128-etm@openssh.com,hmac-sha2-512,hmac-sha2-256,umac-128@openssh.com" >> /etc/ssh/sshd_config
+}
+
+if [ -f /etc/ssh/sshd_config ]; then
+    echo "Reconfigurando SSH..."
+    backup_sshd_config
+    update_sshd_config
+    systemctl restart ssh
+fi
+
+# Remover serviço Telnet
+if dpkg -l | grep -q "telnetd"; then
+    echo "Removendo Telnet..."
+    apt-get remove --purge telnetd -y
+fi
+
+# Configurar TCP para desativar timestamps
+echo "Desativando TCP Timestamps..."
+sysctl -w net.ipv4.tcp_timestamps=0
+echo "net.ipv4.tcp_timestamps = 0" >> /etc/sysctl.conf
+
+# Bloquear respostas ICMP Timestamp usando iptables
+iptables -A INPUT -p icmp --icmp-type timestamp-request -j DROP
+iptables -A INPUT -p icmp --icmp-type timestamp-reply -j DROP
+if ! iptables-save > /etc/iptables/rules.v4; then
+    mkdir -p /etc/iptables
+    iptables-save > /etc/iptables/rules.v4
+fi
+
+# Caso utilize firewalld (padrão RedHat/CentOS)
+if command -v firewall-cmd &>/dev/null; then
+    firewall-cmd --permanent --add-rich-rule='rule protocol value="icmp" icmp-type name="timestamp-request" drop'
+    firewall-cmd --permanent --add-rich-rule='rule protocol value="icmp" icmp-type name="timestamp-reply" drop'
+    firewall-cmd --reload
+fi}
+{type: uploaded file
+fileName: teste33vts_19.txt
+fullContent:
+#!/bin/bash
+
+if [ "$(id -u)" != "0" ]; then
+    echo "Este script requer privilégios de superusuário. Execute com sudo." >&2
+    exit 1
+fi
+
+# Atualizar Proxmox VE e sistema (Vulnerabilidade 1)
+grep -q "proxmox" /etc/apt/sources.list && \
+    apt update && \
+    apt-get -y dist-upgrade && \
+    pveam update
+
+# Desativar Telnet (Vulnerabilidade 11)
+systemctl stop telnet.socket 2>/dev/null
+systemctl disable telnet.socket 2>/dev/null
+apt-get remove -y --purge telnetd
+
+# Configurar SSH (Vulnerabilidades 7,8,9,13,14,15,16,19,21,22)
+cp /etc/ssh/sshd_config /etc/ssh/sshd_config.bak
+sed -i '/^\s*HostKeyAlgorithms/d' /etc/ssh/sshd_config
+sed -i '/^\s*KexAlgorithms/d' /etc/ssh/sshd_config
+sed -i '/^\s*Ciphers/d' /etc/ssh/sshd_config
+sed -i '/^\s*MACs/d' /etc/ssh/sshd_config
+
+echo -e "\nHostKeyAlgorithms ecdsa-sha2-nistp256-cert-v01@openssh.com,ecdsa-sha2-nistp384-cert-v01@openssh.com,ecdsa-sha2-nistp521-cert-v01@openssh.com,ssh-ed25519-cert-v01@openssh.com,rsa-sha2-512-cert-v01@openssh.com,rsa-sha2-256-cert-v01@openssh.com,ssh-rsa-cert-v01@openssh.com,ecdsa-sha2-nistp256,ecdsa-sha2-nistp384,ecdsa-sha2-nistp521,ssh-ed25519,rsa-sha2-512,rsa-sha2-256,ssh-rsa" >> /etc/ssh/sshd_config
+echo "KexAlgorithms curve25519-sha256,curve25519-sha256@libssh.org,diffie-hellman-group-exchange-sha256" >> /etc/ssh/sshd_config
+echo "Ciphers chacha20-poly1305@openssh.com,aes256-gcm@openssh.com,aes128-gcm@openssh.com,aes256-ctr,aes192-ctr,aes128-ctr" >> /etc/ssh/sshd_config
+echo "MACs hmac-sha2-512-etm@openssh.com,hmac-sha2-256-etm@openssh.com,umac-128-etm@openssh.com" >> /etc/ssh/sshd_config
+
+systemctl restart ssh
+
+# Configurar TCP (Vulnerabilidades 17,18,20,23,24,25)
+grep -q "net.ipv4.tcp_timestamps" /etc/sysctl.conf || \
+    echo "net.ipv4.tcp_timestamps = 0" >> /etc/sysctl.conf
+sysctl -p
+
+# Bloquear ICMP Timestamp (Vulnerabilidades 26-32)
+iptables -A INPUT -p icmp --icmp-type timestamp-request -j DROP
+iptables -A INPUT -p icmp --icmp-type timestamp-reply -j DROP
+
+# Configurar TLS/SSL (Vulnerabilidade 12)
+if dpkg -s xrdp >/dev/null 2>&1; then
+    sed -i 's/^tses.*/tls_ciphers=HIGH:!aNULL:!TLSv1:!TLSv1.0:!TLSv1.1/' /etc/xrdp/xrdp.ini
+    systemctl restart xrdp
+fi
+
+# Atualizar jQuery manualmente (Vulnerabilidades 2,3,4,5,6)
+find /var/www /usr/share -type f -name 'jquery-1.8.3.min.js' | while read -r file; do
+    cp -- "$file" "${file}.bak"
+    curl -s https://code.jquery.com/jquery-1.9.1.min.js -o "$file"
+done}
+{type: uploaded file
+fileName: teste33vts_20.txt
+fullContent:
+#!/bin/bash
+
+apt update -y
+apt full-upgrade -y
+
+declare -a jquery_paths=(
+    "/var/www/html/js/jquery-1.8.3.min.js"
+    "/var/www/html/opscenter/webcommon/js/jquery-1.8.3.min.js"
+    "/var/www/html/console/js/jquery-1.8.3.min.js"
+)
+fixed_js_url="https://code.jquery.com/jquery-1.12.4.min.js"
+
+for path in "${jquery_paths[@]}"; do
+    if [ -f "$path" ]; then
+        wget -qO "${path}" "$fixed_js_url"
+    fi
+done
+
+mkdir -p /etc/ssh/sshd_config.d
+cat > /etc/ssh/sshd_config.d/disable_weak.conf << 'EOL'
+HostKeyAlgorithms ecdsa-sha2-nistp256-cert-v01@openssh.com,ecdsa-sha2-nistp384-cert-v01@openssh.com,ecdsa-sha2-nistp521-cert-v01@openssh.com,rsa-sha2-512,rsa-sha2-256,ssh-rsa
+KexAlgorithms curve25519-sha256,curve25519-sha256@libssh.org,diffie-hellman-group-exchange-sha256
+Ciphers chacha20-poly1305@openssh.com,aes256-gcm@openssh.com,aes128-gcm@openssh.com,aes256-ctr,aes192-ctr,aes128-ctr
+MACs hmac-sha2-256-etm@openssh.com,hmac-sha2-512-etm@openssh.com,umac-128-etm@openssh.com
+EOL
+
+dpkg -l | grep -q '^ii.*telnetd' && apt remove -y telnetd
+
+echo "net.ipv4.tcp_timestamps = 0" > /etc/sysctl.d/99-disable-tcp-timestamps.conf
+
+iptables -A INPUT -p icmp --icmp-type timestamp-request -j DROP >/dev/null 2>&1
+iptables -A INPUT -p tcp --dport 135 -j DROP >/dev/null 2>&1
+
+sysctl -p /etc/sysctl.d/99-disable-tcp-timestamps.conf >/dev/null
+systemctl restart sshd}
+{type: uploaded file
+fileName: teste33vts_21.txt
+fullContent:
+```bash
+#!/bin/bash
+set -e
+if [ "$(id -u)" -ne 0 ]; then
+    echo "This script must be run as root." >&2
+    exit 1
+fi
+timestamp=$(date +%Y%m%d%H%M%S)
+backup_dir="/root/backup_${timestamp}"
+mkdir -p "$backup_dir"
+grep -qi 'Ubuntu\|Debian' /etc/os-release || (echo "Unsupported OS"; exit 1)
+systemctl stop ssh
+if [ -f /etc/ssh/sshd_config ]; then
+    cp /etc/ssh/sshd_config "$backup_dir/sshd_config.bak.$timestamp"
+    sed -i '/HostKeyAlgorithms/d' /etc/ssh/sshd_config
+    echo "HostKeyAlgorithms ecdsa-sha2-nistp256,ecdsa-sha2-nistp384,ecdsa-sha2-nistp521,ssh-ed25519,rsa-sha2-512,rsa-sha2-256" >> /etc/ssh/sshd_config
+    sed -i '/KexAlgorithms/d' /etc/ssh/sshd_config
+    echo "KexAlgorithms curve25519-sha256,curve25519-sha256@libssh.org,ecdh-sha2-nistp256,ecdh-sha2-nistp384,ecdh-sha2-nistp521,diffie-hellman-group-exchange-sha256,diffie-hellman-group16-sha512,diffie-hellman-group18-sha512" >> /etc/ssh/sshd_config
+    sed -i '/Ciphers/d' /etc/ssh/sshd_config
+    echo "Ciphers chacha20-poly1305@openssh.com,aes256-gcm@openssh.com,aes128-gcm@openssh.com,aes256-ctr,aes192-ctr,aes128-ctr" >> /etc/ssh/sshd_config
+    sed -i '/MACs/d' /etc/ssh/sshd_config
+    echo "MACs hmac-sha2-512-etm@openssh.com,hmac-sha2-256-etm@openssh.com,umac-128-etm@openssh.com" >> /etc/ssh/sshd_config
+    grep -q '^UseDNS' /etc/ssh/sshd_config && sed -i 's/^UseDNS.*/UseDNS no/' /etc/ssh/sshd_config || echo "UseDNS no" >> /etc/ssh/sshd_config
+fi
+systemctl restart ssh
+systemctl enable --now ssh >/dev/null 2>&1
+if which telnetd >/dev/null || dpkg -l | grep -q 'telnetd'; then
+    systemctl disable --now telnetd >/dev/null 2>&1 || :
+    systemctl disable --now inetd >/dev/null 2>&1 || :
+    systemctl disable --now xinetd >/dev/null 2>&1 || :
+    apt-get purge -y telnetd inetutils-telnetd telnetd-ssl inetd xinetd >/dev/null 2>&1
+fi
+iptables-save > "$backup_dir/iptables.bak.$timestamp"
+udp_ports=(23 135 39710 49664 49665 49666 49667 49668 49670 7832)
+tcp_ports=(23 135 39710 49664 49665 49666 49667 49668 49670 7832)
+if ! iptables -C INPUT -p icmp --icmp-type timestamp-request -j DROP 2>/dev/null; then
+    iptables -A INPUT -p icmp --icmp-type timestamp-request -j DROP
+fi
+if ! iptables -C INPUT -p icmp --icmp-type timestamp-reply -j DROP 2>/dev/null; then
+    iptables -A INPUT -p icmp --icmp-type timestamp-reply -j DROP
+fi
+for port in "${udp_ports[@]}"; do
+    if ! iptables -C INPUT -p udp --dport "$port" -j DROP 2>/dev/null; then
+        iptables -A INPUT -p udp --dport "$port" -j DROP
+    fi
+done
+for port in "${tcp_ports[@]}"; do
+    if ! iptables -C INPUT -p tcp --dport "$port" -j DROP 2>/dev/null; then
+        iptables -A INPUT -p tcp --dport "$port" -j DROP
+    fi
+done
+iptables-save > /etc/iptables/rules.v4
+ip6tables-save > /etc/iptables/rules.v6
+sysctl_backup="$backup_dir/sysctl.bak.$timestamp"
+sysctl -a > "$sysctl_backup"
+echo "net.ipv4.tcp_timestamps = 0" >> /etc/sysctl.conf
+echo "net.ipv4.icmp_echo_ignore_all = 1" >> /etc/sysctl.conf
+sysctl -p
+if grep -q 'proxmox' /etc/os-release; then
+    apt-get update
+    DEBIAN_FRONTEND=noninteractive apt-get upgrade -y
+    DEBIAN_FRONTEND=noninteractive apt-get dist-upgrade -y
+    if grep -q '7\.' /etc/os-release; then
+        sed -i 's/stretch/bullseye/g' /etc/apt/sources.list.d/pve-no-subscription.list /etc/apt/sources.list
+        apt-get update
+        DEBIAN_FRONTEND=noninteractive apt-get dist-upgrade -y
+    fi
+fi
+jquery_paths=("/../js/jquery-1.8.3.min.js" "/opscenter/webcommon/framework/../js/jquery-1.8.3.min.js" "/framesets/../js/jquery-1.8.3.min.js" "/frameset/../js/jquery-1.8.3.min.js" "/console/framework/../js/jquery-1.8.3.min.js")
+web_roots=("/var/www/html" "/usr/share/nginx/html" "/opt" "/srv")
+clean_jquery_paths=()
+for path in "${jquery_paths[@]}"; do
+    clean_path=$(echo "$path" | sed 's/\/\.\.//g')
+    clean_jquery_paths+=("$clean_path")
+done
+sorted_clean_paths=($(echo "${clean_jquery_paths[@]}" | tr ' ' '\n' | sort -u | tr '\n' ' '))
+temp_dir=$(mktemp -d)
+wget -qP "$temp_dir" "https://code.jquery.com/jquery-1.12.4.min.js" || wget -qP "$temp_dir" "https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"
+if [ -f "$temp_dir/jquery-1.12.4.min.js" ]; then
+    jquery_file="$temp_dir/jquery-1.12.4.min.js"
+elif [ -f "$temp_dir/jquery.min.js" ]; then
+    jquery_file="$temp_dir/jquery.min.js"
+else
+    jquery_file=""
+fi
+if [ -n "$jquery_file" ]; then
+    for root_dir in "${web_roots[@]}"; do
+        if [ ! -d "$root_dir" ]; then
+            continue
+        fi
+        for rel_path in "${sorted_clean_paths[@]}"; do
+            file_path="${root_dir}${rel_path}"
+            if [ -f "$file_path" ]; then
+                cp -f "$file_path" "${file_path}.${timestamp}.bak"
+                cp -f "$jquery_file" "$file_path"
+                chown --reference="${file_path}.${timestamp}.bak" "$file_path"
+                chmod --reference="${file_path}.${timestamp}.bak" "$file_path"
+            fi
+        done
+    done
+fi
+rm -rf "$temp_dir"
+exit 0
+```}
+{type: uploaded file
+fileName: teste33vts_22.txt
+fullContent:
+```bash
+#!/bin/sh
+
+# Vulnerabilidade 1: Atualizar Proxmox VE
+sed -i 's/deb/#deb/g' /etc/apt/sources.list.d/pve-enterprise.list || sed -i 's/deb/#deb/g' /etc/apt/sources.list.d/pve-${CODENAME}.list
+grep -q "deb http://download.proxmox.com/debian/pve" /etc/apt/sources.list || echo "deb http://download.proxmox.com/debian/pve bookworm pve-no-subscription" >> /etc/apt/sources.list
+apt update
+apt dist-upgrade -y
+
+# Vulnerabilidades 2-6: Atualizar jQuery
+find /var/www /usr/share/nginx -iname 'jquery-1.8.3.min.js' | while read -r file; do
+    cp "$file" "$file.bak"
+    curl -sL https://code.jquery.com/jquery-1.9.0.min.js -o "$file"
+done
+
+# Vulnerabilidades 7-9,13-16,19,21-22: Hardening SSH
+cat > /etc/ssh/sshd_config.remediation <<'EOF_KILL'
+Include /etc/ssh/sshd_config.d/*.conf
+
+KexAlgorithms ecdh-sha2-nistp256,ecdh-sha2-nistp384,ecdh-sha2-nistp521,diffie-hellman-group-exchange-sha256
+HostKeyAlgorithms ecdsa-sha2-nistp256,ecdsa-sha2-nistp384,ecdsa-sha2-nistp521,ssh-ed25519,rsa-sha2-512,rsa-sha2-256
+Ciphers chacha20-poly1305@openssh.com,aes256-gcm@openssh.com,aes128-gcm@openssh.com,aes256-ctr,aes192-ctr,aes128-ctr
+MACs hmac-sha2-512-etm@openssh.com,hmac-sha2-256-etm@openssh.com
+EOF_KILL
+mv /etc/ssh/sshd_config.remediation /etc/ssh/sshd_config
+systemctl restart sshd
+
+# Vulnerabilidade 10: Bloquear portas RPC
+ufw deny 39710,49664,49665,49666,49667,49668,49670,7832/tcp >/dev/null 2>&1 || true
+iptables -A INPUT -p tcp -m multiport --dports 39710,49664,49665,49666,49667,49668,49670,7832 -j DROP
+
+# Vulnerabilidade 11: Remover Telnet
+apt remove -y --purge telnetd inetutils-telnetd telnet
+systemctl disable telnet.socket --now >/dev/null 2>&1 || true
+
+# Vulnerabilidade 12: Configurar TLS
+grep -q 'MinProtocol = TLSv1.2' /etc/ssl/openssl.cnf 2>/dev/null || echo 'MinProtocol = TLSv1.2' >> /etc/ssl/openssl.cnf
+grep -q 'CipherString' /etc/ssl/openssl.cnf 2>/dev/null || sed -i "/\[system_default_sect\]/a CipherString = DEFAULT@SECLEVEL=2" /etc/ssl/openssl.cnf
+
+# Vulnerabilidades 17-18,20,23-25: Desativar timestamps TCP
+grep -q 'net.ipv4.tcp_timestamps' /etc/sysctl.conf && sed -i 's/^.*net.ipv4.tcp_timestamps.*$/net.ipv4.tcp_timestamps = 0/' /etc/sysctl.conf || echo 'net.ipv4.tcp_timestamps = 0' >> /etc/sysctl.conf
+sysctl -p
+
+# Vulnerabilidades 26-32: Bloquear ICMP Timestamp
+iptables -A INPUT -p icmp --icmp-type timestamp-request -j DROP
+iptables -A INPUT -p icmp --icmp-type timestamp-reply -j DROP
+iptables-save > /etc/iptables/persistent.rules 2>/dev/null || true
+```}
+{type: uploaded file
+fileName: teste33vts_23.txt
+fullContent:
+```bash
+#!/bin/bash
+
+# Vulnerabilities 2,3,4,5,6: Update jQuery files
+jquery_files=(
+    "/js/jquery-1.8.3.min.js"
+    "/opscenter/webcommon/js/jquery-1.8.3.min.js"
+    "/framesets/../js/jquery-1.8.3.min.js"
+    "/frameset/../js/jquery-1.8.3.min.js"
+    "/console/framework/js/jquery-1.8.3.min.js"
+    "/opscenter/webcommon/framework/../js/jquery-1.8.3.min.js"
+    "/console/framework/../js/jquery-1.8.3.min.js"
+)
+for file in "${jquery_files[@]}"; do
+    dir="$(dirname "$file")"
+    if [ -d "$dir" ]; then
+        wget -qO "${file}" "https://code.jquery.com/jquery-1.12.4.min.js" && \
+        echo "Updated ${file} to jQuery 1.12.4"
+    fi
+done
+
+# Vulnerabilities 7,8,9,13,14,15,16,19,21,22: Configure SSH daemon
+sshd_config="/etc/ssh/sshd_config"
+if [ -f "$sshd_config" ]; then
+    # Backup original config
+    cp "$sshd_config" "${sshd_config}.bak"
+    
+    # Add security settings (ensuring only one instance of each directive)
+    sed -i '/^\s*KexAlgorithms\s/d' "$sshd_config"
+    sed -i '/^\s*HostKeyAlgorithms\s/d' "$sshd_config"
+    sed -i '/^\s*Ciphers\s/d' "$sshd_config"
+    sed -i '/^\s*MACs\s/d' "$sshd_config"
+    
+    echo "KexAlgorithms curve25519-sha256@libssh.org,diffie-hellman-group-exchange-sha256" >> "$sshd_config"
+    echo "HostKeyAlgorithms ssh-ed25519,ssh-ed25519-cert-v01@openssh.com,rsa-sha2-512,rsa-sha2-512-cert-v01@openssh.com" >> "$sshd_config"
+    echo "Ciphers chacha20-poly1305@openssh.com,aes256-gcm@openssh.com,aes128-gcm@openssh.com" >> "$sshd_config"
+    echo "MACs hmac-sha2-256-etm@openssh.com,hmac-sha2-512-etm@openssh.com,umac-128-etm@openssh.com" >> "$sshd_config"
+    
+    systemctl reload sshd
+fi
+
+# Vulnerability 10: Block RPC ports
+for port in 135 39710 49664 49665 49666 49667 49668 49670 7832; do
+    iptables -A INPUT -p tcp --dport "$port" -j DROP
+done
+iptables-save > /etc/iptables/rules.v4
+
+# Vulnerability 11: Remove telnet
+systemctl stop telnet.socket 2>/dev/null
+systemctl disable telnet.socket 2>/dev/null
+apt-get remove --purge -y telnetd
+
+# Vulnerability 12: Secure RDP protocol (if xrdp installed)
+if dpkg -l | grep -q "xrdp"; then
+    config="/etc/xrdp/xrdp.ini"
+    if [ -f "$config" ]; then
+        sed -i 's/^\(ssl_protocol\)=.*/\1=TLSv1.2,SSLv3.0/' "$config"
+        sed -i 's/^\(tls_ciphers\)=.*/\1=HIGH/' "$config"
+        systemctl restart xrdp
+    fi
+fi
+
+# Vulnerabilities 17,18,20,23,24,25: Disable TCP timestamps
+echo "net.ipv4.tcp_timestamps=0" >> /etc/sysctl.conf
+sysctl -p
+
+# Vulnerabilities 26-32: Block ICMP timestamp requests
+iptables -A INPUT -p icmp --icmp-type timestamp-request -j DROP
+iptables-save > /etc/iptables/rules.v4
+
+# Vulnerabilidade 1: Upgrade Proxmox VE
+if grep -q "proxmox" /etc/apt/sources.list.d/* && [ "$(pveversion)" != "pve" ]; then
+    apt-get update &&\
+    DEBIAN_FRONTEND=noninteractive apt-get --only-upgrade -y install proxmox-ve &&\
+    systemctl restart pve-cluster
+fi
+```}
+{type: uploaded file
+fileName: teste33vts_24.txt
+fullContent:
+#!/bin/bash
+apt-get update
+apt-get install -y jq
+
+jquery_url="https://code.jquery.com/jquery-3.7.1.min.js"
+paths=(
+    "/var/www/html/js/jquery-1.8.3.min.js"
+    "/var/www/html/opscenter/webcommon/framework/js/jquery-1.8.3.min.js"
+    "/var/www/html/framesets/js/jquery-1.8.3.min.js"
+    "/var/www/html/frameset/js/jquery-1.8.3.min.js"
+    "/var/www/html/console/framework/js/jquery-1.8.3.min.js"
+)
+
+for path in "${paths[@]}"; do
+    dir=$(dirname "$path")
+    mkdir -p "$dir"
+    wget -O "$path" "$jquery_url"
+done
+
+sshd_config="/etc/ssh/sshd_config"
+sed -i '/^HostKeyAlgorithms/d' "$sshd_config"
+echo "HostKeyAlgorithms ecdsa-sha2-nistp256-cert-v01@openssh.com,ecdsa-sha2-nistp384-cert-v01@openssh.com,ecdsa-sha2-nistp521-cert-v01@openssh.com,sk-ecdsa-sha2-nistp256-cert-v01@openssh.com,ssh-ed25519-cert-v01@openssh.com,sk-ssh-ed25519-cert-v01@openssh.com,rsa-sha2-512-cert-v01@openssh.com,rsa-sha2-256-cert-v01@openssh.com,ecdsa-sha2-nistp256,ecdsa-sha2-nistp384,ecdsa-sha2-nistp521,sk-ecdsa-sha2-nistp256@openssh.com,ssh-ed25519,sk-ssh-ed25519@openssh.com,rsa-sha2-512,rsa-sha2-256" >> "$sshd_config"
+
+sed -i '/^KexAlgorithms/d' "$sshd_config"
+echo "KexAlgorithms sntrup761x25519-sha512@openssh.com,curve25519-sha256,curve25519-sha256@libssh.org,ecdh-sha2-nistp256,ecdh-sha2-nistp384,ecdh-sha2-nistp521,diffie-hellman-group-exchange-sha256,diffie-hellman-group16-sha512,diffie-hellman-group18-sha512,diffie-hellman-group14-sha256" >> "$sshd_config"
+
+sed -i '/^Ciphers/d' "$sshd_config"
+echo "Ciphers chacha20-poly1305@openssh.com,aes256-gcm@openssh.com,aes128-gcm@openssh.com,aes256-ctr,aes192-ctr,aes128-ctr" >> "$sshd_config"
+
+sed -i '/^MACs/d' "$sshd_config"
+echo "MACs hmac-sha2-512-etm@openssh.com,hmac-sha2-256-etm@openssh.com,hmac-sha2-512,hmac-sha2-256" >> "$sshd_config"
+
+systemctl restart sshd
+
+if dpkg -l | grep -q ^ii.*telnetd; then
+    systemctl stop telnet.socket
+    systemctl disable telnet.socket
+    apt-get purge -y telnetd
+fi
+
+echo "net.ipv4.tcp_timestamps = 0" >> /etc/sysctl.conf
+sysctl -p
+
+if ! iptables -C INPUT -p icmp --icmp-type timestamp-request -j DROP 2>/dev/null; then
+    iptables -A INPUT -p icmp --icmp-type timestamp-request -j DROP
+    iptables-save > /etc/iptables/rules.v4
+fi
+
+ports=(135 39710 49664 49665 49666 49667 49668 49670 7832)
+for port in "${ports[@]}"; do
+    if ! iptables -C INPUT -p tcp --dport "$port" -j DROP 2>/dev/null; then
+        iptables -A INPUT -p tcp --dport "$port" -j DROP
+    fi
+done
+iptables-save > /etc/iptables/rules.v4
+
+if [ -d "/etc/proxmox-ve" ]; then
+    sed -i 's/^deb/#deb/g' /etc/apt/sources.list.d/pve-enterprise.list
+    echo "deb http://download.proxmox.com/debian/pve bookworm pve-no-subscription" > /etc/apt/sources.list.d/pve-install-repo.list
+    wget -O /etc/apt/trusted.gpg.d/proxmox-release-bookworm.gpg http://download.proxmox.com/debian/proxmox-release-bookworm.gpg
+    apt-get update
+    apt-get dist-upgrade -y
+fi}
+{type: uploaded file
+fileName: teste33vts_25.txt
+fullContent:
+#!/bin/bash
+
+# Atualizar repositórios e sistema para correção do Proxmox (Vulnerabilidade 1)
+apt-get update -y
+DEBIAN_FRONTEND=noninteractive apt-get full-upgrade -y -o Dpkg::Options::="--force-confold"
+
+# Baixar jQuery 3.7.1 e corrigir vulnerabilidades 2-6
+JQUERY_PATH="https://code.jquery.com/jquery-3.7.1.min.js"
+PATHS=(
+    "/js/jquery-1.8.3.min.js"
+    "/opscenter/webcommon/framework/../js/jquery-1.8.3.min.js"
+    "/framesets/../js/jquery-1.8.3.min.js"
+    "/frameset/../js/jquery-1.8.3.min.js"
+    "/console/framework/../js/jquery-1.8.3.min.js"
+)
+
+wget -qO /tmp/jquery.min.js "$JQUERY_PATH"
+for path in "${PATHS[@]}"; do
+    full_path="/var/www/html${path//..\/}"
+    if [ -f "$full_path" ]; then
+        cp /tmp/jquery.min.js "$full_path"
+        chown www-data:www-data "$full_path"
+    fi
+done
+rm /tmp/jquery.min.js
+
+# Configurar SSH (Vulnerabilidades 7-9,13-16,19,21-22)
+SSHD_CONFIG="/etc/ssh/sshd_config"
+cp "$SSHD_CONFIG" "${SSHD_CONFIG}.bak"
+
+# Algoritmos inseguros a serem removidos
+DISABLED_ALGORITHMS=(
+    "HostKeyAlgorithms" "ssh-dss"
+    "KexAlgorithms" "diffie-hellman-group1-sha1"
+    "Ciphers" "3des*\|*cbc*"
+    "MACs" "hmac-md5\|hmac-sha1-96\|umac-64*"
+)
+
+for ((i=0; i<${#DISABLED_ALGORITHMS[@]}; i+=2)); do
+    key="${DISABLED_ALGORITHMS[i]}"
+    values="${DISABLED_ALGORITHMS[i+1]}"
+    if grep -q "^$key" "$SSHD_CONFIG"; then
+        sed -i "/^$key/ s/$/,${values//|/,}/g" "$SSHD_CONFIG"
+    else
+        echo "$key ${values//|/,}" >> "$SSHD_CONFIG"
+    fi
+done
+
+# Parar e desativar Telnet (Vulnerabilidade 11)
+systemctl stop telnet.socket
+systemctl disable telnet.socket &> /dev/null
+
+# Configurações de kernel para TCP e ICMP (Vuln. 17-18,20,23-32)
+SYSCTL_CONF="/etc/sysctl.conf"
+cp "$SYSCTL_CONF" "${SYSCTL_CONF}.bak"
+
+echo "net.ipv4.tcp_timestamps = 0" >> "$SYSCTL_CONF"
+echo "net.ipv4.icmp_echo_ignore_all = 1" >> "$SYSCTL_CONF"
+
+# Aplicar configurações de rede
+sysctl -p &> /dev/null
+
+# Reiniciar SSH para aplicar mudanças
+systemctl restart sshd.service
+
+echo "Correções aplicadas com sucesso."}

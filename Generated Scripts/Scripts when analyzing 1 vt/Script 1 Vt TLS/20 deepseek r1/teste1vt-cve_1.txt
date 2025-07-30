@@ -1,0 +1,52 @@
+#!/bin/bash
+if [ "$(id -u)" -ne 0 ]; then
+    echo "Error: Script must be run as root" >&2
+    exit 1
+fi
+
+config_file=""
+locations=(
+    "/etc/postgresql/*/main/postgresql.conf"
+    "/var/lib/pgsql/data/postgresql.conf"
+    "/var/lib/pgsql/*/data/postgresql.conf"
+    "/usr/local/pgsql/data/postgresql.conf"
+)
+
+pg_pid=$(pgrep -n postmaster || pgrep -n postgres)
+if [ -n "$pg_pid" ] && [ -d "/proc/$pg_pid" ]; then
+    pg_data=$(cat "/proc/$pg_pid/cmdline" | tr -d '\0' | sed -n 's/.*-D\+\([^ ]*\).*/\1/p')
+    if [ -n "$pg_data" ] && [ -f "$pg_data/postgresql.conf" ]; then
+        locations+=("$pg_data/postgresql.conf")
+    fi
+fi
+
+for loc in "${locations[@]}"; do
+    for expanded in $loc; do
+        if [ -f "$expanded" ]; then
+            config_file="$expanded"
+            break 2
+        fi
+    done
+done
+
+if [ -z "$config_file" ]; then
+    echo "Error: postgresql.conf not found" >&2
+    exit 1
+fi
+
+timestamp=$(date +%Y%m%d_%H%M%S)
+backup_file="${config_file}.backup_${timestamp}"
+cp -p "$config_file" "$backup_file" || { echo "Backup failed" >&2; exit 1; }
+
+sed -i -e '/^[[:space:]]*ssl_min_protocol_version[[:space:]]*=/d' \
+       -e '/^[[:space:]]*ssl_protocols[[:space:]]*=/d' "$config_file" || { echo "Config update failed" >&2; exit 1; }
+echo "ssl_min_protocol_version = 'TLSv1.2'" >> "$config_file" || { echo "Config update failed" >&2; exit 1; }
+
+if command -v systemctl >/dev/null 2>&1; then
+    systemctl restart postgresql >/dev/null 2>&1 || service postgresql restart >/dev/null 2>&1 || \
+    { echo "Service restart failed" >&2; exit 1; }
+elif command -v service >/dev/null 2>&1; then
+    service postgresql restart >/dev/null 2>&1 || { echo "Service restart failed" >&2; exit 1; }
+fi
+
+exit 0

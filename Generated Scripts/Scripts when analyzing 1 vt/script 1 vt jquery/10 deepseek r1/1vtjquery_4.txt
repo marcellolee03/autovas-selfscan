@@ -1,0 +1,27 @@
+#!/bin/bash
+TARGET_DIR="/console/js"
+VULNERABLE_FILE="${TARGET_DIR}/jquery-1.8.3.min.js"
+BACKUP_FILE="${VULNERABLE_FILE}.bak"
+
+if [ ! -f "$VULNERABLE_FILE" ]; then
+  echo "Error: Vulnerable file not found" >&2
+  exit 1
+fi
+
+cp "$VULNERABLE_FILE" "$BACKUP_FILE" || {
+  echo "Error: Backup failed" >&2
+  exit 1
+}
+
+FIXED_URL="https://code.jquery.com/jquery-3.7.1.min.js"
+if ! wget -q -O "$VULNERABLE_FILE.tmp" "$FIXED_URL"; then
+  mv "$BACKUP_FILE" "$VULNERABLE_FILE"
+  echo "Error: Download failed" >&2
+  exit 1
+fi
+
+mv "$VULNERABLE_FILE.tmp" "$VULNERABLE_FILE" || {
+  mv "$BACKUP_FILE" "$VULNERABLE_FILE"
+  echo "Error: File replacement failed" >&2
+  exit 1
+}

@@ -1,0 +1,50 @@
+#!/bin/bash
+
+# Verifica se o Apache está instalado
+if ! command -v apache2 &> /dev/null; then
+    echo "Apache HTTP Server não está instalado."
+    exit 1
+fi
+
+# Obtém a versão instalada do Apache
+INSTALLED_VERSION=$(apache2 -v | grep "Server version" | awk '{print $3}' | cut -d'/' -f2)
+
+# Versão mínima necessária para correção
+REQUIRED_VERSION="2.2.22"
+
+# Função para comparar versões
+function version_compare() {
+    if [[ $1 == $2 ]]; then
+        return 0
+    fi
+    local IFS=.
+    local i ver1=($1) ver2=($2)
+    for ((i=${#ver1[@]}; i<${#ver2[@]}; i++)); do
+        ver1[i]=0
+    done
+    for ((i=0; i<${#ver1[@]}; i++)); do
+        if [[ -z ${ver2[i]} ]]; then
+            ver2[i]=0
+        fi
+        if ((10#${ver1[i]} > 10#${ver2[i]})); then
+            return 0
+        fi
+        if ((10#${ver1[i]} < 10#${ver2[i]})); then
+            return 1
+        fi
+    done
+    return 0
+}
+
+# Verifica se a versão instalada é menor que a necessária
+if version_compare $INSTALLED_VERSION $REQUIRED_VERSION; then
+    echo "Atualizando Apache HTTP Server para a versão $REQUIRED_VERSION ou superior..."
+    apt-get update
+    apt-get install --only-upgrade apache2 -y
+    systemctl restart apache2
+    echo "Apache HTTP Server atualizado e reiniciado."
+else
+    echo "Apache HTTP Server já está na versão $REQUIRED_VERSION ou superior."
+fi
+
+exit 0

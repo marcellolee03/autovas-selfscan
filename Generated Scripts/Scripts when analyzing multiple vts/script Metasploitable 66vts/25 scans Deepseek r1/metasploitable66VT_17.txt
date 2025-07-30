@@ -1,0 +1,82 @@
+#!/bin/bash
+
+# Atualização de pacotes e remoção de serviços vulneráveis
+apt-get update
+apt-get upgrade -y
+apt-get install -y openssh-server apache2
+
+# Desabilitar serviços vulneráveis
+systemctl stop rlogin.socket rsh.socket rexec.socket nginx
+systemctl disable rlogin.socket rsh.socket rexec.socket nginx
+systemctl mask rlogin.socket rsh.socket rexec.socket
+systemctl stop telnet.socket
+systemctl disable telnet.socket
+systemctl mask telnet.socket
+systemctl stop distcc
+systemctl disable distcc
+systemctl stop ingreslock
+systemctl disable ingreslock
+systemctl stop vncserver
+systemctl disable vncserver
+
+# Remover pacotes inseguros
+apt-get purge -y vsftpd distcc rsh-client rsh-server rexecd rexec-server telnetd nginx
+apt-get autoremove -y
+
+# Configurar MySQL/MariaDB
+mysql -e "ALTER USER 'root'@'localhost' IDENTIFIED BY 'NovaSenhaForte123!'; FLUSH PRIVILEGES;"
+
+# Configurar PostgreSQL
+sudo -u postgres psql -c "ALTER USER postgres PASSWORD 'NovaSenhaForte456!';"
+
+# Configurações de rede (desabilitar IPv6)
+sysctl -w net.ipv6.conf.all.disable_ipv6=1
+sysctl -w net.ipv6.conf.default.disable_ipv6=1
+
+# Configurações de firewall (iptables básico)
+iptables -F
+iptables -A INPUT -p tcp --dport 22 -j ACCEPT
+iptables -A INPUT -p tcp --dport 80 -j ACCEPT
+iptables -A INPUT -p tcp --dport 443 -j ACCEPT
+iptables -A INPUT -m conntrack --ctstate RELATED,ESTABLISHED -j ACCEPT
+iptables -A INPUT -i lo -j ACCEPT
+iptables -P INPUT DROP
+iptables -P FORWARD DROP
+iptables -P OUTPUT ACCEPT
+iptables-save > /etc/iptables/rules.v4
+
+# Atualizar certificados SSL (exemplo básico)
+mkdir -p /etc/apache2/ssl
+openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout /etc/apache2/ssl/apache.key -out /etc/apache2/ssl/apache.crt -subj "/CN=localhost"
+
+# Configurar PHP
+phpenmod opcache
+echo "expose_php = Off" >> /etc/php/7.4/apache2/php.ini
+systemctl restart apache2
+
+# Remover arquivos sensíveis
+find /var/www/html -name 'phpinfo.php' -delete
+find /var/www/html -name 'test.php' -delete
+
+# Configurar Apache
+a2enmod ssl
+a2ensite default-ssl
+a2enmod headers
+echo "ServerTokens Prod" >> /etc/apache2/apache2.conf
+echo "ServerSignature Off" >> /etc/apache2/apache2.conf
+echo "TraceEnable off" >> /etc/apache2/conf-enabled/security.conf
+a2dismod status
+systemctl restart apache2
+
+# Configurar SSH
+sed -i 's/^#?PermitRootLogin.*/PermitRootLogin prohibit-password/' /etc/ssh/sshd_config
+sed -i 's/^#?PasswordAuthentication.*/PasswordAuthentication no/' /etc/ssh/sshd_config
+sed -i 's/^#?PermitEmptyPasswords.*/PermitEmptyPasswords no/' /etc/ssh/sshd_config
+systemctl restart ssh
+
+# Pós-execução (mensagem final)
+echo "Recomendação CRÍTICA: Atualize todo o sistema operacional para uma versão suportada."
+echo "Execute 'do-release-upgrade' para migrar para uma versão mais recente do Ubuntu."
+echo "Algumas configurações requerem adaptação manual:"
+echo "1. Certificados SSL com chaves >=2048 bits"
+echo "2. Verificações de compatibilidade após atualizações"

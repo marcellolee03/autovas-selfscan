@@ -1,0 +1,60 @@
+```bash
+#!/bin/bash
+
+# Verifica o sistema operacional para determinar o gerenciador de pacotes correto
+if command -v apt-get &> /dev/null; then
+  package_manager="apt-get"
+elif command -v yum &> /dev/null; then
+  package_manager="yum"
+elif command -v dnf &> /dev/null; then
+  package_manager="dnf"
+elif command -v pacman &> /dev/null; then
+  package_manager="pacman"
+else
+  echo "Gerenciador de pacotes não suportado. Saindo."
+  exit 1
+fi
+
+# Interrompe o serviço Python na porta 5000 (se estiver em execução)
+fuser -k 5000/tcp
+
+# Remove a instalação existente do Python 3.10.12
+if [[ "$package_manager" == "apt-get" ]]; then
+  apt-get remove -y python3.10
+elif [[ "$package_manager" == "yum" || "$package_manager" == "dnf" ]]; then
+  yum remove -y python3.10
+elif [[ "$package_manager" == "pacman" ]]; then
+  pacman -Rns python3.10
+fi
+
+# Atualiza o cache do gerenciador de pacotes
+if [[ "$package_manager" == "apt-get" ]]; then
+  apt-get update
+elif [[ "$package_manager" == "yum" || "$package_manager" == "dnf" ]]; then
+  # yum e dnf não precisam de um comando de atualização explícito antes da instalação
+  :
+elif [[ "$package_manager" == "pacman" ]]; then
+  pacman -Syy
+fi
+
+# Instala a versão corrigida do Python 3.10.15
+if [[ "$package_manager" == "apt-get" ]]; then
+  apt-get install -y python3.10
+elif [[ "$package_manager" == "yum" || "$package_manager" == "dnf" ]]; then
+  yum install -y python3.10
+elif [[ "$package_manager" == "pacman" ]]; then
+  pacman -S --noconfirm python3.10
+fi
+
+# Verifica se a instalação foi bem-sucedida e se a versão correta está instalada
+python3 --version | grep "Python 3.10.15"
+
+if [ $? -eq 0 ]; then
+  echo "Python atualizado para a versão 3.10.15 com sucesso."
+else
+  echo "Falha ao atualizar o Python para a versão 3.10.15. Verifique os logs para obter mais detalhes."
+  exit 1
+fi
+
+exit 0
+```

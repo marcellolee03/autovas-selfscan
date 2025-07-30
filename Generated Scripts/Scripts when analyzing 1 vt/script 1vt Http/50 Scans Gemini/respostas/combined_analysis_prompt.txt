@@ -1,0 +1,3982 @@
+>analise esse prompt contendo as vulnerabilidades encontradas em um csv do openvas e analise se os scripts que irei enviar em seguida sao capazes de corrigir esses problemas ou nao, me informando uma porcentagem de correcao das vulnerabilidades
+>Vulnerabilidades:
+   # INSTRUÇÕES PARA O MODELO DE IA
+
+    ## PERSONA
+    Você é um especialista em cibersegurança e automação de sistemas, focado em criar scripts de correção (patching). Sua única função é gerar um script que resolva a vulnerabilidade descrita abaixo.
+
+    ## TAREFA
+    Analise o contexto da vulnerabilidade a seguir e gere um script de shell (compatível com o sistema operacional do localhost) que, ao ser executado, corrija permanentemente a vulnerabilidade descrita.
+
+    ## CONTEXTO DA VULNERABILIDADE
+
+# Vulnerabilidade 1
+CVEs: nan
+NVT Name: Cleartext Transmission of Sensitive Information via HTTP
+Port: 80.0
+Port Protocol: tcp
+Summary: The host / application transmits sensitive information (username, passwords) in
+  cleartext via HTTP.
+Specific Result: Vulnerability was detected according to the Vulnerability Detection Method.
+Vulnerability Detection Method: Evaluate previous collected information and check if the host / application is not
+  enforcing the transmission of sensitive data via an encrypted SSL/TLS connection.
+
+  The script is currently checking the following:
+
+  - HTTP Basic Authentication (Basic Auth)
+
+  - HTTP Forms (e.g. Login) with input field of type 'password'
+Details:
+Cleartext Transmission of Sensitive Information via HTTP
+(OID: 1.3.6.1.4.1.25623.1.0.108440)
+Version used: 2023-09-07T05:05:21Z
+
+Affected Software/OS: Hosts / applications which doesn't enforce the transmission of sensitive data via an
+  encrypted SSL/TLS connection.
+Solution: Enforce the transmission of sensitive data via an encrypted SSL/TLS connection.
+  Additionally make sure the host / application is redirecting all users to the secured SSL/TLS connection before
+  allowing to input sensitive data into the mentioned functions.
+
+    ## REGRAS E RESTRIÇÕES DE SAÍDA
+    1.  **APENAS SCRIPT:** A sua resposta deve conter ÚNICA E EXCLUSIVAMENTE o código do script.
+    2.  **SEM EXPLICAÇÕES:** Não adicione nenhum comentário, explicação, introdução, ou despedida.
+    3.  **SEM BLOCOS DE CÓDIGO MARKDOWN:** Não envolva o script em blocos de código como ` ```bash ` ou ` ```sh `. A resposta deve ser o texto puro do script.
+    4.  **AUTOSSUFICIENTE:** O script deve ser completo, autônomo e não deve exigir interação do usuário para ser executado.
+    5.  **COMPATIBILIDADE:** O script deve ser compatível com o sistema operacional especificado em 'localhost OS'. Se o sistema operacional não for especificado, assuma um sistema baseado em Linux (como Ubuntu/Debian).
+
+    # INÍCIO DO SCRIPT DE CORREÇÃO
+
+
+
+​
+
+
+>Scripts de correção:
+{type: uploaded file
+fileName: aeta_1.txt
+fullContent:
+```bash
+#!/bin/bash
+
+# Descrição: Este script configura o redirecionamento de HTTP para HTTPS no Apache para mitigar a vulnerabilidade de transmissão de informações sensíveis em texto não criptografado.
+
+# Variáveis
+APACHE_CONFIG_FILE="/etc/apache2/sites-available/000-default.conf"
+APACHE_DEFAULT_SSL_FILE="/etc/apache2/sites-available/default-ssl.conf"
+APACHE_SSL_ENABLED="/etc/apache2/mods-enabled/ssl.load"
+APACHE_REWRITE_ENABLED="/etc/apache2/mods-enabled/rewrite.load"
+
+# Funções
+
+enable_ssl() {
+  if [ ! -f "$APACHE_SSL_ENABLED" ]; then
+    sudo a2enmod ssl
+  fi
+}
+
+enable_rewrite() {
+  if [ ! -f "$APACHE_REWRITE_ENABLED" ]; then
+    sudo a2enmod rewrite
+  fi
+}
+
+configure_http_redirect() {
+
+  # Check if the redirect already exists.  Avoids duplicates.
+  if grep -q "RewriteEngine On" "$APACHE_CONFIG_FILE"; then
+    echo "Redirecionamento HTTP para HTTPS já configurado."
+    return
+  fi
+
+  # Backup the original configuration file
+  sudo cp "$APACHE_CONFIG_FILE" "$APACHE_CONFIG_FILE.bak"
+
+  # Add the rewrite rules to redirect HTTP to HTTPS
+  sudo sed -i "s/<VirtualHost \*:80>/<VirtualHost *:80>\n\tRewriteEngine On\n\tRewriteCond %{HTTPS} !=on\n\tRewriteRule ^ https:\/\/%{HTTP_HOST}%{REQUEST_URI} [L,R=301]/g" "$APACHE_CONFIG_FILE"
+
+  echo "Redirecionamento HTTP para HTTPS configurado em $APACHE_CONFIG_FILE"
+}
+
+
+# Main script
+enable_ssl
+enable_rewrite
+configure_http_redirect
+
+# Restart Apache to apply changes
+sudo systemctl restart apache2
+
+echo "Apache reiniciado para aplicar as configurações."
+echo "Verifique a configuração acessando seu site via HTTP. Ele deve ser automaticamente redirecionado para HTTPS."
+```}
+{type: uploaded file
+fileName: aeta_2.txt
+fullContent:
+```bash
+#!/bin/bash
+
+# Este script habilita o redirecionamento HTTP para HTTPS e desabilita o HTTP para evitar a transmissão de informações em texto puro.
+# Assume-se um servidor Apache como o servidor web principal.
+# Ajuste os caminhos e nomes dos arquivos de configuração conforme necessário para o seu ambiente.
+
+# 1. Detectar o sistema operacional.
+OS=$(uname -s)
+
+# 2. Detectar e configurar o servidor web.
+if command -v apache2 &> /dev/null; then
+  WEB_SERVER="apache2"
+  CONFIG_DIR="/etc/apache2/sites-available"
+elif command -v nginx &> /dev/null; then
+  WEB_SERVER="nginx"
+  CONFIG_DIR="/etc/nginx/sites-available"
+else
+  echo "Servidor web não detectado. Por favor, configure manualmente o redirecionamento HTTP para HTTPS."
+  exit 1
+fi
+
+# 3. Configuração para Apache.
+if [ "$WEB_SERVER" = "apache2" ]; then
+  # 3.1. Habilitar mod_rewrite e mod_ssl se não estiverem habilitados.
+  if ! apache2ctl -M | grep -q "rewrite_module"; then
+    sudo a2enmod rewrite
+  fi
+  if ! apache2ctl -M | grep -q "ssl_module"; then
+    sudo a2enmod ssl
+  fi
+
+  # 3.2. Criar um arquivo de configuração virtualhost para redirecionar HTTP para HTTPS.
+  HTTP_CONF="$CONFIG_DIR/000-default.conf" # Adapte para o seu arquivo de configuração HTTP padrão.
+  HTTPS_CONF="$CONFIG_DIR/default-ssl.conf"   #Adapte para o seu arquivo de configuração HTTPS padrão.
+  TEMP_HTTP_CONF="/tmp/http_redirect.conf"
+
+  #3.3  Verifica se o arquivo existe e se pode ser lido.
+  if [ ! -r "$HTTP_CONF" ]; then
+        echo "Arquivo de configuração HTTP não encontrado ou sem permissão de leitura: $HTTP_CONF"
+        exit 1
+  fi
+
+  #3.4 Cria um arquivo temporario com a configuração de redirecionamento
+  echo "<VirtualHost *:80>
+        ServerName \$(hostname)
+        Redirect permanent / https://\${SERVER_NAME}\${REQUEST_URI}
+  </VirtualHost>" | sudo tee "$TEMP_HTTP_CONF" > /dev/null
+  
+  #3.5 Desabilita o site default e habilita o arquivo de redirecionamento
+  sudo a2dissite 000-default.conf
+  sudo mv "$TEMP_HTTP_CONF" "$HTTP_CONF"
+  sudo a2ensite 000-default.conf
+  
+  # 3.6. Forçar HTTPS (opcional - adicione ao VirtualHost HTTPS).
+  # Adicione o seguinte bloco ao arquivo VirtualHost HTTPS (ex: /etc/apache2/sites-available/default-ssl.conf)
+  # <IfModule mod_headers.c>
+  #   Header always set Strict-Transport-Security "max-age=31536000"
+  # </IfModule>
+  # Edite o arquivo default-ssl.conf para adicionar o HSTS.
+  if [ -r "$HTTPS_CONF" ]; then
+    sudo sed -i '
+    /<\/VirtualHost>/i\
+        <IfModule mod_headers.c>\n\t\tHeader always set Strict-Transport-Security "max-age=31536000"\n\t</IfModule>
+    ' "$HTTPS_CONF"
+  else
+    echo "Arquivo de configuração HTTPS não encontrado: $HTTPS_CONF. HSTS não configurado."
+  fi
+
+  # 3.7. Reiniciar o Apache.
+  sudo systemctl restart apache2
+  echo "Apache configurado para redirecionar HTTP para HTTPS."
+
+# 4. Configuração para Nginx.
+elif [ "$WEB_SERVER" = "nginx" ]; then
+  # 4.1. Criar um arquivo de configuração para redirecionar HTTP para HTTPS.
+  HTTP_CONF="$CONFIG_DIR/default"  # Adapte para o seu arquivo de configuração HTTP padrão.
+  TEMP_HTTP_CONF="/tmp/http_redirect.conf"
+
+  #4.2 Verifica se o arquivo existe e se pode ser lido.
+  if [ ! -r "$HTTP_CONF" ]; then
+        echo "Arquivo de configuração HTTP não encontrado ou sem permissão de leitura: $HTTP_CONF"
+        exit 1
+  fi
+
+  #4.3 Cria o arquivo temporario com a configuração de redirecionamento
+  echo "server {
+      listen 80 default_server;
+      listen [::]:80 default_server;
+      server_name \$(hostname);
+      return 301 https://\$host\$request_uri;
+  }" | sudo tee "$TEMP_HTTP_CONF" > /dev/null
+
+  #4.4 Desabilita o site default e habilita o arquivo de redirecionamento.
+  sudo rm /etc/nginx/sites-enabled/default
+  sudo mv "$TEMP_HTTP_CONF" "$HTTP_CONF"
+
+  # 4.5. Reiniciar o Nginx.
+  sudo systemctl restart nginx
+  echo "Nginx configurado para redirecionar HTTP para HTTPS."
+fi
+
+echo "Redirecionamento HTTP para HTTPS configurado.  Verifique o funcionamento acessando o site via HTTP."
+```}
+{type: uploaded file
+fileName: aeta_3.txt
+fullContent:
+```bash
+#!/bin/bash
+
+# Script para mitigar a vulnerabilidade de transmissão de informações sensíveis em texto claro via HTTP.
+# Este script configura um redirecionamento automático de HTTP para HTTPS usando Apache.
+
+# 1. Verifica se o Apache está instalado.
+if ! command -v apache2 &> /dev/null
+then
+    echo "Apache não encontrado. Instalando..."
+    apt-get update && apt-get install -y apache2
+fi
+
+# 2. Habilita o módulo rewrite do Apache.
+a2enmod rewrite
+
+# 3. Cria um arquivo de configuração virtual host para redirecionar HTTP para HTTPS.
+cat > /etc/apache2/sites-available/000-default.conf <<EOL
+<VirtualHost *:80>
+    ServerName \${SERVER_NAME}
+
+    Redirect permanent / https://\${SERVER_NAME}\${REQUEST_URI}
+
+    ErrorLog \${APACHE_LOG_DIR}/error.log
+    CustomLog \${APACHE_LOG_DIR}/access.log combined
+</VirtualHost>
+EOL
+
+
+# 4. Reinicia o Apache para aplicar as alterações.
+systemctl restart apache2
+
+# 5. Imprime uma mensagem informativa.
+echo "Redirecionamento HTTP para HTTPS configurado. Certifique-se de configurar o HTTPS corretamente com um certificado SSL/TLS."
+echo "Você pode usar certbot (Let's Encrypt) para obter um certificado gratuito: https://certbot.eff.org/"
+
+exit 0
+```}
+{type: uploaded file
+fileName: aeta_4.txt
+fullContent:
+```bash
+#!/bin/bash
+
+# Este script corrige a vulnerabilidade de transmissão de informações sensíveis em texto claro via HTTP,
+# redirecionando todas as solicitações HTTP para HTTPS.
+# Assume-se que um servidor web (Apache ou Nginx) está instalado e configurado.
+# Este script precisa ser executado com privilégios de root (sudo).
+
+# Detecta o sistema operacional
+if command -v apache2ctl &> /dev/null; then
+  WEB_SERVER="apache"
+elif command -v nginx &> /dev/null; then
+  WEB_SERVER="nginx"
+else
+  echo "Servidor web não detectado. Suportado: Apache e Nginx."
+  exit 1
+fi
+
+# Configuração para Apache
+if [ "$WEB_SERVER" = "apache" ]; then
+  # 1. Habilita o módulo rewrite do Apache
+  sudo a2enmod rewrite
+
+  # 2. Cria um arquivo de configuração virtual host para redirecionamento HTTP para HTTPS
+  VHOST_FILE="/etc/apache2/sites-available/http-to-https.conf"
+  echo "<VirtualHost *:80>
+    ServerName \$(hostname)
+    Redirect permanent / https://\${SERVER_NAME}\${REQUEST_URI}
+  </VirtualHost>" | sudo tee "$VHOST_FILE"
+
+  # 3. Habilita o virtual host
+  sudo a2ensite http-to-https.conf
+
+  # 4. Reinicia o Apache
+  sudo systemctl restart apache2
+  echo "Apache configurado para redirecionar HTTP para HTTPS."
+fi
+
+# Configuração para Nginx
+if [ "$WEB_SERVER" = "nginx" ]; then
+  # 1. Edita o arquivo de configuração padrão do Nginx para redirecionar HTTP para HTTPS
+  NGINX_CONF="/etc/nginx/conf.d/default.conf" # Ajuste o caminho se necessário
+  if [ ! -f "$NGINX_CONF" ]; then
+      NGINX_CONF="/etc/nginx/sites-available/default" # Tenta outro caminho comum
+      if [ ! -f "$NGINX_CONF" ]; then
+          echo "Arquivo de configuração do Nginx não encontrado.  Verifique o caminho e ajuste o script."
+          exit 1
+      fi
+  fi
+
+  # Cria um backup do arquivo de configuração original
+  sudo cp "$NGINX_CONF" "$NGINX_CONF.bak"
+
+  # Adiciona o bloco de redirecionamento no início do bloco 'server'
+  sudo sed -i 's/server {/server {\n    listen 80;\n    server_name _;\n    return 301 https:\/\/$\host\$request_uri;\n/g' "$NGINX_CONF"
+
+  # 2. Reinicia o Nginx
+  sudo systemctl restart nginx
+  echo "Nginx configurado para redirecionar HTTP para HTTPS."
+fi
+
+echo "Redirecionamento HTTP para HTTPS configurado. Por favor, certifique-se de que o HTTPS está configurado corretamente (certificado SSL/TLS instalado e configurado)."
+exit 0
+```}
+{type: uploaded file
+fileName: aeta_5.txt
+fullContent:
+#!/bin/bash
+
+# Detecta o sistema operacional
+OS=$(uname -s)
+
+# Configuração padrão para Apache em sistemas Debian/Ubuntu
+HTTPD_CONF="/etc/apache2/apache2.conf"
+SITES_AVAILABLE="/etc/apache2/sites-available"
+DEFAULT_SITE="000-default.conf"
+DEFAULT_SSL_SITE="default-ssl.conf"
+APACHE_CTL="apache2ctl"
+
+# Ajusta a configuração para CentOS/RHEL/Fedora
+if [[ "$OS" == "Linux" ]]; then
+  if command -v yum &> /dev/null; then
+    HTTPD_CONF="/etc/httpd/conf/httpd.conf"
+    SITES_AVAILABLE="/etc/httpd/conf.d"
+    DEFAULT_SITE="000-default.conf" # Pode variar
+    DEFAULT_SSL_SITE="default-ssl.conf" # Pode variar
+    APACHE_CTL="apachectl"
+  fi
+fi
+
+# Verifica se o Apache está instalado
+if ! command -v $APACHE_CTL &> /dev/null; then
+  echo "Apache não está instalado. Instalando..."
+  if [[ "$OS" == "Linux" ]]; then
+    if command -v apt-get &> /dev/null; then
+      apt-get update && apt-get install -y apache2
+    elif command -v yum &> /dev/null; then
+      yum install -y httpd
+      systemctl start httpd
+      systemctl enable httpd
+    else
+      echo "Gerenciador de pacotes não suportado. Instale o Apache manualmente."
+      exit 1
+    fi
+  else
+    echo "Sistema operacional não suportado. Instale o Apache manualmente."
+    exit 1
+  fi
+fi
+
+# Habilita SSL se não estiver habilitado
+if ! $APACHE_CTL status 2>&1 | grep -q "mod_ssl"; then
+  echo "Habilitando SSL..."
+  if [[ "$OS" == "Linux" ]]; then
+    if command -v a2enmod &> /dev/null; then
+      a2enmod ssl
+      a2enmod headers
+    elif command -v yum &> /dev/null; then
+      yum install -y mod_ssl
+    else
+      echo "Habilitação de SSL requer instalação manual do mod_ssl."
+      exit 1
+    fi
+  else
+    echo "Habilitação de SSL requer instalação manual do mod_ssl."
+    exit 1
+  fi
+fi
+
+# Gera um certificado auto-assinado (para teste)
+if [ ! -f /etc/ssl/certs/apache.pem ]; then
+  echo "Gerando certificado auto-assinado..."
+  openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout /etc/ssl/private/apache.key -out /etc/ssl/certs/apache.pem -subj "/CN=localhost"
+  chmod 600 /etc/ssl/private/apache.key
+fi
+
+# Configura o site padrão para redirecionar HTTP para HTTPS
+if [ -f "$SITES_AVAILABLE/$DEFAULT_SITE" ]; then
+  echo "Configurando redirecionamento HTTP para HTTPS no site padrão..."
+  SITE_CONF="$SITES_AVAILABLE/$DEFAULT_SITE"
+
+  # Cria um arquivo de configuração temporário
+  TEMP_CONF=$(mktemp)
+
+  # Adiciona a configuração de redirecionamento
+  cat <<EOF > "$TEMP_CONF"
+<VirtualHost *:80>
+    ServerName localhost
+    Redirect permanent / https://\${SERVER_NAME}\${REQUEST_URI}
+</VirtualHost>
+EOF
+
+  # Substitui o conteúdo do arquivo de configuração original
+  sudo tee "$SITE_CONF" > /dev/null <<EOF
+$(cat "$TEMP_CONF")
+EOF
+  rm "$TEMP_CONF"
+fi
+
+# Configura SSL VirtualHost (se não existir)
+if [ ! -f "$SITES_AVAILABLE/$DEFAULT_SSL_SITE" ]; then
+  echo "Criando configuração SSL VirtualHost..."
+  SSL_CONF="$SITES_AVAILABLE/$DEFAULT_SSL_SITE"
+  cat <<EOF > "$SSL_CONF"
+<VirtualHost *:443>
+    ServerName localhost
+    DocumentRoot /var/www/html
+    SSLEngine on
+    SSLCertificateFile /etc/ssl/certs/apache.pem
+    SSLCertificateKeyFile /etc/ssl/private/apache.key
+    <Directory /var/www/html>
+        AllowOverride All
+        Require all granted
+    </Directory>
+</VirtualHost>
+EOF
+  if command -v a2ensite &> /dev/null; then
+    a2ensite default-ssl
+  fi
+fi
+
+# Garante que o site SSL esteja habilitado
+if command -v a2ensite &> /dev/null; then
+  a2ensite default-ssl
+fi
+
+# Reinicia o Apache
+echo "Reiniciando o Apache..."
+$APACHE_CTL restart
+
+echo "Vulnerabilidade corrigida (redirecionamento HTTP para HTTPS implementado)."
+}
+{type: uploaded file
+fileName: aeta_6.txt
+fullContent:
+```bash
+#!/bin/bash
+
+# Script para redirecionar tráfego HTTP para HTTPS e desabilitar HTTP.
+
+# Variáveis
+HTTP_PORT=80
+HTTPS_PORT=443
+WEB_SERVER=$(ps -ef | grep -E 'apache|nginx|httpd' | grep -v grep | awk '{print $8}')
+
+# Função para verificar se um programa está instalado
+command_exists() {
+  command -v "$1" >/dev/null 2>&1
+}
+
+# Detectar o servidor web e executar as ações apropriadas
+if [[ "$WEB_SERVER" == *apache* ]]; then
+  echo "Servidor web Apache detectado."
+
+  # 1. Criar um arquivo .htaccess na raiz do site para redirecionar HTTP para HTTPS.
+  #    Assumindo que o arquivo .htaccess é suportado e AllowOverride All está configurado.
+
+  if command_exists apache2ctl; then
+      VHOST_FILE=$(apache2ctl -S 2>/dev/null | grep "default virtual host" | awk '{print $4}' | sed 's/:80//g')
+  elif command_exists httpd; then
+      VHOST_FILE=$(httpd -V 2>/dev/null | grep "SERVER_CONFIG_FILE" | cut -d\" -f2)
+  else
+      echo "Não foi possível detectar o arquivo de configuração do VirtualHost do Apache. Redirecionamento via .htaccess será tentado."
+      VHOST_FILE=""
+  fi
+
+
+  if [ -n "$VHOST_FILE" ]; then
+    echo "Arquivo VirtualHost detectado: $VHOST_FILE"
+    # Desabilitar o VirtualHost na porta 80
+    if [ -f "$VHOST_FILE" ]; then
+      echo "Comentando as linhas do VirtualHost na porta 80 em $VHOST_FILE"
+      sed -i 's/^<VirtualHost \*:80>/#<VirtualHost *:80>/g' "$VHOST_FILE"
+      sed -i 's/^<\/VirtualHost>/#<\/VirtualHost>/g' "$VHOST_FILE"
+    else
+      echo "Arquivo VirtualHost $VHOST_FILE não encontrado."
+      exit 1
+    fi
+  else
+    echo "Usando .htaccess para redirecionamento."
+    # Tentar criar o arquivo .htaccess se não existir
+    if [ ! -f "/var/www/html/.htaccess" ]; then
+      touch /var/www/html/.htaccess
+      chown www-data:www-data /var/www/html/.htaccess
+      chmod 644 /var/www/html/.htaccess
+    fi
+
+    echo "
+RewriteEngine On
+RewriteCond %{HTTPS} off
+RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+" > /var/www/html/.htaccess
+  fi
+
+  # 2. Reiniciar o Apache para aplicar as mudanças.
+  if command_exists systemctl; then
+      systemctl restart apache2
+  elif command_exists service; then
+      service apache2 restart
+  else
+      echo "Não foi possível reiniciar o Apache. Reinicie manualmente."
+  fi
+
+elif [[ "$WEB_SERVER" == *nginx* ]]; then
+  echo "Servidor web Nginx detectado."
+
+  # 1. Encontrar o arquivo de configuração do Nginx (geralmente em /etc/nginx/sites-available/).
+  #    Este script assume que você tem um arquivo de configuração padrão.
+
+  CONFIG_FILE="/etc/nginx/sites-available/default"
+
+  # 2. Adicionar um bloco de redirecionamento para o arquivo de configuração.
+  if [ -f "$CONFIG_FILE" ]; then
+    echo "Adicionando redirecionamento HTTP para HTTPS em $CONFIG_FILE"
+
+    # Cria um backup do arquivo de configuração
+    cp "$CONFIG_FILE" "$CONFIG_FILE.bak"
+
+    # Adiciona o bloco de redirecionamento ao arquivo de configuração.
+    # Remove o bloco server que escuta na porta 80
+    sed -i '/server {/,/}/d' "$CONFIG_FILE"
+
+    echo "
+server {
+    listen 80;
+    server_name  _; # substitua pelo nome do seu domínio
+    return 301 https://\$host\$request_uri;
+}
+" >> "$CONFIG_FILE"
+  else
+    echo "Arquivo de configuração $CONFIG_FILE não encontrado."
+    exit 1
+  fi
+
+  # 3. Reiniciar o Nginx para aplicar as mudanças.
+  if command_exists systemctl; then
+      systemctl restart nginx
+  elif command_exists service; then
+      service nginx restart
+  else
+      echo "Não foi possível reiniciar o Nginx. Reinicie manualmente."
+  fi
+
+else
+  echo "Servidor web não detectado (Apache ou Nginx).  Redirecionamento manual necessário."
+  exit 1
+fi
+
+echo "Redirecionamento HTTP para HTTPS configurado. Por favor, verifique se o HTTPS está configurado corretamente."
+exit 0
+```}
+{type: uploaded file
+fileName: aeta_7.txt
+fullContent:
+#!/bin/bash
+
+# Script para mitigar a vulnerabilidade de transmissão de informações sensíveis em texto claro via HTTP.
+# Este script configura o redirecionamento de HTTP para HTTPS e habilita o HTTPS.
+# Assumindo que o servidor web é Apache e o sistema operacional é baseado em Debian/Ubuntu.
+
+# Variáveis
+APACHE_CONFIG_FILE="/etc/apache2/sites-available/000-default.conf"
+APACHE_DEFAULT_SSL_CONFIG_FILE="/etc/apache2/sites-available/default-ssl.conf"
+APACHE_SSL_ENABLED_SITE="/etc/apache2/sites-enabled/default-ssl.conf"
+APACHE_ENABLED_SITE="/etc/apache2/sites-enabled/000-default.conf"
+
+# 1. Habilitar o módulo rewrite do Apache
+sudo a2enmod rewrite
+
+# 2. Criar um arquivo de configuração virtual para redirecionar HTTP para HTTPS
+
+REDIRECT_CONFIG="/tmp/redirect.conf"
+
+cat > "$REDIRECT_CONFIG" <<EOL
+<VirtualHost *:80>
+    ServerName \$(hostname)
+    Redirect permanent / https://\${SERVER_NAME}\${REQUEST_URI}
+</VirtualHost>
+EOL
+
+sudo mv "$REDIRECT_CONFIG" /etc/apache2/sites-available/redirect.conf
+
+# 3. Habilitar o site de redirecionamento
+sudo a2ensite redirect.conf
+
+# 4.  Habilitar SSL (se ainda não estiver habilitado)
+if [ ! -f "$APACHE_SSL_ENABLED_SITE" ]; then
+  sudo a2enmod ssl
+  # Habilitar o site default-ssl (se ele existir)
+  if [ -f "$APACHE_DEFAULT_SSL_CONFIG_FILE" ]; then
+    sudo a2ensite default-ssl.conf
+  else
+    echo "Arquivo de configuração SSL padrão não encontrado. Por favor, configure o SSL manualmente."
+  fi
+fi
+
+# 5. Reiniciar o Apache para aplicar as mudanças
+sudo systemctl restart apache2
+
+echo "Redirecionamento HTTP para HTTPS configurado e Apache reiniciado."
+echo "Por favor, verifique se o SSL está configurado corretamente e se o site está acessível via HTTPS."
+echo "Se você não tiver um certificado SSL, considere usar o Let's Encrypt para gerar um certificado gratuito."
+echo "Instruções para Let's Encrypt:  sudo apt install certbot python3-certbot-apache && sudo certbot --apache"
+exit 0
+}
+{type: uploaded file
+fileName: aeta_8.txt
+fullContent:
+```bash
+#!/bin/bash
+
+# Este script corrige a vulnerabilidade de transmissão de informações sensíveis em texto plano via HTTP,
+# redirecionando o tráfego HTTP para HTTPS e habilitando o HTTPS.
+# Assumindo que o servidor web é Apache e o sistema operacional é baseado em Debian/Ubuntu.
+
+# Variáveis
+APACHE_CONFIG_FILE="/etc/apache2/sites-available/000-default.conf"
+APACHE_DEFAULT_SSL_CONFIG_FILE="/etc/apache2/sites-available/default-ssl.conf"
+APACHE_SSL_ENABLED_CONFIG_FILE="/etc/apache2/sites-enabled/default-ssl.conf"
+APACHE_PORTS_CONFIG_FILE="/etc/apache2/ports.conf"
+
+# 1. Habilitar o módulo SSL
+sudo a2enmod ssl
+
+# 2. Configurar o arquivo de configuração do Apache para redirecionar HTTP para HTTPS
+
+# Criar um backup do arquivo de configuração original
+sudo cp "$APACHE_CONFIG_FILE" "${APACHE_CONFIG_FILE}.bak"
+
+# Adicionar a regra de redirecionamento
+sudo sed -i "s|DocumentRoot /var/www/html|DocumentRoot /var/www/html\n\tRewriteEngine On\n\tRewriteCond %{HTTPS} off\n\tRewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]|g" "$APACHE_CONFIG_FILE"
+
+# 3. Criar certificado SSL auto-assinado (para fins de teste; em produção, utilize um certificado válido)
+
+# Verificar se o certificado já existe
+if [ ! -f /etc/ssl/certs/apache-selfsigned.crt ] || [ ! -f /etc/ssl/private/apache-selfsigned.key ]; then
+  sudo openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout /etc/ssl/private/apache-selfsigned.key -out /etc/ssl/certs/apache-selfsigned.crt -subj "/CN=localhost"
+  sudo chmod 400 /etc/ssl/private/apache-selfsigned.key
+fi
+
+# 4. Configurar o arquivo de configuração SSL do Apache para usar o certificado
+
+# Criar um backup do arquivo de configuração SSL original
+if [ -f "$APACHE_DEFAULT_SSL_CONFIG_FILE" ]; then
+    sudo cp "$APACHE_DEFAULT_SSL_CONFIG_FILE" "${APACHE_DEFAULT_SSL_CONFIG_FILE}.bak"
+fi
+
+# Ajustar a configuração SSL
+if [ -f "$APACHE_DEFAULT_SSL_CONFIG_FILE" ]; then
+  sudo sed -i "s|SSLCertificateFile\t\t/etc/ssl/certs/ssl-cert-snakeoil.pem|SSLCertificateFile\t\t/etc/ssl/certs/apache-selfsigned.crt|g" "$APACHE_DEFAULT_SSL_CONFIG_FILE"
+  sudo sed -i "s|SSLCertificateKeyFile /etc/ssl/private/ssl-cert-snakeoil.key|SSLCertificateKeyFile /etc/ssl/private/apache-selfsigned.key|g" "$APACHE_DEFAULT_SSL_CONFIG_FILE"
+fi
+
+#5. Ajustar o arquivo ports.conf para escutar na porta 443
+sudo sed -i 's/#Listen 443 https/Listen 443 https/g' "$APACHE_PORTS_CONFIG_FILE"
+
+# 6. Habilitar o site SSL padrão
+if [ ! -f "$APACHE_SSL_ENABLED_CONFIG_FILE" ]; then
+  sudo a2ensite default-ssl
+fi
+
+# 7. Reiniciar o Apache
+sudo systemctl restart apache2
+
+echo "Redirecionamento HTTP para HTTPS configurado. Certifique-se de acessar o site via HTTPS."
+```}
+{type: uploaded file
+fileName: aeta_9.txt
+fullContent:
+```bash
+#!/bin/bash
+
+# Script para mitigar a vulnerabilidade de transmissão de informações sensíveis em texto claro via HTTP.
+# Este script configura um redirecionamento automático de HTTP para HTTPS usando Apache ou Nginx.
+
+# Variáveis
+HTTP_PORT=80
+HTTPS_PORT=443
+DOMAIN=$(hostname)
+
+# Detecta o servidor web
+if command -v apache2 &> /dev/null; then
+  WEB_SERVER="apache2"
+elif command -v nginx &> /dev/null; then
+  WEB_SERVER="nginx"
+else
+  echo "Nenhum servidor web (Apache ou Nginx) detectado. Impossível continuar."
+  exit 1
+fi
+
+# Função para configurar o redirecionamento no Apache
+configure_apache() {
+  # Verifica se o módulo rewrite está habilitado
+  if ! a2query -m rewrite &> /dev/null; then
+    echo "Habilitando o módulo rewrite do Apache..."
+    sudo a2enmod rewrite
+  fi
+
+  # Cria um arquivo de configuração virtual host para redirecionar HTTP para HTTPS
+  VHOST_FILE="/etc/apache2/sites-available/http-to-https.conf"
+  echo "<VirtualHost *:80>
+    ServerName $DOMAIN
+    Redirect permanent / https://$DOMAIN/
+  </VirtualHost>" | sudo tee $VHOST_FILE
+
+  # Habilita o novo virtual host
+  sudo a2ensite http-to-https.conf
+
+  # Reinicia o Apache
+  echo "Reiniciando o Apache..."
+  sudo systemctl restart apache2
+}
+
+# Função para configurar o redirecionamento no Nginx
+configure_nginx() {
+  # Cria um arquivo de configuração do servidor para redirecionar HTTP para HTTPS
+  SERVER_FILE="/etc/nginx/sites-available/http-to-https"
+  echo "server {
+    listen $HTTP_PORT;
+    server_name $DOMAIN;
+    return 301 https://\$host\$request_uri;
+  }" | sudo tee $SERVER_FILE
+
+  # Cria um link simbólico para habilitar o arquivo de configuração
+  sudo ln -s /etc/nginx/sites-available/http-to-https /etc/nginx/sites-enabled/
+
+  # Remove o arquivo de configuração default, caso exista
+  if [ -f /etc/nginx/sites-enabled/default ]; then
+    sudo rm /etc/nginx/sites-enabled/default
+  fi
+
+  # Reinicia o Nginx
+  echo "Reiniciando o Nginx..."
+  sudo systemctl restart nginx
+}
+
+# Executa a configuração com base no servidor web detectado
+case $WEB_SERVER in
+  "apache2")
+    configure_apache
+    ;;
+  "nginx")
+    configure_nginx
+    ;;
+  *)
+    echo "Servidor web não suportado."
+    exit 1
+    ;;
+esac
+
+echo "Redirecionamento de HTTP para HTTPS configurado com sucesso."
+exit 0
+```}
+{type: uploaded file
+fileName: aeta_10.txt
+fullContent:
+```bash
+#!/bin/bash
+
+# Este script corrige a vulnerabilidade de transmissão de informações sensíveis em texto claro via HTTP.
+# Ele configura o redirecionamento de HTTP para HTTPS e habilita o HTTPS no servidor web Apache.
+
+# Variáveis
+WEB_SERVER="apache2" # Pode ser 'nginx' ou outro servidor web
+HTTP_PORT="80"
+HTTPS_PORT="443"
+DOMAIN_NAME=$(hostname) # Tenta obter o nome do domínio do sistema
+
+# Função para detectar o sistema operacional
+detect_os() {
+  if command -v apt >/dev/null 2>&1; then
+    OS="debian"
+  elif command -v yum >/dev/null 2>&1; then
+    OS="redhat"
+  elif command -v pacman >/dev/null 2>&1; then
+    OS="arch"
+  else
+    OS="unknown"
+  fi
+  echo "$OS"
+}
+
+OS=$(detect_os)
+
+# Função para instalar pacotes, adaptada ao sistema operacional
+install_package() {
+  package="$1"
+  case "$OS" in
+    "debian")
+      apt-get update
+      apt-get install -y "$package"
+      ;;
+    "redhat")
+      yum install -y "$package"
+      ;;
+    "arch")
+      pacman -S --noconfirm "$package"
+      ;;
+    *)
+      echo "Sistema operacional não suportado. Instale o pacote '$package' manualmente."
+      exit 1
+      ;;
+  esac
+}
+
+
+# 1. Instalar o Certbot (Let's Encrypt) para obter um certificado SSL
+install_package certbot
+
+# Ajustar o nome do pacote do apache para certbot
+if [ "$WEB_SERVER" = "apache2" ]; then
+  apache_package="python3-certbot-apache"
+elif [ "$WEB_SERVER" = "nginx" ]; then
+  apache_package="python3-certbot-nginx"
+else
+  echo "Servidor web não suportado.  Aguardando a criação do certificado SSL."
+  apache_package=""
+fi
+
+if [ -n "$apache_package" ]; then
+  install_package "$apache_package"
+fi
+
+
+# 2. Obter o certificado SSL usando Certbot
+certbot --nginx --non-interactive --agree-tos --email seu_email@example.com -d "$DOMAIN_NAME"
+#certbot --apache --non-interactive --agree-tos --email seu_email@example.com -d "$DOMAIN_NAME" #original
+
+# 3. Configurar o redirecionamento HTTP para HTTPS
+
+if [ "$WEB_SERVER" = "apache2" ]; then
+  # Para Apache:
+  # a) Ativar o módulo rewrite
+  a2enmod rewrite
+  # b) Editar o virtual host padrão (ou o virtual host do seu site) para redirecionar HTTP para HTTPS
+  # Este bloco cria um arquivo de configuração temporário com o redirecionamento.
+  REDIRECT_CONFIG="
+<VirtualHost *:80>
+    ServerName $DOMAIN_NAME
+    Redirect permanent / https://$DOMAIN_NAME/
+</VirtualHost>
+"
+  echo "$REDIRECT_CONFIG" > /tmp/redirect.conf
+  # Move o arquivo de configuração temporário para o diretório de configuração do Apache.
+  mv /tmp/redirect.conf /etc/apache2/sites-available/000-default-le-ssl.conf
+  # Desabilita o site padrão.
+  a2dissite 000-default.conf
+  # Habilita o novo site com o redirecionamento.
+  a2ensite 000-default-le-ssl.conf
+
+
+elif [ "$WEB_SERVER" = "nginx" ]; then
+  # Para Nginx:
+  # a) Editar o bloco server HTTP (porta 80) no arquivo de configuração do seu site para redirecionar para HTTPS
+  # (Exemplo: /etc/nginx/sites-available/default)
+  # Adicionar dentro do bloco server { ... } o seguinte:
+  # return 301 https://$host$request_uri;
+  echo "Edite o arquivo de configuração do Nginx para redirecionar HTTP para HTTPS."
+  echo "Exemplo: return 301 https://\$host\$request_uri; dentro do bloco server na porta 80"
+
+else
+  echo "Servidor web não suportado. Configure o redirecionamento HTTP para HTTPS manualmente."
+fi
+
+
+# 4. Reiniciar o servidor web
+systemctl restart "$WEB_SERVER"
+
+echo "Configuração concluída. O servidor web foi configurado para redirecionar HTTP para HTTPS."
+```}
+{type: uploaded file
+fileName: aeta_11.txt
+fullContent:
+```bash
+#!/bin/bash
+
+# Este script corrige a vulnerabilidade de transmissão de informações sensíveis em texto claro via HTTP.
+# Ele configura o redirecionamento de HTTP para HTTPS usando o Apache ou Nginx.
+
+# Verifica se o script está sendo executado como root
+if [[ $EUID -ne 0 ]]; then
+  echo "Este script precisa ser executado como root."
+  exit 1
+fi
+
+# Detecta qual servidor web está sendo usado (Apache ou Nginx)
+if command -v apache2ctl &> /dev/null; then
+  WEB_SERVER="apache"
+elif command -v nginx &> /dev/null; then
+  WEB_SERVER="nginx"
+else
+  echo "Servidor web não detectado (Apache ou Nginx necessários)."
+  exit 1
+fi
+
+# Função para configurar o redirecionamento no Apache
+apache_redirect() {
+  # Habilita o módulo rewrite do Apache
+  a2enmod rewrite
+
+  # Determina o arquivo de configuração padrão do site
+  DEFAULT_SITE_CONFIG=$(find /etc/apache2/sites-available/ -name "000-default.conf" 2>/dev/null)
+  if [ -z "$DEFAULT_SITE_CONFIG" ]; then
+    DEFAULT_SITE_CONFIG=$(find /etc/apache2/sites-available/ -name "default.conf" 2>/dev/null)
+  fi
+
+  # Verifica se o arquivo de configuração padrão foi encontrado
+  if [ -z "$DEFAULT_SITE_CONFIG" ]; then
+    echo "Arquivo de configuração padrão do Apache não encontrado.  Por favor, configure o redirecionamento HTTP para HTTPS manualmente."
+    exit 1
+  fi
+  
+  # Adiciona a regra de redirecionamento ao arquivo de configuração
+  sed -i 's/<VirtualHost \*:80>/<VirtualHost *:80>\n\tRewriteEngine On\n\tRewriteCond %{HTTPS} !=on\n\tRewriteRule \^ https:\/\/%{HTTP_HOST}%{REQUEST_URI} \[L,R=301]/g' "$DEFAULT_SITE_CONFIG"
+
+  # Reinicia o Apache
+  systemctl restart apache2
+  echo "Redirecionamento HTTP para HTTPS configurado no Apache. Reiniciei o Apache."
+}
+
+# Função para configurar o redirecionamento no Nginx
+nginx_redirect() {
+  # Determina o arquivo de configuração padrão do site
+  DEFAULT_SITE_CONFIG=$(find /etc/nginx/sites-available/ -name "default" 2>/dev/null)
+  if [ -z "$DEFAULT_SITE_CONFIG" ]; then
+    DEFAULT_SITE_CONFIG=$(find /etc/nginx/conf.d/ -name "default.conf" 2>/dev/null)
+  fi
+
+  # Verifica se o arquivo de configuração padrão foi encontrado
+    if [ -z "$DEFAULT_SITE_CONFIG" ]; then
+    echo "Arquivo de configuração padrão do Nginx não encontrado. Por favor, configure o redirecionamento HTTP para HTTPS manualmente."
+    exit 1
+  fi
+  
+  # Adiciona o bloco de redirecionamento ao arquivo de configuração
+  sed -i 's/listen 80 default_server;/listen 80 default_server;\n\treturn 301 https:\/\/$host$request_uri;/g' "$DEFAULT_SITE_CONFIG"
+
+  # Reinicia o Nginx
+  systemctl restart nginx
+  echo "Redirecionamento HTTP para HTTPS configurado no Nginx. Reiniciei o Nginx."
+}
+
+# Executa a configuração apropriada com base no servidor web detectado
+case "$WEB_SERVER" in
+  "apache")
+    apache_redirect
+    ;;
+  "nginx")
+    nginx_redirect
+    ;;
+  *)
+    echo "Servidor web não suportado."
+    exit 1
+    ;;
+esac
+
+exit 0
+```}
+{type: uploaded file
+fileName: aeta_12.txt
+fullContent:
+#!/bin/bash
+
+# Detecta o sistema operacional
+OS=$(uname -s)
+
+# Função para configurar o redirecionamento HTTP para HTTPS no Apache
+apache_redirect() {
+  if command -v apache2ctl &> /dev/null; then
+    if ! a2enmod rewrite &> /dev/null; then
+      echo "Habilitando o módulo rewrite do Apache..."
+      a2enmod rewrite
+    fi
+
+    # Cria um arquivo de configuração virtual host para redirecionamento
+    REDIRECT_CONF="/etc/apache2/sites-available/http-to-https.conf"
+    echo "<VirtualHost *:80>
+    ServerName \$(hostname)
+    Redirect permanent / https://\${SERVER_NAME}\${REQUEST_URI}
+</VirtualHost>" > "$REDIRECT_CONF"
+
+    # Habilita o site e recarrega o Apache
+    a2ensite http-to-https.conf
+    apache2ctl reload
+    echo "Redirecionamento HTTP para HTTPS configurado no Apache."
+  else
+    echo "Apache não detectado.  Por favor, instale o Apache ou configure o redirecionamento manualmente."
+  fi
+}
+
+# Função para configurar o redirecionamento HTTP para HTTPS no Nginx
+nginx_redirect() {
+  if command -v nginx &> /dev/null; then
+    # Encontra o arquivo de configuração padrão do Nginx
+    DEFAULT_CONF=$(find /etc/nginx/sites-enabled/ -type f -name "default")
+
+    if [ -z "$DEFAULT_CONF" ]; then
+      DEFAULT_CONF=$(find /etc/nginx/conf.d/ -type f -name "*.conf" | head -n 1)
+      if [ -z "$DEFAULT_CONF" ]; then
+        echo "Arquivo de configuração padrão do Nginx não encontrado.  Por favor, configure o redirecionamento manualmente."
+        return
+      fi
+    fi
+
+    # Adiciona um bloco de redirecionamento ao arquivo de configuração
+    echo "Adicionando redirecionamento HTTP para HTTPS no Nginx..."
+    
+    # Cria um arquivo de backup
+    cp "$DEFAULT_CONF" "$DEFAULT_CONF.bak"
+    
+    # Adiciona o bloco de redirecionamento.  Este bloco assume que já existe um bloco `server { listen 443 ssl; ... }`
+    # Ajuste conforme necessário se seu arquivo de configuração for diferente.
+    
+    REDIRECT_BLOCK="
+server {
+    listen 80;
+    server_name \$(hostname);
+    return 301 https://\$host\$request_uri;
+}
+"
+    echo "$REDIRECT_BLOCK" >> "$DEFAULT_CONF"
+
+    # Recarrega o Nginx
+    nginx -s reload
+    echo "Redirecionamento HTTP para HTTPS configurado no Nginx."
+  else
+    echo "Nginx não detectado.  Por favor, instale o Nginx ou configure o redirecionamento manualmente."
+  fi
+}
+
+# Verifica se o script está sendo executado como root
+if [[ $EUID -ne 0 ]]; then
+   echo "Este script deve ser executado como root."
+   exit 1
+fi
+
+# Procura por Apache ou Nginx e configura o redirecionamento
+if command -v apache2ctl &> /dev/null; then
+  apache_redirect
+elif command -v nginx &> /dev/null; then
+  nginx_redirect
+else
+  echo "Servidor web (Apache ou Nginx) não detectado. Por favor, instale e configure um servidor web para aplicar o redirecionamento HTTP para HTTPS."
+  exit 1
+fi
+
+echo "Script finalizado."
+exit 0
+}
+{type: uploaded file
+fileName: aeta_13.txt
+fullContent:
+```bash
+#!/bin/bash
+
+# Este script corrige a vulnerabilidade de transmissão de informações sensíveis em texto claro via HTTP.
+# Ele configura um redirecionamento automático de HTTP para HTTPS usando Apache ou Nginx, dependendo do que estiver instalado.
+
+# Variáveis
+APACHE_CONFIG="/etc/apache2/sites-available/000-default.conf"
+APACHE_DEFAULT_SSL="/etc/apache2/sites-available/default-ssl.conf"
+NGINX_CONFIG="/etc/nginx/sites-available/default"
+
+# Funções
+
+# Checa se o Apache está instalado
+is_apache_installed() {
+  command -v apache2 &> /dev/null
+}
+
+# Checa se o Nginx está instalado
+is_nginx_installed() {
+  command -v nginx &> /dev/null
+}
+
+# Redireciona HTTP para HTTPS usando Apache
+configure_apache_redirect() {
+  if [ ! -f "$APACHE_CONFIG.backup" ]; then
+    sudo cp "$APACHE_CONFIG" "$APACHE_CONFIG.backup"
+  fi
+
+  # Adiciona a regra de redirecionamento no VirtualHost padrão
+  sudo sed -i "s/<VirtualHost \*:80>/<VirtualHost *:80>\n\tRedirect permanent \/ https:\/\/%{HTTP_HOST}\/ /" "$APACHE_CONFIG"
+
+  # Verifica se o módulo rewrite está habilitado. Caso não, habilita.
+  if ! apache2ctl -M | grep -q "rewrite_module"; then
+    sudo a2enmod rewrite
+  fi
+
+  # Reinicia o Apache
+  sudo systemctl restart apache2
+}
+
+# Redireciona HTTP para HTTPS usando Nginx
+configure_nginx_redirect() {
+  if [ ! -f "$NGINX_CONFIG.backup" ]; then
+    sudo cp "$NGINX_CONFIG" "$NGINX_CONFIG.backup"
+  fi
+
+  # Adiciona o bloco de redirecionamento para HTTPS
+  sudo sed -i "s/listen 80 default_server;/listen 80 default_server;\n\treturn 301 https:\/\/${server_name}\$request_uri;/" "$NGINX_CONFIG"
+
+  # Reinicia o Nginx
+  sudo systemctl restart nginx
+}
+
+# Script principal
+if is_apache_installed; then
+  echo "Apache detectado. Configurando redirecionamento HTTP para HTTPS..."
+  configure_apache_redirect
+elif is_nginx_installed; then
+  echo "Nginx detectado. Configurando redirecionamento HTTP para HTTPS..."
+  configure_nginx_redirect
+else
+  echo "Nenhum servidor web (Apache ou Nginx) detectado. Instale um servidor web e execute este script novamente."
+  exit 1
+fi
+
+echo "Redirecionamento HTTP para HTTPS configurado com sucesso!"
+
+exit 0
+```}
+{type: uploaded file
+fileName: aeta_14.txt
+fullContent:
+```bash
+#!/bin/bash
+
+# Este script tem como objetivo mitigar a vulnerabilidade de transmissão de informações
+# sensíveis em texto claro via HTTP, implementando o redirecionamento para HTTPS.
+# Assume-se que um servidor web (ex: Apache ou Nginx) está instalado e configurado.
+# Adaptar o script para o servidor web específico, se necessário.
+
+# Variáveis
+HTTP_PORT=80
+HTTPS_PORT=443
+SERVER_TYPE=$(which apache2 nginx | head -n 1)
+
+# Função para detectar o tipo de servidor web e configurar o redirecionamento
+configure_redirect() {
+  if [[ -z "$SERVER_TYPE" ]]; then
+    echo "Nenhum servidor web (Apache ou Nginx) detectado.  Instale e configure um servidor web para continuar."
+    exit 1
+  fi
+
+  if [[ "$SERVER_TYPE" == "/usr/sbin/apache2" ]]; then
+    # Configuração para Apache
+    echo "Configurando redirecionamento HTTP para HTTPS no Apache..."
+
+    # Verificar se o módulo rewrite está habilitado
+    if ! apache2ctl -M | grep -q rewrite_module; then
+      echo "Habilitando o módulo rewrite..."
+      a2enmod rewrite
+    fi
+
+    # Criar/editar o arquivo de configuração do VirtualHost para redirecionamento
+    VHOST_FILE="/etc/apache2/sites-available/000-default.conf" # Modifique se necessário
+    if [[ ! -f "$VHOST_FILE" ]]; then
+        VHOST_FILE="/etc/apache2/sites-available/default.conf" # Tentar o arquivo "default.conf"
+    fi
+
+    if [[ ! -f "$VHOST_FILE" ]]; then
+      echo "Arquivo de configuração do VirtualHost padrão não encontrado.  Por favor, configure manualmente."
+      exit 1
+    fi
+   
+    # Backup do arquivo de configuração
+    cp "$VHOST_FILE" "${VHOST_FILE}.backup.$(date +%Y%m%d%H%M%S)"
+
+    # Adicionar regras de redirecionamento no início do VirtualHost
+    sed -i '2i\
+        RewriteEngine On\
+        RewriteCond %{HTTPS} off\
+        RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [R=301,L]\
+    ' "$VHOST_FILE"
+
+    # Reiniciar o Apache
+    systemctl restart apache2
+    echo "Redirecionamento HTTP para HTTPS configurado no Apache. Reiniciei o Apache para aplicar as mudanças."
+
+  elif [[ "$SERVER_TYPE" == "/usr/sbin/nginx" ]]; then
+    # Configuração para Nginx
+    echo "Configurando redirecionamento HTTP para HTTPS no Nginx..."
+
+    # Encontrar o arquivo de configuração do servidor Nginx
+    NGINX_CONF=$(find /etc/nginx/sites-enabled/ -type f -name "default")  #Acha o default. Modificar conforme necessário.
+    if [[ -z "$NGINX_CONF" ]]; then
+      NGINX_CONF=$(find /etc/nginx/conf.d/ -type f -name "*.conf") #Tenta achar qualquer arquivo .conf
+      if [[ -z "$NGINX_CONF" ]]; then
+        echo "Arquivo de configuração do Nginx não encontrado. Por favor, configure manualmente."
+        exit 1
+      fi
+    fi
+
+    # Backup do arquivo de configuração
+    cp "$NGINX_CONF" "${NGINX_CONF}.backup.$(date +%Y%m%d%H%M%S)"
+
+    # Adicionar redirecionamento no bloco HTTP
+    sed -i 's/http {/http {\n    server {\n        listen '$HTTP_PORT';\n        return 301 https:\/\/$host$request_uri;\n    }\n/' "$NGINX_CONF"
+
+    # Reiniciar o Nginx
+    systemctl restart nginx
+    echo "Redirecionamento HTTP para HTTPS configurado no Nginx. Reiniciei o Nginx para aplicar as mudanças."
+
+  else
+    echo "Servidor web não suportado. Por favor, configure o redirecionamento manualmente."
+    exit 1
+  fi
+}
+
+# Executar a configuração
+configure_redirect
+
+echo "Script de mitigação concluído."
+```}
+{type: uploaded file
+fileName: aeta_15.txt
+fullContent:
+#!/bin/bash
+
+# Script para mitigar a vulnerabilidade de transmissão de informações sensíveis em texto claro via HTTP.
+# Este script configura o redirecionamento de HTTP para HTTPS e desabilita o HTTP.
+
+# Variáveis
+HTTP_PORT=80
+HTTPS_PORT=443
+APACHE_CONFIG_FILE="/etc/apache2/sites-available/000-default.conf" # Caminho padrão para a configuração do Apache
+APACHE_DEFAULT_SSL_CONFIG="/etc/apache2/sites-available/default-ssl.conf"
+# Verifica se o Apache está instalado
+if ! command -v apache2ctl &> /dev/null; then
+  echo "Apache não está instalado. Por favor, instale o Apache para executar este script."
+  exit 1
+fi
+
+# 1. Habilita o módulo rewrite do Apache
+sudo a2enmod rewrite
+
+# 2. Cria um arquivo de configuração virtual host para redirecionar HTTP para HTTPS
+REDIRECT_CONFIG="/etc/apache2/sites-available/redirect.conf"
+
+cat > "$REDIRECT_CONFIG" <<EOL
+<VirtualHost *:80>
+    ServerName \$(hostname)
+    Redirect permanent / https://\${SERVER_NAME}\${REQUEST_URI}
+</VirtualHost>
+EOL
+
+# 3. Habilita o site de redirecionamento
+sudo a2ensite redirect.conf
+
+# 4. Configura o Virtual Host SSL para apontar para o diretório correto.
+# Adaptação para sistemas que podem usar /var/www/html ou um diretório diferente.
+if [ -f "$APACHE_DEFAULT_SSL_CONFIG" ]; then
+  # Detecta o DocumentRoot atual da configuração padrão.
+  DOCUMENT_ROOT=$(grep "^DocumentRoot" "$APACHE_CONFIG_FILE" | awk '{print $2}')
+
+  # Se DocumentRoot não estiver definido, usa o padrão /var/www/html
+  if [ -z "$DOCUMENT_ROOT" ]; then
+    DOCUMENT_ROOT="/var/www/html"
+  fi
+  
+  # Modifica o arquivo default-ssl.conf para usar o DocumentRoot correto.
+  sudo sed -i "s|DocumentRoot /var/www/html|DocumentRoot $DOCUMENT_ROOT|g" "$APACHE_DEFAULT_SSL_CONFIG"
+fi
+# 5. Força HTTPS usando .htaccess (se aplicável e se o DocumentRoot existir)
+if [ -d "$DOCUMENT_ROOT" ]; then
+  cat > "$DOCUMENT_ROOT/.htaccess" <<EOL
+RewriteEngine On
+RewriteCond %{HTTPS} off
+RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+EOL
+fi
+
+# 6. Reinicia o Apache para aplicar as mudanças
+sudo systemctl restart apache2
+
+echo "Redirecionamento de HTTP para HTTPS configurado.  Verifique a configuração do seu certificado SSL/TLS."
+echo "Certifique-se de que o HTTPS esteja corretamente configurado e acessível."
+exit 0
+}
+{type: uploaded file
+fileName: aeta_16.txt
+fullContent:
+```bash
+#!/bin/bash
+
+# Script para redirecionar tráfego HTTP para HTTPS e desabilitar HTTP
+
+# Variáveis
+HTTP_PORT=80
+HTTPS_PORT=443
+
+# 1. Detectar o servidor web em uso (Apache, Nginx)
+
+SERVER_TYPE=$(ps aux | awk '{print $11}' | grep -E 'apache2|nginx' | head -n 1)
+
+# 2. Configuração para Apache
+if [[ "$SERVER_TYPE" == "apache2" ]]; then
+  # 2.1 Criar um arquivo de configuração virtual host para redirecionamento HTTP para HTTPS
+  VHOST_FILE="/etc/apache2/sites-available/000-default.conf"
+
+  # 2.2 Verificar se o arquivo existe
+  if [ -f "$VHOST_FILE" ]; then
+    # 2.3 Fazer backup do arquivo original
+    cp "$VHOST_FILE" "$VHOST_FILE.bak"
+
+    # 2.4 Adicionar redirecionamento para HTTPS
+    echo "<VirtualHost *:80>" > "$VHOST_FILE"
+    echo "  ServerName \`hostname\`" >> "$VHOST_FILE"
+    echo "  Redirect permanent / https://\`hostname\`/" >> "$VHOST_FILE"
+    echo "</VirtualHost>" >> "$VHOST_FILE"
+
+    # 2.5 Reiniciar o Apache
+    systemctl restart apache2
+    echo "Apache configurado para redirecionar HTTP para HTTPS."
+  else
+    echo "Arquivo de configuração do Apache não encontrado: $VHOST_FILE"
+    exit 1
+  fi
+fi
+
+# 3. Configuração para Nginx
+if [[ "$SERVER_TYPE" == "nginx" ]]; then
+  # 3.1 Encontrar o arquivo de configuração padrão do Nginx
+  NGINX_CONF=$(find /etc/nginx/sites-enabled/ -type f -name "default")
+
+  # 3.2 Verificar se o arquivo foi encontrado
+  if [ -f "$NGINX_CONF" ]; then
+    # 3.3 Fazer backup do arquivo original
+    cp "$NGINX_CONF" "$NGINX_CONF.bak"
+
+    # 3.4 Adicionar redirecionamento para HTTPS
+    sed -i "s/listen 80;/listen 80;\n\treturn 301 https:\$host\$request_uri;/" "$NGINX_CONF"
+
+    # 3.5 Reiniciar o Nginx
+    systemctl restart nginx
+    echo "Nginx configurado para redirecionar HTTP para HTTPS."
+  else
+    echo "Arquivo de configuração do Nginx não encontrado: $NGINX_CONF"
+    exit 1
+  fi
+fi
+
+# 4. Verificar se o servidor web foi detectado
+if [[ -z "$SERVER_TYPE" ]]; then
+  echo "Servidor web (Apache ou Nginx) não detectado.  Por favor, configure o redirecionamento HTTP para HTTPS manualmente."
+  exit 1
+fi
+
+echo "Redirecionamento HTTP para HTTPS configurado."
+
+exit 0
+```}
+{type: uploaded file
+fileName: aeta_17.txt
+fullContent:
+#!/bin/bash
+
+# Script para redirecionar HTTP para HTTPS e desabilitar HTTP (porta 80)
+
+# Detectar o sistema operacional
+if command -v systemctl &> /dev/null; then
+  OS="systemd"
+elif command -v service &> /dev/null; then
+  OS="sysvinit"
+else
+  echo "Sistema de init desconhecido. Saindo."
+  exit 1
+fi
+
+# Variáveis
+HTTP_PORT=80
+HTTPS_PORT=443
+DOMINIO="seu_dominio.com" # Substitua por seu domínio
+CONFIG_APACHE="/etc/apache2/sites-available/000-default.conf" # Caminho padrão, ajuste se necessário
+CONFIG_NGINX="/etc/nginx/sites-available/default" # Caminho padrão, ajuste se necessário
+
+# Função para Apache
+apache_redirect() {
+  if [ -f "$CONFIG_APACHE" ]; then
+    echo "Configurando redirecionamento HTTP para HTTPS no Apache..."
+
+    # Criar um arquivo de configuração virtualhost para redirecionamento
+    echo "<VirtualHost *:80>
+        ServerName $DOMINIO
+        Redirect permanent / https://$DOMINIO/
+    </VirtualHost>" > /tmp/redirect.conf
+
+    # Mover o arquivo para o diretório de sites disponíveis
+    mv /tmp/redirect.conf /etc/apache2/sites-available/redirect.conf
+
+    # Habilitar o site
+    a2ensite redirect.conf
+
+    # Desabilitar o site padrão (se necessário)
+    a2dissite 000-default.conf
+
+    # Reiniciar o Apache
+    if $OS == "systemd"; then
+      systemctl restart apache2
+    else
+      service apache2 restart
+    fi
+
+    echo "Redirecionamento HTTP para HTTPS no Apache configurado com sucesso."
+  else
+    echo "Arquivo de configuração do Apache não encontrado: $CONFIG_APACHE"
+  fi
+}
+
+# Função para Nginx
+nginx_redirect() {
+  if [ -f "$CONFIG_NGINX" ]; then
+    echo "Configurando redirecionamento HTTP para HTTPS no Nginx..."
+
+    # Fazer um backup do arquivo de configuração original
+    cp "$CONFIG_NGINX" "$CONFIG_NGINX.bak"
+
+    # Substituir a configuração padrão para redirecionar para HTTPS
+    sed -i "s/listen 80 default_server;/listen 80;/g" "$CONFIG_NGINX"
+    sed -i "s/listen \[::\]:80 default_server;/listen \[::\]:80;/g" "$CONFIG_NGINX"
+    echo "server {
+    listen 80;
+    listen [::]:80;
+    server_name $DOMINIO;
+    return 301 https://$DOMINIO\$request_uri;
+}" >> "$CONFIG_NGINX"
+
+
+    # Reiniciar o Nginx
+    if $OS == "systemd"; then
+      systemctl restart nginx
+    else
+      service nginx restart
+    fi
+
+    echo "Redirecionamento HTTP para HTTPS no Nginx configurado com sucesso."
+  else
+    echo "Arquivo de configuração do Nginx não encontrado: $CONFIG_NGINX"
+  fi
+}
+
+# Detectar qual servidor web está em uso (Apache ou Nginx)
+if command -v apache2 &> /dev/null; then
+  SERVER="apache"
+elif command -v nginx &> /dev/null; then
+  SERVER="nginx"
+else
+  echo "Servidor web não detectado (Apache ou Nginx). Saindo."
+  exit 1
+fi
+
+# Configurar o redirecionamento baseado no servidor web detectado
+case "$SERVER" in
+  "apache")
+    apache_redirect
+    ;;
+  "nginx")
+    nginx_redirect
+    ;;
+  *)
+    echo "Servidor web não suportado."
+    exit 1
+    ;;
+esac
+
+echo "Processo de redirecionamento HTTP para HTTPS concluído."
+exit 0
+}
+{type: uploaded file
+fileName: aeta_18.txt
+fullContent:
+#!/bin/bash
+
+# Este script implementa uma solução para mitigar a vulnerabilidade de transmissão
+# de informações sensíveis em texto plano via HTTP, forçando o redirecionamento
+# para HTTPS. Este script assume que você está usando o Apache como servidor web.
+# Adapte o script conforme necessário para outros servidores web.
+
+# Variáveis
+HTTP_PORT=80
+HTTPS_PORT=443
+APACHE_CONFIG_DIR="/etc/apache2/sites-available" # Caminho padrão, ajuste se necessário
+
+# Função para verificar se o Apache está instalado
+check_apache() {
+  if ! command -v apache2ctl &> /dev/null; then
+    echo "Apache não encontrado. Por favor, instale o Apache antes de executar este script."
+    exit 1
+  fi
+}
+
+# Função para habilitar o módulo rewrite do Apache
+enable_rewrite_module() {
+  if ! a2enmod rewrite &> /dev/null; then
+    echo "Falha ao habilitar o módulo rewrite do Apache."
+    exit 1
+  fi
+  echo "Módulo rewrite do Apache habilitado."
+}
+
+# Função para criar um arquivo de configuração virtualhost para redirecionamento HTTP para HTTPS
+create_redirect_virtualhost() {
+  VIRTUALHOST_FILE="000-default.conf" #Nome do arquivo de configuração
+  VIRTUALHOST_PATH="$APACHE_CONFIG_DIR/$VIRTUALHOST_FILE"
+
+  # Verifica se o arquivo de configuração existe
+  if [ ! -f "$VIRTUALHOST_PATH" ]; then
+    echo "Arquivo de configuração VirtualHost padrão não encontrado: $VIRTUALHOST_PATH"
+    echo "Verifique a configuração do seu Apache e ajuste a variável APACHE_CONFIG_DIR."
+    exit 1
+  fi
+
+  # Cria um backup do arquivo de configuração
+  cp "$VIRTUALHOST_PATH" "$VIRTUALHOST_PATH.backup"
+  echo "Backup do arquivo de configuração criado: $VIRTUALHOST_PATH.backup"
+
+  # Adiciona a configuração de redirecionamento ao arquivo
+  {
+  echo "<VirtualHost *:$HTTP_PORT>"
+  echo "  ServerName \$(hostname -f)" #Redireciona o hostname atual
+  echo "  Redirect permanent / https://\${SERVER_NAME}/"
+  echo "</VirtualHost>"
+  } > /tmp/redirect.conf
+
+  cat /tmp/redirect.conf >> "$VIRTUALHOST_PATH"
+
+  rm /tmp/redirect.conf
+
+  echo "Configuração de redirecionamento HTTP para HTTPS adicionada a: $VIRTUALHOST_PATH"
+}
+
+# Função para reiniciar o Apache
+restart_apache() {
+  systemctl restart apache2
+  if [ $? -eq 0 ]; then
+    echo "Apache reiniciado com sucesso."
+  else
+    echo "Falha ao reiniciar o Apache."
+    exit 1
+  fi
+}
+
+# Função principal
+main() {
+  check_apache
+  enable_rewrite_module
+  create_redirect_virtualhost
+  restart_apache
+}
+
+# Executa a função principal
+main
+exit 0
+}
+{type: uploaded file
+fileName: aeta_19.txt
+fullContent:
+```bash
+#!/bin/bash
+
+# Este script corrige a vulnerabilidade de transmissão de informações sensíveis em texto puro via HTTP.
+# Ele configura um redirecionamento HTTP para HTTPS no servidor web Apache ou Nginx.
+
+# Detecta o servidor web utilizado (Apache ou Nginx)
+if command -v apache2ctl &> /dev/null; then
+  SERVER_TYPE="apache"
+elif command -v nginx &> /dev/null; then
+  SERVER_TYPE="nginx"
+else
+  echo "Servidor web Apache ou Nginx não detectado. Impossível configurar o redirecionamento."
+  exit 1
+fi
+
+# Configuração para Apache
+if [ "$SERVER_TYPE" == "apache" ]; then
+  # Habilita o módulo rewrite do Apache
+  sudo a2enmod rewrite
+
+  # Define o arquivo de configuração do VirtualHost HTTP padrão
+  VHOST_FILE="/etc/apache2/sites-available/000-default.conf"
+
+  # Cria um backup do arquivo de configuração original
+  sudo cp "$VHOST_FILE" "$VHOST_FILE.bak"
+
+  # Adiciona o redirecionamento para HTTPS no VirtualHost HTTP padrão
+  sudo sed -i "s|<VirtualHost \*:80>|<VirtualHost *:80>\n\tRewriteEngine On\n\tRewriteCond %{HTTPS} !=on\n\tRewriteRule ^/?(.*) https://%{SERVER_NAME}/\$1 [R=301,L]|g" "$VHOST_FILE"
+
+  # Reinicia o Apache para aplicar as alterações
+  sudo systemctl restart apache2
+  echo "Redirecionamento HTTP para HTTPS configurado no Apache. Reinicie o navegador e teste."
+
+# Configuração para Nginx
+elif [ "$SERVER_TYPE" == "nginx" ]; then
+  # Define o arquivo de configuração do servidor Nginx padrão
+  VHOST_FILE="/etc/nginx/sites-available/default"
+
+  # Cria um backup do arquivo de configuração original
+  sudo cp "$VHOST_FILE" "$VHOST_FILE.bak"
+
+  # Adiciona o redirecionamento para HTTPS no arquivo de configuração
+  sudo sed -i "s|listen 80 default_server;|listen 80 default_server;\n\treturn 301 https://\$host\$request_uri;|g" "$VHOST_FILE"
+  sudo sed -i "s|listen [::]:80 default_server;|listen [::]:80 default_server;\n\treturn 301 https://\$host\$request_uri;|g" "$VHOST_FILE"
+
+  # Reinicia o Nginx para aplicar as alterações
+  sudo systemctl restart nginx
+  echo "Redirecionamento HTTP para HTTPS configurado no Nginx. Reinicie o navegador e teste."
+fi
+
+exit 0
+```}
+{type: uploaded file
+fileName: aeta_20.txt
+fullContent:
+#!/bin/bash
+
+# Detecção do Sistema Operacional (genérico para Linux/Debian/Ubuntu)
+OS=$(uname -s)
+
+# Variáveis globais
+APACHE_CONFIG_FILE=""
+NGINX_CONFIG_FILE=""
+
+# Funções de tratamento de erros
+error_exit() {
+  echo "Erro: $1" >&2
+  exit 1
+}
+
+# Função para detectar e configurar o Apache
+configure_apache() {
+  # Localizar arquivo de configuração principal do Apache
+  if [[ -f /etc/apache2/apache2.conf ]]; then
+    APACHE_CONFIG_FILE="/etc/apache2/apache2.conf"
+  elif [[ -f /etc/httpd/conf/httpd.conf ]]; then
+    APACHE_CONFIG_FILE="/etc/httpd/conf/httpd.conf"
+  else
+    echo "Apache não detectado ou configuração não encontrada. Pulando configuração do Apache."
+    return
+  fi
+
+  # Verificar se o módulo mod_rewrite está habilitado
+  if ! apachectl -M | grep -q "rewrite_module (shared)"; then
+    echo "Habilitando mod_rewrite para Apache..."
+    sudo a2enmod rewrite
+  fi
+
+  # Adicionar redirecionamento HTTP para HTTPS ao arquivo de configuração
+  echo "Adicionando redirecionamento HTTP para HTTPS no arquivo de configuração do Apache..."
+  if [[ -f /etc/apache2/sites-available/000-default.conf ]]; then
+    SITE_CONFIG="/etc/apache2/sites-available/000-default.conf"
+    sudo sed -i 's|<VirtualHost \*:80>|<VirtualHost *:80>\n\tRewriteEngine On\n\tRewriteCond %{HTTPS} off\n\tRewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [R=301,L]|g' "$SITE_CONFIG"
+  elif [[ -f /etc/httpd/conf/httpd.conf ]]; then
+    sudo sed -i 's/<\/VirtualHost>/RewriteEngine On\nRewriteCond %{HTTPS} off\nRewriteRule ^(.*)$ https:\/\/%{HTTP_HOST}%{REQUEST_URI} [R=301,L]\n<\/VirtualHost>/g' "$APACHE_CONFIG_FILE"
+  else
+   echo "Arquivo de configuração do site padrão do Apache não encontrado."
+  fi
+  
+
+  # Reiniciar o Apache
+  echo "Reiniciando o Apache..."
+  sudo systemctl restart apache2 || sudo systemctl restart httpd
+}
+
+# Função para detectar e configurar o Nginx
+configure_nginx() {
+  # Localizar arquivo de configuração principal do Nginx
+  if [[ -f /etc/nginx/nginx.conf ]]; then
+    NGINX_CONFIG_FILE="/etc/nginx/nginx.conf"
+  elif [[ -f /usr/local/nginx/conf/nginx.conf ]]; then
+    NGINX_CONFIG_FILE="/usr/local/nginx/conf/nginx.conf"
+  else
+    echo "Nginx não detectado ou configuração não encontrada. Pulando configuração do Nginx."
+    return
+  fi
+
+  # Adicionar redirecionamento HTTP para HTTPS ao arquivo de configuração
+  echo "Adicionando redirecionamento HTTP para HTTPS no arquivo de configuração do Nginx..."
+
+  # Primeiro, tentar encontrar um bloco server que escuta na porta 80
+  if sudo grep -q "listen 80" "$NGINX_CONFIG_FILE"; then
+    sudo sed -i 's/listen 80;/listen 80;\n\t\treturn 301 https:\/\/${host}${request_uri};/g' "$NGINX_CONFIG_FILE"
+  else
+    # Se não encontrar, adicionar um bloco server padrão para redirecionamento
+    echo "Adicionando bloco server para redirecionamento HTTP para HTTPS..."
+    REDIRECT_BLOCK="server {\n\tlisten 80;\n\tserver_name _;\n\treturn 301 https://\$host\$request_uri;\n}"
+    sudo sed -i '$i'"\n$REDIRECT_BLOCK\n" "$NGINX_CONFIG_FILE"
+  fi
+
+  # Reiniciar o Nginx
+  echo "Reiniciando o Nginx..."
+  sudo systemctl restart nginx
+}
+
+# Função principal para executar as configurações
+main() {
+  echo "Iniciando correção para redirecionamento HTTP para HTTPS..."
+
+  # Verificar se é root
+  if [[ $EUID -ne 0 ]]; then
+    error_exit "Este script precisa ser executado como root."
+  fi
+
+  # Detectar e configurar Apache
+  if command -v apachectl &> /dev/null; then
+    echo "Detectado Apache..."
+    configure_apache
+  fi
+
+  # Detectar e configurar Nginx
+  if command -v nginx &> /dev/null; then
+    echo "Detectado Nginx..."
+    configure_nginx
+  fi
+
+  echo "Correção concluída."
+}
+
+# Executar a função principal
+main
+}
+{type: uploaded file
+fileName: aeta_21.txt
+fullContent:
+```bash
+#!/bin/bash
+
+# Este script tenta mitigar a transmissão de informações sensíveis em texto claro via HTTP.
+# Ele assume que o servidor web é Apache ou Nginx e tenta configurar redirecionamentos para HTTPS.
+
+# Variáveis
+WEB_SERVER=$(ps -ef | grep -E 'apache2|nginx' | grep -v grep | awk '{print $8}')
+LETSENCRYPT_INSTALLED=$(command -v certbot)
+
+# Função para verificar se um comando existe
+command_exists() {
+  command -v "$1" >/dev/null 2>&1
+}
+
+# Função para instalar o Certbot se não estiver instalado
+install_certbot() {
+  if [ -z "$LETSENCRYPT_INSTALLED" ]; then
+    echo "Certbot não encontrado. Tentando instalar..."
+    if command_exists apt-get; then
+      apt-get update
+      apt-get install -y certbot python3-certbot-apache python3-certbot-nginx
+    elif command_exists yum; then
+      yum install -y epel-release
+      yum install -y certbot python3-certbot-apache python3-certbot-nginx
+    elif command_exists dnf; then
+      dnf install -y certbot python3-certbot-apache python3-certbot-nginx
+    else
+      echo "Gerenciador de pacotes não suportado. Instale o Certbot manualmente."
+      exit 1
+    fi
+    LETSENCRYPT_INSTALLED=$(command -v certbot)
+    if [ -z "$LETSENCRYPT_INSTALLED" ]; then
+      echo "Falha ao instalar o Certbot. Verifique a saída e tente instalar manualmente."
+      exit 1
+    fi
+  fi
+}
+
+# Redirecionamento para HTTPS para Apache
+apache_redirect_https() {
+  if [ -f /etc/apache2/apache2.conf ]; then
+    echo "Configurando redirecionamento HTTPS para Apache..."
+    # Habilita o módulo rewrite se não estiver habilitado
+    if ! a2enmod rewrite > /dev/null 2>&1; then
+      echo "Habilitando o módulo rewrite para Apache..."
+      a2enmod rewrite
+    fi
+
+    # Adiciona redirecionamento HTTPS para o arquivo de configuração padrão
+    if [ -f /etc/apache2/sites-available/000-default.conf ]; then
+        echo "Adicionando redirecionamento ao arquivo de configuração padrão (000-default.conf)..."
+        sed -i 's/<\/VirtualHost>/  RewriteEngine On\n  RewriteCond %{HTTPS} off\n  RewriteRule ^(.*)$ https:\/\/%{HTTP_HOST}%{REQUEST_URI} [L,R=301]\n<\/VirtualHost>/' /etc/apache2/sites-available/000-default.conf
+    fi
+
+    # Adiciona redirecionamento HTTPS para o arquivo de configuração padrão SSL
+    if [ -f /etc/apache2/sites-available/default-ssl.conf ]; then
+        echo "Adicionando redirecionamento ao arquivo de configuração SSL padrão (default-ssl.conf)..."
+        sed -i 's/<\/VirtualHost>/<\/VirtualHost>/' /etc/apache2/sites-available/default-ssl.conf # Placeholder para garantir que o arquivo existe (sem alterações)
+    fi
+    systemctl restart apache2
+  elif [ -f /etc/httpd/conf/httpd.conf ]; then
+    echo "Configurando redirecionamento HTTPS para Apache (CentOS/RHEL)..."
+
+    # Habilita o módulo rewrite se não estiver habilitado
+    if ! httpd -M | grep -q rewrite_module; then
+      echo "Habilitando o módulo rewrite para Apache..."
+      sed -i 's/^#LoadModule rewrite_module/LoadModule rewrite_module/' /etc/httpd/conf/httpd.conf
+    fi
+
+    # Adiciona redirecionamento HTTPS ao arquivo de configuração
+        echo "Adicionando redirecionamento ao arquivo de configuração..."
+        sed -i 's/<\/VirtualHost>/  RewriteEngine On\n  RewriteCond %{HTTPS} off\n  RewriteRule ^(.*)$ https:\/\/%{HTTP_HOST}%{REQUEST_URI} [L,R=301]\n<\/VirtualHost>/' /etc/httpd/conf/httpd.conf
+    systemctl restart httpd
+  else
+    echo "Configuração do Apache não encontrada."
+    return 1
+  fi
+  return 0
+}
+
+# Redirecionamento para HTTPS para Nginx
+nginx_redirect_https() {
+  if [ -f /etc/nginx/nginx.conf ]; then
+    echo "Configurando redirecionamento HTTPS para Nginx..."
+    # Adiciona redirecionamento HTTPS ao bloco server padrão
+    if [ -f /etc/nginx/conf.d/default.conf ]; then
+      echo "Adicionando redirecionamento ao arquivo de configuração padrão (default.conf)..."
+      sed -i 's/listen 80 default_server;/listen 80 default_server;\n  return 301 https:\/\/$host$request_uri;/' /etc/nginx/conf.d/default.conf
+    elif [ -f /etc/nginx/sites-available/default ]; then
+      echo "Adicionando redirecionamento ao arquivo de configuração padrão (sites-available/default)..."
+      sed -i 's/listen 80 default_server;/listen 80 default_server;\n  return 301 https:\/\/$host$request_uri;/' /etc/nginx/sites-available/default
+    else
+      echo "Arquivo de configuração padrão do Nginx não encontrado."
+      return 1
+    fi
+    systemctl restart nginx
+  else
+    echo "Configuração do Nginx não encontrada."
+    return 1
+  fi
+  return 0
+}
+
+# Lógica principal
+if [ -n "$WEB_SERVER" ]; then
+  if [[ "$WEB_SERVER" == *"apache"* ]]; then
+    apache_redirect_https
+    if [ $? -eq 0 ]; then
+      echo "Redirecionamento HTTPS configurado para Apache. Considere usar Certbot para configurar o HTTPS."
+    fi
+  elif [[ "$WEB_SERVER" == *"nginx"* ]]; then
+    nginx_redirect_https
+    if [ $? -eq 0 ]; then
+      echo "Redirecionamento HTTPS configurado para Nginx. Considere usar Certbot para configurar o HTTPS."
+    fi
+  else
+    echo "Servidor web não reconhecido."
+  fi
+else
+  echo "Nenhum servidor web (Apache ou Nginx) detectado."
+fi
+
+echo "Script finalizado. Verifique a configuração do seu servidor web e considere usar Certbot para configurar o HTTPS."
+```}
+{type: uploaded file
+fileName: aeta_22.txt
+fullContent:
+```bash
+#!/bin/bash
+
+# Script para redirecionar tráfego HTTP para HTTPS e desabilitar HTTP.
+# Assumindo Apache como servidor web. Ajuste conforme necessário para outros servidores.
+
+# 1. Detectar o servidor web utilizado
+SERVER_TYPE=$(ps aux | grep -E 'apache2|httpd|nginx' | awk '{print $11}' | head -n 1)
+
+# 2. Configurar o redirecionamento para Apache
+if [[ "$SERVER_TYPE" == *"apache2"* ]]; then
+  # Verificar se o módulo mod_rewrite está habilitado
+  if ! apache2ctl -M | grep -q rewrite_module; then
+    echo "Habilitando mod_rewrite..."
+    a2enmod rewrite
+  fi
+
+  # Criar/Modificar o arquivo .htaccess na raiz do site para redirecionar HTTP para HTTPS
+  echo "
+RewriteEngine On
+RewriteCond %{HTTPS} off
+RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+" > /var/www/html/.htaccess
+
+  # Configurar o VirtualHost HTTP para redirecionar permanentemente para HTTPS
+  HTTP_VHOST_FILE="/etc/apache2/sites-available/000-default.conf" # Ajuste o nome do arquivo se necessário
+  
+  # Fazer um backup do arquivo de configuração original
+  cp -n "$HTTP_VHOST_FILE" "$HTTP_VHOST_FILE.bak"
+
+  # Desabilitar o VirtualHost HTTP padrão ou redirecionar tudo para HTTPS
+  # O método abaixo é mais robusto: Alterar a porta para uma não utilizada e retornar erro.
+  sed -i 's/Listen 80/Listen 12345/g' "$HTTP_VHOST_FILE" #Altera a porta para uma não utilizada
+
+  # Reiniciar o Apache para aplicar as mudanças
+  echo "Reiniciando Apache..."
+  systemctl restart apache2
+
+# 3. Configurar o redirecionamento para Nginx
+elif [[ "$SERVER_TYPE" == *"nginx"* ]]; then
+  # Editar o arquivo de configuração do Nginx para redirecionar HTTP para HTTPS
+  NGINX_CONFIG_FILE="/etc/nginx/conf.d/default.conf" # Ajuste o nome do arquivo se necessário
+
+  # Fazer um backup do arquivo de configuração original
+  cp -n "$NGINX_CONFIG_FILE" "$NGINX_CONFIG_FILE.bak"
+
+  # Adicionar o bloco de redirecionamento no arquivo de configuração
+  echo "
+server {
+    listen 80;
+    server_name  _; # Escuta em todos os nomes de host.  Altere se necessário para o nome do seu domínio.
+    return 301 https://\$host\$request_uri;
+}
+" >> "$NGINX_CONFIG_FILE"
+
+  # Reiniciar o Nginx para aplicar as mudanças
+  echo "Reiniciando Nginx..."
+  systemctl restart nginx
+
+else
+  echo "Servidor web não detectado automaticamente. Por favor, configure o redirecionamento HTTP para HTTPS manualmente."
+  exit 1
+fi
+
+echo "Redirecionamento HTTP para HTTPS configurado com sucesso."
+echo "Verifique se o site está acessível via HTTPS e se o redirecionamento está funcionando corretamente."
+
+exit 0
+```}
+{type: uploaded file
+fileName: aeta_23.txt
+fullContent:
+```bash
+#!/bin/bash
+
+# Este script tem como objetivo mitigar a vulnerabilidade de transmissão de informações sensíveis em texto plano via HTTP.
+# Ele configura o redirecionamento de HTTP para HTTPS no servidor web Apache ou Nginx.
+
+# Detecta o servidor web em uso (Apache ou Nginx)
+if command -v apache2ctl &> /dev/null; then
+  WEB_SERVER="apache"
+elif [ -f /etc/nginx/nginx.conf ]; then
+  WEB_SERVER="nginx"
+else
+  echo "Servidor web não detectado.  Este script requer Apache ou Nginx."
+  exit 1
+fi
+
+# Configuração para Apache
+if [ "$WEB_SERVER" = "apache" ]; then
+  # 1. Habilita o módulo rewrite do Apache se não estiver habilitado
+  if ! apache2ctl -M | grep -q "rewrite_module"; then
+    sudo a2enmod rewrite
+  fi
+
+  # 2. Adiciona a regra de redirecionamento para o arquivo de configuração do VirtualHost padrão (porta 80)
+  #    Este bloco tenta encontrar o VirtualHost padrão e inserir a regra de redirecionamento.
+  VHOST_FILE=$(find /etc/apache2/sites-enabled/ -name "000-default.conf" 2>/dev/null)
+
+  if [ -z "$VHOST_FILE" ]; then
+      VHOST_FILE=$(find /etc/apache2/sites-enabled/ -name "default.conf" 2>/dev/null)
+      if [ -z "$VHOST_FILE" ]; then
+          echo "Arquivo VirtualHost padrão não encontrado.  Por favor, configure o redirecionamento manualmente."
+          exit 1
+      fi
+  fi
+
+  # Garante que o arquivo VirtualHost exista e seja legível
+  if [ ! -r "$VHOST_FILE" ]; then
+      echo "Arquivo VirtualHost $VHOST_FILE não encontrado ou ilegível. Verifique as permissões."
+      exit 1
+  fi
+
+  # Cria um backup do arquivo VirtualHost
+  sudo cp "$VHOST_FILE" "$VHOST_FILE.backup.$(date +%Y%m%d%H%M%S)"
+
+  # Adiciona a regra de redirecionamento
+  sudo sed -i '
+  <VirtualHost *:80>
+  #Redirecionamento HTTP para HTTPS
+  RewriteEngine On
+  RewriteCond %{HTTPS} !=on
+  RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+  </VirtualHost>
+  ' "$VHOST_FILE"
+  echo "Redirecionamento HTTP para HTTPS adicionado ao arquivo VirtualHost $VHOST_FILE."
+
+
+  # 3. Reinicia o Apache para aplicar as alterações
+  sudo systemctl restart apache2
+
+  echo "Servidor Apache reiniciado."
+fi
+
+# Configuração para Nginx
+if [ "$WEB_SERVER" = "nginx" ]; then
+  # 1. Localiza o arquivo de configuração do bloco server padrão (porta 80)
+  CONFIG_FILE=$(find /etc/nginx/sites-enabled/ -name "default" 2>/dev/null)
+
+  if [ -z "$CONFIG_FILE" ]; then
+      echo "Arquivo de configuração padrão do Nginx não encontrado. Por favor, configure o redirecionamento manualmente."
+      exit 1
+  fi
+
+  # Garante que o arquivo de configuração exista e seja legível
+  if [ ! -r "$CONFIG_FILE" ]; then
+      echo "Arquivo de configuração $CONFIG_FILE não encontrado ou ilegível. Verifique as permissões."
+      exit 1
+  fi
+
+  # Cria um backup do arquivo de configuração
+  sudo cp "$CONFIG_FILE" "$CONFIG_FILE.backup.$(date +%Y%m%d%H%M%S)"
+
+  # 2. Adiciona a regra de redirecionamento para o arquivo de configuração
+  sudo sed -i '
+  server {
+      listen 80;
+      server_name _;
+      return 301 https://$host$request_uri;
+  }
+  ' "$CONFIG_FILE"
+
+  echo "Redirecionamento HTTP para HTTPS adicionado ao arquivo de configuração $CONFIG_FILE."
+  # 3. Reinicia o Nginx para aplicar as alterações
+  sudo systemctl restart nginx
+
+  echo "Servidor Nginx reiniciado."
+fi
+
+echo "Redirecionamento de HTTP para HTTPS configurado.  Certifique-se de que o HTTPS esteja corretamente configurado (certificado SSL/TLS instalado)."
+
+exit 0
+```}
+{type: uploaded file
+fileName: aeta_24.txt
+fullContent:
+```bash
+#!/bin/bash
+
+# Este script corrige a vulnerabilidade de transmissão de informações sensíveis em texto claro via HTTP,
+# redirecionando todo o tráfego HTTP para HTTPS.
+
+# Assume-se que o servidor web é Apache e que o módulo mod_rewrite está habilitado.
+# Adapte este script para o seu servidor web específico, se necessário.
+
+# 1. Verifica se o Apache está instalado
+if ! command -v apache2ctl &> /dev/null; then
+  echo "Apache não está instalado. Por favor, instale-o antes de executar este script."
+  exit 1
+fi
+
+# 2. Verifica se o mod_rewrite está habilitado
+if ! apache2ctl -M | grep -q "rewrite_module (shared)"; then
+  echo "mod_rewrite não está habilitado. Habilitando..."
+  sudo a2enmod rewrite
+  if [ $? -ne 0 ]; then
+    echo "Falha ao habilitar mod_rewrite. Verifique as permissões e tente novamente."
+    exit 1
+  fi
+  echo "mod_rewrite habilitado."
+  sudo systemctl restart apache2
+fi
+
+# 3. Configura o Virtual Host padrão (porta 80) para redirecionar para HTTPS
+VHOST_FILE="/etc/apache2/sites-available/000-default.conf"
+
+# Cria um backup do arquivo de configuração original
+sudo cp "$VHOST_FILE" "$VHOST_FILE.bak"
+
+# Adiciona a configuração de redirecionamento
+echo "<VirtualHost *:80>
+    ServerName \$(hostname)
+    Redirect permanent / https://\${SERVER_NAME}\${REQUEST_URI}
+</VirtualHost>" | sudo tee "$VHOST_FILE"
+
+# 4. Reinicia o Apache para aplicar as alterações
+sudo systemctl restart apache2
+
+echo "Redirecionamento HTTP para HTTPS configurado. Reinicie o navegador e teste."
+
+exit 0
+```}
+{type: uploaded file
+fileName: aeta_25.txt
+fullContent:
+#!/bin/bash
+
+# Script para mitigar a vulnerabilidade de transmissão de informações sensíveis em texto plano via HTTP.
+# Este script configura um redirecionamento automático de HTTP para HTTPS e desabilita o HTTP.
+# Assume-se que um servidor web (Apache ou Nginx) já esteja instalado e configurado para servir HTTPS.
+
+# Variáveis
+WEB_SERVER=""
+
+# Detecta o servidor web em uso (Apache ou Nginx)
+if command -v apache2ctl &> /dev/null; then
+  WEB_SERVER="apache"
+elif [ -f /etc/nginx/nginx.conf ]; then
+  WEB_SERVER="nginx"
+else
+  echo "Servidor web não detectado. Por favor, instale e configure o Apache ou Nginx para HTTPS antes de executar este script."
+  exit 1
+fi
+
+# Configuração para Apache
+if [ "$WEB_SERVER" = "apache" ]; then
+  # Cria um arquivo de configuração virtual host para redirecionamento HTTP para HTTPS
+  echo "<VirtualHost *:80>
+    ServerName \$(hostname)
+    Redirect permanent / https://\${SERVER_NAME}/
+  </VirtualHost>" > /etc/apache2/sites-available/http_redirect.conf
+
+  # Habilita o site de redirecionamento
+  a2ensite http_redirect.conf
+
+  # Desabilita o site padrão HTTP
+  a2dissite 000-default.conf
+
+  # Reinicia o Apache
+  systemctl restart apache2
+  echo "Redirecionamento HTTP para HTTPS configurado para Apache. Site HTTP padrão desabilitado."
+fi
+
+# Configuração para Nginx
+if [ "$WEB_SERVER" = "nginx" ]; then
+  # Cria um arquivo de configuração para redirecionamento HTTP para HTTPS
+  echo "server {
+    listen 80;
+    server_name \$(hostname);
+    return 301 https://\$host\$request_uri;
+  }" > /etc/nginx/sites-available/http_redirect
+
+  # Cria um link simbólico para habilitar o site
+  ln -s /etc/nginx/sites-available/http_redirect /etc/nginx/sites-enabled/
+
+  # Remove a configuração padrão
+  rm /etc/nginx/sites-enabled/default
+
+  # Reinicia o Nginx
+  systemctl restart nginx
+  echo "Redirecionamento HTTP para HTTPS configurado para Nginx. Configuração HTTP padrão removida."
+fi
+
+echo "Script de correção concluído.  Verifique se o redirecionamento HTTP para HTTPS está funcionando corretamente."
+
+exit 0
+}
+{type: uploaded file
+fileName: aeta_26.txt
+fullContent:
+#!/bin/bash
+
+# Este script corrige a vulnerabilidade de transmissão de informações sensíveis em texto claro via HTTP,
+# redirecionando todo o tráfego HTTP para HTTPS.
+
+# Variáveis
+HTTP_PORT=80
+HTTPS_PORT=443
+DOMAIN="example.com" # Substitua por seu domínio
+SSL_CERT_PATH="/etc/ssl/certs/ssl-cert-snakeoil.pem" # Caminho para o certificado SSL
+SSL_KEY_PATH="/etc/ssl/private/ssl-cert-snakeoil.key" # Caminho para a chave SSL
+
+# 1. Detecta o sistema operacional
+if command -v systemctl &> /dev/null; then
+    OS="systemd"
+elif command -v service &> /dev/null; then
+    OS="sysvinit"
+else
+    echo "Sistema init desconhecido."
+    exit 1
+fi
+
+# 2. Instala o Apache (se não estiver instalado)
+if ! command -v apache2 &> /dev/null; then
+    apt update && apt install -y apache2
+fi
+
+# 3. Habilita o módulo rewrite do Apache
+a2enmod rewrite
+
+# 4. Configura um Virtual Host para redirecionar HTTP para HTTPS
+
+VHOST_CONFIG="/etc/apache2/sites-available/000-default.conf" # Arquivo de configuração original
+TEMP_VHOST="/tmp/000-default.conf.tmp"
+
+# Remove todas as linhas comentadas e os VirtualHosts existentes
+sed '/^\s*#.*$/d' "$VHOST_CONFIG" > "$TEMP_VHOST"
+sed '/<VirtualHost *:80>/,/<\/VirtualHost>/d' "$TEMP_VHOST" > "$VHOST_CONFIG"
+rm "$TEMP_VHOST"
+
+echo "<VirtualHost *:$HTTP_PORT>
+        ServerName $DOMAIN
+        Redirect permanent / https://$DOMAIN/
+</VirtualHost>" >> "$VHOST_CONFIG"
+
+
+# 5. Configura um Virtual Host padrão para HTTPS (se não existir) - usando certificado autoassinado
+if [ ! -f /etc/apache2/sites-available/default-ssl.conf ]; then
+    cat > /etc/apache2/sites-available/default-ssl.conf <<EOL
+<IfModule mod_ssl.c>
+        <VirtualHost _default_:$HTTPS_PORT>
+
+                ServerAdmin webmaster@localhost
+                ServerName $DOMAIN
+
+                DocumentRoot /var/www/html
+
+                ErrorLog \${APACHE_LOG_DIR}/error.log
+                CustomLog \${APACHE_LOG_DIR}/access.log combined
+
+                SSLEngine on
+
+                SSLCertFile $SSL_CERT_PATH
+                SSLCertificateKeyFile $SSL_KEY_PATH
+
+                <FilesMatch "\.(cgi|shtml|phtml|php)$">
+                                SSLOptions +StdEnvVars
+                </FilesMatch>
+                <Directory /usr/lib/cgi-bin>
+                                SSLOptions +ExecCGI
+                </Directory>
+
+                <Directory /var/www/>
+                        Options Indexes FollowSymLinks MultiViews
+                        AllowOverride All
+                        Require all granted
+                </Directory>
+
+
+        </VirtualHost>
+</IfModule>
+EOL
+fi
+
+#Habilita SSL (se não estiver habilitado)
+if ! a2enmod ssl &> /dev/null; then
+    a2enmod ssl
+fi
+
+# Ativa o site padrão SSL
+a2ensite default-ssl.conf
+
+# 6. Reinicia o Apache
+if [[ "$OS" == "systemd" ]]; then
+    systemctl restart apache2
+elif [[ "$OS" == "sysvinit" ]]; then
+    service apache2 restart
+fi
+
+echo "Redirecionamento HTTP para HTTPS configurado. Reinicie o navegador e acesse o site."
+exit 0
+}
+{type: uploaded file
+fileName: aeta_27.txt
+fullContent:
+```bash
+#!/bin/bash
+
+# Este script corrige a vulnerabilidade de transmissão de informações sensíveis em texto puro via HTTP,
+# redirecionando todo o tráfego HTTP para HTTPS.  Ele assume que você já tem um servidor HTTPS configurado e funcional.
+# Este script é específico para servidores Apache em sistemas baseados em Debian/Ubuntu.
+
+# 1. Detectar o sistema operacional (opcional, mas recomendado para garantir compatibilidade)
+if [ -f /etc/os-release ]; then
+  source /etc/os-release
+  OS=$ID
+else
+  OS="unknown"
+fi
+
+# 2. Detectar o servidor web (Apache)
+if command -v apache2ctl &> /dev/null; then
+  WEB_SERVER="apache2"
+elif command -v httpd &> /dev/null; then
+  WEB_SERVER="httpd"
+else
+  echo "Nenhum servidor web Apache detectado.  Por favor, instale e configure o Apache primeiro."
+  exit 1
+fi
+
+# 3. Configurar o redirecionamento HTTP para HTTPS no Apache
+
+# Localizar o arquivo de configuração virtual host padrão do Apache
+if [ "$WEB_SERVER" == "apache2" ]; then
+  DEFAULT_VHOST_FILE="/etc/apache2/sites-available/000-default.conf"
+elif [ "$WEB_SERVER" == "httpd" ]; then
+  DEFAULT_VHOST_FILE="/etc/httpd/conf/httpd.conf" # Pode variar dependendo da distribuição
+  echo "Atenção: A localização padrão do arquivo de configuração do Apache (httpd) pode variar na sua distribuição.  Verifique a localização correta."
+fi
+
+# Criar um arquivo de configuração virtual host para redirecionamento HTTP para HTTPS
+REDIRECT_VHOST_FILE="/tmp/redirect_http_to_https.conf"
+
+cat > "$REDIRECT_VHOST_FILE" <<EOF
+<VirtualHost *:80>
+    ServerName \$(hostname)  # Redireciona para o hostname atual
+
+    Redirect permanent / https://\${SERVER_NAME}\${REQUEST_URI}
+</VirtualHost>
+EOF
+
+
+# Habilitar o arquivo de configuração de redirecionamento
+if [ "$WEB_SERVER" == "apache2" ]; then
+  sudo a2ensite "/tmp/redirect_http_to_https.conf"
+elif [ "$WEB_SERVER" == "httpd" ]; then
+  # Para httpd, geralmente envolve adicionar 'Include /tmp/redirect_http_to_https.conf' ao arquivo de configuração principal.  Como isso varia muito, deixo essa parte manual.
+  echo "Para o httpd, adicione 'Include $REDIRECT_VHOST_FILE' ao arquivo de configuração principal do Apache (geralmente /etc/httpd/conf/httpd.conf) e reinicie o servidor."
+  exit 1
+fi
+
+# 4. Reiniciar o servidor Apache para aplicar as alterações
+if [ "$WEB_SERVER" == "apache2" ]; then
+  sudo systemctl restart apache2
+elif [ "$WEB_SERVER" == "httpd" ]; then
+  sudo systemctl restart httpd
+fi
+
+echo "Redirecionamento HTTP para HTTPS configurado.  Verifique se está funcionando corretamente."
+```}
+{type: uploaded file
+fileName: aeta_28.txt
+fullContent:
+```bash
+#!/bin/bash
+
+# Este script tem como objetivo mitigar a vulnerabilidade de transmissão de informações sensíveis em texto puro via HTTP.
+# Ele configura um redirecionamento de HTTP para HTTPS no servidor web Apache ou Nginx.
+
+# Variáveis
+SERVER_TYPE=""
+DOMAIN=""
+
+# Função para detectar o tipo de servidor web (Apache ou Nginx)
+detect_server_type() {
+  if command -v apache2ctl &> /dev/null; then
+    SERVER_TYPE="apache"
+    echo "Servidor web detectado: Apache"
+  elif command -v nginx &> /dev/null; then
+    SERVER_TYPE="nginx"
+    echo "Servidor web detectado: Nginx"
+  else
+    echo "Servidor web não detectado. Apache ou Nginx devem estar instalados."
+    exit 1
+  fi
+}
+
+# Função para obter o nome do domínio do usuário
+get_domain() {
+  read -p "Por favor, insira o nome do domínio (ex: example.com): " DOMAIN
+  if [ -z "$DOMAIN" ]; then
+    echo "Nome do domínio não pode ser vazio."
+    exit 1
+  fi
+}
+
+# Configuração para Apache
+configure_apache() {
+  # Habilitar mod_rewrite
+  if ! a2enmod rewrite &> /dev/null; then
+    echo "Falha ao habilitar mod_rewrite. Verifique se o Apache está instalado corretamente."
+    exit 1
+  fi
+
+  # Criar arquivo de configuração VirtualHost para redirecionamento HTTP para HTTPS
+  VHOST_FILE="/etc/apache2/sites-available/000-default.conf" # Ajuste para o nome do arquivo VirtualHost padrão.
+  if [ ! -f "$VHOST_FILE" ]; then
+    echo "Arquivo VirtualHost padrão não encontrado: $VHOST_FILE"
+    echo "Por favor, ajuste a variável VHOST_FILE no script."
+    exit 1
+  fi
+
+  # Fazer backup do arquivo original
+  cp "$VHOST_FILE" "$VHOST_FILE.backup"
+
+  # Adicionar a configuração de redirecionamento no início do arquivo VirtualHost
+  sed -i '1i\
+<VirtualHost *:80>\n\
+        ServerName '"$DOMAIN"'\n\
+        Redirect permanent / https://'"$DOMAIN"'\n\
+</VirtualHost>\n' "$VHOST_FILE"
+
+  # Reiniciar Apache
+  systemctl restart apache2
+  echo "Apache configurado para redirecionar HTTP para HTTPS."
+}
+
+# Configuração para Nginx
+configure_nginx() {
+  # Encontrar o arquivo de configuração do servidor padrão
+  CONFIG_FILE="/etc/nginx/conf.d/default.conf" # Ajuste para o nome do arquivo de configuração padrão do Nginx.
+  if [ ! -f "$CONFIG_FILE" ]; then
+    CONFIG_FILE="/etc/nginx/sites-available/default"
+    if [ ! -f "$CONFIG_FILE" ]; then
+      echo "Arquivo de configuração padrão do Nginx não encontrado. Verifique a instalação."
+      exit 1
+    fi
+  fi
+
+  # Fazer backup do arquivo original
+  cp "$CONFIG_FILE" "$CONFIG_FILE.backup"
+
+  # Adicionar a configuração de redirecionamento
+  sed -i 's/listen 80;/listen 80;\n\
+\n\
+    server_name '"$DOMAIN"';\n\
+    return 301 https://$host$request_uri;/' "$CONFIG_FILE"
+
+  # Reiniciar Nginx
+  systemctl restart nginx
+  echo "Nginx configurado para redirecionar HTTP para HTTPS."
+}
+
+# Execução principal
+detect_server_type
+get_domain
+
+if [ "$SERVER_TYPE" == "apache" ]; then
+  configure_apache
+elif [ "$SERVER_TYPE" == "nginx" ]; then
+  configure_nginx
+fi
+
+echo "Redirecionamento HTTP para HTTPS configurado com sucesso para o domínio $DOMAIN."
+exit 0
+```}
+{type: uploaded file
+fileName: aeta_29.txt
+fullContent:
+```bash
+#!/bin/bash
+
+# Descrição: Este script hardening tem como objetivo mitigar a vulnerabilidade de transmissão de informações sensíveis em texto claro via HTTP, implementando o redirecionamento para HTTPS e desabilitando o acesso HTTP.
+# Ele assume que você está usando o Apache como servidor web.  Adapte-o conforme necessário para outros servidores web.
+
+# Variáveis
+HTTP_PORT=80
+HTTPS_PORT=443
+APACHE_CONFIG_DIR="/etc/apache2/sites-available" # Adaptar para o sistema (ex: /etc/httpd/conf.d)
+DEFAULT_SITE="000-default.conf" # Nome do arquivo de configuração do site padrão. Adaptar se necessário.
+
+# 1. Desabilitar o site HTTP padrão
+a2dissite 000-default.conf
+# 2. Criar arquivo de configuração para redirecionamento HTTP para HTTPS
+REDIRECT_FILE="http-redirect.conf"
+echo "<VirtualHost *:80>
+    ServerName \$(hostname)  # Redireciona para o hostname atual
+    Redirect permanent / https://\${SERVER_NAME}/
+</VirtualHost>" > "$APACHE_CONFIG_DIR/$REDIRECT_FILE"
+
+# 3. Ativar o site de redirecionamento
+a2ensite "$REDIRECT_FILE"
+
+# 4. Verificar se o HTTPS está configurado. Se não, configurar com certificado auto-assinado (para fins de demonstração. Em produção, usar Let's Encrypt ou um certificado válido)
+if ! ss -ltn | grep -q ":$HTTPS_PORT"; then
+    echo "HTTPS não configurado. Gerando certificado auto-assinado e configurando o site default-ssl."
+    apt-get update && apt-get install -y openssl apache2-utils 2>/dev/null # Suprime erros se já instalado
+    openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout /etc/ssl/private/apache-selfsigned.key -out /etc/ssl/certs/apache-selfsigned.crt -subj "/CN=$(hostname)" > /dev/null 2>&1
+    DEFAULT_SSL_SITE="default-ssl.conf"
+    if [ ! -f "$APACHE_CONFIG_DIR/$DEFAULT_SSL_SITE" ]; then
+        cp /etc/apache2/sites-available/default-ssl.conf.template "$APACHE_CONFIG_DIR/$DEFAULT_SSL_SITE"  # Para Debian/Ubuntu. Adapte para outros sistemas.
+    fi
+    sed -i "s,\${APACHE_LOG_DIR}/error.log,\${APACHE_LOG_DIR}/error.log,g" "$APACHE_CONFIG_DIR/$DEFAULT_SSL_SITE"
+    sed -i "s,\${APACHE_LOG_DIR}/access.log,\${APACHE_LOG_DIR}/access.log,g" "$APACHE_CONFIG_DIR/$DEFAULT_SSL_SITE"
+    sed -i "s,/etc/ssl/certs/ssl-cert-snakeoil.pem,/etc/ssl/certs/apache-selfsigned.crt,g" "$APACHE_CONFIG_DIR/$DEFAULT_SSL_SITE"
+    sed -i "s,/etc/ssl/private/ssl-cert-snakeoil.key,/etc/ssl/private/apache-selfsigned.key,g" "$APACHE_CONFIG_DIR/$DEFAULT_SSL_SITE"
+    a2enmod ssl
+    a2ensite default-ssl.conf
+else
+    echo "HTTPS já configurado."
+fi
+# 5. Reiniciar o Apache para aplicar as alterações
+systemctl restart apache2
+
+echo "Redirecionamento HTTP para HTTPS configurado.  Acesso HTTP desabilitado.  HTTPS ativado (se já não estava)."
+exit 0
+```}
+{type: uploaded file
+fileName: aeta_30.txt
+fullContent:
+#!/bin/bash
+
+# Este script corrige a vulnerabilidade de transmissão de informações sensíveis em texto plano via HTTP.
+# Ele configura o redirecionamento de HTTP para HTTPS e implementa práticas recomendadas de segurança.
+
+# Variáveis
+HTTP_PORT=80
+HTTPS_PORT=443
+DOMINIO="seu_dominio.com" # Substitua pelo seu domínio
+NOME_CERTIFICADO="seu_dominio.com" # Substitua pelo nome do seu certificado
+
+# 1. Instalação do Certbot (se necessário)
+# Adapte o comando de instalação de acordo com sua distribuição Linux
+apt update && apt install -y certbot python3-certbot-nginx  # Exemplo para Debian/Ubuntu
+
+# 2. Obtenção de um certificado SSL/TLS (se necessário)
+# Certbot pode gerar certificados Let's Encrypt automaticamente
+# Substitua 'seu_email@exemplo.com' por um endereço de e-mail válido.
+certbot --nginx -d $DOMINIO -d www.$DOMINIO --email seu_email@exemplo.com --agree-tos --non-interactive --redirect --hsts --staple --must-staple
+
+# 3. Configuração do Nginx para redirecionamento HTTP para HTTPS
+# Este bloco adiciona um arquivo de configuração para o Nginx que redireciona todo o tráfego HTTP para HTTPS.
+cat <<EOF > /etc/nginx/conf.d/http_redirect.conf
+server {
+    listen $HTTP_PORT;
+    server_name $DOMINIO www.$DOMINIO;
+    return 301 https://\$host\$request_uri;
+}
+EOF
+
+# 4. Reiniciar o Nginx para aplicar as mudanças
+systemctl restart nginx
+
+# 5. Configuração adicional de segurança (opcional, mas recomendado)
+# Ajustar as configurações do Nginx para maior segurança
+# Exemplo: Desativar TLSv1 e TLSv1.1 (adicione ao bloco 'server' HTTPS do arquivo de configuração do seu domínio)
+
+# 6. Testar a configuração
+# Use um navegador para acessar o site via HTTP e verifique se o redirecionamento para HTTPS funciona corretamente.
+# Exemplo: http://seu_dominio.com
+
+echo "Script de correção concluído. Verifique se o redirecionamento HTTP para HTTPS está funcionando corretamente."
+echo "Lembre-se de substituir 'seu_dominio.com' e 'seu_email@exemplo.com' pelos seus valores reais."
+exit 0
+}
+{type: uploaded file
+fileName: aeta_31.txt
+fullContent:
+#!/bin/bash
+
+# Script para mitigar a vulnerabilidade de transmissão de informações sensíveis em texto claro via HTTP.
+# Este script assume que o servidor web é Apache e tenta redirecionar todas as conexões HTTP para HTTPS.
+
+# Variável para armazenar o arquivo de configuração do Apache
+APACHE_CONFIG_FILE="/etc/apache2/sites-available/000-default.conf"
+
+# Verifica se o Apache está instalado
+if ! command -v apache2ctl &> /dev/null; then
+  echo "Apache não está instalado. Por favor, instale o Apache antes de executar este script."
+  exit 1
+fi
+
+# Verifica se o arquivo de configuração do Apache existe
+if [ ! -f "$APACHE_CONFIG_FILE" ]; then
+  echo "Arquivo de configuração do Apache não encontrado: $APACHE_CONFIG_FILE"
+  echo "Por favor, adapte a variável APACHE_CONFIG_FILE no script para o caminho correto do arquivo de configuração do seu Apache."
+  exit 1
+fi
+
+# Habilita o módulo rewrite do Apache
+sudo a2enmod rewrite
+
+# Adiciona a regra de redirecionamento para o arquivo de configuração do Apache
+sudo sed -i 's|</VirtualHost *:80>|<VirtualHost *:80>\n\tRewriteEngine On\n\tRewriteCond %{HTTPS} off\n\tRewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]|g' "$APACHE_CONFIG_FILE"
+
+# Reinicia o Apache para aplicar as mudanças
+sudo systemctl restart apache2
+
+echo "Redirecionamento de HTTP para HTTPS configurado. Por favor, verifique o funcionamento."
+echo "Certifique-se de que o HTTPS está devidamente configurado (certificado SSL/TLS instalado) para o seu site."
+
+exit 0
+}
+{type: uploaded file
+fileName: aeta_32.txt
+fullContent:
+```bash
+#!/bin/bash
+
+# Este script tem como objetivo mitigar a vulnerabilidade de transmissão de informações sensíveis em texto claro via HTTP,
+# redirecionando o tráfego HTTP para HTTPS.  Ele assume que um servidor web (Apache ou Nginx) está instalado e configurado.
+# Ajuste as configurações conforme necessário para o seu ambiente específico.
+
+# Variáveis
+HTTP_PORT=80
+HTTPS_PORT=443
+WEB_SERVER=$(ps -ef | grep -E 'apache2|nginx' | grep -v grep | awk '{print $8}')
+
+# Funções
+
+redirect_http_to_https_apache() {
+  # Cria um arquivo de configuração virtualhost para redirecionar HTTP para HTTPS
+  echo "<VirtualHost *:${HTTP_PORT}>
+    ServerName \$(hostname)
+    Redirect permanent / https://\$(hostname)/
+  </VirtualHost>" > /etc/apache2/sites-available/http_redirect.conf
+
+  # Habilita o site
+  a2ensite http_redirect.conf
+
+  # Desabilita o site padrão (se existir) para evitar conflitos
+  a2dissite 000-default.conf 2>/dev/null
+
+  # Reinicia o Apache
+  systemctl restart apache2
+}
+
+redirect_http_to_https_nginx() {
+  # Cria um arquivo de configuração para redirecionar HTTP para HTTPS
+  echo "server {
+    listen ${HTTP_PORT};
+    server_name \$(hostname);
+    return 301 https://\$host\$request_uri;
+  }" > /etc/nginx/conf.d/http_redirect.conf
+
+  # Reinicia o Nginx
+  systemctl restart nginx
+}
+
+# Lógica principal
+
+if [[ "$WEB_SERVER" == *"apache2"* ]]; then
+  echo "Servidor web detectado: Apache"
+  # Verifica se o mod_rewrite está habilitado
+  if ! apache2ctl -M | grep -q rewrite_module; then
+    echo "Habilitando mod_rewrite..."
+    a2enmod rewrite
+  fi
+
+  redirect_http_to_https_apache
+elif [[ "$WEB_SERVER" == *"nginx"* ]]; then
+  echo "Servidor web detectado: Nginx"
+  redirect_http_to_https_nginx
+else
+  echo "Nenhum servidor web (Apache ou Nginx) detectado.  Por favor, configure o redirecionamento manualmente."
+  exit 1
+fi
+
+echo "Redirecionamento de HTTP para HTTPS configurado.  Por favor, teste a configuração."
+
+exit 0
+```}
+{type: uploaded file
+fileName: aeta_33.txt
+fullContent:
+```bash
+#!/bin/bash
+
+# Script para mitigar a vulnerabilidade de transmissão de informações sensíveis em texto claro via HTTP.
+# Este script configura um redirecionamento HTTP para HTTPS utilizando Apache.
+
+# Variáveis
+APACHE_CONFIG_FILE="/etc/apache2/sites-available/000-default.conf"
+DEFAULT_SITE_CONFIG="/etc/apache2/sites-available/default-ssl.conf"
+APACHE_SSL_ENABLED="/etc/apache2/mods-enabled/ssl.load"
+
+# Checa se o Apache está instalado
+if ! command -v apache2 &> /dev/null || ! command -v a2enmod &> /dev/null; then
+  echo "Apache web server não está instalado. Instalando..."
+  apt update
+  apt install -y apache2
+  apt install -y openssl
+fi
+
+# Habilita o módulo SSL
+if [ ! -f "$APACHE_SSL_ENABLED" ]; then
+    a2enmod ssl
+fi
+
+# Força redirecionamento HTTP para HTTPS no arquivo de configuração padrão
+if [ -f "$APACHE_CONFIG_FILE" ]; then
+  echo "Redirecionando HTTP para HTTPS..."
+  sed -i 's/<\/VirtualHost>/  RewriteEngine On\n  RewriteCond %{HTTPS} off\n  RewriteRule ^(.*)$ https:\/\/%{HTTP_HOST}%{REQUEST_URI} [L,R=301]\n<\/VirtualHost>/g' "$APACHE_CONFIG_FILE"
+else
+  echo "Arquivo de configuração do Apache padrão não encontrado: $APACHE_CONFIG_FILE"
+  exit 1
+fi
+
+# Habilita o site padrão com SSL, se existir
+if [ -f "$DEFAULT_SITE_CONFIG" ]; then
+    echo "Verificando configuração SSL padrão..."
+    if ! grep -q "443" "$DEFAULT_SITE_CONFIG"; then
+        echo "Configurando porta 443 no VirtualHost SSL..."
+        sed -i 's/<VirtualHost _default_:80>/<VirtualHost _default_:443>/g' "$DEFAULT_SITE_CONFIG"
+        sed -i 's/    ServerAdmin webmaster@localhost/    ServerAdmin webmaster@localhost\n    SSLEngine On\n    SSLCertificateFile \/etc\/ssl\/certs\/ssl-cert-snakeoil.pem\n    SSLCertificateKeyFile \/etc\/ssl\/private\/ssl-cert-snakeoil.key/g' "$DEFAULT_SITE_CONFIG"
+
+    fi
+else
+    echo "Configuração SSL padrão não encontrada: $DEFAULT_SITE_CONFIG.  Será necessário configurar o SSL manualmente."
+fi
+# Reinicia o Apache para aplicar as alterações
+echo "Reiniciando o Apache..."
+systemctl restart apache2
+
+echo "Redirecionamento HTTP para HTTPS configurado com sucesso. Reinicie o apache se necessário."
+exit 0
+```}
+{type: uploaded file
+fileName: aeta_34.txt
+fullContent:
+#!/bin/bash
+
+# Script para mitigar a vulnerabilidade de transmissão de informações sensíveis em texto claro via HTTP.
+# Este script configura o redirecionamento de HTTP para HTTPS e desabilita o acesso HTTP.
+
+# Variáveis
+HTTP_PORT=80
+HTTPS_PORT=443
+APACHE_CONFIG_FILE="/etc/apache2/sites-available/000-default.conf" # Caminho padrão para a configuração do Apache
+APACHE_SSL_CONFIG_FILE="/etc/apache2/sites-available/default-ssl.conf" #Caminho padrão para a configuração SSL do Apache (pode variar dependendo da distro)
+APACHE_DEFAULT_CONFIG="/etc/apache2/sites-available/000-default.conf"
+APACHE_SSL_DEFAULT_CONFIG="/etc/apache2/sites-available/default-ssl.conf"
+TEMP_FILE="/tmp/http_redirect.tmp"
+
+# 1. Verificar se o Apache está instalado
+if ! command -v apache2ctl &> /dev/null; then
+  echo "Apache não está instalado. Instalando..."
+  apt-get update && apt-get install -y apache2
+fi
+
+# 2. Habilitar o módulo rewrite do Apache
+if ! a2enmod rewrite &> /dev/null; then
+  a2enmod rewrite
+fi
+
+# 3. Criar arquivo de configuração virtual para redirecionamento HTTP para HTTPS
+echo "<VirtualHost *:${HTTP_PORT}>
+    ServerName \$(hostname)
+    Redirect permanent / https://\${SERVER_NAME}\${REQUEST_URI}
+</VirtualHost>" > ${TEMP_FILE}
+
+# 4. Desabilitar a configuração padrão HTTP
+a2dissite 000-default.conf
+
+# 5. Habilitar o novo site de redirecionamento
+cp ${TEMP_FILE} /etc/apache2/sites-available/http_redirect.conf
+a2ensite http_redirect.conf
+
+# 6. Reiniciar o Apache para aplicar as mudanças
+systemctl restart apache2
+
+echo "Redirecionamento HTTP para HTTPS configurado. Acesso HTTP desabilitado."
+
+rm ${TEMP_FILE}
+exit 0
+}
+{type: uploaded file
+fileName: aeta_35.txt
+fullContent:
+```bash
+#!/bin/bash
+
+# Este script corrige a vulnerabilidade de transmissão de informações sensíveis em texto claro via HTTP,
+# implementando redirecionamento para HTTPS e desabilitando o acesso HTTP.
+
+# Variáveis
+HTTP_PORT=80
+HTTPS_PORT=443
+APACHE_CONFIG_FILE="/etc/apache2/sites-available/000-default.conf"  # Caminho padrão para o arquivo de configuração do Apache em Debian/Ubuntu
+APACHE_SSL_CONFIG_FILE="/etc/apache2/sites-available/default-ssl.conf" # Caminho padrão para o arquivo de configuração SSL do Apache em Debian/Ubuntu
+
+# 1. Verificar se o Apache está instalado
+if ! command -v apache2ctl &> /dev/null; then
+  echo "Apache não está instalado. Por favor, instale o Apache antes de executar este script."
+  exit 1
+fi
+
+# 2. Habilitar o módulo rewrite do Apache
+sudo a2enmod rewrite
+
+# 3. Configurar o redirecionamento HTTP para HTTPS
+echo "<VirtualHost *:${HTTP_PORT}>
+    ServerName \$(hostname)
+    Redirect permanent / https://\${SERVER_NAME}/
+</VirtualHost>" | sudo tee /etc/apache2/sites-available/http_redirect.conf
+
+sudo a2ensite http_redirect.conf
+
+# 4. Configurar o arquivo SSL (se necessário). Assumindo que já existe e está configurado.
+#    Se não estiver configurado, será necessário gerar um certificado SSL e configurar o arquivo default-ssl.conf
+
+# 5. Desabilitar o site padrão HTTP
+sudo a2dissite 000-default.conf
+
+# 6. Reiniciar o Apache para aplicar as mudanças
+sudo systemctl restart apache2
+
+echo "Redirecionamento HTTP para HTTPS configurado.  O acesso HTTP foi desabilitado."
+echo "Verifique se o site está acessível via HTTPS."
+```}
+{type: uploaded file
+fileName: aeta_36.txt
+fullContent:
+#!/bin/bash
+
+# Este script corrige a vulnerabilidade de transmissão de informações sensíveis em texto claro via HTTP,
+# redirecionando todo o tráfego HTTP para HTTPS.
+
+# Variáveis
+HTTP_PORT=80
+HTTPS_PORT=443
+APACHE_CONFIG_FILE="/etc/apache2/sites-available/000-default.conf" # Caminho padrão para sistemas Debian/Ubuntu
+APACHE_SSL_CONFIG_FILE="/etc/apache2/sites-available/default-ssl.conf" # Caminho padrão para sistemas Debian/Ubuntu
+
+# Verifica se o Apache está instalado
+if ! command -v apache2ctl &> /dev/null; then
+  echo "Apache não está instalado. Instalando..."
+  apt update
+  apt install -y apache2
+fi
+
+# Habilita o módulo rewrite do Apache
+if ! a2enmod rewrite &> /dev/null; then
+  a2enmod rewrite
+fi
+
+# Cria um arquivo de configuração virtual para redirecionar HTTP para HTTPS
+REDIRECT_CONFIG="/etc/apache2/sites-available/http-redirect.conf"
+
+cat > "$REDIRECT_CONFIG" <<EOL
+<VirtualHost *:80>
+    ServerName \$(hostname)
+    Redirect permanent / https://\${SERVER_NAME}\${REQUEST_URI}
+</VirtualHost>
+EOL
+
+# Desabilita a configuração padrão do Apache (se existir)
+if [ -f "$APACHE_CONFIG_FILE" ]; then
+  a2dissite 000-default.conf
+fi
+
+# Habilita a configuração de redirecionamento
+a2ensite http-redirect.conf
+
+# Configura o SSL (se ainda não estiver configurado)
+if [ ! -f "$APACHE_SSL_CONFIG_FILE" ]; then
+  echo "Arquivo de configuração SSL não encontrado. Por favor, configure o SSL manualmente e rode este script novamente."
+  echo "Você pode usar Let's Encrypt (certbot) para configurar o SSL automaticamente."
+  echo "Instale o certbot com: apt install certbot python3-certbot-apache"
+  echo "E rode: certbot --apache"
+  exit 1
+fi
+
+# Reinicia o Apache para aplicar as mudanças
+systemctl restart apache2
+
+echo "Redirecionamento HTTP para HTTPS configurado. Verifique se o SSL está corretamente configurado e habilitado."
+exit 0
+}
+{type: uploaded file
+fileName: aeta_37.txt
+fullContent:
+```bash
+#!/bin/bash
+
+# Este script corrige a vulnerabilidade de transmissão de informações sensíveis em texto não criptografado via HTTP,
+# redirecionando todo o tráfego HTTP para HTTPS.
+
+# Variáveis
+HTTP_PORT=80
+HTTPS_PORT=443
+
+# Detecta o sistema operacional (assume-se Debian/Ubuntu se não for detectado)
+OS=$(uname -s)
+
+# Função para configurar o redirecionamento no Apache (Debian/Ubuntu)
+configurar_apache() {
+    # Verifica se o Apache está instalado
+    if command -v apache2 >/dev/null 2>&1; then
+        # Habilita o módulo rewrite se não estiver habilitado
+        if ! a2enmod rewrite >/dev/null 2>&1; then
+            a2enmod rewrite
+        fi
+
+        # Cria um arquivo de configuração virtual host para redirecionamento HTTP para HTTPS
+        cat > /etc/apache2/sites-available/http_to_https.conf <<EOL
+<VirtualHost *:80>
+    ServerName \$(hostname)
+    Redirect permanent / https://\${SERVER_NAME}\${REQUEST_URI}
+</VirtualHost>
+EOL
+
+        # Habilita o site de redirecionamento
+        a2ensite http_to_https.conf
+
+        # Reinicia o Apache para aplicar as mudanças
+        systemctl restart apache2
+        echo "Redirecionamento HTTP para HTTPS configurado no Apache."
+    else
+        echo "Apache não detectado.  Instale o Apache ou adapte o script para outro servidor web."
+    fi
+}
+
+
+# Função para configurar o redirecionamento no Nginx
+configurar_nginx() {
+    # Verifica se o Nginx está instalado
+    if command -v nginx >/dev/null 2>&1; then
+        # Adiciona um bloco de servidor para redirecionamento HTTP para HTTPS
+        cat > /etc/nginx/conf.d/http_to_https.conf <<EOL
+server {
+    listen $HTTP_PORT;
+    server_name \$(hostname);
+    return 301 https://\$host\$request_uri;
+}
+EOL
+        # Reinicia o Nginx para aplicar as mudanças
+        systemctl restart nginx
+        echo "Redirecionamento HTTP para HTTPS configurado no Nginx."
+    else
+        echo "Nginx não detectado. Instale o Nginx ou adapte o script para outro servidor web."
+    fi
+}
+
+# Detecta e configura o servidor web
+if command -v apache2 >/dev/null 2>&1; then
+    configurar_apache
+elif command -v nginx >/dev/null 2>&1; then
+    configurar_nginx
+else
+    echo "Nenhum servidor web (Apache ou Nginx) detectado.  Por favor, instale um ou adapte o script para o seu servidor web."
+fi
+
+exit 0
+```}
+{type: uploaded file
+fileName: aeta_38.txt
+fullContent:
+#!/bin/bash
+
+# Descrição: Este script corrige a vulnerabilidade de transmissão de informações sensíveis em texto claro via HTTP,
+# redirecionando todas as solicitações HTTP para HTTPS.
+
+# Variáveis
+HTTP_PORT=80
+HTTPS_PORT=443
+APACHE_CONFIG_FILE="/etc/apache2/sites-available/000-default.conf" # Caminho padrão para a configuração do Apache
+NGINX_CONFIG_FILE="/etc/nginx/sites-available/default" # Caminho padrão para a configuração do Nginx
+WEB_SERVER=""
+
+# Funções
+
+detect_web_server() {
+  if command -v apache2 >/dev/null 2>&1; then
+    WEB_SERVER="apache"
+    echo "Servidor web Apache detectado."
+  elif command -v nginx >/dev/null 2>&1; then
+    WEB_SERVER="nginx"
+    echo "Servidor web Nginx detectado."
+  else
+    echo "Nenhum servidor web Apache ou Nginx detectado. O script não pode prosseguir."
+    exit 1
+  fi
+}
+
+
+configure_apache() {
+  # 1. Habilitar o módulo rewrite do Apache (se ainda não estiver habilitado)
+  if ! a2enmod rewrite >/dev/null 2>&1; then
+    echo "Habilitando o módulo rewrite do Apache..."
+    a2enmod rewrite
+  fi
+
+  # 2. Adicionar a regra de redirecionamento para o arquivo de configuração do Apache
+  if grep -q "RewriteEngine On" "$APACHE_CONFIG_FILE"; then
+    echo "RewriteEngine já está habilitado no arquivo de configuração."
+  else
+    echo "Adicionando RewriteEngine ao arquivo de configuração..."
+    sed -i 's|<VirtualHost \*:80>|<VirtualHost *:80>\n\tRewriteEngine On|g' "$APACHE_CONFIG_FILE"
+  fi
+
+  if grep -q "RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [R=301,L]" "$APACHE_CONFIG_FILE"; then
+    echo "Regra de redirecionamento já existe no arquivo de configuração."
+  else
+    echo "Adicionando regra de redirecionamento para HTTPS..."
+    sed -i 's|<VirtualHost \*:80>|<VirtualHost *:80>\n\tRewriteEngine On\n\tRewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [R=301,L]|g' "$APACHE_CONFIG_FILE"
+  fi
+
+  # 3. Reiniciar o Apache para aplicar as alterações
+  echo "Reiniciando o Apache..."
+  systemctl restart apache2
+}
+
+
+configure_nginx() {
+  # 1. Adicionar o bloco de redirecionamento no arquivo de configuração do Nginx
+  if grep -q "return 301 https://$host\$request_uri;" "$NGINX_CONFIG_FILE"; then
+    echo "Redirecionamento HTTPS já configurado no Nginx."
+  else
+    echo "Configurando redirecionamento HTTPS no Nginx..."
+    sed -i 's/listen 80 default_server;/listen 80 default_server;\n\treturn 301 https:\/\/${host}\$request_uri;/g' "$NGINX_CONFIG_FILE"
+    sed -i 's/listen 80;/listen 80;\n\treturn 301 https:\/\/${host}\$request_uri;/g' "$NGINX_CONFIG_FILE"
+
+  fi
+
+  # 2. Reiniciar o Nginx para aplicar as alterações
+  echo "Reiniciando o Nginx..."
+  systemctl restart nginx
+}
+
+# Programa principal
+
+detect_web_server
+
+if [ "$WEB_SERVER" == "apache" ]; then
+  configure_apache
+elif [ "$WEB_SERVER" == "nginx" ]; then
+  configure_nginx
+else
+  echo "Nenhum servidor web suportado detectado."
+  exit 1
+fi
+
+echo "Redirecionamento HTTP para HTTPS configurado com sucesso."
+exit 0
+}
+{type: uploaded file
+fileName: aeta_39.txt
+fullContent:
+#!/bin/bash
+
+# Script para mitigar a vulnerabilidade de transmissão de informações sensíveis em texto claro via HTTP.
+# Este script configura um redirecionamento de HTTP para HTTPS no servidor Apache.
+
+# 1. Detectar o sistema operacional
+if command -v systemctl &> /dev/null; then
+  OS="systemd"
+elif command -v service &> /dev/null; then
+  OS="sysvinit"
+else
+  echo "Sistema de init desconhecido. Saindo."
+  exit 1
+fi
+
+# 2. Verificar se o Apache está instalado
+if ! command -v apache2 &> /dev/null && ! command -v httpd &> /dev/null; then
+  echo "Apache não detectado. Por favor, instale o Apache antes de executar este script."
+  exit 1
+fi
+
+# 3. Habilitar o módulo rewrite do Apache
+if a2enmod rewrite &> /dev/null; then
+  echo "Módulo rewrite habilitado."
+else
+  echo "Falha ao habilitar o módulo rewrite. Verifique se o Apache está instalado corretamente."
+  exit 1
+fi
+
+# 4. Configurar o VirtualHost padrão para redirecionar para HTTPS
+VHOST_FILE="/etc/apache2/sites-available/000-default.conf" # Caminho padrão no Debian/Ubuntu
+if [ ! -f "$VHOST_FILE" ]; then
+    VHOST_FILE="/etc/httpd/conf/httpd.conf" #caminho padrao no centos/redhat
+    if [ ! -f "$VHOST_FILE" ]; then
+        echo "Arquivo de configuração do VirtualHost padrão não encontrado. Ajuste a variável VHOST_FILE no script."
+        exit 1
+    fi
+fi
+# Criar um backup do arquivo original
+cp "$VHOST_FILE" "$VHOST_FILE.bak"
+
+# Adicionar o redirecionamento para HTTPS no início do arquivo
+{
+  echo "<VirtualHost *:80>"
+  echo "  ServerName \$(hostname)"
+  echo "  Redirect permanent / https://\${SERVER_NAME}\${REQUEST_URI}"
+  echo "</VirtualHost>"
+  cat "$VHOST_FILE"
+} > "$VHOST_FILE.tmp"
+
+mv "$VHOST_FILE.tmp" "$VHOST_FILE"
+
+# 5. Reiniciar o Apache
+if [ "$OS" == "systemd" ]; then
+  systemctl restart apache2
+elif [ "$OS" == "sysvinit" ]; then
+  service apache2 restart
+else
+  echo "Sistema de init desconhecido. Reinicie o Apache manualmente."
+  exit 1
+fi
+
+echo "Redirecionamento de HTTP para HTTPS configurado. Apache reiniciado."
+
+exit 0
+}
+{type: uploaded file
+fileName: aeta_40.txt
+fullContent:
+#!/bin/bash
+
+# Detecta o sistema operacional
+OS=$(uname -s)
+
+# Variáveis padrão para sistemas Debian/Ubuntu
+APACHE_CONFIG_FILE="/etc/apache2/sites-available/000-default.conf"
+APACHE_DEFAULT_SITE="/etc/apache2/sites-available/default-ssl.conf"
+APACHE_PORTS_CONFIG="/etc/apache2/ports.conf"
+APACHE_MODULES_DIR="/etc/apache2/mods-available"
+
+# Ajusta as variáveis se o sistema operacional for diferente
+if [[ "$OS" == "CentOS" || "$OS" == "RHEL" ]]; then
+  APACHE_CONFIG_FILE="/etc/httpd/conf/httpd.conf"
+  APACHE_DEFAULT_SITE="/etc/httpd/conf.d/ssl.conf"
+  APACHE_PORTS_CONFIG="/etc/httpd/conf/ports.conf"
+  APACHE_MODULES_DIR="/etc/httpd/mods-available"
+fi
+
+# 1. Instalar o mod_ssl (se não estiver instalado)
+if ! apachectl -M | grep -q ssl_module; then
+  if [[ "$OS" == "Debian" || "$OS" == "Ubuntu" ]]; then
+    apt-get update && apt-get install -y apache2 libapache2-mod-ssl
+  elif [[ "$OS" == "CentOS" || "$OS" == "RHEL" ]]; then
+    yum install -y mod_ssl
+  else
+    echo "Sistema operacional não suportado. Instale o mod_ssl manualmente."
+    exit 1
+  fi
+fi
+
+# 2. Ativar o módulo SSL (se necessário)
+if [[ "$OS" == "Debian" || "$OS" == "Ubuntu" ]]; then
+  a2enmod ssl
+  a2enmod headers # Habilita o módulo headers para redirecionamento
+fi
+
+# 3. Configurar o arquivo de portas para ouvir na porta 443
+if ! grep -q "Listen 443" "$APACHE_PORTS_CONFIG"; then
+  echo "Listen 443" >> "$APACHE_PORTS_CONFIG"
+fi
+
+# 4. Criar um VirtualHost para SSL (se não existir) e configurar o redirecionamento HTTP para HTTPS
+
+if [[ "$OS" == "Debian" || "$OS" == "Ubuntu" ]]; then
+
+  # Cria o arquivo de configuração SSL padrão (se não existir)
+  if [ ! -f "$APACHE_DEFAULT_SITE" ]; then
+    cat > "$APACHE_DEFAULT_SITE" <<EOF
+<VirtualHost *:443>
+    ServerName localhost
+    DocumentRoot /var/www/html
+
+    SSLEngine on
+    SSLCertificateFile /etc/ssl/certs/ssl-cert-snakeoil.pem
+    SSLCertificateKeyFile /etc/ssl/private/ssl-cert-snakeoil.key
+
+    <FilesMatch "\.(cgi|shtml|phtml|php)$">
+            SSLOptions +StdEnvVars
+    </FilesMatch>
+    <Directory /usr/lib/cgi-bin>
+            SSLOptions +StdEnvVars
+    </Directory>
+
+    ErrorLog \${APACHE_LOG_DIR}/error.log
+    CustomLog \${APACHE_LOG_DIR}/access.log combined
+</VirtualHost>
+EOF
+  fi
+
+  # Redirecionamento HTTP para HTTPS no arquivo de configuração padrão
+  if ! grep -q "RewriteEngine On" "$APACHE_CONFIG_FILE"; then
+    sed -i 's/<VirtualHost \*:80>/<VirtualHost *:80>\n\tRewriteEngine On\n\tRewriteCond %{HTTPS} !=on\n\tRewriteRule ^(.*)$ https:\/\/%{HTTP_HOST}\/$1 [R=301,L]/g' "$APACHE_CONFIG_FILE"
+  fi
+
+elif [[ "$OS" == "CentOS" || "$OS" == "RHEL" ]]; then
+  # Cria o arquivo de configuração SSL padrão (se não existir)
+    if [ ! -f "$APACHE_DEFAULT_SITE" ]; then
+    cat > "$APACHE_DEFAULT_SITE" <<EOF
+<VirtualHost *:443>
+    ServerName localhost
+    DocumentRoot /var/www/html
+
+    SSLEngine on
+    SSLCertificateFile /etc/pki/tls/certs/localhost.crt
+    SSLCertificateKeyFile /etc/pki/tls/private/localhost.key
+
+    <Directory /var/www/html>
+        AllowOverride All
+    </Directory>
+
+    ErrorLog logs/ssl_error_log
+    TransferLog logs/ssl_access_log
+</VirtualHost>
+EOF
+  fi
+
+  # Redirecionamento HTTP para HTTPS no arquivo de configuração principal
+  if ! grep -q "RewriteEngine On" "$APACHE_CONFIG_FILE"; then
+    sed -i 's/<VirtualHost \*:80>/<VirtualHost \*:80>\n\tRewriteEngine On\n\tRewriteCond %{HTTPS} !=on\n\tRewriteRule ^(.*)$ https:\/\/%{HTTP_HOST}\/$1 [R=301,L]/g' "$APACHE_CONFIG_FILE"
+  fi
+fi
+# 5. Reiniciar o Apache
+if [[ "$OS" == "Debian" || "$OS" == "Ubuntu" ]]; then
+  systemctl restart apache2
+elif [[ "$OS" == "CentOS" || "$OS" == "RHEL" ]]; then
+  systemctl restart httpd
+fi
+
+echo "Configuração completa. O tráfego HTTP será redirecionado para HTTPS."
+}
+{type: uploaded file
+fileName: aeta_41.txt
+fullContent:
+```bash
+#!/bin/bash
+
+# Este script corrige a vulnerabilidade de transmissão de informações sensíveis em texto claro via HTTP.
+# Ele configura o redirecionamento de HTTP para HTTPS usando Apache ou Nginx.
+
+# Detecta o servidor web (Apache ou Nginx)
+if command -v apache2ctl &> /dev/null; then
+  SERVER="apache"
+elif command -v nginx &> /dev/null; then
+  SERVER="nginx"
+else
+  echo "Servidor web Apache ou Nginx não detectado. Impossível configurar o redirecionamento automático."
+  exit 1
+fi
+
+# Configuração para Apache
+if [ "$SERVER" == "apache" ]; then
+  # 1. Habilita o módulo rewrite
+  sudo a2enmod rewrite
+
+  # 2. Configura o Virtual Host para redirecionar HTTP para HTTPS
+  VHOST_FILE="/etc/apache2/sites-available/000-default.conf" # ou default-ssl.conf se HTTPS já estiver configurado
+
+  if [ -f "$VHOST_FILE" ]; then
+    # Cria um backup do arquivo de configuração original
+    sudo cp "$VHOST_FILE" "$VHOST_FILE.bak"
+
+    # Adiciona a regra de redirecionamento ao Virtual Host
+    sudo sed -i "s|<VirtualHost \*:80>|<VirtualHost *:80>\n\tRewriteEngine On\n\tRewriteCond %{HTTPS} !=on\n\tRewriteRule ^/(.*) https://%{HTTP_HOST}/\$1 [R=301,L]|g" "$VHOST_FILE"
+
+    # Reinicia o Apache
+    sudo systemctl restart apache2
+    echo "Apache configurado para redirecionar HTTP para HTTPS. Arquivo de configuração original salvo como $VHOST_FILE.bak"
+
+  else
+    echo "Arquivo de Virtual Host padrão do Apache não encontrado. Verifique o caminho e execute o script novamente."
+    exit 1
+  fi
+fi
+
+# Configuração para Nginx
+if [ "$SERVER" == "nginx" ]; then
+  # 1. Localiza o arquivo de configuração do site
+  CONFIG_FILE="/etc/nginx/sites-available/default" # Adapte para o seu arquivo de configuração
+
+  if [ -f "$CONFIG_FILE" ]; then
+      # Cria um backup do arquivo de configuração original
+      sudo cp "$CONFIG_FILE" "$CONFIG_FILE.bak"
+
+      # 2. Adiciona o redirecionamento para HTTPS
+      sudo sed -i "s/listen 80 default_server;/listen 80 default_server;\n\trewrite ^(.*)\$ https://\$host\$1 permanent;/g" "$CONFIG_FILE"
+      sudo sed -i "s/listen \[::\]:80 default_server;/listen \[::\]:80 default_server;\n\trewrite ^(.*)\$ https://\$host\$1 permanent;/g" "$CONFIG_FILE"
+
+      # 3. Reinicia o Nginx
+      sudo systemctl restart nginx
+      echo "Nginx configurado para redirecionar HTTP para HTTPS. Arquivo de configuração original salvo como $CONFIG_FILE.bak"
+  else
+    echo "Arquivo de configuração do site Nginx não encontrado. Verifique o caminho e execute o script novamente."
+    exit 1
+  fi
+fi
+
+echo "Redirecionamento HTTP para HTTPS configurado com sucesso!"
+exit 0
+```}
+{type: uploaded file
+fileName: aeta_42.txt
+fullContent:
+#!/bin/bash
+
+# Este script corrige a vulnerabilidade de transmissão de informações sensíveis em texto claro via HTTP.
+# Ele configura o redirecionamento de HTTP para HTTPS e habilita o HTTPS.
+
+# Variáveis
+HTTP_PORT=80
+HTTPS_PORT=443
+DOMINIO="seu_dominio.com" # Substitua por seu domínio
+
+# 1. Verifica se o Apache está instalado
+if ! command -v apache2 &> /dev/null; then
+  echo "Apache não encontrado. Instalando..."
+  apt-get update
+  apt-get install -y apache2
+fi
+
+# 2. Habilita o módulo rewrite (se necessário)
+if ! a2enmod rewrite &> /dev/null; then
+  a2enmod rewrite
+fi
+
+# 3. Configura um VirtualHost para redirecionar HTTP para HTTPS
+
+VHOST_CONFIG="/etc/apache2/sites-available/http_redirect.conf"
+
+cat > "$VHOST_CONFIG" <<EOL
+<VirtualHost *:80>
+    ServerName $DOMINIO
+    Redirect permanent / https://$DOMINIO/
+</VirtualHost>
+EOL
+
+# 4. Ativa o VirtualHost de redirecionamento
+a2ensite http_redirect.conf
+
+# 5. Verifica se o certificado SSL existe
+if [ ! -f /etc/ssl/certs/$DOMINIO.crt ] || [ ! -f /etc/ssl/private/$DOMINIO.key ]; then
+    echo "Certificado SSL não encontrado. Gerando um certificado autoassinado..."
+    mkdir -p /etc/ssl/private
+    openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout /etc/ssl/private/$DOMINIO.key -out /etc/ssl/certs/$DOMINIO.crt -subj "/CN=$DOMINIO"
+    chmod 400 /etc/ssl/private/$DOMINIO.key
+fi
+
+# 6. Configura o VirtualHost para HTTPS
+
+HTTPS_VHOST_CONFIG="/etc/apache2/sites-available/$DOMINIO-ssl.conf"
+
+cat > "$HTTPS_VHOST_CONFIG" <<EOL
+<VirtualHost *:443>
+    ServerName $DOMINIO
+
+    SSLEngine on
+    SSLCertificateFile /etc/ssl/certs/$DOMINIO.crt
+    SSLCertificateKeyFile /etc/ssl/private/$DOMINIO.key
+
+    DocumentRoot /var/www/$DOMINIO # Ajuste para o diretório raiz do seu site
+
+    <Directory /var/www/$DOMINIO>
+        AllowOverride All
+        Require all granted
+    </Directory>
+
+    ErrorLog \${APACHE_LOG_DIR}/error.log
+    CustomLog \${APACHE_LOG_DIR}/access.log combined
+</VirtualHost>
+EOL
+
+# 7. Ativa o VirtualHost HTTPS e o módulo SSL
+a2enmod ssl
+a2ensite $DOMINIO-ssl.conf
+
+# 8. Desativa o site padrão (se necessário e se estiver usando)
+a2dissite 000-default.conf 2>/dev/null
+
+# 9. Reinicia o Apache para aplicar as mudanças
+systemctl restart apache2
+
+echo "Redirecionamento HTTP para HTTPS configurado e HTTPS habilitado."
+echo "Certifique-se de atualizar o registro DNS do seu domínio para apontar para este servidor."
+echo "Se você gerou um certificado autoassinado, considere obter um certificado de uma CA confiável para evitar avisos de segurança no navegador."
+}
+{type: uploaded file
+fileName: aeta_43.txt
+fullContent:
+#!/bin/bash
+
+# Script para redirecionar tráfego HTTP para HTTPS e desabilitar HTTP Basic Auth (se aplicável)
+
+# Variáveis
+HTTP_PORT=80
+HTTPS_PORT=443
+VHOST_CONFIG_DIR="/etc/apache2/sites-available" # Alterar se usar Nginx ou outro servidor web
+APACHE_CONFIGURED=$(command -v apache2ctl)
+
+# Verifica se o Apache está instalado
+if [ -z "$APACHE_CONFIGURED" ]; then
+  echo "Apache não detectado. Este script é projetado para servidores Apache."
+  exit 1
+fi
+
+# Função para criar um arquivo de configuração VirtualHost para redirecionamento HTTP para HTTPS
+create_redirect_vhost() {
+  SERVER_NAME="$1"
+  VHOST_FILE="$VHOST_CONFIG_DIR/$SERVER_NAME.http.conf"
+
+  cat > "$VHOST_FILE" <<EOL
+<VirtualHost *:$HTTP_PORT>
+    ServerName $SERVER_NAME
+    Redirect permanent / https://$SERVER_NAME/
+</VirtualHost>
+EOL
+
+  echo "Arquivo de VirtualHost para redirecionamento HTTP para HTTPS criado: $VHOST_FILE"
+  a2ensite "$SERVER_NAME.http.conf"
+}
+
+# Função para desabilitar HTTP Basic Auth (se necessário - requer adaptação para o caso específico)
+disable_basic_auth() {
+  # Este é um exemplo genérico. Adapte conforme a configuração do seu servidor.
+  # Geralmente envolve remover ou comentar diretivas 'AuthType Basic', 'AuthName', 'AuthUserFile', 'Require valid-user'
+  # nos arquivos de configuração do VirtualHost ou .htaccess.
+
+  echo "Desabilitação de HTTP Basic Auth requer configuração específica.  Verifique os arquivos de configuração do VirtualHost e .htaccess."
+  # Exemplo:
+  # sed -i 's/AuthType Basic/#AuthType Basic/g' /path/to/virtualhost/config
+  # sed -i 's/Require valid-user/#Require valid-user/g' /path/to/virtualhost/config
+}
+
+# Obtém a lista de VirtualHosts configurados (pode variar dependendo da configuração do servidor)
+# Este é um exemplo, pode precisar ser adaptado dependendo da configuração.
+VHOSTS=$(apachectl -S 2>/dev/null | grep "ServerName" | awk '{print $2}')
+
+# Itera sobre os VirtualHosts e cria a configuração de redirecionamento
+if [ -n "$VHOSTS" ]; then
+  for VHOST in $VHOSTS; do
+    create_redirect_vhost "$VHOST"
+  done
+else
+  echo "Nenhum VirtualHost encontrado.  Crie a configuração manualmente ou adapte o script."
+fi
+
+# Desabilita HTTP Basic Auth (se necessário)
+disable_basic_auth
+
+# Reinicia o Apache para aplicar as alterações
+systemctl restart apache2
+
+echo "Redirecionamento HTTP para HTTPS configurado.  Apache reiniciado."
+echo "Verifique a configuração e o redirecionamento no seu navegador."
+}
+{type: uploaded file
+fileName: aeta_44.txt
+fullContent:
+```bash
+#!/bin/bash
+
+# Este script corrige a vulnerabilidade de transmissão de informações sensíveis em texto claro via HTTP,
+# redirecionando todas as requisições HTTP para HTTPS.
+# Assume-se que um servidor web (Apache ou Nginx) está instalado e configurado.
+
+# Detecção do servidor web (Apache ou Nginx)
+if command -v apache2ctl &> /dev/null; then
+  WEB_SERVER="apache"
+elif command -v nginx &> /dev/null; then
+  WEB_SERVER="nginx"
+else
+  echo "Servidor web Apache ou Nginx não detectado. Saindo."
+  exit 1
+fi
+
+# Configuração para Apache
+if [ "$WEB_SERVER" == "apache" ]; then
+  # 1. Habilitar o módulo rewrite se não estiver habilitado
+  if ! a2enmod rewrite &> /dev/null; then
+    echo "Habilitando o módulo rewrite do Apache..."
+    a2enmod rewrite
+  fi
+
+  # 2. Criar/Modificar o arquivo .htaccess na raiz do site para redirecionar HTTP para HTTPS
+  #    (Assumindo que o .htaccess já existe ou pode ser criado)
+  echo "
+RewriteEngine On
+RewriteCond %{HTTPS} off
+RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+" > /var/www/html/.htaccess
+
+  # 3. Garantir que o Apache possa ler o .htaccess (se necessário)
+  if ! grep -q "AllowOverride All" /etc/apache2/apache2.conf; then
+    echo "<Directory /var/www/html>" >> /etc/apache2/apache2.conf
+    echo "  AllowOverride All" >> /etc/apache2/apache2.conf
+    echo "</Directory>" >> /etc/apache2/apache2.conf
+  fi
+
+  # 4. Reiniciar o Apache para aplicar as mudanças
+  echo "Reiniciando o Apache..."
+  systemctl restart apache2
+fi
+
+# Configuração para Nginx
+if [ "$WEB_SERVER" == "nginx" ]; then
+  # 1. Localizar o arquivo de configuração do Nginx (pode variar dependendo da instalação)
+  CONFIG_FILE="/etc/nginx/nginx.conf"
+  if [ ! -f "$CONFIG_FILE" ]; then
+    CONFIG_FILE="/etc/nginx/conf.d/default.conf" # Tentativa alternativa
+  fi
+  if [ ! -f "$CONFIG_FILE" ]; then
+      echo "Arquivo de configuração do Nginx não encontrado.  Por favor, ajuste o script com o caminho correto."
+      exit 1
+  fi
+  # 2. Adicionar redirecionamento HTTP para HTTPS no arquivo de configuração
+  echo "Adicionando redirecionamento HTTP para HTTPS no arquivo de configuração do Nginx..."
+  
+  # Faz um backup do arquivo de configuração original
+  cp "$CONFIG_FILE" "$CONFIG_FILE.bak"
+
+  # Insere o bloco de redirecionamento no início do bloco 'http'
+  sed -i 's/http {/http {\n\tserver {\n\t\tlisten 80;\n\t\tserver_name _;\n\t\treturn 301 https\$host\$request_uri;\n\t}\n/' "$CONFIG_FILE"
+
+  # 3. Reiniciar o Nginx para aplicar as mudanças
+  echo "Reiniciando o Nginx..."
+  systemctl restart nginx
+fi
+
+echo "Redirecionamento HTTP para HTTPS configurado com sucesso!"
+exit 0
+```}
+{type: uploaded file
+fileName: aeta_45.txt
+fullContent:
+```bash
+#!/bin/bash
+
+# Script para redirecionar HTTP para HTTPS e desabilitar HTTP em servidores Apache ou Nginx.
+# Suporta Ubuntu/Debian (Apache e Nginx) e CentOS/RHEL (Apache e Nginx).
+
+# Detecta o sistema operacional
+if command -v apt-get &> /dev/null; then
+  OS="debian"
+elif command -v yum &> /dev/null; then
+  OS="centos"
+else
+  echo "Sistema operacional não suportado."
+  exit 1
+fi
+
+# Detecta o servidor web
+if command -v apache2 &> /dev/null; then
+  WEB_SERVER="apache"
+elif command -v nginx &> /dev/null; then
+  WEB_SERVER="nginx"
+else
+  echo "Servidor web não detectado (Apache ou Nginx são suportados)."
+  exit 1
+fi
+
+# Configuração para Apache
+if [ "$WEB_SERVER" = "apache" ]; then
+
+  # Habilita o módulo rewrite do Apache
+  if [ "$OS" = "debian" ]; then
+    a2enmod rewrite
+  elif [ "$OS" = "centos" ]; then
+    # No CentOS/RHEL, o mod_rewrite geralmente já está habilitado.
+    :
+  fi
+
+  # Determina o diretório de configuração do Apache
+  if [ "$OS" = "debian" ]; then
+    SITES_AVAILABLE="/etc/apache2/sites-available"
+  elif [ "$OS" = "centos" ]; then
+    SITES_AVAILABLE="/etc/httpd/conf.d"
+  fi
+
+  # Itera sobre os arquivos de configuração do Apache e adiciona o redirecionamento HTTP para HTTPS
+  for SITE_CONFIG in "$SITES_AVAILABLE"/*; do
+    if [ -f "$SITE_CONFIG" ]; then
+      # Adiciona o redirecionamento no início do VirtualHost padrão (porta 80)
+      if grep -q "<VirtualHost *:80>" "$SITE_CONFIG"; then
+        sed -i 's/<VirtualHost \*:80>/<VirtualHost *:80>\n\tRewriteEngine On\n\tRewriteCond %{HTTPS} off\n\tRewriteRule ^(.*)$ https:\/\/%{HTTP_HOST}%{REQUEST_URI} [R=301,L]/g' "$SITE_CONFIG"
+        echo "Redirecionamento HTTP para HTTPS adicionado em $SITE_CONFIG"
+      fi
+    fi
+  done
+
+  # Reinicia o Apache para aplicar as mudanças
+  systemctl restart apache2 || systemctl restart httpd
+
+  echo "Apache reiniciado para aplicar as mudanças."
+fi
+
+# Configuração para Nginx
+if [ "$WEB_SERVER" = "nginx" ]; then
+
+  # Determina o diretório de configuração do Nginx
+  if [ "$OS" = "debian" ]; then
+    SITES_AVAILABLE="/etc/nginx/sites-available"
+  elif [ "$OS" = "centos" ]; then
+    SITES_AVAILABLE="/etc/nginx/conf.d"
+  fi
+
+  # Itera sobre os arquivos de configuração do Nginx e adiciona o redirecionamento HTTP para HTTPS
+  for SITE_CONFIG in "$SITES_AVAILABLE"/*; do
+    if [ -f "$SITE_CONFIG" ]; then
+      # Adiciona o redirecionamento no bloco server que escuta na porta 80
+      if grep -q "listen 80;" "$SITE_CONFIG"; then
+        sed -i 's/listen 80;/listen 80;\n\t\treturn 301 https:\/\/$\host$\request_uri;/g' "$SITE_CONFIG"
+        echo "Redirecionamento HTTP para HTTPS adicionado em $SITE_CONFIG"
+      fi
+    fi
+  done
+
+  # Reinicia o Nginx para aplicar as mudanças
+  systemctl restart nginx
+
+  echo "Nginx reiniciado para aplicar as mudanças."
+fi
+
+echo "Script finalizado."
+```}
+{type: uploaded file
+fileName: aeta_46.txt
+fullContent:
+```bash
+#!/bin/bash
+
+# Este script corrige a vulnerabilidade de transmissão de informações sensíveis em texto claro via HTTP.
+# Ele configura o redirecionamento de HTTP para HTTPS usando Apache ou Nginx.
+
+# Variáveis
+APACHE_CONFIG="/etc/apache2/sites-available/000-default.conf"
+NGINX_CONFIG="/etc/nginx/sites-available/default"
+
+# Função para verificar se o Apache está instalado
+is_apache_installed() {
+  command -v apache2 >/dev/null 2>&1
+}
+
+# Função para verificar se o Nginx está instalado
+is_nginx_installed() {
+  command -v nginx >/dev/null 2>&1
+}
+
+# Função para configurar o redirecionamento HTTP para HTTPS no Apache
+configure_apache_redirect() {
+  if [ -f "$APACHE_CONFIG" ]; then
+    # Ativar o módulo rewrite
+    sudo a2enmod rewrite
+
+    # Adicionar redirecionamento ao arquivo de configuração
+    sudo sed -i 's/<VirtualHost \*:80>/<VirtualHost *:80>\n\tRewriteEngine On\n\tRewriteCond %{HTTPS} !=on\n\tRewriteRule ^(.*)$ https:\/\/%{HTTP_HOST}\/$1 [R=301,L]/g' "$APACHE_CONFIG"
+
+    # Reiniciar o Apache
+    sudo systemctl restart apache2
+    echo "Redirecionamento HTTP para HTTPS configurado para Apache."
+  else
+    echo "Arquivo de configuração do Apache não encontrado: $APACHE_CONFIG"
+  fi
+}
+
+# Função para configurar o redirecionamento HTTP para HTTPS no Nginx
+configure_nginx_redirect() {
+  if [ -f "$NGINX_CONFIG" ]; then
+    # Adicionar redirecionamento ao arquivo de configuração
+    sudo sed -i 's/listen 80 default_server;/listen 80 default_server;\n\treturn 301 https:\/\/${host}${uri};/g' "$NGINX_CONFIG"
+
+    # Reiniciar o Nginx
+    sudo systemctl restart nginx
+    echo "Redirecionamento HTTP para HTTPS configurado para Nginx."
+  else
+    echo "Arquivo de configuração do Nginx não encontrado: $NGINX_CONFIG"
+  fi
+}
+
+# Função principal
+main() {
+  if is_apache_installed; then
+    configure_apache_redirect
+  elif is_nginx_installed; then
+    configure_nginx_redirect
+  else
+    echo "Nenhum servidor web (Apache ou Nginx) detectado.  Instale um servidor web e um certificado SSL/TLS antes de executar este script."
+    exit 1
+  fi
+}
+
+# Executar a função principal
+main
+```}
+{type: uploaded file
+fileName: aeta_47.txt
+fullContent:
+```bash
+#!/bin/bash
+
+# Este script corrige a vulnerabilidade de transmissão de informações sensíveis em texto claro via HTTP.
+# Ele assume que você deseja redirecionar todo o tráfego HTTP (porta 80) para HTTPS (porta 443).
+# Este script é compatível com sistemas baseados em Linux que utilizam Apache ou Nginx.
+
+# Detecção do servidor web
+if command -v apache2ctl &> /dev/null
+then
+  WEB_SERVER="apache"
+elif command -v nginx &> /dev/null
+then
+  WEB_SERVER="nginx"
+else
+  echo "Servidor web não detectado. Por favor, configure o redirecionamento manualmente."
+  exit 1
+fi
+
+# Configuração para Apache
+if [ "$WEB_SERVER" = "apache" ]; then
+  # 1. Habilitar o módulo rewrite
+  sudo a2enmod rewrite
+
+  # 2. Criar/Editar o arquivo de configuração do VirtualHost padrão (ou o VirtualHost que serve o conteúdo HTTP)
+  #    Substitua '000-default.conf' pelo nome do seu arquivo de configuração, se necessário.
+  VHOST_FILE="/etc/apache2/sites-available/000-default.conf"
+
+  # 3. Adicionar o redirecionamento no início do arquivo VirtualHost
+  #    Este bloco redireciona todo o tráfego HTTP para HTTPS.
+
+  # Criar um backup do arquivo original
+  sudo cp "$VHOST_FILE" "$VHOST_FILE.bak"
+
+  # Inserir o bloco de redirecionamento
+  sudo sed -i '1i\
+<VirtualHost *:80>\n\
+        ServerName ${SERVER_NAME}\n\
+        Redirect permanent / https://${SERVER_NAME}/\n\
+</VirtualHost>\
+' "$VHOST_FILE"
+
+  # 4. Reiniciar o Apache
+  sudo systemctl restart apache2
+  echo "Redirecionamento HTTP para HTTPS configurado para Apache. Reiniciei o servidor."
+fi
+
+# Configuração para Nginx
+if [ "$WEB_SERVER" = "nginx" ]; then
+  # 1. Criar/Editar o arquivo de configuração do VirtualHost padrão (ou o VirtualHost que serve o conteúdo HTTP)
+  #    Substitua 'default' pelo nome do seu arquivo de configuração, se necessário.
+  VHOST_FILE="/etc/nginx/sites-available/default"
+
+  # Criar um backup do arquivo original
+  sudo cp "$VHOST_FILE" "$VHOST_FILE.bak"
+
+  # 2. Adicionar o redirecionamento no bloco 'server' que escuta na porta 80.
+
+  # Inserir o bloco de redirecionamento
+  sudo sed -i 's/listen 80;/listen 80;\n\
+    return 301 https://$host$request_uri;/' "$VHOST_FILE"
+
+  # 3. Reiniciar o Nginx
+  sudo systemctl restart nginx
+  echo "Redirecionamento HTTP para HTTPS configurado para Nginx. Reiniciei o servidor."
+fi
+
+echo "Script concluído. Certifique-se de ter um certificado SSL/TLS válido configurado para HTTPS."
+
+exit 0
+```}
+{type: uploaded file
+fileName: aeta_48.txt
+fullContent:
+#!/bin/bash
+
+# Descrição: Este script configura o redirecionamento HTTP para HTTPS em um servidor web Apache ou Nginx.
+# Ele detecta automaticamente o servidor web em uso e aplica as configurações apropriadas.
+
+# Variáveis
+APACHE_CONFIG_FILE="/etc/apache2/sites-available/000-default.conf"
+APACHE_DEFAULT_SSL_CONFIG_FILE="/etc/apache2/sites-available/default-ssl.conf"
+NGINX_CONFIG_FILE="/etc/nginx/conf.d/default.conf"
+SERVER_TYPE=""
+
+# Funções
+
+detect_server() {
+  if command -v apache2 >/dev/null 2>&1; then
+    SERVER_TYPE="apache"
+  elif command -v nginx >/dev/null 2>&1; then
+    SERVER_TYPE="nginx"
+  else
+    echo "Servidor web não detectado. Apache ou Nginx devem estar instalados."
+    exit 1
+  fi
+}
+
+configure_apache() {
+  echo "Configurando redirecionamento HTTP para HTTPS no Apache..."
+
+  # 1. Habilitar o módulo rewrite do Apache
+  sudo a2enmod rewrite >/dev/null 2>&1
+
+  # 2. Adicionar redirecionamento ao arquivo de configuração padrão do Apache
+  if grep -q "RewriteEngine On" "$APACHE_CONFIG_FILE"; then
+      echo "RewriteEngine já está habilitado."
+  else
+      sudo sed -i 's|<VirtualHost \*:80>|<VirtualHost *:80>\n\tRewriteEngine On\n\tRewriteCond %{HTTPS} off\n\tRewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [R=301,L]|' "$APACHE_CONFIG_FILE"
+  fi
+
+  # Opcional: Forçar HTTPS em default-ssl.conf
+  if [ -f "$APACHE_DEFAULT_SSL_CONFIG_FILE" ]; then
+     if grep -q "Header always set Strict-Transport-Security" "$APACHE_DEFAULT_SSL_CONFIG_FILE"; then
+        echo "HSTS já está configurado em $APACHE_DEFAULT_SSL_CONFIG_FILE."
+     else
+        sudo sed -i 's|<VirtualHost \*:443>|<VirtualHost *:443>\n\tHeader always set Strict-Transport-Security "max-age=31536000"|' "$APACHE_DEFAULT_SSL_CONFIG_FILE"
+     fi
+  fi
+
+  # 3. Reiniciar o Apache
+  sudo systemctl restart apache2
+  echo "Redirecionamento HTTP para HTTPS configurado no Apache. Reiniciei o servidor."
+}
+
+configure_nginx() {
+  echo "Configurando redirecionamento HTTP para HTTPS no Nginx..."
+
+  # 1. Adicionar redirecionamento ao arquivo de configuração do Nginx
+  if grep -q "return 301 https" "$NGINX_CONFIG_FILE"; then
+      echo "Redirecionamento já está configurado."
+  else
+      sudo sed -i 's/listen 80 default_server;/listen 80 default_server;\n\treturn 301 https:\/\/${host}${uri};/' "$NGINX_CONFIG_FILE"
+  fi
+
+  # 2. Reiniciar o Nginx
+  sudo systemctl restart nginx
+  echo "Redirecionamento HTTP para HTTPS configurado no Nginx. Reiniciei o servidor."
+}
+
+# Programa principal
+detect_server
+
+if [ "$SERVER_TYPE" == "apache" ]; then
+  configure_apache
+elif [ "$SERVER_TYPE" == "nginx" ]; then
+  configure_nginx
+else
+  echo "Servidor web não suportado."
+  exit 1
+fi
+
+echo "Processo de configuração de redirecionamento HTTP para HTTPS concluído."
+exit 0
+}
+{type: uploaded file
+fileName: aeta_49.txt
+fullContent:
+```bash
+#!/bin/bash
+
+# Este script corrige a vulnerabilidade de transmissão de informações sensíveis em texto claro via HTTP.
+# Ele configura o redirecionamento de HTTP para HTTPS e habilita o HTTPS para o servidor web Apache.
+
+# Variáveis
+WEB_SERVER="apache2" # Pode ser apache2, nginx, httpd, etc. Ajuste conforme necessário.
+HTTP_PORT="80"
+HTTPS_PORT="443"
+DOMINIO="example.com" # Substitua pelo seu domínio
+DIRETORIO_SSL="/etc/ssl"
+CERT_NAME="selfsigned"
+
+# 1. Verifica se o script está sendo executado como root.
+if [[ $EUID -ne 0 ]]; then
+  echo "Este script precisa ser executado como root."
+  exit 1
+fi
+
+# 2. Verifica se o servidor web está instalado.
+if ! command -v "$WEB_SERVER" &> /dev/null; then
+  echo "Servidor web $WEB_SERVER não encontrado. Instale-o antes de executar este script."
+  exit 1
+fi
+
+# 3. Instala o mod_ssl (se necessário).
+if ! a2enmod ssl &> /dev/null; then
+  apt-get update && apt-get install -y openssl
+  apt-get install -y ssl-cert
+  a2enmod ssl
+fi
+
+# 4. Gera um certificado autoassinado (se necessário).
+if [ ! -f "$DIRETORIO_SSL/certs/$CERT_NAME.crt" ] || [ ! -f "$DIRETORIO_SSL/private/$CERT_NAME.key" ]; then
+  echo "Gerando certificado autoassinado..."
+  mkdir -p "$DIRETORIO_SSL/certs" "$DIRETORIO_SSL/private"
+  openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout "$DIRETORIO_SSL/private/$CERT_NAME.key" -out "$DIRETORIO_SSL/certs/$CERT_NAME.crt" -subj "/CN=$DOMINIO"
+  chmod 600 "$DIRETORIO_SSL/private/$CERT_NAME.key"
+fi
+
+# 5. Cria um arquivo de configuração virtual host para HTTPS.
+cat > /etc/apache2/sites-available/default-ssl.conf <<EOL
+<VirtualHost *:443>
+    ServerName $DOMINIO
+
+    SSLEngine on
+    SSLCertificateFile $DIRETORIO_SSL/certs/$CERT_NAME.crt
+    SSLCertificateKeyFile $DIRETORIO_SSL/private/$CERT_NAME.key
+
+    DocumentRoot /var/www/html
+
+    <Directory /var/www/html>
+        AllowOverride All
+        Require all granted
+    </Directory>
+
+    ErrorLog \${APACHE_LOG_DIR}/error.log
+    CustomLog \${APACHE_LOG_DIR}/access.log combined
+</VirtualHost>
+EOL
+
+# 6. Habilita o site HTTPS e desabilita o site HTTP padrão.
+a2ensite default-ssl.conf
+a2dissite 000-default.conf
+
+# 7. Configura o redirecionamento de HTTP para HTTPS.
+cat > /etc/apache2/sites-available/http-redirect.conf <<EOL
+<VirtualHost *:${HTTP_PORT}>
+    ServerName $DOMINIO
+    Redirect permanent / https://${DOMINIO}/
+</VirtualHost>
+EOL
+
+a2ensite http-redirect.conf
+
+# 8. Reinicia o servidor web.
+systemctl restart "$WEB_SERVER"
+
+echo "Redirecionamento de HTTP para HTTPS configurado e HTTPS habilitado. Reinicie o navegador e acesse o site usando HTTPS."
+```}
+{type: uploaded file
+fileName: aeta_50.txt
+fullContent:
+```bash
+#!/bin/bash
+
+# Este script corrige a vulnerabilidade de transmissão de informações sensíveis em texto claro via HTTP,
+# implementando redirecionamento para HTTPS.
+
+# Variáveis
+HTTP_PORT=80
+HTTPS_PORT=443
+VHOST_DIR="/etc/apache2/sites-available" # Altere para o diretório correto do seu vhost
+DEFAULT_VHOST="000-default.conf" # Nome do arquivo de configuração do vhost padrão
+TEMP_FILE="/tmp/redirect_temp.conf"
+APACHE_CONFIG_TEST="apachectl -t"
+APACHE_RESTART="systemctl restart apache2"
+# Funções
+
+# Detecta o sistema operacional (assume-se que é um sistema Debian/Ubuntu se não for detectado)
+detect_os() {
+  if command -v lsb_release > /dev/null 2>&1; then
+    OS=$(lsb_release -si)
+    VERSION=$(lsb_release -sr)
+    echo "Sistema operacional detectado: $OS $VERSION"
+  else
+    OS="Debian"
+    echo "Sistema operacional não detectado, assumindo Debian/Ubuntu."
+  fi
+}
+
+# Cria o arquivo de configuração para redirecionamento HTTP para HTTPS
+create_redirect_config() {
+  echo "<VirtualHost *:$HTTP_PORT>
+    ServerName \$(hostname -f)
+    Redirect permanent / https://\${SERVER_NAME}\${REQUEST_URI}
+  </VirtualHost>" > "$TEMP_FILE"
+}
+
+# Aplica a configuração de redirecionamento (método para Debian/Ubuntu)
+apply_redirect_config() {
+  if [ -f "$VHOST_DIR/$DEFAULT_VHOST" ]; then
+    cp "$VHOST_DIR/$DEFAULT_VHOST" "$VHOST_DIR/$DEFAULT_VHOST.bak"
+  else
+    echo "Arquivo de configuração padrão não encontrado: $VHOST_DIR/$DEFAULT_VHOST"
+    exit 1
+  fi
+
+  cat "$TEMP_FILE" > "$VHOST_DIR/000-default.conf" #Sobrescreve o arquivo padrão
+  a2enmod rewrite
+
+  # Testar a configuração do Apache
+  if ! $APACHE_CONFIG_TEST > /dev/null 2>&1; then
+    echo "Erro: Configuração do Apache inválida. Restaurando configuração anterior."
+    mv "$VHOST_DIR/$DEFAULT_VHOST.bak" "$VHOST_DIR/$DEFAULT_VHOST"
+    exit 1
+  fi
+
+  # Reiniciar o Apache
+  $APACHE_RESTART
+
+  echo "Redirecionamento HTTP para HTTPS configurado com sucesso."
+}
+
+# Função principal
+main() {
+  detect_os
+  create_redirect_config
+  apply_redirect_config
+  rm -f "$TEMP_FILE"
+}
+
+# Executa a função principal
+main
+exit 0
+```}

@@ -1,0 +1,44 @@
+#!/bin/bash
+
+# Encerra o serviço HTTP
+sudo systemctl stop apache2
+
+# Instala o Apache mod_ssl
+sudo apt-get update
+sudo apt-get install -y apache2 libapache2-mod-ssl
+
+# Gera um certificado autoassinado
+sudo openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout /etc/ssl/private/apache-selfsigned.key -out /etc/ssl/certs/apache-selfsigned.crt -subj "/C=US/ST=State/L=City/O=Organization/CN=localhost"
+
+# Configura o Apache para usar SSL
+sudo sed -i '/<VirtualHost \*:80>/a Redirect permanent / https://'${HOSTNAME}'/' /etc/apache2/sites-available/000-default.conf
+sudo sed -i '/<VirtualHost \*:80>/a <Directory "/var/www/html">' /etc/apache2/sites-available/000-default.conf
+sudo sed -i '/<Directory "/var/www/html">/a Redirect permanent / https://'${HOSTNAME}'/' /etc/apache2/sites-available/000-default.conf
+sudo sed -i '/Redirect permanent \/ https:\/\/'${HOSTNAME}'/a </Directory>' /etc/apache2/sites-available/000-default.conf
+
+sudo tee /etc/apache2/sites-available/default-ssl.conf <<EOL
+<IfModule mod_ssl.c>
+    <VirtualHost _default_:443>
+        ServerAdmin webmaster@localhost
+        DocumentRoot /var/www/html
+        ErrorLog \${APACHE_LOG_DIR}/error.log
+        CustomLog \${APACHE_LOG_DIR}/access.log combined
+        SSLEngine on
+        SSLCertificateFile /etc/ssl/certs/apache-selfsigned.crt
+        SSLCertificateKeyFile /etc/ssl/private/apache-selfsigned.key
+        <FilesMatch "\.(cgi|shtml|phtml|php)$">
+            SSLOptions +StdEnvVars
+        </FilesMatch>
+        <Directory /usr/lib/cgi-bin>
+            SSLOptions +StdEnvVars
+        </Directory>
+    </VirtualHost>
+</IfModule>
+EOL
+
+# Habilita o módulo SSL e o site SSL
+sudo a2enmod ssl
+sudo a2ensite default-ssl
+
+# Reinicia o Apache para aplicar as mudanças
+sudo systemctl restart apache2

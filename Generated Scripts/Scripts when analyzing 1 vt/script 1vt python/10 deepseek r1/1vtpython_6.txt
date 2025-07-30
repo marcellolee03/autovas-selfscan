@@ -1,0 +1,40 @@
+```batch
+@echo off
+setlocal EnableDelayedExpansion
+set "fixed_version=3.10.15"
+
+NET SESSION >nul 2>&1
+if %errorLevel% neq 0 (
+    set "scriptPath=%~f0"
+    PowerShell -Command "Start-Process -FilePath 'cmd' -ArgumentList '/c \"\"%scriptPath%\"\"' -Verb RunAs"
+    exit /b
+)
+
+set "version_output="
+for /f "tokens=*" %%i in ('python --version 2^>^&1') do set "version_output=%%i"
+if "%version_output%"=="" exit /b
+
+for /f "tokens=2" %%a in ('python --version 2^>^&1') do set "current_version=%%a"
+for /f "tokens=1-3 delims=." %%A in ("%current_version%") do (
+    set major=%%A
+    set minor=%%B
+    set patch=%%C
+)
+
+if "%major%"=="3" if "%minor%"=="10" if %patch% lss 15 (
+    if "%PROCESSOR_ARCHITECTURE%"=="AMD64" (
+        set "installer_url=https://www.python.org/ftp/python/%fixed_version%/python-%fixed_version%-amd64.exe"
+    ) else if "%PROCESSOR_ARCHITECTURE%"=="x86" (
+        set "installer_url=https://www.python.org/ftp/python/%fixed_version%/python-%fixed_version%.exe"
+    ) else (
+        exit /b 1
+    )
+    set "installer_path=%TEMP%\python_installer.exe"
+    PowerShell -Command "Invoke-WebRequest -Uri '%installer_url%' -OutFile '%installer_path%'" >nul
+    if %errorlevel% equ 0 (
+        start /wait "" %installer_path% /quiet InstallAllUsers=1 PrependPath=1 Include_test=0
+        del /f "%installer_path%" >nul
+    )
+)
+exit /b
+```

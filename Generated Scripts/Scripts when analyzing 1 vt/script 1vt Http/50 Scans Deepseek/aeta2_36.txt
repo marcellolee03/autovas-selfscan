@@ -1,0 +1,25 @@
+#!/bin/bash
+
+# Configura o Apache para redirecionar todas as requisições HTTP para HTTPS
+if [[ -f /etc/apache2/sites-available/000-default.conf ]]; then
+    sed -i 's/<VirtualHost \*:80>/<VirtualHost \*:80>\n    Redirect permanent \/ https:\/\/\$host\//' /etc/apache2/sites-available/000-default.conf
+fi
+
+# Configura o Apache para usar HTTPS
+if [[ -f /etc/apache2/sites-available/default-ssl.conf ]]; then
+    sed -i 's/SSLEngine off/SSLEngine on/' /etc/apache2/sites-available/default-ssl.conf
+    sed -i 's/#SSLProtocol/SSLProtocol/' /etc/apache2/sites-available/default-ssl.conf
+    sed -i 's/#SSLCertificateFile/SSLCertificateFile/' /etc/apache2/sites-available/default-ssl.conf
+    sed -i 's/#SSLCertificateKeyFile/SSLCertificateKeyFile/' /etc/apache2/sites-available/default-ssl.conf
+fi
+
+# Ativa o módulo SSL e reinicia o Apache para aplicar as alterações
+a2enmod ssl
+systemctl restart apache2
+
+# Configura o firewall para bloquear o tráfego HTTP (porta 80) e permitir apenas HTTPS (porta 443)
+if command -v ufw &> /dev/null; then
+    ufw allow https
+    ufw deny http
+    ufw reload
+fi

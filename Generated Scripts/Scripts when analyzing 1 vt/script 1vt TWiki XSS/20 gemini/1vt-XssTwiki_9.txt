@@ -1,0 +1,69 @@
+```sh
+#!/bin/bash
+
+# Verifica se o usuário é root
+if [[ $EUID -ne 0 ]]; then
+  echo "Este script precisa ser executado como root."
+  exit 1
+fi
+
+# Define as variáveis
+TWIKI_DIR="/var/www/twiki"  # Ajuste este caminho para a localização da sua instalação do TWiki
+BACKUP_DIR="/tmp/twiki_backup"
+VERSION_REQUIRED="4.2.4"
+
+# Função para obter a versão instalada (simplificada, pois o summary já fornece a versão)
+get_installed_version() {
+  echo "01.Feb.2003" # Retorna a versão diretamente do sumário fornecido
+}
+
+# Cria um diretório de backup
+mkdir -p "$BACKUP_DIR"
+
+# Backup da instalação do TWiki
+echo "Fazendo backup da instalação do TWiki em $BACKUP_DIR"
+tar -czvf "$BACKUP_DIR/twiki_backup.tar.gz" "$TWIKI_DIR"
+
+# Atualiza o sistema (exemplo para Debian/Ubuntu, ajuste conforme necessário)
+echo "Atualizando o sistema..."
+apt-get update
+apt-get upgrade -y
+
+# Tenta baixar e instalar a versão 4.2.4 (ou a mais recente, se disponível)
+echo "Baixando TWiki versão $VERSION_REQUIRED..."
+# Adaptar o comando wget para baixar a versão específica do TWiki do site oficial ou de um mirror confiável
+# Este é um exemplo e pode precisar de ajustes para o URL correto
+wget "http://twiki.org/p/pub/Codev/TWikiReleases/TWiki-4.2.4.tgz" -O /tmp/TWiki-4.2.4.tgz
+
+if [ -f "/tmp/TWiki-4.2.4.tgz" ]; then
+    echo "Extraindo TWiki..."
+    tar -xzvf /tmp/TWiki-4.2.4.tgz -C /tmp/
+
+    echo "Substituindo os arquivos do TWiki..."
+    #Importante: Substituir os arquivos com cuidado para não quebrar a configuração existente.
+    #Este script simples assume que a estrutura de diretórios é padrão.
+    #Uma abordagem mais robusta seria comparar e mesclar as configurações.
+
+    # Exemplo simples de substituição de arquivos (requer adaptação)
+    rsync -av /tmp/twiki/* "$TWIKI_DIR/"
+    
+    echo "Removendo arquivos temporários..."
+    rm -rf /tmp/TWiki-4.2.4.tgz /tmp/twiki
+
+    echo "TWiki atualizado para a versão $VERSION_REQUIRED. Verifique a instalação."
+else
+    echo "Falha ao baixar o TWiki versão $VERSION_REQUIRED.  Restaure do backup e tente novamente."
+    exit 1
+fi
+
+# Limpa o cache do sistema
+echo "Limpando o cache do sistema..."
+apt-get autoremove -y
+apt-get clean
+
+echo "Atualização concluída. Reinicie o servidor web."
+# Reinicia o Apache (exemplo, ajuste conforme necessário)
+systemctl restart apache2
+
+exit 0
+```

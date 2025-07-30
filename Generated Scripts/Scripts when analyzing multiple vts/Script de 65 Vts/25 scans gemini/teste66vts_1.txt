@@ -1,0 +1,88 @@
+```bash
+#!/bin/bash
+
+# Variáveis para rastreamento de atualizações
+python3_10_updated=false
+python3_12_updated=false
+
+# Função para atualizar o Python no Windows
+update_python() {
+    version="$1"
+    current_version="$2"
+    fixed_version="$3"
+    port="$4"
+    
+    echo "Atualizando Python ${version} de ${current_version} para ${fixed_version} (Porta: ${port})..."
+    
+    # Construir o comando do PowerShell para atualizar o Python
+    powershell_command="
+    \$ErrorActionPreference = 'Stop';
+    try {
+        Write-Host 'Parando quaisquer processos Python em execução...';
+        Get-Process -Name 'python' | Stop-Process -Force;
+
+        Write-Host 'Baixando o instalador do Python...';
+        \$installer_url = 'https://www.python.org/ftp/python/${fixed_version}/python-${fixed_version}-amd64.exe';
+        \$output_path = '\$env:TEMP\python-${fixed_version}-amd64.exe';
+        Invoke-WebRequest -Uri \$installer_url -OutFile \$output_path;
+
+        Write-Host 'Executando o instalador do Python...';
+        Start-Process -FilePath \$output_path -ArgumentList '/quiet', 'InstallAllUsers=1', 'Include_test=0', 'TargetDir=C:\Python${version}', 'AssociateFiles=1', 'LauncherAllUsers=1', 'PrependPath=1', 'CompileAll=1' -Wait;
+
+        Write-Host 'Verificando a instalação...';
+        \$python_version = python${version} --version;
+        Write-Host 'Versão do Python instalada:' \$python_version;
+
+        if (\$python_version -like '*Python ${fixed_version}*') {
+            Write-Host 'Python atualizado com sucesso para a versão ${fixed_version}.';
+        } else {
+            Write-Host 'Falha ao verificar a versão do Python.';
+            exit 1;
+        }
+    } catch {
+        Write-Host 'Ocorreu um erro durante a atualização:' \$_.Exception.Message;
+        exit 1;
+    }
+    "
+
+    # Executar o comando do PowerShell
+    powershell.exe -Command "$powershell_command"
+    
+    if [ $? -eq 0 ]; then
+        echo "Python ${version} atualizado com sucesso na porta ${port}."
+        return 0
+    else
+        echo "Falha ao atualizar Python ${version} na porta ${port}."
+        return 1
+    fi
+}
+
+# Atualizar Python 3.10
+if ! $python3_10_updated; then
+    if update_python "310" "3.10.12" "3.10.16" "5000"; then
+        python3_10_updated=true
+    fi
+fi
+
+# Atualizar Python 3.12
+if ! $python3_12_updated; then
+    update_python "312" "3.12.0" "3.12.9" "8000"
+    update_python "312" "3.12.0" "3.12.9" "8001"
+    update_python "312" "3.12.0" "3.12.9" "8002"
+    python3_12_updated=true
+fi
+
+# Desativar TLS 1.0 e 1.1 (requer configuração específica do sistema, omitindo comando genérico)
+echo "Desabilitar TLS 1.0 e 1.1 requer configuração específica do sistema. Consulte a documentação do servidor SSH."
+
+# Remediar certificado SSL autoassinado (requer substituição manual)
+echo "Certificados SSL/TLS autoassinados exigem substituição manual por um certificado confiável."
+
+# Remover algoritmos MAC fracos no SSH (requer edição do arquivo de configuração SSH)
+echo "A remoção de algoritmos MAC fracos requer edição manual do arquivo de configuração SSH (ex: /etc/ssh/sshd_config)."
+
+# Desabilitar resposta ICMP Timestamp (Requer configuração do firewall do Windows)
+echo "Desabilitar resposta ICMP Timestamp requer configuração do Firewall do Windows."
+
+echo "Patching concluído."
+```

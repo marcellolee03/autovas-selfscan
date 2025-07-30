@@ -1,0 +1,14 @@
+#!/bin/bash
+VULNERABLE_JS="/console/framework/../js/jquery-1.8.3.min.js"
+FIXED_JS_URL="https://code.jquery.com/jquery-1.9.0.min.js"
+TEMP_FILE=$(mktemp)
+
+curl -s "$FIXED_JS_URL" -o "$TEMP_FILE"
+
+if [ $? -eq 0 ]; then
+    mv "$TEMP_FILE" "$VULNERABLE_JS"
+    chmod 644 "$VULNERABLE_JS"
+else
+    rm -f "$TEMP_FILE"
+    exit 1
+fi

@@ -1,0 +1,115 @@
+#!/bin/bash
+
+# Verificar permissões de root
+if [ "$(id -u)" != "0" ]; then
+    echo "Erro: Este script requer privilégios de root." >&2
+    exit 1
+fi
+
+# Identificar servidor web instalado
+web_server=""
+if systemctl is-active --quiet apache2 2>/dev/null || dpkg -l apache2 &>/dev/null; then
+    web_server="apache"
+elif systemctl is-active --quiet nginx 2>/dev/null || dpkg -l nginx &>/dev/null; then
+    web_server="nginx"
+fi
+
+# Se nenhum servidor encontrado, encerrar
+if [ -z "$web_server" ]; then
+    echo "Nenhum servidor web (Apache/Nginx) foi detectado." >&2
+    exit 1
+fi
+
+# Configurar Apache
+configure_apache() {
+    # Ativar módulos necessários
+    a2enmod ssl rewrite headers >/dev/null
+
+    # Criar certificado autoassinado
+    mkdir -p /etc/apache2/ssl
+    openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
+        -keyout /etc/apache2/ssl/apache.key \
+        -out /etc/apache2/ssl/apache.crt \
+        -subj "/C=/ST=/L=/O=/CN=localhost" >/dev/null 2>&1
+
+    # Configuração de redirecionamento global para HTTPS
+    cat > /etc/apache2/conf-available/force-ssl.conf << 'EOF'
+<VirtualHost *:80>
+    ServerName localhost
+    Redirect permanent / https://localhost/
+    ErrorLog ${APACHE_LOG_DIR}/error.log
+    CustomLog ${APACHE_LOG_DIR}/access.log combined
+</VirtualHost>
+
+<VirtualHost *:443>
+    SSLEngine on
+    SSLCertificateFile /etc/apache2/ssl/apache.crt
+    SSLCertificateKeyFile /etc/apache2/ssl/apache.key
+    Header always set Strict-Transport-Security "max-age=63072000; includeSubDomains"
+
+    <Location />
+        SSLRequireSSL
+        SSLVerifyClient optional
+    </Location>
+</VirtualHost>
+EOF
+
+    # Forçar segurança em formulários/login
+    echo "Header edit Location ^http://(.*)$ https://\$1" > /etc/apache2/conf-available/security-headers.conf
+
+    # Ativar configurações
+    a2enconf force-ssl security-headers >/dev/null
+    systemctl restart apache2
+}
+
+# Configurar Nginx
+configure_nginx() {
+    # Criar certificado autoassinado
+    mkdir -p /etc/nginx/ssl
+    openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
+        -keyout /etc/nginx/ssl/nginx.key \
+        -out /etc/nginx/ssl/nginx.crt \
+        -subj "/C=/ST=/L=/O=/CN=localhost" >/dev/null 2>&1
+
+    # Configuração principal
+    cat > /etc/nginx/conf.d/ssl_redirect.conf << 'EOF'
+server {
+    listen 80 default_server;
+    listen [::]:80 default_server;
+    server_name _;
+    return 301 https://$host$request_uri;
+}
+
+server {
+    listen 443 ssl;
+    ssl_certificate /etc/nginx/ssl/nginx.crt;
+    ssl_certificate_key /etc/nginx/ssl/nginx.key;
+    ssl_protocols TLSv1.2 TLSv1.3;
+    
+    add_header Strict-Transport-Security "max-age=63072000; includeSubDomains" always;
+
+    location / {
+        if ($scheme != "https") {
+            return 301 https://$host$request_uri;
+        }
+    }
+}
+EOF
+
+    # Validar e aplicar configuração
+    nginx -t >/dev/null 2>&1 && systemctl restart nginx
+}
+
+# Executar configuração conforme servidor detectado
+case $web_server in
+    apache) configure_apache >/dev/null ;;
+    nginx)  configure_nginx >/dev/null ;;
+esac
+
+# Verificar sucesso
+if [ $? -eq 0 ]; then
+    echo "Configuração de segurança aplicada com sucesso."
+else
+    echo "Erro durante a aplicação das configurações." >&2
+    exit 1
+fi

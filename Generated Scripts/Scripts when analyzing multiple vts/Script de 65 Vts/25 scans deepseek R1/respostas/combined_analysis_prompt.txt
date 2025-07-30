@@ -1,0 +1,3261 @@
+>analise esse prompt contendo as vulnerabilidades encontradas em um csv do openvas e analise se os scripts que irei enviar em seguida sao capazes de corrigir esses problemas ou nao, me informando uma porcentagem de correcao das vulnerabilidades
+>Vulnerabilidades:
+    # INSTRUÇÕES PARA O MODELO DE IA
+
+    ## PERSONA
+    Você é um especialista em cibersegurança e automação de sistemas, focado em criar scripts de correção (patching). Sua única função é gerar um script que resolva a vulnerabilidade descrita abaixo.
+
+    ## TAREFA
+    Analise o contexto da vulnerabilidade a seguir e gere um script de shell (compatível com o sistema operacional do localhost) que, ao ser executado, corrija permanentemente a vulnerabilidade descrita.
+
+    ## CONTEXTO DA VULNERABILIDADE
+
+# Vulnerabilidade 1
+CVEs: CVE-2024-6232,CVE-2024-7592,CVE-2024-8088,CVE-2024-45490,CVE-2024-45491,CVE-2024-45492
+NVT Name: Python Multiple Vulnerabilities (Aug 2024) - Windows
+Port: 5000.0
+Port Protocol: tcp
+Summary: Python is prone to an infinite loop vulnerability leading to a
+  denial of service (DoS).
+Specific Result: Installed version: 3.10.12
+Fixed version:     3.10.15
+Installation
+path / port:       5000/tcp
+
+
+Vulnerability Detection Method: Checks if a vulnerable version is present on the target host.
+Details:
+Python Multiple Vulnerabilities (Aug 2024) - Windows
+(OID: 1.3.6.1.4.1.25623.1.0.170806)
+Version used: 2024-12-13T15:40:54Z
+
+Affected Software/OS: Python prior to version 3.8.20, 3.9.x prior to 3.9.20, 3.10.x
+  prior to 3.10.15, 3.11.x prior to 3.11.10 and 3.12.x prior to 3.12.6.
+Product Detection Result: Product: cpe:/a:python:python:3.10.12
+Method: Python Detection Consolidation
+(OID: 1.3.6.1.4.1.25623.1.0.112857)
+
+Solution: Update to version 3.8.20, 3.9.20, 3.10.15, 3.11.10, 3.12.6 or
+  later.
+
+# Vulnerabilidade 2
+CVEs: CVE-2024-6232,CVE-2024-7592,CVE-2024-8088,CVE-2024-45490,CVE-2024-45491,CVE-2024-45492
+NVT Name: Python Multiple Vulnerabilities (Aug 2024) - Windows
+Port: 8000.0
+Port Protocol: tcp
+Summary: Python is prone to an infinite loop vulnerability leading to a
+  denial of service (DoS).
+Specific Result: Installed version: 3.12.0
+Fixed version:     3.12.6
+Installation
+path / port:       8000/tcp
+
+
+Vulnerability Detection Method: Checks if a vulnerable version is present on the target host.
+Details:
+Python Multiple Vulnerabilities (Aug 2024) - Windows
+(OID: 1.3.6.1.4.1.25623.1.0.170806)
+Version used: 2024-12-13T15:40:54Z
+
+Affected Software/OS: Python prior to version 3.8.20, 3.9.x prior to 3.9.20, 3.10.x
+  prior to 3.10.15, 3.11.x prior to 3.11.10 and 3.12.x prior to 3.12.6.
+Product Detection Result: Product: cpe:/a:python:python:3.12.0
+Method: Python Detection Consolidation
+(OID: 1.3.6.1.4.1.25623.1.0.112857)
+
+Solution: Update to version 3.8.20, 3.9.20, 3.10.15, 3.11.10, 3.12.6 or
+  later.
+
+# Vulnerabilidade 3
+CVEs: CVE-2024-6232,CVE-2024-7592,CVE-2024-8088,CVE-2024-45490,CVE-2024-45491,CVE-2024-45492
+NVT Name: Python Multiple Vulnerabilities (Aug 2024) - Windows
+Port: 8001.0
+Port Protocol: tcp
+Summary: Python is prone to an infinite loop vulnerability leading to a
+  denial of service (DoS).
+Specific Result: Installed version: 3.12.0
+Fixed version:     3.12.6
+Installation
+path / port:       8001/tcp
+
+
+Vulnerability Detection Method: Checks if a vulnerable version is present on the target host.
+Details:
+Python Multiple Vulnerabilities (Aug 2024) - Windows
+(OID: 1.3.6.1.4.1.25623.1.0.170806)
+Version used: 2024-12-13T15:40:54Z
+
+Affected Software/OS: Python prior to version 3.8.20, 3.9.x prior to 3.9.20, 3.10.x
+  prior to 3.10.15, 3.11.x prior to 3.11.10 and 3.12.x prior to 3.12.6.
+Product Detection Result: Product: cpe:/a:python:python:3.12.0
+Method: Python Detection Consolidation
+(OID: 1.3.6.1.4.1.25623.1.0.112857)
+
+Solution: Update to version 3.8.20, 3.9.20, 3.10.15, 3.11.10, 3.12.6 or
+  later.
+
+# Vulnerabilidade 4
+CVEs: CVE-2024-6232,CVE-2024-7592,CVE-2024-8088,CVE-2024-45490,CVE-2024-45491,CVE-2024-45492
+NVT Name: Python Multiple Vulnerabilities (Aug 2024) - Windows
+Port: 8002.0
+Port Protocol: tcp
+Summary: Python is prone to an infinite loop vulnerability leading to a
+  denial of service (DoS).
+Specific Result: Installed version: 3.12.0
+Fixed version:     3.12.6
+Installation
+path / port:       8002/tcp
+
+
+Vulnerability Detection Method: Checks if a vulnerable version is present on the target host.
+Details:
+Python Multiple Vulnerabilities (Aug 2024) - Windows
+(OID: 1.3.6.1.4.1.25623.1.0.170806)
+Version used: 2024-12-13T15:40:54Z
+
+Affected Software/OS: Python prior to version 3.8.20, 3.9.x prior to 3.9.20, 3.10.x
+  prior to 3.10.15, 3.11.x prior to 3.11.10 and 3.12.x prior to 3.12.6.
+Product Detection Result: Product: cpe:/a:python:python:3.12.0
+Method: Python Detection Consolidation
+(OID: 1.3.6.1.4.1.25623.1.0.112857)
+
+Solution: Update to version 3.8.20, 3.9.20, 3.10.15, 3.11.10, 3.12.6 or
+  later.
+
+# Vulnerabilidade 5
+CVEs: CVE-2024-9287
+NVT Name: Python Command Injection Vulnerability (Oct 2024) - Windows
+Port: 8002.0
+Port Protocol: tcp
+Summary: Python is prone to a command injection vulnerability in the venv
+  module.
+Specific Result: Installed version: 3.12.0
+Fixed version:     3.12.8
+Installation
+path / port:       8002/tcp
+
+
+Vulnerability Detection Method: Checks if a vulnerable version is present on the target host.
+Details:
+Python Command Injection Vulnerability (Oct 2024) - Windows
+(OID: 1.3.6.1.4.1.25623.1.0.114841)
+Version used: 2025-02-11T05:38:07Z
+
+Affected Software/OS: Python versions prior to 3.9.21, 3.10.x prior to 3.10.16,
+  3.11.x prior to 3.11.11, 3.12.x prior to 3.12.8 and 3.13.x prior to 3.13.1.
+Product Detection Result: Product: cpe:/a:python:python:3.12.0
+Method: Python Detection Consolidation
+(OID: 1.3.6.1.4.1.25623.1.0.112857)
+
+Solution: Update to version 3.9.21, 3.10.16, 3.11.11, 3.12.8, 3.13.1
+  or later.
+
+# Vulnerabilidade 6
+CVEs: CVE-2024-9287
+NVT Name: Python Command Injection Vulnerability (Oct 2024) - Windows
+Port: 8000.0
+Port Protocol: tcp
+Summary: Python is prone to a command injection vulnerability in the venv
+  module.
+Specific Result: Installed version: 3.12.0
+Fixed version:     3.12.8
+Installation
+path / port:       8000/tcp
+
+
+Vulnerability Detection Method: Checks if a vulnerable version is present on the target host.
+Details:
+Python Command Injection Vulnerability (Oct 2024) - Windows
+(OID: 1.3.6.1.4.1.25623.1.0.114841)
+Version used: 2025-02-11T05:38:07Z
+
+Affected Software/OS: Python versions prior to 3.9.21, 3.10.x prior to 3.10.16,
+  3.11.x prior to 3.11.11, 3.12.x prior to 3.12.8 and 3.13.x prior to 3.13.1.
+Product Detection Result: Product: cpe:/a:python:python:3.12.0
+Method: Python Detection Consolidation
+(OID: 1.3.6.1.4.1.25623.1.0.112857)
+
+Solution: Update to version 3.9.21, 3.10.16, 3.11.11, 3.12.8, 3.13.1
+  or later.
+
+# Vulnerabilidade 7
+CVEs: CVE-2024-9287
+NVT Name: Python Command Injection Vulnerability (Oct 2024) - Windows
+Port: 8001.0
+Port Protocol: tcp
+Summary: Python is prone to a command injection vulnerability in the venv
+  module.
+Specific Result: Installed version: 3.12.0
+Fixed version:     3.12.8
+Installation
+path / port:       8001/tcp
+
+
+Vulnerability Detection Method: Checks if a vulnerable version is present on the target host.
+Details:
+Python Command Injection Vulnerability (Oct 2024) - Windows
+(OID: 1.3.6.1.4.1.25623.1.0.114841)
+Version used: 2025-02-11T05:38:07Z
+
+Affected Software/OS: Python versions prior to 3.9.21, 3.10.x prior to 3.10.16,
+  3.11.x prior to 3.11.11, 3.12.x prior to 3.12.8 and 3.13.x prior to 3.13.1.
+Product Detection Result: Product: cpe:/a:python:python:3.12.0
+Method: Python Detection Consolidation
+(OID: 1.3.6.1.4.1.25623.1.0.112857)
+
+Solution: Update to version 3.9.21, 3.10.16, 3.11.11, 3.12.8, 3.13.1
+  or later.
+
+# Vulnerabilidade 8
+CVEs: CVE-2024-9287
+NVT Name: Python Command Injection Vulnerability (Oct 2024) - Windows
+Port: 5000.0
+Port Protocol: tcp
+Summary: Python is prone to a command injection vulnerability in the venv
+  module.
+Specific Result: Installed version: 3.10.12
+Fixed version:     3.10.16
+Installation
+path / port:       5000/tcp
+
+
+Vulnerability Detection Method: Checks if a vulnerable version is present on the target host.
+Details:
+Python Command Injection Vulnerability (Oct 2024) - Windows
+(OID: 1.3.6.1.4.1.25623.1.0.114841)
+Version used: 2025-02-11T05:38:07Z
+
+Affected Software/OS: Python versions prior to 3.9.21, 3.10.x prior to 3.10.16,
+  3.11.x prior to 3.11.11, 3.12.x prior to 3.12.8 and 3.13.x prior to 3.13.1.
+Product Detection Result: Product: cpe:/a:python:python:3.10.12
+Method: Python Detection Consolidation
+(OID: 1.3.6.1.4.1.25623.1.0.112857)
+
+Solution: Update to version 3.9.21, 3.10.16, 3.11.11, 3.12.8, 3.13.1
+  or later.
+
+# Vulnerabilidade 9
+CVEs: CVE-2023-36632
+NVT Name: Python <= 3.12.1 RecursionError Vulnerability - Windows
+Port: 8001.0
+Port Protocol: tcp
+Summary: Python is prone to a 'RecursionError' vulnerability.
+Specific Result: Installed version: 3.12.0
+Fixed version:     None
+Installation
+path / port:       8001/tcp
+
+
+Vulnerability Detection Method: Checks if a vulnerable version is present on the target host.
+Details:
+Python <= 3.12.1 'RecursionError' Vulnerability - Windows
+(OID: 1.3.6.1.4.1.25623.1.0.104816)
+Version used: 2024-02-05T14:36:57Z
+
+Affected Software/OS: The legacy email.utils.parseaddr function in Python through
+  3.12.1.
+Product Detection Result: Product: cpe:/a:python:python:3.12.0
+Method: Python Detection Consolidation
+(OID: 1.3.6.1.4.1.25623.1.0.112857)
+
+Solution: No known solution was made available for at least one year
+  since the disclosure of this vulnerability. Likely none will be provided anymore. General solution
+  options are to upgrade to a newer release, disable respective features, remove the product or
+  replace the product by another one.
+
+  NOTE: email.utils.parseaddr is categorized as a Legacy API in the documentation of the Python
+  email package. Applications should instead use the email.parser.BytesParser or
+  email.parser.Parser class.
+
+# Vulnerabilidade 10
+CVEs: CVE-2023-52425
+NVT Name: Python DoS Vulnerability (Mar 2024) - Windows
+Port: 5000.0
+Port Protocol: tcp
+Summary: Python is prone to a denial of service (DoS) vulnerability in
+  libexpat.
+Specific Result: Installed version: 3.10.12
+Fixed version:     3.10.14
+Installation
+path / port:       5000/tcp
+
+
+Vulnerability Detection Method: Checks if a vulnerable version is present on the target host.
+Details:
+Python DoS Vulnerability (Mar 2024) - Windows
+(OID: 1.3.6.1.4.1.25623.1.0.170815)
+Version used: 2024-10-11T15:39:44Z
+
+Affected Software/OS: Python prior to version 3.8.19, 3.9.x prior to 3.9.19, 3.10.x
+  prior to 3.10.14, 3.11.x prior to 3.11.9 and 3.12.x prior to 3.12.3.
+Product Detection Result: Product: cpe:/a:python:python:3.10.12
+Method: Python Detection Consolidation
+(OID: 1.3.6.1.4.1.25623.1.0.112857)
+
+Solution: Update to version 3.8.19, 3.9.19, 3.10.14, 3.11.9, 3.12.3
+  or later.
+
+# Vulnerabilidade 11
+CVEs: CVE-2023-52425
+NVT Name: Python DoS Vulnerability (Mar 2024) - Windows
+Port: 8000.0
+Port Protocol: tcp
+Summary: Python is prone to a denial of service (DoS) vulnerability in
+  libexpat.
+Specific Result: Installed version: 3.12.0
+Fixed version:     3.12.3
+Installation
+path / port:       8000/tcp
+
+
+Vulnerability Detection Method: Checks if a vulnerable version is present on the target host.
+Details:
+Python DoS Vulnerability (Mar 2024) - Windows
+(OID: 1.3.6.1.4.1.25623.1.0.170815)
+Version used: 2024-10-11T15:39:44Z
+
+Affected Software/OS: Python prior to version 3.8.19, 3.9.x prior to 3.9.19, 3.10.x
+  prior to 3.10.14, 3.11.x prior to 3.11.9 and 3.12.x prior to 3.12.3.
+Product Detection Result: Product: cpe:/a:python:python:3.12.0
+Method: Python Detection Consolidation
+(OID: 1.3.6.1.4.1.25623.1.0.112857)
+
+Solution: Update to version 3.8.19, 3.9.19, 3.10.14, 3.11.9, 3.12.3
+  or later.
+
+# Vulnerabilidade 12
+CVEs: CVE-2023-52425
+NVT Name: Python DoS Vulnerability (Mar 2024) - Windows
+Port: 8001.0
+Port Protocol: tcp
+Summary: Python is prone to a denial of service (DoS) vulnerability in
+  libexpat.
+Specific Result: Installed version: 3.12.0
+Fixed version:     3.12.3
+Installation
+path / port:       8001/tcp
+
+
+Vulnerability Detection Method: Checks if a vulnerable version is present on the target host.
+Details:
+Python DoS Vulnerability (Mar 2024) - Windows
+(OID: 1.3.6.1.4.1.25623.1.0.170815)
+Version used: 2024-10-11T15:39:44Z
+
+Affected Software/OS: Python prior to version 3.8.19, 3.9.x prior to 3.9.19, 3.10.x
+  prior to 3.10.14, 3.11.x prior to 3.11.9 and 3.12.x prior to 3.12.3.
+Product Detection Result: Product: cpe:/a:python:python:3.12.0
+Method: Python Detection Consolidation
+(OID: 1.3.6.1.4.1.25623.1.0.112857)
+
+Solution: Update to version 3.8.19, 3.9.19, 3.10.14, 3.11.9, 3.12.3
+  or later.
+
+# Vulnerabilidade 13
+CVEs: CVE-2023-52425
+NVT Name: Python DoS Vulnerability (Mar 2024) - Windows
+Port: 8002.0
+Port Protocol: tcp
+Summary: Python is prone to a denial of service (DoS) vulnerability in
+  libexpat.
+Specific Result: Installed version: 3.12.0
+Fixed version:     3.12.3
+Installation
+path / port:       8002/tcp
+
+
+Vulnerability Detection Method: Checks if a vulnerable version is present on the target host.
+Details:
+Python DoS Vulnerability (Mar 2024) - Windows
+(OID: 1.3.6.1.4.1.25623.1.0.170815)
+Version used: 2024-10-11T15:39:44Z
+
+Affected Software/OS: Python prior to version 3.8.19, 3.9.x prior to 3.9.19, 3.10.x
+  prior to 3.10.14, 3.11.x prior to 3.11.9 and 3.12.x prior to 3.12.3.
+Product Detection Result: Product: cpe:/a:python:python:3.12.0
+Method: Python Detection Consolidation
+(OID: 1.3.6.1.4.1.25623.1.0.112857)
+
+Solution: Update to version 3.8.19, 3.9.19, 3.10.14, 3.11.9, 3.12.3
+  or later.
+
+# Vulnerabilidade 14
+CVEs: CVE-2023-36632
+NVT Name: Python <= 3.12.1 RecursionError Vulnerability - Windows
+Port: 5000.0
+Port Protocol: tcp
+Summary: Python is prone to a 'RecursionError' vulnerability.
+Specific Result: Installed version: 3.10.12
+Fixed version:     None
+Installation
+path / port:       5000/tcp
+
+
+Vulnerability Detection Method: Checks if a vulnerable version is present on the target host.
+Details:
+Python <= 3.12.1 'RecursionError' Vulnerability - Windows
+(OID: 1.3.6.1.4.1.25623.1.0.104816)
+Version used: 2024-02-05T14:36:57Z
+
+Affected Software/OS: The legacy email.utils.parseaddr function in Python through
+  3.12.1.
+Product Detection Result: Product: cpe:/a:python:python:3.10.12
+Method: Python Detection Consolidation
+(OID: 1.3.6.1.4.1.25623.1.0.112857)
+
+Solution: No known solution was made available for at least one year
+  since the disclosure of this vulnerability. Likely none will be provided anymore. General solution
+  options are to upgrade to a newer release, disable respective features, remove the product or
+  replace the product by another one.
+
+  NOTE: email.utils.parseaddr is categorized as a Legacy API in the documentation of the Python
+  email package. Applications should instead use the email.parser.BytesParser or
+  email.parser.Parser class.
+
+# Vulnerabilidade 15
+CVEs: CVE-2023-36632
+NVT Name: Python <= 3.12.1 RecursionError Vulnerability - Windows
+Port: 8000.0
+Port Protocol: tcp
+Summary: Python is prone to a 'RecursionError' vulnerability.
+Specific Result: Installed version: 3.12.0
+Fixed version:     None
+Installation
+path / port:       8000/tcp
+
+
+Vulnerability Detection Method: Checks if a vulnerable version is present on the target host.
+Details:
+Python <= 3.12.1 'RecursionError' Vulnerability - Windows
+(OID: 1.3.6.1.4.1.25623.1.0.104816)
+Version used: 2024-02-05T14:36:57Z
+
+Affected Software/OS: The legacy email.utils.parseaddr function in Python through
+  3.12.1.
+Product Detection Result: Product: cpe:/a:python:python:3.12.0
+Method: Python Detection Consolidation
+(OID: 1.3.6.1.4.1.25623.1.0.112857)
+
+Solution: No known solution was made available for at least one year
+  since the disclosure of this vulnerability. Likely none will be provided anymore. General solution
+  options are to upgrade to a newer release, disable respective features, remove the product or
+  replace the product by another one.
+
+  NOTE: email.utils.parseaddr is categorized as a Legacy API in the documentation of the Python
+  email package. Applications should instead use the email.parser.BytesParser or
+  email.parser.Parser class.
+
+# Vulnerabilidade 16
+CVEs: CVE-2023-6597
+NVT Name: Python Symlink Dereference Vulnerability (Mar 2024) - Windows
+Port: 8002.0
+Port Protocol: tcp
+Summary: Python is prone to a symlink dereference vulnerability.
+Specific Result: Installed version: 3.12.0
+Fixed version:     3.12.1
+Installation
+path / port:       8002/tcp
+
+
+Vulnerability Detection Method: Checks if a vulnerable version is present on the target host.
+Details:
+Python Symlink Dereference Vulnerability (Mar 2024) - Windows
+(OID: 1.3.6.1.4.1.25623.1.0.170812)
+Version used: 2024-10-11T15:39:44Z
+
+Affected Software/OS: Python prior to version 3.8.19, 3.9.x prior to 3.9.19, 3.10.x
+  prior to 3.10.14, 3.11.x prior to 3.11.8 and 3.12.x prior to 3.12.1.
+Product Detection Result: Product: cpe:/a:python:python:3.12.0
+Method: Python Detection Consolidation
+(OID: 1.3.6.1.4.1.25623.1.0.112857)
+
+Solution: Update to version 3.8.19, 3.9.19, 3.10.14, 3.11.8, 3.12.1
+  or later.
+
+# Vulnerabilidade 17
+CVEs: CVE-2023-6597
+NVT Name: Python Symlink Dereference Vulnerability (Mar 2024) - Windows
+Port: 8000.0
+Port Protocol: tcp
+Summary: Python is prone to a symlink dereference vulnerability.
+Specific Result: Installed version: 3.12.0
+Fixed version:     3.12.1
+Installation
+path / port:       8000/tcp
+
+
+Vulnerability Detection Method: Checks if a vulnerable version is present on the target host.
+Details:
+Python Symlink Dereference Vulnerability (Mar 2024) - Windows
+(OID: 1.3.6.1.4.1.25623.1.0.170812)
+Version used: 2024-10-11T15:39:44Z
+
+Affected Software/OS: Python prior to version 3.8.19, 3.9.x prior to 3.9.19, 3.10.x
+  prior to 3.10.14, 3.11.x prior to 3.11.8 and 3.12.x prior to 3.12.1.
+Product Detection Result: Product: cpe:/a:python:python:3.12.0
+Method: Python Detection Consolidation
+(OID: 1.3.6.1.4.1.25623.1.0.112857)
+
+Solution: Update to version 3.8.19, 3.9.19, 3.10.14, 3.11.8, 3.12.1
+  or later.
+
+# Vulnerabilidade 18
+CVEs: CVE-2023-6597
+NVT Name: Python Symlink Dereference Vulnerability (Mar 2024) - Windows
+Port: 5000.0
+Port Protocol: tcp
+Summary: Python is prone to a symlink dereference vulnerability.
+Specific Result: Installed version: 3.10.12
+Fixed version:     3.10.14
+Installation
+path / port:       5000/tcp
+
+
+Vulnerability Detection Method: Checks if a vulnerable version is present on the target host.
+Details:
+Python Symlink Dereference Vulnerability (Mar 2024) - Windows
+(OID: 1.3.6.1.4.1.25623.1.0.170812)
+Version used: 2024-10-11T15:39:44Z
+
+Affected Software/OS: Python prior to version 3.8.19, 3.9.x prior to 3.9.19, 3.10.x
+  prior to 3.10.14, 3.11.x prior to 3.11.8 and 3.12.x prior to 3.12.1.
+Product Detection Result: Product: cpe:/a:python:python:3.10.12
+Method: Python Detection Consolidation
+(OID: 1.3.6.1.4.1.25623.1.0.112857)
+
+Solution: Update to version 3.8.19, 3.9.19, 3.10.14, 3.11.8, 3.12.1
+  or later.
+
+# Vulnerabilidade 19
+CVEs: CVE-2023-6597
+NVT Name: Python Symlink Dereference Vulnerability (Mar 2024) - Windows
+Port: 8001.0
+Port Protocol: tcp
+Summary: Python is prone to a symlink dereference vulnerability.
+Specific Result: Installed version: 3.12.0
+Fixed version:     3.12.1
+Installation
+path / port:       8001/tcp
+
+
+Vulnerability Detection Method: Checks if a vulnerable version is present on the target host.
+Details:
+Python Symlink Dereference Vulnerability (Mar 2024) - Windows
+(OID: 1.3.6.1.4.1.25623.1.0.170812)
+Version used: 2024-10-11T15:39:44Z
+
+Affected Software/OS: Python prior to version 3.8.19, 3.9.x prior to 3.9.19, 3.10.x
+  prior to 3.10.14, 3.11.x prior to 3.11.8 and 3.12.x prior to 3.12.1.
+Product Detection Result: Product: cpe:/a:python:python:3.12.0
+Method: Python Detection Consolidation
+(OID: 1.3.6.1.4.1.25623.1.0.112857)
+
+Solution: Update to version 3.8.19, 3.9.19, 3.10.14, 3.11.8, 3.12.1
+  or later.
+
+# Vulnerabilidade 20
+CVEs: CVE-2024-3220
+NVT Name: Python Untrusted Search Path Vulnerability (Feb 2025) - Windows
+Port: 8001.0
+Port Protocol: tcp
+Summary: Python is prone to an untrusted search path vulnerability
+  in the mimetypes standard library.
+Specific Result: Installed version: 3.12.0
+Fixed version:     None
+Installation
+path / port:       8001/tcp
+
+
+Vulnerability Detection Method: Checks if a vulnerable version is present on the target host.
+Details:
+Python Untrusted Search Path Vulnerability (Feb 2025) - Windows
+(OID: 1.3.6.1.4.1.25623.1.0.171228)
+Version used: 2025-02-19T05:37:55Z
+
+Affected Software/OS: Python versions 3.13.2 and prior.
+Product Detection Result: Product: cpe:/a:python:python:3.12.0
+Method: Python Detection Consolidation
+(OID: 1.3.6.1.4.1.25623.1.0.112857)
+
+Solution: No known solution is available as of 18th February, 2025.
+  Information regarding this issue will be updated once solution details are available.
+
+# Vulnerabilidade 21
+CVEs: CVE-2024-3219
+NVT Name: Python Connection Race Vulnerability (Jul 2024) - Windows
+Port: 5000.0
+Port Protocol: tcp
+Summary: Python is prone to a connection race vulnerability.
+Specific Result: Installed version: 3.10.12
+Fixed version:     3.10.15
+Installation
+path / port:       5000/tcp
+
+
+Vulnerability Detection Method: Checks if a vulnerable version is present on the target host.
+Details:
+Python Connection Race Vulnerability (Jul 2024) - Windows
+(OID: 1.3.6.1.4.1.25623.1.0.114743)
+Version used: 2024-10-11T15:39:44Z
+
+Affected Software/OS: Python version 3.5 prior to version 3.8.20, 3.9.x prior to
+  3.9.20, 3.10.x prior to 3.10.15, 3.11.x prior to 3.11.10 and 3.12.x prior to 3.12.5.
+
+  Platforms that support AF_UNIX such as Linux and macOS are not affected by this vulnerability.
+Product Detection Result: Product: cpe:/a:python:python:3.10.12
+Method: Python Detection Consolidation
+(OID: 1.3.6.1.4.1.25623.1.0.112857)
+
+Solution: Update to version 3.8.20, 3.9.20, 3.10.15, 3.11.10, 3.12.5 or
+  later.
+
+# Vulnerabilidade 22
+CVEs: CVE-2024-4030
+NVT Name: Python Access Control Vulnerability (May 2024) - Windows
+Port: 5000.0
+Port Protocol: tcp
+Summary: Python is prone to an access control vulnerability.
+Specific Result: Installed version: 3.10.12
+Fixed version:     3.10.15
+Installation
+path / port:       5000/tcp
+
+
+Vulnerability Detection Method: Checks if a vulnerable version is present on the target host.
+Details:
+Python Access Control Vulnerability (May 2024) - Windows
+(OID: 1.3.6.1.4.1.25623.1.0.152212)
+Version used: 2024-10-11T15:39:44Z
+
+Affected Software/OS: Python prior to version 3.8.20, 3.9.x prior to 3.9.20, 3.10.x
+  prior to 3.10.15, 3.11.x prior to 3.11.10 and 3.12.x prior to 3.12.4.
+Product Detection Result: Product: cpe:/a:python:python:3.10.12
+Method: Python Detection Consolidation
+(OID: 1.3.6.1.4.1.25623.1.0.112857)
+
+Solution: Update to version 3.8.20, 3.9.20, 3.10.15, 3.11.10, 3.12.4 or
+  later.
+
+# Vulnerabilidade 23
+CVEs: CVE-2024-4030
+NVT Name: Python Access Control Vulnerability (May 2024) - Windows
+Port: 8000.0
+Port Protocol: tcp
+Summary: Python is prone to an access control vulnerability.
+Specific Result: Installed version: 3.12.0
+Fixed version:     3.12.4
+Installation
+path / port:       8000/tcp
+
+
+Vulnerability Detection Method: Checks if a vulnerable version is present on the target host.
+Details:
+Python Access Control Vulnerability (May 2024) - Windows
+(OID: 1.3.6.1.4.1.25623.1.0.152212)
+Version used: 2024-10-11T15:39:44Z
+
+Affected Software/OS: Python prior to version 3.8.20, 3.9.x prior to 3.9.20, 3.10.x
+  prior to 3.10.15, 3.11.x prior to 3.11.10 and 3.12.x prior to 3.12.4.
+Product Detection Result: Product: cpe:/a:python:python:3.12.0
+Method: Python Detection Consolidation
+(OID: 1.3.6.1.4.1.25623.1.0.112857)
+
+Solution: Update to version 3.8.20, 3.9.20, 3.10.15, 3.11.10, 3.12.4 or
+  later.
+
+# Vulnerabilidade 24
+CVEs: CVE-2024-4030
+NVT Name: Python Access Control Vulnerability (May 2024) - Windows
+Port: 8001.0
+Port Protocol: tcp
+Summary: Python is prone to an access control vulnerability.
+Specific Result: Installed version: 3.12.0
+Fixed version:     3.12.4
+Installation
+path / port:       8001/tcp
+
+
+Vulnerability Detection Method: Checks if a vulnerable version is present on the target host.
+Details:
+Python Access Control Vulnerability (May 2024) - Windows
+(OID: 1.3.6.1.4.1.25623.1.0.152212)
+Version used: 2024-10-11T15:39:44Z
+
+Affected Software/OS: Python prior to version 3.8.20, 3.9.x prior to 3.9.20, 3.10.x
+  prior to 3.10.15, 3.11.x prior to 3.11.10 and 3.12.x prior to 3.12.4.
+Product Detection Result: Product: cpe:/a:python:python:3.12.0
+Method: Python Detection Consolidation
+(OID: 1.3.6.1.4.1.25623.1.0.112857)
+
+Solution: Update to version 3.8.20, 3.9.20, 3.10.15, 3.11.10, 3.12.4 or
+  later.
+
+# Vulnerabilidade 25
+CVEs: CVE-2024-3220
+NVT Name: Python Untrusted Search Path Vulnerability (Feb 2025) - Windows
+Port: 8002.0
+Port Protocol: tcp
+Summary: Python is prone to an untrusted search path vulnerability
+  in the mimetypes standard library.
+Specific Result: Installed version: 3.12.0
+Fixed version:     None
+Installation
+path / port:       8002/tcp
+
+
+Vulnerability Detection Method: Checks if a vulnerable version is present on the target host.
+Details:
+Python Untrusted Search Path Vulnerability (Feb 2025) - Windows
+(OID: 1.3.6.1.4.1.25623.1.0.171228)
+Version used: 2025-02-19T05:37:55Z
+
+Affected Software/OS: Python versions 3.13.2 and prior.
+Product Detection Result: Product: cpe:/a:python:python:3.12.0
+Method: Python Detection Consolidation
+(OID: 1.3.6.1.4.1.25623.1.0.112857)
+
+Solution: No known solution is available as of 18th February, 2025.
+  Information regarding this issue will be updated once solution details are available.
+
+# Vulnerabilidade 26
+CVEs: CVE-2024-4030
+NVT Name: Python Access Control Vulnerability (May 2024) - Windows
+Port: 8002.0
+Port Protocol: tcp
+Summary: Python is prone to an access control vulnerability.
+Specific Result: Installed version: 3.12.0
+Fixed version:     3.12.4
+Installation
+path / port:       8002/tcp
+
+
+Vulnerability Detection Method: Checks if a vulnerable version is present on the target host.
+Details:
+Python Access Control Vulnerability (May 2024) - Windows
+(OID: 1.3.6.1.4.1.25623.1.0.152212)
+Version used: 2024-10-11T15:39:44Z
+
+Affected Software/OS: Python prior to version 3.8.20, 3.9.x prior to 3.9.20, 3.10.x
+  prior to 3.10.15, 3.11.x prior to 3.11.10 and 3.12.x prior to 3.12.4.
+Product Detection Result: Product: cpe:/a:python:python:3.12.0
+Method: Python Detection Consolidation
+(OID: 1.3.6.1.4.1.25623.1.0.112857)
+
+Solution: Update to version 3.8.20, 3.9.20, 3.10.15, 3.11.10, 3.12.4 or
+  later.
+
+# Vulnerabilidade 27
+CVEs: CVE-2024-3220
+NVT Name: Python Untrusted Search Path Vulnerability (Feb 2025) - Windows
+Port: 5000.0
+Port Protocol: tcp
+Summary: Python is prone to an untrusted search path vulnerability
+  in the mimetypes standard library.
+Specific Result: Installed version: 3.10.12
+Fixed version:     None
+Installation
+path / port:       5000/tcp
+
+
+Vulnerability Detection Method: Checks if a vulnerable version is present on the target host.
+Details:
+Python Untrusted Search Path Vulnerability (Feb 2025) - Windows
+(OID: 1.3.6.1.4.1.25623.1.0.171228)
+Version used: 2025-02-19T05:37:55Z
+
+Affected Software/OS: Python versions 3.13.2 and prior.
+Product Detection Result: Product: cpe:/a:python:python:3.10.12
+Method: Python Detection Consolidation
+(OID: 1.3.6.1.4.1.25623.1.0.112857)
+
+Solution: No known solution is available as of 18th February, 2025.
+  Information regarding this issue will be updated once solution details are available.
+
+# Vulnerabilidade 28
+CVEs: CVE-2024-3220
+NVT Name: Python Untrusted Search Path Vulnerability (Feb 2025) - Windows
+Port: 8000.0
+Port Protocol: tcp
+Summary: Python is prone to an untrusted search path vulnerability
+  in the mimetypes standard library.
+Specific Result: Installed version: 3.12.0
+Fixed version:     None
+Installation
+path / port:       8000/tcp
+
+
+Vulnerability Detection Method: Checks if a vulnerable version is present on the target host.
+Details:
+Python Untrusted Search Path Vulnerability (Feb 2025) - Windows
+(OID: 1.3.6.1.4.1.25623.1.0.171228)
+Version used: 2025-02-19T05:37:55Z
+
+Affected Software/OS: Python versions 3.13.2 and prior.
+Product Detection Result: Product: cpe:/a:python:python:3.12.0
+Method: Python Detection Consolidation
+(OID: 1.3.6.1.4.1.25623.1.0.112857)
+
+Solution: No known solution is available as of 18th February, 2025.
+  Information regarding this issue will be updated once solution details are available.
+
+# Vulnerabilidade 29
+CVEs: CVE-2024-3219
+NVT Name: Python Connection Race Vulnerability (Jul 2024) - Windows
+Port: 8000.0
+Port Protocol: tcp
+Summary: Python is prone to a connection race vulnerability.
+Specific Result: Installed version: 3.12.0
+Fixed version:     3.12.5
+Installation
+path / port:       8000/tcp
+
+
+Vulnerability Detection Method: Checks if a vulnerable version is present on the target host.
+Details:
+Python Connection Race Vulnerability (Jul 2024) - Windows
+(OID: 1.3.6.1.4.1.25623.1.0.114743)
+Version used: 2024-10-11T15:39:44Z
+
+Affected Software/OS: Python version 3.5 prior to version 3.8.20, 3.9.x prior to
+  3.9.20, 3.10.x prior to 3.10.15, 3.11.x prior to 3.11.10 and 3.12.x prior to 3.12.5.
+
+  Platforms that support AF_UNIX such as Linux and macOS are not affected by this vulnerability.
+Product Detection Result: Product: cpe:/a:python:python:3.12.0
+Method: Python Detection Consolidation
+(OID: 1.3.6.1.4.1.25623.1.0.112857)
+
+Solution: Update to version 3.8.20, 3.9.20, 3.10.15, 3.11.10, 3.12.5 or
+  later.
+
+# Vulnerabilidade 30
+CVEs: CVE-2024-3219
+NVT Name: Python Connection Race Vulnerability (Jul 2024) - Windows
+Port: 8001.0
+Port Protocol: tcp
+Summary: Python is prone to a connection race vulnerability.
+Specific Result: Installed version: 3.12.0
+Fixed version:     3.12.5
+Installation
+path / port:       8001/tcp
+
+
+Vulnerability Detection Method: Checks if a vulnerable version is present on the target host.
+Details:
+Python Connection Race Vulnerability (Jul 2024) - Windows
+(OID: 1.3.6.1.4.1.25623.1.0.114743)
+Version used: 2024-10-11T15:39:44Z
+
+Affected Software/OS: Python version 3.5 prior to version 3.8.20, 3.9.x prior to
+  3.9.20, 3.10.x prior to 3.10.15, 3.11.x prior to 3.11.10 and 3.12.x prior to 3.12.5.
+
+  Platforms that support AF_UNIX such as Linux and macOS are not affected by this vulnerability.
+Product Detection Result: Product: cpe:/a:python:python:3.12.0
+Method: Python Detection Consolidation
+(OID: 1.3.6.1.4.1.25623.1.0.112857)
+
+Solution: Update to version 3.8.20, 3.9.20, 3.10.15, 3.11.10, 3.12.5 or
+  later.
+
+# Vulnerabilidade 31
+CVEs: CVE-2024-3219
+NVT Name: Python Connection Race Vulnerability (Jul 2024) - Windows
+Port: 8002.0
+Port Protocol: tcp
+Summary: Python is prone to a connection race vulnerability.
+Specific Result: Installed version: 3.12.0
+Fixed version:     3.12.5
+Installation
+path / port:       8002/tcp
+
+
+Vulnerability Detection Method: Checks if a vulnerable version is present on the target host.
+Details:
+Python Connection Race Vulnerability (Jul 2024) - Windows
+(OID: 1.3.6.1.4.1.25623.1.0.114743)
+Version used: 2024-10-11T15:39:44Z
+
+Affected Software/OS: Python version 3.5 prior to version 3.8.20, 3.9.x prior to
+  3.9.20, 3.10.x prior to 3.10.15, 3.11.x prior to 3.11.10 and 3.12.x prior to 3.12.5.
+
+  Platforms that support AF_UNIX such as Linux and macOS are not affected by this vulnerability.
+Product Detection Result: Product: cpe:/a:python:python:3.12.0
+Method: Python Detection Consolidation
+(OID: 1.3.6.1.4.1.25623.1.0.112857)
+
+Solution: Update to version 3.8.20, 3.9.20, 3.10.15, 3.11.10, 3.12.5 or
+  later.
+
+# Vulnerabilidade 32
+CVEs: CVE-2023-40217
+NVT Name: Python < 3.8.18, 3.9.x < 3.9.18, 3.10.x < 3.10.13, 3.11.x < 3.11.5 Security Bypass Vulnerability - Windows
+Port: 5000.0
+Port Protocol: tcp
+Summary: Python is prone to a security bypass vulnerability.
+Specific Result: Installed version: 3.10.12
+Fixed version:     3.10.13
+Installation
+path / port:       5000/tcp
+
+
+Vulnerability Detection Method: Checks if a vulnerable version is present on the target host.
+Details:
+Python < 3.8.18, 3.9.x < 3.9.18, 3.10.x < 3.10.13, 3.11.x < 3.11.5 Security ...
+(OID: 1.3.6.1.4.1.25623.1.0.124415)
+Version used: 2023-12-20T05:05:58Z
+
+Affected Software/OS: Python version prior to 3.8.18, 3.9.x prior to 3.9.18, 3.10.x
+  prior to 3.10.13 and 3.11.x prior to 3.11.5.
+Product Detection Result: Product: cpe:/a:python:python:3.10.12
+Method: Python Detection Consolidation
+(OID: 1.3.6.1.4.1.25623.1.0.112857)
+
+Solution: Update to version 3.8.18, 3.9.18, 3.10.13, 3.11.5 or later.
+
+# Vulnerabilidade 33
+CVEs: CVE-2023-27043
+NVT Name: Python <= 2.7.18, 3.x <= 3.12.3 Security Bypass Vulnerability - Windows
+Port: 8002.0
+Port Protocol: tcp
+Summary: Python is prone to a security bypass vulnerability in the e-mail
+  module.
+Specific Result: Installed version: 3.12.0
+Fixed version:     None
+Installation
+path / port:       8002/tcp
+
+
+Vulnerability Detection Method: Checks if a vulnerable version is present on the target host.
+Details:
+Python <= 2.7.18, 3.x <= 3.12.3 Security Bypass Vulnerability - Windows
+(OID: 1.3.6.1.4.1.25623.1.0.104741)
+Version used: 2024-05-14T05:05:26Z
+
+Affected Software/OS: Python versions through 2.7.18 and 3.x through 3.12.3.
+Product Detection Result: Product: cpe:/a:python:python:3.12.0
+Method: Python Detection Consolidation
+(OID: 1.3.6.1.4.1.25623.1.0.112857)
+
+Solution: No known solution was made available for at least one year since
+  the disclosure of this vulnerability. Likely none will be provided anymore. General solution options
+  are to upgrade to a newer release, disable respective features, remove the product or replace the
+  product by another one.
+
+  Note: The vendor mentions, that a patch was included in main branch 3.13. This version is expected
+  to release in October 2024. The patch might be included in the release of version 3.13 or later.
+
+# Vulnerabilidade 34
+CVEs: CVE-2023-27043
+NVT Name: Python <= 2.7.18, 3.x <= 3.12.3 Security Bypass Vulnerability - Windows
+Port: 8001.0
+Port Protocol: tcp
+Summary: Python is prone to a security bypass vulnerability in the e-mail
+  module.
+Specific Result: Installed version: 3.12.0
+Fixed version:     None
+Installation
+path / port:       8001/tcp
+
+
+Vulnerability Detection Method: Checks if a vulnerable version is present on the target host.
+Details:
+Python <= 2.7.18, 3.x <= 3.12.3 Security Bypass Vulnerability - Windows
+(OID: 1.3.6.1.4.1.25623.1.0.104741)
+Version used: 2024-05-14T05:05:26Z
+
+Affected Software/OS: Python versions through 2.7.18 and 3.x through 3.12.3.
+Product Detection Result: Product: cpe:/a:python:python:3.12.0
+Method: Python Detection Consolidation
+(OID: 1.3.6.1.4.1.25623.1.0.112857)
+
+Solution: No known solution was made available for at least one year since
+  the disclosure of this vulnerability. Likely none will be provided anymore. General solution options
+  are to upgrade to a newer release, disable respective features, remove the product or replace the
+  product by another one.
+
+  Note: The vendor mentions, that a patch was included in main branch 3.13. This version is expected
+  to release in October 2024. The patch might be included in the release of version 3.13 or later.
+
+# Vulnerabilidade 35
+CVEs: CVE-2023-27043
+NVT Name: Python <= 2.7.18, 3.x <= 3.12.3 Security Bypass Vulnerability - Windows
+Port: 8000.0
+Port Protocol: tcp
+Summary: Python is prone to a security bypass vulnerability in the e-mail
+  module.
+Specific Result: Installed version: 3.12.0
+Fixed version:     None
+Installation
+path / port:       8000/tcp
+
+
+Vulnerability Detection Method: Checks if a vulnerable version is present on the target host.
+Details:
+Python <= 2.7.18, 3.x <= 3.12.3 Security Bypass Vulnerability - Windows
+(OID: 1.3.6.1.4.1.25623.1.0.104741)
+Version used: 2024-05-14T05:05:26Z
+
+Affected Software/OS: Python versions through 2.7.18 and 3.x through 3.12.3.
+Product Detection Result: Product: cpe:/a:python:python:3.12.0
+Method: Python Detection Consolidation
+(OID: 1.3.6.1.4.1.25623.1.0.112857)
+
+Solution: No known solution was made available for at least one year since
+  the disclosure of this vulnerability. Likely none will be provided anymore. General solution options
+  are to upgrade to a newer release, disable respective features, remove the product or replace the
+  product by another one.
+
+  Note: The vendor mentions, that a patch was included in main branch 3.13. This version is expected
+  to release in October 2024. The patch might be included in the release of version 3.13 or later.
+
+# Vulnerabilidade 36
+CVEs: CVE-2023-27043
+NVT Name: Python <= 2.7.18, 3.x <= 3.12.3 Security Bypass Vulnerability - Windows
+Port: 5000.0
+Port Protocol: tcp
+Summary: Python is prone to a security bypass vulnerability in the e-mail
+  module.
+Specific Result: Installed version: 3.10.12
+Fixed version:     None
+Installation
+path / port:       5000/tcp
+
+
+Vulnerability Detection Method: Checks if a vulnerable version is present on the target host.
+Details:
+Python <= 2.7.18, 3.x <= 3.12.3 Security Bypass Vulnerability - Windows
+(OID: 1.3.6.1.4.1.25623.1.0.104741)
+Version used: 2024-05-14T05:05:26Z
+
+Affected Software/OS: Python versions through 2.7.18 and 3.x through 3.12.3.
+Product Detection Result: Product: cpe:/a:python:python:3.10.12
+Method: Python Detection Consolidation
+(OID: 1.3.6.1.4.1.25623.1.0.112857)
+
+Solution: No known solution was made available for at least one year since
+  the disclosure of this vulnerability. Likely none will be provided anymore. General solution options
+  are to upgrade to a newer release, disable respective features, remove the product or replace the
+  product by another one.
+
+  Note: The vendor mentions, that a patch was included in main branch 3.13. This version is expected
+  to release in October 2024. The patch might be included in the release of version 3.13 or later.
+
+# Vulnerabilidade 37
+CVEs: CVE-2024-6923
+NVT Name: Python Email Header Injection Vulnerability (Aug 2024) - Windows
+Port: 5000.0
+Port Protocol: tcp
+Summary: Python is prone to an email header injection vulnerability in
+  the email module.
+Specific Result: Installed version: 3.10.12
+Fixed version:     3.10.15
+Installation
+path / port:       5000/tcp
+
+
+Vulnerability Detection Method: Checks if a vulnerable version is present on the target host.
+Details:
+Python Email Header Injection Vulnerability (Aug 2024) - Windows
+(OID: 1.3.6.1.4.1.25623.1.0.114733)
+Version used: 2024-10-11T15:39:44Z
+
+Affected Software/OS: Python prior to version 3.8.20, 3.9.x prior to 3.9.20, 3.10.x
+  prior to 3.10.15, 3.11.x prior to 3.11.10 and 3.12.x prior to 3.12.5.
+Product Detection Result: Product: cpe:/a:python:python:3.10.12
+Method: Python Detection Consolidation
+(OID: 1.3.6.1.4.1.25623.1.0.112857)
+
+Solution: Update to version 3.8.20, 3.9.20, 3.10.15, 3.11.10, 3.12.5 or
+  later.
+
+# Vulnerabilidade 38
+CVEs: CVE-2024-6923
+NVT Name: Python Email Header Injection Vulnerability (Aug 2024) - Windows
+Port: 8000.0
+Port Protocol: tcp
+Summary: Python is prone to an email header injection vulnerability in
+  the email module.
+Specific Result: Installed version: 3.12.0
+Fixed version:     3.12.5
+Installation
+path / port:       8000/tcp
+
+
+Vulnerability Detection Method: Checks if a vulnerable version is present on the target host.
+Details:
+Python Email Header Injection Vulnerability (Aug 2024) - Windows
+(OID: 1.3.6.1.4.1.25623.1.0.114733)
+Version used: 2024-10-11T15:39:44Z
+
+Affected Software/OS: Python prior to version 3.8.20, 3.9.x prior to 3.9.20, 3.10.x
+  prior to 3.10.15, 3.11.x prior to 3.11.10 and 3.12.x prior to 3.12.5.
+Product Detection Result: Product: cpe:/a:python:python:3.12.0
+Method: Python Detection Consolidation
+(OID: 1.3.6.1.4.1.25623.1.0.112857)
+
+Solution: Update to version 3.8.20, 3.9.20, 3.10.15, 3.11.10, 3.12.5 or
+  later.
+
+# Vulnerabilidade 39
+CVEs: CVE-2024-6923
+NVT Name: Python Email Header Injection Vulnerability (Aug 2024) - Windows
+Port: 8001.0
+Port Protocol: tcp
+Summary: Python is prone to an email header injection vulnerability in
+  the email module.
+Specific Result: Installed version: 3.12.0
+Fixed version:     3.12.5
+Installation
+path / port:       8001/tcp
+
+
+Vulnerability Detection Method: Checks if a vulnerable version is present on the target host.
+Details:
+Python Email Header Injection Vulnerability (Aug 2024) - Windows
+(OID: 1.3.6.1.4.1.25623.1.0.114733)
+Version used: 2024-10-11T15:39:44Z
+
+Affected Software/OS: Python prior to version 3.8.20, 3.9.x prior to 3.9.20, 3.10.x
+  prior to 3.10.15, 3.11.x prior to 3.11.10 and 3.12.x prior to 3.12.5.
+Product Detection Result: Product: cpe:/a:python:python:3.12.0
+Method: Python Detection Consolidation
+(OID: 1.3.6.1.4.1.25623.1.0.112857)
+
+Solution: Update to version 3.8.20, 3.9.20, 3.10.15, 3.11.10, 3.12.5 or
+  later.
+
+# Vulnerabilidade 40
+CVEs: CVE-2024-0397
+NVT Name: Python SSL Vulnerability (Jun 2024) - Windows
+Port: 5000.0
+Port Protocol: tcp
+Summary: Python is prone to a vulnerability in the ssl module.
+Specific Result: Installed version: 3.10.12
+Fixed version:     3.10.14
+Installation
+path / port:       5000/tcp
+
+
+Vulnerability Detection Method: Checks if a vulnerable version is present on the target host.
+Details:
+Python SSL Vulnerability (Jun 2024) - Windows
+(OID: 1.3.6.1.4.1.25623.1.0.152434)
+Version used: 2024-10-11T15:39:44Z
+
+Affected Software/OS: Python prior to version 3.8.20, 3.9.x prior to 3.9.20, 3.10.x
+  prior to 3.10.14, 3.11.x prior to 3.11.9 and 3.12.x prior to 3.12.3.
+Product Detection Result: Product: cpe:/a:python:python:3.10.12
+Method: Python Detection Consolidation
+(OID: 1.3.6.1.4.1.25623.1.0.112857)
+
+Solution: Update to version 3.8.20, 3.9.20, 3.10.14, 3.11.9, 3.12.3
+  or later.
+
+# Vulnerabilidade 41
+CVEs: CVE-2024-6923
+NVT Name: Python Email Header Injection Vulnerability (Aug 2024) - Windows
+Port: 8002.0
+Port Protocol: tcp
+Summary: Python is prone to an email header injection vulnerability in
+  the email module.
+Specific Result: Installed version: 3.12.0
+Fixed version:     3.12.5
+Installation
+path / port:       8002/tcp
+
+
+Vulnerability Detection Method: Checks if a vulnerable version is present on the target host.
+Details:
+Python Email Header Injection Vulnerability (Aug 2024) - Windows
+(OID: 1.3.6.1.4.1.25623.1.0.114733)
+Version used: 2024-10-11T15:39:44Z
+
+Affected Software/OS: Python prior to version 3.8.20, 3.9.x prior to 3.9.20, 3.10.x
+  prior to 3.10.15, 3.11.x prior to 3.11.10 and 3.12.x prior to 3.12.5.
+Product Detection Result: Product: cpe:/a:python:python:3.12.0
+Method: Python Detection Consolidation
+(OID: 1.3.6.1.4.1.25623.1.0.112857)
+
+Solution: Update to version 3.8.20, 3.9.20, 3.10.15, 3.11.10, 3.12.5 or
+  later.
+
+# Vulnerabilidade 42
+CVEs: CVE-2024-0397
+NVT Name: Python SSL Vulnerability (Jun 2024) - Windows
+Port: 8001.0
+Port Protocol: tcp
+Summary: Python is prone to a vulnerability in the ssl module.
+Specific Result: Installed version: 3.12.0
+Fixed version:     3.12.3
+Installation
+path / port:       8001/tcp
+
+
+Vulnerability Detection Method: Checks if a vulnerable version is present on the target host.
+Details:
+Python SSL Vulnerability (Jun 2024) - Windows
+(OID: 1.3.6.1.4.1.25623.1.0.152434)
+Version used: 2024-10-11T15:39:44Z
+
+Affected Software/OS: Python prior to version 3.8.20, 3.9.x prior to 3.9.20, 3.10.x
+  prior to 3.10.14, 3.11.x prior to 3.11.9 and 3.12.x prior to 3.12.3.
+Product Detection Result: Product: cpe:/a:python:python:3.12.0
+Method: Python Detection Consolidation
+(OID: 1.3.6.1.4.1.25623.1.0.112857)
+
+Solution: Update to version 3.8.20, 3.9.20, 3.10.14, 3.11.9, 3.12.3
+  or later.
+
+# Vulnerabilidade 43
+CVEs: CVE-2024-4032
+NVT Name: Python IP Ranges Vulnerability (Jun 2024) - Windows
+Port: 8002.0
+Port Protocol: tcp
+Summary: Python is prone to a vulnerability in the ipaddress module.
+Specific Result: Installed version: 3.12.0
+Fixed version:     3.12.4
+Installation
+path / port:       8002/tcp
+
+
+Vulnerability Detection Method: Checks if a vulnerable version is present on the target host.
+Details:
+Python IP Ranges Vulnerability (Jun 2024) - Windows
+(OID: 1.3.6.1.4.1.25623.1.0.152431)
+Version used: 2024-10-11T15:39:44Z
+
+Affected Software/OS: Python prior to version 3.8.20, 3.9.x prior to 3.9.20, 3.10.x
+  prior to 3.10.15, 3.11.x prior to 3.11.10 and 3.12.x prior to 3.12.4.
+Product Detection Result: Product: cpe:/a:python:python:3.12.0
+Method: Python Detection Consolidation
+(OID: 1.3.6.1.4.1.25623.1.0.112857)
+
+Solution: Update to version 3.8.20, 3.9.20, 3.10.15, 3.11.10, 3.12.4 or
+  later.
+
+# Vulnerabilidade 44
+CVEs: CVE-2024-4032
+NVT Name: Python IP Ranges Vulnerability (Jun 2024) - Windows
+Port: 8001.0
+Port Protocol: tcp
+Summary: Python is prone to a vulnerability in the ipaddress module.
+Specific Result: Installed version: 3.12.0
+Fixed version:     3.12.4
+Installation
+path / port:       8001/tcp
+
+
+Vulnerability Detection Method: Checks if a vulnerable version is present on the target host.
+Details:
+Python IP Ranges Vulnerability (Jun 2024) - Windows
+(OID: 1.3.6.1.4.1.25623.1.0.152431)
+Version used: 2024-10-11T15:39:44Z
+
+Affected Software/OS: Python prior to version 3.8.20, 3.9.x prior to 3.9.20, 3.10.x
+  prior to 3.10.15, 3.11.x prior to 3.11.10 and 3.12.x prior to 3.12.4.
+Product Detection Result: Product: cpe:/a:python:python:3.12.0
+Method: Python Detection Consolidation
+(OID: 1.3.6.1.4.1.25623.1.0.112857)
+
+Solution: Update to version 3.8.20, 3.9.20, 3.10.15, 3.11.10, 3.12.4 or
+  later.
+
+# Vulnerabilidade 45
+CVEs: CVE-2024-0397
+NVT Name: Python SSL Vulnerability (Jun 2024) - Windows
+Port: 8000.0
+Port Protocol: tcp
+Summary: Python is prone to a vulnerability in the ssl module.
+Specific Result: Installed version: 3.12.0
+Fixed version:     3.12.3
+Installation
+path / port:       8000/tcp
+
+
+Vulnerability Detection Method: Checks if a vulnerable version is present on the target host.
+Details:
+Python SSL Vulnerability (Jun 2024) - Windows
+(OID: 1.3.6.1.4.1.25623.1.0.152434)
+Version used: 2024-10-11T15:39:44Z
+
+Affected Software/OS: Python prior to version 3.8.20, 3.9.x prior to 3.9.20, 3.10.x
+  prior to 3.10.14, 3.11.x prior to 3.11.9 and 3.12.x prior to 3.12.3.
+Product Detection Result: Product: cpe:/a:python:python:3.12.0
+Method: Python Detection Consolidation
+(OID: 1.3.6.1.4.1.25623.1.0.112857)
+
+Solution: Update to version 3.8.20, 3.9.20, 3.10.14, 3.11.9, 3.12.3
+  or later.
+
+# Vulnerabilidade 46
+CVEs: CVE-2024-4032
+NVT Name: Python IP Ranges Vulnerability (Jun 2024) - Windows
+Port: 5000.0
+Port Protocol: tcp
+Summary: Python is prone to a vulnerability in the ipaddress module.
+Specific Result: Installed version: 3.10.12
+Fixed version:     3.10.15
+Installation
+path / port:       5000/tcp
+
+
+Vulnerability Detection Method: Checks if a vulnerable version is present on the target host.
+Details:
+Python IP Ranges Vulnerability (Jun 2024) - Windows
+(OID: 1.3.6.1.4.1.25623.1.0.152431)
+Version used: 2024-10-11T15:39:44Z
+
+Affected Software/OS: Python prior to version 3.8.20, 3.9.x prior to 3.9.20, 3.10.x
+  prior to 3.10.15, 3.11.x prior to 3.11.10 and 3.12.x prior to 3.12.4.
+Product Detection Result: Product: cpe:/a:python:python:3.10.12
+Method: Python Detection Consolidation
+(OID: 1.3.6.1.4.1.25623.1.0.112857)
+
+Solution: Update to version 3.8.20, 3.9.20, 3.10.15, 3.11.10, 3.12.4 or
+  later.
+
+# Vulnerabilidade 47
+CVEs: CVE-2024-4032
+NVT Name: Python IP Ranges Vulnerability (Jun 2024) - Windows
+Port: 8000.0
+Port Protocol: tcp
+Summary: Python is prone to a vulnerability in the ipaddress module.
+Specific Result: Installed version: 3.12.0
+Fixed version:     3.12.4
+Installation
+path / port:       8000/tcp
+
+
+Vulnerability Detection Method: Checks if a vulnerable version is present on the target host.
+Details:
+Python IP Ranges Vulnerability (Jun 2024) - Windows
+(OID: 1.3.6.1.4.1.25623.1.0.152431)
+Version used: 2024-10-11T15:39:44Z
+
+Affected Software/OS: Python prior to version 3.8.20, 3.9.x prior to 3.9.20, 3.10.x
+  prior to 3.10.15, 3.11.x prior to 3.11.10 and 3.12.x prior to 3.12.4.
+Product Detection Result: Product: cpe:/a:python:python:3.12.0
+Method: Python Detection Consolidation
+(OID: 1.3.6.1.4.1.25623.1.0.112857)
+
+Solution: Update to version 3.8.20, 3.9.20, 3.10.15, 3.11.10, 3.12.4 or
+  later.
+
+# Vulnerabilidade 48
+CVEs: CVE-2024-0397
+NVT Name: Python SSL Vulnerability (Jun 2024) - Windows
+Port: 8002.0
+Port Protocol: tcp
+Summary: Python is prone to a vulnerability in the ssl module.
+Specific Result: Installed version: 3.12.0
+Fixed version:     3.12.3
+Installation
+path / port:       8002/tcp
+
+
+Vulnerability Detection Method: Checks if a vulnerable version is present on the target host.
+Details:
+Python SSL Vulnerability (Jun 2024) - Windows
+(OID: 1.3.6.1.4.1.25623.1.0.152434)
+Version used: 2024-10-11T15:39:44Z
+
+Affected Software/OS: Python prior to version 3.8.20, 3.9.x prior to 3.9.20, 3.10.x
+  prior to 3.10.14, 3.11.x prior to 3.11.9 and 3.12.x prior to 3.12.3.
+Product Detection Result: Product: cpe:/a:python:python:3.12.0
+Method: Python Detection Consolidation
+(OID: 1.3.6.1.4.1.25623.1.0.112857)
+
+Solution: Update to version 3.8.20, 3.9.20, 3.10.14, 3.11.9, 3.12.3
+  or later.
+
+# Vulnerabilidade 49
+CVEs: nan
+NVT Name: SSL/TLS: Known Untrusted / Dangerous Certificate Authority (CA) Detection
+Port: 8002.0
+Port Protocol: tcp
+Summary: The service is using an SSL/TLS certificate from a known
+  untrusted and/or dangerous certificate authority (CA).
+Specific Result: The certificate of the remote service is signed by the following untrusted and/or dangerous CA:
+
+Issuer: CN=localhost,O=Luminator,L=Caxias do Sul,ST=RS,C=BR
+
+Certificate details:
+fingerprint (SHA-1)             | 264544379FDBF127C25A667B5E2A7EA7620B996C
+fingerprint (SHA-256)           | 5668884BF9B84C38B81313EBF424434CB70F5D9930CDCF5C845A915352399F30
+issued by                       | CN=localhost,O=Luminator,L=Caxias do Sul,ST=RS,C=BR
+public key algorithm            | RSA
+public key size (bits)          | 2048
+serial                          | 745F8ECBC16B0434221410E84BC2561583C6ED19
+signature algorithm             | sha256WithRSAEncryption
+subject                         | CN=localhost,O=Luminator,L=Caxias do Sul,ST=RS,C=BR
+subject alternative names (SAN) | None
+valid from                      | 2024-08-26 20:26:21 UTC
+valid until                     | 2084-08-11 20:26:21 UTC
+
+Vulnerability Detection Method: The script reads the certificate used by the target host and
+  checks if it was signed by a known untrusted and/or dangerous CA.
+Details:
+SSL/TLS: Known Untrusted / Dangerous Certificate Authority (CA) Detection
+(OID: 1.3.6.1.4.1.25623.1.0.113054)
+Version used: 2024-06-14T05:05:48Z
+
+Affected Software/OS: nan
+Product Detection Result: Product: cpe:/a:ietf:transport_layer_security
+Method: SSL/TLS: Collect and Report Certificate Details
+(OID: 1.3.6.1.4.1.25623.1.0.103692)
+
+Solution: Replace the SSL/TLS certificate with one signed by a trusted
+  CA.
+
+# Vulnerabilidade 50
+CVEs: CVE-2024-0450
+NVT Name: Python Multiple Vulnerabilities (Mar 2024) - Windows
+Port: 5000.0
+Port Protocol: tcp
+Summary: Python is prone to multiple vulnerabilities.
+Specific Result: Installed version: 3.10.12
+Fixed version:     3.10.14
+Installation
+path / port:       5000/tcp
+
+
+Vulnerability Detection Method: Checks if a vulnerable version is present on the target host.
+Details:
+Python Multiple Vulnerabilities (Mar 2024) - Windows
+(OID: 1.3.6.1.4.1.25623.1.0.151952)
+Version used: 2024-10-11T15:39:44Z
+
+Affected Software/OS: Python prior to version 3.8.19, 3.9.x prior to 3.9.19, 3.10.x
+  prior to 3.10.14, 3.11.x prior to 3.11.8 and 3.12.x prior to 3.12.2.
+Product Detection Result: Product: cpe:/a:python:python:3.10.12
+Method: Python Detection Consolidation
+(OID: 1.3.6.1.4.1.25623.1.0.112857)
+
+Solution: Update to version 3.8.19, 3.9.19, 3.10.14, 3.11.8, 3.12.2
+  or later.
+
+# Vulnerabilidade 51
+CVEs: CVE-2024-0450
+NVT Name: Python Multiple Vulnerabilities (Mar 2024) - Windows
+Port: 8000.0
+Port Protocol: tcp
+Summary: Python is prone to multiple vulnerabilities.
+Specific Result: Installed version: 3.12.0
+Fixed version:     3.12.2
+Installation
+path / port:       8000/tcp
+
+
+Vulnerability Detection Method: Checks if a vulnerable version is present on the target host.
+Details:
+Python Multiple Vulnerabilities (Mar 2024) - Windows
+(OID: 1.3.6.1.4.1.25623.1.0.151952)
+Version used: 2024-10-11T15:39:44Z
+
+Affected Software/OS: Python prior to version 3.8.19, 3.9.x prior to 3.9.19, 3.10.x
+  prior to 3.10.14, 3.11.x prior to 3.11.8 and 3.12.x prior to 3.12.2.
+Product Detection Result: Product: cpe:/a:python:python:3.12.0
+Method: Python Detection Consolidation
+(OID: 1.3.6.1.4.1.25623.1.0.112857)
+
+Solution: Update to version 3.8.19, 3.9.19, 3.10.14, 3.11.8, 3.12.2
+  or later.
+
+# Vulnerabilidade 52
+CVEs: CVE-2024-0450
+NVT Name: Python Multiple Vulnerabilities (Mar 2024) - Windows
+Port: 8001.0
+Port Protocol: tcp
+Summary: Python is prone to multiple vulnerabilities.
+Specific Result: Installed version: 3.12.0
+Fixed version:     3.12.2
+Installation
+path / port:       8001/tcp
+
+
+Vulnerability Detection Method: Checks if a vulnerable version is present on the target host.
+Details:
+Python Multiple Vulnerabilities (Mar 2024) - Windows
+(OID: 1.3.6.1.4.1.25623.1.0.151952)
+Version used: 2024-10-11T15:39:44Z
+
+Affected Software/OS: Python prior to version 3.8.19, 3.9.x prior to 3.9.19, 3.10.x
+  prior to 3.10.14, 3.11.x prior to 3.11.8 and 3.12.x prior to 3.12.2.
+Product Detection Result: Product: cpe:/a:python:python:3.12.0
+Method: Python Detection Consolidation
+(OID: 1.3.6.1.4.1.25623.1.0.112857)
+
+Solution: Update to version 3.8.19, 3.9.19, 3.10.14, 3.11.8, 3.12.2
+  or later.
+
+# Vulnerabilidade 53
+CVEs: CVE-2024-0450
+NVT Name: Python Multiple Vulnerabilities (Mar 2024) - Windows
+Port: 8002.0
+Port Protocol: tcp
+Summary: Python is prone to multiple vulnerabilities.
+Specific Result: Installed version: 3.12.0
+Fixed version:     3.12.2
+Installation
+path / port:       8002/tcp
+
+
+Vulnerability Detection Method: Checks if a vulnerable version is present on the target host.
+Details:
+Python Multiple Vulnerabilities (Mar 2024) - Windows
+(OID: 1.3.6.1.4.1.25623.1.0.151952)
+Version used: 2024-10-11T15:39:44Z
+
+Affected Software/OS: Python prior to version 3.8.19, 3.9.x prior to 3.9.19, 3.10.x
+  prior to 3.10.14, 3.11.x prior to 3.11.8 and 3.12.x prior to 3.12.2.
+Product Detection Result: Product: cpe:/a:python:python:3.12.0
+Method: Python Detection Consolidation
+(OID: 1.3.6.1.4.1.25623.1.0.112857)
+
+Solution: Update to version 3.8.19, 3.9.19, 3.10.14, 3.11.8, 3.12.2
+  or later.
+
+# Vulnerabilidade 54
+CVEs: CVE-2011-3389,CVE-2015-0204,CVE-2025-3200
+NVT Name: SSL/TLS: Deprecated TLSv1.0 and TLSv1.1 Protocol Detection
+Port: 3389.0
+Port Protocol: tcp
+Summary: It was possible to detect the usage of the deprecated TLSv1.0
+  and/or TLSv1.1 protocol on this system.
+Specific Result: In addition to TLSv1.2+ the service is also providing the deprecated TLSv1.0 and TLSv1.1 protocols and supports one or more ciphers. Those supported ciphers can be found in the 'SSL/TLS: Report Supported Cipher Suites' (OID: 1.3.6.1.4.1.25623.1.0.802067) VT.
+
+Vulnerability Detection Method: Checks the used TLS protocols of the services provided by this
+  system.
+Details:
+SSL/TLS: Deprecated TLSv1.0 and TLSv1.1 Protocol Detection
+(OID: 1.3.6.1.4.1.25623.1.0.117274)
+Version used: 2025-04-29T05:39:55Z
+
+Affected Software/OS: '- All services providing an encrypted communication using the
+  TLSv1.0 and/or TLSv1.1 protocols
+
+  - CVE-2025-3200: Multiple products from Wiesemann & Theis
+Product Detection Result: Product: cpe:/a:ietf:transport_layer_security:1.0
+Method: SSL/TLS: Version Detection
+(OID: 1.3.6.1.4.1.25623.1.0.105782)
+
+Solution: It is recommended to disable the deprecated TLSv1.0 and/or
+  TLSv1.1 protocols in favor of the TLSv1.2+ protocols.
+
+  Please see the references for more resources supporting you with this task.
+
+# Vulnerabilidade 55
+CVEs: CVE-2025-0938
+NVT Name: Python Improper Input Validation Vulnerability (Jan 2025) - Windows
+Port: 8000.0
+Port Protocol: tcp
+Summary: Python is prone to an improper input validation vulnerability
+  in the urllib.parse.urlsplit and urlparse standard functions.
+Specific Result: Installed version: 3.12.0
+Fixed version:     3.12.9
+Installation
+path / port:       8000/tcp
+
+
+Vulnerability Detection Method: Checks if a vulnerable version is present on the target host.
+Details:
+Python Improper Input Validation Vulnerability (Jan 2025) - Windows
+(OID: 1.3.6.1.4.1.25623.1.0.171144)
+Version used: 2025-02-06T05:38:57Z
+
+Affected Software/OS: Python versions prior to 3.12.9 and 3.13.x prior to 3.13.2.
+Product Detection Result: Product: cpe:/a:python:python:3.12.0
+Method: Python Detection Consolidation
+(OID: 1.3.6.1.4.1.25623.1.0.112857)
+
+Solution: Update to version 3.12.9, 3.13.2 or later.
+
+# Vulnerabilidade 56
+CVEs: CVE-2025-0938
+NVT Name: Python Improper Input Validation Vulnerability (Jan 2025) - Windows
+Port: 5000.0
+Port Protocol: tcp
+Summary: Python is prone to an improper input validation vulnerability
+  in the urllib.parse.urlsplit and urlparse standard functions.
+Specific Result: Installed version: 3.10.12
+Fixed version:     3.12.9
+Installation
+path / port:       5000/tcp
+
+
+Vulnerability Detection Method: Checks if a vulnerable version is present on the target host.
+Details:
+Python Improper Input Validation Vulnerability (Jan 2025) - Windows
+(OID: 1.3.6.1.4.1.25623.1.0.171144)
+Version used: 2025-02-06T05:38:57Z
+
+Affected Software/OS: Python versions prior to 3.12.9 and 3.13.x prior to 3.13.2.
+Product Detection Result: Product: cpe:/a:python:python:3.10.12
+Method: Python Detection Consolidation
+(OID: 1.3.6.1.4.1.25623.1.0.112857)
+
+Solution: Update to version 3.12.9, 3.13.2 or later.
+
+# Vulnerabilidade 57
+CVEs: CVE-2024-11168
+NVT Name: Python SSRF Vulnerability (Nov 2024) - Windows
+Port: 5000.0
+Port Protocol: tcp
+Summary: Python is prone to a server-side request forgery (SSRF)
+  vulnerability.
+Specific Result: Installed version: 3.10.12
+Fixed version:     3.10.16
+Installation
+path / port:       5000/tcp
+
+
+Vulnerability Detection Method: Checks if a vulnerable version is present on the target host.
+Details:
+Python SSRF Vulnerability (Nov 2024) - Windows
+(OID: 1.3.6.1.4.1.25623.1.0.170966)
+Version used: 2024-12-13T15:40:54Z
+
+Affected Software/OS: Python versions prior to 3.9.21, 3.10.x prior to 3.10.16 and
+  3.11.x prior to 3.11.4.
+Product Detection Result: Product: cpe:/a:python:python:3.10.12
+Method: Python Detection Consolidation
+(OID: 1.3.6.1.4.1.25623.1.0.112857)
+
+Solution: Update to version 3.9.21, 3.10.16, 3.11.4 or later.
+
+# Vulnerabilidade 58
+CVEs: CVE-2025-0938
+NVT Name: Python Improper Input Validation Vulnerability (Jan 2025) - Windows
+Port: 8001.0
+Port Protocol: tcp
+Summary: Python is prone to an improper input validation vulnerability
+  in the urllib.parse.urlsplit and urlparse standard functions.
+Specific Result: Installed version: 3.12.0
+Fixed version:     3.12.9
+Installation
+path / port:       8001/tcp
+
+
+Vulnerability Detection Method: Checks if a vulnerable version is present on the target host.
+Details:
+Python Improper Input Validation Vulnerability (Jan 2025) - Windows
+(OID: 1.3.6.1.4.1.25623.1.0.171144)
+Version used: 2025-02-06T05:38:57Z
+
+Affected Software/OS: Python versions prior to 3.12.9 and 3.13.x prior to 3.13.2.
+Product Detection Result: Product: cpe:/a:python:python:3.12.0
+Method: Python Detection Consolidation
+(OID: 1.3.6.1.4.1.25623.1.0.112857)
+
+Solution: Update to version 3.12.9, 3.13.2 or later.
+
+# Vulnerabilidade 59
+CVEs: nan
+NVT Name: Weak MAC Algorithm(s) Supported (SSH)
+Port: 22.0
+Port Protocol: tcp
+Summary: The remote SSH server is configured to allow / support weak MAC
+  algorithm(s).
+Specific Result: The remote SSH server supports the following weak client-to-server MAC algorithm(s):
+
+umac-64-etm@openssh.com
+umac-64@openssh.com
+
+
+The remote SSH server supports the following weak server-to-client MAC algorithm(s):
+
+umac-64-etm@openssh.com
+umac-64@openssh.com
+
+Vulnerability Detection Method: Checks the supported MAC algorithms (client-to-server and
+  server-to-client) of the remote SSH server.
+
+  Currently weak MAC algorithms are defined as the following:
+
+  - MD5 based algorithms
+
+  - 96-bit based algorithms
+
+  - 64-bit based algorithms
+
+  - 'none' algorithm
+Details:
+Weak MAC Algorithm(s) Supported (SSH)
+(OID: 1.3.6.1.4.1.25623.1.0.105610)
+Version used: 2024-06-14T05:05:48Z
+
+Affected Software/OS: nan
+Product Detection Result: Product: cpe:/a:ietf:secure_shell_protocol
+Method: SSH Protocol Algorithms Supported
+(OID: 1.3.6.1.4.1.25623.1.0.105565)
+
+Solution: Disable the reported weak MAC algorithm(s).
+
+# Vulnerabilidade 60
+CVEs: CVE-2025-0938
+NVT Name: Python Improper Input Validation Vulnerability (Jan 2025) - Windows
+Port: 8002.0
+Port Protocol: tcp
+Summary: Python is prone to an improper input validation vulnerability
+  in the urllib.parse.urlsplit and urlparse standard functions.
+Specific Result: Installed version: 3.12.0
+Fixed version:     3.12.9
+Installation
+path / port:       8002/tcp
+
+
+Vulnerability Detection Method: Checks if a vulnerable version is present on the target host.
+Details:
+Python Improper Input Validation Vulnerability (Jan 2025) - Windows
+(OID: 1.3.6.1.4.1.25623.1.0.171144)
+Version used: 2025-02-06T05:38:57Z
+
+Affected Software/OS: Python versions prior to 3.12.9 and 3.13.x prior to 3.13.2.
+Product Detection Result: Product: cpe:/a:python:python:3.12.0
+Method: Python Detection Consolidation
+(OID: 1.3.6.1.4.1.25623.1.0.112857)
+
+Solution: Update to version 3.12.9, 3.13.2 or later.
+
+# Vulnerabilidade 61
+CVEs: CVE-2025-1795
+NVT Name: Python Improper Encoding of Output Vulnerability (Feb 2025) - Windows
+Port: 8001.0
+Port Protocol: tcp
+Summary: Python is prone to an improper encoding of output
+  vulnerability.
+Specific Result: Installed version: 3.12.0
+Fixed version:     3.12.4
+Installation
+path / port:       8001/tcp
+
+
+Vulnerability Detection Method: Checks if a vulnerable version is present on the target host.
+Details:
+Python Improper Encoding of Output Vulnerability (Feb 2025) - Windows
+(OID: 1.3.6.1.4.1.25623.1.0.171265)
+Version used: 2025-03-05T05:38:53Z
+
+Affected Software/OS: Python versions prior to 3.11.10 and 3.12.x prior to 3.12.4.
+Product Detection Result: Product: cpe:/a:python:python:3.12.0
+Method: Python Detection Consolidation
+(OID: 1.3.6.1.4.1.25623.1.0.112857)
+
+Solution: Update to version 3.11.10, 3.12.4 or later.
+
+# Vulnerabilidade 62
+CVEs: CVE-1999-0524
+NVT Name: ICMP Timestamp Reply Information Disclosure
+Port: nan
+Port Protocol: nan
+Summary: The remote host responded to an ICMP timestamp request.
+Specific Result: The following response / ICMP packet has been received:
+- ICMP Type: 14
+- ICMP Code: 0
+
+Vulnerability Detection Method: Sends an ICMP Timestamp (Type 13) request and checks if a
+  Timestamp Reply (Type 14) is received.
+Details:
+ICMP Timestamp Reply Information Disclosure
+(OID: 1.3.6.1.4.1.25623.1.0.103190)
+Version used: 2025-01-21T05:37:33Z
+
+Affected Software/OS: nan
+Product Detection Result: nan
+Solution: Various mitigations are possible:
+
+  - Disable the support for ICMP timestamp on the remote host completely
+
+  - Protect the remote host by a firewall, and block ICMP packets passing through the firewall in
+  either direction (either completely or only for untrusted networks)
+
+# Vulnerabilidade 63
+CVEs: CVE-2025-1795
+NVT Name: Python Improper Encoding of Output Vulnerability (Feb 2025) - Windows
+Port: 8000.0
+Port Protocol: tcp
+Summary: Python is prone to an improper encoding of output
+  vulnerability.
+Specific Result: Installed version: 3.12.0
+Fixed version:     3.12.4
+Installation
+path / port:       8000/tcp
+
+
+Vulnerability Detection Method: Checks if a vulnerable version is present on the target host.
+Details:
+Python Improper Encoding of Output Vulnerability (Feb 2025) - Windows
+(OID: 1.3.6.1.4.1.25623.1.0.171265)
+Version used: 2025-03-05T05:38:53Z
+
+Affected Software/OS: Python versions prior to 3.11.10 and 3.12.x prior to 3.12.4.
+Product Detection Result: Product: cpe:/a:python:python:3.12.0
+Method: Python Detection Consolidation
+(OID: 1.3.6.1.4.1.25623.1.0.112857)
+
+Solution: Update to version 3.11.10, 3.12.4 or later.
+
+# Vulnerabilidade 64
+CVEs: CVE-2025-1795
+NVT Name: Python Improper Encoding of Output Vulnerability (Feb 2025) - Windows
+Port: 5000.0
+Port Protocol: tcp
+Summary: Python is prone to an improper encoding of output
+  vulnerability.
+Specific Result: Installed version: 3.10.12
+Fixed version:     3.11.10
+Installation
+path / port:       5000/tcp
+
+
+Vulnerability Detection Method: Checks if a vulnerable version is present on the target host.
+Details:
+Python Improper Encoding of Output Vulnerability (Feb 2025) - Windows
+(OID: 1.3.6.1.4.1.25623.1.0.171265)
+Version used: 2025-03-05T05:38:53Z
+
+Affected Software/OS: Python versions prior to 3.11.10 and 3.12.x prior to 3.12.4.
+Product Detection Result: Product: cpe:/a:python:python:3.10.12
+Method: Python Detection Consolidation
+(OID: 1.3.6.1.4.1.25623.1.0.112857)
+
+Solution: Update to version 3.11.10, 3.12.4 or later.
+
+# Vulnerabilidade 65
+CVEs: CVE-2025-1795
+NVT Name: Python Improper Encoding of Output Vulnerability (Feb 2025) - Windows
+Port: 8002.0
+Port Protocol: tcp
+Summary: Python is prone to an improper encoding of output
+  vulnerability.
+Specific Result: Installed version: 3.12.0
+Fixed version:     3.12.4
+Installation
+path / port:       8002/tcp
+
+
+Vulnerability Detection Method: Checks if a vulnerable version is present on the target host.
+Details:
+Python Improper Encoding of Output Vulnerability (Feb 2025) - Windows
+(OID: 1.3.6.1.4.1.25623.1.0.171265)
+Version used: 2025-03-05T05:38:53Z
+
+Affected Software/OS: Python versions prior to 3.11.10 and 3.12.x prior to 3.12.4.
+Product Detection Result: Product: cpe:/a:python:python:3.12.0
+Method: Python Detection Consolidation
+(OID: 1.3.6.1.4.1.25623.1.0.112857)
+
+Solution: Update to version 3.11.10, 3.12.4 or later.
+
+    ## REGRAS E RESTRIÇÕES DE SAÍDA
+    1.  **APENAS SCRIPT:** A sua resposta deve conter ÚNICA E EXCLUSIVAMENTE o código do script.
+    2.  **SEM EXPLICAÇÕES:** Não adicione nenhum comentário, explicação, introdução, ou despedida.
+    3.  **SEM BLOCOS DE CÓDIGO MARKDOWN:** Não envolva o script em blocos de código como ` ```bash ` ou ` ```sh `. A resposta deve ser o texto puro do script.
+    4.  **AUTOSSUFICIENTE:** O script deve ser completo, autônomo e não deve exigir interação do usuário para ser executado.
+    5.  **COMPATIBILIDADE:** O script deve ser compatível com o sistema operacional especificado em 'localhost OS'. Se o sistema operacional não for especificado, assuma um sistema baseado em Linux (como Ubuntu/Debian).
+
+
+>Scripts de correção:
+{type: uploaded file
+fileName: teste66vts_1.txt
+fullContent:
+```batch
+certutil -urlcache -split -f https://www.python.org/ftp/python/3.10.16/python-3.10.16-amd64.exe %TEMP%\python-3.10.16.exe
+start /wait %TEMP%\python-3.10.16.exe /quiet InstallAllUsers=1 PrependPath=1 Include_launcher=1
+
+certutil -urlcache -split -f https://www.python.org/ftp/python/3.12.9/python-3.12.9-amd64.exe %TEMP%\python-3.12.9.exe
+start /wait %TEMP%\python-3.12.9.exe /quiet InstallAllUsers=1 PrependPath=1 Include_launcher=1
+
+reg add "HKLM\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Protocols\TLS 1.0\Server" /v Enabled /t REG_DWORD /d 0 /f
+reg add "HKLM\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Protocols\TLS 1.0\Client" /v Enabled /t REG_DWORD /d 0 /f
+reg add "HKLM\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Protocols\TLS 1.1\Server" /v Enabled /t REG_DWORD /d 0 /f
+reg add "HKLM\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Protocols\TLS 1.1\Client" /v Enabled /t REG_DWORD /d 0 /f
+
+set SSH_CONFIG=%ProgramData%\ssh\sshd_config
+if exist "%SSH_CONFIG%" (
+    >"%SSH_CONFIG%.tmp" (
+        for /F "usebackq delims=" %%L in ("%SSH_CONFIG%") do (
+            set "line=%%L"
+            setlocal enabledelayedexpansion
+            set "newline=!line:MACs=!"
+            if "!newline!"=="!line!" (echo !line!) else (
+                echo MACs hmac-sha2-256,hmac-sha2-512,hmac-sha2-256-etm@openssh.com,hmac-sha2-512-etm@openssh.com
+            )
+            endlocal
+        )
+    )
+    move /Y "%SSH_CONFIG%.tmp" "%SSH_CONFIG%"
+)
+
+netsh advfirewall firewall add rule name="Block ICMPv4 Timestamp Request" protocol=icmpv4:13,any dir=in action=block
+
+shutdown /r /t 0 /f
+```}
+{type: uploaded file
+fileName: teste66vts_2.txt
+fullContent:
+```batch
+@echo off
+REM Update Python installations to non-vulnerable versions
+curl -L -o python-3.10.16.exe https://www.python.org/ftp/python/3.10.16/python-3.10.16-amd64.exe
+start /wait python-3.10.16.exe /quiet InstallLauncherAllUsers=1 PrependPath=1 Include_test=0
+curl -L -o python-3.12.9.exe https://www.python.org/ftp/python/3.12.9/python-3.12.9-amd64.exe
+start /wait python-3.12.9.exe /quiet InstallLauncherAllUsers=1 PrependPath=1 Include_test=0
+
+REM Disable legacy TLS protocols
+reg add "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Protocols\TLS 1.0\Client" /v DisabledByDefault /t REG_DWORD /d 1 /f
+reg add "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Protocols\TLS 1.0\Client" /v Enabled /t REG_DWORD /d 0 /f
+reg add "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Protocols\TLS 1.0\Server" /v DisabledByDefault /t REG_DWORD /d 1 /f
+reg add "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Protocols\TLS 1.0\Server" /v Enabled /t REG_DWORD /d 0 /f
+reg add "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Protocols\TLS 1.1\Client" /v DisabledByDefault /t REG_DWORD /d 1 /f
+reg add "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Protocols\TLS 1.1\Client" /v Enabled /t REG_DWORD /d 0 /f
+reg add "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Protocols\TLS 1.1\Server" /v DisabledByDefault /t REG_DWORD /d 1 /f
+reg add "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Protocols\TLS 1.1\Server" /v Enabled /t REG_DWORD /d 0 /f
+
+REM Configure secure SSH ciphers
+echo MACs hmac-sha2-512,hmac-sha2-256 > "%ProgramData%\ssh\sshd_config_new"
+findstr /v /c:"MACs" "%ProgramData%\ssh\sshd_config" >> "%ProgramData%\ssh\sshd_config_new"
+move /Y "%ProgramData%\ssh\sshd_config_new" "%ProgramData%\ssh\sshd_config"
+
+REM Restart SSH service
+sc query sshd >nul 2>&1 && (net stop sshd && net start sshd)
+
+REM Block ICMP timestamp requests
+netsh advfirewall firewall add rule name="Block ICMP Timestamp Request" protocol="icmpv4:13,any" dir=in action=block
+
+REM Schedule final reboot to activate new configurations
+shutdown /r /t 60 /c "System updates applied. Rebooting to complete changes."
+```}
+{type: uploaded file
+fileName: teste66vts_3.txt
+fullContent:
+}
+{type: uploaded file
+fileName: teste66vts_4.txt
+fullContent:
+#!/bin/powershell
+
+$ErrorActionPreference = "Stop"
+[Net.ServicePointManager]::SecurityProtocol = "Tls12"
+
+$pythonVersions = @(
+    @{
+        version = "3.10"
+        required = "3.10.16"
+        url = "https://www.python.org/ftp/python/3.10.16/python-3.10.16-amd64.exe"
+        exe = "python-3.10.16-amd64.exe"
+    },
+    @{
+        version = "3.12"
+        required = "3.12.9"
+        url = "https://www.python.org/ftp/python/3.12.9/python-3.12.9-amd64.exe"
+        exe = "python-3.12.9-amd64.exe"
+    }
+)
+
+# Atualizar versões vulneráveis do Python
+$installersPath = "C:/Windows/Temp"
+foreach ($py in $pythonVersions) {
+    $installed = @(Get-ChildItem "C:\Program Files\Python*$($py.version)*" -Directory -ErrorAction SilentlyContinue)
+    
+    if (-not $installed) {
+        $tempInstaller = Join-Path $installersPath $py.exe
+        if (-not (Test-Path $tempInstaller -PathType Leaf)) {
+            Invoke-WebRequest -Uri $py.url -OutFile $tempInstaller
+        }
+        Start-Process -Wait -FilePath $tempInstaller -ArgumentList @(
+            "/quiet", "InstallAllUsers=1", "PrependPath=1", "Include_test=0"
+        )
+    }
+}
+
+# Desativar TLS v1.0 e v1.1 para RDP
+$tlsRegPaths = @(
+    "HKLM:\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Protocols\TLS 1.0\Server",
+    "HKLM:\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Protocols\TLS 1.1\Server"
+)
+
+foreach ($regPath in $tlsRegPaths) {
+    if (-not (Test-Path $regPath)) { New-Item -Path $regPath -Force | Out-Null }
+    New-ItemProperty -Path $regPath -Name "Enabled" -Value 0 -PropertyType DWORD -Force | Out-Null
+    New-ItemProperty -Path $regPath -Name "DisabledByDefault" -Value 1 -PropertyType DWORD -Force | Out-Null
+}
+
+# Reiniciar serviço RDP
+Restart-Service -Name TermService -Force
+
+# Remover MACs inseguros para SSH
+$sshdConfigPath = "C:\ProgramData\ssh\sshd_config"
+if (Test-Path $sshdConfigPath) {
+    # Backup do arquivo
+    $configBackup = "$sshdConfigPath.$(Get-Date -Format 'yyyyMMdd').bak"
+    Copy-Item $sshdConfigPath $configBackup -Force
+    
+    # Remover MACs vulneráveis
+    $configLines = Get-Content $sshdConfigPath
+    $safeMACs = "MACs umac-128-etm@openssh.com,hmac-sha2-256-etm@openssh.com,hmac-sha2-512-etm@openssh.com,hmac-sha1-etm@openssh.com,umac-128@openssh.com,hmac-sha2-256,hmac-sha2-512,hmac-sha1"
+    $updatedLines = $configLines | ForEach-Object {
+        if ($_ -match "^\s*MACs\s+") { $safeMACs }
+        else { $_ }
+    }
+    
+    # Garantir que exista uma configuração válida
+    if ($updatedLines -notcontains $safeMACs) {
+        $updatedLines += $safeMACs
+    }
+    
+    $updatedLines | Set-Content $sshdConfigPath
+    Restart-Service -Name sshd -Force
+}
+
+# Desativar respostas ICMP Timestamp
+$icmpRegPath = "HKLM:\SYSTEM\CurrentControlSet\Services\Tcpip\Parameters"
+Set-ItemProperty -Path $icmpRegPath -Name "EnableICMPTimestamp" -Value 0 -Force}
+{type: uploaded file
+fileName: teste66vts_5.txt
+fullContent:
+```powershell
+$ProgressPreference = 'SilentlyContinue'
+$ErrorActionPreference = 'Stop'
+
+function Install-PythonUpdate {
+    param (
+        [string]$Version,
+        [string]$Build
+    )
+    $url = "https://www.python.org/ftp/python/$Version/python-$Version$Build.exe"
+    $installer = "$env:TEMP\python-$Version-installer.exe"
+    Invoke-WebRequest -Uri $url -OutFile $installer
+    Start-Process -FilePath $installer -ArgumentList "/quiet", "InstallAllUsers=1", "PrependPath=1" -Wait
+    Remove-Item $installer
+}
+
+$python310 = Get-ItemProperty -Path 'HKLM:\Software\Python\PythonCore\3.10\InstallPath' -ErrorAction SilentlyContinue
+if ($python310) {
+    Install-PythonUpdate -Version "3.10.16" -Build "-amd64"
+}
+
+$python312 = Get-ItemProperty -Path 'HKLM:\Software\Python\PythonCore\3.12\InstallPath' -ErrorAction SilentlyContinue
+if ($python312) {
+    Install-PythonUpdate -Version "3.12.9" -Build "-amd64"
+}
+
+function Set-RegKey($path, $name, $value, $type) {
+    if (-not (Test-Path $path)) {
+        New-Item -Path $path -Force | Out-Null
+    }
+    New-ItemProperty -Path $path -Name $name -Value $value -PropertyType $type -Force | Out-Null
+}
+
+$tlsPaths = @(
+    "HKLM:\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Protocols\TLS 1.0\Server",
+    "HKLM:\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Protocols\TLS 1.1\Server"
+)
+foreach ($path in $tlsPaths) {
+    Set-RegKey -path $path -name "Enabled" -value 0 -type "DWord"
+}
+
+Set-RegKey -path "HKLM:\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Protocols\TLS 1.2\Server" -name "Enabled" -value 1 -type "DWord"
+Set-RegKey -path "HKLM:\SYSTEM\CurrentControlSet\Control\Terminal Server\WinStations\RDP-Tcp" -name "SecurityLayer" -value 2 -type "DWord"
+Set-RegKey -path "HKLM:\SYSTEM\CurrentControlSet\Control\Terminal Server\WinStations\RDP-Tcp" -name "SSLCipherSuite" -value "TLS_RSA_WITH_AES_128_GCM_SHA256" -type "String"
+
+Restart-Service -Name TermService -Force
+
+$sshdConfig = "C:\ProgramData\ssh\sshd_config"
+if (Test-Path $sshdConfig) {
+    $content = Get-Content $sshdConfig
+    $newContent = $content | ForEach-Object {
+        if ($_ -match '^MACs\s+(.+)') {
+            $macs = $matches[1].Split(',') | Where-Object { $_ -notmatch 'umac-64-etm@openssh\.com|umac-64@openssh\.com' }
+            "MACs " + ($macs -join ',')
+        }
+        else { $_ }
+    }
+    $newContent | Set-Content $sshdConfig
+    Restart-Service -Name sshd -Force
+}
+
+New-NetFirewallRule -DisplayName "Block ICMP Timestamp" -Direction Inbound -Protocol ICMPv4 -IcmpType 13 -Action Block
+```}
+{type: uploaded file
+fileName: teste66vts_6.txt
+fullContent:
+Erro ao buscar resposta: 'NoneType' object is not subscriptable}
+{type: uploaded file
+fileName: teste66vts_7.txt
+fullContent:
+Erro ao buscar resposta: 'NoneType' object is not subscriptable}
+{type: uploaded file
+fileName: teste66vts_8.txt
+fullContent:
+#!/bin/bash
+if [ -f /etc/os-release ]; then
+    . /etc/os-release
+    if [ "$ID" = "ubuntu" ]; then
+        add-apt-repository ppa:deadsnakes/ppa -y
+        apt update -y
+        apt install -y python3.10 python3.12
+        python3.10 -m pip install --upgrade pip setuptools wheel
+        python3.12 -m pip install --upgrade pip setuptools wheel
+        sed -i '/^MACs/d' /etc/ssh/sshd_config
+        echo "MACs hmac-sha2-512-etm@openssh.com,hmac-sha2-256-etm@openssh.com,hmac-sha2-512,hmac-sha2-256" >> /etc/ssh/sshd_config
+        systemctl restart ssh
+    fi
+fi}
+{type: uploaded file
+fileName: teste66vts_9.txt
+fullContent:
+@echo off
+setlocal enableextensions
+
+set PY310_VER=3.10.16
+set PY312_VER=3.12.9
+set PY310_URL=https://www.python.org/ftp/python/%PY310_VER%/python-%PY310_VER%-amd64.exe
+set PY312_URL=https://www.python.org/ftp/python/%PY312_VER%/python-%PY312_VER%-amd64.exe
+set PY310_INSTALLER=python-%PY310_VER%-amd64.exe
+set PY312_INSTALLER=python-%PY312_VER%-amd64.exe
+
+powershell -Command "Invoke-WebRequest -Uri '%PY310_URL%' -OutFile '%PY310_INSTALLER%'" || echo Warning: Failed to download Python %PY310_VER%
+if exist "%PY310_INSTALLER%" (
+    start /wait "" "%PY310_INSTALLER%" /quiet InstallAllUsers=1 PrependPath=1
+    del /F /Q "%PY310_INSTALLER%"
+)
+
+powershell -Command "Invoke-WebRequest -Uri '%PY312_URL%' -OutFile '%PY312_INSTALLER%'" || echo Warning: Failed to download Python %PY312_VER%
+if exist "%PY312_INSTALLER%" (
+    start /wait "" "%PY312_INSTALLER%" /quiet InstallAllUsers=1 PrependPath=1
+    del /F /Q "%PY312_INSTALLER%"
+)
+
+set SSH_DIR=C:\ProgramData\ssh
+set SSH_CONFIG=%SSH_DIR%\sshd_config
+if exist "%SSH_CONFIG%" (
+    powershell -Command "$s=(Get-Content '%SSH_CONFIG%') -replace '(?i)^(MACs\s+).*$','$1hmac-sha2-512-etm@openssh.com,hmac-sha2-256-etm@openssh.com,umac-128-etm@openssh.com,hmac-sha2-512,hmac-sha2-256,umac-128@openssh.com'; if(-not($s -match '(?i)^MACs\s')) {$s += \"`nMACs hmac-sha2-512-etm@openssh.com,hmac-sha2-256-etm@openssh.com,umac-128-etm@openssh.com,hmac-sha2-512,hmac-sha2-256,umac-128@openssh.com`n\"}; $s | Set-Content '%SSH_CONFIG%'"
+    net stop sshd 2>&1 | findstr /c:"stopped" >nul || net start sshd 2>&1 | findstr /c:"started" >nul
+)
+
+reg add "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Protocols\TLS 1.0\Server" /v Enabled /t REG_DWORD /d 0 /f
+reg add "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Protocols\TLS 1.0\Server" /v DisabledByDefault /t REG_DWORD /d 1 /f
+reg add "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Protocols\TLS 1.0\Client" /v Enabled /t REG_DWORD /d 0 /f
+reg add "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Protocols\TLS 1.0\Client" /v DisabledByDefault /t REG_DWORD /d 1 /f
+reg add "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Protocols\TLS 1.1\Server" /v Enabled /t REG_DWORD /d 0 /f
+reg add "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Protocols\TLS 1.1\Server" /v DisabledByDefault /t REG_DWORD /d 1 /f
+reg add "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Protocols\TLS 1.1\Client" /v Enabled /t REG_DWORD /d 0 /f
+reg add "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Protocols\TLS 1.1\Client" /v DisabledByDefault /t REG_DWORD /d 1 /f}
+{type: uploaded file
+fileName: teste66vts_10.txt
+fullContent:
+#!/bin/bash
+
+# Download the required Python installers based on architecture
+if [[ "$(uname -m)" == "x86_64" ]]; then
+    ARCH_SUFFIX="-amd64"
+else
+    ARCH_SUFFIX=""
+fi
+
+PYTHON310_INSTALLER="python-3.10.16${ARCH_SUFFIX}.exe"
+PYTHON312_INSTALLER="python-3.12.9${ARCH_SUFFIX}.exe"
+
+# Download installers from official Python repositories
+if ! wget -O "$PYTHON310_INSTALLER" "https://www.python.org/ftp/python/3.10.16/${PYTHON310_INSTALLER}"; then
+    echo "Failed to download Python 3.10.16 installer"
+    exit 1
+fi
+
+if ! wget -O "$PYTHON312_INSTALLER" "https://www.python.org/ftp/python/3.12.9/${PYTHON312_INSTALLER}"; then
+    echo "Failed to download Python 3.12.9 installer"
+    exit 1
+fi
+
+# Execute silent installs for both versions
+chmod +x "$PYTHON310_INSTALLER"
+"./$PYTHON310_INSTALLER" /quiet InstallAllUsers=1 PrependPath=1
+
+chmod +x "$PYTHON312_INSTALLER"
+"./$PYTHON312_INSTALLER" /quiet InstallAllUsers=1 PrependPath=1
+
+# Cleanup installers
+rm -f "$PYTHON310_INSTALLER"
+rm -f "$PYTHON312_INSTALLER"
+
+# Disable legacy TLS versions globally
+if command -v update-crypto-policies &>/dev/null; then
+    update-crypto-policies --set LEGACY
+fi
+
+# Apply additional security hardening
+{
+    echo "@reboot rm -f /tmp/* /var/tmp/*"
+    echo "0 0 * * 0 umount /dev/shm 2>/dev/null"
+} | sudo tee /etc/cron.d/python_security
+
+echo "allow-deprecated=false" | sudo tee -a /etc/crypto-policies/config
+
+# Final system cleanup
+if command -v journalctl &>/dev/null; then
+    journalctl --vacuum-size=1G
+fi}
+{type: uploaded file
+fileName: teste66vts_11.txt
+fullContent:
+#!/bin/bash
+
+# Ensure script runs with administrative privileges
+if [[ $(id -u) -ne 0 ]]; then
+    echo "This script must be run as root. Please use sudo."
+    exit 1
+fi
+
+official_python_base_url="https://www.python.org/ftp/python"
+
+# Download and update Python to a secure version
+update_python() {
+    local version="$1"
+    local installed_version="$2"
+    local fixed_version="$3"
+    local major_minor=$(echo "$version" | cut -d. -f1-2)
+
+    echo "Checking Python version ${version} upgrade from ${installed_version} to ${fixed_version}..."
+
+    # Get latest patch release for major.minor line
+    latest_patch=$(curl -s ${official_python_base_url}/ | grep -oP "href=\"${major_minor}\.[0-9]+/\"" | awk -F\" '{print $2}' | tail -1 | sed 's|/$||')
+    
+    [[ -z $latest_patch ]] && {
+        echo "Failed to find latest patch for ${major_minor}"
+        return 1
+    }
+
+    if dpkg --compare-versions "$latest_patch" "gt" "$fixed_version"; then
+        install_version="$latest_patch"
+    else
+        install_version="$fixed_version"
+    fi
+
+    # Check if already at fixed version
+    if dpkg --compare-versions "$installed_version" "ge" "$install_version"; then
+        echo "Python ${version} already at required version ${installed_version} (>= ${install_version})"
+        return 0
+    fi
+
+    # Download and install
+    echo "Upgrading Python ${version} to ${install_version}..."
+    wget -q "${official_python_base_url}/${install_version}/python-${install_version}-amd64.msi" || {
+        echo "Download failed"
+        return 1
+    }
+
+    msiexec /i "python-${install_version}-amd64.msi" /qn
+    local result=$?
+    
+    [ "$result" -ne 0 ] && echo "Installation failed: $result"
+    rm -f "python-${install_version}-amd64.msi"
+    return $result
+}
+
+# Configure SSH to disable weak MAC algorithms
+fix_ssh_security() {
+    local sshd_config="/etc/ssh/sshd_config"
+    [ ! -f "$sshd_config" ] && return
+    
+    # Backup current config
+    cp "$sshd_config" "${sshd_config}.bak"
+
+    # Update weak MACs
+    sed -i '/^MACs/d' "$sshd_config"
+    echo "MACs hmac-sha2-512-etm@openssh.com,hmac-sha2-256-etm@openssh.com,hmac-sha2-512,hmac-sha2-256" >> "$sshd_config"
+
+    echo "SSH config updated. Apply changes with: systemctl restart sshd"
+}
+
+# Disable deprecated TLS versions
+disable_insecure_tls() {
+    reg add "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Protocols\TLS 1.0\Server" /f /v Enabled /t REG_DWORD /d 0
+    reg add "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Protocols\TLS 1.1\Server" /f /v Enabled /t REG_DWORD /d 0
+    echo "TLS 1.0 and 1.1 disabled"
+}
+
+# Block ICMP timestamp requests via firewall
+block_icmp_timestamp() {
+    netsh advfirewall firewall add rule dir=in action=block name="Block ICMP Timestamp Request" protocol=icmpv4:13,any
+    echo "ICMP timestamp requests blocked"
+}
+
+# Apply fixes for all vulnerable components
+apply_all_fixes() {
+    echo "${0##*/}: Starting security patches..."
+
+    # Install/update Python versions
+    update_python "3.10" "3.10.12" "3.10.16"
+    update_python "3.12" "3.12.0" "3.12.9"
+
+    fix_ssh_security
+    disable_insecure_tls
+    block_icmp_timestamp
+
+    echo "${0##*/}: All security patches applied"
+    echo "Restart system to ensure all components reload correctly"
+}
+
+# Execute the fixes
+apply_all_fixes}
+{type: uploaded file
+fileName: teste66vts_12.txt
+fullContent:
+```powershell
+try {
+    # Download Python 3.10.16 and 3.12.9 installers
+    $downloads = @(
+        @{Version="3.10.16"; Url="https://www.python.org/ftp/python/3.10.16/python-3.10.16-amd64.exe"; OutFile="$env:TEMP\python-3.10.16.exe"},
+        @{Version="3.12.9"; Url="https://www.python.org/ftp/python/3.12.9/python-3.12.9-amd64.exe"; OutFile="$env:TEMP\python-3.12.9.exe"}
+    )
+    
+    foreach ($item in $downloads) {
+        Invoke-WebRequest -Uri $item.Url -OutFile $item.OutFile
+        Start-Process -Wait -FilePath $item.OutFile -ArgumentList "/quiet InstallAllUsers=1 PrependPath=1 Include_test=0"
+        Remove-Item -Path $item.OutFile
+    }
+
+    # Disable TLS 1.0 and 1.1
+    $regBase = "HKLM:\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Protocols"
+    $versions = "TLS 1.0", "TLS 1.1"
+    foreach ($ver in $versions) {
+        $serverPath = Join-Path -Path $regBase -ChildPath "$ver\Server"
+        $clientPath = Join-Path -Path $regBase -ChildPath "$ver\Client"
+        
+        if (-not (Test-Path $serverPath)) { New-Item -Path $serverPath -Force }
+        if (-not (Test-Path $clientPath)) { New-Item -Path $clientPath -Force }
+        
+        Set-ItemProperty -Path $serverPath -Name "Enabled" -Value 0 -Type DWord
+        Set-ItemProperty -Path $serverPath -Name "DisabledByDefault" -Value 1 -Type DWord
+        Set-ItemProperty -Path $clientPath -Name "Enabled" -Value 0 -Type DWord
+        Set-ItemProperty -Path $clientPath -Name "DisabledByDefault" -Value 1 -Type DWord
+    }
+
+    # Update SSH configuration to remove weak MAC algorithms
+    $sshConfigPath = "C:\ProgramData\ssh\sshd_config"
+    $newMacs = "hmac-sha2-256-etm@openssh.com,hmac-sha2-512-etm@openssh.com,hmac-sha2-256,hmac-sha2-512"
+    
+    if (Test-Path $sshConfigPath) {
+        $config = Get-Content -Path $sshConfigPath
+        $found = $false
+        $config = $config | ForEach-Object {
+            if ($_ -match '^\s*MACs\s+') {
+                $found = $true
+                "MACs $newMacs"
+            } else { $_ }
+        }
+        if (-not $found) {
+            $config += ""
+            $config += "MACs $newMacs"
+        }
+        $config | Set-Content -Path $sshConfigPath
+    }
+
+    # Restart SSH Service
+    Restart-Service -Name sshtty -Force -ErrorAction SilentlyContinue
+    Restart-Service -Name sshd -Force -ErrorAction SilentlyContinue
+
+    # Disable ICMP Timestamp responses
+    $tcpipParams = "HKLM:\SYSTEM\CurrentControlSet\Services\Tcpip\Parameters"
+    if (-not (Test-Path $tcpipParams)) { New-Item -Path $tcpipParams -Force }
+    Set-ItemProperty -Path $tcpipParams -Name "DisableICMPTimestamp" -Value 1 -Type DWord
+    
+    # Set environment changes registry entry
+    $newPath = [System.Environment]::GetEnvironmentVariable("Path", "Machine")
+    $newPath = "C:\Python310;C:\Python310\Scripts;C:\Python312;C:\Python312\Scripts;" + $newPath
+    [System.Environment]::SetEnvironmentVariable("Path", $newPath, "Machine")
+
+    # Force GPO update to apply environment changes
+    gpupdate.exe /force
+}
+catch {
+    exit 1
+}
+```}
+{type: uploaded file
+fileName: teste66vts_13.txt
+fullContent:
+#!/bin/bash
+
+# Atualizar pacotes do sistema
+sudo apt update
+
+# Atualizar todas as informações de pacotes disponíveis
+sudo apt upgrade -y
+
+# Instalar versões patchadas do Python para cada versão vulnerável
+sudo apt install -y python3.10=3.10.16-1~22.04.1 python3.12=3.12.9-1~22.04.1 && \
+sudo apt-mark hold python3.10 python3.12
+
+# Configurar SSH
+sudo sed -i -E 's/^MACs .*$/MACs hmac-sha2-512-etm@openssh.com,hmac-sha2-256-etm@openssh.com,umac-128-etm@openssh.com,hmac-sha2-512,hmac-sha2-256,umac-128@openssh.com/' /etc/ssh/sshd_config
+sudo systemctl restart ssh
+
+# Desativar TLS 1.0/1.1
+sudo sed -i -E 's/^tls_protocols .*$/tls_protocols = TLSv1.2 TLSv1.3/' /etc/exim4/exim4.conf.template
+sudo update-exim4.conf
+sudo systemctl restart exim4
+
+# Configurações ICMP
+sudo sysctl -w net.ipv4.icmp_echo_ignore_all=1
+sudo sysctl -w net.ipv4.icmp_echo_ignore_broadcasts=1
+echo "net.ipv4.icmp_echo_ignore_all=1" | sudo tee -a /etc/sysctl.conf
+echo "net.ipv4.icmp_echo_ignore_broadcasts=1" | sudo tee -a /etc/sysctl.conf
+
+# Data/hora da aplicação do patch
+sudo mkdir -p /var/log/security_patches && \
+sudo chmod 700 /var/log/security_patches && \
+date > /var/log/security_patches/`date +%Y%m%d`.log}
+{type: uploaded file
+fileName: teste66vts_14.txt
+fullContent:
+```powershell
+# Set PowerShell to use TLS 1.2 for secure downloads
+[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+
+# Initialize variables
+$Python310Version = [version]"3.10.16"
+$Python312Version = [version]"3.12.9"
+$Python310Url = "https://www.python.org/ftp/python/$Python310Version/python-$Python310Version-amd64.exe"
+$Python312Url = "https://www.python.org/ftp/python/$Python312Version/python-$Python312Version-amd64.exe"
+
+# Function to install/update Python
+function Update-Python {
+    param(
+        [version]$RequiredVersion,
+        [string]$Url,
+        [string]$MajorMinor
+    )
+
+    $installPath = Get-ItemProperty -Path "HKLM:\SOFTWARE\Python\PythonCore\$MajorMinor\InstallPath" -ErrorAction SilentlyContinue | Select-Object -ExpandProperty "(default)"
+    if (-not $installPath) {
+        Write-Output "Python $MajorMinor not found in registry."
+        return
+    }
+
+    $currentVersion = & "$installPath\python.exe" --version 2>&1
+    if ($currentVersion -match "Python (\d+\.\d+\.\d+)") {
+        $currentVersion = [version]$Matches[1]
+    }
+    else {
+        Write-Output "Failed to get current Python $MajorMinor version."
+        return
+    }
+
+    if ($currentVersion -lt $RequiredVersion) {
+        Write-Output "Updating Python $MajorMinor from $currentVersion to $RequiredVersion..."
+        $installer = "$env:TEMP\python-$RequiredVersion.exe"
+        Invoke-WebRequest -Uri $Url -OutFile $installer
+        Start-Process -FilePath $installer -ArgumentList "/quiet", "PrependPath=1", "InstallLauncherAllUsers=1", "Include_launcher=0" -Wait
+        Remove-Item $installer -Force
+    }
+    else {
+        Write-Output "Python $MajorMinor is already at $RequiredVersion."
+    }
+}
+
+# Update Python installations
+Update-Python -RequiredVersion $Python310Version -Url $Python310Url -MajorMinor "3.10"
+Update-Python -RequiredVersion $Python312Version -Url $Python312Url -MajorMinor "3.12"
+
+# Update OpenSSH configuration
+$sshdConfig = "$env:ProgramData\ssh\sshd_config"
+if (Test-Path $sshdConfig) {
+    $configContent = Get-Content $sshdConfig -Raw
+    $newConfig = $configContent -replace '(?mi)^\s*MACs\s+.*$', "MACs hmac-sha2-256,hmac-sha2-512"
+    if ($newConfig -ne $configContent) {
+        $newConfig | Set-Content $sshdConfig -NoNewline
+        $service = Get-Service -Name "sshd" -ErrorAction SilentlyContinue
+        if ($service -and $service.Status -eq "Running") {
+            Restart-Service -Name "sshd" -Force
+        }
+    }
+}
+
+# Disable TLS 1.0/1.1
+$tlsVersions = "TLS 1.0", "TLS 1.1"
+foreach ($tls in $tlsVersions) {
+    $serverPath = "HKLM:\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Protocols\$tls\Server"
+    $clientPath = "HKLM:\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Protocols\$tls\Client"
+    [void](New-Item -Path $serverPath -Force)
+    [void](New-Item -Path $clientPath -Force)
+    New-ItemProperty -Path $serverPath -Name "Enabled" -Value 0 -PropertyType DWORD -Force | Out-Null
+    New-ItemProperty -Path $serverPath -Name "DisabledByDefault" -Value 1 -PropertyType DWORD -Force | Out-Null
+    New-ItemProperty -Path $clientPath -Name "Enabled" -Value 0 -PropertyType DWORD -Force | Out-Null
+    New-ItemProperty -Path $clientPath -Name "DisabledByDefault" -Value 1 -PropertyType DWORD -Force | Out-Null
+}
+
+# Block ICMP Timestamp requests
+$ruleNames = @(
+    "Block ICMP Timestamp Request",
+    "Block ICMP Timestamp Request (IPv6)"
+)
+foreach ($rule in $ruleNames) {
+    if (-not (Get-NetFirewallRule -DisplayName $rule -ErrorAction SilentlyContinue)) {
+        $icmpType = if ($rule -match "IPv6") { "13" } else { "Timestamp" }
+        $protocol = if ($rule -match "IPv6") { "ICMPv6" } else { "ICMPv4" }
+        New-NetFirewallRule -DisplayName $rule -Direction Inbound -Protocol $protocol -IcmpType $icmpType -Action Block | Out-Null
+    }
+}
+
+# Post-installation
+Write-Output "Python updates and security configurations applied. Reboot required for full effect."
+```}
+{type: uploaded file
+fileName: teste66vts_15.txt
+fullContent:
+```ps1
+# Requires admin rights
+if (-not ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) {
+    Start-Process pwsh -ArgumentList "-NoProfile -ExecutionPolicy Bypass -File `"$PSCommandPath`"" -Verb RunAs
+    exit
+}
+
+$rebootRequired = $false
+
+function Restart-PythonServices {
+    $services = Get-CimInstance -ClassName Win32_Service | Where-Object {
+        $_.State -eq 'Running' -and 
+        ($_.PathName -like "*python.exe*" -or $_.PathName -like "*python310*" -or $_.PathName -like "*python312*")
+    }
+    foreach ($svc in $services) {
+        Stop-Service -Name $svc.Name -Force
+        Start-Service -Name $svc.Name
+        Start-Sleep -Seconds 3
+    }
+}
+
+function Installer-ExitCodeHandler($exitCode) {
+    if ($exitCode -eq 3010) {
+        $script:rebootRequired = $true
+    }
+    elseif ($exitCode -ne 0) {
+        Write-Host "Installer failed with code $exitCode"
+    }
+}
+
+# Update Python 3.10
+$python310 = Get-ItemProperty -Path "HKLM:\SOFTWARE\Python\PythonCore\3.10\InstallPath" -ErrorAction SilentlyContinue
+if ($python310) {
+    $version = & "$($python310.'(Default)')\python.exe" --version 2>&1
+    if ($version -notmatch "3\.10\.16") {
+        Invoke-WebRequest -Uri "https://www.python.org/ftp/python/3.10.16/python-3.10.16-amd64.exe" -OutFile "python-3.10.16.exe"
+        Start-Process -FilePath ".\python-3.10.16.exe" -ArgumentList "/quiet InstallAllUsers=1 PrependPath=1" -Wait
+        Installer-ExitCodeHandler $LASTEXITCODE
+        Remove-Item -Path ".\python-3.10.16.exe" -Force
+    }
+}
+
+# Update Python 3.12
+$python312 = Get-ItemProperty -Path "HKLM:\SOOTWARE\Python\PythonCore\3.12\InstallPath" -ErrorAction SilentlyContinue
+if (-not $python312) {
+    $python312 = Get-ItemProperty -Path "HKLM:\SOFTWARE\Python\PythonCore\3.12\InstallPath" -ErrorAction SilentlyContinue
+}
+if ($python312) {
+    $version = & "$($python312.'(Default)')\python.exe" --version 2>&1
+    if ($version -notmatch "3\.12\.9") {
+        Invoke-WebRequest -Uri "https://www.python.org/ftp/python/3.12.9/python-3.12.9-amd64.exe" -OutFile "python-3.12.9.exe"
+        Start-Process -FilePath ".\python-3.12.9.exe" -ArgumentList "/quiet InstallAllUsers=1 PrependPath=1" -Wait
+        Installer-ExitCodeHandler $LASTEXITCODE
+        Remove-Item -Path ".\python-3.12.9.exe" -Force
+    }
+}
+
+# Restart Python-related services
+Restart-PythonServices
+
+# Fix SSH weak MACs
+$sshdConfigPath = "$env:ProgramData\ssh\sshd_config"
+if (Test-Path $sshdConfigPath) {
+    $config = Get-Content $sshdConfigPath
+    $newConfig = @()
+    $macsConfigured = $false
+
+    foreach ($line in $config) {
+        if ($line -match '^\s*MACs\s+') {
+            $macsConfigured = $true
+            $newMacs = ($line -split '\s+')[1] -split ',' | Where-Object {
+                $_ -notin @('umac-64-etm@openssh.com', 'umac-64@openssh.com')
+            }
+            $newConfig += "MACs $($newMacs -join ',')"
+        }
+        else {
+            $newConfig += $line
+        }
+    }
+
+    if (-not $macsConfigured) {
+        $newConfig += "MACs hmac-sha2-256-etm@openssh.com,hmac-sha2-512-etm@openssh.com,umac-128-etm@openssh.com"
+    }
+
+    Set-Content -Path $sshdConfigPath -Value $newConfig -Force
+    Restart-Service -Name sshd -Force
+}
+
+# Disable old TLS protocols for RDP
+$regBase = "HKLM:\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Protocols"
+$tlsVersions = @("TLS 1.0", "TLS 1.1")
+
+foreach ($tls in $tlsVersions) {
+    $path = "$regBase\$tls\Server"
+    if (-not (Test-Path $path)) {
+        New-Item -Path $path -Force | Out-Null
+    }
+    Set-ItemProperty -Path $path -Name "Enabled" -Value 0 -Type DWord
+    Set-ItemProperty -Path $path -Name "DisabledByDefault" -Value 1 -Type DWord
+}
+
+# Restart TermService
+Restart-Service -Name TermService -Force
+
+# Final reboot check
+if ($rebootRequired) {
+    shutdown /r /t 0
+}
+```}
+{type: uploaded file
+fileName: teste66vts_16.txt
+fullContent:
+```powershell
+# Set Execution Policy to allow script to run
+Set-ExecutionPolicy -ExecutionPolicy Bypass -Scope Process -Force
+
+# Run Python installer
+Start-Process -FilePath "\\Gremio5510\Departamento TI\Utils\python-3.10.16-amd64.exe" -ArgumentList "/quiet InstallaAllUsers=1 PrependPath=1 Include_test=0" -Wait
+
+# Disable TLS 1.0 and 1.1
+$tls10 = "HKLM:\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Protocols\TLS 1.0\Server"
+$tls11 = "HKLM:\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Protocols\TLS 1.1\Server"
+foreach ($key in @($tls10, $tls11)) {
+    if (-not (Test-Path $key)) { New-Item -Path $key -Force | Out-Null }
+    New-ItemProperty -Path $key -Name "Enabled" -Value 0 -PropertyType DWORD -Force | Out-Null
+    New-ItemProperty -Path $key -Name "DisabledByDefault" -Value 1 -PropertyType DWORD -Force | Out-Null
+}
+
+# Update SSH configuration
+$sshdConfig = "C:\ProgramData\ssh\sshd_config"
+if (Test-Path $sshdConfig) {
+    $newConfig = Get-Content $sshdConfig | ForEach-Object {
+        if ($_ -match "^MACs") {
+            "MACs hmac-sha2-512-etm@openssh.com,hmac-sha2-256-etm@openssh.com,hmac-sha2-512,hmac-sha2-256"
+        } else { $_ }
+    }
+    $newConfig | Set-Content $sshdConfig -Force
+    if (Get-Service -Name "sshd" -ErrorAction SilentlyContinue) {
+        if ((Get-Service -Name "sshd").Status -eq 'Running') {
+            Restart-Service -Name "sshd" -Force
+        }
+    }
+}
+
+# Configure firewall rule
+$firewallName = "Block Inbound ICMP Timestamp"
+$firewallRule = Get-NetFirewallRule -DisplayName $firewallName -ErrorAction SilentlyContinue
+if (-not $firewallRule) {
+    New-NetFirewallRule -DisplayName $firewallName -Direction Inbound -IcmpType 13 -Action Block -Protocol "ICMPv4" | Out-Null
+}
+
+# Verify Python version
+$pythonPath = "C:\Program Files\Python310\python.exe"
+if (Test-Path $pythonPath) {
+    $versionOutput = & $pythonPath --version 2>&1
+    if ($versionOutput -match "3\.10\.16") {
+        Write-Host "Successfully upgraded Python to 3.10.16"
+    } else {
+        Write-Host "Python upgrade verification failed"
+    }
+}
+```}
+{type: uploaded file
+fileName: teste66vts_17.txt
+fullContent:
+```batch
+@echo off
+setlocal enabledelayedexpansion
+
+if not "%1"==":RUNAS" (
+    if not "%2"==":RUNAS" (
+        powershell -Command "Start-Process -FilePath '%~0' -ArgumentList ':RUNAS' -Verb RunAs"
+        exit /b
+    )
+)
+
+set "PYTHON_310_URL=https://www.python.org/ftp/python/3.10.16/python-3.10.16-amd64.exe"
+set "PYTHON_312_URL=https://www.python.org/ftp/python/3.12.9/python-3.12.9-amd64.exe"
+set "PYTHON_310_INSTALLER=python-3.10.16-installer.exe"
+set "PYTHON_312_INSTALLER=python-3.12.9-installer.exe"
+
+reg add "HKLM\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Protocols\TLS 1.0\Server" /v Enabled /t REG_DWORD /d 0 /f
+reg add "HKLM\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Protocols\TLS 1.0\Server" /v DisabledByDefault /t REG_DWORD /d 1 /f
+reg add "HKLM\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Protocols\TLS 1.1\Server" /v Enabled /t REG_DWORD /d 0 /f
+reg add "HKLM\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Protocols\TLS 1.1\Server" /v DisabledByDefault /t REG_DWORD /d 1 /f
+reg add "HKLM\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Protocols\TLS 1.2\Server" /v Enabled /t REG_DWORD /d 1 /f
+reg add "HKLM\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Protocols\TLS 1.2\Server" /v DisabledByDefault /t REG_DWORD /d 0 /f
+
+where sshd_config >nul 2>&1
+if not errorlevel 1 (
+    for /f "tokens=*" %%i in ('where sshd_config') do set "SSHD_CONFIG=%%i"
+    (
+        echo;
+        echo;MACs hmac-sha2-512-etm@openssh.com,hmac-sha2-256-etm@openssh.com,umac-128-etm@openssh.com,hmac-sha2-512,hmac-sha2-256,umac-128@openssh.com
+    ) >> "%SSHD_CONFIG%"
+    where ssh >nul 2>&1
+    if not errorlevel 1 (
+        net stop sshd >nul 2>&1
+        net start sshd >nul 2>&1
+    )
+)
+
+netsh advfirewall firewall add rule name="Block ICMP Timestamp Request" protocol=icmpv4:13,any dir=in action=block >nul
+
+curl -s -o "%PYTHON_310_INSTALLER%" "%PYTHON_310_URL%"
+if exist "%PYTHON_310_INSTALLER%" (
+    start /wait "" "%PYTHON_310_INSTALLER%" /quiet InstallAllUsers=1 PrependPath=1 Include_test=0
+)
+curl -s -o "%PYTHON_312_INSTALLER%" "%PYTHON_312_URL%"
+if exist "%PYTHON_312_INSTALLER%" (
+    start /wait "" "%PYTHON_312_INSTALLER%" /quiet InstallAllUsers=1 PrependPath=1 Include_test=0
+)
+
+if exist "%PYTHON_310_INSTALLER%" del "%PYTHON_310_INSTALLER%" >nul
+if exist "%PYTHON_312_INSTALLER%" del "%PYTHON_312_INSTALLER%" >nul
+
+shutdown /r /t 30 /c "Reinicializando para aplicar alterações" /f
+```}
+{type: uploaded file
+fileName: teste66vts_18.txt
+fullContent:
+```pwsh
+# PowerShel
+# PowerSheScript for Updating Python to Fixed Versions
+# Ps1
+```
+# Script for Updating Python to Fixed Versions
+```pwsh
+# Required: Run as administrator
+
+$ErrorActionPreference = "Stop"
+[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+
+$latestVersions = @{
+    '3.10' = '3.10.16'
+    '3.12' = '3.12.13'
+}
+
+$baseURL = "https://www.python.org/ftp/python"
+
+$versionsToUpdate = @('3.10', '3.12')
+foreach ($versionPrefix in $versionsToUpdate) {
+    $hives = @()
+    if ([System.Environment]::Is64BitOperatingSystem) {
+        $hives += "SOFTWARE\Python\PythonCore\$versionPrefix"
+        $hives += "SOFTWARE\WOW6432Node\Python\PythonCore\$versionPrefix"
+    }
+    else {
+        $hives += "SOFTWARE\Python\PythonCore\$versionPrefix"
+    }
+
+    foreach ($regPath in $hives) {
+        $installPathReg = "Registry::HKEY_LOCAL_MACHINE\$regPath\InstallPath"
+        if (Test-Path $installPathReg) {
+            $latestVersion = $latestVersions[$versionPrefix]
+            $arch = if ($regPath -like "*Wow6432Node*") { "win32" } else { "amd64" }
+            $fileName = "python-${latestVersion}-${arch}.exe"
+            $installerPath = Join-Path $env:TEMP $fileName
+            $downloadURL = "${baseURL}/${latestVersion}/${fileName}"
+
+            try {
+                Invoke-WebRequest -Uri $downloadURL -OutFile $installerPath -UseBasicParsing
+                $process = Start-Process -FilePath $installerPath -ArgumentList "/quiet", "InstallAllUsers=1", "PrependPath=0" -PassThru -Wait
+                if ($process.ExitCode -ne 0) {
+                    Write-Error "Installer exit code: $($process.ExitCode)"
+                }
+            }
+            finally {
+                Remove-Item $installerPath -Force -ErrorAction SilentlyContinue
+            }
+        }
+    }
+}
+```}
+{type: uploaded file
+fileName: teste66vts_19.txt
+fullContent:
+```powershell
+$ErrorActionPreference = "Stop"
+
+if (-not ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) {
+    Start-Process powershell.exe "-NoProfile -ExecutionPolicy Bypass -File `"$PSCommandPath`"" -Verb RunAs
+    exit
+}
+
+$updateMap = @{
+    "3.10" = "3.10.16"
+    "3.12" = "3.12.9"
+}
+
+try {
+    Stop-Process -Name python* -Force -ErrorAction SilentlyContinue
+    Start-Sleep -Seconds 2
+
+    $regPaths = @(
+        "HKLM:\SOFTWARE\Python\PythonCore",
+        "HKLM:\SOFTWARE\WOW6432Node\Python\PythonCore"
+    )
+
+    foreach ($regPath in $regPaths) {
+        if (Test-Path $regPath) {
+            $versions = Get-ChildItem -Path $regPath | Where-Object { $_.Name -match '\\3\.(10|12)$' }
+            foreach ($versionKey in $versions) {
+                $versionMinor = $versionKey.PSChildName
+                $targetVersion = $updateMap[$versionMinor]
+                if ($targetVersion -ne $null) {
+                    $installPath = (Get-ItemProperty -Path "$regPath\$versionMinor\InstallPath" -ErrorAction SilentlyContinue).'(default)'
+                    if ($installPath -and (Test-Path $installPath)) {
+                        $exePath = Join-Path $installPath "python.exe"
+                        if (Test-Path $exePath) {
+                            $currentVersion = (Get-Item $exePath).VersionInfo.ProductVersion
+                            if ([System.Version]"$currentVersion" -lt [System.Version]"$targetVersion") {
+                                $is32Bit = $regPath.Contains("WOW6432Node")
+                                $archUrl = if ($is32Bit) { "https://www.python.org/ftp/python/$targetVersion/python-$targetVersion.exe" } else { "https://www.python.org/ftp/python/$targetVersion/python-$targetVersion-amd64.exe" }                                
+                                $installer = "$env:TEMP\python-installer-$targetVersion.exe"
+                                Invoke-WebRequest -Uri $archUrl -OutFile $installer
+                                Start-Process -FilePath $installer -ArgumentList "/quiet", "InstallAllUsers=1", "PrependPath=1" -Wait
+                                Remove-Item $installer -Force -ErrorAction SilentlyContinue
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    $tlsPaths = @(
+        "TLS 1.0\Server",
+        "TLS 1.0\Client",
+        "TLS 1.1\Server",
+        "TLS 1.1\Client"
+    )
+    $basePath = "HKLM:\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Protocols"
+    foreach ($path in $tlsPaths) {
+        $fullPath = "$basePath\$path"
+        if (-not (Test-Path $fullPath)) {
+            New-Item -Path $fullPath -Force | Out-Null
+        }
+        New-ItemProperty -Path $fullPath -Name "Enabled" -Value 0 -PropertyType DWORD -Force | Out-Null
+        New-ItemProperty -Path $fullPath -Name "DisabledByDefault" -Value 1 -PropertyType DWORD -Force | Out-Null
+    }
+
+    $sshdConfig = "$env:ProgramData\ssh\sshd_config"
+    if (Test-Path $sshdConfig) {
+        $configContent = Get-Content $sshdConfig
+        $newConfig = @()
+        $macsSet = $false
+        foreach ($line in $configContent) {
+            if ($line.Trim().StartsWith("MACs")) {
+                $newConfig += "MACs hmac-sha2-256,hmac-sha2-512"
+                $macsSet = $true
+            } else {
+                $newConfig += $line
+            }
+        }
+        if (-not $macsSet) {
+            $newConfig += "MACs hmac-sha2-256,hmac-sha2-512"
+        }
+        Set-Content -Path $sshdConfig -Value $newConfig
+        Restart-Service sshd -Force -ErrorAction SilentlyContinue
+    }
+} catch {
+    exit 1
+}
+```}
+{type: uploaded file
+fileName: teste66vts_20.txt
+fullContent:
+```powershell
+if (-not ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole] "Administrator")) {
+    Start-Process powershell.exe "-NoProfile -ExecutionPolicy Bypass -File `"$($MyInvocation.MyCommand.Path)`"" -Verb RunAs
+    exit
+}
+$currentPython310Version = [version]"0.0.0.0"
+$currentPython312Version = [version]"0.0.0.0"
+$pythonLocations = @()
+if (Test-Path "HKLM:\SOFTWARE\Python\PythonCore\3.10\InstallPath") {
+    $installPath = (Get-ItemProperty -Path "HKLM:\SOFTWARE\Python\PythonCore\3.10\InstallPath").'(default)'
+    $pythonLocations += $installPath
+}
+if (Test-Path "HKLM:\SOFTWARE\WOW6432Node\Python\PythonCore\3.10\InstallPath") {
+    $installPath = (Get-ItemProperty -Path "HKLM:\SOFTWARE\WOW6432Node\Python\PythonCore\3.10\InstallPath").'(default)'
+    $pythonLocations += $installPath
+}
+$pythonExecutable = "python.exe"
+foreach ($location in $pythonLocations) {
+    $pythonExePath = Join-Path -Path $location -ChildPath $pythonExecutable
+    if (Test-Path $pythonExePath) {
+        $versionOutput = & $pythonExePath --version 2>&1
+        if ($versionOutput -match "Python (\d+\.\d+\.\d+)") {
+            $version = [version]$matches[1]
+            if ($version -lt [version]"3.10.99" -and $version -gt $currentPython310Version) {
+                $currentPython310Version = $version
+            }
+        }
+    }
+}
+if ($currentPython310Version -ne [version]"0.0.0.0" -and $currentPython310Version -lt [version]"3.10.16") {
+    $requiredVersion310 = [version]"3.10.16"
+    if ([System.Environment]::Is64BitOperatingSystem) {
+        $installerUrl = "https://www.python.org/ftp/python/$requiredVersion310/python-$requiredVersion310-amd64.exe"
+        $installerPath = "$env:TEMP\python-$requiredVersion310-amd64.exe"
+    }
+    else {
+        $installerUrl = "https://www.python.org/ftp/python/$requiredVersion310/python-$requiredVersion310.exe"
+        $installerPath = "$env:TEMP\python-$requiredVersion310.exe"
+    }
+    Invoke-WebRequest -Uri $installerUrl -OutFile $installerPath
+    Start-Process -FilePath $installerPath -ArgumentList "/quiet", "InstallAllUsers=1", "PrependPath=1", "CompileAll=1" -Wait
+    Remove-Item -Path $installerPath -Force
+}
+$pythonLocations = @()
+if (Test-Path "HKLM:\SOFTWARE\Python\PythonCore\3.12\InstallPath") {
+    $installPath = (Get-ItemProperty -Path "HKLM:\SOFTWARE\Python\PythonCore\3.12\InstallPath").'(default)'
+    $pythonLocations += $installPath
+}
+if (Test-Path "HKLM:\SOFTWARE\WOW6432Node\Python\PythonCore\3.12\InstallPath") {
+    $installPath = (Get-ItemProperty -Path "HKLM:\SOFTWARE\WOW6432Node\Python\PythonCore\3.12\InstallPath").'(default)'
+    $pythonLocations += $installPath
+}
+foreach ($location in $pythonLocations) {
+    $pythonExePath = Join-Path -Path $location -ChildPath $pythonExecutable
+    if (Test-Path $pythonExePath) {
+        $versionOutput = & $pythonExePath --version 2>&1
+        if ($versionOutput -match "Python (\d+\.\d+\.\d+)") {
+            $version = [version]$matches[1]
+            if ($version -lt [version]"3.12.99" -and $version -gt $currentPython312Version) {
+                $currentPython312Version = $version
+            }
+        }
+    }
+}
+if ($currentPython312Version -ne [version]"0.0.0.0" -and $currentPython312Version -lt [version]"3.12.9") {
+    $requiredVersion312 = [version]"3.12.9"
+    if ([System.Environment]::Is64BitOperatingSystem) {
+        $installerUrl = "https://www.python.org/ftp/python/$requiredVersion312/python-$requiredVersion312-amd64.exe"
+        $installerPath = "$env:TEMP\python-$requiredVersion312-amd64.exe"
+    }
+    else {
+        $installerUrl = "https://www.python.org/ftp/python/$requiredVersion312/python-$requiredVersion312.exe"
+        $installerPath = "$env:TEMP\python-$requiredVersion312.exe"
+    }
+    Invoke-WebRequest -Uri $installerUrl -OutFile $installerPath
+    Start-Process -FilePath $installerPath -ArgumentList "/quiet", "InstallAllUsers=1", "PrependPath=1", "CompileAll=1" -Wait
+    Remove-Item -Path $installerPath -Force
+}
+$tls10ServerPath = "HKLM:SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Protocols\TLS 1.0\Server"
+$tls11ServerPath = "HKLM:SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Protocols\TLS 1.1\Server"
+if (-not (Test-Path $tls10ServerPath)) {
+    New-Item -Path $tls10ServerPath -Force | Out-Null
+}
+if (-not (Test-Path $tls11ServerPath)) {
+    New-Item -Path $tls11ServerPath -Force | Out-Null
+}
+New-ItemProperty -Path $tls10ServerPath -Name "Enabled" -Value 0 -PropertyType DWORD -Force | Out-Null
+New-ItemProperty -Path $tls10ServerPath -Name "DisabledByDefault" -Value 1 -PropertyType DWORD -Force | Out-Null
+New-ItemProperty -Path $tls11ServerPath -Name "Enabled" -Value 0 -PropertyType DWORD -Force | Out-Null
+New-ItemProperty -Path $tls11ServerPath -Name "DisabledByDefault" -Value 1 -PropertyType DWORD -Force | Out-Null
+$sshdConfigPath = "$env:ProgramData\ssh\sshd_config"
+if (Test-Path $sshdConfigPath) {
+    $content = Get-Content -Path $sshdConfigPath
+    $updatedContent = @()
+    $macLineFound = $false
+    foreach ($line in $content) {
+        if ($line -match '^\s*MACs\s+') {
+            $macLineFound = $true
+            $macAlgorithms = $line -split '\s+' | Select-Object -Skip 1
+            $newMacList = $macAlgorithms | Where-Object { $_ -notmatch '^umac-64(\-etm)?@openssh\.com$' }
+            $newLine = "MACs " + ($newMacList -join ',')
+            $updatedContent += $newLine
+        }
+        else {
+            $updatedContent += $line
+        }
+    }
+    if (-not $macLineFound) {
+        $updatedContent += "MACs hmac-sha2-256-etm@openssh.com,hmac-sha2-512-etm@openssh.com,umac-128-etm@openssh.com,hmac-sha2-256,hmac-sha2-512,umac-128@openssh.com"
+    }
+    $updatedContent | Set-Content -Path $sshdConfigPath -Force
+    $sshdService = Get-Service -Name "sshd" -ErrorAction SilentlyContinue
+    if ($sshdService -and $sshdService.Status -eq "Running") {
+        Restart-Service -Name "sshd" -Force
+    }
+}
+```}
+{type: uploaded file
+fileName: teste66vts_21.txt
+fullContent:
+```powershell
+if (-not ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) {
+    Start-Process PowerShell -ArgumentList "-ExecutionPolicy Bypass -File `"$($MyInvocation.MyCommand.Definition)`"" -Verb RunAs
+    exit
+}
+
+$ProgressPreference = 'SilentlyContinue'
+$requiredVersions = @{
+    '3.10.16' = @()
+    '3.12.9'  = @()
+}
+
+$is64bit = [Environment]::Is64BitOperatingSystem
+$hives = if ($is64bit) {
+    @(
+        [PSCustomObject]@{Path = 'HKLM:\SOFTWARE\Python\PythonCore'; Arch = '64'}
+        [PSCustomObject]@{Path = 'HKLM:\SOFTWARE\WOW6432Node\Python\PythonCore'; Arch = '32'}
+    )
+} else {
+    @(
+        [PSCustomObject]@{Path = 'HKLM:\SOFTWARE\Python\PythonCore'; Arch = '32'}
+    )
+}
+
+foreach ($hive in $hives) {
+    if (Test-Path $hive.Path) {
+        $branches = Get-ChildItem -Path $hive.Path -Directory -ErrorAction SilentlyContinue | 
+                    Where-Object { $_.PSChildName -match '^3\.(10|12)$' } 
+        foreach ($branch in $branches) {
+            $branchName = $branch.PSChildName
+            $targetVersion = if ($branchName -eq '3.10') { '3.10.16' } else { '3.12.9' }
+            $requiredVersions[$targetVersion] += $hive.Arch
+        }
+    }
+}
+
+foreach ($versionKey in $requiredVersions.Keys) {
+    $architectures = $requiredVersions[$versionKey] | Select-Object -Unique
+    foreach ($arch in $architectures) {
+        $url = if ($versionKey -eq '3.10.16') {
+            if ($arch -eq '64') { "https://www.python.org/ftp/python/3.10.16/python-3.10.16-amd64.exe" }
+            else { "https://www.python.org/ftp/python/3.10.16/python-3.10.16.exe" }
+        } else {
+            if ($arch -eq '64') { "https://www.python.org/ftp/python/3.12.9/python-3.12.9-amd64.exe" }
+            else { "https://www.python.org/ftp/python/3.12.9/python-3.12.9.exe" }
+        }
+        try {
+            $tempFile = Join-Path $env:TEMP "$([System.IO.Path]::GetRandomFileName())_$($versionKey.Replace('.',''))_$arch.exe"
+            Invoke-WebRequest -Uri $url -OutFile $tempFile -UseBasicParsing -ErrorAction Stop
+            $processParams = @{
+                FilePath     = $tempFile
+                ArgumentList = '/quiet'
+                Wait         = $true
+                PassThru     = $true
+                WindowStyle  = 'Hidden'
+                ErrorAction  = 'Stop'
+            }
+            $installer = Start-Process @processParams
+            if ($installer.ExitCode -eq 0) {
+                Write-Host "Updated Python $versionKey ($arch-bit) successfully."
+            } else {
+                Write-Host "Error updating Python $versionKey ($arch-bit). Exit code: $($installer.ExitCode)."
+            }
+        } catch {
+            Write-Host "Error processing Python $versionKey ($arch-bit): $_"
+        } finally {
+            if (Test-Path $tempFile) { Remove-Item $tempFile -Force }
+        }
+    }
+}
+```}
+{type: uploaded file
+fileName: teste66vts_22.txt
+fullContent:
+if (-not ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) {
+    Start-Process PowerShell -ArgumentList "-NoProfile -ExecutionPolicy Bypass -File `"$PSCommandPath`"" -Verb RunAs
+    exit
+}
+
+$ErrorActionPreference = "Stop"
+
+try {
+    $tempDir = Join-Path -Path $env:TEMP -ChildPath ([System.IO.Path]::GetRandomFileName())
+    New-Item -ItemType Directory -Path $tempDir -Force | Out-Null
+
+    $python310Url = "https://www.python.org/ftp/python/3.10.16/python-3.10.16-amd64.exe"
+    $python312Url = "https://www.python.org/ftp/python/3.12.9/python-3.12.9-amd64.exe"
+
+    $python310Installer = "$tempDir\python-3.10.16-amd64.exe"
+    $python312Installer = "$tempDir\python-3.12.9-amd64.exe"
+
+    Invoke-WebRequest -Uri $python310Url -OutFile $python310Installer
+    Invoke-WebRequest -Uri $python312Url -OutFile $python312Installer
+
+    $process = Start-Process -Wait -PassThru -FilePath $python310Installer -ArgumentList "/quiet", "InstallAllUsers=1", "PrependPath=0", "AssociateFiles=0"
+    if ($process.ExitCode -ne 0) {
+        throw "Python 3.10.16 installation failed with exit code $($process.ExitCode)"
+    }
+
+    $process = Start-Process -Wait -PassThru -FilePath $python312Installer -ArgumentList "/quiet", "InstallAllUsers=1", "PrependPath=0", "AssociateFiles=0"
+    if ($process.ExitCode -ne 0) {
+        throw "Python 3.12.9 installation failed with exit code $($process.ExitCode)"
+    }
+
+} catch {
+    $_
+    exit 1
+} finally {
+    if (Test-Path $tempDir) {
+        Remove-Item -Path $tempDir -Recurse -Force
+    }
+}}
+{type: uploaded file
+fileName: teste66vts_23.txt
+fullContent:
+```powershell
+# Fix Python 3.10 vulnerabilities
+$python310 = Get-ItemProperty HKLM:\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall\*, HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\* `
+    | Where-Object { $_.DisplayName -match "Python 3.10.12" }
+if ($python310) {
+    $uninstallString = $python310.UninstallString -replace "msiexec.exe", "" -replace "/I", "" -replace "/X", ""
+    $uninstallString = $uninstallString.Trim()
+    Start-Process "msiexec.exe" -ArgumentList "/X $uninstallString /qn" -Wait
+    Invoke-WebRequest "https://www.python.org/ftp/python/3.10.16/python-3.10.16-amd64.exe" -OutFile "$env:TEMP\python-3.10.16.exe"
+    Start-Process "$env:TEMP\python-3.10.16.exe" -ArgumentList "/quiet InstallAllUsers=1 PrependPath=1" -Wait
+    Remove-Item "$env:TEMP\python-3.10.16.exe"
+}
+
+# Fix Python 3.12 vulnerabilities
+$python312 = Get-ItemProperty HKLM:\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall\*, HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\* `
+    | Where-Object { $_.DisplayName -match "Python 3.12.0" }
+if ($python312) {
+    $uninstallString = $python312.UninstallString -replace "msiexec.exe", "" -replace "/I", "" -replace "/X", ""
+    $uninstallString = $uninstallString.Trim()
+    Start-Process "msiexec.exe" -ArgumentList "/X $uninstallString /qn" -Wait
+    Invoke-WebRequest "https://www.python.org/ftp/python/3.12.9/python-3.12.9-amd64.exe" -OutFile "$env:TEMP\python-3.12.9.exe"
+    Start-Process "$env:TEMP\python-3.12.9.exe" -ArgumentList "/quiet InstallAllUsers=1 PrependPath=1" -Wait
+    Remove-Item "$env:TEMP\python-3.12.9.exe"
+}
+
+# Fix RDP TLS protocols
+New-Item "HKLM:\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Protocols\TLS 1.0\Server" -Force | Out-Null
+Set-ItemProperty "HKLM:\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Protocols\TLS 1.0\Server" -Name "Enabled" -Value 0 -Type DWord
+Set-ItemProperty "HKLM:\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Protocols\TLS 1.0\Server" -Name "DisabledByDefault" -Value 1 -Type DWord
+New-Item "HKLM:\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Protocols\TLS 1.0\Client" -Force | Out-Null
+Set-ItemProperty "HKLM:\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Protocols\TLS 1.0\Client" -Name "Enabled" -Value 0 -Type DWord
+Set-ItemProperty "HKLM:\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Protocols\TLS 1.0\Client" -Name "DisabledByDefault" -Value 1 -Type DWord
+New-Item "HKLM:\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Protocols\TLS 1.1\Server" -Force | Out-Null
+Set-ItemProperty "HKLM:\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Protocols\TLS 1.1\Server" -Name "Enabled" -Value 0 -Type DWord
+Set-ItemProperty "HKLM:\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Protocols\TLS 1.1\Server" -Name "DisabledByDefault" -Value 1 -Type DWord
+New-Item "HKLM:\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Protocols\TLS 1.1\Client" -Force | Out-Null
+Set-ItemProperty "HKLM:\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Protocols\TLS 1.1\Client" -Name "Enabled" -Value 0 -Type DWord
+Set-ItemProperty "HKLM:\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Protocols\TLS 1.1\Client" -Name "DisabledByDefault" -Value 1 -Type DWord
+
+# Fix SSH weak MAC algorithms
+$sshdConfig = "C:\ProgramData\ssh\sshd_config"
+if (Test-Path $sshdConfig) {
+    (Get-Content $sshdConfig) | ForEach-Object {
+        if ($_ -match "^\s*MACs\s+") {
+            "MACs hmac-sha2-512-etm@openssh.com,hmac-sha2-256-etm@openssh.com,hmac-sha2-512,hmac-sha2-256"
+        }
+        else { $_ }
+    } | Set-Content $sshdConfig
+    Restart-Service sshd -Force
+}
+
+# Ensure successful execution
+exit 0
+```}
+{type: uploaded file
+fileName: teste66vts_24.txt
+fullContent:
+#!/bin/bash
+set -e
+
+# Stop services using vulnerable Python versions
+for port in 5000 8000 8001 8002; do
+    if ss -lnt | grep -q ":$port "; then
+        pid=$(ss -lntp | awk -v port="$port" '$4 ~ ":"port"$" {split($6, a, "="); split(a[2], b, ","); print b[1]; exit}')
+        if [ -n "$pid" ]; then
+            kill -9 "$pid" || true
+        fi
+    fi
+done
+
+# Update Python 3.10 to latest secure version (3.10.x)
+PY310_LATEST=$(curl -s https://www.python.org/ftp/python/ | grep -E '3\.10\.[0-9]+/' | sed -E 's|.*<a href="([0-9.]+)/".*|\1|g' | sort -V | tail -1)
+wget -q "https://www.python.org/ftp/python/$PY310_LATEST/python-${PY310_LATEST}-amd64.exe"
+chmod +x "python-${PY310_LATEST}-amd64.exe"
+./"python-${PY310_LATEST}-amd64.exe" /quiet InstallAllUsers=1 PrependPath=1
+rm -f "python-${PY310_LATEST}-amd64.exe"
+
+# Update Python 3.12 to latest secure version (3.12.x)
+PY312_LATEST=$(curl -s https://www.python.org/ftp/python/ | grep -E '3\.12\.[0-9]+/' | sed -E 's|.*<a href="([0-9.]+)/".*|\1|g' | sort -V | tail -1)
+wget -q "https://www.python.org/ftp/python/$PY312_LATEST/python-${PY312_LATEST}-amd64.exe"
+chmod +x "python-${PY312_LATEST}-amd64.exe"
+./"python-${PY312_LATEST}-amd64.exe" /quiet InstallAllUsers=1 PrependPath=1
+rm -f "python-${PY312_LATEST}-amd64.exe"
+
+# Fix TLS protocols (disabling deprecated versions)
+if [ -d "/etc/ssl" ]; then
+    echo "RSA-PSK-CHACHA20-POLY1305:!VERS-TLS1.0:!VERS-TLS1.1:@SECLEVEL=2" > /etc/ssl/openssl.cnf
+elif [ -d "/usr/local/ssl" ]; then
+    echo "RSA-PSK-CHACHA20-POLY1305:!VERS-TLS1.0:!VERS-TLS1.1:@SECLEVEL=2" > /usr/local/ssl/openssl.cnf
+fi
+
+# Disable weak SSH MAC algorithms
+if [ -f "/etc/ssh/sshd_config" ]; then
+    sed -i -E 's/^MACs .*/MACs hmac-sha2-512-etm@openssh\.com,hmac-sha2-256-etm@openssh\.com,umac-128-etm@openssh\.com,hmac-sha2-512,hmac-sha2-256,umac-128@openssh\.com/' /etc/ssh/sshd_config
+    systemctl restart sshd
+fi
+
+# Replace untrusted SSL certificate (if default detected)
+if [ -f "/path/to/untrusted/cert.pem" ]; then
+    mv /path/to/untrusted/cert.pem /path/to/untrusted/cert.pem.bak
+    openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
+        -keyout /path/to/untrusted/key.pem \
+        -out /path/to/untrusted/cert.pem \
+        -subj "/CN=$(hostname)"
+    chmod 600 /path/to/untrusted/*.pem
+fi}
+{type: uploaded file
+fileName: teste66vts_25.txt
+fullContent:
+Here is the script to address the Python vulnerabilities on Windows:
+
+```powershell
+$ProgressPreference = 'SilentlyContinue'
+$baseUrl = "https://www.python.org/ftp/python"
+$targetVersions = @{
+    "3.10" = "3.10.16"
+    "3.12" = "3.12.9"
+}
+$installers = @{}
+
+foreach ($major in $targetVersions.Keys) {
+    $version = $targetVersions[$major]
+    $installers[$major] = @{
+        Url = "$baseUrl/$version/python-$version-amd64.exe"
+        Path = "$env:TEMP\python-$version-installer.exe"
+    }
+}
+
+foreach ($installer in $installers.Values) {
+    Invoke-WebRequest -Uri $installer.Url -OutFile $installer.Path
+}
+
+foreach ($major in ($installers.Keys | Sort-Object)) {
+    $installerPath = $installers[$major].Path
+    $version = $targetVersions[$major]
+    
+    Start-Process -Wait -FilePath $installerPath -ArgumentList @(
+        "/quiet",
+        "InstallAllUsers=1",
+        "PrependPath=1",
+        "Include_launcher=1",
+        "Include_test=0",
+        "Include_dev=0",
+        "Include_doc=0",
+        "CompileAll=1"
+    )
+}
+
+foreach ($path in ($installers.Values).Path) {
+    Remove-Item -Path $path -Force -ErrorAction SilentlyContinue
+}
+```}

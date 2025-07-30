@@ -1,0 +1,100 @@
+#!/bin/bash
+
+# Ensure script runs with administrative privileges
+if [[ $(id -u) -ne 0 ]]; then
+    echo "This script must be run as root. Please use sudo."
+    exit 1
+fi
+
+official_python_base_url="https://www.python.org/ftp/python"
+
+# Download and update Python to a secure version
+update_python() {
+    local version="$1"
+    local installed_version="$2"
+    local fixed_version="$3"
+    local major_minor=$(echo "$version" | cut -d. -f1-2)
+
+    echo "Checking Python version ${version} upgrade from ${installed_version} to ${fixed_version}..."
+
+    # Get latest patch release for major.minor line
+    latest_patch=$(curl -s ${official_python_base_url}/ | grep -oP "href=\"${major_minor}\.[0-9]+/\"" | awk -F\" '{print $2}' | tail -1 | sed 's|/$||')
+    
+    [[ -z $latest_patch ]] && {
+        echo "Failed to find latest patch for ${major_minor}"
+        return 1
+    }
+
+    if dpkg --compare-versions "$latest_patch" "gt" "$fixed_version"; then
+        install_version="$latest_patch"
+    else
+        install_version="$fixed_version"
+    fi
+
+    # Check if already at fixed version
+    if dpkg --compare-versions "$installed_version" "ge" "$install_version"; then
+        echo "Python ${version} already at required version ${installed_version} (>= ${install_version})"
+        return 0
+    fi
+
+    # Download and install
+    echo "Upgrading Python ${version} to ${install_version}..."
+    wget -q "${official_python_base_url}/${install_version}/python-${install_version}-amd64.msi" || {
+        echo "Download failed"
+        return 1
+    }
+
+    msiexec /i "python-${install_version}-amd64.msi" /qn
+    local result=$?
+    
+    [ "$result" -ne 0 ] && echo "Installation failed: $result"
+    rm -f "python-${install_version}-amd64.msi"
+    return $result
+}
+
+# Configure SSH to disable weak MAC algorithms
+fix_ssh_security() {
+    local sshd_config="/etc/ssh/sshd_config"
+    [ ! -f "$sshd_config" ] && return
+    
+    # Backup current config
+    cp "$sshd_config" "${sshd_config}.bak"
+
+    # Update weak MACs
+    sed -i '/^MACs/d' "$sshd_config"
+    echo "MACs hmac-sha2-512-etm@openssh.com,hmac-sha2-256-etm@openssh.com,hmac-sha2-512,hmac-sha2-256" >> "$sshd_config"
+
+    echo "SSH config updated. Apply changes with: systemctl restart sshd"
+}
+
+# Disable deprecated TLS versions
+disable_insecure_tls() {
+    reg add "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Protocols\TLS 1.0\Server" /f /v Enabled /t REG_DWORD /d 0
+    reg add "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Protocols\TLS 1.1\Server" /f /v Enabled /t REG_DWORD /d 0
+    echo "TLS 1.0 and 1.1 disabled"
+}
+
+# Block ICMP timestamp requests via firewall
+block_icmp_timestamp() {
+    netsh advfirewall firewall add rule dir=in action=block name="Block ICMP Timestamp Request" protocol=icmpv4:13,any
+    echo "ICMP timestamp requests blocked"
+}
+
+# Apply fixes for all vulnerable components
+apply_all_fixes() {
+    echo "${0##*/}: Starting security patches..."
+
+    # Install/update Python versions
+    update_python "3.10" "3.10.12" "3.10.16"
+    update_python "3.12" "3.12.0" "3.12.9"
+
+    fix_ssh_security
+    disable_insecure_tls
+    block_icmp_timestamp
+
+    echo "${0##*/}: All security patches applied"
+    echo "Restart system to ensure all components reload correctly"
+}
+
+# Execute the fixes
+apply_all_fixes

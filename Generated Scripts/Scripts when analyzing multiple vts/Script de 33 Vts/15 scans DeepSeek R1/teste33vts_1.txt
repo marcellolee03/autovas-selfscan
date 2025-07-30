@@ -1,0 +1,63 @@
+```bash
+#!/bin/bash
+set -euo pipefail
+
+# Fix for Proxmox VE EOL
+if grep -qi "proxmox" /etc/apt/sources.list /etc/apt/sources.list.d/*; then
+    apt-get update
+    apt-get -y dist-upgrade
+fi
+
+# Replace vulnerable jQuery files
+jquery_url="https://code.jquery.com/jquery-3.7.1.min.js"
+jquery_files=(
+    "/var/www/html/js/jquery-1.8.3.min.js"
+    "/var/www/html/opscenter/webcommon/js/jquery-1.8.3.min.js"
+    "/var/www/html/frameset/js/jquery-1.8.3.min.js"
+    "/var/www/html/framesets/js/jquery-1.8.3.min.js"
+    "/var/www/html/console/framework/js/jquery-1.8.3.min.js"
+)
+for file in "${jquery_files[@]}"; do
+    if [ -f "$file" ]; then
+        if wget -q "$jquery_url" -O "$file.secure"; then
+            chown --reference="$file" "$file.secure"
+            chmod --reference="$file" "$file.secure"
+            mv -f "$file.secure" "$file"
+        fi
+    fi
+done
+
+# SSH security hardening
+sshd_config="/etc/ssh/sshd_config"
+if [ -f "$sshd_config" ]; then
+    backup_time=$(date +%Y%m%d%H%M%S)
+    cp "$sshd_config" "$sshd_config.bak$backup_time"
+    
+    sed -i '/^HostKeyAlgorithms/d;/^KexAlgorithms/d;/^Ciphers/d;/^MACs/d' "$sshd_config"
+    
+    echo 'HostKeyAlgorithms ecdsa-sha2-nistp256-cert-v01@openssh.com,ecdsa-sha2-nistp384-cert-v01@openssh.com,ecdsa-sha2-nistp521-cert-v01@openssh.com,rsa-sha2-512-cert-v01@openssh.com,rsa-sha2-256-cert-v01@openssh.com,ssh-ed25519-cert-v01@openssh.com,ecdsa-sha2-nistp256,ecdsa-sha2-nistp384,ecdsa-sha2-nistp521,rsa-sha2-512,rsa-sha2-256,ssh-ed25519' >> "$sshd_config"
+    echo 'KexAlgorithms curve25519-sha256@libssh.org,diffie-hellman-group-exchange-sha256' >> "$sshd_config"
+    echo 'Ciphers chacha20-poly1305@openssh.com,aes256-gcm@openssh.com,aes128-gcm@openssh.com,aes256-ctr,aes192-ctr,aes128-ctr' >> "$sshd_config"
+    echo 'MACs hmac-sha2-512-etm@openssh.com,hmac-sha2-256-etm@openssh.com,hmac-sha2-512,hmac-sha2-256' >> "$sshd_config"
+
+    systemctl restart sshd
+fi
+
+# Remove Telnet service
+if systemctl is-enabled telnet.socket &>/dev/null || dpkg -l | grep -q "telnetd"; then
+    systemctl stop telnet.socket
+    apt-get purge -y telnetd
+fi
+
+# TCP and ICMP hardening
+sysctl_file="/etc/sysctl.d/99-hardening.conf"
+echo "net.ipv4.tcp_timestamps = 0" > "$sysctl_file"
+echo "net.ipv4.icmp_echo_ignore_all = 1" >> "$sysctl_file"
+sysctl -p "$sysctl_file"
+
+# Add iptables rule for ICMP timestamp requests
+if command -v iptables &>/dev/null; then
+    iptables -A INPUT -p icmp --icmp-type timestamp-request -j DROP
+    iptables-save > /etc/iptables/rules.v4
+fi
+```

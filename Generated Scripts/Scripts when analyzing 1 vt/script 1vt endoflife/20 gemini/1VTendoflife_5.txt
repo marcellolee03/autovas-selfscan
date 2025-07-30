@@ -1,0 +1,24 @@
+```sh
+#!/bin/bash
+
+# Este script atualiza o sistema operacional Ubuntu para uma versão suportada.
+# Ele assume que o sistema está executando uma versão EOL do Ubuntu (8.04 no caso).
+# O script tenta atualizar para a versão LTS mais recente disponível.
+
+# Interrompe em caso de erro
+set -e
+
+# Atualiza a lista de pacotes
+apt-get update
+
+# Faz o upgrade da distribuição para a versão mais recente
+apt-get dist-upgrade -y
+
+# Remove pacotes obsoletos
+apt-get autoremove -y
+
+# Limpa o cache do APT
+apt-get clean
+
+echo "Atualização completa. Reinicie o sistema para aplicar as mudanças."
+```

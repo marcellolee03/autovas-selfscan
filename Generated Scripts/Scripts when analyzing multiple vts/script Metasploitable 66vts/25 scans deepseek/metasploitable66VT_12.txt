@@ -1,0 +1,68 @@
+```bash
+#!/bin/bash
+
+# Desabilitar o serviço rlogin
+systemctl stop rlogin
+systemctl disable rlogin
+
+# Atualizar o TWiki para a versão 4.2.4 ou posterior
+wget https://downloads.sourceforge.net/project/twiki/TWiki/4.2.4/twiki-4.2.4.tgz -O /tmp/twiki-4.2.4.tgz
+tar -xzf /tmp/twiki-4.2.4.tgz -C /opt/
+rm /tmp/twiki-4.2.4.tgz
+
+# Configurar dRuby para usar $SAFE >= 2
+echo "$SAFE=2" >> /etc/drb/drb.conf
+
+# Desabilitar o serviço rexec
+systemctl stop rexec
+systemctl disable rexec
+
+# Desabilitar o serviço rsh
+systemctl stop rsh
+systemctl disable rsh
+
+# Atualizar o Apache Tomcat para a versão 7.0.100, 8.5.51 ou 9.0.31
+wget https://downloads.apache.org/tomcat/tomcat-9/v9.0.31/bin/apache-tomcat-9.0.31.tar.gz -O /tmp/apache-tomcat-9.0.31.tar.gz
+tar -xzf /tmp/apache-tomcat-9.0.31.tar.gz -C /opt/
+rm /tmp/apache-tomcat-9.0.31.tar.gz
+
+# Alterar senha do MySQL
+mysql -u root -e "ALTER USER 'root'@'localhost' IDENTIFIED BY 'nova_senha_segura';"
+
+# Atualizar o PHP para a versão 5.6.30
+add-apt-repository ppa:ondrej/php -y
+apt-get update
+apt-get install php5.6 -y
+
+# Desabilitar métodos HTTP perigosos (PUT, DELETE)
+sed -i 's/AllowMethods\s\+GET\s\+POST\s\+HEAD/AllowMethods GET POST HEAD/' /etc/apache2/apache2.conf
+
+# Desabilitar o serviço VNC
+systemctl stop vncserver
+systemctl disable vncserver
+
+# Desabilitar o serviço FTP
+systemctl stop vsftpd
+systemctl disable vsftpd
+
+# Remover arquivos de saída do phpinfo()
+find /var/www/html -name "phpinfo.php" -exec rm -f {} \;
+
+# Desabilitar TRACE e TRACK no Apache
+echo "TraceEnable off" >> /etc/apache2/apache2.conf
+
+# Desabilitar SSLv3 e TLSv1.0
+sed -i 's/SSLProtocol all -SSLv3 -TLSv1 -TLSv1.1 -TLSv1.2/SSLProtocol +TLSv1.2 +TLSv1.3/' /etc/apache2/mods-enabled/ssl.conf
+
+# Desabilitar TCP timestamps
+echo "net.ipv4.tcp_timestamps = 0" >> /etc/sysctl.conf
+sysctl -p
+
+# Desabilitar ICMP timestamp replies
+iptables -A INPUT -p icmp --icmp-type timestamp-request -j DROP
+iptables -A OUTPUT -p icmp --icmp-type timestamp-reply -j DROP
+
+# Reiniciar serviços afetados
+systemctl restart apache2
+systemctl restart mysql
+```

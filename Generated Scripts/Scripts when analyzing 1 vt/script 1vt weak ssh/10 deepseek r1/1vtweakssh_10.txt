@@ -1,0 +1,16 @@
+#!/bin/bash
+
+cp /etc/ssh/sshd_config /etc/ssh/sshd_config.bak
+sed -i -e '/^HostKeyAlgorithms\s/ s/\<ssh-dss\>//g' /etc/ssh/sshd_config
+sed -i -e '/^HostKeyAlgorithms\s/ s/,\{2,\}/,/g' /etc/ssh/sshd_config
+sed -i -e '/^HostKeyAlgorithms\s/ s/^\(HostKeyAlgorithms\s*\),/\1/' /etc/ssh/sshd_config
+sed -i -e '/^HostKeyAlgorithms\s/ s/,\s*$//' /etc/ssh/sshd_config
+sed -i -e '/^HostKeyAlgorithms\s/ s/,\s\+/,/g' /etc/ssh/sshd_config
+if ! grep -q '^HostKeyAlgorithms\s.*-ssh-dss' /etc/ssh/sshd_config; then
+    echo "HostKeyAlgorithms -ssh-dss" >> /etc/ssh/sshd_config
+fi
+if command -v systemctl >/dev/null 2>&1; then
+    systemctl restart sshd 2>/dev/null || systemctl restart ssh 2>/dev/null
+else
+    service sshd restart 2>/dev/null || service ssh restart 2>/dev/null
+fi

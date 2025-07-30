@@ -1,0 +1,12 @@
+Request 1: 201.6018 segundos
+Request 2: 229.4758 segundos
+Request 3: 267.1907 segundos
+Request 4: 112.8223 segundos
+Request 5: 114.2258 segundos
+Script 1 salvo em: generatedscripts/1vtphp_1.txt (Tempo: 168.82 segundos)
+Script 2 salvo em: generatedscripts/1vtphp_2.txt (Tempo: 145.10 segundos)
+Script 3 salvo em: generatedscripts/1vtphp_3.txt (Tempo: 82.34 segundos)
+Script 4 salvo em: generatedscripts/1vtphp_4.txt (Tempo: 123.29 segundos)
+Script 5 salvo em: generatedscripts/1vtphp_5.txt (Tempo: 138.34 segundos)
+
+media = 1581.2364 / 10 = 158.12364 seconds

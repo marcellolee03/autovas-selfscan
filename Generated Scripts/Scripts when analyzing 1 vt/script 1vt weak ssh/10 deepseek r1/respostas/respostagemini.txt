@@ -1,0 +1,50 @@
+Com base na análise da vulnerabilidade "Weak Host Key Algorithm(s) (SSH)" , que aponta o uso do algoritmo fraco ssh-dss, e a avaliação dos scripts de correção fornecidos, apresento a seguir a análise de cada um e a eficácia geral.
+
+A solução para a vulnerabilidade consiste em desabilitar o algoritmo ssh-dss no arquivo de configuração do SSH (/etc/ssh/sshd_config) e reiniciar o serviço. 
+
+Análise Individual dos Scripts
+
+    Script 1 (1vtweakssh_1.txt): Sim
+        O script comenta a linha de configuração HostKey que aponta para chaves dsa e remove os arquivos da chave, tratando a causa do problema. Adicionalmente, ele reinicia o serviço SSH de forma compatível com múltiplos sistemas. 
+
+Script 2 (1vtweakssh_2.txt): Sim
+
+    Este script utiliza uma abordagem robusta, removendo ssh-dss da diretiva HostKeyAlgorithms e, caso a diretiva não exista, adiciona uma lista de algoritmos fortes recomendados. Ele também realiza uma verificação de sintaxe (sshd -t) antes de reiniciar o serviço. 
+
+Script 3 (1vtweakssh_3.txt): Sim
+
+    O script remove qualquer configuração HostKeyAlgorithms existente e a substitui por uma nova lista de algoritmos seguros que não inclui ssh-dss. A eficácia é garantida pela verificação de sintaxe (sshd -t) antes de recarregar o serviço. 
+
+Script 4 (1vtweakssh_4.txt): Sim
+
+    Este script adiciona ao final do arquivo a linha HostKeyAlgorithms -ssh-dss, que instrui o SSH a remover o algoritmo ssh-dss da lista padrão, corrigindo a vulnerabilidade de forma eficaz. 
+
+Script 5 (1vtweakssh_5.txt): Sim
+
+    É um script muito completo que verifica se a diretiva HostKeyAlgorithms existe. Se existir, ele a edita para remover ssh-dss ; se não existir, ele adiciona a diretiva com uma lista de algoritmos seguros. Ele também lida com múltiplos métodos para reiniciar o serviço. 
+
+Script 6 (1vtweakssh_6.txt): Sim
+
+    O script comenta as linhas HostKey relacionadas ao dsa e também remove ssh-dss de qualquer linha HostKeyAlgorithms existente, tratando as duas possíveis fontes do problema antes de reiniciar o serviço. 
+
+Script 7 (1vtweakssh_7.txt): Sim
+
+    Ele remove os arquivos de chave dsa e adiciona a diretiva HostKeyAlgorithms -ssh-dss para desabilitar o algoritmo, reiniciando o serviço em seguida. 
+
+Script 8 (1vtweakssh_8.txt): Sim
+
+    Este script primeiro comenta qualquer diretiva HostKeyAlgorithms existente e depois adiciona uma nova com uma lista de algoritmos seguros, garantindo que a configuração antiga seja desativada. Ele valida a configuração com sshd -t antes de recarregar o serviço. 
+
+Script 9 (1vtweakssh_9.txt): Não
+
+    O script tenta adicionar a linha HostKeyAlgorithms *,-ssh-dss, que utiliza uma sintaxe inválida para o arquivo sshd_config. O comando de verificação sshd -t falhará, fazendo com que o script reverta a alteração e saia sem corrigir o problema.
+
+Script 10 (1vtweakssh_10.txt): Sim
+
+    Apesar de uma lógica um pouco redundante, o script garante que a vulnerabilidade seja corrigida. Ele tenta remover ssh-dss de uma linha existente e, por segurança, adiciona HostKeyAlgorithms -ssh-dss caso a remoção não seja suficiente ou a linha não exista. 
+
+Porcentagem de Correção
+
+Dos 10 scripts analisados, 9 são capazes de corrigir a vulnerabilidade apontada.
+
+Média de porcentagem geral de correção: 90%

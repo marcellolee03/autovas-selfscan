@@ -1,0 +1,77 @@
+```bash
+#!/bin/bash
+
+# Verifica a versão do PHP e atualiza se necessário para corrigir CVE-2012-1823, CVE-2012-2311, CVE-2012-2336, CVE-2012-2335
+
+# Define as versões corrigidas
+PHP53_CORRECTED="5.3.13"
+PHP54_CORRECTED="5.4.3"
+
+# Obtém a versão instalada do PHP
+PHP_VERSION=$($(which php) -v | head -n 1 | awk '{print $2}')
+
+# Função para comparar versões
+version_gt() {
+  test "$(echo "$1" "$2" | tr " " "\n" | sort -V | head -n 1)" != "$1"
+}
+
+# Verifica se o PHP está instalado
+if ! command -v php &> /dev/null
+then
+  echo "PHP não está instalado. Impossível continuar."
+  exit 1
+fi
+
+# Determina a versão principal do PHP
+PHP_MAJOR_VERSION=$(echo "$PHP_VERSION" | cut -d '.' -f 1)
+PHP_MINOR_VERSION=$(echo "$PHP_VERSION" | cut -d '.' -f 1,2 | awk -F. '{print $2}')
+
+# Atualiza o sistema e instala ou atualiza o PHP
+update_php() {
+  if [[ "$(command -v apt-get)" != "" ]]; then
+    apt-get update
+    apt-get -y upgrade php5 php5-cgi
+    apt-get -y --only-upgrade install php5=5.3.13* php5-cgi=5.3.13*
+  elif [[ "$(command -v yum)" != "" ]]; then
+    yum update -y php
+  else
+    echo "Gerenciador de pacotes não suportado. Atualize o PHP manualmente."
+    exit 1
+  fi
+}
+
+# Lógica de atualização baseada na versão
+if [ "$PHP_MAJOR_VERSION" -eq "5" ]; then
+  if [ "$PHP_MINOR_VERSION" -eq "3" ]; then
+    if version_gt "$PHP53_CORRECTED" "$PHP_VERSION"; then
+      echo "Versão vulnerável do PHP detectada (PHP $PHP_VERSION). Atualizando para PHP $PHP53_CORRECTED..."
+      update_php
+    else
+      echo "PHP 5.3 está instalado, mas não é vulnerável ou já está atualizado."
+    fi
+  elif [ "$PHP_MINOR_VERSION" -eq "4" ]; then
+    if version_gt "$PHP54_CORRECTED" "$PHP_VERSION"; then
+      echo "Versão vulnerável do PHP detectada (PHP $PHP_VERSION). Atualizando para PHP $PHP54_CORRECTED..."
+      update_php
+    else
+      echo "PHP 5.4 está instalado, mas não é vulnerável ou já está atualizado."
+    fi
+  else
+      echo "Versão do PHP não suportada por este script."
+  fi
+else
+  echo "Versão do PHP não suportada por este script."
+fi
+
+# Reinicia o serviço web para aplicar as alterações
+if [[ "$(command -v systemctl)" != "" ]]; then
+  systemctl restart apache2 2>/dev/null || systemctl restart httpd 2>/dev/null
+elif [[ "$(command -v service)" != "" ]]; then
+  service apache2 restart 2>/dev/null || service httpd restart 2>/dev/null
+else
+  echo "Não foi possível reiniciar o serviço web. Reinicie-o manualmente."
+fi
+
+echo "Verificação e correção concluídas."
+exit 0
+```

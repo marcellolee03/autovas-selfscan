@@ -1,0 +1,14 @@
+#!/bin/bash
+update_python() {
+    version=$(python3 -V 2>&1 | awk '{print $2}')
+    if [[ "$version" == "3.10.12" ]]; then
+        sudo apt-get update
+        sudo apt-get install --only-upgrade python3.10=3.10.15-1~20.04.1
+    elif [[ "$version" == "3.12.0" ]]; then
+        sudo apt-get update
+        sudo apt-get install --only-upgrade python3.12=3.12.6-1~20.04.1
+    fi
+}
+
+update_python
+exit 0

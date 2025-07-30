@@ -1,0 +1,50 @@
+#!/bin/sh
+
+if [ "$(id -u)" != "0" ]; then
+    if command -v sudo >/dev/null 2>&1; then
+        exec sudo sh "$0" "$@"
+    else
+        echo "Erro: necessario executar como root" >&2
+        exit 1
+    fi
+fi
+
+detect_os() {
+    if [ -f /etc/os-release ]; then
+        . /etc/os-release
+        echo "$ID"
+    else
+        uname -s
+    fi
+}
+
+OS_ID=$(detect_os)
+
+update_apache_debian() {
+    apt update >/dev/null 2>&1
+    apt install --only-upgrade apache2 -y >/dev/null 2>&1
+}
+
+update_apache_rhel() {
+    yum update httpd -y >/dev/null 2>&1
+}
+
+case "$OS_ID" in
+    debian|ubuntu)
+        update_apache_debian
+        systemctl restart apache2 >/dev/null 2>&1 || service apache2 restart >/dev/null 2>&1
+        ;;
+    rhel|centos|fedora|ol)
+        update_apache_rhel
+        systemctl restart httpd >/dev/null 2>&1 || service httpd restart >/dev/null 2>&1
+        ;;
+    alpine)
+        apk update >/dev/null 2>&1
+        apk upgrade apache2 >/dev/null 2>&1
+        rc-service apache2 restart >/dev/null 2>&1
+        ;;
+    *)
+        echo "Sistema nao suportado" >&2
+        exit 1
+        ;;
+esac

@@ -1,0 +1,47 @@
+#!/bin/bash
+# Atualizar o Proxmox Virtual Environment para uma versão suportada
+apt-get update -y
+apt-get install -y proxmox-ve
+
+# Atualizar o jQuery para versão 1.9.0 ou superior
+curl -o /tmp/jquery.min.js https://code.jquery.com/jquery-3.6.0.min.js
+cp /tmp/jquery.min.js /var/www/html/js/jquery-1.8.3.min.js
+cp /tmp/jquery.min.js /var/www/html/opscenter/webcommon/framework/js/jquery-1.8.3.min.js
+cp /tmp/jquery.min.js /var/www/html/framesets/js/jquery-1.8.3.min.js
+cp /tmp/jquery.min.js /var/www/html/frameset/js/jquery-1.8.3.min.js
+cp /tmp/jquery.min.js /var/www/html/console/framework/js/jquery-1.8.3.min.js
+
+# Configurar SSH para desabilitar algoritmos fracos
+sed -i 's/^HostKeyAlgorithms .*/HostKeyAlgorithms ssh-rsa,ssh-ed25519/' /etc/ssh/sshd_config
+sed -i 's/^KexAlgorithms .*/KexAlgorithms curve25519-sha256,curve25519-sha256@libssh.org/' /etc/ssh/sshd_config
+sed -i 's/^Ciphers .*/Ciphers chacha20-poly1305@openssh.com,aes256-gcm@openssh.com,aes128-gcm@openssh.com/' /etc/ssh/sshd_config
+sed -i 's/^MACs .*/MACs hmac-sha2-512-etm@openssh.com,hmac-sha2-256-etm@openssh.com/' /etc/ssh/sshd_config
+systemctl restart sshd
+
+# Desabilitar TCP Timestamps
+echo "net.ipv4.tcp_timestamps = 0" >> /etc/sysctl.conf
+sysctl -p
+
+# Desabilitar ICMP Timestamp Reply
+echo "1" > /proc/sys/net/ipv4/icmp_echo_ignore_all
+
+# Filtrar tráfego de entrada nas portas DCE/RPC e MSRPC
+iptables -A INPUT -p tcp --dport 135 -j DROP
+iptables -A INPUT -p tcp --dport 39710 -j DROP
+iptables -A INPUT -p tcp --dport 49664 -j DROP
+iptables -A INPUT -p tcp --dport 49665 -j DROP
+iptables -A INPUT -p tcp --dport 49666 -j DROP
+iptables -A INPUT -p tcp --dport 49667 -j DROP
+iptables -A INPUT -p tcp --dport 49668 -j DROP
+iptables -A INPUT -p tcp --dport 49670 -j DROP
+iptables -A INPUT -p tcp --dport 7832 -j DROP
+
+# Substituir Telnet por SSH
+apt-get remove --purge -y telnetd
+apt-get install -y openssh-server
+systemctl enable ssh
+systemctl start ssh
+
+# Desabilitar TLSv1.0 e TLSv1.1
+sed -i 's/^SSLProtocol .*/SSLProtocol all -SSLv3 -TLSv1 -TLSv1.1/' /etc/apache2/mods-enabled/ssl.conf
+systemctl restart apache2

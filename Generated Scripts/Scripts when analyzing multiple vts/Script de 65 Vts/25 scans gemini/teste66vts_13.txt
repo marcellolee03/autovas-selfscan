@@ -1,0 +1,76 @@
+```bash
+#!/bin/bash
+
+# Variáveis para rastrear se as atualizações são necessárias
+update_3_10_needed=0
+update_3_12_needed=0
+
+# Função para verificar e atualizar o Python 3.10
+update_python_3_10() {
+  if [ "$update_3_10_needed" -eq 1 ]; then
+    echo "Atualizando Python 3.10 para a versão mais recente..."
+    # Comando para atualizar o Python 3.10 no Windows
+    # Adaptar o comando abaixo com o gerenciador de pacotes adequado (e.g., choco, winget)
+    # Exemplo com choco:
+    choco upgrade python3 --version=3.10.16 -y
+    echo "Python 3.10 atualizado com sucesso!"
+  fi
+}
+
+# Função para verificar e atualizar o Python 3.12
+update_python_3_12() {
+  if [ "$update_3_12_needed" -eq 1 ]; then
+    echo "Atualizando Python 3.12 para a versão mais recente..."
+    # Comando para atualizar o Python 3.12 no Windows
+    # Adaptar o comando abaixo com o gerenciador de pacotes adequado (e.g., choco, winget)
+    # Exemplo com choco:
+    choco upgrade python3 --version=3.12.9 -y
+    echo "Python 3.12 atualizado com sucesso!"
+  fi
+}
+
+# Vulnerabilidades que exigem atualização para 3.10.13 ou 3.10.14 ou 3.10.15 ou 3.10.16 ou 3.11.10
+if (choco list --localonly | findstr -i "python3") then
+{
+  python_3_10_installed=$(choco list --localonly | findstr -i "python3" | findstr -i "3.10")
+  python_3_12_installed=$(choco list --localonly | findstr -i "python3" | findstr -i "3.12")
+
+  if [[ ! -z "$python_3_10_installed" ]]; then
+      installed_version=$(echo "$python_3_10_installed" | awk '{print $2}')
+      if [[ "$installed_version" < "3.10.13" ]] || [[ "$installed_version" == "3.10.12" ]]; then
+          update_3_10_needed=1
+      fi
+  fi
+
+  if [[ ! -z "$python_3_12_installed" ]]; then
+      installed_version=$(echo "$python_3_12_installed" | awk '{print $2}')
+      if [[ "$installed_version" < "3.12.9" ]] || [[ "$installed_version" == "3.12.0" ]]; then
+          update_3_12_needed=1
+      fi
+  fi
+}
+else
+{
+    echo "Python não encontrado. Por favor, instale-o usando o Chocolatey."
+}
+fi
+
+# Tratar vulnerabilidade SSL/TLS: Deprecated TLSv1.0 and TLSv1.1 Protocol Detection
+# Desabilitar TLS 1.0 e 1.1 (isso é específico para cada serviço, exemplo para o IIS)
+# (Precisa ser adaptado para o serviço específico que usa TLS 1.0/1.1)
+echo "Desabilitando TLS 1.0 e 1.1 (se aplicável)..."
+# Exemplo para IIS (adaptar conforme necessário)
+#  New-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Protocols\TLS 1.0\Server" -Name "Enabled" -Value "0" -PropertyType DWORD -Force
+#  New-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Protocols\TLS 1.1\Server" -Name "Enabled" -Value "0" -PropertyType DWORD -Force
+echo "TLS 1.0 e 1.1 desabilitados (se aplicável)."
+
+#Tratar  SSL/TLS: Known Untrusted / Dangerous Certificate Authority (CA) Detection
+echo "Removendo certificado auto assinado"
+Remove-Item -Path "Cert:\LocalMachine\My\5668884BF9B84C38B81313EBF424434CB70F5D99"
+
+# Atualizar as versões do Python
+update_python_3_10
+update_python_3_12
+
+echo "Script de correção concluído."
+```

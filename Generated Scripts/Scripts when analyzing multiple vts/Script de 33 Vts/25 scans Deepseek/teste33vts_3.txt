@@ -1,0 +1,42 @@
+#!/bin/bash
+
+# Vulnerabilidade 1 - Atualizar Proxmox VE
+apt-get update && apt-get install -y proxmox-ve
+
+# Vulnerabilidades 2-6 - Atualizar jQuery
+find / -name "jquery-1.8.3.min.js" -exec rm {} \;
+wget -O /var/www/html/js/jquery-1.9.0.min.js https://code.jquery.com/jquery-1.9.0.min.js
+wget -O /var/www/html/opscenter/webcommon/framework/js/jquery-1.9.0.min.js https://code.jquery.com/jquery-1.9.0.min.js
+wget -O /var/www/html/framesets/js/jquery-1.9.0.min.js https://code.jquery.com/jquery-1.9.0.min.js
+wget -O /var/www/html/frameset/js/jquery-1.9.0.min.js https://code.jquery.com/jquery-1.9.0.min.js
+wget -O /var/www/html/console/framework/js/jquery-1.9.0.min.js https://code.jquery.com/jquery-1.9.0.min.js
+
+# Vulnerabilidade 7 - Desabilitar ssh-dss no SSH
+sed -i '/^HostKeyAlgorithms/s/,\?ssh-dss\b//g' /etc/ssh/sshd_config
+systemctl restart sshd
+
+# Vulnerabilidades 8-9 - Desabilitar KEX algorithms fracos
+sed -i '/^KexAlgorithms/s/,\?diffie-hellman-group1-sha1\b//g' /etc/ssh/sshd_config
+systemctl restart sshd
+
+# Vulnerabilidades 13-14, 19, 21-22 - Desabilitar algoritmos de criptografia fracos
+disabled_algs="3des-cbc aes128-cbc aes256-cbc twofish-cbc twofish128-cbc twofish256-cbc"
+for alg in $disabled_algs; do
+    sed -i "/^\s*Ciphers/s/,\?$alg\b//g" /etc/ssh/sshd_config
+done
+systemctl restart sshd
+
+# Vulnerabilidades 15-16, 19, 21-22 - Desabilitar MAC algorithms fracos
+disabled_macs="umac-64-etm@openssh.com umac-64@openssh.com hmac-md5 hmac-sha1-96"
+for mac in $disabled_macs; do
+    sed -i "/^\s*MACs/s/,\?$mac\b//g" /etc/ssh/sshd_config
+done
+systemctl restart sshd
+
+# Vulnerabilidades 17-18, 20, 23-25 - Desabilitar timestamps TCP
+echo "net.ipv4.tcp_timestamps = 0" >> /etc/sysctl.conf
+sysctl -p
+
+# Vulnerabilidades 26-32 - Bloquear ICMP timestamp
+iptables -A INPUT -p icmp --icmp-type timestamp-request -j DROP
+iptables -A OUTPUT -p icmp --icmp-type timestamp-reply -j DROP

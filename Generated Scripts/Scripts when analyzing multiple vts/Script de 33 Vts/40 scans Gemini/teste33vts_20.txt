@@ -1,0 +1,157 @@
+```bash
+#!/bin/bash
+
+# Vulnerability 1: Proxmox VE EOL
+# Solution: Upgrade Proxmox VE to a supported version.
+# This script cannot automatically upgrade Proxmox.  Manual upgrade is required.
+# Provide a warning and instructions.
+echo "WARNING: Proxmox Virtual Environment (VE) version 7.3-3 has reached End of Life."
+echo "Please upgrade to a supported version (e.g., 8.x) as soon as possible."
+echo "Refer to the Proxmox VE documentation for upgrade instructions."
+echo "https://pve.proxmox.com/wiki/Upgrade_from_7_to_8"
+
+# Vulnerabilities 2-6: jQuery < 1.9.0 XSS Vulnerability (CVE-2012-6708)
+# Solution: Replace vulnerable jQuery files with version 1.9.0 or later.
+# Vulnerable file paths (extracted from report):
+jquery_files=(
+    "/../js/jquery-1.8.3.min.js"
+    "/opscenter/webcommon/framework/../js/jquery-1.8.3.min.js"
+    "/framesets/../js/jquery-1.8.3.min.js"
+    "/frameset/../js/jquery-1.8.3.min.js"
+    "/console/framework/../js/jquery-1.8.3.min.js"
+    "/root/js/jquery-1.8.3.min.js" # Adicionado considerando a simetria e para pegar o js dentro do root
+)
+
+new_jquery_version="1.9.0"
+new_jquery_url="https://code.jquery.com/jquery-${new_jquery_version}.min.js"
+
+for file in "${jquery_files[@]}"; do
+  # Sanitize the file path to prevent directory traversal exploits in the script itself
+  sanitized_file=$(realpath "$file" 2>/dev/null) # Check if the path exists and is a real file, not a symlink to a sensitive area.
+  if [ -z "$sanitized_file" ]; then
+    echo "Warning: File path '$file' does not exist or cannot be resolved. Skipping."
+    continue
+  fi
+
+  if [[ "$sanitized_file" == /* ]]; then  # Ensure it's an absolute path for extra security
+    echo "Updating jQuery file: $sanitized_file"
+    # Create a backup
+    cp -n "$sanitized_file" "$sanitized_file.bak" 2>/dev/null # -n prevents overwriting existing backups
+
+    # Download the new jQuery version
+    wget -q "$new_jquery_url" -O "$sanitized_file"
+
+    if [ $? -eq 0 ]; then
+      echo "Successfully updated $sanitized_file to jQuery $new_jquery_version"
+    else
+      echo "Error updating $sanitized_file. Restoring from backup."
+      mv "$sanitized_file.bak" "$sanitized_file" 2>/dev/null
+    fi
+  else
+    echo "Warning: Invalid file path '$file'. Skipping."
+  fi
+done
+
+# Vulnerabilities 7, 8, 9, 13, 14, 15, 16, 19, 21, 22: Weak SSH algorithms
+# Solution: Disable weak SSH algorithms.
+# Edit /etc/ssh/sshd_config to remove weak algorithms.
+# This script modifies the SSH configuration file and restarts the SSH service.
+# Create a backup of the sshd_config file
+cp -n /etc/ssh/sshd_config /etc/ssh/sshd_config.bak 2>/dev/null
+# Disable weak KEX algorithms (diffie-hellman-group1-sha1) and weak MAC algorithms (umac-64*, hmac-md5, hmac-sha1-96)
+# and weak encryption algorithms (3des-cbc, aes128-cbc, aes256-cbc, twofish-cbc, twofish128-cbc, twofish256-cbc)
+# and weak host key algorithms (ssh-dss).
+
+sed -i 's/^KexAlgorithms .*/KexAlgorithms curve25519-sha256@libssh.org,ecdh-sha2-nistp256,ecdh-sha2-nistp384,ecdh-sha2-nistp521,diffie-hellman-group-exchange-sha256/g' /etc/ssh/sshd_config
+sed -i 's/^Ciphers .*/Ciphers chacha20-poly1305@openssh.com,aes256-gcm@openssh.com,aes128-gcm@openssh.com,aes256-ctr,aes128-ctr/g' /etc/ssh/sshd_config
+sed -i 's/^MACs .*/MACs hmac-sha2-512-etm@openssh.com,hmac-sha2-256-etm@openssh.com,umac-128-etm@openssh.com,hmac-sha2-512,hmac-sha2-256,umac-128@openssh.com/g' /etc/ssh/sshd_config
+sed -i 's/^HostKeyAlgorithms .*/HostKeyAlgorithms ecdsa-sha2-nistp256,ecdsa-sha2-nistp384,ecdsa-sha2-nistp521,ssh-ed25519/g' /etc/ssh/sshd_config
+
+# Remove the 'umac-64', 'hmac-md5', 'hmac-sha1-96', '3des-cbc', 'aes128-cbc', 'aes256-cbc', 'twofish-cbc', 'twofish128-cbc', and 'twofish256-cbc' entries if they exist
+# Restart the SSH service
+if command -v systemctl &> /dev/null
+then
+  systemctl restart ssh
+elif command -v service &> /dev/null
+then
+  service ssh restart
+else
+  echo "Warning: Could not restart SSH service.  Please restart it manually."
+fi
+
+# Vulnerability 10: DCE/RPC and MSRPC Services Enumeration Reporting
+# Solution: Filter incoming traffic to port 135.
+# This script assumes a firewall is in place (e.g., iptables or firewalld).
+# It adds a rule to block incoming traffic on port 135.
+
+if command -v iptables &> /dev/null
+then
+  iptables -A INPUT -p tcp --dport 135 -j DROP
+  iptables -A INPUT -p udp --dport 135 -j DROP
+  echo "Added iptables rules to block incoming traffic on port 135."
+  # Make the rule permanent
+  if [ -f /etc/iptables/rules.v4 ]; then
+    iptables-save > /etc/iptables/rules.v4
+  fi
+elif command -v firewall-cmd &> /dev/null
+then
+  firewall-cmd --permanent --add-port=135/tcp
+  firewall-cmd --permanent --add-port=135/udp
+  firewall-cmd --reload
+  echo "Added firewalld rules to block incoming traffic on port 135."
+else
+  echo "Warning: No firewall (iptables or firewalld) detected.  Please configure a firewall to block incoming traffic on port 135 manually."
+fi
+
+# Vulnerability 11: Telnet Unencrypted Cleartext Login
+# Solution: Disable Telnet and use SSH instead.
+# This script disables the Telnet service.
+if command -v systemctl &> /dev/null
+then
+  systemctl stop telnet.socket 2>/dev/null
+  systemctl disable telnet.socket 2>/dev/null
+  systemctl stop telnetd.socket 2>/dev/null
+  systemctl disable telnetd.socket 2>/dev/null
+  echo "Disabled Telnet service."
+elif command -v service &> /dev/null
+then
+  service telnet stop 2>/dev/null
+  update-rc.d telnet disable 2>/dev/null
+  echo "Disabled Telnet service."
+else
+  echo "Warning: Could not disable Telnet service.  Please disable it manually."
+fi
+
+# Vulnerability 12: SSL/TLS: Deprecated TLSv1.0 and TLSv1.1 Protocol Detection
+# Solution: Disable TLSv1.0 and TLSv1.1 in favor of TLSv1.2+.
+# The exact method depends on the service using TLS.  This script provides a general guideline.
+echo "WARNING:  Deprecated TLSv1.0 and TLSv1.1 protocols are enabled."
+echo "Please disable them in the configuration of the affected service (likely the RDP service in this case)."
+echo "Consult the service's documentation for instructions on how to disable TLSv1.0 and TLSv1.1."
+
+# Vulnerabilities 17, 18, 20, 23, 24, 25: TCP Timestamps Information Disclosure
+# Solution: Disable TCP timestamps.
+# This script disables TCP timestamps on Linux.
+
+kernel_param="net.ipv4.tcp_timestamps"
+
+if [ -f /etc/sysctl.conf ]; then
+  grep -q "^$kernel_param" /etc/sysctl.conf || echo "$kernel_param = 0" >> /etc/sysctl.conf
+  sysctl -p
+  echo "Disabled TCP timestamps by adding '$kernel_param = 0' to /etc/sysctl.conf and applying the changes."
+else
+  echo "Warning: /etc/sysctl.conf not found.  Please disable TCP timestamps manually."
+fi
+
+# Vulnerabilities 26, 27, 28, 29, 30, 31, 32: ICMP Timestamp Reply Information Disclosure
+# Solution: Disable ICMP timestamp replies.
+
+if [ -f /etc/sysctl.conf ]; then
+    icmp_param="net.ipv4.icmp_echo_ignore_all"
+    grep -q "^$icmp_param" /etc/sysctl.conf || echo "$icmp_param = 1" >> /etc/sysctl.conf
+    sysctl -p
+    echo "Disabled ICMP timestamp replies by adding '$icmp_param = 1' to /etc/sysctl.conf and applying the changes."
+else
+    echo "Warning: /etc/sysctl.conf not found.  Please disable ICMP timestamp replies manually."
+fi
+```

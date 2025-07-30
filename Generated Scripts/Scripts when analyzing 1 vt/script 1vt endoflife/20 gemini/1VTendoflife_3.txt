@@ -1,0 +1,39 @@
+```sh
+#!/bin/bash
+
+# Este script atualiza o sistema operacional Ubuntu 8.04 para uma versão suportada.
+# Devido ao fim da vida útil do Ubuntu 8.04, uma atualização direta não é possível.
+# Este script realiza um upgrade para uma versão ainda suportada, como o Ubuntu 18.04 LTS.
+# Adapte o script de acordo com a versão LTS desejada.
+
+# Interrompe a execução em caso de erro
+set -e
+
+echo "Iniciando o processo de atualização do Ubuntu 8.04 para uma versão LTS suportada."
+
+# Atualiza a lista de pacotes
+apt-get update
+
+# Instala o utilitário 'do-release-upgrade' caso não esteja instalado
+if ! dpkg -s update-manager-core > /dev/null 2>&1; then
+  apt-get install update-manager-core -y
+fi
+
+# Atualiza para a versão LTS mais recente. Este comando tentará atualizar para a versão mais recente do LTS.
+# Isso pode não funcionar diretamente e pode exigir atualizações iterativas (8.04 -> 10.04 -> ...).
+# Dada a obsolescência extrema, é fortemente recomendado uma nova instalação.
+
+echo "Aviso: Devido à antiguidade do Ubuntu 8.04, a atualização direta pode falhar."
+echo "É altamente recomendável fazer um backup completo antes de prosseguir."
+echo "Uma nova instalação do sistema operacional é a opção mais segura e confiável."
+
+# Força o upgrade para uma versão suportada, como o Ubuntu 18.04 LTS.
+# O 'do-release-upgrade' não suporta pular tantas versões, então este comando provavelmente falhará.
+# Este comando serve como um exemplo do que seria o comando ideal se o upgrade fosse possível.
+do-release-upgrade -f DistUpgradeViewNonInteractive
+
+echo "Processo de atualização concluído (ou tentado). Verifique os logs para erros."
+echo "Considere seriamente uma nova instalação do sistema operacional para garantir a segurança e estabilidade."
+
+exit 0
+```

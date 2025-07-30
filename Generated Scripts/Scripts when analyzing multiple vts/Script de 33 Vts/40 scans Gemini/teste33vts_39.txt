@@ -1,0 +1,103 @@
+```bash
+#!/bin/bash
+
+# Vulnerability 1: Proxmox VE EOL
+# Solution: Upgrade Proxmox VE to a supported version.
+# This script cannot automatically upgrade Proxmox. Manual upgrade is required.
+# Please refer to the Proxmox documentation for upgrade instructions.
+echo "Vulnerability: Proxmox VE EOL"
+echo "Solution: Upgrade Proxmox VE to a supported version."
+echo "Please refer to the Proxmox documentation for upgrade instructions."
+
+# Vulnerabilities 2-6: jQuery < 1.9.0 XSS Vulnerability
+# Solution: Update jQuery to version 1.9.0 or later.
+# Vulnerable paths:
+jquery_paths=(
+    "/var/www/html/../js/jquery-1.8.3.min.js"
+    "/var/www/html/opscenter/webcommon/framework/../js/jquery-1.8.3.min.js"
+    "/var/www/html/framesets/../js/jquery-1.8.3.min.js"
+    "/var/www/html/frameset/../js/jquery-1.8.3.min.js"
+    "/var/www/html/console/framework/../js/jquery-1.8.3.min.js"
+)
+
+new_jquery_url="https://code.jquery.com/jquery-1.9.0.min.js"
+new_jquery_version="1.9.0"
+
+for path in "${jquery_paths[@]}"; do
+    if [ -f "$path" ]; then
+        echo "Updating jQuery at $path to version $new_jquery_version"
+        # Create backup
+        cp "$path" "${path}.bak"
+        # Download new version
+        wget -q "$new_jquery_url" -O "$path"
+        echo "jQuery updated at $path"
+    else
+        echo "jQuery not found at $path"
+    fi
+done
+
+# Vulnerabilities 7, 8, 9, 13, 14, 15, 16, 19, 21, 22: Weak SSH Algorithms
+# Solution: Disable weak SSH algorithms.
+ssh_config="/etc/ssh/sshd_config"
+
+# Backup sshd_config
+cp "$ssh_config" "$ssh_config.bak"
+
+# Disable weak KEX algorithms
+sed -i 's/^#KexAlgorithms.*/KexAlgorithms curve25519-sha256@libssh.org,ecdh-sha2-nistp256,ecdh-sha2-nistp384,ecdh-sha2-nistp521,diffie-hellman-group-exchange-sha256/' "$ssh_config"
+
+# Disable weak MAC algorithms
+sed -i 's/^#MACs.*/MACs hmac-sha2-512,hmac-sha2-256,hmac-ripemd160/' "$ssh_config"
+
+# Disable weak Ciphers
+sed -i 's/^#Ciphers.*/Ciphers chacha20-poly1305@openssh.com,aes256-gcm@openssh.com,aes128-gcm@openssh.com,aes256-ctr,aes128-ctr/' "$ssh_config"
+
+# Disable weak HostKeyAlgorithms
+sed -i 's/^#HostKeyAlgorithms.*/HostKeyAlgorithms ecdsa-sha2-nistp256-cert-v01@openssh.com,ecdsa-sha2-nistp384-cert-v01@openssh.com,ecdsa-sha2-nistp521-cert-v01@openssh.com,ecdsa-sha2-nistp256,ecdsa-sha2-nistp384,ecdsa-sha2-nistp521,rsa-sha2-512,rsa-sha2-256/' "$ssh_config"
+
+
+# Restart SSH service
+systemctl restart sshd
+
+echo "Weak SSH algorithms disabled. SSH service restarted."
+
+# Vulnerability 10: DCE/RPC and MSRPC Services Enumeration Reporting
+# Solution: Filter incoming traffic to port 135.
+# This requires a firewall. This script provides a basic UFW example.
+# Enable UFW if it's not already enabled
+ufw status | grep -q "Status: inactive" && sudo ufw enable
+
+# Deny incoming traffic to port 135
+ufw deny 135/tcp
+echo "Incoming traffic to port 135 (DCE/RPC) blocked via UFW."
+
+# Vulnerability 11: Telnet Unencrypted Cleartext Login
+# Solution: Disable Telnet and use SSH instead.
+systemctl stop telnet.socket
+systemctl disable telnet.socket
+systemctl stop telnetd.socket
+systemctl disable telnetd.socket
+apt-get -y remove telnetd xinetd
+echo "Telnet service disabled and removed. Use SSH instead."
+
+# Vulnerability 12: SSL/TLS: Deprecated TLSv1.0 and TLSv1.1 Protocol Detection
+# Solution: Disable TLSv1.0 and TLSv1.1.
+# This requires modification of service-specific configuration.
+# This script cannot automatically disable TLSv1.0 and TLSv1.1 on all services.
+echo "Vulnerability: Deprecated TLSv1.0 and TLSv1.1"
+echo "Solution: Disable TLSv1.0 and TLSv1.1 in the configurations of services using SSL/TLS (e.g., Apache, Nginx, etc.)."
+echo "Please refer to the specific service documentation for instructions."
+
+# Vulnerabilities 17, 18, 20, 23, 24, 25: TCP Timestamps Information Disclosure
+# Solution: Disable TCP timestamps.
+echo "net.ipv4.tcp_timestamps = 0" >> /etc/sysctl.conf
+sysctl -p
+echo "TCP timestamps disabled."
+
+# Vulnerabilities 26, 27, 28, 29, 30, 31, 32: ICMP Timestamp Reply Information Disclosure
+# Solution: Disable ICMP timestamp replies.
+echo "net.ipv4.icmp_echo_ignore_all = 1" >> /etc/sysctl.conf
+echo "net.ipv4.icmp_echo_ignore_broadcasts = 1" >> /etc/sysctl.conf
+sysctl -p
+echo "ICMP timestamp replies disabled."
+```

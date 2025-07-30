@@ -1,0 +1,25 @@
+#!/bin/bash
+
+# Backup original configuration files
+cp /etc/ssl/openssl.cnf /etc/ssl/openssl.cnf.bak
+cp /etc/ssl/openssl.cnf /etc/ssl/openssl.cnf.bak_$(date +%F_%T)
+
+# Adjust OpenSSL configuration to disable TLSv1.0 and TLSv1.1
+sed -i '/^MinProtocol/ d; /^CipherString/ d' /etc/ssl/openssl.cnf
+echo "MinProtocol = TLSv1.2" >> /etc/ssl/openssl.cnf
+echo "CipherString = DEFAULT@SECLEVEL=2" >> /etc/ssl/openssl.cnf
+
+# Apply the changes to the system
+update-ca-certificates
+
+# Restart services that might be using TLS
+systemctl restart apache2
+systemctl restart postgresql
+
+# Verify the configuration
+openssl ciphers -v | grep -E 'TLSv1\.0|TLSv1\.1'
+if [ $? -eq 0 ]; then
+    echo "Warning: Some services might still be using deprecated TLS versions."
+else
+    echo "Deprecated TLS versions TLSv1.0 and TLSv1.1 have been disabled successfully."
+fi

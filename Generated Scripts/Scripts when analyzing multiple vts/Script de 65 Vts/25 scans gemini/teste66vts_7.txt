@@ -1,0 +1,89 @@
+```bash
+#!/bin/bash
+
+# Function to check if a command exists
+command_exists() {
+  command -v "$1" >/dev/null 2>&1
+}
+
+# Function to update Python installations
+update_python() {
+  local port=$1
+  local current_version=$2
+  local target_version=$3
+
+  echo "Updating Python on port $port from version $current_version to $target_version..."
+
+  # Determine the major and minor version
+  major_minor_version=$(echo "$current_version" | cut -d'.' -f1-2)
+
+  # Check if pyenv is installed
+  if command_exists pyenv; then
+    echo "pyenv found. Using pyenv to update Python."
+
+    # Install the target version if it's not already installed
+    if ! pyenv versions | grep -q "$target_version"; then
+      echo "Installing Python version $target_version..."
+      pyenv install "$target_version"
+    else
+      echo "Python version $target_version is already installed."
+    fi
+
+    # Set the local Python version for the project (assuming each port is a separate project)
+    echo "Setting local Python version to $target_version..."
+    pyenv local "$target_version"
+
+    echo "Python on port $port updated to version $target_version using pyenv."
+  else
+    echo "pyenv not found. Attempting to update using system package manager (apt, yum, etc.)."
+
+    # Attempt to use the system package manager (example for Debian/Ubuntu)
+    if command_exists apt-get; then
+      echo "apt-get found. Attempting to update Python."
+      sudo apt-get update
+      sudo apt-get install "python${major_minor_version}=$target_version" -y
+      echo "Python on port $port updated using apt-get (if available)."
+    elif command_exists yum; then
+      echo "yum found. Attempting to update Python."
+      sudo yum update "python${major_minor_version}" -y
+      echo "Python on port $port updated using yum (if available)."
+    else
+      echo "No suitable package manager found.  Please update Python manually."
+      echo "Refer to the documentation for your system to update Python to version $target_version."
+    fi
+  fi
+}
+
+# Vulnerability 1, 8, 10, 14, 18, 21, 22, 32, 36, 37, 40, 46, 50, 56, 57, 64
+update_python 5000 3.10.12 3.10.16
+
+# Vulnerability 2, 3, 4, 5, 6, 7, 9, 11, 12, 13, 15, 16, 17, 19, 20, 23, 24, 25, 26, 28, 29, 30, 31, 33, 34, 35, 38, 39, 41, 42, 43, 44, 45, 47, 48, 51, 52, 53, 55, 58, 60, 61, 63, 65
+update_python 8000 3.12.0 3.12.9
+update_python 8001 3.12.0 3.12.9
+update_python 8002 3.12.0 3.12.9
+
+# Vulnerability 49:  Replace the SSL/TLS certificate with one signed by a trusted CA.
+echo "Please replace the SSL/TLS certificate used on port 8002 with one signed by a trusted CA."
+echo "The current certificate details are:"
+echo "  Issuer: CN=localhost,O=Luminator,L=Caxias do Sul,ST=RS,C=BR"
+echo "  SHA-1 Fingerprint: 264544379FDBF127C25A667B5E2A7EA7620B996C"
+echo "  SHA-256 Fingerprint: 5668884BF9B84C38B81313EBF424434CB70F5D9930CDCF5C845A915352399F30"
+
+# Vulnerability 54: Disable deprecated TLSv1.0 and TLSv1.1 protocols on port 3389
+echo "Please disable TLSv1.0 and TLSv1.1 protocols on port 3389 in favor of TLSv1.2 or later."
+echo "This typically involves modifying the SSH server configuration file (e.g., /etc/ssh/sshd_config)."
+echo "Example:  Remove or comment out 'Protocol 2, 1' and ensure 'Protocol 2' is enabled.  Also ensure that any weak ciphers are removed/disabled from the Ciphers and MACs settings."
+
+# Vulnerability 59: Disable weak MAC algorithms in SSH configuration
+echo "Please disable weak MAC algorithms (umac-64-etm@openssh.com, umac-64@openssh.com) in your SSH server configuration."
+echo "This involves editing the /etc/ssh/sshd_config file."
+echo "Example:  Modify the MACs line to exclude these algorithms: MACs <strong_macs_only>"
+
+# Vulnerability 62: Disable ICMP timestamp replies
+echo "Please disable ICMP timestamp replies on the system to prevent information disclosure."
+echo "This can typically be done via sysctl."
+echo "Example: sudo sysctl -w net.ipv4.icmp_echo_ignore_all=1"
+echo "To make this permanent, add 'net.ipv4.icmp_echo_ignore_all=1' to /etc/sysctl.conf."
+
+echo "Patching completed."
+```

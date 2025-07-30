@@ -1,0 +1,157 @@
+```bash
+#!/bin/bash
+
+# Vulnerability 1: Proxmox VE EOL
+# Solution: Update PVE to a supported version.  This requires manual intervention.
+# This script will only display a warning message.
+echo "WARNING: Proxmox VE version 7.3-3 is End of Life.  Please upgrade to a supported version."
+
+# Vulnerability 2-6: jQuery < 1.9.0 XSS Vulnerability (CVE-2012-6708)
+# Solution: Replace vulnerable jQuery versions with 1.9.0 or later.
+# Paths are relative to the web server root.
+jquery_vulnerable_paths=(
+    "/../js/jquery-1.8.3.min.js"
+    "/opscenter/webcommon/framework/../js/jquery-1.8.3.min.js"
+    "/framesets/../js/jquery-1.8.3.min.js"
+    "/frameset/../js/jquery-1.8.3.min.js"
+    "/console/framework/../js/jquery-1.8.3.min.js"
+)
+
+new_jquery_version="1.9.0"
+new_jquery_url="https://code.jquery.com/jquery-${new_jquery_version}.min.js"
+
+web_server_root="/var/www/html" # Adjust if different
+
+for path in "${jquery_vulnerable_paths[@]}"; do
+    full_path="${web_server_root}${path}"
+    # Ensure the directory exists
+    dir_name=$(dirname "$full_path")
+    if [ ! -d "$dir_name" ]; then
+        echo "Directory $dir_name does not exist. Creating..."
+        mkdir -p "$dir_name"
+    fi
+    if [ -f "$full_path" ]; then
+        echo "Replacing $full_path with jQuery ${new_jquery_version}..."
+        wget -q -O "$full_path" "$new_jquery_url"
+        if [ $? -eq 0 ]; then
+          echo "Successfully updated $full_path"
+        else
+          echo "Failed to update $full_path"
+        fi
+
+    else
+        echo "File not found: $full_path"
+    fi
+done
+
+# Vulnerability 7, 8, 9, 13, 14, 15, 16, 19, 21, 22: Weak SSH Algorithms
+# Solution: Disable weak SSH algorithms.
+# Edit sshd_config to remove weak algorithms.
+
+sshd_config="/etc/ssh/sshd_config"
+sshd_config_tmp="/tmp/sshd_config.tmp"
+
+# Create a backup
+cp "$sshd_config" "$sshd_config.bak"
+
+# Disable weak KEX algorithms
+sed -i '/KexAlgorithms/s/diffie-hellman-group1-sha1//g' "$sshd_config"
+
+# Disable weak MAC algorithms.  Note: This will remove the algorithms, but doesn't add new ones.
+#  You will likely need to manually add better algorithms to the config file.
+sed -i '/MACs/s/umac-64-etm@openssh.com//g' "$sshd_config"
+sed -i '/MACs/s/umac-64@openssh.com//g' "$sshd_config"
+sed -i '/MACs/s/hmac-md5//g' "$sshd_config"
+sed -i '/MACs/s/hmac-sha1-96//g' "$sshd_config"
+
+# Disable weak Ciphers
+sed -i '/Ciphers/s/3des-cbc//g' "$sshd_config"
+sed -i '/Ciphers/s/aes128-cbc//g' "$sshd_config"
+sed -i '/Ciphers/s/aes256-cbc//g' "$sshd_config"
+sed -i '/Ciphers/s/twofish-cbc//g' "$sshd_config"
+sed -i '/Ciphers/s/twofish128-cbc//g' "$sshd_config"
+sed -i '/Ciphers/s/twofish256-cbc//g' "$sshd_config"
+
+#Disable weak HostKeyAlgorithms
+sed -i '/HostKeyAlgorithms/s/ssh-dss//g' "$sshd_config"
+
+echo "Weak SSH algorithms disabled in $sshd_config.  Please review and ensure the configuration is correct, then restart sshd."
+
+# Restart SSH service (Debian/Ubuntu)
+if command -v systemctl &> /dev/null
+then
+    systemctl restart sshd
+    echo "Restarted sshd service using systemctl"
+elif command -v service &> /dev/null
+then
+    service sshd restart
+    echo "Restarted sshd service using service command"
+else
+    echo "Could not restart sshd. Please restart the sshd service manually"
+fi
+
+# Vulnerability 10: DCE/RPC and MSRPC Services Enumeration Reporting
+# Solution: Filter incoming traffic to port 135.
+# This requires firewall configuration (e.g., iptables or ufw) and is beyond the scope of a simple script.
+echo "WARNING: Filter incoming traffic to port 135 to mitigate DCE/RPC and MSRPC enumeration. Configure your firewall."
+
+# Vulnerability 11: Telnet Unencrypted Cleartext Login
+# Solution: Disable Telnet and use SSH instead.
+# Stop and disable telnet service (Debian/Ubuntu)
+if command -v systemctl &> /dev/null
+then
+    systemctl stop telnet.socket telnet.service 2>/dev/null
+    systemctl disable telnet.socket telnet.service 2>/dev/null
+    echo "Telnet service stopped and disabled using systemctl"
+elif command -v service &> /dev/null
+then
+    service telnet stop 2>/dev/null
+    update-rc.d telnet disable 2>/dev/null # Debian specific, may not exist
+    echo "Telnet service stopped and disabled using service command"
+else
+    echo "Could not stop telnet. Please stop and disable the telnet service manually"
+fi
+
+# Vulnerability 12: SSL/TLS: Deprecated TLSv1.0 and TLSv1.1 Protocol Detection
+# Solution: Disable TLSv1.0 and TLSv1.1. Requires identifying the service and its configuration.
+# Assuming the vulnerable service is using OpenSSL, edit the OpenSSL configuration file.
+# The location of this file may vary depending on the distribution.
+
+openssl_config="/etc/ssl/openssl.cnf" # Adjust if different
+
+# Check if OpenSSL config exists.
+if [ -f "$openssl_config" ]; then
+    # Append the option to disable TLSv1.0 and TLSv1.1 to the [system_default_sect] section
+    sed -i '/\[system_default_sect]/a MinProtocol = TLSv1.2' "$openssl_config"
+    echo "TLSv1.0 and TLSv1.1 disabled in $openssl_config.  Restart services that use OpenSSL for the changes to take effect."
+
+    # Restart services using OpenSSL - Requires knowing the specific services.  Example for Apache:
+    #systemctl restart apache2
+else
+    echo "OpenSSL configuration file not found at $openssl_config.  Manual configuration required."
+fi
+
+# Vulnerability 17, 18, 20, 23, 24, 25: TCP Timestamps Information Disclosure
+# Solution: Disable TCP timestamps.
+# Add the line to /etc/sysctl.conf and apply.
+echo "net.ipv4.tcp_timestamps = 0" >> /etc/sysctl.conf
+sysctl -p
+
+echo "TCP timestamps disabled.  Run 'sysctl -p' to apply the changes."
+
+# Vulnerability 26, 27, 28, 29, 30, 31, 32: ICMP Timestamp Reply Information Disclosure
+# Solution: Disable ICMP timestamp replies.
+# This script assumes a Linux system.
+echo "Disabling ICMP timestamp replies..."
+echo "0" > /proc/sys/net/ipv4/icmp_echo_ignore_all
+echo "1" > /proc/sys/net/ipv4/icmp_echo_ignore_broadcasts
+
+# Make the change permanent by adding it to /etc/sysctl.conf
+echo "net.ipv4.icmp_echo_ignore_all=1" >> /etc/sysctl.conf
+echo "net.ipv4.icmp_echo_ignore_broadcasts=1" >> /etc/sysctl.conf
+sysctl -p
+
+echo "ICMP timestamp replies disabled.  Run 'sysctl -p' to apply the changes."
+
+echo "Script finished.  Review and test all changes."
+```

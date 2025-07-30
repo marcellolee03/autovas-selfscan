@@ -1,0 +1,41 @@
+```bash
+#!/bin/bash
+
+# Desabilita o serviço rexec
+if systemctl is-active rexec.socket > /dev/null 2>&1; then
+  systemctl stop rexec.socket
+  systemctl disable rexec.socket
+  echo "Serviço rexec desabilitado e removido da inicialização."
+else
+  echo "Serviço rexec não está ativo."
+fi
+
+# Remove o pacote rexec (se instalado)
+if dpkg -s rexec &> /dev/null; then
+  apt-get remove --purge -y rexec
+  apt-get autoremove -y
+  echo "Pacote rexec removido."
+elif rpm -q rexec &> /dev/null; then
+  yum remove rexec -y
+  echo "Pacote rexec removido."
+else
+  echo "Pacote rexec não encontrado."
+fi
+
+# Garante que o serviço não está listado no inetd.conf ou xinetd.d/rexec
+if [ -f /etc/inetd.conf ]; then
+  sed -i '/^rexec/d' /etc/inetd.conf
+  echo "Removido rexec de /etc/inetd.conf"
+  systemctl reload inetd
+fi
+
+if [ -d /etc/xinetd.d ]; then
+  if [ -f /etc/xinetd.d/rexec ]; then
+    rm -f /etc/xinetd.d/rexec
+    echo "Removido configuração do xinetd para rexec."
+    systemctl restart xinetd
+  fi
+fi
+
+echo "Verificações e ações completadas para remover/desabilitar o rexec."
+```

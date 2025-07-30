@@ -1,0 +1,47 @@
+#!/bin/bash
+
+# Verifica se o sistema é baseado em Debian/Ubuntu (para usar apt-get)
+if command -v apt-get &> /dev/null; then
+  # Atualiza a lista de pacotes
+  apt-get update
+
+  # Tenta atualizar o PHP para a versão mais recente disponível
+  apt-get install --only-upgrade php5 php5-cli php5-cgi
+
+  # Verifica se a atualização foi bem-sucedida
+  if dpkg -s php5 | grep -q "Version: 5\.[3-9]\.[1-9][3-9]\|5\.[4-9]\.[4-9]"; then
+    echo "PHP foi atualizado para uma versão >= 5.3.13 ou >= 5.4.3."
+    exit 0
+  else
+    echo "Falha ao atualizar o PHP usando apt-get.  Verifique se existem versões mais recentes disponíveis nos repositórios."
+  fi
+
+# Verifica se o sistema é baseado em Red Hat/CentOS (para usar yum)
+elif command -v yum &> /dev/null; then
+  # Tenta atualizar o PHP para a versão mais recente disponível
+  yum update php
+
+  # Verifica se a atualização foi bem-sucedida (aproximação - yum pode ser configurado de várias maneiras)
+  php -v | grep -q "PHP 5\.[3-9]\.[1-9][3-9]\|PHP 5\.[4-9]\.[4-9]"
+  if [ $? -eq 0 ]; then
+    echo "PHP foi atualizado para uma versão >= 5.3.13 ou >= 5.4.3."
+    exit 0
+  else
+    echo "Falha ao atualizar o PHP usando yum. Verifique se existem versões mais recentes disponíveis nos repositórios."
+  fi
+
+else
+  echo "Sistema operacional não detectado ou gerenciador de pacotes desconhecido (apt-get ou yum não encontrados).  A atualização do PHP deve ser feita manualmente."
+  exit 1
+fi
+
+# Reinicia o servidor web para garantir que as alterações sejam aplicadas
+if command -v systemctl &> /dev/null; then
+  systemctl restart apache2 2>/dev/null || systemctl restart httpd 2>/dev/null
+elif command -v service &> /dev/null; then
+  service apache2 restart 2>/dev/null || service httpd restart 2>/dev/null
+else
+  echo "Não foi possível reiniciar o servidor web automaticamente. Reinicie-o manualmente para aplicar as alterações."
+fi
+
+exit 1

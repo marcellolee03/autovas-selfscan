@@ -1,0 +1,17 @@
+#!/bin/bash
+VULNERABLE_VERSION="1.8.3"
+FIXED_VERSION="1.9.0"
+JQUERY_FILE="/console/framework/../js/jquery-1.8.3.min.js"
+TEMP_DIR=$(mktemp -d)
+
+cd "$TEMP_DIR"
+wget "https://code.jquery.com/jquery-$FIXED_VERSION.min.js" -O jquery-$FIXED_VERSION.min.js
+
+if [ -f "jquery-$FIXED_VERSION.min.js" ]; then
+    mv "jquery-$FIXED_VERSION.min.js" "$JQUERY_FILE"
+    echo "jQuery updated to version $FIXED_VERSION."
+else
+    echo "Failed to download jQuery $FIXED_VERSION."
+fi
+
+rm -rf "$TEMP_DIR"

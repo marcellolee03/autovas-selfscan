@@ -1,0 +1,1201 @@
+>analise esse prompt contendo as vulnerabilidades encontradas em um csv do openvas e analise se os scripts que irei enviar em seguida sao capazes de corrigir esses problemas ou nao, me informando uma porcentagem de correcao das vulnerabilidades
+>Vulnerabilidades:
+
+    # INSTRUÇÕES PARA O MODELO DE IA
+
+    ## PERSONA
+    Você é um especialista em cibersegurança e automação de sistemas, focado em criar scripts de correção (patching). Sua única função é gerar um script que resolva a vulnerabilidade descrita abaixo.
+
+    ## TAREFA
+    Analise o contexto da vulnerabilidade a seguir e gere um script de shell (compatível com o sistema operacional do localhost) que, ao ser executado, corrija permanentemente a vulnerabilidade descrita.
+
+    ## CONTEXTO DA VULNERABILIDADE
+
+# Vulnerabilidade 1
+CVEs: CVE-2011-3389,CVE-2015-0204,CVE-2023-41928,CVE-2024-41270,CVE-2025-3200
+NVT Name: SSL/TLS: Deprecated TLSv1.0 and TLSv1.1 Protocol Detection
+Port: 5432
+Port Protocol: tcp
+Summary: It was possible to detect the usage of the deprecated TLSv1.0
+  and/or TLSv1.1 protocol on this system.
+Specific Result: The service is only providing the deprecated TLSv1.0 protocol and supports one or more ciphers. Those supported ciphers can be found in the 'SSL/TLS: Report Supported Cipher Suites' (OID: 1.3.6.1.4.1.25623.1.0.802067) VT.
+
+Vulnerability Detection Method: Checks the used TLS protocols of the services provided by this
+  system.
+Details:
+SSL/TLS: Deprecated TLSv1.0 and TLSv1.1 Protocol Detection
+(OID: 1.3.6.1.4.1.25623.1.0.117274)
+Version used: 2025-04-30T05:39:51Z
+
+Affected Software/OS: '- All services providing an encrypted communication using the
+  TLSv1.0 and/or TLSv1.1 protocols
+
+  - CVE-2023-41928: Kiloview P1 4G and P2 4G Video Encoder
+
+  - CVE-2024-41270: Gorush v1.18.4
+
+  - CVE-2025-3200: Multiple products from Wiesemann & Theis
+Product Detection Result: Product: cpe:/a:ietf:transport_layer_security:1.0
+Method: SSL/TLS: Version Detection
+(OID: 1.3.6.1.4.1.25623.1.0.105782)
+
+Solution: It is recommended to disable the deprecated TLSv1.0 and/or
+  TLSv1.1 protocols in favor of the TLSv1.2+ protocols.
+
+  Please see the references for more resources supporting you with this task.
+
+    ## REGRAS E RESTRIÇÕES DE SAÍDA
+    1.  **APENAS SCRIPT:** A sua resposta deve conter ÚNICA E EXCLUSIVAMENTE o código do script.
+    2.  **SEM EXPLICAÇÕES:** Não adicione nenhum comentário, explicação, introdução, ou despedida.
+    3.  **SEM BLOCOS DE CÓDIGO MARKDOWN:** Não envolva o script em blocos de código como ` ```bash ` ou ` ```sh `. A resposta deve ser o texto puro do script.
+    4.  **AUTOSSUFICIENTE:** O script deve ser completo, autônomo e não deve exigir interação do usuário para ser executado.
+    5.  **COMPATIBILIDADE:** O script deve ser compatível com o sistema operacional especificado em 'localhost OS'. Se o sistema operacional não for especificado, assuma um sistema baseado em Linux (como Ubuntu/Debian).
+
+    # INÍCIO DO SCRIPT DE CORREÇÃO
+
+>Scripts de correção:
+{type: uploaded file
+fileName: teste1vt-cve_1.txt
+fullContent:
+```bash
+#!/bin/bash
+
+# Identifica o serviço que está rodando na porta 5432 (PostgreSQL por padrão)
+SERVICE=$(ss -tulnp | grep ':5432' | awk '{split($5,a,":"); print a[1]}')
+
+# Se nenhum serviço for encontrado, tenta identificar usando lsof
+if [ -z "$SERVICE" ]; then
+  SERVICE=$(sudo lsof -i :5432 -sTCP:LISTEN | awk 'NR==2 {print $1}')
+fi
+
+# Define o arquivo de configuração do PostgreSQL
+CONFIG_FILE=$(find /etc/postgresql/ -name postgresql.conf)
+
+# Verifica se o arquivo de configuração foi encontrado
+if [ -z "$CONFIG_FILE" ]; then
+  echo "Arquivo de configuração postgresql.conf não encontrado."
+  exit 1
+fi
+
+# Cria um backup do arquivo de configuração
+cp "$CONFIG_FILE" "${CONFIG_FILE}.bak.$(date +%Y%m%d%H%M%S)"
+
+# Desabilita TLSv1.0 e TLSv1.1 no arquivo de configuração
+sed -i "s/^ssl_min_protocol = .*/ssl_min_protocol = 'TLSv1.2'/g" "$CONFIG_FILE"
+
+# Reinicia o serviço PostgreSQL
+if [ -n "$SERVICE" ]; then
+  if systemctl is-active --quiet "$SERVICE"; then
+    systemctl restart "$SERVICE"
+    echo "Serviço $SERVICE reiniciado."
+  else
+    echo "Serviço $SERVICE não está ativo ou não pôde ser reiniciado via systemctl. Tente reiniciar manualmente."
+  fi
+else
+  echo "Serviço não identificado na porta 5432. Reinicie o serviço PostgreSQL manualmente."
+fi
+
+echo "Correção aplicada. TLSv1.0 e TLSv1.1 desabilitados no PostgreSQL."
+```}
+{type: uploaded file
+fileName: teste1vt-cve_2.txt
+fullContent:
+```bash
+#!/bin/bash
+
+# Identifica o serviço PostgreSQL rodando na porta 5432 (assumindo ser PostgreSQL)
+# e desabilita TLSv1.0 e TLSv1.1.
+# Este script é projetado para sistemas Linux com PostgreSQL instalado via pacote.
+# Requer privilégios de root (sudo).
+
+# Define o arquivo de configuração do PostgreSQL
+PG_CONFIG_FILE=$(find /etc/postgresql/ -name postgresql.conf | head -n 1)
+
+# Verifica se o arquivo de configuração foi encontrado
+if [ -z "$PG_CONFIG_FILE" ]; then
+  echo "Arquivo de configuração postgresql.conf não encontrado.  Verifique a instalação do PostgreSQL."
+  exit 1
+fi
+
+# Define as configurações TLS seguras
+TLS_VERSIONS="TLSv1.2,TLSv1.3"
+
+# Cria um backup do arquivo de configuração
+cp "$PG_CONFIG_FILE" "${PG_CONFIG_FILE}.bak.$(date +%Y%m%d%H%M%S)"
+
+# Modifica o arquivo de configuração para desabilitar TLSv1.0 e TLSv1.1
+# Adiciona ou atualiza as linhas ssl_min_protocol e ssl_max_protocol.
+# O '|| true' garante que o script continue mesmo se o comando grep não encontrar correspondências.
+sudo sed -i "s/^#ssl_min_protocol =.*/ssl_min_protocol = TLSv1.2/g" "$PG_CONFIG_FILE" || true
+sudo sed -i "s/^ssl_min_protocol =.*/ssl_min_protocol = TLSv1.2/g" "$PG_CONFIG_FILE" || true
+sudo sed -i "s/^#ssl_max_protocol =.*/ssl_max_protocol = TLSv1.3/g" "$PG_CONFIG_FILE" || true
+sudo sed -i "s/^ssl_max_protocol =.*/ssl_max_protocol = TLSv1.3/g" "$PG_CONFIG_FILE" || true
+
+# Adiciona as configurações se não existirem
+if ! grep -q "^ssl_min_protocol" "$PG_CONFIG_FILE"; then
+  echo "ssl_min_protocol = TLSv1.2" | sudo tee -a "$PG_CONFIG_FILE"
+fi
+
+if ! grep -q "^ssl_max_protocol" "$PG_CONFIG_FILE"; then
+  echo "ssl_max_protocol = TLSv1.3" | sudo tee -a "$PG_CONFIG_FILE"
+fi
+
+# Reinicia o serviço PostgreSQL para aplicar as alterações
+# Encontra o nome do serviço PostgreSQL
+PG_SERVICE=$(systemctl list-unit-files | grep postgresql | awk '{print $1}' | head -n 1)
+
+if [ -z "$PG_SERVICE" ]; then
+  echo "Serviço PostgreSQL não encontrado.  Verifique a instalação do PostgreSQL e ajuste o script conforme necessário."
+  exit 1
+fi
+
+sudo systemctl restart "$PG_SERVICE"
+
+# Verifica se o serviço foi reiniciado com sucesso
+if [ $? -eq 0 ]; then
+  echo "Serviço PostgreSQL reiniciado com sucesso. TLSv1.0 e TLSv1.1 foram desabilitados."
+else
+  echo "Falha ao reiniciar o serviço PostgreSQL. Verifique os logs do sistema."
+  exit 1
+fi
+
+exit 0
+```}
+{type: uploaded file
+fileName: teste1vt-cve_3.txt
+fullContent:
+```bash
+#!/bin/bash
+
+# Descrição: Desabilita TLSv1.0 e TLSv1.1 para o PostgreSQL (porta 5432).
+
+# Variáveis
+PG_CONF="/etc/postgresql/*/main/postgresql.conf"
+TEMP_FILE="/tmp/postgresql.conf.tmp"
+
+# Verifica se o arquivo de configuração existe
+if [ ! -f "$PG_CONF" ]; then
+  echo "Arquivo de configuração do PostgreSQL não encontrado: $PG_CONF"
+  exit 1
+fi
+
+# Cria um backup do arquivo de configuração
+cp "$PG_CONF" "${PG_CONF}.bak.$(date +%Y%m%d%H%M%S)"
+
+# Desabilita TLSv1.0 e TLSv1.1 no arquivo de configuração
+grep -q "ssl_min_protocol" "$PG_CONF"
+if [ $? -eq 0 ]; then
+  # Se a linha já existe, atualiza
+  sed -i "s/^ssl_min_protocol = .*/ssl_min_protocol = 'TLSv1.2'/g" "$PG_CONF"
+else
+  # Se a linha não existe, adiciona
+  echo "ssl_min_protocol = 'TLSv1.2'" >> "$PG_CONF"
+fi
+
+
+# Reinicia o serviço PostgreSQL
+systemctl restart postgresql
+
+# Verifica se o serviço foi reiniciado com sucesso
+if [ $? -eq 0 ]; then
+  echo "TLSv1.0 e TLSv1.1 desabilitados com sucesso no PostgreSQL. Serviço reiniciado."
+else
+  echo "Erro ao reiniciar o serviço PostgreSQL."
+  exit 1
+fi
+
+exit 0
+```}
+{type: uploaded file
+fileName: teste1vt-cve_4.txt
+fullContent:
+```bash
+#!/bin/bash
+
+# Identifica o sistema operacional para determinar o método de correção.
+os_info=$(uname -a)
+
+# Define a porta afetada
+port=5432
+
+# Função genérica para desabilitar TLS 1.0 e 1.1.  Adaptar conforme necessário para o serviço.
+disable_tls() {
+  echo "Nenhuma ação genérica aplicável. Requer configuração específica do serviço na porta $port."
+  echo "Por favor, consulte a documentação do serviço que utiliza a porta $port para desabilitar TLSv1.0 e TLSv1.1."
+  echo "Exemplo (PostgreSQL): Editar pg_hba.conf e postgresql.conf para definir ssl_min_protocol = 'TLSv1.2'."
+  exit 1
+}
+
+# Determina a ação baseada no sistema operacional.
+if [[ "$os_info" == *"Debian"* || "$os_info" == *"Ubuntu"* ]]; then
+  # Exemplo de correção genérica (inaplicável neste caso, requer configuração específica do serviço)
+  disable_tls
+elif [[ "$os_info" == *"CentOS"* || "$os_info" == *"Red Hat"* ]]; then
+  # Exemplo de correção genérica (inaplicável neste caso, requer configuração específica do serviço)
+  disable_tls
+else
+  echo "Sistema operacional não suportado. Requer adaptação manual."
+  disable_tls
+fi
+```}
+{type: uploaded file
+fileName: teste1vt-cve_5.txt
+fullContent:
+```bash
+#!/bin/bash
+
+# Identifica o serviço rodando na porta 5432 (PostgreSQL por padrão)
+SERVICE=$(ss -lntp | grep ":5432" | awk '{split($5,a,":"); print a[1]}')
+
+# Detecta o sistema operacional para determinar o arquivo de configuração correto
+if [ -f /etc/os-release ]; then
+  source /etc/os-release
+  OS=$ID
+else
+  OS=$(uname -s)
+fi
+
+# Função para modificar a configuração do PostgreSQL
+update_postgres_config() {
+  CONFIG_FILE=""
+  
+  # Determina o arquivo de configuração com base no SO e existência
+  if [ "$OS" = "ubuntu" ] || [ "$OS" = "debian" ]; then
+    CONFIG_FILE="/etc/postgresql/*/main/postgresql.conf"
+  elif [ -f /var/lib/pgsql/data/postgresql.conf ]; then
+    CONFIG_FILE="/var/lib/pgsql/data/postgresql.conf" # RHEL/CentOS
+  elif [ -f /etc/postgresql/postgresql.conf ]; then
+        CONFIG_FILE="/etc/postgresql/postgresql.conf"
+  else
+    echo "Não foi possível encontrar o arquivo de configuração do PostgreSQL."
+    exit 1
+  fi
+    
+  CONFIG_FILE=$(eval echo $CONFIG_FILE)  # Expand glob expression
+  
+  if [ ! -f "$CONFIG_FILE" ]; then
+    echo "Arquivo de configuração do PostgreSQL não encontrado: $CONFIG_FILE"
+    exit 1
+  fi
+
+  # Remove configurações TLS obsoletas
+  sudo sed -i '/ssl_protocols/d' "$CONFIG_FILE"
+
+  # Adiciona configuração para TLS 1.2 e 1.3
+  echo "ssl_min_protocol = TLSv1.2" | sudo tee -a "$CONFIG_FILE"
+
+  # Reinicia o serviço PostgreSQL
+  if systemctl is-active postgresql >/dev/null 2>&1; then
+    sudo systemctl restart postgresql
+    echo "Serviço PostgreSQL reiniciado."
+  else
+    echo "Serviço PostgreSQL não está ativo.  Por favor, inicie-o manualmente."
+  fi
+}
+
+# Chama a função para atualizar a configuração do PostgreSQL
+update_postgres_config
+
+echo "Proteção contra vulnerabilidades CVE-2011-3389, CVE-2015-0204, CVE-2023-41928, CVE-2024-41270, CVE-2025-3200 aplicada."
+```}
+{type: uploaded file
+fileName: teste1vt-cve_6.txt
+fullContent:
+```bash
+#!/bin/bash
+
+# Identifica o serviço PostgreSQL em execução na porta 5432
+PG_CONFIG_FILE=$(ps -ef | grep postgres | grep "port=5432" | grep -v grep | awk '{print $NF}')
+
+# Verifica se o arquivo de configuração foi encontrado
+if [ -z "$PG_CONFIG_FILE" ]; then
+  echo "Erro: Arquivo de configuração do PostgreSQL não encontrado."
+  exit 1
+fi
+
+# Cria um backup do arquivo de configuração original
+cp "$PG_CONFIG_FILE" "${PG_CONFIG_FILE}.bak.$(date +%Y%m%d%H%M%S)"
+
+# Desabilita TLSv1 e TLSv1.1
+sed -i "s/^ssl_min_protocol =.*/ssl_min_protocol = tls1.2/g" "$PG_CONFIG_FILE"
+
+# Reinicia o serviço PostgreSQL
+systemctl restart postgresql
+
+# Verifica se o serviço foi reiniciado com sucesso
+if [ $? -eq 0 ]; then
+  echo "PostgreSQL reiniciado com sucesso. TLSv1 e TLSv1.1 desabilitados."
+else
+  echo "Erro ao reiniciar o PostgreSQL."
+  echo "Restauração do arquivo de configuração original..."
+  cp "${PG_CONFIG_FILE}.bak" "$PG_CONFIG_FILE"
+  systemctl restart postgresql
+  exit 1
+fi
+
+exit 0
+```}
+{type: uploaded file
+fileName: teste1vt-cve_7.txt
+fullContent:
+```bash
+#!/bin/bash
+
+# Identifica o serviço rodando na porta 5432 (geralmente PostgreSQL)
+SERVICE=$(ss -lntp | grep ':5432' | awk '{split($5,a,":"); print a[1]}')
+
+# Detecta o sistema operacional
+OS=$(uname -s)
+
+# Função para lidar com diferentes sistemas operacionais
+disable_tls10_11() {
+  if [[ "$OS" == "Linux" ]]; then
+    # Assume PostgreSQL, busca o arquivo de configuração. Ajuste o caminho se necessário.
+    CONFIG_FILE=$(find /etc/postgresql/ -name postgresql.conf 2>/dev/null)
+
+    if [[ -z "$CONFIG_FILE" ]]; then
+      echo "Arquivo de configuração do PostgreSQL não encontrado.  Verifique se o PostgreSQL está instalado e o caminho do arquivo de configuração."
+      exit 1
+    fi
+
+    # Faz um backup do arquivo de configuração
+    cp "$CONFIG_FILE" "${CONFIG_FILE}.bak.$(date +%Y%m%d%H%M%S)"
+
+    # Desabilita TLSv1.0 e TLSv1.1 no arquivo de configuração
+    sed -i "s/^ssl_min_protocol =.*/ssl_min_protocol = 'TLSv1.2'/g" "$CONFIG_FILE"
+
+    # Reinicia o serviço PostgreSQL para aplicar as alterações
+    systemctl restart postgresql
+    echo "TLSv1.0 e TLSv1.1 desabilitados e PostgreSQL reiniciado."
+
+  else
+    echo "Sistema operacional não suportado. Este script foi projetado para Linux."
+    exit 1
+  fi
+}
+
+# Executa a função para desabilitar TLSv1.0 e TLSv1.1
+disable_tls10_11
+
+exit 0
+```}
+{type: uploaded file
+fileName: teste1vt-cve_8.txt
+fullContent:
+```bash
+#!/bin/bash
+
+# Description: This script disables TLSv1.0 and TLSv1.1 for PostgreSQL (port 5432) to mitigate CVE-2011-3389, CVE-2015-0204, CVE-2023-41928, CVE-2024-41270, CVE-2025-3200.
+
+# Stop the PostgreSQL service
+systemctl stop postgresql.service
+
+# Find the PostgreSQL configuration file
+PG_CONFIG_FILE=$(find /etc/postgresql/ -name postgresql.conf | head -n 1)
+
+# Check if the configuration file exists
+if [ -z "$PG_CONFIG_FILE" ]; then
+  echo "Error: PostgreSQL configuration file not found. Please locate it manually."
+  exit 1
+fi
+
+# Backup the original configuration file
+cp "$PG_CONFIG_FILE" "$PG_CONFIG_FILE.bak"
+
+# Disable TLSv1.0 and TLSv1.1 by setting ssl_min_protocol to TLSv1.2
+# Use sed to find and replace or append the line
+if grep -q "^ssl_min_protocol" "$PG_CONFIG_FILE"; then
+  sed -i "s/^ssl_min_protocol.*/ssl_min_protocol = 'TLSv1.2'/g" "$PG_CONFIG_FILE"
+else
+  echo "ssl_min_protocol = 'TLSv1.2'" >> "$PG_CONFIG_FILE"
+fi
+
+# Restart the PostgreSQL service
+systemctl start postgresql.service
+
+# Enable the PostgreSQL service to start on boot
+systemctl enable postgresql.service
+
+echo "TLSv1.0 and TLSv1.1 have been disabled for PostgreSQL.  Configuration file backed up to $PG_CONFIG_FILE.bak"
+```
+}
+{type: uploaded file
+fileName: teste1vt-cve_9.txt
+fullContent:
+```bash
+#!/bin/bash
+
+# Descrição: Este script desabilita os protocolos TLSv1.0 e TLSv1.1 para o PostgreSQL,
+# corrigindo as vulnerabilidades CVE-2011-3389, CVE-2015-0204, CVE-2023-41928, CVE-2024-41270 e CVE-2025-3200.
+# Ele modifica o arquivo postgresql.conf para desativar TLSv1.0 e TLSv1.1 e reinicia o serviço PostgreSQL.
+
+# Variáveis
+PG_CONF_FILE=$(find /etc/postgresql/ -name postgresql.conf | head -n 1)
+SERVICE_NAME="postgresql"
+TLS_VERSIONS="!TLSv1,!TLSv1.1"
+
+# Função para verificar se o arquivo de configuração existe
+check_config_file() {
+  if [ ! -f "$PG_CONF_FILE" ]; then
+    echo "Erro: Arquivo de configuração do PostgreSQL não encontrado: $PG_CONF_FILE"
+    exit 1
+  fi
+}
+
+# Função para atualizar as configurações de TLS
+update_tls_config() {
+  # Verificar se o arquivo já contém a configuração ssl_min_protocol
+  if grep -q "^ssl_min_protocol" "$PG_CONF_FILE"; then
+    echo "ssl_min_protocol já configurado. Verificando valor."
+    CURRENT_SSL_MIN_PROTOCOL=$(grep "^ssl_min_protocol" "$PG_CONF_FILE" | awk '{print $3}' | tr -d "'")
+    if [ "$CURRENT_SSL_MIN_PROTOCOL" != "TLSv1.2" ]; then
+      echo "Atualizando ssl_min_protocol para TLSv1.2"
+      sudo sed -i "s/^ssl_min_protocol.*$/ssl_min_protocol = 'TLSv1.2'/" "$PG_CONF_FILE"
+    else
+      echo "ssl_min_protocol já está configurado corretamente (TLSv1.2)."
+    fi
+  else
+      echo "Adicionando ssl_min_protocol = 'TLSv1.2' ao arquivo de configuração."
+      sudo sed -i '$a ssl_min_protocol = \'TLSv1.2\'' "$PG_CONF_FILE"
+  fi
+
+  # Verificar se o arquivo já contém a configuração ssl_ciphers
+  if grep -q "^ssl_ciphers" "$PG_CONF_FILE"; then
+    echo "ssl_ciphers já configurado. Nenhuma alteração necessária."
+  else
+    echo "Adicionando ssl_ciphers (recomendado) ao arquivo de configuração. Ajuste conforme necessário."
+    # Adicione uma configuração ssl_ciphers segura (exemplo; ajuste conforme necessário).
+    sudo sed -i '$a ssl_ciphers = \'HIGH:!SSLv2:!aNULL:!eNULL:!3DES@STRENGTH\'' "$PG_CONF_FILE"
+  fi
+}
+
+# Função para reiniciar o serviço PostgreSQL
+restart_postgresql() {
+  if systemctl is-active --quiet "$SERVICE_NAME"; then
+    echo "Reiniciando o serviço PostgreSQL..."
+    sudo systemctl restart "$SERVICE_NAME"
+    if [ $? -eq 0 ]; then
+      echo "Serviço PostgreSQL reiniciado com sucesso."
+    else
+      echo "Erro ao reiniciar o serviço PostgreSQL."
+      exit 1
+    fi
+  else
+    echo "Serviço PostgreSQL não está em execução. Iniciando..."
+    sudo systemctl start "$SERVICE_NAME"
+    if [ $? -eq 0 ]; then
+      echo "Serviço PostgreSQL iniciado com sucesso."
+    else
+      echo "Erro ao iniciar o serviço PostgreSQL."
+      exit 1
+    fi
+
+  fi
+}
+
+# Main
+check_config_file
+update_tls_config
+restart_postgresql
+
+echo "Script de correção concluído."
+
+exit 0
+```}
+{type: uploaded file
+fileName: teste1vt-cve_10.txt
+fullContent:
+```bash
+#!/bin/bash
+
+# Identifica o sistema operacional para adaptar o script
+if command -v systemctl &> /dev/null; then
+    OS="systemd"
+elif [ -f /etc/init.d/postgresql ]; then
+    OS="sysvinit"
+else
+    echo "Sistema operacional não suportado. Saindo."
+    exit 1
+fi
+
+# Define o arquivo de configuração do PostgreSQL
+PG_CONF="/etc/postgresql/*/main/postgresql.conf"
+
+# Define a string para desabilitar TLSv1.0 e TLSv1.1
+TLS_DISABLE="!TLSv1,!TLSv1.1"
+
+# Função para modificar a configuração SSL do PostgreSQL
+configure_postgresql() {
+    if [ ! -f "$PG_CONF" ]; then
+        echo "Arquivo de configuração do PostgreSQL não encontrado: $PG_CONF"
+        return 1
+    fi
+
+    # Verifica se a linha ssl_min_protocol já existe
+    if grep -q "ssl_min_protocol" "$PG_CONF"; then
+        # Se existe, atualiza a linha
+        sed -i "s/ssl_min_protocol = .*/ssl_min_protocol = TLSv1.2/g" "$PG_CONF"
+    else
+        # Se não existe, adiciona a linha
+        echo "ssl_min_protocol = TLSv1.2" >> "$PG_CONF"
+    fi
+
+    # Verifica se a linha ssl_ciphers já existe
+    if grep -q "ssl_ciphers" "$PG_CONF"; then
+        # Se existe, atualiza a linha removendo ciphers fracos
+        # Manter apenas ciphers fortes e modernos é uma prática recomendada
+        sed -i "s/ssl_ciphers = .*/ssl_ciphers = 'HIGH:!aNULL:!MD5'/" "$PG_CONF"
+    else
+        # Se não existe, adiciona a linha
+        echo "ssl_ciphers = 'HIGH:!aNULL:!MD5'" >> "$PG_CONF"
+    fi
+}
+
+# Configura o PostgreSQL
+configure_postgresql
+
+# Reinicia o serviço PostgreSQL dependendo do sistema operacional
+if [ "$OS" = "systemd" ]; then
+    systemctl restart postgresql.service
+elif [ "$OS" = "sysvinit" ]; then
+    /etc/init.d/postgresql restart
+fi
+
+echo "Script de correção completo. PostgreSQL foi configurado para desabilitar TLSv1.0 e TLSv1.1 e o serviço foi reiniciado."
+
+exit 0
+```}
+{type: uploaded file
+fileName: teste1vt-cve_11.txt
+fullContent:
+```bash
+#!/bin/bash
+
+# Identifica o serviço rodando na porta 5432 (PostgreSQL provavelmente)
+SERVICE=$(ss -tlpn | grep ":5432" | awk '{split($5,a,":"); print a[1]}')
+
+# Verifica se o serviço foi encontrado
+if [ -z "$SERVICE" ]; then
+  echo "Serviço na porta 5432 não encontrado. Verifique se o PostgreSQL está rodando."
+  exit 1
+fi
+
+# Localiza o arquivo de configuração do PostgreSQL
+CONFIG_FILE=$(find /etc/postgresql/ /var/lib/postgresql/ -name postgresql.conf 2>/dev/null | head -n 1)
+
+# Verifica se o arquivo de configuração foi encontrado
+if [ -z "$CONFIG_FILE" ]; then
+  echo "Arquivo de configuração do PostgreSQL não encontrado."
+  exit 1
+fi
+
+# Define as configurações de SSL/TLS desejadas
+TLS_VERSIONS="TLSv1.2,TLSv1.3"
+
+# Modifica o arquivo de configuração para desabilitar TLSv1.0 e TLSv1.1
+# e habilitar TLSv1.2 e TLSv1.3
+
+# Cria um backup do arquivo de configuração
+cp "$CONFIG_FILE" "${CONFIG_FILE}.bak"
+
+# Remove as linhas existentes de ssl_min_protocol e ssl_max_protocol (se existirem)
+sed -i '/ssl_min_protocol/d' "$CONFIG_FILE"
+sed -i '/ssl_max_protocol/d' "$CONFIG_FILE"
+
+# Adiciona as novas configurações de protocolo TLS
+echo "# Desabilita TLSv1.0 e TLSv1.1, habilita TLSv1.2 e TLSv1.3" >> "$CONFIG_FILE"
+echo "ssl_min_protocol = 'TLSv1.2'" >> "$CONFIG_FILE"
+echo "ssl_max_protocol = 'TLSv1.3'" >> "$CONFIG_FILE"
+
+# Reinicia o serviço PostgreSQL
+if systemctl is-active --quiet postgresql; then
+  systemctl restart postgresql
+else
+  service postgresql restart
+fi
+
+# Verifica se o serviço foi reiniciado com sucesso
+if [ $? -eq 0 ]; then
+  echo "PostgreSQL reiniciado com sucesso. TLSv1.0 e TLSv1.1 foram desabilitados."
+else
+  echo "Erro ao reiniciar o PostgreSQL. Verifique o arquivo de log para mais detalhes."
+  echo "Reverter para o arquivo de configuração de backup."
+  cp "${CONFIG_FILE}.bak" "$CONFIG_FILE"
+  exit 1
+fi
+
+exit 0
+```}
+{type: uploaded file
+fileName: teste1vt-cve_12.txt
+fullContent:
+```bash
+#!/bin/bash
+
+# Identifica o sistema operacional (assumindo Linux/Debian-based)
+OS=$(uname -s)
+
+# Função para desabilitar TLSv1.0 e TLSv1.1 no PostgreSQL (porta 5432)
+disable_tls_postgres() {
+  # Localiza o arquivo postgresql.conf
+  POSTGRES_CONF=$(find /etc/postgresql/ -name postgresql.conf | head -n 1)
+
+  if [ -z "$POSTGRES_CONF" ]; then
+    echo "Arquivo postgresql.conf não encontrado.  Verifique a instalação do PostgreSQL."
+    exit 1
+  fi
+
+  # Cria um backup do arquivo de configuração
+  cp "$POSTGRES_CONF" "${POSTGRES_CONF}.bak.$(date +%Y%m%d%H%M%S)"
+
+  # Adiciona ou modifica a configuração ssl_min_protocol para 'TLSv1.2'
+  if grep -q "^ssl_min_protocol" "$POSTGRES_CONF"; then
+    sed -i "s/^ssl_min_protocol.*/ssl_min_protocol = 'TLSv1.2'/g" "$POSTGRES_CONF"
+  else
+    echo "ssl_min_protocol = 'TLSv1.2'" >> "$POSTGRES_CONF"
+  fi
+
+  # Reinicia o serviço PostgreSQL
+  systemctl restart postgresql
+
+  echo "TLSv1.0 e TLSv1.1 desabilitados no PostgreSQL (porta 5432).  Serviço reiniciado."
+}
+
+# Função genérica para desabilitar TLS 1.0/1.1 em outros serviços (requer adaptação)
+disable_tls_generic() {
+  echo "Função genérica para desabilitar TLS 1.0/1.1. Requer adaptação para o serviço específico."
+  echo "Verifique a documentação do serviço afetado para desabilitar TLSv1.0 e TLSv1.1 e habilitar TLSv1.2+."
+  echo "Esta função não modifica nenhum arquivo por padrão."
+  # Exemplo (requer adaptação):
+  # SED_COMMAND="s/TLSv1.0/!TLSv1.0/g; s/TLSv1.1/!TLSv1.1/g"
+  # find /etc -name "<nome_do_arquivo_de_configuração>" -exec sed -i "$SED_COMMAND" {} \;
+  # systemctl restart <nome_do_serviço>
+}
+
+# Correções específicas para CVEs (se aplicável e se informações suficientes forem fornecidas)
+fix_cve_2023_41928() {
+  echo "Atenção: A correção para CVE-2023-41928 (Kiloview P1/P2) requer instruções específicas do fabricante."
+  echo "Verifique a documentação da Kiloview para obter as últimas atualizações de firmware e instruções de segurança."
+}
+
+fix_cve_2024_41270() {
+  echo "Atenção: A correção para CVE-2024-41270 (Gorush v1.18.4) pode exigir uma atualização para uma versão mais recente ou configuração específica."
+  echo "Verifique a documentação do Gorush para obter as instruções de segurança mais recentes."
+}
+
+fix_cve_2025_3200() {
+  echo "Atenção: A correção para CVE-2025-3200 (Wiesemann & Theis) requer instruções específicas do produto."
+  echo "Verifique a documentação da Wiesemann & Theis para obter as últimas atualizações de firmware e instruções de segurança."
+}
+
+
+# Executa as funções de correção
+disable_tls_postgres
+
+# Chama as funções de correção específicas para os CVEs (se aplicável).
+fix_cve_2023_41928
+fix_cve_2024_41270
+fix_cve_2025_3200
+
+echo "Script finalizado. Verifique manualmente a configuração dos serviços afetados."
+```}
+{type: uploaded file
+fileName: teste1vt-cve_13.txt
+fullContent:
+```bash
+#!/bin/bash
+
+# Script para desabilitar TLSv1.0 e TLSv1.1 no PostgreSQL (porta 5432)
+
+# 1. Detectar a configuração atual do TLS no postgresql.conf
+tls_config=$(grep "ssl_min_protocol" /etc/postgresql/*/main/postgresql.conf)
+
+# 2. Verificar se a configuração já existe e agir de acordo
+if [ -z "$tls_config" ]; then
+  # Adicionar a configuração se não existir
+  echo "ssl_min_protocol = 'TLSv1.2'" | sudo tee -a /etc/postgresql/*/main/postgresql.conf
+  echo "Configuração ssl_min_protocol adicionada."
+else
+  # Alterar a configuração existente
+  sudo sed -i "s/ssl_min_protocol =.*/ssl_min_protocol = 'TLSv1.2'/g" /etc/postgresql/*/main/postgresql.conf
+  echo "Configuração ssl_min_protocol alterada para TLSv1.2."
+fi
+
+# 3. Reiniciar o serviço PostgreSQL para aplicar as mudanças
+sudo systemctl restart postgresql
+
+# 4. Verificar se o serviço reiniciou corretamente
+if [ $? -eq 0 ]; then
+  echo "Serviço PostgreSQL reiniciado com sucesso."
+else
+  echo "Erro ao reiniciar o serviço PostgreSQL."
+  exit 1
+fi
+
+# 5. Opcional: Verificar a versão do TLS em uso (requer o pacote sslscan)
+if command -v sslscan &> /dev/null; then
+  echo "Verificando a versão do TLS em uso na porta 5432..."
+  sslscan localhost:5432 | grep "TLSv1.2"
+  if [ $? -eq 0 ]; then
+    echo "TLSv1.2 ou superior detectado."
+  else
+    echo "Atenção: TLSv1.2 ou superior não detectado. Verifique a configuração e reinicie o serviço."
+  fi
+else
+  echo "sslscan não encontrado. Instale-o para verificar a configuração TLS."
+fi
+
+echo "Script de correção finalizado."
+exit 0
+```
+}
+{type: uploaded file
+fileName: teste1vt-cve_14.txt
+fullContent:
+```bash
+#!/bin/bash
+
+# Identifica o sistema operacional.
+OS=$(uname -s)
+
+# Função para desabilitar TLSv1.0 e TLSv1.1 no PostgreSQL.
+disable_tls_postgres() {
+  # Arquivo de configuração do PostgreSQL.  Pode variar dependendo da distribuição.
+  POSTGRES_CONF="/etc/postgresql/*/main/postgresql.conf"
+
+  # Verifica se o arquivo de configuração existe.
+  if [ ! -f "$POSTGRES_CONF" ]; then
+    echo "Arquivo de configuração do PostgreSQL não encontrado em $POSTGRES_CONF. Verifique a localização."
+    return 1
+  fi
+
+  # Cria um backup do arquivo de configuração.
+  cp "$POSTGRES_CONF" "${POSTGRES_CONF}.bak.$(date +%Y%m%d%H%M%S)"
+
+  # Desabilita TLSv1.0 e TLSv1.1 editando o arquivo postgresql.conf.
+  # Define ssl_min_protocol para tls1.2
+  sed -i "s/^#ssl_min_protocol = .*/ssl_min_protocol = 'tls1.2'/g" "$POSTGRES_CONF"
+  if ! grep -q "^ssl_min_protocol = " "$POSTGRES_CONF"; then
+    echo "ssl_min_protocol = 'tls1.2'" >> "$POSTGRES_CONF"
+  fi
+
+  # Reinicia o serviço PostgreSQL para aplicar as mudanças.
+  systemctl restart postgresql
+
+  # Verifica se o serviço foi reiniciado com sucesso.
+  if [ $? -eq 0 ]; then
+    echo "PostgreSQL reiniciado com sucesso com TLSv1.2+ apenas."
+  else
+    echo "Erro ao reiniciar o PostgreSQL. Verifique os logs."
+    return 1
+  fi
+
+  return 0
+}
+
+# Desabilita TLSv1.0 e TLSv1.1 no OpenSSL (configuração global do sistema).
+disable_tls_openssl() {
+  # Localização do arquivo openssl.cnf (pode variar).
+  OPENSSL_CONF="/etc/ssl/openssl.cnf"
+
+  # Verifica se o arquivo de configuração existe.
+  if [ ! -f "$OPENSSL_CONF" ]; then
+    OPENSSL_CONF="/etc/pki/tls/openssl.cnf"
+    if [ ! -f "$OPENSSL_CONF" ]; then
+      echo "Arquivo de configuração do OpenSSL não encontrado. Verifique a localização."
+      return 1
+    fi
+  fi
+
+  # Cria um backup do arquivo de configuração.
+  cp "$OPENSSL_CONF" "${OPENSSL_CONF}.bak.$(date +%Y%m%d%H%M%S)"
+
+  # Adiciona a configuração MinProtocol = TLSv1.2 na seção [system_default_sect] ou similar.
+  sed -i 's/^[ ]*CipherString = DEFAULT@SECLEVEL=2/&\\nMinProtocol = TLSv1.2/g' "$OPENSSL_CONF"
+
+  if ! grep -q "^MinProtocol = TLSv1.2" "$OPENSSL_CONF"; then
+      echo "Não foi possível adicionar MinProtocol ao arquivo openssl.cnf. A configuração manual pode ser necessária."
+  fi
+
+  echo "Configuração do OpenSSL atualizada. Reinicie os serviços afetados para aplicar as mudanças."
+
+  return 0
+}
+
+# Função principal que coordena as ações.
+main() {
+  echo "Iniciando a correção para desabilitar TLSv1.0 e TLSv1.1..."
+
+  # Desabilita no PostgreSQL
+  echo "Desabilitando TLSv1.0 e TLSv1.1 no PostgreSQL..."
+  disable_tls_postgres
+
+  # Desabilita no OpenSSL (configuração global)
+  echo "Desabilitando TLSv1.0 e TLSv1.1 no OpenSSL (configuração global)..."
+  disable_tls_openssl
+
+  echo "Correção concluída.  Reinicie os serviços afetados (além do PostgreSQL) para garantir que as mudanças sejam aplicadas."
+}
+
+# Executa a função principal.
+main
+```}
+{type: uploaded file
+fileName: teste1vt-cve_15.txt
+fullContent:
+```bash
+#!/bin/bash
+
+# Detecta o sistema operacional
+os=$(uname -s)
+
+# Define o nome do serviço PostgreSQL
+service_name="postgresql"
+
+# Define a porta do PostgreSQL
+port="5432"
+
+# Função para verificar se o PostgreSQL está instalado
+check_postgresql() {
+  if command -v pg_ctl >/dev/null 2>&1; then
+    return 0
+  else
+    return 1
+  fi
+}
+
+# Função para obter a versão do PostgreSQL
+get_postgresql_version() {
+  if check_postgresql; then
+    pg_ctl --version | awk '{print $3}'
+  else
+    echo "PostgreSQL não está instalado."
+    exit 1
+  fi
+}
+
+# Função para desabilitar TLSv1.0 e TLSv1.1 no PostgreSQL
+disable_tls10_tls11_postgresql() {
+  version=$(get_postgresql_version)
+  config_file=""
+
+  # Determina o arquivo de configuração com base na versão do PostgreSQL
+  if [[ "$version" == 9.* ]]; then
+    config_file="/etc/postgresql/9.x/main/postgresql.conf"
+  elif [[ "$version" == 10.* ]]; then
+    config_file="/etc/postgresql/10/main/postgresql.conf"
+  elif [[ "$version" == 11.* ]]; then
+    config_file="/etc/postgresql/11/main/postgresql.conf"
+  elif [[ "$version" == 12.* ]]; then
+    config_file="/etc/postgresql/12/main/postgresql.conf"
+  elif [[ "$version" == 13.* ]]; then
+    config_file="/etc/postgresql/13/main/postgresql.conf"
+  elif [[ "$version" == 14.* ]]; then
+    config_file="/etc/postgresql/14/main/postgresql.conf"
+  elif [[ "$version" == 15.* ]]; then
+    config_file="/etc/postgresql/15/main/postgresql.conf"
+  elif [[ "$version" == 16.* ]]; then
+    config_file="/etc/postgresql/16/main/postgresql.conf"
+  else
+    echo "Versão do PostgreSQL não suportada: $version"
+    exit 1
+  fi
+
+  # Verifica se o arquivo de configuração existe
+  if [ ! -f "$config_file" ]; then
+    echo "Arquivo de configuração não encontrado: $config_file"
+    exit 1
+  fi
+
+  # Define as configurações de SSL/TLS
+  tls_settings="ssl = on
+ssl_min_protocol = TLSv1.2"
+
+  # Remove configurações antigas (se existirem)
+  sudo sed -i '/^ssl =/d' "$config_file"
+  sudo sed -i '/^ssl_min_protocol =/d' "$config_file"
+
+  # Adiciona as novas configurações
+  echo "$tls_settings" | sudo tee -a "$config_file" > /dev/null
+
+  # Reinicia o serviço PostgreSQL
+  if systemctl is-active --quiet "$service_name"; then
+      sudo systemctl restart "$service_name"
+  else
+      echo "O serviço PostgreSQL não está em execução."
+  fi
+
+  echo "TLSv1.0 e TLSv1.1 desabilitados no PostgreSQL. Arquivo de configuração modificado: $config_file"
+}
+
+# Script principal
+if check_postgresql; then
+  disable_tls10_tls11_postgresql
+else
+  echo "PostgreSQL não está instalado."
+  exit 1
+fi
+
+exit 0
+```}
+{type: uploaded file
+fileName: teste1vt-cve_16.txt
+fullContent:
+```bash
+#!/bin/bash
+
+# Identifica o serviço rodando na porta 5432 (PostgreSQL por padrão)
+SERVICE=$(ss -tlpn | grep ':5432' | awk '{split($5,a,":"); print a[1]}')
+
+# Verifica se o serviço foi encontrado
+if [ -z "$SERVICE" ]; then
+  echo "Serviço na porta 5432 não encontrado. Verifique se PostgreSQL ou outro serviço está rodando nessa porta."
+  exit 1
+fi
+
+# Assume que é PostgreSQL e tenta desabilitar TLSv1.0 e TLSv1.1
+
+# Localiza o arquivo de configuração do PostgreSQL (pg_hba.conf)
+PG_HBA_CONF=$(find /etc/postgresql/ /var/lib/postgresql/ -name pg_hba.conf 2>/dev/null | head -n 1)
+
+# Verifica se o arquivo pg_hba.conf foi encontrado
+if [ -z "$PG_HBA_CONF" ]; then
+  echo "Arquivo pg_hba.conf não encontrado. Impossível configurar TLS."
+  exit 1
+fi
+
+# Localiza o arquivo de configuração do PostgreSQL (postgresql.conf)
+PG_CONF=$(find /etc/postgresql/ /var/lib/postgresql/ -name postgresql.conf 2>/dev/null | head -n 1)
+
+# Verifica se o arquivo postgresql.conf foi encontrado
+if [ -z "$PG_CONF" ]; then
+  echo "Arquivo postgresql.conf não encontrado. Impossível configurar TLS."
+  exit 1
+fi
+
+# Define a string de configuração TLS para postgresql.conf
+TLS_CONFIG="ssl = on
+ssl_min_protocol = 'TLSv1.2'"
+
+# Adiciona ou atualiza as configurações TLS no postgresql.conf
+if grep -q "ssl_min_protocol" "$PG_CONF"; then
+  sed -i "s/ssl_min_protocol =.*/ssl_min_protocol = 'TLSv1.2'/" "$PG_CONF"
+else
+  echo "$TLS_CONFIG" >> "$PG_CONF"
+fi
+
+# Reinicia o serviço PostgreSQL
+if systemctl is-active --quiet postgresql; then
+  systemctl restart postgresql
+  echo "Serviço PostgreSQL reiniciado."
+else
+  echo "Serviço PostgreSQL não está ativo. Verifique a instalação."
+  exit 1
+fi
+
+echo "Proteção contra TLSv1.0 e TLSv1.1 aplicada (assumindo PostgreSQL)."
+exit 0
+```}
+{type: uploaded file
+fileName: teste1vt-cve_17.txt
+fullContent:
+```bash
+#!/bin/bash
+
+# Descrição: Desabilita TLSv1.0 e TLSv1.1 para o serviço PostgreSQL (porta 5432).
+#           Este script assume que o PostgreSQL está configurado para usar TLS.
+#           Ele modifica o arquivo de configuração postgresql.conf para desabilitar TLSv1.0 e TLSv1.1.
+#           Em seguida, reinicia o serviço PostgreSQL para aplicar as mudanças.
+
+# Variáveis
+PG_CONF_FILE="/etc/postgresql/$(pg_lsclusters | awk '$2 == 5432 {print $1}')/main/postgresql.conf"
+SERVICE_NAME="postgresql"
+
+# Verifica se o arquivo de configuração existe
+if [ ! -f "$PG_CONF_FILE" ]; then
+  echo "Erro: Arquivo de configuração do PostgreSQL não encontrado: $PG_CONF_FILE"
+  exit 1
+fi
+
+# Realiza um backup do arquivo de configuração
+cp "$PG_CONF_FILE" "$PG_CONF_FILE.bak"
+
+# Desabilita TLSv1.0 e TLSv1.1 adicionando a configuração ssl_min_protocol
+if grep -q "ssl_min_protocol" "$PG_CONF_FILE"; then
+  # Se a configuração já existe, atualiza
+  sed -i "s/^ssl_min_protocol.*/ssl_min_protocol = 'TLSv1.2'/g" "$PG_CONF_FILE"
+else
+  # Se não existe, adiciona a nova configuração
+  echo "ssl_min_protocol = 'TLSv1.2'" >> "$PG_CONF_FILE"
+fi
+
+# Reinicia o serviço PostgreSQL
+if systemctl is-active --quiet "$SERVICE_NAME"; then
+  systemctl restart "$SERVICE_NAME"
+  if [ $? -eq 0 ]; then
+    echo "Serviço PostgreSQL reiniciado com sucesso."
+  else
+    echo "Erro ao reiniciar o serviço PostgreSQL."
+    exit 1
+  fi
+else
+  echo "Serviço PostgreSQL não está em execução. Iniciando..."
+  systemctl start "$SERVICE_NAME"
+  if [ $? -eq 0 ]; then
+        echo "Serviço PostgreSQL iniciado com sucesso."
+  else
+        echo "Erro ao iniciar o serviço PostgreSQL."
+        exit 1
+  fi
+fi
+
+echo "TLSv1.0 e TLSv1.1 desabilitados com sucesso no PostgreSQL."
+exit 0
+```}
+{type: uploaded file
+fileName: teste1vt-cve_18.txt
+fullContent:
+```bash
+#!/bin/bash
+
+# Identifica o serviço rodando na porta 5432 (PostgreSQL por padrão).
+# Adapte conforme necessário se não for PostgreSQL ou se a porta estiver incorreta.
+SERVICE=$(ss -tulnp | grep ":5432" | awk '{print $6}' | cut -d ',' -f 2 | cut -d '=' -f 2)
+
+# Verifica se o serviço foi encontrado.
+if [ -z "$SERVICE" ]; then
+  echo "Serviço rodando na porta 5432 não encontrado. Verifique a porta e o serviço."
+  exit 1
+fi
+
+# Determina o sistema operacional.
+OS=$(uname -s)
+
+# Função para lidar com a configuração do PostgreSQL (assumindo ser o serviço).
+configure_postgresql() {
+  PG_CONF="/etc/postgresql/*/main/postgresql.conf" # Caminho padrão do arquivo de configuração.
+
+  # Verifica se o arquivo de configuração existe.
+  if [ ! -f "$PG_CONF" ]; then
+    echo "Arquivo de configuração do PostgreSQL não encontrado em $PG_CONF.  Tente encontrar manualmente e ajustar o script."
+    exit 1
+  fi
+
+  # Desabilita TLS 1.0 e 1.1 e força TLS 1.2 e superior.
+  sed -i 's/^#?ssl_min_protocol =.*/ssl_min_protocol = TLSv1.2/g' "$PG_CONF"
+
+  # Reinicia o serviço PostgreSQL para aplicar as alterações.
+  systemctl restart postgresql
+  echo "Serviço PostgreSQL reiniciado para aplicar as configurações TLS."
+}
+
+
+# Executa a configuração baseada no serviço detectado.
+case "$SERVICE" in
+  "postgresql")
+    configure_postgresql
+    ;;
+  *)
+    echo "Serviço não suportado automaticamente.  Ajuste o script para configurar $SERVICE."
+    exit 1
+    ;;
+esac
+
+echo "Correção completa.  Verifique as configurações e o serviço."
+exit 0
+```}
+{type: uploaded file
+fileName: teste1vt-cve_19.txt
+fullContent:
+```bash
+#!/bin/bash
+
+# Identifica o serviço que está usando TLSv1.0 na porta 5432
+# Este script assume que o serviço é o PostgreSQL, que usa a porta 5432 por padrão.
+# Se não for PostgreSQL, ajuste os comandos abaixo conforme necessário.
+
+# 1. Localiza o arquivo de configuração do PostgreSQL.
+PG_CONF=$(find /etc/postgresql/ -name postgresql.conf | head -n 1)
+
+if [ -z "$PG_CONF" ]; then
+  echo "Arquivo postgresql.conf não encontrado. Verifique a instalação do PostgreSQL."
+  exit 1
+fi
+
+# 2. Modifica o arquivo postgresql.conf para desabilitar TLSv1.0 e TLSv1.1 e habilitar TLSv1.2 e TLSv1.3.
+# Adiciona ou modifica a linha ssl_min_protocol para 'TLSv1.2'.
+if grep -q "ssl_min_protocol" "$PG_CONF"; then
+  sed -i "s/^ssl_min_protocol.*/ssl_min_protocol = 'TLSv1.2'/g" "$PG_CONF"
+else
+  echo "ssl_min_protocol = 'TLSv1.2'" >> "$PG_CONF"
+fi
+
+# Garante que o SSL esteja habilitado
+if ! grep -q "ssl = on" "$PG_CONF"; then
+  if grep -q "ssl =" "$PG_CONF"; then
+    sed -i "s/^ssl =.*/ssl = on/g" "$PG_CONF"
+  else
+    echo "ssl = on" >> "$PG_CONF"
+  fi
+fi
+
+# 3. Reinicia o serviço PostgreSQL para aplicar as alterações.
+if systemctl is-active postgresql > /dev/null 2>&1; then
+  systemctl restart postgresql
+  echo "Serviço PostgreSQL reiniciado."
+else
+  echo "Serviço PostgreSQL não está em execução. Verifique a instalação."
+  exit 1
+fi
+
+echo "Correção aplicada. TLSv1.0 e TLSv1.1 desabilitados para PostgreSQL."
+exit 0
+```}
+{type: uploaded file
+fileName: teste1vt-cve_20.txt
+fullContent:
+```bash
+#!/bin/bash
+
+# Descrição: Desabilita TLSv1.0 e TLSv1.1 no PostgreSQL (porta 5432).
+# Adapte o caminho do arquivo de configuração conforme necessário.
+
+# Variáveis
+PG_CONFIG_FILE="/etc/postgresql/$(pg_lsclusters | awk '{print $1 "/" $2}' | head -n 1)/postgresql.conf"
+TEMP_FILE="/tmp/postgresql.conf.tmp"
+
+# Verifica se o arquivo de configuração existe
+if [ ! -f "$PG_CONFIG_FILE" ]; then
+  echo "Arquivo de configuração do PostgreSQL não encontrado: $PG_CONFIG_FILE"
+  exit 1
+fi
+
+# Cria um backup do arquivo de configuração
+cp "$PG_CONFIG_FILE" "$PG_CONFIG_FILE.bak"
+
+# Desabilita TLSv1.0 e TLSv1.1, habilitando apenas TLSv1.2 e superior
+grep -q "^ssl_min_protocol" "$PG_CONFIG_FILE"
+if [ $? -eq 0 ]; then
+  # A diretiva já existe, então vamos atualizá-la
+  sed -i "s/^ssl_min_protocol = .*/ssl_min_protocol = 'TLSv1.2'/g" "$PG_CONFIG_FILE"
+else
+  # A diretiva não existe, então vamos adicioná-la
+  echo "ssl_min_protocol = 'TLSv1.2'" >> "$PG_CONFIG_FILE"
+fi
+
+
+# Reinicia o serviço PostgreSQL para aplicar as alterações
+systemctl restart postgresql.service
+
+# Verifica se o serviço foi reiniciado com sucesso
+if [ $? -eq 0 ]; then
+  echo "PostgreSQL reiniciado com sucesso. TLSv1.0 e TLSv1.1 foram desabilitados."
+else
+  echo "Erro ao reiniciar o PostgreSQL. Verifique os logs do sistema."
+  echo "Restaure o arquivo de configuração original:"
+  cp "$PG_CONFIG_FILE.bak" "$PG_CONFIG_FILE"
+  exit 1
+fi
+
+exit 0
+```}

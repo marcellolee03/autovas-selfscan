@@ -1,0 +1,26 @@
+#!/bin/bash
+sudo apt-get update
+sudo apt-get install --only-upgrade python3.10 python3.10-dev python3.10-venv -y
+sudo apt-get install --only-upgrade python3.12 python3.12-dev python3.12-venv -y
+sudo python3.10 -m pip install --upgrade pip
+sudo python3.12 -m pip install --upgrade pip
+sudo python3.10 -m pip install --upgrade setuptools wheel
+sudo python3.12 -m pip install --upgrade setuptools wheel
+sudo python3.10 -m pip install --upgrade urllib3
+sudo python3.12 -m pip install --upgrade urllib3
+sudo python3.10 -m pip install --upgrade pyopenssl
+sudo python3.12 -m pip install --upgrade pyopenssl
+sudo python3.10 -m pip install --upgrade cryptography
+sudo python3.12 -m pip install --upgrade cryptography
+sudo python3.10 -m pip install --upgrade email_validator
+sudo python3.12 -m pip install --upgrade email_validator
+sudo python3.10 -m pip install --upgrade expat
+sudo python3.12 -m pip install --upgrade expat
+sudo python3.10 -m pip install --upgrade ipaddress
+sudo python3.12 -m pip install --upgrade ipaddress
+sudo python3.10 -m pip install --upgrade mimetypes
+sudo python3.12 -m pip install --upgrade mimetypes
+sudo python3.10 -m pip install --upgrade email.parser
+sudo python3.12 -m pip install --upgrade email.parser
+sudo systemctl restart python3.10
+sudo systemctl restart python3.12

@@ -1,0 +1,22 @@
+#!/bin/bash
+TWIKI_VERSION="4.2.4"
+TWIKI_INSTALL_DIR="/var/www/twiki"
+
+if [ -d "$TWIKI_INSTALL_DIR" ]; then
+    cd "$TWIKI_INSTALL_DIR"
+    CURRENT_VERSION=$(grep -oP '(?<=VERSION=).*' bin/setlib.cfg)
+    if [ "$CURRENT_VERSION" != "$TWIKI_VERSION" ]; then
+        wget -O twiki.zip "https://github.com/TWikiOrg/twiki/archive/TWikiRelease$TWIKI_VERSION.zip"
+        unzip twiki.zip
+        rm -rf "$TWIKI_INSTALL_DIR"/*
+        mv "twiki-TWikiRelease$TWIKI_VERSION"/* "$TWIKI_INSTALL_DIR"/
+        rm -rf twiki.zip "twiki-TWikiRelease$TWIKI_VERSION"
+        chown -R www-data:www-data "$TWIKI_INSTALL_DIR"
+        chmod -R 755 "$TWIKI_INSTALL_DIR"
+        echo "TWiki upgraded to version $TWIKI_VERSION"
+    else
+        echo "TWiki is already at version $TWIKI_VERSION"
+    fi
+else
+    echo "TWiki installation directory not found."
+fi

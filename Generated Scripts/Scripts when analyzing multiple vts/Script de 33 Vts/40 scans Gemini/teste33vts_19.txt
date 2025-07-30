@@ -1,0 +1,131 @@
+```bash
+#!/bin/bash
+
+# Vulnerability 1: Proxmox VE EOL
+# Since upgrading Proxmox VE requires careful planning and execution,
+# this script will only print a warning message.  A full upgrade script
+# would be complex and potentially disruptive.
+echo "WARNING: Proxmox VE version 7.3-3 is End of Life.  Please upgrade to a supported version."
+
+# Vulnerabilities 2-6: jQuery < 1.9.0 XSS
+# Defining the target IP
+TARGET_IP="10.129.4.254"
+
+# Define the jQuery 1.9.0 download URL
+JQUERY_1_9_0_URL="https://code.jquery.com/jquery-1.9.0.min.js"
+
+# Array of vulnerable file paths
+VULNERABLE_FILES=(
+    "/../js/jquery-1.8.3.min.js"
+    "/opscenter/webcommon/framework/../js/jquery-1.8.3.min.js"
+    "/framesets/../js/jquery-1.8.3.min.js"
+    "/frameset/../js/jquery-1.8.3.min.js"
+    "/console/framework/../js/jquery-1.8.3.min.js"
+)
+
+# Function to update jQuery file
+update_jquery() {
+    FILE_PATH="$1"
+    FULL_URL="$TARGET_IP$FILE_PATH"
+    
+    # Determine the directory
+    DIR=$(dirname "$FILE_PATH")
+    
+    # Create the directory if it doesn't exist
+    if [[ ! -d "$DIR" ]]; then
+      mkdir -p "$DIR"
+    fi
+
+    # Download jQuery 1.9.0 and replace the vulnerable file
+    echo "Downloading jQuery 1.9.0 and replacing $FULL_URL"
+    wget -q -O "$FILE_PATH" "$JQUERY_1_9_0_URL"
+
+    if [ $? -eq 0 ]; then
+        echo "Successfully updated $FULL_URL"
+    else
+        echo "Failed to update $FULL_URL"
+    fi
+}
+
+# Loop through each vulnerable file and update it
+for FILE_PATH in "${VULNERABLE_FILES[@]}"; do
+    update_jquery "$FILE_PATH"
+done
+
+# Vulnerabilities 7, 8, 9, 13, 14, 15, 16, 19, 21, 22: SSH Weak Algorithms
+# Disable weak SSH algorithms by modifying /etc/ssh/sshd_config
+
+# Create a backup of the original sshd_config file
+sudo cp /etc/ssh/sshd_config /etc/ssh/sshd_config.bak
+
+# Use sed to remove and add the required lines in sshd_config
+sudo sed -i 's/^#?KexAlgorithms .*/KexAlgorithms curve25519-sha256@libssh.org,ecdh-sha2-nistp256,ecdh-sha2-nistp384,ecdh-sha2-nistp521,diffie-hellman-group-exchange-sha256/' /etc/ssh/sshd_config
+sudo sed -i 's/^#?Ciphers .*/Ciphers chacha20-poly1305@openssh.com,aes256-gcm@openssh.com,aes128-gcm@openssh.com,aes256-ctr,aes128-ctr/' /etc/ssh/sshd_config
+sudo sed -i 's/^#?MACs .*/MACs hmac-sha2-256,hmac-sha2-512/' /etc/ssh/sshd_config
+
+# Remove potentially conflicting entries if they exist
+sudo sed -i '/umac-64-etm@openssh.com/d' /etc/ssh/sshd_config
+sudo sed -i '/umac-64@openssh.com/d' /etc/ssh/sshd_config
+sudo sed -i '/hmac-md5/d' /etc/ssh/sshd_config
+sudo sed -i '/hmac-sha1-96/d' /etc/ssh/sshd_config
+sudo sed -i '/3des-cbc/d' /etc/ssh/sshd_config
+sudo sed -i '/aes128-cbc/d' /etc/ssh/sshd_config
+sudo sed -i '/aes256-cbc/d' /etc/ssh/sshd_config
+sudo sed -i '/twofish-cbc/d' /etc/ssh/sshd_config
+sudo sed -i '/twofish128-cbc/d' /etc/ssh/sshd_config
+sudo sed -i '/twofish256-cbc/d' /etc/ssh/sshd_config
+sudo sed -i '/diffie-hellman-group1-sha1/d' /etc/ssh/sshd_config
+sudo sed -i '/ssh-dss/d' /etc/ssh/sshd_config
+
+# Restart SSH service to apply changes
+sudo systemctl restart sshd
+
+# Vulnerability 10: DCE/RPC and MSRPC Services Enumeration Reporting
+# Mitigation: Filter incoming traffic to port 135 using iptables
+# This script assumes a basic understanding of iptables.
+# It's crucial to tailor the rules to your specific network environment.
+
+# Flush existing rules for INPUT chain (optional, use with caution)
+# sudo iptables -F INPUT
+
+# Add a rule to drop incoming traffic to port 135
+sudo iptables -A INPUT -p tcp --dport 135 -j DROP
+
+# Save the iptables rules to make them persistent
+if command -v iptables-save &>/dev/null; then
+    sudo iptables-save > /etc/iptables/rules.v4
+fi
+
+# Display a message to remind the user to configure the firewall properly
+echo "DCE/RPC and MSRPC Services: Added a basic iptables rule to drop traffic to port 135."
+echo "Please configure your firewall (e.g., iptables) for comprehensive protection."
+
+# Vulnerability 11: Telnet Unencrypted Cleartext Login
+# Remove Telnet server
+sudo apt-get purge -y telnetd xinetd
+
+# Install SSH as a replacement
+sudo apt-get install -y openssh-server
+
+echo "Telnet server removed. SSH server installed as a replacement."
+
+# Vulnerability 12: SSL/TLS: Deprecated TLSv1.0 and TLSv1.1 Protocol Detection
+# Edit the /etc/ssl/openssl.cnf file to disable TLSv1.0 and TLSv1.1
+sudo sed -i 's/^\(openssl_conf = default_conf\)$/\1\n[default_conf]\nssl_conf = ssl_sect\n\n[ssl_sect]\nsystem_default = system_default_sect\n\n[system_default_sect]\nMinProtocol = TLSv1.2\nCipherString = DEFAULT@SECLEVEL=2/' /etc/ssl/openssl.cnf
+
+echo "TLSv1.0 and TLSv1.1 disabled in /etc/ssl/openssl.cnf"
+
+# Vulnerabilities 17, 18, 20, 23, 24, 25: TCP Timestamps Information Disclosure
+# Disable TCP timestamps
+sudo sysctl -w net.ipv4.tcp_timestamps=0
+echo "net.ipv4.tcp_timestamps=0" | sudo tee /etc/sysctl.d/99-tcp-timestamps.conf
+sudo sysctl -p /etc/sysctl.d/99-tcp-timestamps.conf
+
+# Vulnerabilities 26, 27, 28, 29, 30, 31, 32: ICMP Timestamp Reply Information Disclosure
+# Disable ICMP timestamp replies
+sudo sysctl -w net.ipv4.icmp_echo_ignore_timestamp=1
+echo "net.ipv4.icmp_echo_ignore_timestamp=1" | sudo tee /etc/sysctl.d/99-icmp-timestamp.conf
+sudo sysctl -p /etc/sysctl.d/99-icmp-timestamp.conf
+
+echo "Mitigation complete."
+```

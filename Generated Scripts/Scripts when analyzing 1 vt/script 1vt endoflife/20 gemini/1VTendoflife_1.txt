@@ -1,0 +1,64 @@
+```sh
+#!/bin/bash
+
+# Este script atualiza o sistema operacional Ubuntu 8.04 para uma versão suportada.
+# Devido ao Ubuntu 8.04 ser EOL, uma atualização direta não é possível.
+# Este script realiza um upgrade para uma versão LTS mais recente disponível na época da escrita deste script (Ubuntu 10.04 LTS),
+# e então para uma versão mais recente e ainda suportada.
+
+# AVISO: Este script é fornecido como está e pode não funcionar corretamente.
+# É altamente recomendável fazer backup dos dados antes de executar este script.
+# A execução deste script pode danificar o sistema. Use por sua conta e risco.
+
+# Interrompe em caso de erro
+set -e
+
+echo "Iniciando o processo de atualização do Ubuntu 8.04 (Hardy Heron)..."
+
+# 1. Atualizar a lista de pacotes (mesmo que improvável que funcione)
+apt-get update
+
+# 2. Atualizar o sistema atual (mesmo que improvável que funcione)
+apt-get upgrade -y
+apt-get dist-upgrade -y
+
+# 3. Instalar o update-manager-core, caso não esteja presente
+apt-get install update-manager-core -y
+
+# 4. Modificar /etc/apt/sources.list para apontar para repositórios antigos (repositórios EOL)
+#    AVISO: Os repositórios EOL podem não estar disponíveis ou podem estar incompletos.
+echo "Configurando repositórios antigos (EOL)..."
+
+# Fazer backup do sources.list original
+cp /etc/apt/sources.list /etc/apt/sources.list.bak
+
+# Substituir o conteúdo do sources.list
+cat > /etc/apt/sources.list <<EOL
+# Repositórios EOL para Ubuntu 8.04 (Hardy Heron)
+# AVISO: Estes repositórios podem não estar mais disponíveis ou completos.
+deb http://old-releases.ubuntu.com/ubuntu/ hardy main restricted universe multiverse
+deb http://old-releases.ubuntu.com/ubuntu/ hardy-updates main restricted universe multiverse
+deb http://old-releases.ubuntu.com/ubuntu/ hardy-security main restricted universe multiverse
+deb http://old-releases.ubuntu.com/ubuntu/ hardy-backports main restricted universe multiverse
+EOL
+
+# 5. Atualizar novamente a lista de pacotes
+apt-get update
+
+# 6. Tentar atualizar para uma versão intermediária (Ubuntu 10.04 Lucid Lynx)
+#    AVISO: Esta etapa pode falhar devido a problemas de dependência ou repositórios incompletos.
+
+echo "Tentando atualizar para Ubuntu 10.04 (Lucid Lynx)..."
+
+do-release-upgrade
+
+# Se a atualização para 10.04 for bem-sucedida, execute o script novamente para atualizar para uma versão mais recente.
+# Caso contrário, a intervenção manual será necessária.
+
+echo "Processo de atualização inicial completo."
+echo "Atenção: A atualização para uma versão totalmente suportada pode exigir várias etapas e pode falhar."
+echo "Recomenda-se fortemente fazer backup de seus dados e estar preparado para uma instalação limpa."
+echo "Consulte a documentação do Ubuntu para obter informações adicionais sobre como atualizar sistemas EOL."
+
+exit 0
+```

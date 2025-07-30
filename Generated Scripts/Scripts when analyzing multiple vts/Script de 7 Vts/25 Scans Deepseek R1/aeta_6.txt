@@ -1,0 +1,61 @@
+```bash
+#!/bin/bash
+
+# Fix DNS Cache Snooping (Vuln2) in BIND
+if [ -e /etc/bind/named.conf ]; then
+    sed -i.bak 's/.*allow-query.*/allow-query { localhost; };/g;
+                s/.*recursion .*/recursion no;/g;
+                s/.*dnssec-validation .*/dnssec-validation auto;/
+                s/.*allow-transfer.*/allow-transfer { none; };/g;
+                s/.*allow-query-cache.*/allow-query-cache { localhost; };/g' /etc/bind/named.conf
+fi
+
+# Fix ICMP Timestamp (Vuln3) with iptables rules
+iptables -A INPUT -p icmp --icmp-type timestamp-request -j DROP
+iptables -A INPUT -p icmp --icmp-type timestamp-reply -j DROP
+iptables -A OUTPUT -p icmp --icmp-type timestamp-reply -j DROP
+iptables-save > /etc/iptables/rules.v4
+
+# Fix TLS Protocols & Ciphers for Apache (Vuln4,6,1,5)
+for dir in /etc/apache2/ /etc/httpd/; do
+    if [ -d "$dir" ]; then
+        find "$dir" -type f -name '*.conf' -exec sed -i.bak \
+            -e 's/^SSLProtocol.*$/SSLProtocol -all +TLSv1.2 +TLSv1.3/g' \
+            -e 's/^SSLCipherSuite.*$/SSLCipherSuite HIGH:!aNULL:!MD5:!RC4:!3DES/g' \
+            -e 's/^SSLInsecureRenegotiation.*$/SSLInsecureRenegotiation off/g' {} +
+        a2enmod ssl &> /dev/null
+    fi
+done
+
+# Fix TLS Protocols & Ciphers for Nginx (Vuln4,6,5)
+if [ -d /etc/nginx/ ]; then
+    grep -rl "ssl_protocols" /etc/nginx/ | xargs sed -i.bak \
+        's/ssl_protocols.*/ssl_protocols TLSv1.2 TLSv1.3;/g'
+    grep -rl "ssl_ciphers" /etc/nginx/ | xargs sed -i.bak \
+        's/ssl_ciphers.*/ssl_ciphers HIGH:!aNULL:!MD5:!RC4:!3DES;/g'
+    grep -rl "ssl_session_cache" /etc/nginx/ | xargs sed -i.bak \
+        's/ssl_session_cache.*/ssl_session_cache off;/g'
+fi
+
+# HTTP to HTTPS Redirect (Vuln1) for Apache
+for conf in $(find /etc/apache2/ /etc/httpd/ -name '*.conf' 2>/dev/null); do
+    sed -i.bak '/<VirtualHost/,/<\/VirtualHost>/ {
+        /DocumentRoot/ {
+        i\
+RewriteEngine On\
+RewriteCond %{HTTPS} off\
+RewriteRule (.*) https://%{HTTP_HOST}%{REQUEST_URI}
+        }
+    }' "$conf"
+done
+
+# HTTP to HTTPS Redirect (Vuln1) for Nginx
+if [ -d /etc/nginx/ ]; then
+    grep -rlF "listen 80;" /etc/nginx/ | xargs sed -i.bak \
+        '/listen 80;/a \    return 301 https://$host$request_uri;'
+fi
+
+# Disable TCP Timestamps (Vuln7)
+sysctl -w net.ipv4.tcp_timestamps=0
+echo "net.ipv4.tcp_timestamps = 0" >> /etc/sysctl.conf
+```

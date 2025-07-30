@@ -1,0 +1,65 @@
+```bash
+#!/bin/bash
+
+# Variáveis para controle
+PYTHON_3_10_12_INSTALLED=$(dpkg-query -W -f='${Status}' python3.10 2>/dev/null | grep -c "install ok installed")
+PYTHON_3_12_0_INSTALLED=$(dpkg-query -W -f='${Status}' python3.12 2>/dev/null | grep -c "install ok installed")
+
+# Função para atualizar o Python
+update_python() {
+    local version="$1"
+    local target_version="$2"
+
+    echo "Atualizando Python $version para a versão $target_version..."
+
+    # Atualizar a lista de pacotes
+    apt update -y
+
+    # Verificar se uma versão mais recente está disponível
+    if apt-cache policy python$version | grep -q "Candidate: $target_version"; then
+        echo "Atualizando Python $version para a versão $target_version..."
+        apt install "python${version}=$target_version" -y
+        echo "Python $version atualizado para a versão $target_version."
+    else
+        echo "Versão $target_version não encontrada para Python $version nos repositórios padrão."
+        echo "Tentando instalar a versão mais recente disponível..."
+        apt install "python${version}" -y
+        echo "Python $version atualizado para a versão mais recente disponível nos repositórios."
+    fi
+}
+
+# Tratamento das vulnerabilidades
+# Priorizando atualizações específicas onde possível, caso contrário, atualiza para a versão mais recente disponível
+
+# Vulnerabilidade 1, 8, 10, 14, 18, 21, 22, 32, 36, 37, 40, 46, 50, 56, 57, 64: Atualizar Python 3.10.12 para >= 3.10.16 (ou 3.10.15/3.10.14 quando especificado)
+if [ "$PYTHON_3_10_12_INSTALLED" -gt 0 ]; then
+  update_python 3.10 3.10.16
+fi
+
+# Vulnerabilidade 2, 3, 4, 5, 6, 7, 9, 11, 12, 13, 15, 16, 17, 19, 20, 23, 24, 25, 26, 28, 29, 30, 31, 33, 34, 35, 38, 39, 41, 42, 43, 44, 45, 47, 48, 51, 52, 53, 55, 58, 60, 61, 63, 65: Atualizar Python 3.12.0 para >= 3.12.9 (ou 3.12.8/3.12.6/3.12.5/3.12.4/3.12.3/3.12.2/3.12.1 quando especificado)
+if [ "$PYTHON_3_12_0_INSTALLED" -gt 0 ]; then
+  update_python 3.12 3.12.9
+fi
+
+# Vulnerabilidade 49: Substituir certificado SSL/TLS auto-assinado
+# Esta vulnerabilidade requer intervenção manual para gerar/instalar um certificado confiável.
+echo "Vulnerabilidade 49: Requer a substituição manual do certificado SSL/TLS por um certificado assinado por uma CA confiável."
+
+# Vulnerabilidade 54: Desabilitar TLSv1.0 e TLSv1.1 (específico para cada serviço)
+# Esta vulnerabilidade requer configuração específica do serviço SSH ou outro serviço TLS.
+echo "Vulnerabilidade 54: Requer a desabilitação manual dos protocolos TLSv1.0 e TLSv1.1 na configuração do serviço (ex: SSH)."
+
+# Vulnerabilidade 59: Desabilitar algoritmos MAC fracos no SSH
+# Requer modificação do arquivo de configuração sshd_config
+echo "Vulnerabilidade 59: Requer a modificação manual do arquivo /etc/ssh/sshd_config para desabilitar os algoritmos MAC fracos."
+echo "Exemplo: Adicione 'MACs -umac-64-etm@openssh.com,-umac-64@openssh.com' ou similar, removendo os algoritmos fracos."
+
+# Vulnerabilidade 62: Desabilitar ICMP Timestamp Reply
+echo "Vulnerabilidade 62: Desabilitando ICMP Timestamp Reply..."
+echo "Executando: sysctl -w net.ipv4.icmp_echo_ignore_all=1"
+sysctl -w net.ipv4.icmp_echo_ignore_all=1
+echo "Adicionando regra permanente em /etc/sysctl.conf"
+echo "net.ipv4.icmp_echo_ignore_all=1" >> /etc/sysctl.conf
+
+echo "Script de correção concluído. Reinicie os serviços afetados se necessário."
+```

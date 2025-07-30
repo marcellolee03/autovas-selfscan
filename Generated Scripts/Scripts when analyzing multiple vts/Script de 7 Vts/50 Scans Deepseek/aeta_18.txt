@@ -1,0 +1,64 @@
+#!/bin/bash
+
+# Configurar Apache para redirecionar HTTP para HTTPS
+if [ -f /etc/apache2/sites-available/000-default.conf ]; then
+    sed -i 's/<VirtualHost \*:80>/<VirtualHost \*:80>\n    Redirect permanent \/ https:\/\/'$(hostname)'\//' /etc/apache2/sites-available/000-default.conf
+    systemctl restart apache2
+fi
+
+# Configurar Nginx para redirecionar HTTP para HTTPS
+if [ -f /etc/nginx/sites-available/default ]; then
+    sed -i 's/listen 80 default_server;/listen 80 default_server;\n    return 301 https:\/\/'$(hostname)'$request_uri;/' /etc/nginx/sites-available/default
+    systemctl restart nginx
+fi
+
+# Desabilitar recursão no DNS (BIND)
+if [ -f /etc/bind/named.conf.options ]; then
+    sed -i 's/recursion yes;/recursion no;/' /etc/bind/named.conf.options
+    systemctl restart bind9
+fi
+
+# Desabilitar ICMP timestamp replies
+echo "net.ipv4.icmp_echo_ignore_all=1" >> /etc/sysctl.conf
+sysctl -p
+
+# Atualizar configurações de TLS para desabilitar TLSv1.0 e TLSv1.1 (Apache)
+if [ -f /etc/apache2/mods-available/ssl.conf ]; then
+    sed -i 's/SSLProtocol all -SSLv3/SSLProtocol all -SSLv3 -TLSv1 -TLSv1.1/' /etc/apache2/mods-available/ssl.conf
+    systemctl restart apache2
+fi
+
+# Atualizar configurações de TLS para desabilitar TLSv1.0 e TLSv1.1 (Nginx)
+if [ -f /etc/nginx/nginx.conf ]; then
+    sed -i 's/ssl_protocols TLSv1 TLSv1.1 TLSv1.2;/ssl_protocols TLSv1.2 TLSv1.3;/' /etc/nginx/nginx.conf
+    systemctl restart nginx
+fi
+
+# Desabilitar renegociação de SSL/TLS (Apache)
+if [ -f /etc/apache2/mods-available/ssl.conf ]; then
+    echo "SSLHonorCipherOrder on" >> /etc/apache2/mods-available/ssl.conf
+    echo "SSLInsecureRenegotiation off" >> /etc/apache2/mods-available/ssl.conf
+    systemctl restart apache2
+fi
+
+# Desabilitar renegociação de SSL/TLS (Nginx)
+if [ -f /etc/nginx/nginx.conf ]; then
+    echo "ssl_renegotiation_limit 0;" >> /etc/nginx/nginx.conf
+    systemctl restart nginx
+fi
+
+# Remover cifras fracas (Apache)
+if [ -f /etc/apache2/mods-available/ssl.conf ]; then
+    sed -i 's/SSLCipherSuite HIGH:!aNULL:!MD5/SSLCipherSuite HIGH:!aNULL:!MD5:!3DES:!DES:!RC4:!EXPORT:!LOW/' /etc/apache2/mods-available/ssl.conf
+    systemctl restart apache2
+fi
+
+# Remover cifras fracas (Nginx)
+if [ -f /etc/nginx/nginx.conf ]; then
+    sed -i 's/ssl_ciphers HIGH:!aNULL:!MD5;/ssl_ciphers HIGH:!aNULL:!MD5:!3DES:!DES:!RC4:!EXPORT:!LOW;/' /etc/nginx/nginx.conf
+    systemctl restart nginx
+fi
+
+# Desabilitar timestamps TCP
+echo "net.ipv4.tcp_timestamps = 0" >> /etc/sysctl.conf
+sysctl -p

@@ -1,0 +1,80 @@
+#!/bin/bash
+
+# Disable rlogin service
+systemctl stop rlogin
+systemctl disable rlogin
+
+# Disable rexec service
+systemctl stop rexec
+systemctl disable rexec
+
+# Upgrade TWiki to version 4.2.4 or later
+wget https://downloads.sourceforge.net/project/twiki/TWiki%20for%20all%20platforms/TWiki-4.2.4/TWiki-4.2.4.tgz
+tar -xvzf TWiki-4.2.4.tgz
+mv TWiki-4.2.4 /var/www/html/twiki
+chown -R www-data:www-data /var/www/html/twiki
+
+# Disable VRFY and EXPN on Mailserver
+postconf -e "disable_vrfy_command=yes"
+systemctl restart postfix
+
+# Disable SSH weak algorithms
+sed -i 's/^HostKeyAlgorithms.*/HostKeyAlgorithms ssh-rsa,ssh-dss,ecdsa-sha2-nistp256/' /etc/ssh/sshd_config
+sed -i 's/^KexAlgorithms.*/KexAlgorithms curve25519-sha256,curve25519-sha256@libssh.org/' /etc/ssh/sshd_config
+sed -i 's/^Ciphers.*/Ciphers aes256-ctr,aes192-ctr,aes128-ctr/' /etc/ssh/sshd_config
+sed -i 's/^MACs.*/MACs hmac-sha2-512,hmac-sha2-256/' /etc/ssh/sshd_config
+systemctl restart sshd
+
+# Disable Telnet service
+systemctl stop telnet
+systemctl disable telnet
+
+# Disable FTP service
+systemctl stop vsftpd
+systemctl disable vsftpd
+
+# Disable VNC service
+systemctl stop vncserver
+systemctl disable vncserver
+
+# Update PHP to version 5.6.30
+add-apt-repository ppa:ondrej/php
+apt-get update
+apt-get install php5.6
+systemctl restart apache2
+
+# Disable dangerous HTTP methods
+cat <<EOF > /etc/apache2/conf-available/disallow-methods.conf
+<Directory />
+    <LimitExcept GET POST>
+        Deny from all
+    </LimitExcept>
+</Directory>
+EOF
+a2enconf disallow-methods
+systemctl restart apache2
+
+# Disable TRACE and TRACK methods
+cat <<EOF > /etc/apache2/conf-available/disable-trace.conf
+TraceEnable off
+EOF
+a2enconf disable-trace
+systemctl restart apache2
+
+# Replace expired SSL/TLS certificates
+openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout /etc/ssl/private/ssl-cert-snakeoil.key -out /etc/ssl/certs/ssl-cert-snakeoil.pem -subj "/C=US/ST=State/L=City/O=Company/OU=Department/CN=example.com"
+systemctl restart apache2
+
+# Disable SSLv3 and TLSv1.0
+cat <<EOF > /etc/apache2/conf-available/ssl-params.conf
+SSLProtocol all -SSLv2 -SSLv3 -TLSv1
+SSLCipherSuite HIGH:!aNULL:!MD5:!EXP:!eNULL:!RC4
+SSLHonorCipherOrder on
+SSLCompression off
+EOF
+a2enconf ssl-params
+systemctl restart apache2
+
+# Disable TCP timestamps
+echo "net.ipv4.tcp_timestamps = 0" >> /etc/sysctl.conf
+sysctl -p

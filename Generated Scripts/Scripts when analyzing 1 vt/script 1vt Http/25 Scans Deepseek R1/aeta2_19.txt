@@ -1,0 +1,94 @@
+```bash
+#!/bin/bash
+
+if [ "$(id -u)" -ne 0 ]; then
+    echo "This script must be run as root." >&2
+    exit 1
+fi
+
+PORT=80
+process_name=""
+nginx_conf="/etc/nginx/nginx.conf"
+apache_conf_dir="/etc/apache2"
+httpd_conf_dir="/etc/httpd"
+
+detect_webserver() {
+    if command -v lsof >/dev/null 2>&1; then
+        pid=$(lsof -t -i:"$PORT" -sTCP:LISTEN 2>/dev/null | head -1)
+        [ -n "$pid" ] && process_name=$(basename "$(readlink "/proc/$pid/exe")")
+    fi
+    [ -z "$process_name" ] && if ss -tuln 2>/dev/null | grep -q ":$PORT\b"; then
+        if grep -q "httpd.conf\|apache2.conf" "$nginx_conf" 2>/dev/null; then
+            process_name="nginx"
+        fi
+    fi
+}
+
+configure_apache() {
+    conf_dir=""
+    if [ -d "$apache_conf_dir" ]; then
+        conf_dir="$apache_conf_dir"
+    elif [ -d "$httpd_conf_dir" ]; then
+        conf_dir="$httpd_conf_dir"
+    fi
+    [ -z "$conf_dir" ] && return 1
+
+    redirect_conf="$conf_dir/conf-available/https-redirect.conf"
+    if grep -q "RewriteRule .* https://%{HTTP_HOST}%{REQUEST_URI} \[R=301,L\]" "$redirect_conf" 2>/dev/null; then
+        return 0
+    fi
+
+    mkdir -p "$(dirname "$redirect_conf")"
+    cat > "$redirect_conf" <<EOF
+<VirtualHost *:80>
+    ServerName _
+    RewriteEngine On
+    RewriteCond %{REQUEST_URI} !^/server-status
+    RewriteRule ^(.*)$ https://%{HTTP_HOST}\$1 [R=301,L]
+</VirtualHost>
+EOF
+
+    enabled_conf="$conf_dir/conf-enabled/https-redirect.conf"
+    if [ ! -f "$enabled_conf" ] && [ -d "$conf_dir/conf-enabled" ]; then
+        ln -s "$redirect_conf" "$enabled_conf"
+    fi
+    service_name=$(systemctl list-units --type service | grep -E 'apache2|httpd' | head -1 | awk '{print $1}')
+    [ -n "$service_name" ] && systemctl restart "$service_name"
+    return $?
+}
+
+configure_nginx() {
+    if ! grep -q "listen 80" "$nginx_conf" 2>/dev/null; then
+        return 1
+    fi
+
+    if grep -q "return 301 https://\$host\$request_uri;" "$nginx_conf"; then
+        return 0
+    fi
+
+    if ! grep -qF "server { listen 80; server_name" "$nginx_conf"; then
+        sed -i '/http {/a \    server {\n        listen 80;\n        server_name _;\n        return 301 https://$host$request_uri;\n    }\n' "$nginx_conf"
+    else
+        sed -i '/server {/,/^[[:space:]]*}/ {/listen 88;/! s/.*/&\n    return 301 https:\/\/$host$request_uri;/}' "$nginx_conf"
+    fi
+
+    nginx -t 2>/dev/null || return 1
+    service_name=$(systemctl list-units --type service | grep -E 'nginx' | head -1 | awk '{print $1}')
+    [ -n "$service_name" ] && systemctl reload "$service_name"
+}
+
+detect_webserver
+if [ -n "$process_name" ]; then
+    case "$process_name" in
+        apache2|httpd|apache) configure_apache ;;
+        nginx) configure_nginx ;;
+    esac
+else
+    if configure_apache || configure_nginx; then
+        exit 0
+    else
+        echo "Failed to configure web server." >&2
+        exit 1
+    fi
+fi
+```

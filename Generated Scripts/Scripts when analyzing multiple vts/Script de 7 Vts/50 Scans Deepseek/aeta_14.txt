@@ -1,0 +1,29 @@
+#!/bin/bash
+# Corrige a vulnerabilidade de transmissão de dados sensíveis via HTTP
+sed -i 's/^#\?\(Listen 80\)/\1\nRewriteEngine On\nRewriteCond %{HTTPS} off\nRewriteRule (.*) https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]/' /etc/apache2/sites-available/000-default.conf
+a2enmod ssl rewrite
+service apache2 restart
+
+# Corrige a vulnerabilidade de DNS Cache Snooping
+sed -i 's/recursion yes/recursion no/' /etc/bind/named.conf.options
+service bind9 restart
+
+# Corrige a vulnerabilidade de ICMP Timestamp Reply
+echo "net.ipv4.icmp_echo_ignore_all = 1" >> /etc/sysctl.conf
+sysctl -p
+
+# Corrige a vulnerabilidade de TLSv1.0 e TLSv1.1
+sed -i 's/^SSLProtocol.*/SSLProtocol -all +TLSv1.2 +TLSv1.3/' /etc/apache2/mods-enabled/ssl.conf
+service apache2 restart
+
+# Corrige a vulnerabilidade de Renegotiation DoS
+sed -i 's/^SSLInsecureRenegotiation.*/SSLInsecureRenegotiation off/' /etc/apache2/mods-enabled/ssl.conf
+service apache2 restart
+
+# Corrige a vulnerabilidade de Weak Cipher Suites
+sed -i 's/^SSLCipherSuite.*/SSLCipherSuite HIGH:!aNULL:!MD5:!RC4/' /etc/apache2/mods-enabled/ssl.conf
+service apache2 restart
+
+# Corrige a vulnerabilidade de TCP Timestamps
+echo "net.ipv4.tcp_timestamps = 0" >> /etc/sysctl.conf
+sysctl -p

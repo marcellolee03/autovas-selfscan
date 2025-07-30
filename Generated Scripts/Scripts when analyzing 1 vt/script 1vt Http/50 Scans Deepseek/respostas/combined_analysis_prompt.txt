@@ -1,0 +1,1793 @@
+>analise esse prompt contendo as vulnerabilidades encontradas em um csv do openvas e analise se os scripts que irei enviar em seguida sao capazes de corrigir esses problemas ou nao, me informando uma porcentagem de correcao das vulnerabilidades
+>Vulnerabilidades:
+   # INSTRUÇÕES PARA O MODELO DE IA
+
+    ## PERSONA
+    Você é um especialista em cibersegurança e automação de sistemas, focado em criar scripts de correção (patching). Sua única função é gerar um script que resolva a vulnerabilidade descrita abaixo.
+
+    ## TAREFA
+    Analise o contexto da vulnerabilidade a seguir e gere um script de shell (compatível com o sistema operacional do localhost) que, ao ser executado, corrija permanentemente a vulnerabilidade descrita.
+
+    ## CONTEXTO DA VULNERABILIDADE
+
+# Vulnerabilidade 1
+CVEs: nan
+NVT Name: Cleartext Transmission of Sensitive Information via HTTP
+Port: 80.0
+Port Protocol: tcp
+Summary: The host / application transmits sensitive information (username, passwords) in
+  cleartext via HTTP.
+Specific Result: Vulnerability was detected according to the Vulnerability Detection Method.
+Vulnerability Detection Method: Evaluate previous collected information and check if the host / application is not
+  enforcing the transmission of sensitive data via an encrypted SSL/TLS connection.
+
+  The script is currently checking the following:
+
+  - HTTP Basic Authentication (Basic Auth)
+
+  - HTTP Forms (e.g. Login) with input field of type 'password'
+Details:
+Cleartext Transmission of Sensitive Information via HTTP
+(OID: 1.3.6.1.4.1.25623.1.0.108440)
+Version used: 2023-09-07T05:05:21Z
+
+Affected Software/OS: Hosts / applications which doesn't enforce the transmission of sensitive data via an
+  encrypted SSL/TLS connection.
+Solution: Enforce the transmission of sensitive data via an encrypted SSL/TLS connection.
+  Additionally make sure the host / application is redirecting all users to the secured SSL/TLS connection before
+  allowing to input sensitive data into the mentioned functions.
+
+    ## REGRAS E RESTRIÇÕES DE SAÍDA
+    1.  **APENAS SCRIPT:** A sua resposta deve conter ÚNICA E EXCLUSIVAMENTE o código do script.
+    2.  **SEM EXPLICAÇÕES:** Não adicione nenhum comentário, explicação, introdução, ou despedida.
+    3.  **SEM BLOCOS DE CÓDIGO MARKDOWN:** Não envolva o script em blocos de código como ` ```bash ` ou ` ```sh `. A resposta deve ser o texto puro do script.
+    4.  **AUTOSSUFICIENTE:** O script deve ser completo, autônomo e não deve exigir interação do usuário para ser executado.
+    5.  **COMPATIBILIDADE:** O script deve ser compatível com o sistema operacional especificado em 'localhost OS'. Se o sistema operacional não for especificado, assuma um sistema baseado em Linux (como Ubuntu/Debian).
+
+    # INÍCIO DO SCRIPT DE CORREÇÃO
+
+
+
+​
+
+
+>Scripts de correção:
+{type: uploaded file
+fileName: aeta2_1.txt
+fullContent:
+#!/bin/bash
+# Configura o firewall para bloquear o tráfego HTTP não criptografado na porta 80
+iptables -A INPUT -p tcp --dport 80 -j DROP
+
+# Configura o servidor web para redirecionar todas as requisições HTTP para HTTPS
+if [ -f /etc/apache2/sites-available/000-default.conf ]; then
+    sed -i '/<VirtualHost \*:80>/a RewriteEngine On\nRewriteCond %{HTTPS} off\nRewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]' /etc/apache2/sites-available/000-default.conf
+    systemctl restart apache2
+fi
+
+if [ -f /etc/nginx/sites-available/default ]; then
+    sed -i '/listen 80 default_server;/a return 301 https://$host$request_uri;' /etc/nginx/sites-available/default
+    systemctl restart nginx
+fi
+
+# Verifica se o certificado SSL está configurado corretamente
+if [ -f /etc/ssl/certs/ssl-cert-snakeoil.pem ]; then
+    echo "Certificado SSL encontrado."
+else
+    echo "Certificado SSL não encontrado. Configurando auto-certificado..."
+    openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout /etc/ssl/private/ssl-cert-snakeoil.key -out /etc/ssl/certs/ssl-cert-snakeoil.pem -subj "/CN=localhost"
+fi
+
+# Verifica se o serviço HTTPS (porta 443) está ativo
+if netstat -tuln | grep -q ':443'; then
+    echo "Serviço HTTPS já está ativo."
+else
+    echo "Configurando e ativando o serviço HTTPS..."
+    if [ -f /etc/apache2/sites-available/default-ssl.conf ]; then
+        a2enmod ssl
+        a2ensite default-ssl
+        systemctl restart apache2
+    elif [ -f /etc/nginx/sites-available/default-ssl ]; then
+        ln -s /etc/nginx/sites-available/default-ssl /etc/nginx/sites-enabled/
+        systemctl restart nginx
+    fi
+fi
+
+echo "Vulnerabilidade corrigida com sucesso. Todos os dados sensíveis serão agora transmitidos via HTTPS."}
+{type: uploaded file
+fileName: aeta2_2.txt
+fullContent:
+#!/bin/bash
+
+# Configura o Apache para redirecionar HTTP para HTTPS
+if [ -f /etc/apache2/sites-available/000-default.conf ]; then
+    sed -i 's/<VirtualHost *:80>/<VirtualHost *:80>\n\tRedirect permanent \/ https:\/\/${HOSTNAME}\/\n/' /etc/apache2/sites-available/000-default.conf
+fi
+
+# Habilita o módulo SSL do Apache
+a2enmod ssl
+
+# Configura o Apache para usar SSL
+if [ -f /etc/apache2/sites-available/default-ssl.conf ]; then
+    sed -i 's/<\/VirtualHost>/<\/VirtualHost>\n\tSSLEngine on\n\tSSLCertificateFile \/etc\/ssl\/certs\/ssl-cert-snakeoil.pem\n\tSSLCertificateKeyFile \/etc\/ssl\/private\/ssl-cert-snakeoil.key\n/' /etc/apache2/sites-available/default-ssl.conf
+    a2ensite default-ssl
+fi
+
+# Reinicia o Apache para aplicar as mudanças
+systemctl restart apache2
+
+# Verifica se o redirecionamento está funcionando
+curl -I http://localhost | grep "Location: https://"}
+{type: uploaded file
+fileName: aeta2_3.txt
+fullContent:
+#!/bin/bash
+# Configura o Apache para redirecionar HTTP para HTTPS
+if [ -f /etc/apache2/sites-available/000-default.conf ]; then
+    sed -i 's/<VirtualHost \*:80>/<VirtualHost \*:80>\n    Redirect permanent \/ https:\/\/$1\//' /etc/apache2/sites-available/000-default.conf
+    a2enmod ssl
+    systemctl restart apache2
+fi
+
+# Configura o Nginx para redirecionar HTTP para HTTPS
+if [ -f /etc/nginx/sites-available/default ]; then
+    sed -i 's/listen 80 default_server;/listen 80 default_server;\n    return 301 https:\/\/$1$request_uri;/' /etc/nginx/sites-available/default
+    systemctl restart nginx
+fi
+
+# Verifica se o certificado SSL está configurado
+if [ ! -f /etc/ssl/certs/ssl-cert-snakeoil.pem ]; then
+    openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout /etc/ssl/private/ssl-cert-snakeoil.key -out /etc/ssl/certs/ssl-cert-snakeoil.pem -subj "/CN=localhost"
+fi
+
+# Verifica se o Apache está usando o certificado SSL
+if [ -f /etc/apache2/sites-available/default-ssl.conf ]; then
+    sed -i 's/SSLCertificateFile.*/SSLCertificateFile \/etc\/ssl\/certs\/ssl-cert-snakeoil.pem/' /etc/apache2/sites-available/default-ssl.conf
+    sed -i 's/SSLCertificateKeyFile.*/SSLCertificateKeyFile \/etc\/ssl\/private\/ssl-cert-snakeoil.key/' /etc/apache2/sites-available/default-ssl.conf
+    a2ensite default-ssl
+    systemctl restart apache2
+fi
+
+# Verifica se o Nginx está usando o certificado SSL
+if [ -f /etc/nginx/sites-available/default-ssl ]; then
+    sed -i 's/ssl_certificate .*/ssl_certificate \/etc\/ssl\/certs\/ssl-cert-snakeoil.pem;/' /etc/nginx/sites-available/default-ssl
+    sed -i 's/ssl_certificate_key .*/ssl_certificate_key \/etc\/ssl\/private\/ssl-cert-snakeoil.key;/' /etc/nginx/sites-available/default-ssl
+    ln -s /etc/nginx/sites-available/default-ssl /etc/nginx/sites-enabled/
+    systemctl restart nginx
+fi
+
+# Força o uso de HTTPS em todos os formulários de login
+if [ -f /var/www/html/index.html ]; then
+    sed -i 's/<form action="http:/<form action="https:/g' /var/www/html/index.html
+fi
+
+# Reinicia os serviços para aplicar as mudanças
+systemctl restart apache2
+systemctl restart nginx}
+{type: uploaded file
+fileName: aeta2_4.txt
+fullContent:
+#!/bin/bash
+
+# Configuração do Apache para forçar HTTPS
+if [ -d "/etc/apache2/sites-available" ]; then
+    # Cria redirecionamento HTTP para HTTPS
+    sed -i 's/<VirtualHost \*:80>/<VirtualHost \*:80>\n    RewriteEngine On\n    RewriteCond %{HTTPS} off\n    RewriteRule (.*) https:\/\/%{HTTP_HOST}%{REQUEST_URI} [L,R=301]/' /etc/apache2/sites-available/000-default.conf
+
+    # Habilita o módulo SSL
+    a2enmod ssl
+    a2ensite default-ssl
+
+    # Reinicia o Apache
+    systemctl restart apache2
+fi
+
+# Configuração do Nginx para forçar HTTPS
+if [ -d "/etc/nginx/sites-available" ]; then
+    # Cria redirecionamento HTTP para HTTPS
+    sed -i 's/listen 80 default_server;/listen 80 default_server;\n    return 301 https:\/\/\$host\$request_uri;/' /etc/nginx/sites-available/default
+
+    # Reinicia o Nginx
+    systemctl restart nginx
+fi
+
+# Verifica se o certificado SSL está instalado e válido
+if ! command -v openssl &> /dev/null; then
+    apt-get update
+    apt-get install -y openssl
+fi
+
+SSL_CERT="/etc/ssl/certs/ssl-cert-snakeoil.pem"
+if [ ! -f "$SSL_CERT" ] || ! openssl x509 -checkend 0 -noout -in "$SSL_CERT"; then
+    openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout /etc/ssl/private/ssl-cert-snakeoil.key -out /etc/ssl/certs/ssl-cert-snakeoil.pem -subj "/CN=localhost"
+fi}
+{type: uploaded file
+fileName: aeta2_5.txt
+fullContent:
+#!/bin/bash
+# Enforce HTTPS for sensitive data transmission
+if ! grep -q "RewriteEngine On" /etc/apache2/sites-available/000-default.conf; then
+    sed -i '/<VirtualHost \*:80>/a \\tRewriteEngine On\n\tRewriteCond %{HTTPS} off\n\tRewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]' /etc/apache2/sites-available/000-default.conf
+    systemctl restart apache2
+fi
+
+# Disable HTTP Basic Authentication if not using HTTPS
+if grep -q "AuthType Basic" /etc/apache2/sites-available/000-default.conf; then
+    sed -i '/AuthType Basic/d' /etc/apache2/sites-available/000-default.conf
+    systemctl restart apache2
+fi
+
+# Ensure SSL is enabled
+if ! a2query -s default-ssl | grep -q "enabled"; then
+    a2enmod ssl
+    a2ensite default-ssl
+    systemctl restart apache2
+fi
+
+# Redirect all HTTP traffic to HTTPS
+if ! grep -q "Redirect permanent / https://" /etc/apache2/sites-available/000-default.conf; then
+    sed -i '/<VirtualHost \*:80>/a \\tRedirect permanent / https://%{HTTP_HOST}%{REQUEST_URI}' /etc/apache2/sites-available/000-default.conf
+    systemctl restart apache2
+fi}
+{type: uploaded file
+fileName: aeta2_6.txt
+fullContent:
+#!/bin/bash
+# Desabilitar o serviço HTTP e habilitar o HTTPS
+systemctl stop apache2
+systemctl disable apache2
+systemctl enable apache2-ssl
+systemctl start apache2-ssl
+
+# Configurar redirecionamento de HTTP para HTTPS no Apache
+if ! grep -q "RewriteEngine On" /etc/apache2/sites-available/000-default.conf; then
+    echo '<VirtualHost *:80>
+    RewriteEngine On
+    RewriteCond %{HTTPS} off
+    RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+</VirtualHost>' >> /etc/apache2/sites-available/000-default.conf
+fi
+
+# Reiniciar o Apache para aplicar as mudanças
+systemctl restart apache2-ssl
+
+# Verificar se o HTTPS está habilitado
+if curl -s -o /dev/null -I -w "%{http_code}" https://localhost | grep -q "200"; then
+    echo "HTTPS está habilitado e funcionando corretamente."
+else
+    echo "Falha ao habilitar HTTPS. Verifique a configuração."
+    exit 1
+fi}
+{type: uploaded file
+fileName: aeta2_7.txt
+fullContent:
+#!/bin/bash
+# Disable HTTP access and enforce HTTPS
+iptables -A INPUT -p tcp --dport 80 -j DROP
+iptables -A OUTPUT -p tcp --dport 80 -j DROP
+
+# Ensure HTTPS is enabled
+iptables -A INPUT -p tcp --dport 443 -j ACCEPT
+iptables -A OUTPUT -p tcp --dport 443 -j ACCEPT
+
+# Redirect HTTP to HTTPS using iptables
+iptables -t nat -A PREROUTING -p tcp --dport 80 -j REDIRECT --to-port 443
+
+# Update web server configuration to enforce HTTPS
+if [ -f /etc/apache2/sites-available/default-ssl.conf ]; then
+    sed -i 's/^#SSLProtocol all/SSLProtocol all -SSLv2 -SSLv3/g' /etc/apache2/sites-available/default-ssl.conf
+    sed -i 's/^#SSLCipherSuite HIGH:!aNULL:!MD5/SSLCipherSuite HIGH:!aNULL:!MD5/g' /etc/apache2/sites-available/default-ssl.conf
+    a2enmod ssl
+    a2ensite default-ssl
+    systemctl restart apache2
+fi
+
+if [ -f /etc/nginx/sites-available/default ]; then
+    sed -i 's/listen 80 default_server;/listen 80 default_server;\n    return 301 https:\/\/\$host\$request_uri;/g' /etc/nginx/sites-available/default
+    systemctl restart nginx
+fi
+
+# Harden SSL/TLS configuration
+openssl dhparam -out /etc/ssl/certs/dhparam.pem 2048
+
+if [ -f /etc/nginx/nginx.conf ]; then
+    echo "ssl_dhparam /etc/ssl/certs/dhparam.pem;" >> /etc/nginx/nginx.conf
+    systemctl restart nginx
+fi
+
+if [ -f /etc/apache2/mods-enabled/ssl.conf ]; then
+    echo "SSLOpenSSLConfCmd DHParameters \"/etc/ssl/certs/dhparam.pem\"" >> /etc/apache2/mods-enabled/ssl.conf
+    systemctl restart apache2
+fi
+
+# Ensure SSH is only listening on IPv4 and IPv6
+sed -i 's/^#AddressFamily any/AddressFamily inet/g' /etc/ssh/sshd_config
+systemctl restart sshd
+
+# Disable weak ciphers in SSH
+sed -i 's/^Ciphers .*/Ciphers aes256-ctr,aes192-ctr,aes128-ctr/g' /etc/ssh/sshd_config
+systemctl restart sshd
+
+# Restart services to apply changes
+systemctl restart apache2
+systemctl restart nginx
+
+# Flush iptables rules to apply immediately
+iptables-save > /etc/iptables/rules.v4
+ip6tables-save > /etc/iptables/rules.v6
+
+exit 0}
+{type: uploaded file
+fileName: aeta2_8.txt
+fullContent:
+#!/bin/bash
+# Configurar o Apache para redirecionar HTTP para HTTPS
+if [ -f /etc/apache2/sites-available/default-ssl.conf ] && [ -f /etc/apache2/sites-available/000-default.conf ]; then
+    sed -i 's/<VirtualHost *:80>/<VirtualHost *:80>\n    RewriteEngine On\n    RewriteCond %{HTTPS} !=on\n    RewriteRule ^\/?(.*) https:\/\/%{SERVER_NAME}\/$1 [R,L]/' /etc/apache2/sites-available/000-default.conf
+    a2enmod ssl
+    a2ensite default-ssl
+    systemctl restart apache2
+fi
+
+# Configurar o Nginx para redirecionar HTTP para HTTPS
+if [ -f /etc/nginx/sites-available/default ]; then
+    sed -i 's/listen 80 default_server;/listen 80 default_server;\n    return 301 https:\/\/$host$request_uri;/' /etc/nginx/sites-available/default
+    systemctl restart nginx
+fi
+
+# Verificar se o certificado SSL está configurado e, caso não esteja, gerar um self-signed (apenas para desenvolvimento)
+if ! [ -f /etc/ssl/certs/ssl-cert-snakeoil.pem ] && ! [ -f /etc/ssl/private/ssl-cert-snakeoil.key ]; then
+    openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout /etc/ssl/private/ssl-cert-snakeoil.key -out /etc/ssl/certs/ssl-cert-snakeoil.pem -subj "/CN=localhost"
+fi}
+{type: uploaded file
+fileName: aeta2_9.txt
+fullContent:
+#!/bin/bash
+SERVER_CONF="/etc/apache2/sites-available/000-default.conf"
+SSL_CONF="/etc/apache2/sites-available/default-ssl.conf"
+
+# Instalar o módulo SSL do Apache e gerar certificado autoassinado
+apt-get update && apt-get install -y apache2 openssl
+a2enmod ssl
+openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout /etc/ssl/private/apache-selfsigned.key -out /etc/ssl/certs/apache-selfsigned.crt -subj "/CN=localhost"
+
+# Configurar o site SSL
+sed -i 's/SSLCertificateFile\t\$.*/SSLCertificateFile\t\/etc\/ssl\/certs\/apache-selfsigned.crt/' $SSL_CONF
+sed -i 's/SSLCertificateKeyFile \$.*/SSLCertificateKeyFile \/etc\/ssl\/private\/apache-selfsigned.key/' $SSL_CONF
+a2ensite default-ssl
+
+# Redirecionar todo tráfego HTTP para HTTPS
+sed -i '/<VirtualHost \*:80>/a \\tRedirect permanent \/ https:\/\/localhost\/' $SERVER_CONF
+
+# Restart Apache to apply changes
+systemctl restart apache2}
+{type: uploaded file
+fileName: aeta2_10.txt
+fullContent:
+#!/bin/bash
+# Configura o Apache para redirecionar HTTP para HTTPS
+if [ -f /etc/apache2/sites-available/default.conf ]; then
+    sed -i 's/<VirtualHost \*:80>/<VirtualHost \*:80>\n    Redirect permanent \/ https:\/\/'"$(hostname)"'\/\n/' /etc/apache2/sites-available/default.conf
+elif [ -f /etc/apache2/sites-available/000-default.conf ]; then
+    sed -i 's/<VirtualHost \*:80>/<VirtualHost \*:80>\n    Redirect permanent \/ https:\/\/'"$(hostname)"'\/\n/' /etc/apache2/sites-available/000-default.conf
+fi
+
+# Habilita o módulo SSL do Apache
+a2enmod ssl
+
+# Reinicia o Apache para aplicar as mudanças
+systemctl restart apache2
+
+# Verifica se o Apache está escutando na porta 443
+if ! netstat -tuln | grep -q ':443 '; then
+    echo "Erro: Apache não está escutando na porta 443."
+    exit 1
+fi
+
+# Configura o firewall para permitir HTTPS e bloquear HTTP
+ufw allow 443/tcp
+ufw deny 80/tcp
+
+# Verifica se o UFW está ativo e aplica as regras
+if ufw status | grep -q 'Status: active'; then
+    ufw reload
+else
+    ufw enable
+    ufw reload
+fi
+
+echo "Configuração concluída. O tráfego HTTP foi redirecionado para HTTPS."}
+{type: uploaded file
+fileName: aeta2_11.txt
+fullContent:
+#!/bin/bash
+# Ensure the web server enforces HTTPS for sensitive data transmission
+
+# Check if Apache is installed
+if command -v apache2 &> /dev/null; then
+    # Backup the original configuration file
+    cp /etc/apache2/sites-available/000-default.conf /etc/apache2/sites-available/000-default.conf.bak
+
+    # Modify the Apache configuration to redirect HTTP to HTTPS
+    sed -i 's/<VirtualHost \*:80>/<VirtualHost \*:80>\n    Redirect permanent \/ https:\/\/$host\//' /etc/apache2/sites-available/000-default.conf
+
+    # Enable SSL module and default SSL site
+    a2enmod ssl
+    a2ensite default-ssl
+
+    # Restart Apache to apply changes
+    systemctl restart apache2
+fi
+
+# Check if Nginx is installed
+if command -v nginx &> /dev/null; then
+    # Backup the original configuration file
+    cp /etc/nginx/sites-available/default /etc/nginx/sites-available/default.bak
+
+    # Modify the Nginx configuration to redirect HTTP to HTTPS
+    sed -i 's/listen 80 default_server;/listen 80 default_server;\n    return 301 https:\/\/$host$request_uri;/' /etc/nginx/sites-available/default
+
+    # Enable SSL for Nginx
+    sed -i 's/# listen 443 ssl default_server;/listen 443 ssl default_server;/' /etc/nginx/sites-available/default
+    sed -i 's/# include snippets\/snakeoil.conf;/include snippets\/snakeoil.conf;/' /etc/nginx/sites-available/default
+
+    # Restart Nginx to apply changes
+    systemctl restart nginx
+fi
+
+# Ensure that the web server is enforcing HTTPS
+echo "HTTPS enforcement has been configured successfully."}
+{type: uploaded file
+fileName: aeta2_12.txt
+fullContent:
+#!/bin/bash
+
+# Enforce HTTPS and redirect HTTP to HTTPS for Apache
+if [[ -f /etc/apache2/sites-available/000-default.conf ]]; then
+    sed -i 's/<VirtualHost \*:80>/<VirtualHost *:80>\n    RewriteEngine On\n    RewriteCond %{HTTPS} off\n    RewriteRule ^ https:\/\/%{HTTP_HOST}%{REQUEST_URI} [L,R=301]/' /etc/apache2/sites-available/000-default.conf
+    a2enmod rewrite ssl
+    systemctl restart apache2
+fi
+
+# Enforce HTTPS and redirect HTTP to HTTPS for Nginx
+if [[ -f /etc/nginx/sites-available/default ]]; then
+    sed -i 's/listen 80 default_server;/listen 80 default_server;\n    return 301 https:\/\/$host$request_uri;/' /etc/nginx/sites-available/default
+    systemctl restart nginx
+fi
+
+# Check if SSL certificates are present and generate self-signed if missing
+if [[ ! -f /etc/ssl/certs/ssl-cert-snakeoil.pem ]] || [[ ! -f /etc/ssl/private/ssl-cert-snakeoil.key ]]; then
+    openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout /etc/ssl/private/ssl-cert-snakeoil.key -out /etc/ssl/certs/ssl-cert-snakeoil.pem -subj "/CN=localhost"
+fi
+
+# Check if UFW is installed and enable HTTPS
+if command -v ufw > /dev/null; then
+    ufw allow 'Apache Full'
+    ufw allow 'Nginx Full'
+    ufw reload
+fi}
+{type: uploaded file
+fileName: aeta2_13.txt
+fullContent:
+#!/bin/bash
+# Configura o apache para redirecionar HTTP para HTTPS
+if [ -f /etc/apache2/sites-available/default.conf ]; then
+    sed -i 's/<VirtualHost \*:80>/<VirtualHost *:80>\n    RewriteEngine On\n    RewriteCond %{HTTPS} off\n    RewriteRule (.*) https:\/\/%{HTTP_HOST}%{REQUEST_URI} [R=301,L]/' /etc/apache2/sites-available/default.conf
+fi
+
+if [ -f /etc/apache2/sites-available/000-default.conf ]; then
+    sed -i 's/<VirtualHost \*:80>/<VirtualHost *:80>\n    RewriteEngine On\n    RewriteCond %{HTTPS} off\n    RewriteRule (.*) https:\/\/%{HTTP_HOST}%{REQUEST_URI} [R=301,L]/' /etc/apache2/sites-available/000-default.conf
+fi
+
+# Habilita o módulo SSL e reinicia o apache
+a2enmod ssl
+systemctl restart apache2
+
+# Verifica se o redirecionamento está funcionando
+curl -I http://localhost | grep "Location: https://localhost" > /dev/null 2>&1
+if [ $? -eq 0 ]; then
+    echo "Redirecionamento de HTTP para HTTPS configurado com sucesso."
+else
+    echo "Falha ao configurar o redirecionamento de HTTP para HTTPS."
+fi}
+{type: uploaded file
+fileName: aeta2_14.txt
+fullContent:
+#!/bin/bash
+# Ensure Apache is installed
+if ! command -v apache2 &> /dev/null; then
+    sudo apt-get update
+    sudo apt-get install -y apache2
+fi
+
+# Enable SSL module if not already enabled
+sudo a2enmod ssl
+
+# Ensure default-ssl site is enabled
+sudo a2ensite default-ssl
+
+# Redirect HTTP to HTTPS
+if ! grep -q "Redirect permanent / https://" /etc/apache2/sites-available/000-default.conf; then
+    sudo sed -i '/<\/VirtualHost>/i Redirect permanent / https://localhost/' /etc/apache2/sites-available/000-default.conf
+fi
+
+# Restart Apache to apply changes
+sudo systemctl restart apache2
+
+# Ensure UFW firewall is installed and enabled
+if ! command -v ufw &> /dev/null; then
+    sudo apt-get update
+    sudo apt-get install -y ufw
+fi
+
+# Allow HTTPS through the firewall
+sudo ufw allow 'Apache Full'
+
+# Enable UFW if not already enabled
+sudo ufw --force enable
+
+# Ensure HTTPS is enforced
+if ! grep -q "Redirect permanent / https://" /etc/apache2/sites-available/default-ssl.conf; then
+    sudo sed -i '/<\/VirtualHost>/i Redirect permanent / https://localhost/' /etc/apache2/sites-available/default-ssl.conf
+fi
+
+# Restart Apache to apply changes
+sudo systemctl restart apache2}
+{type: uploaded file
+fileName: aeta2_15.txt
+fullContent:
+#!/bin/bash
+apt-get update
+apt-get install -y apache2
+a2enmod ssl
+a2ensite default-ssl
+systemctl restart apache2
+sed -i '/<VirtualHost \*:80>/a Redirect permanent / https://localhost/' /etc/apache2/sites-available/000-default.conf
+sed -i '/<VirtualHost \*:443>/a SSLEngine on\nSSLCertificateFile /etc/ssl/certs/ssl-cert-snakeoil.pem\nSSLCertificateKeyFile /etc/ssl/private/ssl-cert-snakeoil.key' /etc/apache2/sites-available/default-ssl.conf
+systemctl restart apache2}
+{type: uploaded file
+fileName: aeta2_16.txt
+fullContent:
+#!/bin/bash
+CONF_FILE="/etc/apache2/sites-available/default-ssl.conf"
+if [ -f "$CONF_FILE" ]; then
+    sed -i 's/# Redirect/RewriteEngine On\nRewriteCond %{HTTPS} off\nRewriteRule (.*) https:\/\/%{HTTP_HOST}%{REQUEST_URI} [L,R=301]\n&/' "$CONF_FILE"
+    sed -i 's/<\/VirtualHost>/Redirect permanent \/ https:\/\/%{HTTP_HOST}\/\n&/' "$CONF_FILE"
+    a2enmod ssl
+    a2enmod rewrite
+    systemctl restart apache2
+else
+    echo "SSL configuration file not found. Please ensure Apache is installed and configured correctly."
+    exit 1
+fi}
+{type: uploaded file
+fileName: aeta2_17.txt
+fullContent:
+#!/bin/bash
+SSL_CONF="/etc/apache2/sites-available/default-ssl.conf"
+HTTP_CONF="/etc/apache2/sites-available/000-default.conf"
+
+if [[ ! -f "$SSL_CONF" ]]; then
+    echo "SSL configuration file not found. Exiting."
+    exit 1
+fi
+
+if [[ ! -f "$HTTP_CONF" ]]; then
+    echo "HTTP configuration file not found. Exiting."
+    exit 1
+fi
+
+a2enmod ssl
+a2ensite default-ssl
+
+sed -i '/<VirtualHost \*:80>/a\\tRedirect permanent / https://%{HTTP_HOST}%{REQUEST_URI}' "$HTTP_CONF"
+
+sed -i 's/SSLCertificateFile \/etc\/ssl\/certs\/ssl-cert-snakeoil.pem/SSLCertificateFile \/etc\/ssl\/certs\/server.crt/' "$SSL_CONF"
+sed -i 's/SSLCertificateKeyFile \/etc\/ssl\/private\/ssl-cert-snakeoil.key/SSLCertificateKeyFile \/etc\/ssl\/private\/server.key/' "$SSL_CONF"
+
+systemctl restart apache2}
+{type: uploaded file
+fileName: aeta2_18.txt
+fullContent:
+#!/bin/bash
+
+# Desativar o serviço HTTP
+systemctl stop apache2
+systemctl disable apache2
+
+# Instalar o Apache SSL se não estiver instalado
+if ! dpkg -l | grep -q apache2; then
+    apt-get update
+    apt-get install -y apache2
+fi
+
+if ! dpkg -l | grep -q ssl-cert; then
+    apt-get install -y ssl-cert
+fi
+
+if ! a2query -m ssl; then
+    a2enmod ssl
+fi
+
+if ! a2query -s default-ssl; then
+    a2ensite default-ssl
+fi
+
+# Configurar redirecionamento HTTP para HTTPS
+if ! grep -q "RewriteEngine On" /etc/apache2/sites-available/000-default.conf; then
+    echo '<VirtualHost *:80>
+    RewriteEngine On
+    RewriteCond %{HTTPS} off
+    RewriteRule (.*) https://%{HTTP_HOST}%{REQUEST_URI}
+</VirtualHost>' > /etc/apache2/sites-available/000-default.conf
+fi
+
+# Reiniciar o Apache para aplicar as mudanças
+systemctl restart apache2
+
+# Verificar se o serviço está rodando
+if systemctl is-active --quiet apache2; then
+    echo "Apache configurado com SSL e redirecionamento HTTP para HTTPS."
+else
+    echo "Erro ao configurar o Apache."
+    exit 1
+fi}
+{type: uploaded file
+fileName: aeta2_19.txt
+fullContent:
+#!/bin/bash
+if ! command -v openssl &> /dev/null; then
+    apt-get update && apt-get install -y openssl
+fi
+
+openssl req -new -newkey rsa:2048 -days 365 -nodes -x509 -keyout /etc/ssl/private/nginx-selfsigned.key -out /etc/ssl/certs/nginx-selfsigned.crt -subj "/CN=localhost"
+
+cat > /etc/nginx/sites-available/default <<EOL
+server {
+    listen 80;
+    server_name localhost;
+    return 301 https://\$host\$request_uri;
+}
+
+server {
+    listen 443 ssl;
+    server_name localhost;
+
+    ssl_certificate /etc/ssl/certs/nginx-selfsigned.crt;
+    ssl_certificate_key /etc/ssl/private/nginx-selfsigned.key;
+
+    location / {
+        proxy_pass http://localhost:8080;
+        proxy_set_header Host \$host;
+        proxy_set_header X-Real-IP \$remote_addr;
+        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto \$scheme;
+    }
+}
+EOL
+
+systemctl restart nginx}
+{type: uploaded file
+fileName: aeta2_20.txt
+fullContent:
+#!/bin/bash
+
+# Configura o Apache para redirecionar HTTP para HTTPS
+if ! grep -q "Redirect permanent / https://" /etc/apache2/sites-available/000-default.conf; then
+    echo "<VirtualHost *:80>
+    Redirect permanent / https://\${SERVER_NAME}/
+</VirtualHost>" | sudo tee -a /etc/apache2/sites-available/000-default.conf > /dev/null
+fi
+
+# Habilita o módulo SSL do Apache
+sudo a2enmod ssl
+
+# Configura o Apache para usar SSL
+if [ ! -f /etc/apache2/sites-available/default-ssl.conf ]; then
+    sudo cp /etc/apache2/sites-available/default-ssl.conf /etc/apache2/sites-available/default-ssl.conf.bak
+fi
+
+echo "<IfModule mod_ssl.c>
+    <VirtualHost _default_:443>
+        ServerAdmin webmaster@localhost
+        DocumentRoot /var/www/html
+
+        ErrorLog \${APACHE_LOG_DIR}/error.log
+        CustomLog \${APACHE_LOG_DIR}/access.log combined
+
+        SSLEngine on
+        SSLCertificateFile /etc/ssl/certs/ssl-cert-snakeoil.pem
+        SSLCertificateKeyFile /etc/ssl/private/ssl-cert-snakeoil.key
+
+        <FilesMatch \"\.(cgi|shtml|phtml|php)$\">
+            SSLOptions +StdEnvVars
+        </FilesMatch>
+        <Directory /usr/lib/cgi-bin>
+            SSLOptions +StdEnvVars
+        </Directory>
+
+        BrowserMatch \"MSIE [2-6]\" \\
+            nokeepalive ssl-unclean-shutdown \\
+            downgrade-1.0 force-response-1.0
+        BrowserMatch \"MSIE [17-9]\" ssl-unclean-shutdown
+    </VirtualHost>
+</IfModule>" | sudo tee /etc/apache2/sites-available/default-ssl.conf > /dev/null
+
+# Habilita o site SSL
+sudo a2ensite default-ssl
+
+# Reinicia o Apache para aplicar as mudanças
+sudo systemctl restart apache2}
+{type: uploaded file
+fileName: aeta2_21.txt
+fullContent:
+#!/bin/bash
+if ! command -v certbot &> /dev/null
+then
+    apt-get update
+    apt-get install -y certbot python3-certbot-nginx
+fi
+
+if ! command -v nginx &> /dev/null
+then
+    apt-get install -y nginx
+fi
+
+certbot --nginx -d $(hostname) --non-interactive --agree-tos -m admin@$(hostname)
+
+nginx_conf="/etc/nginx/sites-available/default"
+if grep -q "listen 80;" "$nginx_conf"
+then
+    sed -i 's/listen 80;/listen 80;\n    return 301 https:\/\/$host$request_uri;/g' "$nginx_conf"
+fi
+
+nginx -t && systemctl reload nginx}
+{type: uploaded file
+fileName: aeta2_22.txt
+fullContent:
+#!/bin/bash
+DOMAIN="example.com"
+CERT_DIR="/etc/letsencrypt/live/$DOMAIN"
+NGINX_CONF="/etc/nginx/sites-available/$DOMAIN"
+APT_UPDATE_DONE=0
+
+install_certbot() {
+    if ! command -v certbot &> /dev/null; then
+        if [ -f /etc/debian_version ]; then
+            sudo apt-get update
+            APT_UPDATE_DONE=1
+            sudo apt-get install -y certbot python3-certbot-nginx
+        else
+            echo "Unsupported OS for automatic Certbot installation."
+            exit 1
+        fi
+    fi
+}
+
+configure_ssl() {
+    if [ ! -d "$CERT_DIR" ]; then
+        sudo certbot --nginx -d "$DOMAIN" --non-interactive --agree-tos -m admin@example.com
+    fi
+}
+
+configure_nginx() {
+    if [ -f "$NGINX_CONF" ]; then
+        sudo sed -i '/listen 80;/a \    return 301 https://$host$request_uri;' "$NGINX_CONF"
+        sudo sed -i 's/listen 80;/# listen 80;/' "$NGINX_CONF"
+        sudo systemctl reload nginx
+    else
+        echo "Nginx configuration file not found."
+        exit 1
+    fi
+}
+
+install_certbot
+configure_ssl
+configure_nginx}
+{type: uploaded file
+fileName: aeta2_23.txt
+fullContent:
+#!/bin/bash
+# Configura o Apache para redirecionar HTTP para HTTPS
+if [ -f /etc/apache2/sites-available/000-default.conf ]; then
+    sed -i 's/<VirtualHost \*:80>/<VirtualHost \*:80>\n    Redirect permanent \/ https:\/\/'"$(hostname)"'\//' /etc/apache2/sites-available/000-default.conf
+    a2enmod ssl
+    systemctl restart apache2
+fi
+
+# Configura o Nginx para redirecionar HTTP para HTTPS
+if [ -f /etc/nginx/sites-available/default ]; then
+    sed -i 's/listen 80 default_server;/listen 80 default_server;\n    return 301 https:\/\/$host$request_uri;/' /etc/nginx/sites-available/default
+    systemctl restart nginx
+fi
+
+# Verifica se o certificado SSL está configurado
+if [ ! -f /etc/ssl/certs/ssl-cert-snakeoil.pem ]; then
+    openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout /etc/ssl/private/ssl-cert-snakeoil.key -out /etc/ssl/certs/ssl-cert-snakeoil.pem -subj "/CN=$(hostname)"
+fi
+
+# Habilita o SSL no Apache
+if [ -f /etc/apache2/sites-available/default-ssl.conf ]; then
+    a2ensite default-ssl.conf
+    systemctl restart apache2
+fi
+
+# Habilita o SSL no Nginx
+if [ -f /etc/nginx/sites-available/default-ssl ]; then
+    ln -s /etc/nginx/sites-available/default-ssl /etc/nginx/sites-enabled/
+    systemctl restart nginx
+fi
+
+# Verifica se o redirecionamento está funcionando
+curl -I http://$(hostname) | grep "Location: https://$(hostname)"}
+{type: uploaded file
+fileName: aeta2_24.txt
+fullContent:
+#!/bin/bash
+# Enforce HTTPS and disable HTTP
+if [ -f /etc/apache2/sites-available/000-default.conf ]; then
+    sed -i 's/<VirtualHost \*:80>/<VirtualHost \*:80>\n    Redirect permanent \/ https:\/\/$SERVER_NAME\//' /etc/apache2/sites-available/000-default.conf
+    a2enmod ssl
+    a2ensite default-ssl
+    systemctl restart apache2
+fi
+
+if [ -f /etc/nginx/sites-available/default ]; then
+    sed -i 's/listen 80 default_server;/listen 80 default_server;\n    return 301 https:\/\/$host$request_uri;/' /etc/nginx/sites-available/default
+    systemctl restart nginx
+fi
+
+# Ensure SSL/TLS is enabled and configured
+if [ -f /etc/apache2/mods-enabled/ssl.conf ]; then
+    sed -i 's/SSLEngine off/SSLEngine on/' /etc/apache2/mods-enabled/ssl.conf
+    sed -i 's/SSLProtocol all -SSLv3/SSLProtocol TLSv1.2 TLSv1.3/' /etc/apache2/mods-enabled/ssl.conf
+    sed -i 's/SSLCipherSuite HIGH:!aNULL:!MD5/SSLCipherSuite ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:DHE-RSA-AES128-GCM-SHA256:DHE-RSA-AES256-GCM-SHA384/' /etc/apache2/mods-enabled/ssl.conf
+    systemctl restart apache2
+fi
+
+if [ -f /etc/nginx/nginx.conf ]; then
+    sed -i 's/# ssl_protocols TLSv1 TLSv1.1 TLSv1.2;/ssl_protocols TLSv1.2 TLSv1.3;/' /etc/nginx/nginx.conf
+    sed -i 's/# ssl_ciphers HIGH:!aNULL:!MD5;/ssl_ciphers ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:DHE-RSA-AES128-GCM-SHA256:DHE-RSA-AES256-GCM-SHA384;/' /etc/nginx/nginx.conf
+    systemctl restart nginx
+fi
+
+# HSTS Header
+if [ -f /etc/apache2/conf-available/security.conf ]; then
+    echo "Header always set Strict-Transport-Security \"max-age=31536000; includeSubDomains; preload\"" >> /etc/apache2/conf-available/security.conf
+    a2enmod headers
+    systemctl restart apache2
+fi
+
+if [ -f /etc/nginx/nginx.conf ]; then
+    sed -i '/server {/a \    add_header Strict-Transport-Security "max-age=31536000; includeSubDomains; preload";' /etc/nginx/nginx.conf
+    systemctl restart nginx
+fi}
+{type: uploaded file
+fileName: aeta2_25.txt
+fullContent:
+#!/bin/bash
+# Configura o Apache para redirecionar HTTP para HTTPS
+if [ -f /etc/apache2/sites-available/000-default.conf ]; then
+    sed -i 's/<VirtualHost \*:80>/<VirtualHost \*:80>\n    Redirect permanent \/ https:\/\/'"$(hostname)"'\//' /etc/apache2/sites-available/000-default.conf
+    a2enmod ssl
+    systemctl restart apache2
+fi
+
+# Configura o Nginx para redirecionar HTTP para HTTPS
+if [ -f /etc/nginx/sites-available/default ]; then
+    sed -i 's/listen 80 default_server;/listen 80 default_server;\n    return 301 https:\/\/$host$request_uri;/' /etc/nginx/sites-available/default
+    systemctl restart nginx
+fi
+
+# Verifica se o certificado SSL está configurado
+if [ ! -f /etc/ssl/certs/ssl-cert-snakeoil.pem ]; then
+    openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout /etc/ssl/private/ssl-cert-snakeoil.key -out /etc/ssl/certs/ssl-cert-snakeoil.pem -subj "/CN=$(hostname)"
+fi
+
+# Habilita o SSL no Apache
+if [ -f /etc/apache2/sites-available/default-ssl.conf ]; then
+    a2ensite default-ssl
+    systemctl restart apache2
+fi
+
+# Habilita o SSL no Nginx
+if [ -f /etc/nginx/sites-available/default-ssl ]; then
+    ln -s /etc/nginx/sites-available/default-ssl /etc/nginx/sites-enabled/
+    systemctl restart nginx
+fi
+
+# Verifica se o redirecionamento está funcionando
+curl -I http://$(hostname) | grep "Location: https://$(hostname)" && echo "Redirecionamento HTTP para HTTPS configurado com sucesso." || echo "Erro ao configurar redirecionamento HTTP para HTTPS."}
+{type: uploaded file
+fileName: aeta2_26.txt
+fullContent:
+#!/bin/bash
+# Enforce HTTPS and disable HTTP
+CONFIG_FILE="/etc/apache2/sites-available/000-default.conf"
+SSL_CONFIG_FILE="/etc/apache2/sites-available/default-ssl.conf"
+
+# Ensure SSL module is enabled
+a2enmod ssl
+
+# Redirect HTTP to HTTPS
+if ! grep -q "RewriteEngine On" $CONFIG_FILE; then
+    echo "<VirtualHost *:80>" > $CONFIG_FILE
+    echo "    RewriteEngine On" >> $CONFIG_FILE
+    echo "    RewriteCond %{HTTPS} off" >> $CONFIG_FILE
+    echo "    RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]" >> $CONFIG_FILE
+    echo "</VirtualHost>" >> $CONFIG_FILE
+fi
+
+# Configure SSL
+if [ ! -f $SSL_CONFIG_FILE ]; then
+    echo "<IfModule mod_ssl.c>" > $SSL_CONFIG_FILE
+    echo "    <VirtualHost _default_:443>" >> $SSL_CONFIG_FILE
+    echo "        ServerAdmin webmaster@localhost" >> $SSL_CONFIG_FILE
+    echo "        DocumentRoot /var/www/html" >> $SSL_CONFIG_FILE
+    echo "        ErrorLog ${APACHE_LOG_DIR}/error.log" >> $SSL_CONFIG_FILE
+    echo "        CustomLog ${APACHE_LOG_DIR}/access.log combined" >> $SSL_CONFIG_FILE
+    echo "        SSLEngine on" >> $SSL_CONFIG_FILE
+    echo "        SSLCertificateFile /etc/ssl/certs/ssl-cert-snakeoil.pem" >> $SSL_CONFIG_FILE
+    echo "        SSLCertificateKeyFile /etc/ssl/private/ssl-cert-snakeoil.key" >> $SSL_CONFIG_FILE
+    echo "        <FilesMatch \"\.(cgi|shtml|phtml|php)$\">" >> $SSL_CONFIG_FILE
+    echo "            SSLOptions +StdEnvVars" >> $SSL_CONFIG_FILE
+    echo "        </FilesMatch>" >> $SSL_CONFIG_FILE
+    echo "        <Directory /usr/lib/cgi-bin>" >> $SSL_CONFIG_FILE
+    echo "            SSLOptions +StdEnvVars" >> $SSL_CONFIG_FILE
+    echo "        </Directory>" >> $SSL_CONFIG_FILE
+    echo "    </VirtualHost>" >> $SSL_CONFIG_FILE
+    echo "</IfModule>" >> $SSL_CONFIG_FILE
+fi
+
+# Enable SSL site and restart Apache
+a2ensite default-ssl
+systemctl restart apache2}
+{type: uploaded file
+fileName: aeta2_27.txt
+fullContent:
+#!/bin/bash
+# Enforce HTTPS by configuring Apache to redirect HTTP to HTTPS
+if [ -f /etc/apache2/sites-available/000-default.conf ]; then
+    sed -i '/<VirtualHost \*:80>/a\\tRedirect permanent / https://'"$(hostname)"'/' /etc/apache2/sites-available/000-default.conf
+    systemctl restart apache2
+fi
+
+# Enforce HTTPS by configuring Nginx to redirect HTTP to HTTPS
+if [ -f /etc/nginx/sites-available/default ]; then
+    sed -i '/listen 80 default_server;/a\\treturn 301 https://$host$request_uri;' /etc/nginx/sites-available/default
+    systemctl restart nginx
+fi
+
+# Ensure SSL/TLS is enabled for any running web service
+if ! command -v certbot &> /dev/null; then
+    apt-get update && apt-get install -y certbot python3-certbot-apache python3-certbot-nginx
+fi
+
+# Obtain and install SSL certificate for Apache
+if systemctl is-active --quiet apache2; then
+    certbot --apache --non-interactive --agree-tos --redirect -m admin@example.com -d "$(hostname)"
+fi
+
+# Obtain and install SSL certificate for Nginx
+if systemctl is-active --quiet nginx; then
+    certbot --nginx --non-interactive --agree-tos --redirect -m admin@example.com -d "$(hostname)"
+fi
+
+# Update firewall rules to allow HTTPS
+if command -v ufw &> /dev/null; then
+    ufw allow 'Apache Full'
+    ufw allow 'Nginx Full'
+fi}
+{type: uploaded file
+fileName: aeta2_28.txt
+fullContent:
+#!/bin/bash
+if ! command -v a2enmod &> /dev/null
+then
+    echo "Apache2 is not installed. Please install Apache2 first."
+    exit 1
+fi
+
+a2enmod ssl
+a2ensite default-ssl
+sed -i 's/^Listen 80$/Listen 443/' /etc/apache2/ports.conf
+sed -i 's/^<VirtualHost \*:80>$/<VirtualHost \*:443>/' /etc/apache2/sites-available/000-default.conf
+echo '<VirtualHost *:80>' > /etc/apache2/sites-available/redirect.conf
+echo '    Redirect permanent / https://localhost/' >> /etc/apache2/sites-available/redirect.conf
+echo '</VirtualHost>' >> /etc/apache2/sites-available/redirect.conf
+a2ensite redirect
+systemctl restart apache2}
+{type: uploaded file
+fileName: aeta2_29.txt
+fullContent:
+#!/bin/bash
+# Enforce HTTPS and disable HTTP
+if [ -f /etc/apache2/sites-available/000-default.conf ]; then
+    sed -i 's/<VirtualHost \*:80>/<VirtualHost \*:80>\n    Redirect permanent \/ https:\/\/'"$(hostname)"'\/\n/' /etc/apache2/sites-available/000-default.conf
+    a2enmod ssl
+    systemctl restart apache2
+fi
+
+if [ -f /etc/nginx/sites-available/default ]; then
+    sed -i 's/listen 80 default_server;/listen 80 default_server;\n    return 301 https:\/\/$host$request_uri;\n/' /etc/nginx/sites-available/default
+    systemctl restart nginx
+fi
+
+# Ensure SSL/TLS is enabled and configured
+if [ -f /etc/apache2/sites-available/default-ssl.conf ]; then
+    sed -i 's/SSLEngine off/SSLEngine on/' /etc/apache2/sites-available/default-ssl.conf
+    a2ensite default-ssl
+    systemctl restart apache2
+fi
+
+if [ -f /etc/nginx/sites-available/default-ssl ]; then
+    sed -i 's/# listen 443 ssl default_server;/listen 443 ssl default_server;\n    ssl_certificate \/etc\/nginx\/ssl\/nginx.crt;\n    ssl_certificate_key \/etc\/nginx\/ssl\/nginx.key;\n/' /etc/nginx/sites-available/default-ssl
+    systemctl restart nginx
+fi
+
+# HSTS Header for Apache
+if [ -f /etc/apache2/sites-available/default-ssl.conf ]; then
+    sed -i 's/<\/VirtualHost>/    Header always set Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"\n<\/VirtualHost>/' /etc/apache2/sites-available/default-ssl.conf
+    systemctl restart apache2
+fi
+
+# HSTS Header for Nginx
+if [ -f /etc/nginx/sites-available/default-ssl ]; then
+    sed -i 's/}/    add_header Strict-Transport-Security "max-age=31536000; includeSubDomains; preload";\n}/' /etc/nginx/sites-available/default-ssl
+    systemctl restart nginx
+fi}
+{type: uploaded file
+fileName: aeta2_30.txt
+fullContent:
+#!/bin/bash
+# Enforce HTTPS and disable HTTP
+if [ -f /etc/apache2/sites-available/000-default.conf ]; then
+    sed -i 's/<VirtualHost \*:80>/<VirtualHost \*:80>\n    Redirect permanent \/ https:\/\/$HOSTNAME\//' /etc/apache2/sites-available/000-default.conf
+    a2enmod ssl
+    a2ensite default-ssl
+    systemctl restart apache2
+fi
+
+if [ -f /etc/nginx/sites-available/default ]; then
+    sed -i 's/listen 80 default_server;/listen 80 default_server;\n    return 301 https:\/\/$host$request_uri;/' /etc/nginx/sites-available/default
+    systemctl restart nginx
+fi
+
+# Ensure SSL/TLS is enabled and configured
+if [ -f /etc/apache2/mods-enabled/ssl.conf ]; then
+    sed -i 's/SSLEngine off/SSLEngine on/' /etc/apache2/mods-enabled/ssl.conf
+    sed -i 's/SSLProtocol all -SSLv3/SSLProtocol TLSv1.2/' /etc/apache2/mods-enabled/ssl.conf
+    sed -i 's/SSLCipherSuite HIGH:!aNULL:!MD5/SSLCipherSuite ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:DHE-RSA-AES128-GCM-SHA256:DHE-RSA-AES256-GCM-SHA384/' /etc/apache2/mods-enabled/ssl.conf
+    systemctl restart apache2
+fi
+
+if [ -f /etc/nginx/nginx.conf ]; then
+    sed -i 's/# ssl_protocols TLSv1 TLSv1.1 TLSv1.2;/ssl_protocols TLSv1.2;/' /etc/nginx/nginx.conf
+    sed -i 's/# ssl_ciphers HIGH:!aNULL:!MD5;/ssl_ciphers ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:DHE-RSA-AES128-GCM-SHA256:DHE-RSA-AES256-GCM-SHA384;/' /etc/nginx/nginx.conf
+    systemctl restart nginx
+fi
+
+# HSTS Header for Apache
+if [ -f /etc/apache2/conf-available/security.conf ]; then
+    echo "Header always set Strict-Transport-Security \"max-age=31536000; includeSubDomains; preload\"" >> /etc/apache2/conf-available/security.conf
+    systemctl restart apache2
+fi
+
+# HSTS Header for Nginx
+if [ -f /etc/nginx/nginx.conf ]; then
+    echo "add_header Strict-Transport-Security \"max-age=31536000; includeSubDomains; preload\";" >> /etc/nginx/nginx.conf
+    systemctl restart nginx
+fi}
+{type: uploaded file
+fileName: aeta2_31.txt
+fullContent:
+#!/bin/bash
+
+# Configuração do Apache para forçar HTTPS
+APACHE_CONF="/etc/apache2/sites-available/000-default.conf"
+
+# Verifica se o Apache está instalado
+if ! command -v apache2 &> /dev/null; then
+    echo "Apache não está instalado. Instalando..."
+    apt-get update
+    apt-get install -y apache2
+fi
+
+# Cria um certificado SSL autoassinado para teste
+mkdir -p /etc/apache2/ssl
+openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout /etc/apache2/ssl/apache.key -out /etc/apache2/ssl/apache.crt -subj "/CN=localhost"
+
+# Configura o Apache para usar SSL
+a2enmod ssl
+a2ensite default-ssl
+
+# Edita o arquivo de configuração do Apache para redirecionar HTTP para HTTPS
+cat <<EOL >> $APACHE_CONF
+<VirtualHost *:80>
+    ServerAdmin webmaster@localhost
+    DocumentRoot /var/www/html
+    ErrorLog ${APACHE_LOG_DIR}/error.log
+    CustomLog ${APACHE_LOG_DIR}/access.log combined
+    Redirect permanent / https://localhost/
+</VirtualHost>
+
+<VirtualHost *:443>
+    ServerAdmin webmaster@localhost
+    DocumentRoot /var/www/html
+    ErrorLog ${APACHE_LOG_DIR}/error.log
+    CustomLog ${APACHE_LOG_DIR}/access.log combined
+    SSLEngine on
+    SSLCertificateFile /etc/apache2/ssl/apache.crt
+    SSLCertificateKeyFile /etc/apache2/ssl/apache.key
+</VirtualHost>
+EOL
+
+# Reinicia o Apache para aplicar as mudanças
+systemctl restart apache2
+
+# Verifica se o redirecionamento está funcionando
+if curl -I http://localhost | grep "Location: https://localhost/"; then
+    echo "Redirecionamento para HTTPS configurado com sucesso."
+else
+    echo "Erro ao configurar o redirecionamento para HTTPS."
+fi}
+{type: uploaded file
+fileName: aeta2_32.txt
+fullContent:
+#!/bin/bash
+
+# Configurar o Apache para forçar o uso de HTTPS
+if [ -f /etc/apache2/sites-available/000-default.conf ]; then
+    sed -i 's/<VirtualHost \*:80>/<VirtualHost *:80>\n    Redirect permanent \/ https:\/\/'"$(hostname)"'\//' /etc/apache2/sites-available/000-default.conf
+fi
+
+# Habilitar o módulo SSL do Apache
+a2enmod ssl
+
+# Configurar o SSL no Apache
+if [ -f /etc/apache2/sites-available/default-ssl.conf ]; then
+    sed -i 's/<VirtualHost _default_:443>/<VirtualHost *:443>/' /etc/apache2/sites-available/default-ssl.conf
+    sed -i 's/SSLEngine on/SSLEngine on\n    SSLProtocol all -SSLv2 -SSLv3 -TLSv1 -TLSv1.1\n    SSLCipherSuite HIGH:!aNULL:!MD5/' /etc/apache2/sites-available/default-ssl.conf
+fi
+
+# Reiniciar o Apache para aplicar as mudanças
+systemctl restart apache2
+
+# Configurar o iptables para bloquear o tráfego HTTP
+iptables -A INPUT -p tcp --dport 80 -j DROP
+iptables-save > /etc/iptables/rules.v4
+
+# Configurar o firewall UFW para bloquear o tráfego HTTP
+if command -v ufw &> /dev/null; then
+    ufw deny 80
+    ufw reload
+fi}
+{type: uploaded file
+fileName: aeta2_33.txt
+fullContent:
+#!/bin/bash
+CONFIG_FILE="/etc/apache2/sites-available/000-default.conf"
+SSL_CONFIG="/etc/apache2/sites-available/default-ssl.conf"
+ENABLED_SITES="/etc/apache2/sites-enabled/"
+
+if [ ! -f "$SSL_CONFIG" ]; then
+    a2enmod ssl
+    apt-get install -y openssl
+    mkdir -p /etc/apache2/ssl
+    openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout /etc/apache2/ssl/apache.key -out /etc/apache2/ssl/apache.crt -subj "/CN=localhost"
+    cp /etc/apache2/sites-available/default-ssl.conf /etc/apache2/sites-available/default-ssl.conf.bak
+    sed -i 's/SSLCertificateFile\t\/etc\/ssl\/certs\/ssl-cert-snakeoil.pem/SSLCertificateFile\t\/etc\/apache2\/ssl\/apache.crt/' $SSL_CONFIG
+    sed -i 's/SSLCertificateKeyFile \/etc\/ssl\/private\/ssl-cert-snakeoil.key/SSLCertificateKeyFile \/etc\/apache2\/ssl\/apache.key/' $SSL_CONFIG
+fi
+
+a2ensite default-ssl
+systemctl reload apache2
+
+if ! grep -q "Redirect permanent / https://" $CONFIG_FILE; then
+    sed -i '/<\/VirtualHost>/i Redirect permanent / https://' $CONFIG_FILE
+    systemctl restart apache2
+fi
+
+if ! grep -q "</VirtualHost>" $CONFIG_FILE; then
+    echo "Redirect permanent / https://" >> $CONFIG_FILE
+    systemctl restart apache2
+fi
+
+if [ -f "$ENABLED_SITES/000-default.conf" ]; then
+    a2dissite 000-default
+    systemctl reload apache2
+fi}
+{type: uploaded file
+fileName: aeta2_34.txt
+fullContent:
+#!/bin/bash
+if ! command -v openssl &> /dev/null; then
+    echo "OpenSSL is not installed. Installing OpenSSL..."
+    sudo apt-get update && sudo apt-get install -y openssl
+fi
+
+if ! command -v apache2 &> /dev/null; then
+    echo "Apache2 is not installed. Installing Apache2..."
+    sudo apt-get update && sudo apt-get install -y apache2
+fi
+
+if [ ! -f /etc/apache2/sites-available/default-ssl.conf ]; then
+    echo "Enabling SSL module and creating default SSL configuration..."
+    sudo a2enmod ssl
+    sudo a2ensite default-ssl
+    sudo systemctl restart apache2
+fi
+
+if ! grep -q "Redirect permanent / https://" /etc/apache2/sites-available/000-default.conf; then
+    echo "Configuring HTTP to HTTPS redirection..."
+    echo -e "\n<VirtualHost *:80>\n    Redirect permanent / https://\n</VirtualHost>" | sudo tee -a /etc/apache2/sites-available/000-default.conf > /dev/null
+    sudo systemctl restart apache2
+fi
+
+if [ ! -f /etc/ssl/certs/apache-selfsigned.crt ] || [ ! -f /etc/ssl/private/apache-selfsigned.key ]; then
+    echo "Generating self-signed SSL certificate..."
+    sudo openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout /etc/ssl/private/apache-selfsigned.key -out /etc/ssl/certs/apache-selfsigned.crt -subj "/C=US/ST=State/L=City/O=Organization/CN=localhost"
+    sudo sed -i 's|SSLCertificateFile /etc/ssl/certs/ssl-cert-snakeoil.pem|SSLCertificateFile /etc/ssl/certs/apache-selfsigned.crt|g' /etc/apache2/sites-available/default-ssl.conf
+    sudo sed -i 's|SSLCertificateKeyFile /etc/ssl/private/ssl-cert-snakeoil.key|SSLCertificateKeyFile /etc/ssl/private/apache-selfsigned.key|g' /etc/apache2/sites-available/default-ssl.conf
+    sudo systemctl restart apache2
+fi
+
+echo "SSL/TLS enforced and redirection configured successfully."}
+{type: uploaded file
+fileName: aeta2_35.txt
+fullContent:
+#!/bin/bash
+SERVER_CONFIG="/etc/apache2/sites-available/000-default.conf"
+SSL_CONFIG="/etc/apache2/sites-available/default-ssl.conf"
+
+# Ensure SSL module is enabled
+a2enmod ssl
+
+# Ensure SSL site is enabled
+a2ensite default-ssl
+
+# Redirect all HTTP traffic to HTTPS
+if grep -q "RewriteEngine On" $SERVER_CONFIG; then
+    sed -i '/RewriteEngine On/a RewriteCond %{HTTPS} off\nRewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [R=301,L]' $SERVER_CONFIG
+else
+    echo -e "RewriteEngine On\nRewriteCond %{HTTPS} off\nRewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [R=301,L]" >> $SERVER_CONFIG
+fi
+
+# Restart Apache to apply changes
+systemctl restart apache2}
+{type: uploaded file
+fileName: aeta2_36.txt
+fullContent:
+#!/bin/bash
+
+# Configura o Apache para redirecionar todas as requisições HTTP para HTTPS
+if [[ -f /etc/apache2/sites-available/000-default.conf ]]; then
+    sed -i 's/<VirtualHost \*:80>/<VirtualHost \*:80>\n    Redirect permanent \/ https:\/\/\$host\//' /etc/apache2/sites-available/000-default.conf
+fi
+
+# Configura o Apache para usar HTTPS
+if [[ -f /etc/apache2/sites-available/default-ssl.conf ]]; then
+    sed -i 's/SSLEngine off/SSLEngine on/' /etc/apache2/sites-available/default-ssl.conf
+    sed -i 's/#SSLProtocol/SSLProtocol/' /etc/apache2/sites-available/default-ssl.conf
+    sed -i 's/#SSLCertificateFile/SSLCertificateFile/' /etc/apache2/sites-available/default-ssl.conf
+    sed -i 's/#SSLCertificateKeyFile/SSLCertificateKeyFile/' /etc/apache2/sites-available/default-ssl.conf
+fi
+
+# Ativa o módulo SSL e reinicia o Apache para aplicar as alterações
+a2enmod ssl
+systemctl restart apache2
+
+# Configura o firewall para bloquear o tráfego HTTP (porta 80) e permitir apenas HTTPS (porta 443)
+if command -v ufw &> /dev/null; then
+    ufw allow https
+    ufw deny http
+    ufw reload
+fi}
+{type: uploaded file
+fileName: aeta2_37.txt
+fullContent:
+#!/bin/bash
+if ! command -v openssl &> /dev/null; then
+    sudo apt-get update && sudo apt-get install -y openssl
+fi
+if [ ! -f /etc/ssl/certs/nginx-selfsigned.crt ] || [ ! -f /etc/ssl/private/nginx-selfsigned.key ]; then
+    sudo openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout /etc/ssl/private/nginx-selfsigned.key -out /etc/ssl/certs/nginx-selfsigned.crt -subj "/CN=localhost"
+fi
+if ! grep -q "listen 443 ssl;" /etc/nginx/sites-available/default; then
+    sudo sed -i '/listen 80;/a \ \ \ \ listen 443 ssl;' /etc/nginx/sites-available/default
+    sudo sed -i '/listen 443 ssl;/a \ \ \ \ ssl_certificate /etc/ssl/certs/nginx-selfsigned.crt;' /etc/nginx/sites-available/default
+    sudo sed -i '/ssl_certificate /a \ \ \ \ ssl_certificate_key /etc/ssl/private/nginx-selfsigned.key;' /etc/nginx/sites-available/default
+fi
+if ! grep -q "return 301 https://\$host\$request_uri;" /etc/nginx/sites-available/default; then
+    sudo sed -i '/listen 80;/a \ \ \ \ return 301 https://\$host\$request_uri;' /etc/nginx/sites-available/default
+fi
+sudo systemctl restart nginx}
+{type: uploaded file
+fileName: aeta2_38.txt
+fullContent:
+#!/bin/bash
+# Configura o Apache para redirecionar HTTP para HTTPS
+if [ -f /etc/apache2/sites-available/000-default.conf ]; then
+    sed -i 's/<VirtualHost \*:80>/<VirtualHost \*:80>\n    Redirect permanent \/ https:\/\/'"$(hostname)"'\//' /etc/apache2/sites-available/000-default.conf
+fi
+
+# Habilita o módulo SSL do Apache
+a2enmod ssl
+
+# Configura o Apache para usar SSL
+if [ -f /etc/apache2/sites-available/default-ssl.conf ]; then
+    sed -i 's/<VirtualHost _default_:443>/<VirtualHost _default_:443>\n    SSLEngine on\n    SSLCertificateFile \/etc\/ssl\/certs\/ssl-cert-snakeoil.pem\n    SSLCertificateKeyFile \/etc\/ssl\/private\/ssl-cert-snakeoil.key/' /etc/apache2/sites-available/default-ssl.conf
+fi
+
+# Habilita o site SSL
+a2ensite default-ssl
+
+# Reinicia o Apache para aplicar as mudanças
+systemctl restart apache2
+
+# Verifica se o redirecionamento está funcionando
+if curl -I http://localhost | grep "Location: https://"; then
+    echo "Redirecionamento HTTP para HTTPS configurado com sucesso."
+else
+    echo "Erro ao configurar o redirecionamento HTTP para HTTPS."
+fi}
+{type: uploaded file
+fileName: aeta2_39.txt
+fullContent:
+#!/bin/bash
+
+# Verifica se o Apache está instalado
+if ! command -v apache2 &> /dev/null; then
+    echo "Apache não está instalado. Este script é destinado a sistemas com Apache instalado."
+    exit 1
+fi
+
+# Instala o módulo SSL do Apache, se não estiver instalado
+if ! apache2ctl -M | grep -q ssl; then
+    apt-get install -y apache2-ssl
+fi
+
+# Habilita o módulo SSL e reinicia o Apache
+a2enmod ssl
+systemctl restart apache2
+
+# Verifica se o site está configurado para usar SSL
+if [ ! -f /etc/apache2/sites-available/default-ssl.conf ]; then
+    echo "Configuração SSL padrão não encontrada. Criando configuração SSL padrão..."
+    mkdir -p /etc/apache2/ssl
+    openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout /etc/apache2/ssl/apache.key -out /etc/apache2/ssl/apache.crt -subj "/CN=localhost"
+    cp /etc/apache2/sites-available/default-ssl.conf /etc/apache2/sites-available/default-ssl.conf.bak
+    cat <<EOL > /etc/apache2/sites-available/default-ssl.conf
+<IfModule mod_ssl.c>
+    <VirtualHost _default_:443>
+        ServerAdmin webmaster@localhost
+        DocumentRoot /var/www/html
+        ErrorLog \${APACHE_LOG_DIR}/error.log
+        CustomLog \${APACHE_LOG_DIR}/access.log combined
+        SSLEngine on
+        SSLCertificateFile /etc/apache2/ssl/apache.crt
+        SSLCertificateKeyFile /etc/apache2/ssl/apache.key
+        <FilesMatch "\.(cgi|shtml|phtml|php)$">
+            SSLOptions +StdEnvVars
+        </FilesMatch>
+        <Directory /usr/lib/cgi-bin>
+            SSLOptions +StdEnvVars
+        </Directory>
+    </VirtualHost>
+</IfModule>
+EOL
+fi
+
+# Habilita o site SSL e reinicia o Apache
+a2ensite default-ssl
+systemctl restart apache2
+
+# Configura o redirecionamento de HTTP para HTTPS
+if [ ! -f /etc/apache2/sites-available/000-default.conf ]; then
+    echo "Configuração padrão HTTP não encontrada. Criando configuração HTTP padrão..."
+    cp /etc/apache2/sites-available/000-default.conf /etc/apache2/sites-available/000-default.conf.bak
+    cat <<EOL > /etc/apache2/sites-available/000-default.conf
+<VirtualHost *:80>
+    ServerAdmin webmaster@localhost
+    DocumentRoot /var/www/html
+    ErrorLog \${APACHE_LOG_DIR}/error.log
+    CustomLog \${APACHE_LOG_DIR}/access.log combined
+    RewriteEngine On
+    RewriteCond %{HTTPS} off
+    RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+</VirtualHost>
+EOL
+fi
+
+# Habilita o módulo de redirecionamento e reinicia o Apache
+a2enmod rewrite
+systemctl restart apache2
+
+echo "Configuração de SSL e redirecionamento para HTTPS concluída com sucesso."}
+{type: uploaded file
+fileName: aeta2_40.txt
+fullContent:
+#!/bin/bash
+if [[ ! -f /etc/apache2/sites-available/default-ssl.conf ]]; then
+    apt-get update
+    apt-get install -y apache2
+    a2enmod ssl
+    systemctl restart apache2
+fi
+if [[ ! -f /etc/ssl/certs/apache-selfsigned.crt ]]; then
+    openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout /etc/ssl/private/apache-selfsigned.key -out /etc/ssl/certs/apache-selfsigned.crt -subj "/CN=localhost"
+fi
+if ! grep -q "SSLEngine on" /etc/apache2/sites-available/default-ssl.conf; then
+    echo "<VirtualHost *:443>
+    ServerAdmin webmaster@localhost
+    DocumentRoot /var/www/html
+    SSLEngine on
+    SSLCertificateFile /etc/ssl/certs/apache-selfsigned.crt
+    SSLCertificateKeyFile /etc/ssl/private/apache-selfsigned.key
+    <Directory /var/www/html>
+        AllowOverride All
+    </Directory>
+    ErrorLog ${APACHE_LOG_DIR}/error.log
+    CustomLog ${APACHE_LOG_DIR}/access.log combined
+</VirtualHost>" > /etc/apache2/sites-available/default-ssl.conf
+fi
+if ! a2ensite default-ssl.conf; then
+    echo "Failed to enable default-ssl site."
+    exit 1
+fi
+if ! grep -q "Redirect permanent / https://" /etc/apache2/sites-available/000-default.conf; then
+    sed -i '/<VirtualHost \*:80>/a \\tRedirect permanent / https://localhost/' /etc/apache2/sites-available/000-default.conf
+fi
+systemctl restart apache2}
+{type: uploaded file
+fileName: aeta2_41.txt
+fullContent:
+#!/bin/bash
+
+# Configura o Apache para redirecionar HTTP para HTTPS
+if [ -f /etc/apache2/sites-available/000-default.conf ]; then
+    sed -i 's/<VirtualHost *:80>/<VirtualHost *:80>\n    Redirect permanent \/ https:\/\/$HOSTNAME\//' /etc/apache2/sites-available/000-default.conf
+fi
+
+# Habilita o módulo SSL do Apache
+a2enmod ssl
+
+# Configura o SSL no Apache
+if [ -f /etc/apache2/sites-available/default-ssl.conf ]; then
+    sed -i 's/<VirtualHost _default_:443>/<VirtualHost *:443>\n    SSLEngine on\n    SSLCertificateFile \/etc\/ssl\/certs\/ssl-cert-snakeoil.pem\n    SSLCertificateKeyFile \/etc\/ssl\/private\/ssl-cert-snakeoil.key/' /etc/apache2/sites-available/default-ssl.conf
+fi
+
+# Reinicia o Apache para aplicar as mudanças
+systemctl restart apache2
+
+# Verifica se o redirecionamento foi aplicado
+if curl -I http://localhost | grep "Location: https://"; then
+    echo "Redirecionamento HTTP para HTTPS configurado com sucesso."
+else
+    echo "Erro ao configurar o redirecionamento HTTP para HTTPS."
+fi}
+{type: uploaded file
+fileName: aeta2_42.txt
+fullContent:
+#!/bin/bash
+
+# Instalar Apache2 se não estiver instalado
+if ! command -v apache2 &> /dev/null; then
+    sudo apt-get update
+    sudo apt-get install -y apache2
+fi
+
+# Habilitar o módulo SSL do Apache
+sudo a2enmod ssl
+
+# Criar um certificado autoassinado
+sudo openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout /etc/ssl/private/apache-selfsigned.key -out /etc/ssl/certs/apache-selfsigned.crt -subj "/CN=localhost"
+
+# Configurar o Apache para usar SSL
+sudo bash -c 'cat > /etc/apache2/sites-available/default-ssl.conf <<EOF
+<IfModule mod_ssl.c>
+    <VirtualHost _default_:443>
+        ServerAdmin webmaster@localhost
+        DocumentRoot /var/www/html
+        SSLEngine on
+        SSLCertificateFile /etc/ssl/certs/apache-selfsigned.crt
+        SSLCertificateKeyFile /etc/ssl/private/apache-selfsigned.key
+        <FilesMatch "\.(cgi|shtml|phtml|php)$">
+            SSLOptions +StdEnvVars
+        </FilesMatch>
+        <Directory /usr/lib/cgi-bin>
+            SSLOptions +StdEnvVars
+        </Directory>
+        BrowserMatch "MSIE [2-6]" \\
+            nokeepalive ssl-unclean-shutdown \\
+            downgrade-1.0 force-response-1.0
+        BrowserMatch "MSIE [17-9]" ssl-unclean-shutdown
+    </VirtualHost>
+</IfModule>
+EOF'
+
+# Habilitar o site SSL
+sudo a2ensite default-ssl
+
+# Redirecionar HTTP para HTTPS
+sudo bash -c 'cat > /etc/apache2/sites-available/000-default.conf <<EOF
+<VirtualHost *:80>
+    ServerAdmin webmaster@localhost
+    DocumentRoot /var/www/html
+    RewriteEngine On
+    RewriteCond %{HTTPS} off
+    RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+    ErrorLog \${APACHE_LOG_DIR}/error.log
+    CustomLog \${APACHE_LOG_DIR}/access.log combined
+</VirtualHost>
+EOF'
+
+# Reiniciar o Apache para aplicar as alterações
+sudo systemctl restart apache2}
+{type: uploaded file
+fileName: aeta2_43.txt
+fullContent:
+#!/bin/bash
+# Enforce HTTPS and disable HTTP
+if [ -f /etc/apache2/sites-available/000-default.conf ]; then
+    sed -i 's/<VirtualHost \*:80>/<VirtualHost \*:80>\n    Redirect permanent \/ https:\/\/$SERVER_NAME\//' /etc/apache2/sites-available/000-default.conf
+    a2enmod ssl
+    a2ensite default-ssl
+    systemctl restart apache2
+fi
+
+if [ -f /etc/nginx/sites-available/default ]; then
+    sed -i 's/listen 80 default_server;/listen 80 default_server;\n    return 301 https:\/\/$host$request_uri;/' /etc/nginx/sites-available/default
+    systemctl restart nginx
+fi
+
+# Ensure SSL/TLS is enabled and configured
+if [ -f /etc/apache2/mods-enabled/ssl.conf ]; then
+    sed -i 's/SSLEngine off/SSLEngine on/' /etc/apache2/mods-enabled/ssl.conf
+    sed -i 's/SSLProtocol all -SSLv3/SSLProtocol TLSv1.2/' /etc/apache2/mods-enabled/ssl.conf
+    sed -i 's/SSLCipherSuite HIGH:!aNULL:!MD5/SSLCipherSuite ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:DHE-RSA-AES128-GCM-SHA256:DHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:DHE-RSA-CHACHA20-POLY1305/' /etc/apache2/mods-enabled/ssl.conf
+fi
+
+if [ -f /etc/nginx/nginx.conf ]; then
+    sed -i 's/ssl_protocols TLSv1 TLSv1.1 TLSv1.2;/ssl_protocols TLSv1.2 TLSv1.3;/' /etc/nginx/nginx.conf
+    sed -i 's/ssl_ciphers HIGH:!aNULL:!MD5;/ssl_ciphers ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:DHE-RSA-AES128-GCM-SHA256:DHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:DHE-RSA-CHACHA20-POLY1305;/' /etc/nginx/nginx.conf
+fi
+
+# HSTS Header
+if [ -f /etc/apache2/conf-available/security.conf ]; then
+    echo "Header always set Strict-Transport-Security \"max-age=31536000; includeSubDomains; preload\"" >> /etc/apache2/conf-available/security.conf
+    a2enmod headers
+    systemctl restart apache2
+fi
+
+if [ -f /etc/nginx/nginx.conf ]; then
+    sed -i '/server {/a \    add_header Strict-Transport-Security "max-age=31536000; includeSubDomains; preload";' /etc/nginx/nginx.conf
+    systemctl restart nginx
+fi}
+{type: uploaded file
+fileName: aeta2_44.txt
+fullContent:
+#!/bin/bash
+if ! command -v apache2 &> /dev/null; then
+    echo "Apache2 not installed, exiting."
+    exit 1
+fi
+
+if [ ! -f /etc/apache2/sites-available/default-ssl.conf ]; then
+    echo "Default SSL configuration file not found, exiting."
+    exit 1
+fi
+
+a2enmod ssl
+a2ensite default-ssl
+
+if ! grep -q "Redirect permanent / https://" /etc/apache2/sites-available/000-default.conf; then
+    sed -i '/<\/VirtualHost>/i \\tRedirect permanent / https://%{SERVER_NAME}/' /etc/apache2/sites-available/000-default.conf
+fi
+
+systemctl restart apache2
+
+if ! grep -q "Strict-Transport-Security" /etc/apache2/sites-available/default-ssl.conf; then
+    sed -i '/<\/VirtualHost>/i \\tHeader always set Strict-Transport-Security "max-age=31536000; includeSubDomains"' /etc/apache2/sites-available/default-ssl.conf
+fi
+
+systemctl restart apache2}
+{type: uploaded file
+fileName: aeta2_45.txt
+fullContent:
+#!/bin/bash
+# Enforce HTTPS and disable HTTP
+if [ -f /etc/apache2/sites-available/000-default.conf ]; then
+    sed -i 's/<VirtualHost \*:80>/<VirtualHost \*:80>\n    Redirect permanent \/ https:\/\/$HOSTNAME\//' /etc/apache2/sites-available/000-default.conf
+    a2enmod ssl
+    a2ensite default-ssl
+    systemctl restart apache2
+fi
+
+if [ -f /etc/nginx/sites-available/default ]; then
+    sed -i 's/listen 80 default_server;/listen 80 default_server;\n    return 301 https:\/\/$host$request_uri;/' /etc/nginx/sites-available/default
+    systemctl restart nginx
+fi
+
+# Ensure SSL/TLS is enabled and configured
+if [ -f /etc/apache2/mods-enabled/ssl.conf ]; then
+    sed -i 's/SSLEngine off/SSLEngine on/' /etc/apache2/mods-enabled/ssl.conf
+    sed -i 's/SSLProtocol all -SSLv3/SSLProtocol TLSv1.2 TLSv1.3/' /etc/apache2/mods-enabled/ssl.conf
+    sed -i 's/SSLCipherSuite HIGH:!aNULL:!MD5/SSLCipherSuite ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:DHE-RSA-AES128-GCM-SHA256:DHE-RSA-AES256-GCM-SHA384/' /etc/apache2/mods-enabled/ssl.conf
+    systemctl restart apache2
+fi
+
+if [ -f /etc/nginx/nginx.conf ]; then
+    sed -i 's/# ssl_protocols TLSv1 TLSv1.1 TLSv1.2;/ssl_protocols TLSv1.2 TLSv1.3;/' /etc/nginx/nginx.conf
+    sed -i 's/# ssl_ciphers HIGH:!aNULL:!MD5;/ssl_ciphers ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:DHE-RSA-AES128-GCM-SHA256:DHE-RSA-AES256-GCM-SHA384;/' /etc/nginx/nginx.conf
+    systemctl restart nginx
+fi
+
+# HSTS Header
+if [ -f /etc/apache2/conf-available/security.conf ]; then
+    echo "Header always set Strict-Transport-Security \"max-age=31536000; includeSubDomains; preload\"" >> /etc/apache2/conf-available/security.conf
+    a2enmod headers
+    systemctl restart apache2
+fi
+
+if [ -f /etc/nginx/nginx.conf ]; then
+    sed -i '/server {/a \    add_header Strict-Transport-Security "max-age=31536000; includeSubDomains; preload";' /etc/nginx/nginx.conf
+    systemctl restart nginx
+fi}
+{type: uploaded file
+fileName: aeta2_46.txt
+fullContent:
+#!/bin/bash
+if ! command -v certbot &> /dev/null; then
+    sudo apt-get update
+    sudo apt-get install -y certbot python3-certbot-nginx
+fi
+sudo certbot --nginx -d yourdomain.com --non-interactive --agree-tos -m your@email.com
+sudo systemctl restart nginx
+sed -i 's/listen 80;/listen 80;\n    return 301 https:\/\/$host$request_uri;/' /etc/nginx/sites-available/default
+sudo systemctl restart nginx}
+{type: uploaded file
+fileName: aeta2_47.txt
+fullContent:
+#!/bin/bash
+
+# Encerra o serviço HTTP
+sudo systemctl stop apache2
+
+# Instala o Apache mod_ssl
+sudo apt-get update
+sudo apt-get install -y apache2 libapache2-mod-ssl
+
+# Gera um certificado autoassinado
+sudo openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout /etc/ssl/private/apache-selfsigned.key -out /etc/ssl/certs/apache-selfsigned.crt -subj "/C=US/ST=State/L=City/O=Organization/CN=localhost"
+
+# Configura o Apache para usar SSL
+sudo sed -i '/<VirtualHost \*:80>/a Redirect permanent / https://'${HOSTNAME}'/' /etc/apache2/sites-available/000-default.conf
+sudo sed -i '/<VirtualHost \*:80>/a <Directory "/var/www/html">' /etc/apache2/sites-available/000-default.conf
+sudo sed -i '/<Directory "/var/www/html">/a Redirect permanent / https://'${HOSTNAME}'/' /etc/apache2/sites-available/000-default.conf
+sudo sed -i '/Redirect permanent \/ https:\/\/'${HOSTNAME}'/a </Directory>' /etc/apache2/sites-available/000-default.conf
+
+sudo tee /etc/apache2/sites-available/default-ssl.conf <<EOL
+<IfModule mod_ssl.c>
+    <VirtualHost _default_:443>
+        ServerAdmin webmaster@localhost
+        DocumentRoot /var/www/html
+        ErrorLog \${APACHE_LOG_DIR}/error.log
+        CustomLog \${APACHE_LOG_DIR}/access.log combined
+        SSLEngine on
+        SSLCertificateFile /etc/ssl/certs/apache-selfsigned.crt
+        SSLCertificateKeyFile /etc/ssl/private/apache-selfsigned.key
+        <FilesMatch "\.(cgi|shtml|phtml|php)$">
+            SSLOptions +StdEnvVars
+        </FilesMatch>
+        <Directory /usr/lib/cgi-bin>
+            SSLOptions +StdEnvVars
+        </Directory>
+    </VirtualHost>
+</IfModule>
+EOL
+
+# Habilita o módulo SSL e o site SSL
+sudo a2enmod ssl
+sudo a2ensite default-ssl
+
+# Reinicia o Apache para aplicar as mudanças
+sudo systemctl restart apache2}
+{type: uploaded file
+fileName: aeta2_48.txt
+fullContent:
+#!/bin/bash
+if ! command -v certbot &> /dev/null; then
+    apt-get update
+    apt-get install -y certbot python3-certbot-nginx
+fi
+certbot --nginx --non-interactive --agree-tos --email admin@example.com --domains $(hostname -f)
+sed -i 's/listen 80 default_server;/listen 80 default_server;\n    return 301 https:\/\/$host$request_uri;/' /etc/nginx/sites-available/default
+systemctl restart nginx}
+{type: uploaded file
+fileName: aeta2_49.txt
+fullContent:
+#!/bin/bash
+# Configura o Apache para redirecionar todo o tráfego HTTP para HTTPS
+CONF_FILE="/etc/apache2/sites-available/000-default.conf"
+SSL_CONF_FILE="/etc/apache2/sites-available/default-ssl.conf"
+
+# Verifica se o módulo SSL está habilitado
+if ! a2query -m ssl; then
+    a2enmod ssl
+fi
+
+# Cria o arquivo de configuração SSL se não existir
+if [ ! -f "$SSL_CONF_FILE" ]; then
+    cat > "$SSL_CONF_FILE" <<EOL
+<IfModule mod_ssl.c>
+    <VirtualHost _default_:443>
+        ServerAdmin webmaster@localhost
+        DocumentRoot /var/www/html
+        ErrorLog \${APACHE_LOG_DIR}/error.log
+        CustomLog \${APACHE_LOG_DIR}/access.log combined
+        SSLEngine on
+        SSLCertificateFile    /etc/ssl/certs/ssl-cert-snakeoil.pem
+        SSLCertificateKeyFile /etc/ssl/private/ssl-cert-snakeoil.key
+        <FilesMatch "\.(cgi|shtml|phtml|php)$">
+            SSLOptions +StdEnvVars
+        </FilesMatch>
+        <Directory /usr/lib/cgi-bin>
+            SSLOptions +StdEnvVars
+        </Directory>
+    </VirtualHost>
+</IfModule>
+EOL
+fi
+
+# Habilita o site SSL
+a2ensite default-ssl.conf
+
+# Configura o redirecionamento HTTP para HTTPS
+if ! grep -q "Redirect permanent / https://" "$CONF_FILE"; then
+    sed -i '/<VirtualHost _default_:80>/a \    Redirect permanent / https://' "$CONF_FILE"
+fi
+
+# Reinicia o Apache para aplicar as mudanças
+systemctl restart apache2}
+{type: uploaded file
+fileName: aeta2_50.txt
+fullContent:
+#!/bin/bash
+# Enforce HTTPS and disable HTTP
+if [ -f /etc/apache2/sites-available/000-default.conf ]; then
+    sed -i 's/<VirtualHost \*:80>/<VirtualHost \*:80>\n    Redirect permanent \/ https:\/\/$HOSTNAME\//' /etc/apache2/sites-available/000-default.conf
+    a2enmod ssl
+    a2ensite default-ssl
+    systemctl restart apache2
+fi
+
+if [ -f /etc/nginx/sites-available/default ]; then
+    sed -i 's/listen 80 default_server;/listen 80 default_server;\n    return 301 https:\/\/$host$request_uri;/' /etc/nginx/sites-available/default
+    systemctl restart nginx
+fi
+
+# Ensure SSL/TLS is enabled and configured
+if [ -f /etc/apache2/mods-enabled/ssl.conf ]; then
+    sed -i 's/SSLEngine off/SSLEngine on/' /etc/apache2/mods-enabled/ssl.conf
+    sed -i 's/SSLProtocol all -SSLv3/SSLProtocol TLSv1.2/' /etc/apache2/mods-enabled/ssl.conf
+    sed -i 's/SSLCipherSuite HIGH:!aNULL:!MD5/SSLCipherSuite ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:DHE-RSA-AES128-GCM-SHA256:DHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:DHE-RSA-CHACHA20-POLY1305/' /etc/apache2/mods-enabled/ssl.conf
+    systemctl restart apache2
+fi
+
+if [ -f /etc/nginx/nginx.conf ]; then
+    sed -i 's/ssl_protocols TLSv1 TLSv1.1 TLSv1.2;/ssl_protocols TLSv1.2 TLSv1.3;/' /etc/nginx/nginx.conf
+    sed -i 's/ssl_ciphers HIGH:!aNULL:!MD5;/ssl_ciphers ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:DHE-RSA-AES128-GCM-SHA256:DHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:DHE-RSA-CHACHA20-POLY1305;/' /etc/nginx/nginx.conf
+    systemctl restart nginx
+fi
+
+# HSTS Header
+if [ -f /etc/apache2/conf-available/security.conf ]; then
+    echo "Header always set Strict-Transport-Security \"max-age=31536000; includeSubDomains; preload\"" >> /etc/apache2/conf-available/security.conf
+    systemctl restart apache2
+fi
+
+if [ -f /etc/nginx/nginx.conf ]; then
+    sed -i '/server {/a \    add_header Strict-Transport-Security "max-age=31536000; includeSubDomains; preload";' /etc/nginx/nginx.conf
+    systemctl restart nginx
+fi}

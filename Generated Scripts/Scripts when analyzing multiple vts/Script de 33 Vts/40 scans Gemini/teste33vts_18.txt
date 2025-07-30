@@ -1,0 +1,131 @@
+```bash
+#!/bin/bash
+
+# Vulnerability 1: Proxmox VE EOL
+# This script assumes you want to upgrade to the latest supported version.
+# It's highly recommended to consult the Proxmox documentation before upgrading.
+# This script might require manual intervention and is provided without warranty.
+
+# Update package lists
+apt update
+
+# Upgrade Proxmox VE distribution
+apt dist-upgrade -y
+
+# Clean up old packages
+apt autoremove -y
+
+# Vulnerability 2-6: jQuery < 1.9.0 XSS
+# Define the paths to the vulnerable jQuery files and the replacement jQuery version
+jquery_version="1.9.0"
+jquery_files=(
+    "/var/www/html/js/jquery-1.8.3.min.js"
+    "/var/www/html/opscenter/webcommon/framework/js/jquery-1.8.3.min.js"
+    "/var/www/html/framesets/js/jquery-1.8.3.min.js"
+    "/var/www/html/frameset/js/jquery-1.8.3.min.js"
+    "/var/www/html/console/framework/js/jquery-1.8.3.min.js"
+)
+
+# Download jQuery 1.9.0 minified
+wget "https://code.jquery.com/jquery-${jquery_version}.min.js" -O /tmp/jquery.min.js
+
+# Loop through each vulnerable jQuery file and replace it
+for file in "${jquery_files[@]}"; do
+    if [ -f "$file" ]; then
+        echo "Replacing $file with jQuery ${jquery_version}"
+        cp /tmp/jquery.min.js "$file"
+        # Optionally, rename the file to keep the original name
+        file_name=$(basename "$file")
+        file_name="${file_name%.*min.js}.min.js"
+        cp /tmp/jquery.min.js "${file%/*}/${file_name}" 2>/dev/null || true
+    else
+        echo "File $file not found."
+    fi
+done
+
+# Remove the temporary jQuery file
+rm /tmp/jquery.min.js
+
+# Vulnerability 7, 8, 9, 13, 14, 15, 16, 19, 21, 22: Weak SSH Algorithms
+# Edit the SSH configuration file to disable weak algorithms
+ssh_config="/etc/ssh/sshd_config"
+
+# Backup the original SSH configuration file
+cp "$ssh_config" "$ssh_config.bak"
+
+# Disable weak KEX algorithms
+sed -i 's/^#KexAlgorithms .*/KexAlgorithms curve25519-sha256@libssh.org,ecdh-sha2-nistp256,ecdh-sha2-nistp384,ecdh-sha2-nistp521,diffie-hellman-group-exchange-sha256/' "$ssh_config"
+
+# Disable weak MAC algorithms (add more as needed)
+sed -i 's/^#MACs .*/MACs hmac-sha2-512,hmac-sha2-256/' "$ssh_config"
+
+# Disable weak Ciphers (add more as needed)
+sed -i 's/^#Ciphers .*/Ciphers chacha20-poly1305@openssh.com,aes256-gcm@openssh.com,aes128-gcm@openssh.com,aes256-ctr,aes128-ctr/' "$ssh_config"
+
+# Remove support for DSA keys
+sed -i '/^HostKey \/etc\/ssh\/ssh_host_dsa_key/d' "$ssh_config"
+
+#Restart SSH service
+systemctl restart sshd
+
+# Vulnerability 10: DCE/RPC and MSRPC Services Enumeration Reporting
+# It's generally not recommended to completely block RPC, as it can break core functionality.
+# Instead, configure a firewall to restrict access to port 135 (and dynamic RPC ports)
+# to only trusted networks. This example uses ufw (Uncomplicated Firewall)
+
+# Install ufw if not already installed
+apt install -y ufw
+
+# Enable ufw
+ufw enable
+
+# Deny incoming traffic on port 135 from all networks
+ufw deny 135
+
+# Allow incoming traffic on port 135 from trusted network (e.g., 10.129.4.0/24)
+ufw allow from 10.129.4.0/24 to any port 135
+
+# Note: Dynamic RPC ports (49152-65535) should also be restricted in a similar fashion.
+# It is better to configure RPC to use a smaller range of ports instead of the full range, then limit access to those.
+
+# Reload firewall rules
+ufw reload
+
+# Vulnerability 11: Telnet Unencrypted Cleartext Login
+# Remove telnet server to enforce usage of SSH
+
+# Stop telnet service if running
+systemctl stop telnetd.socket || true
+systemctl stop telnetd || true
+
+# Remove telnet package
+apt remove --purge -y telnetd xinetd
+
+# Vulnerability 12: SSL/TLS: Deprecated TLSv1.0 and TLSv1.1 Protocol Detection
+# Disable TLS 1.0 and TLS 1.1. This needs to be done at the application level.
+# This example assumes it's an Apache web server using OpenSSL.  Adjust accordingly
+# for your specific service (e.g., stunnel, nginx, etc.)
+
+apache_config="/etc/apache2/mods-available/ssl.conf"
+
+if [ -f "$apache_config" ]; then
+    # Backup the original SSL configuration file
+    cp "$apache_config" "$apache_config.bak"
+
+    # Modify SSLProtocol directive
+    sed -i 's/^SSLProtocol .*/SSLProtocol All -SSLv3 -TLSv1 -TLSv1.1/' "$apache_config"
+
+    # Restart Apache service
+    systemctl restart apache2
+fi
+
+# Vulnerability 17, 18, 20, 23, 24, 25: TCP Timestamps Information Disclosure
+# Disable TCP timestamps
+echo "net.ipv4.tcp_timestamps = 0" >> /etc/sysctl.conf
+sysctl -p
+
+# Vulnerability 26, 27, 28, 29, 30, 31, 32: ICMP Timestamp Reply Information Disclosure
+# Disable ICMP timestamp replies
+echo "net.ipv4.icmp_echo_ignore_all = 1" >> /etc/sysctl.conf
+sysctl -p
+```

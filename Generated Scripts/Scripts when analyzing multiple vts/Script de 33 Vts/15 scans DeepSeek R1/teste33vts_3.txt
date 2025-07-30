@@ -1,0 +1,46 @@
+#!/bin/bash
+
+# Vulnerabilidade 1: Atualizar Proxmox VE para versão suportada
+apt update
+apt install -y curl
+cat <<EOF > /etc/apt/sources.list.d/pve-no-subscription.list
+deb http://download.proxmox.com/debian/pve bookworm pve-no-subscription
+EOF
+apt update
+apt full-upgrade -y --auto-remove
+
+# Vulnerabilidades jQuery (2-6): Atualizar arquivos vulneráveis
+jquery_replace() {
+    local file="$1"
+    backup="${file}.bak-$(date +%s)"
+    cp "$file" "$backup"
+    wget -q -O "$file" https://code.jquery.com/jquery-3.7.1.min.js
+}
+export -f jquery_replace
+find / -name 'jquery-1.8.3.min.js' ! -path "/run*" -exec bash -c 'for f; do jquery_replace "$f"; done' _ {} +
+
+# Vulnerabilidades SSH (7-9,13,14,15,16,19,21,22): Ajustes de configuração
+sed -i '/^KexAlgorithms/d' /etc/ssh/sshd_config
+sed -i '/^Ciphers/d' /etc/ssh/sshd_config
+sed -i '/^MACs/d' /etc/ssh/sshd_config
+sed -i '/^HostKeyAlgorithms/d' /etc/ssh/sshd_config
+echo -e "KexAlgorithms curve25519-sha256,ecdh-sha2-nistp521,ecdh-sha2-nistp384
+Ciphers chacha20-poly1305@openssh.com,aes256-gcm@openssh.com
+MACs hmac-sha2-512-etm@openssh.com,hmac-sha2-256-etm@openssh.com
+HostKeyAlgorithms ecdsa-sha2-nistp256,rsa-sha2-512" >> /etc/ssh/sshd_config
+systemctl restart sshd
+
+# Vulnerabilidade 11: Remover Telnet
+{ systemctl disable --now telnet.socket telnet.service; } &>/dev/null
+{ apt purge -y telnetd; } &>/dev/null
+
+# Vulnerabilidade 12: Configurar TLS para RDP (assumindo xrdp)
+sed -i 's/ssl_protocols=.*/ssl_protocols=TLSv1.2/' /etc/xrdp/xrdp.ini
+systemctl restart xrdp
+
+# Vulnerabilidades TCP/ICMP (17,18,20,23-25,26-32): Configurações de rede
+echo "net.ipv4.tcp_timestamps=0" >> /etc/sysctl.conf
+sysctl -p
+iptables -I INPUT -p icmp --icmp-type timestamp-request -j DROP
+iptables -I INPUT -p icmp --icmp-type timestamp-reply -j DROP
+iptables-save > /etc/iptables/rules.v4

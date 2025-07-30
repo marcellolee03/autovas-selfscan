@@ -1,0 +1,23 @@
+Analisando o prompt e os scripts fornecidos, a vulnerabilidade em questão afeta o Apache HTTP Server, especificamente as versões 2.2.0 até 2.2.21. A solução proposta é a atualização para a versão 2.2.22 ou uma mais recente. Os scripts enviados visam automatizar essa correção.
+
+Abaixo, uma análise individual de cada script, seguida pela média de sucesso geral.
+Análise dos Scripts de Correção
+
+    1vtapache_1.txt: Sim. Este script tenta instalar a versão específica 2.2.22-1ubuntu1 para os pacotes apache2-bin e apache2.2-common, o que corrigiria a vulnerabilidade.
+    1vtapache_2.txt: Sim. O script verifica o gerenciador de pacotes do sistema (APT, YUM, DNF, ZYPER) e executa a atualização do Apache. Ao final, ele reinicia o serviço se a versão for inferior à 2.2.22.
+
+1vtapache_3.txt: Sim. Este script tenta instalar a versão específica 2.2.22-1ubuntu1 do Apache, o que resolveria o problema.
+1vtapache_4.txt: Sim. O script compara a versão instalada do Apache com a versão necessária (2.2.22) e, se for inferior, atualiza o pacote apache2 para a versão mais recente disponível.
+1vtapache_5.txt: Sim. O script verifica se o Apache está instalado e compara a versão atual com a necessária (2.2.22). Caso a versão seja mais antiga, ele prossegue com a atualização.
+1vtapache_6.txt: Sim. Este script tenta instalar uma versão do apache2 que comece com 2.2.22, o que atenderia ao requisito de correção.
+1vtapache_7.txt: Sim. O script atualiza o Apache para a versão mais recente disponível no repositório, o que, em um sistema atualizado, instalaria uma versão superior à 2.2.21.
+1vtapache_8.txt: Não. Embora o script compare corretamente a versão atual com a necessária, o comando de instalação apt-get install -y apache2=2.2.22* possui uma sintaxe incorreta para especificar a versão, o que provavelmente resultará em erro.
+1vtapache_9.txt: Não. A forma como o script extrai a versão do Apache (cut -d '.' -f 3) pegaria apenas o número do "patch", tornando a comparação [ "$APACHE_VERSION" -lt 22 ] falha para versões como 2.2.8. Além disso, a sintaxe para instalação com wildcard (2.2.22*) pode não funcionar como esperado.
+
+    1vtapache_10.txt: Não. O comando apt-get install -y apache2=2.2.22-* utiliza uma sintaxe com curinga que não é padrão para o apt-get ao especificar versões de pacotes, o que levaria a um erro na execução.
+
+Média Geral de Correção
+
+Com base na análise, 7 dos 10 scripts são capazes de corrigir a vulnerabilidade.
+
+Média geral de porcentagem de correção: 70%

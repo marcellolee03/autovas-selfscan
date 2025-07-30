@@ -1,0 +1,79 @@
+```bash
+#!/bin/bash
+
+# Verificar se o sistema é Debian/Ubuntu (ou similar)
+if command -v apt-get &> /dev/null; then
+  # Atualizar o índice de pacotes
+  apt-get update
+
+  # Tentar atualizar o PHP para a versão mais recente disponível
+  apt-get install --only-upgrade php5 php5-cgi php5-cli
+
+  # Verificar se a atualização foi bem-sucedida e se a versão é >= 5.3.13 ou 5.4.3
+  php_version=$(php -v | head -n 1 | awk '{print $2}')
+  php_major_minor=$(echo "$php_version" | cut -d '.' -f 1-2)
+
+  if dpkg -s php5 php5-cgi php5-cli | grep "Status: install ok installed" &> /dev/null; then
+    if [[ $(printf "%s\n" "5.4" "$php_major_minor" | sort -V | head -n 1) == "5.4" ]]; then
+      if [[ $(printf "%s\n" "5.4.3" "$php_version" | sort -V | head -n 1) == "5.4.3" ]]; then
+        echo "PHP foi atualizado para uma versão segura ($php_version)."
+        exit 0
+      else
+        echo "PHP foi atualizado, mas ainda pode estar vulnerável. ($php_version)"
+        exit 1
+      fi
+    elif [[ $(printf "%s\n" "5.3" "$php_major_minor" | sort -V | head -n 1) == "5.3" ]]; then
+      if [[ $(printf "%s\n" "5.3.13" "$php_version" | sort -V | head -n 1) == "5.3.13" ]]; then
+        echo "PHP foi atualizado para uma versão segura ($php_version)."
+        exit 0
+      else
+        echo "PHP foi atualizado, mas ainda pode estar vulnerável. ($php_version)"
+        exit 1
+      fi
+    else
+      echo "PHP foi atualizado para uma versão segura ($php_version)."
+      exit 0
+    fi
+  else
+    echo "Falha ao atualizar o PHP. Verifique se há erros e tente novamente."
+    exit 1
+  fi
+
+elif command -v yum &> /dev/null; then
+  # Atualizar o sistema usando yum
+  yum update php
+
+  # Verificar se a atualização foi bem-sucedida e se a versão é >= 5.3.13 ou 5.4.3
+  php_version=$(php -v | head -n 1 | awk '{print $2}')
+  php_major_minor=$(echo "$php_version" | cut -d '.' -f 1-2)
+
+  if rpm -q php | grep "php-" &> /dev/null; then
+    if [[ $(printf "%s\n" "5.4" "$php_major_minor" | sort -V | head -n 1) == "5.4" ]]; then
+      if [[ $(printf "%s\n" "5.4.3" "$php_version" | sort -V | head -n 1) == "5.4.3" ]]; then
+        echo "PHP foi atualizado para uma versão segura ($php_version)."
+        exit 0
+      else
+        echo "PHP foi atualizado, mas ainda pode estar vulnerável. ($php_version)"
+        exit 1
+      fi
+    elif [[ $(printf "%s\n" "5.3" "$php_major_minor" | sort -V | head -n 1) == "5.3" ]]; then
+      if [[ $(printf "%s\n" "5.3.13" "$php_version" | sort -V | head -n 1) == "5.3.13" ]]; then
+        echo "PHP foi atualizado para uma versão segura ($php_version)."
+        exit 0
+      else
+        echo "PHP foi atualizado, mas ainda pode estar vulnerável. ($php_version)"
+        exit 1
+      fi
+    else
+      echo "PHP foi atualizado para uma versão segura ($php_version)."
+      exit 0
+    fi
+  else
+    echo "Falha ao atualizar o PHP. Verifique se há erros e tente novamente."
+    exit 1
+  fi
+else
+  echo "Sistema operacional não suportado. A atualização do PHP deve ser feita manualmente."
+  exit 1
+fi
+```

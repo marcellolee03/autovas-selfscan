@@ -1,0 +1,32 @@
+#!/bin/bash
+INSTALL_DIR="${1:-/var/www/twiki}"
+BACKUP_DIR="/var/twiki_backup"
+TEMP_DIR=$(mktemp -d)
+TWIKI_URL="https://sourceforge.net/projects/twiki/files/TWiki%20for%20all%20platforms/TWiki%204.2.4/TWiki-4.2.4.tgz"
+
+if [ ! -d "$INSTALL_DIR" ]; then
+  echo "Erro: Diretório do TWiki não encontrado: $INSTALL_DIR" >&2
+  exit 1
+fi
+
+mkdir -p "$BACKUP_DIR"
+find "$INSTALL_DIR" -name command.*.txt -exec rm -f {} \;
+find "$INSTALL_DIR" -name lil.phtml -exec rm -f {} \;
+rm -f "$INSTALL_DIR"/bin/testenv
+BACKUP_FILE="$BACKUP_DIR/twiki_backup_$(date +%Y%m%d%H%M%S).tar.gz"
+tar -czf "$BACKUP_FILE" -C "$(dirname "$INSTALL_DIR")" "$(basename "$INSTALL_DIR")"
+
+wget -qO "$TEMP_DIR/twiki.tgz" "$TWIKI_URL"
+tar -xzf "$TEMP_DIR/twiki.tgz" -C "$TEMP_DIR" --strip-components=1
+
+rsync -av --delete \
+  --exclude=data \
+  --exclude=pub \
+  --exclude=cfg/LocalSite.cfg \
+  "$TEMP_DIR/" "$INSTALL_DIR/"
+
+find "$INSTALL_DIR" -type d -exec chmod 755 {} \;
+find "$INSTALL_DIR" -type f -exec chmod 644 {} \;
+chmod 755 "$INSTALL_DIR"/*.cgi
+chmod 755 "$INSTALL_DIR"/bin/*.pl
+rm -rf "$TEMP_DIR"

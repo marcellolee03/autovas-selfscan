@@ -1,0 +1,67 @@
+```sh
+#!/bin/bash
+
+# Script para atualizar o TWiki para a versão 4.2.4 ou mais recente
+# Este script assume que o TWiki está instalado em /var/www/twiki
+# e que o usuário que executa o script tem permissões para modificar
+# os arquivos nessa pasta.
+
+TWIKI_INSTALL_DIR="/var/www/twiki"
+TWIKI_VERSION=$(grep "Version:" "$TWIKI_INSTALL_DIR/templates/VERSION.txt" | awk '{print $2}')
+
+# Verifica se o TWiki está instalado
+if [ ! -d "$TWIKI_INSTALL_DIR" ]; then
+  echo "Erro: Diretório de instalação do TWiki não encontrado: $TWIKI_INSTALL_DIR"
+  exit 1
+fi
+
+# Verifica a versão atual do TWiki
+if [ -z "$TWIKI_VERSION" ]; then
+  echo "Erro: Não foi possível determinar a versão atual do TWiki."
+  echo "Verifique se o arquivo VERSION.txt existe em $TWIKI_INSTALL_DIR/templates/"
+  exit 1
+fi
+
+echo "Versão atual do TWiki: $TWIKI_VERSION"
+
+# Verifica se a versão atual é inferior a 4.2.4
+if [[ "$TWIKI_VERSION" < "4.2.4" ]]; then
+  echo "Atualizando o TWiki para a versão 4.2.4 ou mais recente..."
+
+  # Faz o download da versão mais recente do TWiki (substitua pelo link correto)
+  # Adapte o link para a versão mais recente disponível no site oficial do TWiki
+  TWIKI_DOWNLOAD_URL="https://downloads.sourceforge.net/project/twiki/TWiki-4.2.4.zip"  # Substituir com o link real
+
+  # Cria um diretório temporário
+  TEMP_DIR=$(mktemp -d)
+
+  # Faz o download do arquivo
+  wget -q "$TWIKI_DOWNLOAD_URL" -O "$TEMP_DIR/twiki.zip"
+
+  # Descompacta o arquivo
+  unzip -q "$TEMP_DIR/twiki.zip" -d "$TEMP_DIR"
+
+  # Para evitar problemas, vamos mover o diretório de instalação atual para um backup
+  mv "$TWIKI_INSTALL_DIR" "${TWIKI_INSTALL_DIR}.bak.$(date +%Y%m%d%H%M%S)"
+
+  # Move os arquivos descompactados para o diretório de instalação
+  mv "$TEMP_DIR/twiki-4.2.4" "$TWIKI_INSTALL_DIR" # Adapte o nome do diretório descompactado
+
+  # Define as permissões adequadas (adapte conforme necessário)
+  chown -R www-data:www-data "$TWIKI_INSTALL_DIR"
+  chmod -R 755 "$TWIKI_INSTALL_DIR/bin"
+  chmod -R 644 "$TWIKI_INSTALL_DIR/data"
+  chmod -R 644 "$TWIKI_INSTALL_DIR/templates"
+  chmod -R 777 "$TWIKI_INSTALL_DIR/pub"
+
+  # Remove o diretório temporário
+  rm -rf "$TEMP_DIR"
+
+  echo "TWiki atualizado com sucesso para a versão 4.2.4."
+  echo "Verifique se a instalação está funcionando corretamente."
+else
+  echo "O TWiki já está na versão 4.2.4 ou mais recente. Nenhuma atualização necessária."
+fi
+
+exit 0
+```

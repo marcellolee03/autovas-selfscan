@@ -1,0 +1,24 @@
+#!/bin/bash
+
+# Configura o Apache para redirecionar HTTP para HTTPS
+if [ -f /etc/apache2/sites-available/000-default.conf ]; then
+    sed -i 's/<VirtualHost *:80>/<VirtualHost *:80>\n    Redirect permanent \/ https:\/\/$HOSTNAME\//' /etc/apache2/sites-available/000-default.conf
+fi
+
+# Habilita o módulo SSL do Apache
+a2enmod ssl
+
+# Configura o SSL no Apache
+if [ -f /etc/apache2/sites-available/default-ssl.conf ]; then
+    sed -i 's/<VirtualHost _default_:443>/<VirtualHost *:443>\n    SSLEngine on\n    SSLCertificateFile \/etc\/ssl\/certs\/ssl-cert-snakeoil.pem\n    SSLCertificateKeyFile \/etc\/ssl\/private\/ssl-cert-snakeoil.key/' /etc/apache2/sites-available/default-ssl.conf
+fi
+
+# Reinicia o Apache para aplicar as mudanças
+systemctl restart apache2
+
+# Verifica se o redirecionamento foi aplicado
+if curl -I http://localhost | grep "Location: https://"; then
+    echo "Redirecionamento HTTP para HTTPS configurado com sucesso."
+else
+    echo "Erro ao configurar o redirecionamento HTTP para HTTPS."
+fi

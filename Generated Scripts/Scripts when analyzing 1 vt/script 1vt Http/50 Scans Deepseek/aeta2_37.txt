@@ -1,0 +1,16 @@
+#!/bin/bash
+if ! command -v openssl &> /dev/null; then
+    sudo apt-get update && sudo apt-get install -y openssl
+fi
+if [ ! -f /etc/ssl/certs/nginx-selfsigned.crt ] || [ ! -f /etc/ssl/private/nginx-selfsigned.key ]; then
+    sudo openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout /etc/ssl/private/nginx-selfsigned.key -out /etc/ssl/certs/nginx-selfsigned.crt -subj "/CN=localhost"
+fi
+if ! grep -q "listen 443 ssl;" /etc/nginx/sites-available/default; then
+    sudo sed -i '/listen 80;/a \ \ \ \ listen 443 ssl;' /etc/nginx/sites-available/default
+    sudo sed -i '/listen 443 ssl;/a \ \ \ \ ssl_certificate /etc/ssl/certs/nginx-selfsigned.crt;' /etc/nginx/sites-available/default
+    sudo sed -i '/ssl_certificate /a \ \ \ \ ssl_certificate_key /etc/ssl/private/nginx-selfsigned.key;' /etc/nginx/sites-available/default
+fi
+if ! grep -q "return 301 https://\$host\$request_uri;" /etc/nginx/sites-available/default; then
+    sudo sed -i '/listen 80;/a \ \ \ \ return 301 https://\$host\$request_uri;' /etc/nginx/sites-available/default
+fi
+sudo systemctl restart nginx

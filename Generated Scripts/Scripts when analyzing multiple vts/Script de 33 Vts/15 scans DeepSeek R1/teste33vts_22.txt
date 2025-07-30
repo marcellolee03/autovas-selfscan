@@ -1,0 +1,48 @@
+```bash
+#!/bin/sh
+
+# Vulnerabilidade 1: Atualizar Proxmox VE
+sed -i 's/deb/#deb/g' /etc/apt/sources.list.d/pve-enterprise.list || sed -i 's/deb/#deb/g' /etc/apt/sources.list.d/pve-${CODENAME}.list
+grep -q "deb http://download.proxmox.com/debian/pve" /etc/apt/sources.list || echo "deb http://download.proxmox.com/debian/pve bookworm pve-no-subscription" >> /etc/apt/sources.list
+apt update
+apt dist-upgrade -y
+
+# Vulnerabilidades 2-6: Atualizar jQuery
+find /var/www /usr/share/nginx -iname 'jquery-1.8.3.min.js' | while read -r file; do
+    cp "$file" "$file.bak"
+    curl -sL https://code.jquery.com/jquery-1.9.0.min.js -o "$file"
+done
+
+# Vulnerabilidades 7-9,13-16,19,21-22: Hardening SSH
+cat > /etc/ssh/sshd_config.remediation <<'EOF_KILL'
+Include /etc/ssh/sshd_config.d/*.conf
+
+KexAlgorithms ecdh-sha2-nistp256,ecdh-sha2-nistp384,ecdh-sha2-nistp521,diffie-hellman-group-exchange-sha256
+HostKeyAlgorithms ecdsa-sha2-nistp256,ecdsa-sha2-nistp384,ecdsa-sha2-nistp521,ssh-ed25519,rsa-sha2-512,rsa-sha2-256
+Ciphers chacha20-poly1305@openssh.com,aes256-gcm@openssh.com,aes128-gcm@openssh.com,aes256-ctr,aes192-ctr,aes128-ctr
+MACs hmac-sha2-512-etm@openssh.com,hmac-sha2-256-etm@openssh.com
+EOF_KILL
+mv /etc/ssh/sshd_config.remediation /etc/ssh/sshd_config
+systemctl restart sshd
+
+# Vulnerabilidade 10: Bloquear portas RPC
+ufw deny 39710,49664,49665,49666,49667,49668,49670,7832/tcp >/dev/null 2>&1 || true
+iptables -A INPUT -p tcp -m multiport --dports 39710,49664,49665,49666,49667,49668,49670,7832 -j DROP
+
+# Vulnerabilidade 11: Remover Telnet
+apt remove -y --purge telnetd inetutils-telnetd telnet
+systemctl disable telnet.socket --now >/dev/null 2>&1 || true
+
+# Vulnerabilidade 12: Configurar TLS
+grep -q 'MinProtocol = TLSv1.2' /etc/ssl/openssl.cnf 2>/dev/null || echo 'MinProtocol = TLSv1.2' >> /etc/ssl/openssl.cnf
+grep -q 'CipherString' /etc/ssl/openssl.cnf 2>/dev/null || sed -i "/\[system_default_sect\]/a CipherString = DEFAULT@SECLEVEL=2" /etc/ssl/openssl.cnf
+
+# Vulnerabilidades 17-18,20,23-25: Desativar timestamps TCP
+grep -q 'net.ipv4.tcp_timestamps' /etc/sysctl.conf && sed -i 's/^.*net.ipv4.tcp_timestamps.*$/net.ipv4.tcp_timestamps = 0/' /etc/sysctl.conf || echo 'net.ipv4.tcp_timestamps = 0' >> /etc/sysctl.conf
+sysctl -p
+
+# Vulnerabilidades 26-32: Bloquear ICMP Timestamp
+iptables -A INPUT -p icmp --icmp-type timestamp-request -j DROP
+iptables -A INPUT -p icmp --icmp-type timestamp-reply -j DROP
+iptables-save > /etc/iptables/persistent.rules 2>/dev/null || true
+```

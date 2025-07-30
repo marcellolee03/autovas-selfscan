@@ -1,0 +1,72 @@
+#!/bin/bash
+
+# Verifica se o sistema é baseado em Debian/Ubuntu.
+if command -v apt-get &> /dev/null; then
+  PKG_MANAGER="apt-get"
+elif command -v yum &> /dev/null; then
+  PKG_MANAGER="yum"
+elif command -v zypper &> /dev/null; then
+  PKG_MANAGER="zypper"
+else
+  echo "Sistema operacional não suportado. Não é possível determinar o gerenciador de pacotes."
+  exit 1
+fi
+
+# Define a versão alvo do TWiki.
+TARGET_VERSION="4.2.4"
+
+# Define o diretório de instalação do TWiki (pode variar, ajustar conforme necessário).
+TWIKI_INSTALL_DIR="/var/www/twiki" #ou /usr/share/twiki ou /opt/twiki
+
+# Função para verificar se o TWiki está instalado.
+is_twiki_installed() {
+  if [ -d "$TWIKI_INSTALL_DIR" ]; then
+    return 0  # TWiki instalado
+  else
+    return 1  # TWiki não instalado
+  fi
+}
+
+# Função para fazer backup do diretório TWiki
+backup_twiki() {
+  timestamp=$(date +%Y%m%d%H%M%S)
+  backup_file="twiki_backup_${timestamp}.tar.gz"
+  tar -czvf "$backup_file" "$TWIKI_INSTALL_DIR"
+  echo "Backup do TWiki criado: $backup_file"
+}
+
+# Função para atualizar o TWiki (simulação, pois não há atualização direta por pacote)
+update_twiki() {
+  echo "Iniciando a atualização simulada do TWiki para a versão $TARGET_VERSION..."
+
+  # PASSO 1: Fazer Backup
+  backup_twiki
+
+  # PASSO 2: Simular a remoção da instalação antiga (na prática, você descompactaria a nova versão aqui)
+  echo "Removendo a instalação antiga do TWiki..."
+  rm -rf "$TWIKI_INSTALL_DIR"
+
+  # PASSO 3: Simular a instalação da nova versão (descompactar a nova versão aqui na prática)
+  echo "Instalando a versão $TARGET_VERSION do TWiki..."
+  mkdir -p "$TWIKI_INSTALL_DIR"
+  echo "TWiki $TARGET_VERSION instalado em $TWIKI_INSTALL_DIR" #Simula a instalação
+
+  # PASSO 4: Ajustar permissões (importante!)
+  echo "Ajustando as permissões do diretório TWiki..."
+  chown -R www-data:www-data "$TWIKI_INSTALL_DIR" # Adapte o usuário e grupo conforme necessário.
+  chmod -R 755 "$TWIKI_INSTALL_DIR"
+  echo "Permissões ajustadas."
+
+  echo "Atualização do TWiki concluída (simulada)."
+}
+
+# Verifica se o TWiki está instalado.
+if is_twiki_installed; then
+  echo "TWiki detectado em: $TWIKI_INSTALL_DIR"
+  update_twiki
+else
+  echo "TWiki não encontrado no diretório padrão: $TWIKI_INSTALL_DIR. Verifique a instalação."
+  exit 1
+fi
+
+exit 0

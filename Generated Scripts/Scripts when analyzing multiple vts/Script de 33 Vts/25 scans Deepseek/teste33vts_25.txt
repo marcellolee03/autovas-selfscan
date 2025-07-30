@@ -1,0 +1,36 @@
+#!/bin/bash
+
+# Atualizar o Proxmox VE para a versão mais recente
+apt-get update
+apt-get install -y proxmox-ve
+
+# Atualizar o jQuery para a versão 1.9.0 ou superior
+wget https://code.jquery.com/jquery-1.9.0.min.js -O /var/www/html/js/jquery-1.9.0.min.js
+wget https://code.jquery.com/jquery-1.9.0.min.js -O /var/www/html/opscenter/webcommon/framework/js/jquery-1.9.0.min.js
+wget https://code.jquery.com/jquery-1.9.0.min.js -O /var/www/html/framesets/js/jquery-1.9.0.min.js
+wget https://code.jquery.com/jquery-1.9.0.min.js -O /var/www/html/frameset/js/jquery-1.9.0.min.js
+wget https://code.jquery.com/jquery-1.9.0.min.js -O /var/www/html/console/framework/js/jquery-1.9.0.min.js
+
+# Configurar o SSH para desabilitar algoritmos fracos
+sed -i 's/^HostKeyAlgorithms.*/HostKeyAlgorithms ssh-rsa,ssh-ed25519/' /etc/ssh/sshd_config
+sed -i 's/^KexAlgorithms.*/KexAlgorithms curve25519-sha256@libssh.org/' /etc/ssh/sshd_config
+sed -i 's/^Ciphers.*/Ciphers chacha20-poly1305@openssh.com,aes256-gcm@openssh.com,aes128-gcm@openssh.com/' /etc/ssh/sshd_config
+sed -i 's/^MACs.*/MACs hmac-sha2-512-etm@openssh.com,hmac-sha2-256-etm@openssh.com/' /etc/ssh/sshd_config
+systemctl restart sshd
+
+# Desabilitar TCP timestamps
+echo "net.ipv4.tcp_timestamps = 0" >> /etc/sysctl.conf
+sysctl -p
+
+# Desabilitar ICMP timestamp replies
+echo "1" > /proc/sys/net/ipv4/icmp_echo_ignore_all
+
+# Desabilitar Telnet e habilitar SSH
+systemctl stop telnet.socket
+systemctl disable telnet.socket
+systemctl enable ssh
+systemctl start ssh
+
+# Desabilitar TLSv1.0 e TLSv1.1
+sed -i 's/^SSLProtocol.*/SSLProtocol -all +TLSv1.2 +TLSv1.3/' /etc/apache2/mods-enabled/ssl.conf
+systemctl restart apache2

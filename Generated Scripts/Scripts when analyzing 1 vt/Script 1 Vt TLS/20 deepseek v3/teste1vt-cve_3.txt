@@ -1,0 +1,12 @@
+#!/bin/bash
+CONF_FILE="/etc/ssl/openssl.cnf"
+
+if [ -f "$CONF_FILE" ]; then
+    sed -i '/^MinProtocol =/d' "$CONF_FILE"
+    sed -i '/^CipherString =/d' "$CONF_FILE"
+    echo "MinProtocol = TLSv1.2" >> "$CONF_FILE"
+    echo "CipherString = DEFAULT@SECLEVEL=2" >> "$CONF_FILE"
+    systemctl restart apache2
+    systemctl restart nginx
+    systemctl restart postgresql
+fi

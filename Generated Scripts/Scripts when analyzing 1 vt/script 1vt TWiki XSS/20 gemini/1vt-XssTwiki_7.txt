@@ -1,0 +1,80 @@
+#!/bin/bash
+
+# Verifica se o script está sendo executado como root
+if [[ $EUID -ne 0 ]]; then
+  echo "Este script deve ser executado como root."
+  exit 1
+fi
+
+# Variáveis
+TWIKI_DIR="/var/www/twiki" # Ajuste este caminho se a instalação do TWiki for diferente
+TWIKI_VERSION_FILE="$TWIKI_DIR/VERSION" # Arquivo que contém a versão do TWiki (pode variar)
+BACKUP_DIR="/tmp/twiki_backup_$(date +%Y%m%d%H%M%S)"
+LATEST_VERSION="4.2.4"
+
+# Função para obter a versão atual do TWiki
+get_twiki_version() {
+  if [ -f "$TWIKI_VERSION_FILE" ]; then
+    # Adapte a lógica abaixo para extrair a versão corretamente do seu arquivo VERSION
+    # Exemplo usando grep e awk:
+    VERSION=$(cat "$TWIKI_VERSION_FILE" | grep -oP '(?<=Version: ).*') # Procura a linha que contém "Version:" e extrai o valor
+    if [ -z "$VERSION" ]; then
+       VERSION=$(cat "$TWIKI_VERSION_FILE" | grep -oP '(?<=\$Rev: ).*?(?= \$)') # Procura a string com o formato "$Rev: 12345 $"
+    fi
+
+    if [ -z "$VERSION" ]; then
+        echo "Não foi possível determinar a versão do TWiki."
+        exit 1
+    fi
+    echo "$VERSION"
+  else
+    echo "Arquivo de versão do TWiki não encontrado: $TWIKI_VERSION_FILE"
+    exit 1
+  fi
+}
+
+# Obtém a versão atual do TWiki
+CURRENT_VERSION=$(get_twiki_version)
+echo "Versão atual do TWiki: $CURRENT_VERSION"
+
+# Compara as versões
+if [[ $(printf '%s\n' "$CURRENT_VERSION" "$LATEST_VERSION" | sort -V | head -n 1) == "$CURRENT_VERSION" ]]; then
+  echo "Versão do TWiki precisa ser atualizada."
+else
+  echo "TWiki está na versão mais recente ($LATEST_VERSION) ou superior. Nenhuma ação necessária."
+  exit 0
+fi
+
+# Cria um backup do diretório TWiki
+echo "Criando backup do diretório TWiki em: $BACKUP_DIR"
+mkdir -p "$BACKUP_DIR"
+cp -r "$TWIKI_DIR"/* "$BACKUP_DIR"
+
+# Baixa a versão mais recente do TWiki (4.2.4) - Adapte o link para o download real
+echo "Baixando TWiki $LATEST_VERSION"
+wget "https://downloads.sourceforge.net/project/twiki/TWiki%20Release%204.2/TWiki-4.2.4.zip" -O /tmp/twiki-4.2.4.zip
+
+# Descompacta o arquivo
+echo "Descompactando o arquivo TWiki"
+unzip /tmp/twiki-4.2.4.zip -d /tmp/
+
+# Para a instalação do TWiki, geralmente envolve copiar os arquivos descompactados para o diretório de instalação.
+# Adapte os comandos abaixo de acordo com as instruções de instalação do TWiki 4.2.4.
+echo "Atualizando arquivos do TWiki"
+cp -r /tmp/twiki/* "$TWIKI_DIR/"
+
+# Remove o arquivo zipado e o diretório temporário
+echo "Limpeza de arquivos temporários"
+rm -rf /tmp/twiki-4.2.4.zip /tmp/twiki
+
+# Define as permissões corretas (adaptar conforme necessário)
+echo "Definindo permissões"
+chown -R www-data:www-data "$TWIKI_DIR" # Altere www-data:www-data para o usuário e grupo do seu servidor web
+find "$TWIKI_DIR" -type d -exec chmod 755 {} \;
+find "$TWIKI_DIR" -type f -exec chmod 644 {} \;
+
+# Atualiza o arquivo de versão (se necessário, ajuste o caminho)
+echo "$LATEST_VERSION" > "$TWIKI_VERSION_FILE"
+
+echo "Atualização do TWiki concluída para a versão $LATEST_VERSION."
+exit 0

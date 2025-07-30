@@ -1,0 +1,42 @@
+#!/bin/bash
+
+COMMON_PATHS=("/etc/postgresql/*/main/postgresql.conf" "/var/lib/pgsql/*/data/postgresql.conf" "/var/lib/postgresql/*/main/postgresql.conf" "/usr/local/var/postgres/postgresql.conf" "/usr/var/lib/postgres/postgresql.conf" "/data/postgresql.conf" "/opt/PostgreSQL/*/data/postgresql.conf")
+config_file=""
+
+get_config_path() {
+    for pattern in "${COMMON_PATHS[@]}"; do
+        for file in $pattern; do
+            if [ -f "$file" ]; then
+                config_file="$file"
+                return 0
+            fi
+        done
+    done
+
+    if command -v psql >/dev/null; then
+        config_file=$(sudo -u postgres psql -c "SHOW config_file;" -t 2>/dev/null | tr -d '[:space:]')
+        [ -f "$config_file" ] && return 0
+    fi
+
+    return 1
+}
+
+if ! get_config_path; then
+    exit 1
+fi
+
+backup_file="${config_file}.bak_$(date +%Y%m%d)"
+cp -p "$config_file" "$backup_file"
+sed -i -e '/^\s*ssl_min_protocol_version\s*=\s*/d' "$config_file"
+
+if grep -qE "^\s*ssl\s*=\s*on" "$config_file"; then
+    sed -i -e '/^\s*ssl\s*=\s*on/ a ssl_min_protocol_version = '"'TLSv1.2'" "$config_file"
+else
+    echo "ssl_min_protocol_version = 'TLSv1.2'" >> "$config_file"
+fi
+
+if command -v systemctl >/dev/null; then
+    systemctl restart postgresql >/dev/null 2>&1
+elif command -v service >/dev/null; then
+    service postgresql restart >/dev/null 2>&1
+fi

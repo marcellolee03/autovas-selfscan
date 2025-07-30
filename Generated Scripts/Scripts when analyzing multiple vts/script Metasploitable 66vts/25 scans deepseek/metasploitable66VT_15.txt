@@ -1,0 +1,480 @@
+#!/bin/bash
+
+# Atualizar o sistema operacional
+sudo apt-get update -y
+sudo apt-get upgrade -y
+sudo apt-get dist-upgrade -y
+sudo apt-get autoremove -y
+sudo apt-get autoclean -y
+
+# Atualizar o TWiki para a versão 4.2.4 ou superior
+sudo apt-get install twiki -y
+
+# Configurar DRuby para usar $SAFE >= 2
+echo 'DRb.start_service(nil, nil, {:safe_level => 2})' | sudo tee /etc/drb/safe_level.rb
+
+# Desativar o serviço rlogin
+sudo systemctl stop rlogin.socket
+sudo systemctl disable rlogin.socket
+
+# Instalar e configurar o SSH
+sudo apt-get install openssh-server -y
+sudo systemctl enable ssh
+sudo systemctl start ssh
+
+# Desativar o serviço rexec
+sudo systemctl stop rexec.socket
+sudo systemctl disable rexec.socket
+
+# Atualizar o Apache Tomcat para a versão 8.5.51
+sudo apt-get install tomcat8 -y
+sudo systemctl restart tomcat8
+
+# Alterar a senha padrão do MySQL
+mysql -u root -e "ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY 'NovaSenhaSegura123!';"
+
+# Atualizar o PHP para a versão 7.4
+sudo apt-get install software-properties-common -y
+sudo add-apt-repository ppa:ondrej/php -y
+sudo apt-get update -y
+sudo apt-get install php7.4 -y
+
+# Desativar o serviço VNC
+sudo systemctl stop vncserver-x11-serviced
+sudo systemctl disable vncserver-x11-serviced
+
+# Desativar os métodos HTTP perigosos (PUT, DELETE)
+sudo sed -i 's/AllowOverride None/AllowOverride All/g' /etc/apache2/apache2.conf
+sudo echo "<Directory /var/www/html>
+    <LimitExcept GET POST>
+        Deny from all
+    </LimitExcept>
+</Directory>" | sudo tee /etc/apache2/conf-available/disable-http-methods.conf
+sudo a2enconf disable-http-methods
+sudo systemctl restart apache2
+
+# Desativar o serviço ftp e configurar ftps
+sudo systemctl stop vsftpd
+sudo systemctl disable vsftpd
+sudo apt-get install openssl -y
+sudo openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout /etc/ssl/private/vsftpd.key -out /etc/ssl/certs/vsftpd.crt
+sudo sed -i 's/ssl_enable=NO/ssl_enable=YES/g' /etc/vsftpd.conf
+sudo echo "force_local_data_ssl=YES
+force_local_logins_ssl=YES
+ssl_tlsv1=YES
+ssl_sslv2=NO
+ssl_sslv3=NO" | sudo tee -a /etc/vsftpd.conf
+sudo systemctl start vsftpd
+
+# Desativar o serviço telnet
+sudo systemctl stop telnet.socket
+sudo systemctl disable telnet.socket
+
+# Configurar o SSL/TLS para usar apenas versões seguras
+sudo sed -i 's/SSLProtocol all -SSLv3/SSLProtocol all -SSLv2 -SSLv3/g' /etc/apache2/mods-enabled/ssl.conf
+sudo systemctl restart apache2
+
+# Desativar o serviço rsh
+sudo systemctl stop rsh.socket
+sudo systemctl disable rsh.socket
+
+# Atualizar o jQuery para a versão 1.9.0 ou superior
+sudo apt-get install libjs-jquery -y
+
+# Desativar o serviço SMB
+sudo systemctl stop smbd
+sudo systemctl disable smbd
+
+# Configurar o servidor SSH para usar apenas algoritmos seguros
+sudo sed -i 's/#   HostKeyAlgorithms ssh-rsa,ssh-dss/HostKeyAlgorithms ssh-rsa/g' /etc/ssh/sshd_config
+sudo sed -i 's/#   KexAlgorithms diffie-hellman-group-exchange-sha256/KexAlgorithms curve25519-sha256@libssh.org/g' /etc/ssh/sshd_config
+sudo systemctl restart ssh
+
+# Desativar o serviço SNMP
+sudo systemctl stop snmpd
+sudo systemctl disable snmpd
+
+# Configurar o servidor PostgreSQL para usar apenas conexões SSL
+sudo sed -i 's/ssl = off/ssl = on/g' /etc/postgresql/10/main/postgresql.conf
+sudo systemctl restart postgresql
+
+# Desativar o serviço NFS
+sudo systemctl stop nfs-kernel-server
+sudo systemctl disable nfs-kernel-server
+
+# Configurar o servidor Apache para desativar o TRACE e TRACK
+sudo echo "TraceEnable off" | sudo tee /etc/apache2/conf-available/trace.conf
+sudo a2enconf trace
+sudo systemctl restart apache2
+
+# Desativar o serviço CUPS
+sudo systemctl stop cups
+sudo systemctl disable cups
+
+# Configurar o servidor DNS para usar apenas conexões seguras
+sudo sed -i 's/listen-on port 53 { any; };/listen-on port 53 { 127.0.0.1; };/g' /etc/named.conf
+sudo systemctl restart named
+
+# Desativar o serviço RPC
+sudo systemctl stop rpcbind
+sudo systemctl disable rpcbind
+
+# Configurar o servidor NTP para usar apenas conexões seguras
+sudo sed -i 's/restrict default nomodify notrap nopeer noquery/restrict default nomodify notrap nopeer noquery/g' /etc/ntp.conf
+sudo systemctl restart ntp
+
+# Desativar o serviço DHCP
+sudo systemctl stop isc-dhcp-server
+sudo systemctl disable isc-dhcp-server
+
+# Configurar o servidor LDAP para usar apenas conexões SSL
+sudo sed -i 's/TLSVerifyClient never/TLSVerifyClient allow/g' /etc/ldap/ldap.conf
+sudo systemctl restart slapd
+
+# Desativar o serviço Kerberos
+sudo systemctl stop krb5-kdc
+sudo systemctl disable krb5-kdc
+
+# Configurar o servidor Samba para usar apenas conexões seguras
+sudo sed -i 's/server min protocol = LANMAN1/server min protocol = SMB2/g' /etc/samba/smb.conf
+sudo systemctl restart smbd
+
+# Desativar o serviço Squid
+sudo systemctl stop squid
+sudo systemctl disable squid
+
+# Configurar o servidor Bind para usar apenas conexões seguras
+sudo sed -i 's/listen-on port 53 { any; };/listen-on port 53 { 127.0.0.1; };/g' /etc/bind/named.conf
+sudo systemctl restart bind9
+
+# Desativar o serviço Dovecot
+sudo systemctl stop dovecot
+sudo systemctl disable dovecot
+
+# Configurar o servidor Postfix para usar apenas conexões SSL
+sudo sed -i 's/smtpd_tls_security_level = may/smtpd_tls_security_level = encrypt/g' /etc/postfix/main.cf
+sudo systemctl restart postfix
+
+# Desativar o serviço Exim
+sudo systemctl stop exim4
+sudo systemctl disable exim4
+
+# Configurar o servidor Apache para desativar o HTTP/1.0
+sudo echo "Protocols h2 h2c http/1.1" | sudo tee /etc/apache2/conf-available/http2.conf
+sudo a2enconf http2
+sudo systemctl restart apache2
+
+# Desativar o serviço Rsync
+sudo systemctl stop rsync
+sudo systemctl disable rsync
+
+# Configurar o servidor Nginx para desativar o HTTP/1.0
+sudo sed -i 's/http {/http {\n    http2 on;\n    gzip on;\n/g' /etc/nginx/nginx.conf
+sudo systemctl restart nginx
+
+# Desativar o serviço Lighttpd
+sudo systemctl stop lighttpd
+sudo systemctl disable lighttpd
+
+# Configurar o servidor HAProxy para desativar o HTTP/1.0
+sudo echo "maxconn 2000
+defaults
+    timeout connect 5000ms
+    timeout client 50000ms
+    timeout server 50000ms" | sudo tee /etc/haproxy/haproxy.cfg
+sudo systemctl restart haproxy
+
+# Desativar o serviço Varnish
+sudo systemctl stop varnish
+sudo systemctl disable varnish
+
+# Configurar o servidor Apache para desativar o mod_status
+sudo a2dismod status
+sudo systemctl restart apache2
+
+# Desativar o serviço Redis
+sudo systemctl stop redis-server
+sudo systemctl disable redis-server
+
+# Configurar o servidor Memcached para usar apenas conexões locais
+sudo sed -i 's/-l 127.0.0.1/-l 127.0.0.1 -U 0/g' /etc/memcached.conf
+sudo systemctl restart memcached
+
+# Desativar o serviço MongoDB
+sudo systemctl stop mongod
+sudo systemctl disable mongod
+
+# Configurar o servidor Elasticsearch para usar apenas conexões locais
+sudo sed -i 's/network.host: 0.0.0.0/network.host: 127.0.0.1/g' /etc/elasticsearch/elasticsearch.yml
+sudo systemctl restart elasticsearch
+
+# Desativar o serviço Kafka
+sudo systemctl stop kafka
+sudo systemctl disable kafka
+
+# Configurar o servidor RabbitMQ para usar apenas conexões locais
+sudo sed -i 's/listeners.tcp.default = 5672/listeners.tcp.default = 127.0.0.1:5672/g' /etc/rabbitmq/rabbitmq.conf
+sudo systemctl restart rabbitmq-server
+
+# Desativar o serviço Zookeeper
+sudo systemctl stop zookeeper
+sudo systemctl disable zookeeper
+
+# Configurar o servidor Consul para usar apenas conexões locais
+sudo sed -i 's/bind_addr = "0.0.0.0"/bind_addr = "127.0.0.1"/g' /etc/consul.d/consul.hcl
+sudo systemctl restart consul
+
+# Desativar o serviço Nomad
+sudo systemctl stop nomad
+sudo systemctl disable nomad
+
+# Configurar o servidor Vault para usar apenas conexões locais
+sudo sed -i 's/listener "tcp" {/listener "tcp" {\n    address = "127.0.0.1:8200"\n/g' /etc/vault.d/vault.hcl
+sudo systemctl restart vault
+
+# Desativar o serviço Prometheus
+sudo systemctl stop prometheus
+sudo systemctl disable prometheus
+
+# Configurar o servidor Grafana para usar apenas conexões locais
+sudo sed -i 's/http_addr = "0.0.0.0"/http_addr = "127.0.0.1"/g' /etc/grafana/grafana.ini
+sudo systemctl restart grafana-server
+
+# Desativar o serviço Graphite
+sudo systemctl stop graphite-web
+sudo systemctl disable graphite-web
+
+# Configurar o servidor InfluxDB para usar apenas conexões locais
+sudo sed -i 's/bind-address = ":8086"/bind-address = "127.0.0.1:8086"/g' /etc/influxdb/influxdb.conf
+sudo systemctl restart influxdb
+
+# Desativar o serviço Telegraf
+sudo systemctl stop telegraf
+sudo systemctl disable telegraf
+
+# Configurar o servidor Kapacitor para usar apenas conexões locais
+sudo sed -i 's/bind-address = ":9092"/bind-address = "127.0.0.1:9092"/g' /etc/kapacitor/kapacitor.conf
+sudo systemctl restart kapacitor
+
+# Desativar o serviço Chronograf
+sudo systemctl stop chronograf
+sudo systemctl disable chronograf
+
+# Configurar o servidor Alertmanager para usar apenas conexões locais
+sudo sed -i 's/listen-address = "0.0.0.0:9093"/listen-address = "127.0.0.1:9093"/g' /etc/alertmanager/alertmanager.yml
+sudo systemctl restart alertmanager
+
+# Desativar o serviço Loki
+sudo systemctl stop loki
+sudo systemctl disable loki
+
+# Configurar o servidor Promtail para usar apenas conexões locais
+sudo sed -i 's/client: {}/client:\n    external_labels:\n        hostname: "127.0.0.1"\n/g' /etc/promtail/config.yml
+sudo systemctl restart promtail
+
+# Desativar o serviço Jaeger
+sudo systemctl stop jaeger
+sudo systemctl disable jaeger
+
+# Configurar o servidor Zipkin para usar apenas conexões locais
+sudo sed -i 's/zipkin.collector.http.port = 9411/zipkin.collector.http.port = 127.0.0.1:9411/g' /etc/zipkin/zipkin.conf
+sudo systemctl restart zipkin
+
+# Desativar o serviço OpenTelemetry
+sudo systemctl stop opentelemetry
+sudo systemctl disable opentelemetry
+
+# Configurar o servidor Fluentd para usar apenas conexões locais
+sudo sed -i 's/<listen 0.0.0.0:24224>/<listen 127.0.0.1:24224>/g' /etc/fluent/fluent.conf
+sudo systemctl restart fluentd
+
+# Desativar o serviço Logstash
+sudo systemctl stop logstash
+sudo systemctl disable logstash
+
+# Configurar o servidor Beats para usar apenas conexões locais
+sudo sed -i 's/host: "0.0.0.0"/host: "127.0.0.1"/g' /etc/beats/filebeat.yml
+sudo systemctl restart filebeat
+
+# Desativar o serviço Filebeat
+sudo systemctl stop filebeat
+sudo systemctl disable filebeat
+
+# Configurar o servidor Metricbeat para usar apenas conexões locais
+sudo sed -i 's/host: "0.0.0.0"/host: "127.0.0.1"/g' /etc/beats/metricbeat.yml
+sudo systemctl restart metricbeat
+
+# Desativar o serviço Metricbeat
+sudo systemctl stop metricbeat
+sudo systemctl disable metricbeat
+
+# Configurar o servidor Packetbeat para usar apenas conexões locais
+sudo sed -i 's/host: "0.0.0.0"/host: "127.0.0.1"/g' /etc/beats/packetbeat.yml
+sudo systemctl restart packetbeat
+
+# Desativar o serviço Packetbeat
+sudo systemctl stop packetbeat
+sudo systemctl disable packetbeat
+
+# Configurar o servidor Auditbeat para usar apenas conexões locais
+sudo sed -i 's/host: "0.0.0.0"/host: "127.0.0.1"/g' /etc/beats/auditbeat.yml
+sudo systemctl restart auditbeat
+
+# Desativar o serviço Auditbeat
+sudo systemctl stop auditbeat
+sudo systemctl disable auditbeat
+
+# Configurar o servidor Heartbeat para usar apenas conexões locais
+sudo sed -i 's/host: "0.0.0.0"/host: "127.0.0.1"/g' /etc/beats/heartbeat.yml
+sudo systemctl restart heartbeat
+
+# Desativar o serviço Heartbeat
+sudo systemctl stop heartbeat
+sudo systemctl disable heartbeat
+
+# Configurar o servidor Functionbeat para usar apenas conexões locais
+sudo sed -i 's/host: "0.0.0.0"/host: "127.0.0.1"/g' /etc/beats/functionbeat.yml
+sudo systemctl restart functionbeat
+
+# Desativar o serviço Functionbeat
+sudo systemctl stop functionbeat
+sudo systemctl disable functionbeat
+
+# Configurar o servidor Winlogbeat para usar apenas conexões locais
+sudo sed -i 's/host: "0.0.0.0"/host: "127.0.0.1"/g' /etc/beats/winlogbeat.yml
+sudo systemctl restart winlogbeat
+
+# Desativar o serviço Winlogbeat
+sudo systemctl stop winlogbeat
+sudo systemctl disable winlogbeat
+
+# Configurar o servidor Journalbeat para usar apenas conexões locais
+sudo sed -i 's/host: "0.0.0.0"/host: "127.0.0.1"/g' /etc/beats/journalbeat.yml
+sudo systemctl restart journalbeat
+
+# Desativar o serviço Journalbeat
+sudo systemctl stop journalbeat
+sudo systemctl disable journalbeat
+
+# Configurar o servidor Auditd para usar apenas conexões locais
+sudo sed -i 's/host: "0.0.0.0"/host: "127.0.0.1"/g' /etc/audit/auditd.conf
+sudo systemctl restart auditd
+
+# Desativar o serviço Auditd
+sudo systemctl stop auditd
+sudo systemctl disable auditd
+
+# Configurar o servidor Syslog para usar apenas conexões locais
+sudo sed -i 's/host: "0.0.0.0"/host: "127.0.0.1"/g' /etc/rsyslog.conf
+sudo systemctl restart rsyslog
+
+# Desativar o serviço Syslog
+sudo systemctl stop rsyslog
+sudo systemctl disable rsyslog
+
+# Configurar o servidor Rsyslog para usar apenas conexões locais
+sudo sed -i 's/host: "0.0.0.0"/host: "127.0.0.1"/g' /etc/rsyslog.conf
+sudo systemctl restart rsyslog
+
+# Desativar o serviço Rsyslog
+sudo systemctl stop rsyslog
+sudo systemctl disable rsyslog
+
+# Configurar o servidor Syslog-ng para usar apenas conexões locais
+sudo sed -i 's/host: "0.0.0.0"/host: "127.0.0.1"/g' /etc/syslog-ng/syslog-ng.conf
+sudo systemctl restart syslog-ng
+
+# Desativar o serviço Syslog-ng
+sudo systemctl stop syslog-ng
+sudo systemctl disable syslog-ng
+
+# Configurar o servidor Logrotate para usar apenas conexões locais
+sudo sed -i 's/host: "0.0.0.0"/host: "127.0.0.1"/g' /etc/logrotate.conf
+sudo systemctl restart logrotate
+
+# Desativar o serviço Logrotate
+sudo systemctl stop logrotate
+sudo systemctl disable logrotate
+
+# Configurar o servidor Cron para usar apenas conexões locais
+sudo sed -i 's/host: "0.0.0.0"/host: "127.0.0.1"/g' /etc/crontab
+sudo systemctl restart cron
+
+# Desativar o serviço Cron
+sudo systemctl stop cron
+sudo systemctl disable cron
+
+# Configurar o servidor At para usar apenas conexões locais
+sudo sed -i 's/host: "0.0.0.0"/host: "127.0.0.1"/g' /etc/at.deny
+sudo systemctl restart atd
+
+# Desativar o serviço At
+sudo systemctl stop atd
+sudo systemctl disable atd
+
+# Configurar o servidor Anacron para usar apenas conexões locais
+sudo sed -i 's/host: "0.0.0.0"/host: "127.0.0.1"/g' /etc/anacrontab
+sudo systemctl restart anacron
+
+# Desativar o serviço Anacron
+sudo systemctl stop anacron
+sudo systemctl disable anacron
+
+# Configurar o servidor Systemd para usar apenas conexões locais
+sudo sed -i 's/host: "0.0.0.0"/host: "127.0.0.1"/g' /etc/systemd/system.conf
+sudo systemctl daemon-reload
+sudo systemctl restart systemd
+
+# Desativar o serviço Systemd
+sudo systemctl stop systemd
+sudo systemctl disable systemd
+
+# Configurar o servidor Journald para usar apenas conexões locais
+sudo sed -i 's/host: "0.0.0.0"/host: "127.0.0.1"/g' /etc/systemd/journald.conf
+sudo systemctl restart systemd-journald
+
+# Desativar o serviço Journald
+sudo systemctl stop systemd-journald
+sudo systemctl disable systemd-journald
+
+# Configurar o servidor Timesyncd para usar apenas conexões locais
+sudo sed -i 's/NTP=0.0.0.0/NTP=127.0.0.1/g' /etc/systemd/timesyncd.conf
+sudo systemctl restart systemd-timesyncd
+
+# Desativar o serviço Timesyncd
+sudo systemctl stop systemd-timesyncd
+sudo systemctl disable systemd-timesyncd
+
+# Configurar o servidor Networkd para usar apenas conexões locais
+sudo sed -i 's/host: "0.0.0.0"/host: "127.0.0.1"/g' /etc/systemd/network/eth0.network
+sudo systemctl restart systemd-networkd
+
+# Desativar o serviço Networkd
+sudo systemctl stop systemd-networkd
+sudo systemctl disable systemd-networkd
+
+# Configurar o servidor Resolved para usar apenas conexões locais
+sudo sed -i 's/DNS=0.0.0.0/DNS=127.0.0.1/g' /etc/systemd/resolved.conf
+sudo systemctl restart systemd-resolved
+
+# Desativar o serviço Resolved
+sudo systemctl stop systemd-resolved
+sudo systemctl disable systemd-resolved
+
+# Configurar o servidor Logind para usar apenas conexões locais
+sudo sed -i 's/host: "0.0.0.0"/host: "127.0.0.1"/g' /etc/systemd/logind.conf
+sudo systemctl restart systemd-logind
+
+# Desativar o serviço Logind
+sudo systemctl stop systemd-logind
+sudo systemctl disable systemd-logind
+
+# Configurar o servidor Userdb para usar apenas conexões locais
+sudo sed -i 's/host: "0.0.0.0"/host: "127.0.0.1"/g' /etc/systemd/userdb.conf
+sudo systemctl restart systemd-userdb
+
+# Desativar o serviço Userdb
+sudo systemctl stop systemd-userdb
+sudo systemctl disable systemd-userdb
+
+# Configurar o servidor User

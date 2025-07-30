@@ -1,0 +1,53 @@
+```bash
+#!/bin/bash
+
+# Verifica se o usuário tem permissões de root
+if [[ $EUID -ne 0 ]]; then
+  echo "Este script precisa ser executado como root."
+  exit 1
+fi
+
+# Variável para o diretório de backup
+BACKUP_DIR="/var/backup_ubuntu_8_04"
+
+# Cria o diretório de backup se não existir
+if [ ! -d "$BACKUP_DIR" ]; then
+  mkdir -p "$BACKUP_DIR"
+  echo "Diretório de backup criado em $BACKUP_DIR"
+fi
+
+# Função para fazer backup de arquivos e diretórios importantes
+backup_files() {
+  local file_list=("$@")
+  for file in "${file_list[@]}"; do
+    if [ -e "$file" ]; then
+      cp -r "$file" "$BACKUP_DIR/" 2>/dev/null
+      echo "Backup de $file realizado."
+    else
+      echo "Arquivo $file não encontrado, ignorando backup."
+    fi
+  done
+}
+
+# Lista de arquivos e diretórios importantes para backup (customizar se necessário)
+backup_files /etc/apt/sources.list /etc/apt/sources.list.d /home
+
+# Atualiza a lista de pacotes (tentativa, já que o sistema é EOL)
+apt-get update > /dev/null 2>&1
+
+# Tenta fazer o upgrade para uma versão mais recente do Ubuntu
+do-release-upgrade
+
+# Verifica se o upgrade foi bem-sucedido
+if [ $? -eq 0 ]; then
+  echo "Upgrade do sistema operacional iniciado. Reinicie o sistema após a conclusão."
+else
+  echo "Falha ao iniciar o upgrade do sistema operacional. Considere uma instalação limpa de uma versão suportada."
+  echo "Verifique o arquivo /var/log/dist-upgrade/main.log para mais detalhes sobre a falha."
+fi
+
+# Sugestão para realizar uma instalação limpa caso o upgrade falhe
+echo "Recomenda-se realizar uma instalação limpa de uma versão suportada do Ubuntu."
+
+exit 0
+```

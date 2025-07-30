@@ -1,0 +1,42 @@
+```bash
+#!/bin/bash
+
+# Este script atualiza o sistema operacional Ubuntu 8.04 para uma versão suportada.
+# Atenção: A atualização de uma versão tão antiga pode ser problemática e resultar em perda de dados ou instabilidade do sistema.
+# Recomenda-se fortemente fazer um backup completo do sistema antes de prosseguir.
+# Devido à idade da versão 8.04, uma atualização direta para a versão mais recente não é possível.
+# Este script irá atualizar para uma versão intermediária suportada e, em seguida, para uma versão mais recente.
+
+# Define a versão intermediária e a versão final desejada.
+INTERMEDIATE_VERSION="12.04"
+FINAL_VERSION="14.04"
+
+# Função para atualizar para uma versão especificada.
+update_ubuntu() {
+  VERSION=$1
+  echo "Atualizando para o Ubuntu $VERSION..."
+  sed -i "s/hardy/precise/g" /etc/apt/sources.list
+  sed -i "s/8.04/$VERSION/g" /etc/apt/sources.list
+  apt-get update
+  apt-get dist-upgrade -y
+  apt-get autoremove -y
+  apt-get clean
+  echo "Atualização para o Ubuntu $VERSION concluída."
+}
+
+# Atualiza para a versão intermediária.
+update_ubuntu "$INTERMEDIATE_VERSION"
+
+# Atualiza para a versão final.
+update_ubuntu "$FINAL_VERSION"
+
+# Remove arquivos de configuração antigos e pacotes desnecessários.
+apt-get autoremove -y
+apt-get clean
+
+# Reinicia o sistema.
+echo "Reiniciando o sistema..."
+reboot
+
+# Fim do script.
+```

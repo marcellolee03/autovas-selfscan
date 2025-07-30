@@ -1,0 +1,62 @@
+```bash
+#!/bin/bash
+
+# Vulnerabilidade 1: Cleartext Transmission of Sensitive Information via HTTP
+# Solução: Impossível de corrigir via script sem acesso à configuração do servidor web. Requer configuração HTTPS e redirecionamento.
+echo "Vulnerabilidade 1: Requer configuração manual do servidor web para habilitar HTTPS e redirecionar HTTP para HTTPS."
+
+# Vulnerabilidade 2: DNS Cache Snooping Vulnerability (UDP) - Active Check
+# Solução: Desabilitar recursão ou restringir acesso público ao servidor DNS.
+# Assumindo que o servidor DNS é o BIND9 e a configuração está em /etc/bind/named.conf.options
+if [ -f "/etc/bind/named.conf.options" ]; then
+  echo "Atualizando /etc/bind/named.conf.options para desabilitar recursão..."
+  sed -i 's/recursion yes;/recursion no;/' /etc/bind/named.conf.options
+  systemctl reload bind9
+  echo "Servidor DNS (BIND9) configurado para desabilitar recursão."
+else
+  echo "Arquivo de configuração do BIND9 não encontrado.  Por favor, configure o servidor DNS manualmente."
+fi
+
+# Vulnerabilidade 3: ICMP Timestamp Reply Information Disclosure
+# Solução: Desabilitar respostas ICMP timestamp.
+echo "Desabilitando respostas ICMP timestamp..."
+echo 1 > /proc/sys/net/ipv4/icmp_echo_ignore_all
+echo "net.ipv4.icmp_echo_ignore_all = 1" >> /etc/sysctl.conf
+sysctl -p
+echo "Respostas ICMP timestamp desabilitadas."
+
+# Vulnerabilidade 4: SSL/TLS: Deprecated TLSv1.0 and TLSv1.1 Protocol Detection
+# Vulnerabilidade 5: SSL/TLS: Renegotiation DoS Vulnerability (CVE-2011-1473, CVE-2011-5094)
+# Vulnerabilidade 6: SSL/TLS: Report Weak Cipher Suites
+# Solução combinada: Desabilitar TLSv1.0 e TLSv1.1, desabilitar renegotiation e remover cipher suites fracas no Nginx e Apache.
+# Atualizar a configuração SSL/TLS do Nginx (se instalado)
+if [ -f "/etc/nginx/nginx.conf" ]; then
+  echo "Atualizando configuração SSL/TLS do Nginx..."
+  sed -i 's/ssl_protocols TLSv1 TLSv1.1 TLSv1.2 TLSv1.3;/ssl_protocols TLSv1.2 TLSv1.3;/' /etc/nginx/nginx.conf
+  sed -i 's/ssl_ciphers .*/ssl_ciphers ECDHE-RSA-AES256-GCM-SHA512:DHE-RSA-AES256-GCM-SHA512:ECDHE-RSA-AES256-GCM-SHA384:DHE-RSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-SHA384;/' /etc/nginx/nginx.conf
+  nginx -s reload
+  echo "Configuração SSL/TLS do Nginx atualizada."
+fi
+
+# Atualizar a configuração SSL/TLS do Apache (se instalado)
+if [ -f "/etc/apache2/mods-available/ssl.conf" ]; then
+  echo "Atualizando configuração SSL/TLS do Apache..."
+  sed -i 's/SSLProtocol all -SSLv3 -TLSv1 -TLSv1.1/SSLProtocol all -SSLv3 -TLSv1 -TLSv1.1/' /etc/apache2/mods-available/ssl.conf
+  sed -i 's/SSLCipherSuite .*/SSLCipherSuite ECDHE-RSA-AES256-GCM-SHA512:DHE-RSA-AES256-GCM-SHA512:ECDHE-RSA-AES256-GCM-SHA384:DHE-RSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-SHA384/' /etc/apache2/mods-available/ssl.conf
+  systemctl restart apache2
+  echo "Configuração SSL/TLS do Apache atualizada."
+fi
+
+if [ ! -f "/etc/nginx/nginx.conf" ] && [ ! -f "/etc/apache2/mods-available/ssl.conf" ]; then
+    echo "Nginx e Apache não detectados.  Por favor, configure os protocolos TLS e cipher suites manualmente."
+fi
+
+# Vulnerabilidade 7: TCP Timestamps Information Disclosure
+# Solução: Desabilitar TCP timestamps.
+echo "Desabilitando TCP timestamps..."
+echo "net.ipv4.tcp_timestamps = 0" >> /etc/sysctl.conf
+sysctl -p
+echo "TCP timestamps desabilitados."
+
+echo "Correções aplicadas. Reinicie os serviços afetados para aplicar as mudanças."
+```

@@ -1,0 +1,52 @@
+```bash
+#!/bin/bash
+
+[ "$(id -u)" -eq 0 ] || exit 1
+
+syscfile="/etc/sysctl.conf"
+echo "net.ipv4.icmp_timestamps = 0" >> "$syscfile"
+echo "net.ipv4.tcp_timestamps = 0" >> "$syscfile"
+sysctl -p "$syscfile"
+
+if [ -d "/etc/apache2" ]; then
+    [ -f "/etc/ssl/certs/ssl-cert-snakeoil.pem" ] && sed -i '/SSLCertificateFile/c\SSLCertificateFile \/etc\/ssl\/certs\/ssl-cert-snakeoil.pem' /etc/apache2/sites-available/default-ssl.conf
+    a2enmod ssl headers rewrite >/dev/null
+    a2ensite default-ssl >/dev/null
+    apache_ssl_conf="/etc/apache2/mods-available/ssl.conf"
+    [ -f "$apache_ssl_conf" ] && {
+        sed -i '/^.*SSLProtocol.*/c\SSLProtocol all -SSLv2 -SSLv3 -TLSv1 -TLSv1.1' "$apache_ssl_conf"
+        sed -i '/^.*SSLCipherSuite.*/c\SSLCipherSuite ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:DHE-RSA-AES256-GCM-SHA384:DHE-RSA-AES128-GCM-SHA256' "$apache_ssl_conf"
+        echo "SSLHonorCipherOrder on" >> "$apache_ssl_conf"
+        echo "Header always set Strict-Transport-Security \"max-age=15768000\"" >> "$apache_ssl_conf"
+    }
+    apache_conf="/etc/apache2/sites-available/000-default.conf"
+    [ -f "$apache_conf" ] {
+        sed -i '/^.*<VirtualHost \*:80>.*/a \    <Location \/>\n        RewriteEngine On\n        RewriteCond %{HTTPS} off\n        RewriteRule ^ https:\/\/%{HTTP_HOST}%{REQUEST_URI} [R=301,L]\n    <\/Location>' "$apache_conf"
+    }
+    systemctl restart apache2
+fi
+
+if [ -d "/etc/nginx" ]; then
+    nginx_conf="/etc/nginx/nginx.conf"
+    [ -f "$nginx_conf" ] && {
+        sed -i '/ssl_protocols/d' "$nginx_conf"
+        echo "ssl_protocols TLSv1.2 TLSv1.3;" >> "$nginx_conf"
+        sed -i '/^.*ssl_ciphers.*/c\    ssl_ciphers ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:DHE-RSA-AES256-GCM-SHA384:DHE-RSA-AES128-GCM-SHA256;' "$nginx_conf"
+        echo "    ssl_prefer_server_ciphers on;" >> "$nginx_conf"
+        echo "    add_header Strict-Transport-Security \"max-age=15768000; includeSubDomains\" always;" >> "$nginx_conf"
+    }
+    nginx_default="/etc/nginx/sites-available/default"
+    [ -f "$nginx_default" ] && {
+        sed -i '/listen 80/,/server_name/ {/listen 80/a \    if ($host = example.com) {\n        return 301 https:\/\/$host$request_uri;\n    }' "$nginx_default"
+    }
+    systemctl restart nginx
+fi
+
+if [ -f "/etc/bind/named.conf.options" ]; then
+    bind_conf="/etc/bind/named.conf.options"
+    sed -i '/recursion/d' "$bind_conf"
+    sed -i '/allow-query-cache/d' "$bind_conf"
+    sed -i '/options {/a \    recursion no;\n    allow-query-cache { none; };' "$bind_conf"
+    systemctl restart bind9
+fi
+```

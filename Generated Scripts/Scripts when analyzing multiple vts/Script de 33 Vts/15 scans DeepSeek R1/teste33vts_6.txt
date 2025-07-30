@@ -1,0 +1,46 @@
+#!/bin/bash
+
+# Atualização completa do sistema
+apt-get update
+apt-get dist-upgrade -y
+
+# Backup da configuração do SSH
+cp /etc/ssh/sshd_config /etc/ssh/sshd_config.bak
+
+# Remove antigas configurações de algoritmos
+for directive in KexAlgorithms HostKeyAlgorithms Ciphers MACs; do
+    sed -i "/^[[:space:]]*${directive}[[:space:]]\+/d" /etc/ssh/sshd_config
+done
+
+# Configurações seguras para SSH
+echo "KexAlgorithms curve25519-sha256,curve25519-sha256@libssh.org,diffie-hellman-group-exchange-sha256" >> /etc/ssh/sshd_config
+echo "HostKeyAlgorithms ecdsa-sha2-nistp256-cert-v01@openssh.com,ecdsa-sha2-nistp384-cert-v01@openssh.com,ecdsa-sha2-nistp521-cert-v01@openssh.com,sk-ecdsa-sha2-nistp256-cert-v01@openssh.com,ssh-ed25519-cert-v01@openssh.com,sk-ssh-ed25519-cert-v01@openssh.com,rsa-sha2-512-cert-v01@openssh.com,rsa-sha2-256-cert-v01@openssh.com,ssh-rsa-cert-v01@openssh.com,ecdsa-sha2-nistp256,ecdsa-sha2-nistp384,ecdsa-sha2-nistp521,sk-ecdsa-sha2-nistp256@openssh.com,ssh-ed25519,sk-ssh-ed25519@openssh.com,rsa-sha2-512,rsa-sha2-256,ssh-rsa" >> /etc/ssh/sshd_config
+echo "Ciphers chacha20-poly1305@openssh.com,aes256-gcm@openssh.com,aes128-gcm@openssh.com,aes256-ctr,aes192-ctr,aes128-ctr" >> /etc/ssh/sshd_config
+echo "MACs hmac-sha2-512-etm@openssh.com,hmac-sha2-256-etm@openssh.com,umac-128-etm@openssh.com,hmac-sha2-512,hmac-sha2-256,umac-128@openssh.com" >> /etc/ssh/sshd_config
+
+# Reinicia o serviço SSH
+systemctl restart sshd
+
+# Remove servico Telnet
+apt-get remove -y telnet telnetd > /dev/null
+
+# Desabilita TCP Timestamps (RFC1323)
+echo "net.ipv4.tcp_timestamps = 0" >> /etc/sysctl.conf
+sysctl -p > /dev/null
+
+# Bloqueia requisições ICMP timestamp
+iptables -A INPUT -p icmp --icmp-type timestamp-request -j DROP > /dev/null
+
+# Persiste regras do iptables
+if [ ! -d /etc/iptables ]; then
+    mkdir -p /etc/iptables
+fi
+iptables-save > /etc/iptables/rules.v4
+
+# Habilita kernel para ignorar ICMP timestamp se suportado
+if sysctl -a 2>/dev/null | grep -q 'net.ipv4.icmp_echo_ignore_timestamp'; then
+    sysctl -w net.ipv4.icmp_echo_ignore_timestamp=1
+    sed -i '/net.ipv4.icmp_echo_ignore_timestamp/d' /etc/sysctl.conf
+    echo "net.ipv4.icmp_echo_ignore_timestamp=1" >> /etc/sysctl.conf
+    sysctl -p > /dev/null
+fi

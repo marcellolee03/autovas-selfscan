@@ -1,0 +1,650 @@
+```bash
+#!/bin/bash
+
+# Script de correção automática para vulnerabilidades detectadas.
+
+# Variáveis globais
+OS=$(uname -s)
+ARCH=$(uname -m)
+
+# Funções auxiliares
+
+# Atualiza o sistema (Debian/Ubuntu)
+update_system() {
+    apt-get update && apt-get upgrade -y
+    apt-get dist-upgrade -y
+    apt-get autoremove -y
+}
+
+# Instala um pacote (Debian/Ubuntu)
+install_package() {
+    apt-get install -y "$1"
+}
+
+# Remove um pacote (Debian/Ubuntu)
+remove_package() {
+    apt-get remove -y "$1"
+    apt-get purge -y "$1"
+    apt-get autoremove -y
+}
+
+# Desabilita um serviço
+disable_service() {
+    service "$1" stop
+    systemctl disable "$1"
+}
+
+# TWiki Vulnerabilities (CVE-2008-5304, CVE-2008-5305, CVE-2009-4898, CVE-2018-20212, CVE-2009-1339)
+# Solução: Como o TWiki está desatualizado (01.Feb.2003) e a versão fixa é 4.2.4 ou superior, a solução mais segura é remover o TWiki.
+remove_twiki() {
+    echo "Removendo TWiki..."
+    # Identifica a localização dos arquivos do TWiki (exemplo: /var/www/twiki)
+    # Adapte o comando abaixo com a localização correta
+    TWIKI_DIR="/var/www/twiki"
+    if [ -d "$TWIKI_DIR" ]; then
+        rm -rf "$TWIKI_DIR"
+        echo "Diretório TWiki removido: $TWIKI_DIR"
+    else
+        echo "Diretório TWiki não encontrado em: $TWIKI_DIR"
+    fi
+
+    # Remove pacotes relacionados (se existirem)
+    PACKAGE_NAME="twiki"
+    if dpkg -s "$PACKAGE_NAME" &> /dev/null; then
+        remove_package "$PACKAGE_NAME"
+        echo "Pacote TWiki removido: $PACKAGE_NAME"
+    else
+        echo "Pacote TWiki não encontrado: $PACKAGE_NAME"
+    fi
+
+    echo "TWiki removido com sucesso."
+}
+
+# Distributed Ruby (dRuby/DRb) Multiple RCE Vulnerabilities
+# Solução: Desativar o serviço DRb ou implementar controles de acesso.
+disable_drb() {
+    echo "Desativando Distributed Ruby (DRb)..."
+    kill $(lsof -t -i:8787) 2>/dev/null # Tenta matar o processo na porta 8787
+    # Implementar controles de acesso mais robustos se necessário
+    echo "Distributed Ruby (DRb) desativado."
+}
+
+# rlogin Passwordless Login & rlogin service & rexec service
+# Solução: Desativar rlogin, rsh e rexec
+disable_rlogin_rsh_rexec() {
+    echo "Desativando rlogin, rsh e rexec..."
+    disable_service "rlogin" 2>/dev/null
+    disable_service "rsh" 2>/dev/null
+    disable_service "rexec" 2>/dev/null
+    echo "rlogin, rsh e rexec desativados."
+}
+
+# Operating System (OS) End of Life (EOL) Detection
+# Solução: Atualizar o SO para uma versão suportada.
+eol_upgrade() {
+    echo "Sistema operacional Ubuntu 8.04 EOL detectado."
+    echo "Atualizar o sistema operacional para uma versão suportada é altamente recomendado."
+    echo "Este script não realiza a atualização do sistema operacional automaticamente."
+    echo "Consulte a documentação do Ubuntu para realizar a atualização manual."
+    echo "https://wiki.ubuntu.com/Releases"
+}
+
+# Possible Backdoor: Ingreslock
+# Solução: Limpeza completa do sistema infectado
+remove_ingreslock() {
+    echo "Removendo possível backdoor Ingreslock..."
+    kill $(lsof -t -i:1524) 2>/dev/null  # Tenta matar o processo
+    # Remove o binário (se souber a localização)
+    rm -f /usr/bin/ingreslock 2>/dev/null # Exemplo de localização, ajuste se necessário
+    echo "Verifique o sistema em busca de outros arquivos maliciosos."
+    echo "A reinstalação completa do sistema pode ser necessária."
+}
+
+# Apache Tomcat AJP RCE Vulnerability (Ghostcat)
+# Solução: Desabilitar ou configurar corretamente o conector AJP
+disable_ajp() {
+    echo "Desabilitando o conector AJP no Tomcat..."
+    # Localizar o arquivo server.xml do Tomcat (pode variar)
+    TOMCAT_SERVER_XML="/etc/tomcat5.5/server.xml" # Ajuste para a versão do Tomcat
+    if [ -f "$TOMCAT_SERVER_XML" ]; then
+        # Comentar o conector AJP (porta 8009)
+        sed -i 's/<Connector port="8009" protocol="AJP\/1.3".*/<!-- & -->/' "$TOMCAT_SERVER_XML"
+        echo "Conector AJP comentado em $TOMCAT_SERVER_XML"
+    else
+        echo "Arquivo server.xml do Tomcat não encontrado: $TOMCAT_SERVER_XML"
+    fi
+    echo "Reinicie o Tomcat para aplicar as alterações."
+}
+
+# MySQL / MariaDB Default Credentials
+# Solução: Alterar a senha do usuário root do MySQL
+change_mysql_root_password() {
+    echo "Alterando a senha do usuário root do MySQL..."
+    # Define uma nova senha forte
+    NEW_PASSWORD=$(openssl rand -base64 12)
+    mysqladmin -u root password "$NEW_PASSWORD"
+    echo "Senha do usuário root do MySQL alterada. Guarde a nova senha: $NEW_PASSWORD"
+}
+
+# PHP Vulnerabilities (CVEs diversos)
+# Solução: Atualizar o PHP para uma versão suportada.
+update_php() {
+    echo "Atualizando o PHP..."
+    if [ "$OS" == "Debian" ] || [ "$OS" == "Ubuntu" ]; then
+        # Adiciona o repositório PPA para versões mais recentes do PHP
+        add-apt-repository ppa:ondrej/php -y
+        update_system
+        # Atualiza ou instala a versão mais recente do PHP
+        apt-get install -y php libapache2-mod-php
+    elif [ "$OS" == "CentOS" ] || [ "$OS" == "RedHat" ]; then
+        # Adiciona o repositório Remi para versões mais recentes do PHP
+        yum install -y https://rpms.remirepo.net/enterprise/remi-release-$(rpm -E %dist).rpm
+        yum-config-manager --enable remi-php74 # Ajuste para a versão desejada
+        update_system
+        yum install -y php
+    else
+        echo "Sistema operacional não suportado para atualização automática do PHP."
+        echo "Atualize o PHP manualmente."
+    fi
+    echo "PHP atualizado."
+}
+
+# vsftpd Compromised Source Packages Backdoor Vulnerability (CVE-2011-2523)
+# Solução: Reinstalar o vsftpd a partir de uma fonte confiável.
+reinstall_vsftpd() {
+    echo "Reinstalando vsftpd a partir de uma fonte confiável..."
+    remove_package vsftpd
+    install_package vsftpd
+    echo "vsftpd reinstalado."
+}
+
+# DistCC RCE Vulnerability (CVE-2004-2687)
+# Solução: Desativar ou remover o DistCC
+disable_distcc() {
+    echo "Desativando DistCC..."
+    disable_service distccd 2>/dev/null
+    echo "DistCC desativado."
+}
+
+# PostgreSQL Default Credentials
+# Solução: Alterar a senha do usuário postgres
+change_postgres_password() {
+    echo "Alterando a senha do usuário postgres..."
+    sudo -u postgres psql -c "ALTER USER postgres PASSWORD '$(openssl rand -base64 12)';"
+    echo "Senha do usuário postgres alterada."
+}
+
+# VNC Brute Force Login & VNC Server Unencrypted Data Transmission
+# Solução: Alterar a senha do VNC e configurar para usar canais criptografados (SSH Tunnel)
+secure_vnc() {
+    echo "Protegendo o VNC..."
+    echo "Altere a senha do VNC usando o comando vncpasswd"
+    echo "Configure o VNC para usar um túnel SSH para conexões seguras."
+    echo "Consulte a documentação do VNC para mais informações."
+}
+
+# Test HTTP dangerous methods (PUT/DELETE)
+# Solução: Desabilitar os métodos PUT e DELETE no servidor web.
+disable_http_methods() {
+    echo "Desabilitando métodos HTTP PUT e DELETE..."
+    # Exemplo para Apache: Adiciona a configuração no arquivo .htaccess ou httpd.conf
+    if [ -f "/etc/apache2/apache2.conf" ]; then
+        echo "<LimitExcept GET POST HEAD>" >> /etc/apache2/apache2.conf
+        echo "  Require valid-user" >> /etc/apache2/apache2.conf
+        echo "</LimitExcept>" >> /etc/apache2/apache2.conf
+        echo "Métodos PUT e DELETE desabilitados no Apache. Reinicie o Apache."
+    elif [ -f "/etc/httpd/conf/httpd.conf" ]; then
+         echo "<LimitExcept GET POST HEAD>" >> /etc/httpd/conf/httpd.conf
+         echo "  Require valid-user" >> /etc/httpd/conf/httpd.conf
+         echo "</LimitExcept>" >> /etc/httpd/conf/httpd.conf
+         echo "Métodos PUT e DELETE desabilitados no Apache. Reinicie o Apache."
+    else
+        echo "Arquivo de configuração do Apache não encontrado. Desabilite os métodos PUT e DELETE manualmente."
+    fi
+}
+
+# FTP Brute Force Logins With Default Credentials Reporting & Anonymous FTP Login Reporting & FTP Unencrypted Cleartext Login
+# Solução: Alterar as senhas FTP padrão e desabilitar o login anônimo
+secure_ftp() {
+    echo "Protegendo o FTP..."
+    echo "Altere as senhas padrão das contas FTP (msfadmin, postgres, service, user)."
+    echo "Desabilite o login anônimo no servidor FTP."
+    # Exemplo para vsftpd:
+    if [ -f "/etc/vsftpd.conf" ]; then
+        sed -i 's/anonymous_enable=YES/anonymous_enable=NO/' /etc/vsftpd.conf
+        echo "Login anônimo desabilitado no vsftpd.conf. Reinicie o vsftpd."
+    else
+        echo "Arquivo de configuração do FTP não encontrado. Desabilite o login anônimo manualmente."
+    fi
+}
+
+# rsh Unencrypted Cleartext Login
+# Solução: Desabilitar o serviço rsh
+disable_rsh() {
+    echo "Desabilitando rsh..."
+    disable_service "rsh" 2>/dev/null
+    echo "rsh desativado."
+}
+
+# SSL/TLS Vulnerabilities (CVEs diversos)
+# Solução: Desabilitar SSLv2, SSLv3, TLSv1.0, TLSv1.1 e configurar cifras seguras.
+secure_ssl_tls() {
+    echo "Configurando SSL/TLS seguro..."
+    # Localizar arquivo de configuração do OpenSSL (pode variar)
+    OPENSSL_CONF="/etc/ssl/openssl.cnf"
+    if [ -f "$OPENSSL_CONF" ]; then
+        # Adicionar configurações para desabilitar protocolos inseguros
+        sed -i 's/^\#Options =/Options = -SSLv2 -SSLv3 -TLSv1 -TLSv1.1/' "$OPENSSL_CONF"
+        echo "SSLv2, SSLv3, TLSv1.0 e TLSv1.1 desabilitados no OpenSSL. Reinicie os serviços SSL/TLS."
+        # Adicionar configurações para cifras seguras (Exemplo: apenas TLSv1.2 e TLSv1.3)
+        sed -i 's/^\#CipherString =/CipherString = TLSv1.2+HIGH:!aNULL:!MD5/' "$OPENSSL_CONF"
+    else
+        echo "Arquivo de configuração do OpenSSL não encontrado: $OPENSSL_CONF. Configure manualmente."
+    fi
+}
+
+# Multiple Vendors STARTTLS Implementation Plaintext Arbitrary Command Injection Vulnerability
+# Solução: Aplicar patches dos vendors ou desabilitar STARTTLS (dependendo do serviço)
+fix_starttls() {
+    echo "Aplicar patches ou desabilitar STARTTLS. Consulte a documentação do serviço afetado."
+}
+
+# jQuery < 1.9.0 XSS Vulnerability & jQuery < 1.6.3 XSS Vulnerability
+# Solução: Atualizar a versão do jQuery
+update_jquery() {
+    echo "Atualizando jQuery..."
+    # Identifica a localização dos arquivos jQuery (exemplo: /var/www/mutillidae/javascript/ddsmoothmenu/jquery.min.js)
+    JQUERY_FILE="/var/www/mutillidae/javascript/ddsmoothmenu/jquery.min.js" # Ajuste
+    if [ -f "$JQUERY_FILE" ]; then
+        # Baixa a versão mais recente do jQuery (exemplo)
+        wget -O "$JQUERY_FILE" "https://code.jquery.com/jquery-3.7.0.min.js"
+        echo "jQuery atualizado em $JQUERY_FILE"
+    else
+        echo "Arquivo jQuery não encontrado: $JQUERY_FILE"
+    fi
+}
+
+# HTTP Debugging Methods (TRACE/TRACK) Enabled
+# Solução: Desabilitar os métodos TRACE e TRACK no servidor web.
+disable_trace_track() {
+  echo "Desabilitando métodos HTTP TRACE e TRACK..."
+  # Exemplo para Apache
+  if [ -f "/etc/apache2/apache2.conf" ]; then
+    sed -i 's/TraceEnable On/TraceEnable Off/' /etc/apache2/apache2.conf
+    echo "Métodos TRACE e TRACK desabilitados no Apache. Reinicie o Apache."
+  elif [ -f "/etc/httpd/conf/httpd.conf" ]; then
+    sed -i 's/TraceEnable On/TraceEnable Off/' /etc/httpd/conf/httpd.conf
+    echo "Métodos TRACE e TRACK desabilitados no Apache. Reinicie o Apache."
+  else
+    echo "Arquivo de configuração do Apache não encontrado. Desabilite os métodos TRACE e TRACK manualmente."
+  fi
+}
+
+# SSL/TLS: Server Certificate / Certificate in Chain with RSA keys less than 2048 bits
+# Solução: Gerar e instalar um novo certificado com chave RSA de 2048 bits ou superior.
+replace_weak_certificate() {
+    echo "Substituindo certificado SSL/TLS fraco..."
+    echo "Gere um novo certificado com uma chave RSA de 2048 bits ou superior e substitua o certificado atual."
+    echo "Este script não gera certificados automaticamente. Consulte a documentação do seu servidor web."
+}
+
+# Weak Key Exchange (KEX) Algorithm(s) Supported (SSH)
+# Solução: Desabilitar algoritmos KEX fracos no SSH.
+disable_weak_kex() {
+    echo "Desabilitando algoritmos KEX fracos no SSH..."
+    # Localizar arquivo de configuração do SSH (pode variar)
+    SSH_CONFIG="/etc/ssh/sshd_config"
+    if [ -f "$SSH_CONFIG" ]; then
+        # Adicionar/alterar a linha KexAlgorithms
+        sed -i 's/^KexAlgorithms .*/KexAlgorithms curve25519-sha256@libssh.org,ecdh-sha2-nistp256,ecdh-sha2-nistp384,ecdh-sha2-nistp521,diffie-hellman-group14-sha256,diffie-hellman-group16-sha512,diffie-hellman-group18-sha512/' "$SSH_CONFIG"
+        echo "Algoritmos KEX fracos desabilitados no SSH. Reinicie o SSH."
+    else
+        echo "Arquivo de configuração do SSH não encontrado: $SSH_CONFIG. Configure manualmente."
+    fi
+}
+
+# phpinfo() Output Reporting (HTTP)
+# Solução: Remover os arquivos phpinfo.php
+remove_phpinfo() {
+    echo "Removendo arquivos phpinfo()..."
+    # Lista de arquivos phpinfo() detectados (ajuste se necessário)
+    PHPINFO_FILES=(
+        "/var/www/html/mutillidae/phpinfo.php"
+        "/var/www/html/phpinfo.php"
+    )
+
+    for file in "${PHPINFO_FILES[@]}"; do
+        if [ -f "$file" ]; then
+            rm -f "$file"
+            echo "Arquivo phpinfo() removido: $file"
+        else
+            echo "Arquivo phpinfo() não encontrado: $file"
+        fi
+    done
+}
+
+# Weak Host Key Algorithm(s) (SSH)
+# Solução: Desabilitar algoritmos de chave de host fracos no SSH.
+disable_weak_hostkey() {
+    echo "Desabilitando algoritmos de chave de host fracos no SSH..."
+    # Localizar arquivo de configuração do SSH (pode variar)
+    SSH_CONFIG="/etc/ssh/sshd_config"
+    if [ -f "$SSH_CONFIG" ]; then
+        # Remover ssh-dss
+        sed -i '/^HostKey \/etc\/ssh\/ssh_host_dsa_key/d' "$SSH_CONFIG"
+        echo "Algoritmos de chave de host fracos desabilitados no SSH. Reinicie o SSH."
+    else
+        echo "Arquivo de configuração do SSH não encontrado: $SSH_CONFIG. Configure manualmente."
+    fi
+}
+
+# Check if Mailserver answer to VRFY and EXPN requests
+# Solução: Desabilitar VRFY e EXPN no servidor de email.
+disable_vrfy_expn() {
+    echo "Desabilitando VRFY e EXPN no servidor de email..."
+    # Exemplo para Postfix
+    if [ -f "/etc/postfix/main.cf" ]; then
+        sed -i 's/^disable_vrfy_command = no/disable_vrfy_command = yes/' /etc/postfix/main.cf
+        echo "VRFY desabilitado no Postfix. Reinicie o Postfix."
+    else
+        echo "Arquivo de configuração do Postfix não encontrado. Desabilite VRFY e EXPN manualmente."
+    fi
+}
+
+# SSL/TLS: Renegotiation DoS Vulnerability
+# Solução: Desabilitar a renegociação ou aplicar patches.
+disable_ssl_renegotiation() {
+    echo "Desabilitando a renegociação SSL/TLS..."
+    echo "Consulte a documentação do serviço afetado para desabilitar a renegociação ou aplicar patches."
+}
+
+# SSL/TLS: Certificate Expired
+# Solução: Substituir o certificado SSL/TLS expirado.
+replace_expired_certificate() {
+    echo "Substituindo certificado SSL/TLS expirado..."
+    echo "Gere um novo certificado e substitua o certificado expirado."
+    echo "Este script não gera certificados automaticamente. Consulte a documentação do seu servidor web."
+}
+
+# QWikiwiki directory traversal vulnerability & awiki <= 20100125 Multiple LFI Vulnerabilities
+# Solução: Remover QWikiwiki e awiki
+remove_qwiki_awiki() {
+    echo "Removendo QWikiwiki e awiki..."
+    # Identifica a localização dos arquivos (exemplo: /var/www/qwikiwiki)
+    QWIKI_DIR="/var/www/qwikiwiki" # Ajuste
+    AWIKI_DIR="/var/www/awiki" # Ajuste
+
+    if [ -d "$QWIKI_DIR" ]; then
+        rm -rf "$QWIKI_DIR"
+        echo "Diretório QWikiwiki removido: $QWIKI_DIR"
+    else
+        echo "Diretório QWikiwiki não encontrado: $QWIKI_DIR"
+    fi
+    if [ -d "$AWIKI_DIR" ]; then
+        rm -rf "$AWIKI_DIR"
+        echo "Diretório awiki removido: $AWIKI_DIR"
+    else
+        echo "Diretório awiki não encontrado: $AWIKI_DIR"
+    fi
+}
+
+# /doc directory browsable
+# Solução: Desativar a listagem de diretório para /doc.
+disable_doc_browsing() {
+  echo "Desabilitando listagem do diretório /doc..."
+  # Exemplo para Apache
+  if [ -f "/etc/apache2/apache2.conf" ]; then
+    echo "<Directory /usr/share/doc>" >> /etc/apache2/apache2.conf
+    echo "  Options -Indexes" >> /etc/apache2/apache2.conf
+    echo "  <FilesMatch \"\.txt$\">" >> /etc/apache2/apache2.conf
+    echo "    Require all granted" >> /etc/apache2/apache2.conf
+    echo "  </FilesMatch>" >> /etc/apache2/apache2.conf
+    echo "</Directory>" >> /etc/apache2/apache2.conf
+    echo "Listagem do diretório /doc desabilitada no Apache. Reinicie o Apache."
+  elif [ -f "/etc/httpd/conf/httpd.conf" ]; then
+    echo "<Directory /usr/share/doc>" >> /etc/httpd/conf/httpd.conf
+    echo "  Options -Indexes" >> /etc/httpd/conf/httpd.conf
+    echo "  <FilesMatch \"\.txt$\">" >> /etc/httpd/conf/httpd.conf
+    echo "    Require all granted" >> /etc/httpd/conf/httpd.conf
+    echo "  </FilesMatch>" >> /etc/httpd/conf/httpd.conf
+    echo "</Directory>" >> /etc/httpd/conf/httpd.conf
+    echo "Listagem do diretório /doc desabilitada no Apache. Reinicie o Apache."
+  else
+    echo "Arquivo de configuração do Apache não encontrado. Desabilite a listagem do diretório /doc manualmente."
+  fi
+}
+
+# Telnet Unencrypted Cleartext Login
+# Solução: Desativar o serviço Telnet
+disable_telnet() {
+    echo "Desativando Telnet..."
+    disable_service "telnetd" 2>/dev/null
+    echo "Telnet desativado."
+}
+
+# FTP Unencrypted Cleartext Login
+# Solução: Habilitar FTPS ou forçar o uso de AUTH TLS
+enable_ftps() {
+    echo "Habilitando FTPS ou forçando o uso de AUTH TLS..."
+    # Exemplo para vsftpd:
+    if [ -f "/etc/vsftpd.conf" ]; then
+        sed -i 's/^#ssl_enable=YES/ssl_enable=YES/' /etc/vsftpd.conf
+        sed -i 's/^#force_local_data_ssl=YES/force_local_data_ssl=YES/' /etc/vsftpd.conf
+        sed -i 's/^#force_local_logins_ssl=YES/force_local_logins_ssl=YES/' /etc/vsftpd.conf
+        echo "FTPS habilitado no vsftpd.conf. Reinicie o vsftpd."
+    else
+        echo "Arquivo de configuração do FTP não encontrado. Habilite FTPS ou force o uso de AUTH TLS manualmente."
+    fi
+}
+
+# Cleartext Transmission of Sensitive Information via HTTP
+# Solução: Forçar a transmissão de informações sensíveis via HTTPS
+enforce_https() {
+    echo "Forçando a transmissão de informações sensíveis via HTTPS..."
+    # Adicionar redirecionamento para HTTPS no arquivo .htaccess (exemplo)
+    if [ -f "/var/www/html/.htaccess" ]; then
+        echo "RewriteEngine On" >> /var/www/html/.htaccess
+        echo "RewriteCond %{HTTPS} !=on" >> /var/www/html/.htaccess
+        echo "RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]" >> /var/www/html/.htaccess
+        echo "Redirecionamento para HTTPS configurado no .htaccess."
+    else
+        echo "Arquivo .htaccess não encontrado. Configure o redirecionamento para HTTPS manualmente."
+    fi
+}
+
+# SSL/TLS: Deprecated TLSv1.0 and TLSv1.1 Protocol Detection
+# Solução: Desabilitar TLSv1.0 e TLSv1.1
+disable_tlsv1_0_1_1() {
+    echo "Desabilitando TLSv1.0 e TLSv1.1..."
+     # Localizar arquivo de configuração do OpenSSL (pode variar)
+    OPENSSL_CONF="/etc/ssl/openssl.cnf"
+    if [ -f "$OPENSSL_CONF" ]; then
+        # Adicionar configurações para desabilitar protocolos inseguros
+        sed -i 's/^\#Options =/Options = -SSLv2 -SSLv3 -TLSv1 -TLSv1.1/' "$OPENSSL_CONF"
+        echo "TLSv1.0 e TLSv1.1 desabilitados no OpenSSL. Reinicie os serviços SSL/TLS."
+    else
+        echo "Arquivo de configuração do OpenSSL não encontrado: $OPENSSL_CONF. Configure manualmente."
+    fi
+}
+
+# Weak Encryption Algorithm(s) Supported (SSH)
+# Solução: Desabilitar algoritmos de encriptação fracos no SSH
+disable_weak_ciphers() {
+    echo "Desabilitando algoritmos de encriptação fracos no SSH..."
+        # Localizar arquivo de configuração do SSH (pode variar)
+    SSH_CONFIG="/etc/ssh/sshd_config"
+    if [ -f "$SSH_CONFIG" ]; then
+        # Alterar a linha Ciphers
+        sed -i 's/^Ciphers .*/Ciphers chacha20-poly1305@openssh.com,aes256-gcm@openssh.com,aes128-gcm@openssh.com,aes256-ctr,aes192-ctr,aes128-ctr/' "$SSH_CONFIG"
+        echo "Algoritmos de encriptação fracos desabilitados no SSH. Reinicie o SSH."
+    else
+        echo "Arquivo de configuração do SSH não encontrado: $SSH_CONFIG. Configure manualmente."
+    fi
+}
+
+# Apache HTTP Server httpOnly Cookie Information Disclosure Vulnerability
+# Solução: Atualizar o Apache HTTP Server
+update_apache() {
+    echo "Atualizando o Apache HTTP Server..."
+    update_system
+    echo "Apache HTTP Server atualizado."
+}
+
+# phpMyAdmin error.php Cross Site Scripting Vulnerability
+# Solução: Remover o phpMyAdmin
+remove_phpmyadmin() {
+    echo "Removendo o phpMyAdmin..."
+    # Identifica a localização dos arquivos (exemplo: /var/www/phpmyadmin)
+    PHPMYADMIN_DIR="/var/www/phpmyadmin" # Ajuste
+    if [ -d "$PHPMYADMIN_DIR" ]; then
+        rm -rf "$PHPMYADMIN_DIR"
+        echo "Diretório phpMyAdmin removido: $PHPMYADMIN_DIR"
+    else
+        echo "Diretório phpMyAdmin não encontrado: $PHPMYADMIN_DIR"
+    fi
+}
+
+# SSL/TLS: RSA Temporary Key Handling RSA_EXPORT Downgrade Issue (FREAK)
+# SSL/TLS: DHE_EXPORT MITM Security Bypass Vulnerability (LogJam)
+# Solução: Desabilitar cifras EXPORT no servidor
+disable_export_ciphers() {
+    echo "Desabilitando cifras EXPORT no servidor..."
+    # Localizar arquivo de configuração do OpenSSL (pode variar)
+    OPENSSL_CONF="/etc/ssl/openssl.cnf"
+    if [ -f "$OPENSSL_CONF" ]; then
+        # Remover cifras EXPORT da CipherString
+        sed -i 's/:EXPORT//g' "$OPENSSL_CONF"
+        echo "Cifras EXPORT desabilitadas no OpenSSL. Reinicie os serviços SSL/TLS."
+    else
+        echo "Arquivo de configuração do OpenSSL não encontrado: $OPENSSL_CONF. Configure manualmente."
+    fi
+}
+
+# SSL/TLS: Certificate Signed Using A Weak Signature Algorithm
+# Solução: Obter um novo certificado assinado com SHA-256
+replace_sha1_certificate() {
+    echo "Obtendo um novo certificado assinado com SHA-256..."
+    echo "Gere um novo certificado com SHA-256 e substitua o certificado atual."
+    echo "Este script não gera certificados automaticamente. Consulte a documentação do seu servidor web."
+}
+
+# SSL/TLS: Diffie-Hellman Key Exchange Insufficient DH Group Strength Vulnerability
+# Solução: Usar grupos DH com chave de 2048 bits ou superior
+increase_dh_key_size() {
+    echo "Aumentando o tamanho da chave DH..."
+    # Exemplo para Apache:
+    if [ -f "/etc/apache2/conf-available/ssl-params.conf" ]; then
+        echo "SSLOpenSSLConfCmd DHParameters \"/etc/ssl/certs/dhparam.pem\"" >> /etc/apache2/conf-available/ssl-params.conf
+        # Gera o arquivo dhparam.pem (se não existir)
+        if [ ! -f "/etc/ssl/certs/dhparam.pem" ]; then
+            openssl dhparam -out /etc/ssl/certs/dhparam.pem 2048
+        fi
+        a2enconf ssl-params
+        systemctl restart apache2
+        echo "Tamanho da chave DH aumentada no Apache. Reinicie o Apache."
+
+    else
+      echo "Arquivo de configuração do Apache não encontrado. Siga este passo manualmente"
+      echo "openssl dhparam -out /etc/ssl/certs/dhparam.pem 2048"
+    fi
+
+}
+
+# SSL/TLS: SSLv3 Protocol CBC Cipher Suites Information Disclosure Vulnerability (POODLE)
+# Solução: Desabilitar SSLv3
+disable_sslv3() {
+    echo "Desabilitando SSLv3..."
+    # Localizar arquivo de configuração do OpenSSL (pode variar)
+    OPENSSL_CONF="/etc/ssl/openssl.cnf"
+    if [ -f "$OPENSSL_CONF" ]; then
+        # Desabilitar SSLv3
+        sed -i 's/^\#Options =/Options = -SSLv2 -SSLv3/' "$OPENSSL_CONF"
+        echo "SSLv3 desabilitado no OpenSSL. Reinicie os serviços SSL/TLS."
+    else
+        echo "Arquivo de configuração do OpenSSL não encontrado: $OPENSSL_CONF. Configure manualmente."
+    fi
+}
+
+# Weak MAC Algorithm(s) Supported (SSH)
+# Solução: Desabilitar algoritmos MAC fracos no SSH.
+disable_weak_mac() {
+  echo "Desabilitando algoritmos MAC fracos no SSH..."
+  # Localizar arquivo de configuração do SSH (pode variar)
+  SSH_CONFIG="/etc/ssh/sshd_config"
+  if [ -f "$SSH_CONFIG" ]; then
+    # Alterar a linha MACs
+    sed -i 's/^MACs .*/MACs hmac-sha2-512,hmac-sha2-256,umac-128@openssh.com/' "$SSH_CONFIG"
+    echo "Algoritmos MAC fracos desabilitados no SSH. Reinicie o SSH."
+  else
+    echo "Arquivo de configuração do SSH não encontrado: $SSH_CONFIG. Configure manualmente."
+  fi
+}
+
+# TCP Timestamps Information Disclosure
+# Solução: Desabilitar TCP Timestamps.
+disable_tcp_timestamps() {
+    echo "Desabilitando TCP Timestamps..."
+    echo "net.ipv4.tcp_timestamps = 0" >> /etc/sysctl.conf
+    sysctl -p
+    echo "TCP Timestamps desabilitados."
+}
+
+# ICMP Timestamp Reply Information Disclosure
+# Solução: Bloquear ou desabilitar respostas ICMP Timestamp.
+disable_icmp_timestamps() {
+    echo "Bloqueando respostas ICMP Timestamp..."
+    # Bloqueio via iptables (exemplo)
+    iptables -A INPUT -p icmp --icmp-type timestamp-request -j DROP
+    echo "Respostas ICMP Timestamp bloqueadas via iptables."
+}
+
+# Execução principal
+
+echo "Iniciando script de correção automática..."
+
+# Aplica as correções
+remove_twiki
+disable_drb
+disable_rlogin_rsh_rexec
+eol_upgrade
+remove_ingreslock
+disable_ajp
+change_mysql_root_password
+update_php
+reinstall_vsftpd
+disable_distcc
+change_postgres_password
+secure_vnc
+disable_http_methods
+secure_ftp
+disable_rsh
+secure_ssl_tls
+fix_starttls
+update_jquery
+disable_trace_track
+replace_weak_certificate
+disable_weak_kex
+remove_phpinfo
+disable_weak_hostkey
+disable_vrfy_expn
+disable_ssl_renegotiation
+replace_expired_certificate
+remove_qwiki_awiki
+disable_doc_browsing
+disable_telnet
+enable_ftps
+enforce_https
+disable_tlsv1_0_1_1
+disable_weak_ciphers
+update_apache
+remove_phpmyadmin
+disable_export_ciphers
+replace_sha1_certificate
+increase_dh_key_size
+disable_sslv3
+disable_weak_mac
+disable_tcp_timestamps
+disable_icmp_timestamps
+
+echo "Script de correção automática concluído."
+```

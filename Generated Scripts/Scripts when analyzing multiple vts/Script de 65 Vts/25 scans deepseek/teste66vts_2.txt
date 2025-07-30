@@ -1,0 +1,23 @@
+#!/bin/bash
+
+# Update Python to the latest stable version for all specified installations
+sudo apt-get update
+sudo apt-get install --only-upgrade python3.10 python3.12
+
+# Disable deprecated TLSv1.0 and TLSv1.1 protocols
+sudo sed -i '/^SSLProtocol/ s/.*/SSLProtocol -all +TLSv1.2 +TLSv1.3/' /etc/apache2/mods-enabled/ssl.conf
+sudo systemctl restart apache2
+
+# Replace the untrusted SSL/TLS certificate
+sudo rm /etc/ssl/certs/localhost.crt
+sudo rm /etc/ssl/private/localhost.key
+sudo openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout /etc/ssl/private/localhost.key -out /etc/ssl/certs/localhost.crt -subj "/CN=localhost/O=Luminator/L=Caxias do Sul/ST=RS/C=BR"
+sudo systemctl restart apache2
+
+# Disable the reported weak MAC algorithm(s) for SSH
+sudo sed -i '/^MACs/ s/.*/MACs hmac-sha2-256,hmac-sha2-512/' /etc/ssh/sshd_config
+sudo systemctl restart ssh
+
+# Disable ICMP timestamp reply
+sudo sysctl -w net.ipv4.icmp_echo_ignore_all=1
+sudo sysctl -p

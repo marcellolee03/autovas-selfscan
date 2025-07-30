@@ -1,0 +1,104 @@
+```bash
+#!/bin/bash
+
+# Correção para vulnerabilidades de serviços
+service rsh stop
+service rlogin stop
+service rexec stop
+update-rc.d -f rexec remove
+update-rc.d -f rlogin remove
+update-rc.d -f rsh remove
+apt-get purge rsh-client rsh-server rlogin rexec -y
+
+# Desabilitar protocolos inseguros para SSH
+sed -i '/^KexAlgorithms/d' /etc/ssh/sshd_config
+sed -i '/^Ciphers/d' /etc/ssh/sshd_config
+sed -i '/^MACs/d' /etc/ssh/sshd_config
+sed -i '/^HostKeyAlgorithms/d' /etc/ssh/sshd_config
+echo "KexAlgorithms curve25519-sha256,curve25519-sha256@libssh.org,diffie-hellman-group16-sha512,diffie-hellman-group18-sha512,diffie-hellman-group-exchange-sha256" >> /etc/ssh/sshd_config
+echo "Ciphers chacha20-poly1305@openssh.com,aes256-gcm@openssh.com,aes128-gcm@openssh.com,aes256-ctr,aes192-ctr,aes128-ctr" >> /etc/ssh/sshd_config
+echo "MACs hmac-sha2-512-etm@openssh.com,hmac-sha2-256-etm@openssh.com,umac-128-etm@openssh.com" >> /etc/ssh/sshd_config
+echo "HostKeyAlgorithms ssh-ed25519,ssh-ed25519-cert-v01@openssh.com,sk-ssh-ed25519@openssh.com,sk-ssh-ed25519-cert-v01@openssh.com,rsa-sha2-512,rsa-sha2-512-cert-v01@openssh.com" >> /etc/ssh/sshd_config
+service sshd restart
+
+# Remover backdoor Ingreslock e serviços de rede vulneráveis
+fuser -k 1524/tcp
+fuser -k 6200/tcp
+fuser -k 513/tcp
+fuser -k 514/tcp
+fuser -k 512/tcp
+rm -f /usr/sbin/in.ingreslock
+sed -i '/ingreslock/d' /etc/inetd.conf /etc/xinetd.d/*
+pkill -f 'druby_timeserver'
+rm -f /usr/sbin/druby_timeserver.rb
+sed -i '/distccd/d' /etc/inetd.conf /etc/xinetd.d/*
+pkill -f distccd
+
+# Proteger serviços e alterar credenciais padrão
+# PostgreSQL
+service postgresql stop
+update-rc.d postgresql disable
+echo "ALTER USER postgres WITH PASSWORD 'StrongPassword123!';" | sudo -u postgres psql
+service postgresql start
+
+# MySQL
+service mysql stop
+update-rc.d mysql disable
+mysql --user=root -e "ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY 'StrongPassword123!'; FLUSH PRIVILEGES;"
+service mysql start
+
+# Permissões para VNC
+fuser -k 5900/tcp
+sed -i '/vncserver/d' /etc/init.d/*
+pkill -f vncserver
+
+# Apache - Desativar métodos HTTP inseguros
+a2disconf trace
+a2disconf loaded_deflate
+sed -i '/<Directory "\/var\/www">/,/<\/Directory>/s/Options Indexes FollowSymLinks/Options -Indexes +FollowSymLinks/' /etc/apache2/apache2.conf
+sed -i '/<Directory "\/var\/www">/,/<\/Directory>/s/AllowOverride None/AllowOverride None\n\tRedirectMatch 403 \^\\\/doc\\\/\$/' /etc/apache2/apache2.conf
+sed -i '/<Location \/>/,/<\/Location>/s/.*//' /etc/apache2/apache2.conf
+echo "<Location />" >> /etc/apache2/apache2.conf
+echo "    TraceEnable off" >> /etc/apache2/apache2.conf
+echo "    </Location>" >> /etc/apache2/apache2.conf
+echo "<LocationMatch \"^/dav\">" >> /etc/apache2/apache2.conf
+echo "    LimitExcept GET POST HEAD OPTIONS" >> /etc/apache2/apache2.conf
+echo "        Order deny,allow" >> /etc/apache2/apache2.conf
+echo "        Deny from all" >> /etc/apache2/apache2.conf
+echo "    </LimitExcept>" >> /etc/apache2/apache2.conf
+echo "</LocationMatch>" >> /etc/apache2/apache2.conf
+rm -f /var/www/html/phpinfo.php
+rm -f /var/www/mutillidae/phpinfo.php
+rm -f /var/www/html/mutillidae/javascript/ddsmoothmenu/jquery.min.js
+service apache2 restart
+
+# Tomcat - Proteger contra Ghostcat
+service tomcat5.5 stop
+sed -i '/<Connector port=\"8009\"/s/ protocol=\"AJP\/1.3\"/ protocol=\"AJP\/1.3\" secretRequired=\"true\" secret=\"StrongSecret\"/' /etc/tomcat5.5/server.xml
+sed -i '/<Connector port=\"8009\"/s/ / address=\"127.0.0.1\"/' /etc/tomcat5.5/server.xml
+echo '<Valve className="org.apache.catalina.authenticator.SSLAuthenticator" allowIpSourceCheck="true" />' >> /etc/tomcat5.5/server.xml
+mv /var/lib/tomcat5.5/webapps/ROOT/WEB-INF/web.xml /root/web.xml.backup
+service tomcat5.5 start
+
+# Fechando serviços não essenciais
+service vsftpd stop
+update-rc.d vsftpd disable
+fuser -k 21/tcp
+fuser -k 2121/tcp
+service sendmail stop
+update-rc.d sendmail disable
+service telnet stop
+update-rc.d telnet remove
+service inetd stop
+update-rc.d inetd disable
+service xinetd stop
+update-rc.d xinetd disable
+
+# Configurações globais de SSL/TLS
+echo 'ssl_protocols = !SSLv2 !SSLv3 !TLSv1 !TLSv1.1' > /etc/ssl/safe_ssl.conf
+echo 'ssl_ciphers = "EECDH+ECDSA+AESGCM EECDH+aRSA+AESGCM EECDH+ECDSA+SHA384 EECDH+ECDSA+SHA256 EECDH+aRSA+SHA384 EECDH+aRSA+SHA256 EECDH+aRSA+RC4 EECDH !aNULL !eNULL !LOW !3DES !MD5 !EXP !PSK !SRP !DSS !RC4"' >> /etc/ssl/safe_ssl.conf
+
+# Proteção contra time-based attacks
+echo "net.ipv4.tcp_timestamps = 0" >> /etc/sysctl.conf
+sysctl -p
+```

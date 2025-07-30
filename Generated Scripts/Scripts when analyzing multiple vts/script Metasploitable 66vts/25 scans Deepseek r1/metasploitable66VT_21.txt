@@ -1,0 +1,139 @@
+```bash
+#!/bin/bash
+
+# Configurações iniciais
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+NC='\033[0m'
+export DEBIAN_FRONTEND=noninteractive
+
+# Funções utilitárias
+print_section() {
+    echo -e "\n${GREEN}[*] $1${NC}"
+}
+
+print_critical() {
+    echo -e "\n${RED}[CRITICAL] $1${NC}"
+    echo "   $2"
+}
+
+# 1. Remover/desativar serviços vulneráveis
+print_section "Desativando serviços vulneráveis"
+services=("rlogin" "rsh" "rexec" "telnet" "vncserver" "distcc" "vsftpd")
+for service in "${services[@]}"; do
+    if systemctl list-unit-files | grep -q "$service.service"; then
+        systemctl stop "$service"
+        systemctl disable "$service"
+    fi
+    pkill -9 -f "$service"
+done
+apt-get purge -y rsh-client rsh-server rexecd telnetd tightvncserver distcc vsftpd
+
+# 2. Parar serviço de backdoor Ingreslock
+print_section "Removendo backdoor Ingreslock"
+ingres_pid=$(lsof -ti tcp:1524)
+if [ -n "$ingres_pid" ]; then
+    kill -9 "$ingres_pid"
+fi
+
+# 3. Alterar credenciais padrão do MySQL
+print_section "Mudando senha padrão do MySQL"
+if command -v mysqladmin &> /dev/null; then
+    MYSQL_NEW_PW=$(openssl rand -base64 32)
+    mysqladmin -u root password "$MYSQL_NEW_PW" >/dev/null 2>&1
+    echo "[!] MySQL root password changed to: $MYSQL_NEW_PW"
+fi
+
+# 4. Alterar credenciais padrão do PostgreSQL
+print_section "Mudando senha padrão do PostgreSQL"
+if command -v psql &> /dev/null; then
+    PGSQL_NEW_PW=$(openssl rand -base64 32)
+    sudo -u postgres psql -c "ALTER USER postgres WITH PASSWORD '$PGSQL_NEW_PW';" >/dev/null 2>&1
+    echo "[!] PostgreSQL postgres password changed to: $PGSQL_NEW_PW"
+fi
+
+# 5. Desativar protocolos inseguros (SSLv2, SSLv3, TLSv1.0, TLSv1.1)
+print_section "Desativando protocolos SSL/TLS inseguros"
+find /etc/ -name '*.conf' -exec sed -i -E \
+    's/(SSLProtocol.*)(\bSSLv2\b|\bSSLv3\b|\bTLSv1\b|\bTLSv1\.1\b)//g' {} +
+find /etc/ -name '*.cnf' -exec sed -i -E \
+    's/(min_protocol\s*=\s*)(TLSv1|TLSv1\.0|TLSv1\.1)/\1TLSv1.2/g' {} +
+
+# 6. Correção Ghostcat (Tomcat)
+print_section "Removendo conector AJP vulnerável do Tomcat"
+find / -name 'server.xml' -type f -exec sed -i \
+    's/<Connector.*protocol="AJP\/1.3".*>/<!-- \0 -->/' {} +
+
+# 7. Remover métodos HTTP perigosos
+print_section "Desabilitando métodos HTTP perigosos"
+apache_conf_files=$(find /etc/apache2/ -name '*.conf')
+for conf in $apache_conf_files; do
+    echo -e "<Location />\n  TraceEnable off\n</Location>\n<LimitExcept GET POST HEAD>\n  Deny from all\n</LimitExcept>" >> "$conf"
+done
+systemctl restart apache2 2>/dev/null
+
+# 8. Reforçar configurações SSH
+print_section "Aplicando hardening do SSH"
+ssh_config="/etc/ssh/sshd_config"
+if [ -f "$ssh_config" ]; then
+    sed -i -E \
+        -e 's/^(Port|Protocol|PermitRootLogin|PasswordAuthentication|KexAlgorithms|Ciphers|MACs).*/# Commented_by_security/' \
+        -e 's/^#.*VersionAddendum.*//' "$ssh_config"
+    cat << EOF >> "$ssh_config"
+Port 22
+Protocol 2
+PermitRootLogin no
+PasswordAuthentication no
+KexAlgorithms curve25519-sha256@libssh.org,diffie-hellman-group-exchange-sha256
+Ciphers chacha20-poly1305@openssh.com,aes256-gcm@openssh.com,aes128-gcm@openssh.com
+MACs hmac-sha2-512-etm@openssh.com,hmac-sha2-256-etm@openssh.com
+UsePAM yes
+ClientAliveInterval 300
+ClientAliveCountMax 2
+EOF
+    systemctl restart sshd
+fi
+
+# 9. Desativar login FTP anônimo
+print_section "Removendo acesso FTP anônimo"
+sed -i 's/anonymous_enable=.*/anonymous_enable=NO/g' /etc/vsftpd.conf 2>/dev/null
+rm -rf /srv/ftp/public /var/ftp/pub
+
+# 10. Habilitar modo seguro Ruby (SAFE)
+print_section "Configurando modo seguro do Ruby"
+if command -v gem &> /dev/null; then
+    gem env | grep 'EXECUTABLE DIRECTORY' | cut -d: -f2 >> /etc/environment
+    echo "export RUBYOPT='-r $SAFE -d'" >> /etc/profile
+    echo "$SAFE = 3" >> /etc/ruby/site_ruby/*/safe_mode_config.rb
+fi
+
+# 11. Remover info do PHP
+print_section "Removendo arquivos phpinfo"
+find /var/www/ /srv/ -type f -name '*phpinfo*.php' -delete
+
+# 12. Aplicar hardening do Postfix
+print_section "Desativando VRFY/EXPN no Postfix"
+postfix_conf="/etc/postfix/main.cf"
+if [ -f "$postfix_conf" ]; then
+    echo "disable_vrfy_command = yes" >> "$postfix_conf"
+    echo "smtpd_discard_ehlo_keywords = vrfy, expn" >> "$postfix_conf"
+    systemctl restart postfix
+fi
+
+# 13. Remover configurações de debug do PHP
+print_section "Desativando modo debug PHP"
+sed -i 's/\bps\.debug\b.*=.*1/ps.debug=0/g' /etc/php*/*/php.ini
+
+# 14. Adicionar hardening do kernel
+print_section "Hardening do kernel"
+cat << EOF >> /etc/sysctl.conf
+net.ipv4.tcp_syncookies = 1
+net.ipv4.tcp_timestamps = 0
+net.ipv4.conf.all.rp_filter = 1
+kernel.kptr_restrict = 2
+kernel.dmesg_restrict = 1
+EOF
+sysctl -p
+
+echo -e "\n${GREEN}[+] Configurações de segurança aplicadas!"
+```

@@ -1,0 +1,86 @@
+#!/bin/bash
+
+if [ "$(id -u)" -ne 0 ]; then
+    echo "Erro: Este script deve ser executado como root." >&2
+    exit 1
+fi
+
+if systemctl is-active --quiet apache2; then
+    FQDN=$(hostname -f 2>/dev/null || hostname)
+    a2enmod ssl
+
+    mkdir -p /etc/ssl/private
+    mkdir -p /etc/ssl/certs
+    if ! [ -f "/etc/ssl/certs/${FQDN}.crt" ] || ! [ -f "/etc/ssl/private/${FQDN}.key" ]; then
+        openssl req -x509 -nodes -days 3650 -newkey rsa:2048 \
+            -keyout "/etc/ssl/private/${FQDN}.key" \
+            -out "/etc/ssl/certs/${FQDN}.crt" \
+            -subj "/CN=${FQDN}" >/dev/null 2>&1
+    fi
+
+    cat > /etc/apache2/sites-available/000-default.conf <<EOF
+<VirtualHost *:80>
+    ServerName $FQDN
+    Redirect permanent / https://$FQDN/
+</VirtualHost>
+EOF
+
+    if ! [ -f "/etc/apache2/sites-available/default-ssl.conf" ]; then
+        cat > /etc/apache2/sites-available/default-ssl.conf <<EOF
+<IfModule mod_ssl.c>
+    <VirtualHost *:443>
+        ServerName $FQDN
+        DocumentRoot /var/www/html
+
+        ErrorLog \${APACHE_LOG_DIR}/error.log
+        CustomLog \${APACHE_LOG_DIR}/access.log combined
+
+        SSLEngine on
+        SSLCertificateFile /etc/ssl/certs/$FQDN.crt
+        SSLCertificateKeyFile /etc/ssl/private/$FQDN.key
+    </VirtualHost>
+</IfModule>
+EOF
+    fi
+
+    a2ensite default-ssl.conf >/dev/null 2>&1
+    systemctl restart apache2
+
+elif systemctl is-active --quiet nginx; then
+    FQDN=$(hostname -f 2>/dev/null || hostname)
+
+    mkdir -p /etc/ssl/private
+    mkdir -p /etc/ssl/certs
+    if ! [ -f "/etc/ssl/certs/${FQDN}.crt" ] || ! [ -f "/etc/ssl/private/${FQDN}.key" ]; then
+        openssl req -x509 -nodes -days 3650 -newkey rsa:2048 \
+            -keyout "/etc/ssl/private/${FQDN}.key" \
+            -out "/etc/ssl/certs/${FQDN}.crt" \
+            -subj "/CN=${FQDN}" >/dev/null 2>&1
+    fi
+
+    cat > /etc/nginx/sites-available/default <<EOF
+server {
+    listen 80 default_server;
+    return 301 https://\$host\$request_uri;
+}
+EOF
+
+    if ! [ -f "/etc/nginx/sites-available/default-ssl" ] && ! [ -f "/etc/nginx/sites-enabled/default-ssl" ]; then
+        cat > /etc/nginx/sites-available/default-ssl <<EOF
+server {
+    listen 443 ssl default_server;
+    ssl_certificate /etc/ssl/certs/$FQDN.crt;
+    ssl_certificate_key /etc/ssl/private/$FQDN.key;
+    ssl_protocols TLSv1.2 TLSv1.3;
+    root /var/www/html;
+    index index.html;
+}
+EOF
+        ln -s ../sites-available/default-ssl /etc/nginx/sites-enabled/default-ssl
+    fi
+
+    systemctl restart nginx
+else
+    echo "Servidor web nao suportado." >&2
+    exit 1
+fi

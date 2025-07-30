@@ -1,0 +1,101 @@
+#!/bin/bash
+
+# Este script corrige a vulnerabilidade de transmissão de informações sensíveis em texto claro via HTTP,
+# redirecionando todo o tráfego HTTP para HTTPS.
+
+# Variáveis
+HTTP_PORT=80
+HTTPS_PORT=443
+DOMAIN="example.com" # Substitua por seu domínio
+SSL_CERT_PATH="/etc/ssl/certs/ssl-cert-snakeoil.pem" # Caminho para o certificado SSL
+SSL_KEY_PATH="/etc/ssl/private/ssl-cert-snakeoil.key" # Caminho para a chave SSL
+
+# 1. Detecta o sistema operacional
+if command -v systemctl &> /dev/null; then
+    OS="systemd"
+elif command -v service &> /dev/null; then
+    OS="sysvinit"
+else
+    echo "Sistema init desconhecido."
+    exit 1
+fi
+
+# 2. Instala o Apache (se não estiver instalado)
+if ! command -v apache2 &> /dev/null; then
+    apt update && apt install -y apache2
+fi
+
+# 3. Habilita o módulo rewrite do Apache
+a2enmod rewrite
+
+# 4. Configura um Virtual Host para redirecionar HTTP para HTTPS
+
+VHOST_CONFIG="/etc/apache2/sites-available/000-default.conf" # Arquivo de configuração original
+TEMP_VHOST="/tmp/000-default.conf.tmp"
+
+# Remove todas as linhas comentadas e os VirtualHosts existentes
+sed '/^\s*#.*$/d' "$VHOST_CONFIG" > "$TEMP_VHOST"
+sed '/<VirtualHost *:80>/,/<\/VirtualHost>/d' "$TEMP_VHOST" > "$VHOST_CONFIG"
+rm "$TEMP_VHOST"
+
+echo "<VirtualHost *:$HTTP_PORT>
+        ServerName $DOMAIN
+        Redirect permanent / https://$DOMAIN/
+</VirtualHost>" >> "$VHOST_CONFIG"
+
+
+# 5. Configura um Virtual Host padrão para HTTPS (se não existir) - usando certificado autoassinado
+if [ ! -f /etc/apache2/sites-available/default-ssl.conf ]; then
+    cat > /etc/apache2/sites-available/default-ssl.conf <<EOL
+<IfModule mod_ssl.c>
+        <VirtualHost _default_:$HTTPS_PORT>
+
+                ServerAdmin webmaster@localhost
+                ServerName $DOMAIN
+
+                DocumentRoot /var/www/html
+
+                ErrorLog \${APACHE_LOG_DIR}/error.log
+                CustomLog \${APACHE_LOG_DIR}/access.log combined
+
+                SSLEngine on
+
+                SSLCertFile $SSL_CERT_PATH
+                SSLCertificateKeyFile $SSL_KEY_PATH
+
+                <FilesMatch "\.(cgi|shtml|phtml|php)$">
+                                SSLOptions +StdEnvVars
+                </FilesMatch>
+                <Directory /usr/lib/cgi-bin>
+                                SSLOptions +ExecCGI
+                </Directory>
+
+                <Directory /var/www/>
+                        Options Indexes FollowSymLinks MultiViews
+                        AllowOverride All
+                        Require all granted
+                </Directory>
+
+
+        </VirtualHost>
+</IfModule>
+EOL
+fi
+
+#Habilita SSL (se não estiver habilitado)
+if ! a2enmod ssl &> /dev/null; then
+    a2enmod ssl
+fi
+
+# Ativa o site padrão SSL
+a2ensite default-ssl.conf
+
+# 6. Reinicia o Apache
+if [[ "$OS" == "systemd" ]]; then
+    systemctl restart apache2
+elif [[ "$OS" == "sysvinit" ]]; then
+    service apache2 restart
+fi
+
+echo "Redirecionamento HTTP para HTTPS configurado. Reinicie o navegador e acesse o site."
+exit 0

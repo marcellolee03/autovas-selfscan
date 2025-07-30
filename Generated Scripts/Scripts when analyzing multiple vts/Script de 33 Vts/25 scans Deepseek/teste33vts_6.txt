@@ -1,0 +1,76 @@
+#!/bin/bash
+
+# Atualizar o Proxmox Virtual Environment (VE, PVE)
+if command -v pveversion &>/dev/null; then
+    apt-get update
+    apt-get install -y proxmox-ve
+fi
+
+# Atualizar jQuery para versão 1.9.0 ou superior
+find / -type f -name "jquery-1.8.3.min.js" -exec sh -c 'curl -s https://code.jquery.com/jquery-1.9.0.min.js -o "$1"' _ {} \;
+
+# Desativar algoritmos de chave de hospedeiro fracos para SSH
+if [ -f /etc/ssh/sshd_config ]; then
+    sed -i '/^HostKeyAlgorithms/d' /etc/ssh/sshd_config
+    echo "HostKeyAlgorithms ecdsa-sha2-nistp256-cert-v01@openssh.com,ecdsa-sha2-nistp384-cert-v01@openssh.com,ecdsa-sha2-nistp521-cert-v01@openssh.com,ssh-ed25519-cert-v01@openssh.com,rsa-sha2-512-cert-v01@openssh.com,rsa-sha2-256-cert-v01@openssh.com,ssh-rsa-cert-v01@openssh.com,ecdsa-sha2-nistp256,ecdsa-sha2-nistp384,ecdsa-sha2-nistp521,ssh-ed25519,rsa-sha2-512,rsa-sha2-256,ssh-rsa" >> /etc/ssh/sshd_config
+    systemctl restart sshd
+fi
+
+# Desativar algoritmos de troca de chaves (KEX) fracos para SSH
+if [ -f /etc/ssh/sshd_config ]; then
+    sed -i '/^KexAlgorithms/d' /etc/ssh/sshd_config
+    echo "KexAlgorithms curve25519-sha256,curve25519-sha256@libssh.org,diffie-hellman-group-exchange-sha256,diffie-hellman-group16-sha512,diffie-hellman-group18-sha512,diffie-hellman-group14-sha256" >> /etc/ssh/sshd_config
+    systemctl restart sshd
+fi
+
+# Desativar algoritmos de criptografia fracos para SSH
+if [ -f /etc/ssh/sshd_config ]; then
+    sed -i '/^Ciphers/d' /etc/ssh/sshd_config
+    echo "Ciphers chacha20-poly1305@openssh.com,aes256-gcm@openssh.com,aes128-gcm@openssh.com,aes256-ctr,aes192-ctr,aes128-ctr" >> /etc/ssh/sshd_config
+    systemctl restart sshd
+fi
+
+# Desativar algoritmos MAC fracos para SSH
+if [ -f /etc/ssh/sshd_config ]; then
+    sed -i '/^MACs/d' /etc/ssh/sshd_config
+    echo "MACs hmac-sha2-512-etm@openssh.com,hmac-sha2-256-etm@openssh.com,hmac-sha2-512,hmac-sha2-256" >> /etc/ssh/sshd_config
+    systemctl restart sshd
+fi
+
+# Desativar timestamps TCP
+if [ -f /etc/sysctl.conf ]; then
+    echo "net.ipv4.tcp_timestamps = 0" >> /etc/sysctl.conf
+    sysctl -p
+fi
+
+# Substituir Telnet por SSH
+if command -v telnetd &>/dev/null; then
+    apt-get remove --purge -y telnetd
+    apt-get install -y openssh-server
+    systemctl enable ssh
+    systemctl start ssh
+fi
+
+# Desativar TLSv1.0 e TLSv1.1
+if [ -f /etc/ssl/openssl.cnf ]; then
+    sed -i 's/MinProtocol = TLSv1.0/MinProtocol = TLSv1.2/' /etc/ssl/openssl.cnf
+    sed -i 's/MaxProtocol = TLSv1.1/MaxProtocol = TLSv1.3/' /etc/ssl/openssl.cnf
+fi
+
+# Configurar firewall para bloquear portas de DCE/RPC e MSRPC
+ufw deny 135/tcp
+ufw deny 39710/tcp
+ufw deny 49664/tcp
+ufw deny 49665/tcp
+ufw deny 49666/tcp
+ufw deny 49667/tcp
+ufw deny 49668/tcp
+ufw deny 49670/tcp
+ufw deny 7832/tcp
+ufw reload
+
+# Desativar respostas ICMP timestamp
+if [ -f /etc/sysctl.conf ]; then
+    echo "net.ipv4.icmp_echo_ignore_time_stamp = 1" >> /etc/sysctl.conf
+    sysctl -p
+fi

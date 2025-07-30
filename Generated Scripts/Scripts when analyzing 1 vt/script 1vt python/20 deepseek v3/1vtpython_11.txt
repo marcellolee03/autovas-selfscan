@@ -1,0 +1,5 @@
+#!/bin/bash
+sudo apt-get update
+sudo apt-get install --only-upgrade python3.10=3.10.15-* -y
+sudo systemctl restart python3.10
+sudo systemctl restart service_name_using_port_5000

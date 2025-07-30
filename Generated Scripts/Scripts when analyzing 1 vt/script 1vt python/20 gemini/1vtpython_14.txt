@@ -1,0 +1,31 @@
+```bash
+#!/bin/bash
+
+# Script para atualizar o Python para a versão 3.10.15 ou superior no Windows.
+# Este script é um esqueleto e requer ajustes para funcionar corretamente em um ambiente Windows.
+# A atualização do Python no Windows geralmente envolve o uso do instalador do Python.
+# Este script serve como um guia e precisará ser adaptado ao seu ambiente específico.
+
+# 1. Download do instalador do Python 3.10.15 (ou versão mais recente).
+# Substitua 'python_installer.exe' pelo nome do arquivo real.
+# Você pode usar o 'curl' para baixar, mas ele precisa estar instalado e configurado no Windows.
+# Para usar o curl no windows instalar o pacote do curl.
+# Invoke-WebRequest -Uri "https://www.python.org/ftp/python/3.10.15/python-3.10.15-amd64.exe" -OutFile "python-3.10.15-amd64.exe"
+
+# 2. Executar o instalador de forma não interativa (silent install).
+# O parâmetro '/quiet' realiza uma instalação silenciosa.
+# ./python-3.10.15-amd64.exe /quiet InstallAllUsers=1 TargetDir=$Env:ProgramFiles\Python310 Include_doc=0 Include_debug=0
+# Start-Process -FilePath "python-3.10.15-amd64.exe" -ArgumentList "/quiet InstallAllUsers=1 TargetDir=$Env:ProgramFiles\Python310 Include_doc=0 Include_debug=0" -Wait
+
+# 3. Verificar a versão do Python após a instalação.
+# python --version
+
+# 4. Remover versões antigas (opcional, requer lógica adicional para identificar e desinstalar).
+# wmic product where "name like 'Python 3.10.%%'" call uninstall /nointeractive
+
+# Mensagem de conclusão (opcional).
+echo "A atualização do Python foi iniciada. Verifique a instalação manualmente."
+
+#Observação: Este script precisa de adaptações para ser executado corretamente no Windows.
+#Principalmente no gerenciamento de permissões e na execução de comandos em powershell
+```

@@ -1,0 +1,58 @@
+```bash
+#!/bin/bash
+
+# Este script corrige a vulnerabilidade de transmissão de informações sensíveis em texto plano via HTTP,
+# redirecionando o tráfego HTTP para HTTPS e habilitando o HTTPS.
+# Assumindo que o servidor web é Apache e o sistema operacional é baseado em Debian/Ubuntu.
+
+# Variáveis
+APACHE_CONFIG_FILE="/etc/apache2/sites-available/000-default.conf"
+APACHE_DEFAULT_SSL_CONFIG_FILE="/etc/apache2/sites-available/default-ssl.conf"
+APACHE_SSL_ENABLED_CONFIG_FILE="/etc/apache2/sites-enabled/default-ssl.conf"
+APACHE_PORTS_CONFIG_FILE="/etc/apache2/ports.conf"
+
+# 1. Habilitar o módulo SSL
+sudo a2enmod ssl
+
+# 2. Configurar o arquivo de configuração do Apache para redirecionar HTTP para HTTPS
+
+# Criar um backup do arquivo de configuração original
+sudo cp "$APACHE_CONFIG_FILE" "${APACHE_CONFIG_FILE}.bak"
+
+# Adicionar a regra de redirecionamento
+sudo sed -i "s|DocumentRoot /var/www/html|DocumentRoot /var/www/html\n\tRewriteEngine On\n\tRewriteCond %{HTTPS} off\n\tRewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]|g" "$APACHE_CONFIG_FILE"
+
+# 3. Criar certificado SSL auto-assinado (para fins de teste; em produção, utilize um certificado válido)
+
+# Verificar se o certificado já existe
+if [ ! -f /etc/ssl/certs/apache-selfsigned.crt ] || [ ! -f /etc/ssl/private/apache-selfsigned.key ]; then
+  sudo openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout /etc/ssl/private/apache-selfsigned.key -out /etc/ssl/certs/apache-selfsigned.crt -subj "/CN=localhost"
+  sudo chmod 400 /etc/ssl/private/apache-selfsigned.key
+fi
+
+# 4. Configurar o arquivo de configuração SSL do Apache para usar o certificado
+
+# Criar um backup do arquivo de configuração SSL original
+if [ -f "$APACHE_DEFAULT_SSL_CONFIG_FILE" ]; then
+    sudo cp "$APACHE_DEFAULT_SSL_CONFIG_FILE" "${APACHE_DEFAULT_SSL_CONFIG_FILE}.bak"
+fi
+
+# Ajustar a configuração SSL
+if [ -f "$APACHE_DEFAULT_SSL_CONFIG_FILE" ]; then
+  sudo sed -i "s|SSLCertificateFile\t\t/etc/ssl/certs/ssl-cert-snakeoil.pem|SSLCertificateFile\t\t/etc/ssl/certs/apache-selfsigned.crt|g" "$APACHE_DEFAULT_SSL_CONFIG_FILE"
+  sudo sed -i "s|SSLCertificateKeyFile /etc/ssl/private/ssl-cert-snakeoil.key|SSLCertificateKeyFile /etc/ssl/private/apache-selfsigned.key|g" "$APACHE_DEFAULT_SSL_CONFIG_FILE"
+fi
+
+#5. Ajustar o arquivo ports.conf para escutar na porta 443
+sudo sed -i 's/#Listen 443 https/Listen 443 https/g' "$APACHE_PORTS_CONFIG_FILE"
+
+# 6. Habilitar o site SSL padrão
+if [ ! -f "$APACHE_SSL_ENABLED_CONFIG_FILE" ]; then
+  sudo a2ensite default-ssl
+fi
+
+# 7. Reiniciar o Apache
+sudo systemctl restart apache2
+
+echo "Redirecionamento HTTP para HTTPS configurado. Certifique-se de acessar o site via HTTPS."
+```

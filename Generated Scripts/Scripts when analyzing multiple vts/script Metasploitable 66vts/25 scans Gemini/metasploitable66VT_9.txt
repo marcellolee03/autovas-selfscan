@@ -1,0 +1,454 @@
+```bash
+#!/bin/bash
+
+# Variáveis Globais
+OS=$(uname -s)
+ARCH=$(uname -m)
+
+# Funções Utilitárias
+error_exit() {
+  echo "Erro: $1" >&2
+  exit 1
+}
+
+# Correção para Vulnerabilidade 1: TWiki XSS and Command Execution Vulnerabilities
+# Solução: Upgrade para versão 4.2.4 ou posterior.
+echo "Atenção: A correção para a vulnerabilidade do TWiki (CVE-2008-5304, CVE-2008-5305) requer atualização manual."
+echo "Recomenda-se fazer backup da instalação atual e seguir as instruções de atualização no site oficial do TWiki."
+
+# Correção para Vulnerabilidade 2: Distributed Ruby (dRuby/DRb) Multiple RCE Vulnerabilities
+# Solução: Implementar controles de nível de código (taint, $SAFE levels, drb/acl.rb).
+echo "Atenção: A correção para a vulnerabilidade do Distributed Ruby requer configuração manual."
+echo "Recomenda-se implementar 'taint' em entradas não confiáveis, definir níveis $SAFE apropriados (>=2 ou >=3), e incluir 'drb/acl.rb'."
+
+# Correção para Vulnerabilidade 3: rlogin Passwordless Login
+# Solução: Desabilitar o serviço rlogin e usar SSH.
+if [ "$OS" = "Linux" ]; then
+  if systemctl is-active rlogin.socket; then
+    systemctl stop rlogin.socket
+    systemctl disable rlogin.socket
+    echo "Serviço rlogin desativado."
+  else
+    echo "Serviço rlogin já está desativado."
+  fi
+elif [ "$OS" = "Darwin" ]; then
+  echo "Atenção: Desabilitar o rlogin no macOS requer configurações específicas do sistema. Consulte a documentação do macOS para obter instruções."
+else
+  echo "Atenção: Desabilitar o rlogin em outros sistemas operacionais requer comandos específicos do sistema. Consulte a documentação do seu sistema operacional."
+fi
+
+# Correção para Vulnerabilidade 4: Operating System (OS) End of Life (EOL) Detection
+# Solução: Atualizar o sistema operacional para uma versão suportada.
+echo "Atenção: O sistema operacional está em fim de vida (EOL). Recomenda-se atualizar para uma versão suportada o mais rápido possível."
+echo "Esta correção requer uma reinstalação ou atualização completa do sistema operacional."
+
+# Correção para Vulnerabilidade 5: The rexec service is running
+# Solução: Desabilitar o serviço rexec e usar SSH.
+if [ "$OS" = "Linux" ]; then
+  if systemctl is-active rexec.socket; then
+    systemctl stop rexec.socket
+    systemctl disable rexec.socket
+    echo "Serviço rexec desativado."
+  else
+    echo "Serviço rexec já está desativado."
+  fi
+elif [ "$OS" = "Darwin" ]; then
+  echo "Atenção: Desabilitar o rexec no macOS requer configurações específicas do sistema. Consulte a documentação do macOS para obter instruções."
+else
+  echo "Atenção: Desabilitar o rexec em outros sistemas operacionais requer comandos específicos do sistema. Consulte a documentação do seu sistema operacional."
+fi
+
+# Correção para Vulnerabilidade 6: Possible Backdoor: Ingreslock
+# Solução: Limpar todo o sistema infectado.
+echo "Atenção: A presença de um backdoor (Ingreslock) requer uma limpeza completa do sistema. Recomenda-se reinstalar o sistema operacional a partir de uma mídia confiável."
+
+# Correção para Vulnerabilidade 7: Apache Tomcat AJP RCE Vulnerability (Ghostcat)
+# Solução: Atualizar o Apache Tomcat para versão 7.0.100, 8.5.51, 9.0.31 ou posterior.
+echo "Atenção: A correção para a vulnerabilidade do Tomcat (Ghostcat) requer atualização manual."
+echo "Recomenda-se fazer backup da instalação atual e seguir as instruções de atualização no site oficial do Apache Tomcat."
+
+# Correção para Vulnerabilidade 8: MySQL / MariaDB Default Credentials (MySQL Protocol)
+# Solução: Alterar a senha do usuário root do MySQL/MariaDB.
+if [ "$OS" = "Linux" ]; then
+  mysql -u root -e "ALTER USER 'root'@'localhost' IDENTIFIED BY 'nova_senha';"
+  mysql -u root -e "ALTER USER 'root'@'127.0.0.1' IDENTIFIED BY 'nova_senha';"
+  mysql -u root -e "ALTER USER 'root'@'::1' IDENTIFIED BY 'nova_senha';"
+  echo "Senha do usuário root do MySQL/MariaDB alterada. Substitua 'nova_senha' por uma senha forte."
+elif [ "$OS" = "Darwin" ]; then
+  echo "Atenção: Alterar a senha do usuário root do MySQL/MariaDB no macOS requer comandos específicos do sistema. Consulte a documentação do MySQL/MariaDB para obter instruções."
+else
+  echo "Atenção: Alterar a senha do usuário root do MySQL/MariaDB em outros sistemas operacionais requer comandos específicos do sistema. Consulte a documentação do MySQL/MariaDB para obter instruções."
+fi
+
+# Correção para Vulnerabilidade 9: PHP < 5.6.30, 7.x < 7.0.15, 7.1.x < 7.1.1 Multiple Vulnerabilities (Jan 2017) - Linux
+# Solução: Atualizar para versão 5.6.30, 7.0.15, 7.1.1 ou posterior.
+echo "Atenção: A correção para a vulnerabilidade do PHP requer atualização manual."
+echo "Recomenda-se utilizar o gerenciador de pacotes do sistema operacional (apt, yum, etc.) para atualizar o PHP para uma versão segura."
+
+# Correção para Vulnerabilidade 10: PHP < 5.3.13, 5.4.x < 5.4.3 Multiple Vulnerabilities - Active Check
+# Solução: Atualizar para versão 5.3.13, 5.4.3 ou posterior.
+echo "Atenção: A correção para a vulnerabilidade do PHP requer atualização manual."
+echo "Recomenda-se utilizar o gerenciador de pacotes do sistema operacional (apt, yum, etc.) para atualizar o PHP para uma versão segura."
+
+# Correção para Vulnerabilidade 11: vsftpd Compromised Source Packages Backdoor Vulnerability
+# Solução: Obter o pacote reparado do site do fornecedor e validar a assinatura.
+echo "Atenção: A correção para a vulnerabilidade do vsftpd requer a substituição do pacote comprometido por um pacote reparado e validado."
+echo "Recomenda-se baixar o pacote reparado do site oficial do vsftpd e verificar a sua assinatura."
+
+# Correção para Vulnerabilidade 12: vsftpd Compromised Source Packages Backdoor Vulnerability
+# Solução: Obter o pacote reparado do site do fornecedor e validar a assinatura.
+echo "Atenção: A correção para a vulnerabilidade do vsftpd requer a substituição do pacote comprometido por um pacote reparado e validado."
+echo "Recomenda-se baixar o pacote reparado do site oficial do vsftpd e verificar a sua assinatura."
+
+# Correção para Vulnerabilidade 13: DistCC RCE Vulnerability (CVE-2004-2687)
+# Solução: Atualizar o DistCC.
+if [ "$OS" = "Linux" ]; then
+  if command -v distccd &> /dev/null; then
+    apt update && apt install --only-upgrade distcc -y
+    echo "DistCC atualizado."
+  else
+    echo "DistCC não está instalado."
+  fi
+elif [ "$OS" = "Darwin" ]; then
+  echo "Atenção: A atualização do DistCC no macOS requer comandos específicos do sistema. Consulte a documentação do DistCC para obter instruções."
+else
+  echo "Atenção: A atualização do DistCC em outros sistemas operacionais requer comandos específicos do sistema. Consulte a documentação do DistCC para obter instruções."
+fi
+
+# Correção para Vulnerabilidade 14: PostgreSQL Default Credentials (PostgreSQL Protocol)
+# Solução: Alterar a senha do usuário postgres do PostgreSQL.
+if [ "$OS" = "Linux" ]; then
+  sudo -u postgres psql -c "ALTER USER postgres PASSWORD 'nova_senha';"
+  echo "Senha do usuário postgres do PostgreSQL alterada. Substitua 'nova_senha' por uma senha forte."
+elif [ "$OS" = "Darwin" ]; then
+  echo "Atenção: Alterar a senha do usuário postgres do PostgreSQL no macOS requer comandos específicos do sistema. Consulte a documentação do PostgreSQL para obter instruções."
+else
+  echo "Atenção: Alterar a senha do usuário postgres do PostgreSQL em outros sistemas operacionais requer comandos específicos do sistema. Consulte a documentação do PostgreSQL para obter instruções."
+fi
+
+# Correção para Vulnerabilidade 15: VNC Brute Force Login
+# Solução: Alterar a senha do VNC.
+echo "Atenção: A correção para a vulnerabilidade do VNC requer a alteração da senha para uma senha forte."
+echo "Esta correção requer a edição do arquivo de configuração do VNC (normalmente ~/.vnc/xstartup ou /etc/vnc.conf) e a definição de uma senha forte."
+
+# Correção para Vulnerabilidade 16: Test HTTP dangerous methods
+# Solução: Desabilitar ou restringir os métodos HTTP PUT e DELETE.
+echo "Atenção: A correção para a vulnerabilidade dos métodos HTTP PUT e DELETE requer configuração no servidor web (Apache, Nginx, etc.)."
+echo "Consulte a documentação do seu servidor web para desabilitar ou restringir os métodos PUT e DELETE."
+
+# Correção para Vulnerabilidade 17: FTP Brute Force Logins With Default Credentials Reporting
+# Solução: Alterar as senhas dos usuários msfadmin, postgres, service e user.
+echo "Atenção: A correção para a vulnerabilidade de logins FTP com credenciais padrão requer a alteração das senhas dos usuários msfadmin, postgres, service e user."
+echo "Utilize os comandos de gerenciamento de usuários do sistema operacional (useradd, passwd, etc.) para alterar as senhas."
+
+# Correção para Vulnerabilidade 18: FTP Brute Force Logins With Default Credentials Reporting
+# Solução: Alterar as senhas dos usuários msfadmin, postgres, service e user.
+echo "Atenção: A correção para a vulnerabilidade de logins FTP com credenciais padrão requer a alteração das senhas dos usuários msfadmin, postgres, service e user."
+echo "Utilize os comandos de gerenciamento de usuários do sistema operacional (useradd, passwd, etc.) para alterar as senhas."
+
+# Correção para Vulnerabilidade 19: The rlogin service is running
+# Solução: Desabilitar o serviço rlogin e usar SSH.
+if [ "$OS" = "Linux" ]; then
+  if systemctl is-active rlogin.socket; then
+    systemctl stop rlogin.socket
+    systemctl disable rlogin.socket
+    echo "Serviço rlogin desativado."
+  else
+    echo "Serviço rlogin já está desativado."
+  fi
+elif [ "$OS" = "Darwin" ]; then
+  echo "Atenção: Desabilitar o rlogin no macOS requer configurações específicas do sistema. Consulte a documentação do macOS para obter instruções."
+else
+  echo "Atenção: Desabilitar o rlogin em outros sistemas operacionais requer comandos específicos do sistema. Consulte a documentação do seu sistema operacional."
+fi
+
+# Correção para Vulnerabilidade 20: rsh Unencrypted Cleartext Login
+# Solução: Desabilitar o serviço rsh e usar SSH.
+if [ "$OS" = "Linux" ]; then
+  if systemctl is-active rsh.socket; then
+    systemctl stop rsh.socket
+    systemctl disable rsh.socket
+    echo "Serviço rsh desativado."
+  else
+    echo "Serviço rsh já está desativado."
+  fi
+elif [ "$OS" = "Darwin" ]; then
+  echo "Atenção: Desabilitar o rsh no macOS requer configurações específicas do sistema. Consulte a documentação do macOS para obter instruções."
+else
+  echo "Atenção: Desabilitar o rsh em outros sistemas operacionais requer comandos específicos do sistema. Consulte a documentação do seu sistema operacional."
+fi
+
+# Correção para Vulnerabilidade 21: SSL/TLS: OpenSSL CCS Man in the Middle Security Bypass Vulnerability
+# Solução: Atualizar o OpenSSL para uma versão segura.
+if [ "$OS" = "Linux" ]; then
+  apt update && apt upgrade openssl -y
+  echo "OpenSSL atualizado."
+elif [ "$OS" = "Darwin" ]; then
+  echo "Atenção: A atualização do OpenSSL no macOS requer comandos específicos do sistema. Recomenda-se utilizar o Homebrew ou outro gerenciador de pacotes para atualizar o OpenSSL."
+else
+  echo "Atenção: A atualização do OpenSSL em outros sistemas operacionais requer comandos específicos do sistema. Consulte a documentação do seu sistema operacional para obter instruções."
+fi
+
+# Correção para Vulnerabilidade 22: Multiple Vendors STARTTLS Implementation Plaintext Arbitrary Command Injection Vulnerability
+# Solução: Atualizar os softwares afetados (Ipswitch, Kerio, Postfix, Qmail-TLS, Oracle, SCO Group, spamdyke, ISC).
+echo "Atenção: A correção para a vulnerabilidade do STARTTLS requer a atualização dos softwares afetados. Consulte a documentação de cada software para obter instruções."
+
+# Correção para Vulnerabilidade 23: TWiki Cross-Site Request Forgery Vulnerability (Sep 2010)
+# Solução: Upgrade para TWiki versão 4.3.2 ou posterior.
+echo "Atenção: A correção para a vulnerabilidade do TWiki (CVE-2009-4898) requer atualização manual."
+echo "Recomenda-se fazer backup da instalação atual e seguir as instruções de atualização no site oficial do TWiki."
+
+# Correção para Vulnerabilidade 24: Anonymous FTP Login Reporting
+# Solução: Desabilitar logins anônimos no FTP.
+echo "Atenção: A correção para a vulnerabilidade de logins anônimos no FTP requer configuração no servidor FTP."
+echo "Consulte a documentação do seu servidor FTP para desabilitar logins anônimos."
+
+# Correção para Vulnerabilidade 25: jQuery < 1.9.0 XSS Vulnerability
+# Solução: Atualizar o jQuery para versão 1.9.0 ou posterior.
+echo "Atenção: A correção para a vulnerabilidade do jQuery requer a substituição do arquivo jquery.min.js por uma versão segura."
+echo "Recomenda-se baixar a versão 1.9.0 ou posterior do site oficial do jQuery e substituir o arquivo vulnerável."
+
+# Correção para Vulnerabilidade 26: TWiki < 6.1.0 XSS Vulnerability
+# Solução: Update para versão 6.1.0 ou posterior.
+echo "Atenção: A correção para a vulnerabilidade do TWiki (CVE-2018-20212) requer atualização manual."
+echo "Recomenda-se fazer backup da instalação atual e seguir as instruções de atualização no site oficial do TWiki."
+
+# Correção para Vulnerabilidade 27: TWiki CSRF Vulnerability
+# Solução: Upgrade para versão 4.3.1 ou posterior.
+echo "Atenção: A correção para a vulnerabilidade do TWiki (CVE-2009-1339) requer atualização manual."
+echo "Recomenda-se fazer backup da instalação atual e seguir as instruções de atualização no site oficial do TWiki."
+
+# Correção para Vulnerabilidade 28: SSL/TLS: Deprecated SSLv2 and SSLv3 Protocol Detection
+# Solução: Desabilitar os protocolos SSLv2 e SSLv3.
+echo "Atenção: A correção para a vulnerabilidade de protocolos SSLv2 e SSLv3 requer configuração nos softwares que utilizam SSL/TLS."
+echo "Consulte a documentação dos softwares afetados para desabilitar os protocolos SSLv2 e SSLv3."
+
+# Correção para Vulnerabilidade 29: SSL/TLS: Deprecated SSLv2 and SSLv3 Protocol Detection
+# Solução: Desabilitar os protocolos SSLv2 e SSLv3.
+echo "Atenção: A correção para a vulnerabilidade de protocolos SSLv2 e SSLv3 requer configuração nos softwares que utilizam SSL/TLS."
+echo "Consulte a documentação dos softwares afetados para desabilitar os protocolos SSLv2 e SSLv3."
+
+# Correção para Vulnerabilidade 30: SSL/TLS: Report Weak Cipher Suites
+# Solução: Desabilitar as cipher suites consideradas fracas.
+echo "Atenção: A correção para a vulnerabilidade de cipher suites fracas requer configuração nos softwares que utilizam SSL/TLS."
+echo "Consulte a documentação dos softwares afetados para desabilitar as cipher suites fracas."
+
+# Correção para Vulnerabilidade 31: HTTP Debugging Methods (TRACE/TRACK) Enabled
+# Solução: Desabilitar os métodos TRACE e TRACK no servidor web.
+echo "Atenção: A correção para a vulnerabilidade dos métodos HTTP TRACE e TRACK requer configuração no servidor web (Apache, Nginx, etc.)."
+echo "Consulte a documentação do seu servidor web para desabilitar os métodos TRACE e TRACK."
+
+# Correção para Vulnerabilidade 32: SSL/TLS: Server Certificate / Certificate in Chain with RSA keys less than 2048 bits
+# Solução: Substituir o certificado por um com chave RSA de 2048 bits ou mais.
+echo "Atenção: A correção para a vulnerabilidade de certificados SSL/TLS com chaves RSA menores que 2048 bits requer a substituição do certificado."
+echo "Gere um novo certificado com chave RSA de 2048 bits ou mais e instale-o no servidor."
+
+# Correção para Vulnerabilidade 33: SSL/TLS: Server Certificate / Certificate in Chain with RSA keys less than 2048 bits
+# Solução: Substituir o certificado por um com chave RSA de 2048 bits ou mais.
+echo "Atenção: A correção para a vulnerabilidade de certificados SSL/TLS com chaves RSA menores que 2048 bits requer a substituição do certificado."
+echo "Gere um novo certificado com chave RSA de 2048 bits ou mais e instale-o no servidor."
+
+# Correção para Vulnerabilidade 34: Weak Key Exchange (KEX) Algorithm(s) Supported (SSH)
+# Solução: Desabilitar os algoritmos de troca de chave (KEX) fracos.
+if [ "$OS" = "Linux" ]; then
+  sed -i 's/^KexAlgorithms.*/KexAlgorithms curve25519-sha256@libssh.org,ecdh-sha2-nistp256,ecdh-sha2-nistp384,ecdh-sha2-nistp521,diffie-hellman-group-exchange-sha256/g' /etc/ssh/sshd_config
+  systemctl restart sshd
+  echo "Algoritmos de troca de chave fracos desabilitados no SSH. Serviço SSH reiniciado."
+elif [ "$OS" = "Darwin" ]; then
+  echo "Atenção: Desabilitar os algoritmos de troca de chave fracos no SSH no macOS requer a edição do arquivo /etc/ssh/sshd_config e a reinicialização do serviço SSH."
+  echo "Consulte a documentação do macOS para obter instruções."
+else
+  echo "Atenção: Desabilitar os algoritmos de troca de chave fracos no SSH em outros sistemas operacionais requer comandos específicos do sistema. Consulte a documentação do seu sistema operacional."
+fi
+
+# Correção para Vulnerabilidade 35: phpinfo() Output Reporting (HTTP)
+# Solução: Remover os arquivos phpinfo.php ou restringir o acesso a eles.
+echo "Atenção: A correção para a vulnerabilidade de arquivos phpinfo() requer a remoção dos arquivos ou a restrição do acesso a eles."
+echo "Remova os arquivos phpinfo.php listados ou configure o servidor web para restringir o acesso a eles."
+
+# Correção para Vulnerabilidade 36: Weak Host Key Algorithm(s) (SSH)
+# Solução: Desabilitar os algoritmos de chave de host fracos.
+if [ "$OS" = "Linux" ]; then
+  sed -i '/^HostKeyAlgorithms/s/ssh-dss/,/' /etc/ssh/sshd_config
+  systemctl restart sshd
+  echo "Algoritmos de chave de host fracos desabilitados no SSH. Serviço SSH reiniciado."
+elif [ "$OS" = "Darwin" ]; then
+  echo "Atenção: Desabilitar os algoritmos de chave de host fracos no SSH no macOS requer a edição do arquivo /etc/ssh/sshd_config e a reinicialização do serviço SSH."
+  echo "Consulte a documentação do macOS para obter instruções."
+else
+  echo "Atenção: Desabilitar os algoritmos de chave de host fracos no SSH em outros sistemas operacionais requer comandos específicos do sistema. Consulte a documentação do seu sistema operacional."
+fi
+
+# Correção para Vulnerabilidade 37: Check if Mailserver answer to VRFY and EXPN requests
+# Solução: Desabilitar VRFY e EXPN no servidor de email.
+echo "Atenção: A correção para a vulnerabilidade de VRFY e EXPN requer configuração no servidor de email (Postfix, Sendmail, etc.)."
+echo "Consulte a documentação do seu servidor de email para desabilitar VRFY e EXPN."
+
+# Correção para Vulnerabilidade 38: SSL/TLS: Renegotiation DoS Vulnerability (CVE-2011-1473, CVE-2011-5094)
+# Solução: Desabilitar o renegotiation no serviço SSL/TLS.
+echo "Atenção: A correção para a vulnerabilidade de Renegotiation DoS requer configuração nos softwares que utilizam SSL/TLS."
+echo "Consulte a documentação dos softwares afetados para desabilitar o renegotiation."
+
+# Correção para Vulnerabilidade 39: SSL/TLS: Renegotiation DoS Vulnerability (CVE-2011-1473, CVE-2011-5094)
+# Solução: Desabilitar o renegotiation no serviço SSL/TLS.
+echo "Atenção: A correção para a vulnerabilidade de Renegotiation DoS requer configuração nos softwares que utilizam SSL/TLS."
+echo "Consulte a documentação dos softwares afetados para desabilitar o renegotiation."
+
+# Correção para Vulnerabilidade 40: SSL/TLS: Certificate Expired
+# Solução: Substituir o certificado expirado.
+echo "Atenção: A correção para a vulnerabilidade de certificados SSL/TLS expirados requer a substituição do certificado."
+echo "Gere um novo certificado e instale-o no servidor."
+
+# Correção para Vulnerabilidade 41: SSL/TLS: Certificate Expired
+# Solução: Substituir o certificado expirado.
+echo "Atenção: A correção para a vulnerabilidade de certificados SSL/TLS expirados requer a substituição do certificado."
+echo "Gere um novo certificado e instale-o no servidor."
+
+# Correção para Vulnerabilidade 42: QWikiwiki directory traversal vulnerability
+# Solução: Remover o QWikiwiki ou atualizar para uma versão segura (se disponível).
+echo "Atenção: A correção para a vulnerabilidade de directory traversal no QWikiwiki requer a remoção do software ou a atualização para uma versão segura (se disponível)."
+
+# Correção para Vulnerabilidade 43: awiki <= 20100125 Multiple LFI Vulnerabilities - Active Check
+# Solução: Remover o awiki ou atualizar para uma versão segura (se disponível).
+echo "Atenção: A correção para a vulnerabilidade LFI no awiki requer a remoção do software ou a atualização para uma versão segura (se disponível)."
+
+# Correção para Vulnerabilidade 44: /doc directory browsable
+# Solução: Restringir o acesso ao diretório /doc.
+echo "Atenção: A correção para a vulnerabilidade do diretório /doc browsable requer configuração no servidor web (Apache, Nginx, etc.)."
+echo "Consulte a documentação do seu servidor web para restringir o acesso ao diretório /doc."
+
+# Correção para Vulnerabilidade 45: Telnet Unencrypted Cleartext Login
+# Solução: Desabilitar o serviço Telnet e usar SSH.
+if [ "$OS" = "Linux" ]; then
+  if systemctl is-active telnet.socket; then
+    systemctl stop telnet.socket
+    systemctl disable telnet.socket
+    echo "Serviço Telnet desativado."
+  else
+    echo "Serviço Telnet já está desativado."
+  fi
+elif [ "$OS" = "Darwin" ]; then
+  echo "Atenção: Desabilitar o Telnet no macOS requer configurações específicas do sistema. Consulte a documentação do macOS para obter instruções."
+else
+  echo "Atenção: Desabilitar o Telnet em outros sistemas operacionais requer comandos específicos do sistema. Consulte a documentação do seu sistema operacional."
+fi
+
+# Correção para Vulnerabilidade 46: FTP Unencrypted Cleartext Login
+# Solução: Habilitar FTPS ou forçar a conexão via AUTH TLS.
+echo "Atenção: A correção para a vulnerabilidade de logins FTP sem criptografia requer configuração no servidor FTP."
+echo "Consulte a documentação do seu servidor FTP para habilitar FTPS ou forçar a conexão via AUTH TLS."
+
+# Correção para Vulnerabilidade 47: VNC Server Unencrypted Data Transmission
+# Solução: Executar o VNC sobre um canal criptografado (IPsec ou SSH) ou utilizar tipos de segurança mais seguros.
+echo "Atenção: A correção para a vulnerabilidade de transmissão de dados VNC sem criptografia requer configuração no servidor VNC."
+echo "Configure o VNC para utilizar tipos de segurança mais seguros ou execute-o sobre um canal criptografado (IPsec ou SSH)."
+
+# Correção para Vulnerabilidade 48: FTP Unencrypted Cleartext Login
+# Solução: Habilitar FTPS ou forçar a conexão via AUTH TLS.
+echo "Atenção: A correção para a vulnerabilidade de logins FTP sem criptografia requer configuração no servidor FTP."
+echo "Consulte a documentação do seu servidor FTP para habilitar FTPS ou forçar a conexão via AUTH TLS."
+
+# Correção para Vulnerabilidade 49: Cleartext Transmission of Sensitive Information via HTTP
+# Solução: Forçar a transmissão de dados sensíveis via HTTPS.
+echo "Atenção: A correção para a vulnerabilidade de transmissão de dados sensíveis via HTTP requer configuração no servidor web."
+echo "Configure o servidor web para forçar a transmissão de dados sensíveis via HTTPS."
+
+# Correção para Vulnerabilidade 50: SSL/TLS: Deprecated TLSv1.0 and TLSv1.1 Protocol Detection
+# Solução: Desabilitar os protocolos TLSv1.0 e TLSv1.1.
+echo "Atenção: A correção para a vulnerabilidade de protocolos TLSv1.0 e TLSv1.1 requer configuração nos softwares que utilizam SSL/TLS."
+echo "Consulte a documentação dos softwares afetados para desabilitar os protocolos TLSv1.0 e TLSv1.1."
+
+# Correção para Vulnerabilidade 51: Weak Encryption Algorithm(s) Supported (SSH)
+# Solução: Desabilitar os algoritmos de criptografia fracos.
+if [ "$OS" = "Linux" ]; then
+  sed -i '/^Ciphers/s/3des-cbc,aes128-cbc,aes192-cbc,aes256-cbc,arcfour,arcfour128,arcfour256,blowfish-cbc,cast128-cbc,rijndael-cbc@lysator.liu.se/,/' /etc/ssh/sshd_config
+  systemctl restart sshd
+  echo "Algoritmos de criptografia fracos desabilitados no SSH. Serviço SSH reiniciado."
+elif [ "$OS" = "Darwin" ]; then
+  echo "Atenção: Desabilitar os algoritmos de criptografia fracos no SSH no macOS requer a edição do arquivo /etc/ssh/sshd_config e a reinicialização do serviço SSH."
+  echo "Consulte a documentação do macOS para obter instruções."
+else
+  echo "Atenção: Desabilitar os algoritmos de criptografia fracos no SSH em outros sistemas operacionais requer comandos específicos do sistema. Consulte a documentação do seu sistema operacional."
+fi
+
+# Correção para Vulnerabilidade 52: Apache HTTP Server httpOnly Cookie Information Disclosure Vulnerability
+# Solução: Atualizar o Apache HTTP Server para versão 2.2.22 ou posterior.
+echo "Atenção: A correção para a vulnerabilidade do Apache HTTP Server (CVE-2012-0053) requer atualização manual."
+echo "Recomenda-se fazer backup da instalação atual e seguir as instruções de atualização no site oficial do Apache HTTP Server."
+
+# Correção para Vulnerabilidade 53: phpMyAdmin error.php Cross Site Scripting Vulnerability
+# Solução: Remover o phpMyAdmin ou atualizar para uma versão segura (se disponível).
+echo "Atenção: A correção para a vulnerabilidade XSS no phpMyAdmin requer a remoção do software ou a atualização para uma versão segura (se disponível)."
+
+# Correção para Vulnerabilidade 54: SSL/TLS: Deprecated TLSv1.0 and TLSv1.1 Protocol Detection
+# Solução: Desabilitar os protocolos TLSv1.0 e TLSv1.1.
+echo "Atenção: A correção para a vulnerabilidade de protocolos TLSv1.0 e TLSv1.1 requer configuração nos softwares que utilizam SSL/TLS."
+echo "Consulte a documentação dos softwares afetados para desabilitar os protocolos TLSv1.0 e TLSv1.1."
+
+# Correção para Vulnerabilidade 55: jQuery < 1.6.3 XSS Vulnerability
+# Solução: Atualizar o jQuery para versão 1.6.3 ou posterior.
+echo "Atenção: A correção para a vulnerabilidade do jQuery requer a substituição do arquivo jquery.min.js por uma versão segura."
+echo "Recomenda-se baixar a versão 1.6.3 ou posterior do site oficial do jQuery e substituir o arquivo vulnerável."
+
+# Correção para Vulnerabilidade 56: SSL/TLS: RSA Temporary Key Handling RSA_EXPORT Downgrade Issue (FREAK)
+# Solução: Remover o suporte para cipher suites RSA_EXPORT.
+echo "Atenção: A correção para a vulnerabilidade RSA_EXPORT requer configuração nos softwares que utilizam SSL/TLS."
+echo "Consulte a documentação dos softwares afetados para remover o suporte para cipher suites RSA_EXPORT."
+
+# Correção para Vulnerabilidade 57: SSL/TLS: Certificate Signed Using A Weak Signature Algorithm
+# Solução: Obter um novo certificado assinado com um algoritmo de hash forte (SHA-2).
+echo "Atenção: A correção para a vulnerabilidade de certificados SSL/TLS assinados com algoritmos fracos requer a obtenção de um novo certificado assinado com SHA-2."
+echo "Gere um novo certificado assinado com SHA-2 e instale-o no servidor."
+
+# Correção para Vulnerabilidade 58: SSL/TLS: Diffie-Hellman Key Exchange Insufficient DH Group Strength Vulnerability
+# Solução: Utilizar ECDHE ou Diffie-Hellman com chave de 2048 bits ou mais.
+echo "Atenção: A correção para a vulnerabilidade Diffie-Hellman requer configuração nos softwares que utilizam SSL/TLS."
+echo "Configure os softwares afetados para utilizar ECDHE ou Diffie-Hellman com chave de 2048 bits ou mais."
+
+# Correção para Vulnerabilidade 59: SSL/TLS: Diffie-Hellman Key Exchange Insufficient DH Group Strength Vulnerability
+# Solução: Utilizar ECDHE ou Diffie-Hellman com chave de 2048 bits ou mais.
+echo "Atenção: A correção para a vulnerabilidade Diffie-Hellman requer configuração nos softwares que utilizam SSL/TLS."
+echo "Configure os softwares afetados para utilizar ECDHE ou Diffie-Hellman com chave de 2048 bits ou mais."
+
+# Correção para Vulnerabilidade 60: SSL/TLS: Certificate Signed Using A Weak Signature Algorithm
+# Solução: Obter um novo certificado assinado com um algoritmo de hash forte (SHA-2).
+echo "Atenção: A correção para a vulnerabilidade de certificados SSL/TLS assinados com algoritmos fracos requer a obtenção de um novo certificado assinado com SHA-2."
+echo "Gere um novo certificado assinado com SHA-2 e instale-o no servidor."
+
+# Correção para Vulnerabilidade 61: SSL/TLS: DHE_EXPORT MITM Security Bypass Vulnerability (LogJam)
+# Solução: Remover o suporte para cipher suites DHE_EXPORT.
+echo "Atenção: A correção para a vulnerabilidade DHE_EXPORT requer configuração nos softwares que utilizam SSL/TLS."
+echo "Consulte a documentação dos softwares afetados para remover o suporte para cipher suites DHE_EXPORT."
+
+# Correção para Vulnerabilidade 62: SSL/TLS: SSLv3 Protocol CBC Cipher Suites Information Disclosure Vulnerability (POODLE)
+# Solução: Desabilitar o SSLv3, desabilitar cipher suites CBC ou habilitar TLS_FALLBACK_SCSV.
+echo "Atenção: A correção para a vulnerabilidade POODLE requer configuração nos softwares que utilizam SSL/TLS."
+echo "Consulte a documentação dos softwares afetados para desabilitar o SSLv3, desabilitar cipher suites CBC ou habilitar TLS_FALLBACK_SCSV."
+
+# Correção para Vulnerabilidade 63: SSL/TLS: SSLv3 Protocol CBC Cipher Suites Information Disclosure Vulnerability (POODLE)
+# Solução: Desabilitar o SSLv3, desabilitar cipher suites CBC ou habilitar TLS_FALLBACK_SCSV.
+echo "Atenção: A correção para a vulnerabilidade POODLE requer configuração nos softwares que utilizam SSL/TLS."
+echo "Consulte a documentação dos softwares afetados para desabilitar o SSLv3, desabilitar cipher suites CBC ou habilitar TLS_FALLBACK_SCSV."
+
+# Correção para Vulnerabilidade 64: Weak MAC Algorithm(s) Supported (SSH)
+# Solução: Desabilitar os algoritmos MAC fracos.
+if [ "$OS" = "Linux" ]; then
+  sed -i '/^MACs/s/hmac-md5,hmac-md5-96,hmac-sha1-96,umac-64@openssh.com/,/' /etc/ssh/sshd_config
+  systemctl restart sshd
+  echo "Algoritmos MAC fracos desabilitados no SSH. Serviço SSH reiniciado."
+elif [ "$OS" = "Darwin" ]; then
+  echo "Atenção: Desabilitar os algoritmos MAC fracos no SSH no macOS requer a edição do arquivo /etc/ssh/sshd_config e a reinicialização do serviço SSH."
+  echo "Consulte a documentação do macOS para obter instruções."
+else
+  echo "Atenção: Desabilitar os algoritmos MAC fracos no SSH em outros sistemas operacionais requer comandos específicos do sistema. Consulte a documentação do seu sistema operacional."
+fi
+
+# Correção para Vulnerabilidade 65: TCP Timestamps Information Disclosure
+# Solução: Desabilitar TCP timestamps.
+if [ "$OS" = "Linux" ]; then
+  echo "net.ipv4.tcp_timestamps = 0" >> /etc/sysctl.conf
+  sysctl -p
+  echo "TCP timestamps desabilitados."
+elif [ "$OS" = "Darwin" ]; then
+  echo "Atenção: Desabilitar TCP timestamps no macOS requer comandos específicos do sistema. Consulte a documentação do macOS para obter instruções."
+elif

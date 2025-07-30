@@ -1,0 +1,33 @@
+#!/bin/bash
+if ! command -v openssl &> /dev/null; then
+    echo "OpenSSL is not installed. Installing OpenSSL..."
+    sudo apt-get update && sudo apt-get install -y openssl
+fi
+
+if ! command -v apache2 &> /dev/null; then
+    echo "Apache2 is not installed. Installing Apache2..."
+    sudo apt-get update && sudo apt-get install -y apache2
+fi
+
+if [ ! -f /etc/apache2/sites-available/default-ssl.conf ]; then
+    echo "Enabling SSL module and creating default SSL configuration..."
+    sudo a2enmod ssl
+    sudo a2ensite default-ssl
+    sudo systemctl restart apache2
+fi
+
+if ! grep -q "Redirect permanent / https://" /etc/apache2/sites-available/000-default.conf; then
+    echo "Configuring HTTP to HTTPS redirection..."
+    echo -e "\n<VirtualHost *:80>\n    Redirect permanent / https://\n</VirtualHost>" | sudo tee -a /etc/apache2/sites-available/000-default.conf > /dev/null
+    sudo systemctl restart apache2
+fi
+
+if [ ! -f /etc/ssl/certs/apache-selfsigned.crt ] || [ ! -f /etc/ssl/private/apache-selfsigned.key ]; then
+    echo "Generating self-signed SSL certificate..."
+    sudo openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout /etc/ssl/private/apache-selfsigned.key -out /etc/ssl/certs/apache-selfsigned.crt -subj "/C=US/ST=State/L=City/O=Organization/CN=localhost"
+    sudo sed -i 's|SSLCertificateFile /etc/ssl/certs/ssl-cert-snakeoil.pem|SSLCertificateFile /etc/ssl/certs/apache-selfsigned.crt|g' /etc/apache2/sites-available/default-ssl.conf
+    sudo sed -i 's|SSLCertificateKeyFile /etc/ssl/private/ssl-cert-snakeoil.key|SSLCertificateKeyFile /etc/ssl/private/apache-selfsigned.key|g' /etc/apache2/sites-available/default-ssl.conf
+    sudo systemctl restart apache2
+fi
+
+echo "SSL/TLS enforced and redirection configured successfully."

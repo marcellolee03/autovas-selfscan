@@ -1,0 +1,54 @@
+#!/bin/bash
+
+# Vulnerabilidade 1: Forçar HTTPS para transmissão sensível (Apache/Nginx)
+if command -v apache2 &> /dev/null; then
+    [ ! -f /etc/apache2/sites-available/000-default-le-ssl.conf ] && \
+    a2enmod ssl rewrite && systemctl restart apache2
+    sed -i '/<VirtualHost \*:80>/a \\tRewriteEngine On\n\tRewriteCond %{HTTPS} off\n\tRewriteRule (.*) https://%{HTTP_HOST}%{REQUEST_URI}' /etc/apache2/sites-enabled/000-default.conf
+    systemctl restart apache2
+fi
+
+if command -v nginx &> /dev/null; then
+    grep -q "return 301 https" /etc/nginx/sites-enabled/default || \
+    sed -i '/server {/a \\tif ($scheme = "http") {\n\t\treturn 301 https://$host$request_uri;\n\t}' /etc/nginx/sites-enabled/default
+    systemctl restart nginx
+fi
+
+# Vulnerabilidade 2: Mitigar DNS Cache Snooping (BIND9)
+if [ -f /etc/bind/named.conf.options ]; then
+    grep -q "allow-recursion" /etc/bind/named.conf.options || \
+    sed -i '/options {/a \\tallow-recursion { none; };\n\tallow-query-cache { none; };' /etc/bind/named.conf.options
+    grep -q "allow-query" /etc/bind/named.conf.options || \
+    sed -i '/options {/a \\tallow-query { localhost; };' /etc/bind/named.conf.options
+    systemctl restart bind9
+fi
+
+# Vulnerabilidade 3: Bloquear ICMP Timestamp
+iptables -A INPUT -p icmp --icmp-type timestamp-request -j DROP
+iptables -A INPUT -p icmp --icmp-type timestamp-reply -j DROP
+echo "net.ipv4.icmp_echo_ignore_all=1" >> /etc/sysctl.conf
+
+# Vulnerabilidade 4 e 6: Desativar TLS antigos e cifras fracas (Apache)
+if command -v apache2 &> /dev/null && [ -f /etc/apache2/mods-available/ssl.conf ]; then
+    sed -i 's/SSLProtocol.*/SSLProtocol -all +TLSv1.2 +TLSv1.3/' /etc/apache2/mods-available/ssl.conf
+    sed -i 's/SSLCipherSuite.*/SSLCipherSuite ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-SHA384:ECDHE-RSA-AES256-SHA384:ECDHE-ECDSA-AES128-SHA256:ECDHE-RSA-AES128-SHA256/' /etc/apache2/mods-available/ssl.conf
+    systemctl restart apache2
+fi
+
+# Vulnerabilidade 4 e 6: Desativar TLS antigos e cifras fracas (Nginx)
+if command -v nginx &> /dev/null && [ -f /etc/nginx/nginx.conf ]; then
+    sed -i '/ssl_protocols/s/.*/    ssl_protocols TLSv1.2 TLSv1.3;/' /etc/nginx/nginx.conf
+    sed -i '/ssl_ciphers/s/.*/    ssl_ciphers "ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-SHA384:ECDHE-RSA-AES256-SHA384:ECDHE-ECDSA-AES128-SHA256:ECDHE-RSA-AES128-SHA256";/' /etc/nginx/nginx.conf
+    systemctl restart nginx
+fi
+
+# Vulnerabilidade 5: Desativar renegociação SSL (Apache)
+if command -v apache2 &> /dev/null; then
+    grep -q "SSLInsecureRenegotiation off" /etc/apache2/mods-available/ssl.conf || \
+    echo "SSLInsecureRenegotiation off" >> /etc/apache2/mods-available/ssl.conf
+    systemctl restart apache2
+fi
+
+# Vulnerabilidade 7: Desativar TCP Timestamps
+echo "net.ipv4.tcp_timestamps = 0" >> /etc/sysctl.conf
+sysctl -p &> /dev/null

@@ -1,0 +1,4291 @@
+>analise esse prompt contendo as vulnerabilidades encontradas em um csv do openvas e analise se os scripts que irei enviar em seguida sao capazes de corrigir esses problemas ou nao, me informando uma porcentagem de correcao das vulnerabilidades
+>Vulnerabilidades:
+    # INSTRUÇÕES PARA O MODELO DE IA
+
+    ## PERSONA
+    Você é um especialista em cibersegurança e automação de sistemas, focado em criar scripts de correção (patching). Sua única função é gerar um script que resolva a vulnerabilidade descrita abaixo.
+
+    ## TAREFA
+    Analise o contexto da vulnerabilidade a seguir e gere um script de shell (compatível com o sistema operacional do localhost) que, ao ser executado, corrija permanentemente a vulnerabilidade descrita.
+
+    ## CONTEXTO DA VULNERABILIDADE
+
+# Vulnerabilidade 1
+CVEs: CVE-2008-5304,CVE-2008-5305
+NVT Name: TWiki XSS and Command Execution Vulnerabilities
+Port: 80.0
+Port Protocol: tcp
+Summary: TWiki is prone to Cross-Site Scripting (XSS) and Command Execution Vulnerabilities.
+Specific Result: Installed version: 01.Feb.2003
+Fixed version:     4.2.4
+
+
+Vulnerability Detection Method: 
+Details:
+TWiki XSS and Command Execution Vulnerabilities
+(OID: 1.3.6.1.4.1.25623.1.0.800320)
+Version used: 2024-03-01T14:37:10Z
+
+Affected Software/OS: TWiki, TWiki version prior to 4.2.4.
+Product Detection Result: nan
+Solution: Upgrade to version 4.2.4 or later.
+
+# Vulnerabilidade 2
+CVEs: nan
+NVT Name: Distributed Ruby (dRuby/DRb) Multiple RCE Vulnerabilities
+Port: 8787.0
+Port Protocol: tcp
+Summary: Systems using Distributed Ruby (dRuby/DRb), which is available in Ruby versions 1.6
+  and later, may permit unauthorized systems to execute distributed commands.
+Specific Result: The service is running in $SAFE >= 1 mode. However it is still possible to run arbitrary syscall commands on the remote host. Sending an invalid syscall the service returned the following response:
+
+Flo:Errno::ENOSYS:bt["3/usr/lib/ruby/1.8/drb/drb.rb:1555:in `syscall'"0/usr/lib/ruby/1.8/drb/drb.rb:1555:in `send'"4/usr/lib/ruby/1.8/drb/drb.rb:1555:in `__send__'"A/usr/lib/ruby/1.8/drb/drb.rb:1555:in `perform_without_block'"3/usr/lib/ruby/1.8/drb/drb.rb:1515:in `perform'"5/usr/lib/ruby/1.8/drb/drb.rb:1589:in `main_loop'"0/usr/lib/ruby/1.8/drb/drb.rb:1585:in `loop'"5/usr/lib/ruby/1.8/drb/drb.rb:1585:in `main_loop'"1/usr/lib/ruby/1.8/drb/drb.rb:1581:in `start'"5/usr/lib/ruby/1.8/drb/drb.rb:1581:in `main_loop'"//usr/lib/ruby/1.8/drb/drb.rb:1430:in `run'"1/usr/lib/ruby/1.8/drb/drb.rb:1427:in `start'"//usr/lib/ruby/1.8/drb/drb.rb:1427:in `run'"6/usr/lib/ruby/1.8/drb/drb.rb:1347:in `initialize'"//usr/lib/ruby/1.8/drb/drb.rb:1627:in `new'"9/usr/lib/ruby/1.8/drb/drb.rb:1627:in `start_service'"%/usr/sbin/druby_timeserver.rb:12:errnoi+:mesg"Function not implemented
+
+Vulnerability Detection Method: Send a crafted command to the service and check for a remote command execution
+  via the instance_eval or syscall requests.
+Details:
+Distributed Ruby (dRuby/DRb) Multiple RCE Vulnerabilities
+(OID: 1.3.6.1.4.1.25623.1.0.108010)
+Version used: 2024-06-28T05:05:33Z
+
+Affected Software/OS: nan
+Product Detection Result: nan
+Solution: Administrators of environments that rely on Distributed Ruby should ensure that
+  appropriate controls are in place. Code-level controls may include:
+
+  - Implementing taint on untrusted input
+
+  - Setting $SAFE levels appropriately (>=2 is recommended if untrusted hosts are allowed to submit Ruby commands, and >=3 may be appropriate)
+
+  - Including drb/acl.rb to set ACLEntry to restrict access to trusted hosts
+
+# Vulnerabilidade 3
+CVEs: nan
+NVT Name: rlogin Passwordless Login
+Port: 513.0
+Port Protocol: tcp
+Summary: The rlogin service allows root access without a password.
+Specific Result: It was possible to gain root access without a password.
+
+Vulnerability Detection Method: Checks if a vulnerable version is present on the target host.
+Details:
+rlogin Passwordless Login
+(OID: 1.3.6.1.4.1.25623.1.0.113766)
+Version used: 2020-09-30T09:30:12Z
+
+Affected Software/OS: nan
+Product Detection Result: nan
+Solution: Disable the rlogin service and use alternatives like SSH instead.
+
+# Vulnerabilidade 4
+CVEs: nan
+NVT Name: Operating System (OS) End of Life (EOL) Detection
+Port: nan
+Port Protocol: nan
+Summary: The Operating System (OS) on the remote host has reached the end
+  of life (EOL) and should not be used anymore.
+Specific Result: The "Ubuntu" Operating System on the remote host has reached the end of life.
+
+CPE:               cpe:/o:canonical:ubuntu_linux:8.04
+Installed version,
+build or SP:       8.04
+EOL date:          2013-05-09
+EOL info:          https://wiki.ubuntu.com/Releases
+
+Vulnerability Detection Method: Checks if an EOL version of an OS is present on the target
+  host.
+Details:
+Operating System (OS) End of Life (EOL) Detection
+(OID: 1.3.6.1.4.1.25623.1.0.103674)
+Version used: 2025-05-21T05:40:19Z
+
+Affected Software/OS: nan
+Product Detection Result: Product: cpe:/o:canonical:ubuntu_linux:8.04
+Method: OS Detection Consolidation and Reporting
+(OID: 1.3.6.1.4.1.25623.1.0.105937)
+
+Solution: Update the OS on the remote host to a version which is still
+  supported and receiving security updates by the vendor.
+
+  Note / Important: Please create an override for this result if the target host is a:
+
+  - Windows system with Extended Security Updates (ESU)
+
+  - System with additional 3rd-party / non-vendor security updates like e.g. from 'TuxCare',
+  'Freexian Extended LTS' or similar
+
+# Vulnerabilidade 5
+CVEs: CVE-1999-0618
+NVT Name: The rexec service is running
+Port: 512.0
+Port Protocol: tcp
+Summary: This remote host is running a rexec service.
+Specific Result: The rexec service was detected on the target system.
+
+Vulnerability Detection Method: Checks whether an rexec service is exposed on the target
+  host.
+Details:
+The rexec service is running
+(OID: 1.3.6.1.4.1.25623.1.0.100111)
+Version used: 2023-09-12T05:05:19Z
+
+Affected Software/OS: nan
+Product Detection Result: nan
+Solution: Disable the rexec service and use alternatives like SSH
+  instead.
+
+# Vulnerabilidade 6
+CVEs: nan
+NVT Name: Possible Backdoor: Ingreslock
+Port: 1524.0
+Port Protocol: tcp
+Summary: A backdoor is installed on the remote host.
+Specific Result: The service is answering to an 'id;' command with the following response: uid=0(root) gid=0(root)
+
+Vulnerability Detection Method: 
+Details:
+Possible Backdoor: Ingreslock
+(OID: 1.3.6.1.4.1.25623.1.0.103549)
+Version used: 2023-07-25T05:05:58Z
+
+Affected Software/OS: nan
+Product Detection Result: nan
+Solution: A whole cleanup of the infected system is recommended.
+
+# Vulnerabilidade 7
+CVEs: CVE-2020-1938
+NVT Name: Apache Tomcat AJP RCE Vulnerability (Ghostcat)
+Port: 8009.0
+Port Protocol: tcp
+Summary: Apache Tomcat is prone to a remote code execution (RCE)
+  vulnerability (dubbed 'Ghostcat') in the AJP connector.
+Specific Result: It was possible to read the file "/WEB-INF/web.xml" through the AJP connector.
+
+Result:
+
+AB 8\x0004 Ã\x0088 \x0002OK  \x0001 \x000CContent-Type  \x001Ctext/html;charset=ISO-8859-1 AB\x001FÃ¼\x0003\x001FÃ¸<!--
+  Licensed to the Apache Software Foundation (ASF) under one or more
+  contributor license agreements.  See the NOTICE file distributed with
+  this work for additional information regarding copyright ownership.
+  The ASF licenses this file to You under the Apache License, Version 2.0
+  (the "License"); you may not use this file except in compliance with
+  the License.  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+    <head>
+    <title>Apache Tomcat/5.5</title>
+    <style type="text/css">
+    /*<![CDATA[*/
+      body {
+          color: #000000;
+          background-color: #FFFFFF;
+	  font-family: Arial, "Times New Roman", Times, serif;
+          margin: 10px 0px;
+      }
+
+    img {
+       border: none;
+    }
+    
+    a:link, a:visited {
+        color: blue
+    }
+
+    th {
+        font-family: Verdana, "Times New Roman", Times, serif;
+        font-size: 110%;
+        font-weight: normal;
+        font-style: italic;
+        background: #D2A41C;
+        text-align: left;
+    }
+
+    td {
+        color: #000000;
+	font-family: Arial, Helvetica, sans-serif;
+    }
+    
+    td.menu {
+        background: #FFDC75;
+    }
+
+    .center {
+        text-align: center;
+    }
+
+    .code {
+        color: #000000;
+        font-family: "Courier New", Courier, monospace;
+        font-size: 110%;
+        margin-left: 2.5em;
+    }
+    
+     #banner {
+        margin-bottom: 12px;
+     }
+
+     p#congrats {
+         margin-top: 0;
+         font-weight: bold;
+         text-align: center;
+     }
+
+     p#footer {
+         text-align: right;
+         font-size: 80%;
+     }
+     /*]]>*/
+   </style>
+</head>
+
+<body>
+
+<!-- Header -->
+<table id="banner" width="100%">
+    <tr>
+      <td align="left" style="width:130px">
+        <a href="http://tomcat.apache.org/">
+	  <img src="tomcat.gif" height="92" width="130" alt="The Mighty Tomcat - MEOW!"/>
+	</a>
+      </td>
+      <td align="left" valign="top"><b>Apache Tomcat/5.5</b></td>
+      <td align="right">
+        <a href="http://www.apache.org/">
+	  <img src="asf-logo-wide.gif" height="51" width="537" alt="The Apache Software Foundation"/>
+	</a>
+       </td>
+     </tr>
+</table>
+
+<table>
+    <tr>
+
+        <!-- Table of Contents -->
+        <td valign="top">
+            <table width="100%" border="1" cellspacing="0" cellpadding="3">
+                <tr>
+		  <th>Administration</th>
+                </tr>
+                <tr>
+		  <td class="menu">
+		    <a href="manager/status">Status</a><br/>
+                    <a href="admin">Tomcat&nbsp;Administration</a><br/>
+                    <a href="manager/html">Tomcat&nbsp;Manager</a><br/>
+                    &nbsp;
+                  </td>
+                </tr>
+            </table>
+
+	    <br />
+            <table width="100%" border="1" cellspacing="0" cellpadding="3">
+                <tr>
+		  <th>Documentation</th>
+                </tr>
+                <tr>
+                  <td class="menu">
+                    <a href="RELEASE-NOTES.txt">Release&nbsp;Notes</a><br/>
+                    <a href="tomcat-docs/changelog.html">Change&nbsp;Log</a><br/>
+                    <a href="tomcat-docs">Tomcat&nbsp;Documentation</a><br/>                        &nbsp;
+                    &nbsp;
+		    </td>
+                </tr>
+            </table>
+	    
+            <br/>
+            <table width="100%" border="1" cellspacing="0" cellpadding="3">
+                <tr>
+                  <th>Tomcat Online</th>
+                </tr>
+                <tr>
+                  <td class="menu">
+                    <a href="http://tomcat.apache.org/">Home&nbsp;Page</a><br/>
+		    <a href="http://tomcat.apache.org/faq/">FAQ</a><br/>
+                    <a href="http://tomcat.apache.org/bugreport.html">Bug&nbsp;Database</a><br/>
+                    <a href="http://issues.apache.org/bugzilla/buglist.cgi?bug_status=UNCONFIRMED&amp;bug_status=NEW&amp;bug_status=ASSIGNED&amp;bug_status=REOPENED&amp;bug_status=RESOLVED&amp;resolution=LATER&amp;resolution=REMIND&amp;resolution=---&amp;bugidtype=include&amp;product=Tomcat+5&amp;cmdtype=doit&amp;order=Importance">Open Bugs</a><br/>
+                    <a href="http://mail-archives.apache.org/mod_mbox/tomcat-users/">Users&nbsp;Mailing&nbsp;List</a><br/>
+                    <a href="http://mail-archives.apache.org/mod_mbox/tomcat-dev/">Developers&nbsp;Mailing&nbsp;List</a><br/>
+                    <a href="irc://irc.freenode.net/#tomcat">IRC</a><br/>
+		    &nbsp;
+                  </td>
+                </tr>
+            </table>
+	    
+            <br/>
+            <table width="100%" border="1" cellspacing="0" cellpadding="3">
+                <tr>
+                  <th>Examples</th>
+                </tr>
+                <tr>
+                  <td class="menu">
+                    <a href="jsp-examples/">JSP&nbsp;Examples</a><br/>
+                    <a href="servlets-examples/">Servlet&nbsp;Examples</a><br/>
+                    <a href="webdav/">WebDAV&nbsp;capabilities</a><br/>
+     		    &nbsp;
+                  </td>
+                </tr>
+            </table>
+	    
+            <br/>
+            <table width="100%" border="1" cellspacing="0" cellpadding="3">
+                <tr>
+		  <th>Miscellaneous</th>
+                </tr>
+                <tr>
+                  <td class="menu">
+                    <a href="http://java.sun.com/products/jsp">Sun's&nbsp;Java&nbsp;Server&nbsp;Pages&nbsp;Site</a><br/>
+                    <a href="http://java.sun.com/products/servlet">Sun's&nbsp;Servlet&nbsp;Site</a><br/>
+    		    &nbsp;
+                  </td>
+                </tr>
+            </table>
+        </td>
+
+        <td style="width:20px">&nbsp;</td>
+	
+        <!-- Body -->
+        <td align="left" valign="top">
+          <p id="congrats">If you're seeing this page via a web browser, it means you've setup Tomcat successfully. Congratulations!</p>
+ 
+          <p>As you may have guessed by now, this is the default Tomcat home page. It can be found on the local filesystem at:</p>
+          <p class="code">$CATALINA_HOME/webapps/ROOT/index.jsp</p>
+	  
+          <p>where "$CATALINA_HOME" is the root of the Tomcat installation directory. If you're seeing this page, and you don't think you should be, then either you're either a user who has arrived at new installation of Tomcat, or you're an administrator who hasn't got his/her setup quite right. Providing the latter is the case, please refer to the <a href="tomcat-docs">Tomcat Documentation</a> for more detailed setup and administration information than is found in the INSTALL file.</p>
+
+            <p><b>NOTE:</b> This page is precompiled. If you change it, this page will not change since
+                  it was compiled into a servlet at build time.
+                  (See <tt>$CATALINA_HOME/webapps/ROOT/WEB-INF/web.xml</tt> as to how it was mapped.)
+            </p>
+
+            <p><b>NOTE: For security reasons, using the administration webapp
+            is restricted to users with role "admin". The manager webapp
+            is restricted to users with role "manager".</b>
+            Users are defined in <code>$CATALINA_HOME/conf/tomcat-users.xml</code>.</p>
+
+            <p>Included with this release are a host of sample Servlets and JSPs (with associated source code), extensive documentation (including the Servlet 2.4 and JSP 2.0 API JavaDoc), and an introductory guide to developing web applications.</p>
+
+            <p>Tomcat mailing lists are available at the Tomcat project web site:</p>
+
+           <ul>
+               <li><b><a href="mailto:users@tomcat.apache.org">users@tomc
+
+Vulnerability Detection Method: Sends a crafted AJP request and checks the response.
+Details:
+Apache Tomcat AJP RCE Vulnerability (Ghostcat)
+(OID: 1.3.6.1.4.1.25623.1.0.143545)
+Version used: 2025-01-21T05:37:33Z
+
+Affected Software/OS: Apache Tomcat versions prior 7.0.100, 8.5.51 or 9.0.31 when the AJP connector
+  is enabled.
+
+  Other products like JBoss or Wildfly which are using Tomcat might be affected as well.
+Product Detection Result: nan
+Solution: Update Apache Tomcat to version 7.0.100, 8.5.51, 9.0.31 or later. For other products
+  using Tomcat please contact the vendor for more information on fixed versions.
+
+# Vulnerabilidade 8
+CVEs: CVE-2015-4669,CVE-2001-0645,CVE-2002-1809,CVE-2004-1532,CVE-2004-2357,CVE-2006-1451,CVE-2007-2554,CVE-2007-6081,CVE-2009-0919,CVE-2014-3419,CVE-2016-6531,CVE-2018-15719,CVE-2024-22901
+NVT Name: MySQL / MariaDB Default Credentials (MySQL Protocol)
+Port: 3306.0
+Port Protocol: tcp
+Summary: It was possible to login into the remote MySQL using default
+  credentials.
+Specific Result: It was possible to login as user "root" with an empty password.
+
+Vulnerability Detection Method: 
+Details:
+MySQL / MariaDB Default Credentials (MySQL Protocol)
+(OID: 1.3.6.1.4.1.25623.1.0.103551)
+Version used: 2025-03-14T05:38:04Z
+
+Affected Software/OS: The following products are know to use such weak credentials:
+
+  - CVE-2001-0645: Symantec/AXENT NetProwler 3.5.x
+
+  - CVE-2002-1809: Windows binary release of MySQL 3.23.2 through 3.23.52
+
+  - CVE-2004-1532: AppServ 2.5.x and earlier
+
+  - CVE-2004-2357: Proofpoint Protection Server
+
+  - CVE-2006-1451: MySQL Manager in Apple Mac OS X 10.3.9 and 10.4.6
+
+  - CVE-2007-2554: Associated Press (AP) Newspower 4.0.1 and earlier
+
+  - CVE-2007-6081: AdventNet EventLog Analyzer build 4030
+
+  - CVE-2009-0919: XAMPP
+
+  - CVE-2014-3419: Infoblox NetMRI before 6.8.5
+
+  - CVE-2015-4669: Xsuite 2.x
+
+  - CVE-2016-6531, CVE-2018-15719: Open Dental before version 18.4
+
+  - CVE-2024-22901: Vinchin Backup & Recovery 7.2 and prior
+
+  Other products might be affected as well.
+Product Detection Result: Product: cpe:/a:mysql:mysql:5.0.51a
+Method: MariaDB / Oracle MySQL Detection (MySQL Protocol)
+(OID: 1.3.6.1.4.1.25623.1.0.100152)
+
+Solution: '- Change the password as soon as possible
+
+  - Contact the vendor for other possible fixes / updates
+
+# Vulnerabilidade 9
+CVEs: CVE-2017-11147,CVE-2016-10158,CVE-2016-10159,CVE-2016-10160,CVE-2016-10161,CVE-2016-10167,CVE-2016-10168
+NVT Name: PHP < 5.6.30, 7.x < 7.0.15, 7.1.x < 7.1.1 Multiple Vulnerabilities (Jan 2017) - Linux
+Port: 80.0
+Port Protocol: tcp
+Summary: PHP is prone to multiple vulnerabilities.
+Specific Result: Installed version: 5.2.4
+Fixed version:     5.6.30
+Installation
+path / port:       80/tcp
+
+
+Vulnerability Detection Method: Checks if a vulnerable version is present on the target host.
+Details:
+PHP < 5.6.30, 7.x < 7.0.15, 7.1.x < 7.1.1 Multiple Vulnerabilities (Jan 2017...
+(OID: 1.3.6.1.4.1.25623.1.0.108052)
+Version used: 2025-05-21T05:40:19Z
+
+Affected Software/OS: PHP prior to version 5.6.30, 7.x prior to 7.0.15 and 7.1.x
+  prior to 7.1.1.
+Product Detection Result: Product: cpe:/a:php:php:5.2.4
+Method: PHP Detection (HTTP)
+(OID: 1.3.6.1.4.1.25623.1.0.800109)
+
+Solution: Update to version 5.6.30, 7.0.15, 7.1.1 or later.
+
+# Vulnerabilidade 10
+CVEs: CVE-2012-1823,CVE-2012-2311,CVE-2012-2336,CVE-2012-2335
+NVT Name: PHP < 5.3.13, 5.4.x < 5.4.3 Multiple Vulnerabilities - Active Check
+Port: 80.0
+Port Protocol: tcp
+Summary: PHP is prone to multiple vulnerabilities.
+Specific Result: By doing the following HTTP POST request:
+
+"HTTP POST" body : <?php phpinfo();?>
+URL              : http://192.168.100.20/cgi-bin/php?%2D%64+%61%6C%6C%6F%77%5F%75%72%6C%5F%69%6E%63%6C%75%64%65%3D%6F%6E+%2D%64+%73%61%66%65%5F%6D%6F%64%65%3D%6F%66%66+%2D%64+%73%75%68%6F%73%69%6E%2E%73%69%6D%75%6C%61%74%69%6F%6E%3D%6F%6E+%2D%64+%64%69%73%61%62%6C%65%5F%66%75%6E%63%74%69%6F%6E%73%3D%22%22+%2D%64+%6F%70%65%6E%5F%62%61%73%65%64%69%72%3D%6E%6F%6E%65+%2D%64+%61%75%74%6F%5F%70%72%65%70%65%6E%64%5F%66%69%6C%65%3D%70%68%70%3A%2F%2F%69%6E%70%75%74+%2D%64+%63%67%69%2E%66%6F%72%63%65%5F%72%65%64%69%72%65%63%74%3D%30+%2D%64+%63%67%69%2E%72%65%64%69%72%65%63%74%5F%73%74%61%74%75%73%5F%65%6E%76%3D%30+%2D%6E
+
+it was possible to execute the "<?php phpinfo();?>" command.
+
+Result:
+  <title>phpinfo()</title><meta name="ROBOTS" content="NOINDEX,NOFOLLOW,NOARCHIVE" /></head>
+  <tr><td class="e">Configuration File (php.ini) Path </td><td class="v">/etc/php5/cgi </td></tr>
+  <h2>PHP Variables</h2>
+
+Vulnerability Detection Method: Send multiple a crafted HTTP POST requests and checks the
+  responses.
+
+  Note: This script checks for the presence of CVE-2012-1823 which indicates that the system is also
+  affected by the other included CVEs.
+Details:
+PHP < 5.3.13, 5.4.x < 5.4.3 Multiple Vulnerabilities - Active Check
+(OID: 1.3.6.1.4.1.25623.1.0.103482)
+Version used: 2025-04-24T05:40:00Z
+
+Affected Software/OS: PHP versions prior to 5.3.13 and 5.4.x prior to 5.4.3.
+
+  Other products / applications might be affected by the tested CVE-2012-1823 as well.
+Product Detection Result: nan
+Solution: PHP: Update to version 5.3.13, 5.4.3 or later
+
+  - Other products / applications: Please contact the vendor for a solution
+
+# Vulnerabilidade 11
+CVEs: CVE-2011-2523
+NVT Name: vsftpd Compromised Source Packages Backdoor Vulnerability
+Port: 6200.0
+Port Protocol: tcp
+Summary: vsftpd is prone to a backdoor vulnerability.
+Specific Result: Vulnerability was detected according to the Vulnerability Detection Method.
+Vulnerability Detection Method: 
+Details:
+vsftpd Compromised Source Packages Backdoor Vulnerability
+(OID: 1.3.6.1.4.1.25623.1.0.103185)
+Version used: 2023-12-07T05:05:41Z
+
+Affected Software/OS: The vsftpd 2.3.4 source package downloaded between 20110630 and
+  20110703 is affected.
+Product Detection Result: nan
+Solution: The repaired package can be downloaded from the referenced
+  vendor homepage. Please validate the package with its signature.
+
+# Vulnerabilidade 12
+CVEs: CVE-2011-2523
+NVT Name: vsftpd Compromised Source Packages Backdoor Vulnerability
+Port: 21.0
+Port Protocol: tcp
+Summary: vsftpd is prone to a backdoor vulnerability.
+Specific Result: Vulnerability was detected according to the Vulnerability Detection Method.
+Vulnerability Detection Method: 
+Details:
+vsftpd Compromised Source Packages Backdoor Vulnerability
+(OID: 1.3.6.1.4.1.25623.1.0.103185)
+Version used: 2023-12-07T05:05:41Z
+
+Affected Software/OS: The vsftpd 2.3.4 source package downloaded between 20110630 and
+  20110703 is affected.
+Product Detection Result: Product: cpe:/a:beasts:vsftpd:2.3.4
+Method: vsFTPd FTP Server Detection
+(OID: 1.3.6.1.4.1.25623.1.0.111050)
+
+Solution: The repaired package can be downloaded from the referenced
+  vendor homepage. Please validate the package with its signature.
+
+# Vulnerabilidade 13
+CVEs: CVE-2004-2687
+NVT Name: DistCC RCE Vulnerability (CVE-2004-2687)
+Port: 3632.0
+Port Protocol: tcp
+Summary: DistCC is prone to a remote code execution (RCE)
+  vulnerability.
+Specific Result: It was possible to execute the "id" command.
+
+Result: uid=1(daemon) gid=1(daemon)
+
+Vulnerability Detection Method: 
+Details:
+DistCC RCE Vulnerability (CVE-2004-2687)
+(OID: 1.3.6.1.4.1.25623.1.0.103553)
+Version used: 2022-07-07T10:16:06Z
+
+Affected Software/OS: nan
+Product Detection Result: nan
+Solution: Vendor updates are available. Please see the references for
+  more information.
+
+  For more information about DistCC's security see the references.
+
+# Vulnerabilidade 14
+CVEs: nan
+NVT Name: PostgreSQL Default Credentials (PostgreSQL Protocol)
+Port: 5432.0
+Port Protocol: tcp
+Summary: It was possible to login into the remote PostgreSQL as user
+  postgres using weak credentials.
+Specific Result: It was possible to login as user postgres with password "postgres".
+
+
+
+Vulnerability Detection Method: 
+Details:
+PostgreSQL Default Credentials (PostgreSQL Protocol)
+(OID: 1.3.6.1.4.1.25623.1.0.103552)
+Version used: 2024-07-19T15:39:06Z
+
+Affected Software/OS: nan
+Product Detection Result: Product: cpe:/a:postgresql:postgresql:8.3.1
+Method: PostgreSQL Detection Consolidation
+(OID: 1.3.6.1.4.1.25623.1.0.128025)
+
+Solution: Change the password as soon as possible.
+
+# Vulnerabilidade 15
+CVEs: nan
+NVT Name: VNC Brute Force Login
+Port: 5900.0
+Port Protocol: tcp
+Summary: Try to log in with given passwords via VNC protocol.
+Specific Result: It was possible to connect to the VNC server with the password: password
+
+Vulnerability Detection Method: 
+Details:
+VNC Brute Force Login
+(OID: 1.3.6.1.4.1.25623.1.0.106056)
+Version used: 2021-07-23T07:56:26Z
+
+Affected Software/OS: nan
+Product Detection Result: nan
+Solution: Change the password to something hard to guess or enable
+  password protection at all.
+
+# Vulnerabilidade 16
+CVEs: nan
+NVT Name: Test HTTP dangerous methods
+Port: 80.0
+Port Protocol: tcp
+Summary: Misconfigured web servers allows remote clients to perform
+  dangerous HTTP methods such as PUT and DELETE.
+Specific Result: We could upload the following files via the PUT method at this web server:
+
+http://192.168.100.20/dav/puttest537126888.html
+
+We could delete the following files via the DELETE method at this web server:
+
+http://192.168.100.20/dav/puttest537126888.html
+
+
+
+Vulnerability Detection Method: Checks if dangerous HTTP methods such as PUT and DELETE are
+  enabled and can be misused to upload or delete files.
+Details:
+Test HTTP dangerous methods
+(OID: 1.3.6.1.4.1.25623.1.0.10498)
+Version used: 2023-08-01T13:29:10Z
+
+Affected Software/OS: Web servers with enabled PUT and/or DELETE methods.
+Product Detection Result: nan
+Solution: Use access restrictions to these dangerous HTTP methods
+  or disable them completely.
+
+# Vulnerabilidade 17
+CVEs: CVE-1999-0501,CVE-1999-0502,CVE-1999-0507,CVE-1999-0508,CVE-2001-1594,CVE-2013-7404,CVE-2014-9198,CVE-2015-7261,CVE-2016-8731,CVE-2017-8218,CVE-2018-9068,CVE-2018-17771,CVE-2018-19063,CVE-2018-19064
+NVT Name: FTP Brute Force Logins With Default Credentials Reporting
+Port: 21.0
+Port Protocol: tcp
+Summary: It was possible to login into the remote FTP server using
+  weak/known credentials.
+Specific Result: It was possible to login with the following credentials <User>:<Password>
+
+msfadmin:msfadmin
+postgres:postgres
+service:service
+user:user
+
+Vulnerability Detection Method: Reports weak/known credentials detected by the VT
+  'FTP Brute Force Logins With Default Credentials' (OID: 1.3.6.1.4.1.25623.1.0.108717).
+Details:
+FTP Brute Force Logins With Default Credentials Reporting
+(OID: 1.3.6.1.4.1.25623.1.0.108718)
+Version used: 2025-05-13T05:41:39Z
+
+Affected Software/OS: nan
+Product Detection Result: nan
+Solution: Change the password as soon as possible.
+
+# Vulnerabilidade 18
+CVEs: CVE-1999-0501,CVE-1999-0502,CVE-1999-0507,CVE-1999-0508,CVE-2001-1594,CVE-2013-7404,CVE-2014-9198,CVE-2015-7261,CVE-2016-8731,CVE-2017-8218,CVE-2018-9068,CVE-2018-17771,CVE-2018-19063,CVE-2018-19064
+NVT Name: FTP Brute Force Logins With Default Credentials Reporting
+Port: 2121.0
+Port Protocol: tcp
+Summary: It was possible to login into the remote FTP server using
+  weak/known credentials.
+Specific Result: It was possible to login with the following credentials <User>:<Password>
+
+msfadmin:msfadmin
+postgres:postgres
+service:service
+user:user
+
+Vulnerability Detection Method: Reports weak/known credentials detected by the VT
+  'FTP Brute Force Logins With Default Credentials' (OID: 1.3.6.1.4.1.25623.1.0.108717).
+Details:
+FTP Brute Force Logins With Default Credentials Reporting
+(OID: 1.3.6.1.4.1.25623.1.0.108718)
+Version used: 2025-05-13T05:41:39Z
+
+Affected Software/OS: nan
+Product Detection Result: nan
+Solution: Change the password as soon as possible.
+
+# Vulnerabilidade 19
+CVEs: CVE-1999-0651
+NVT Name: The rlogin service is running
+Port: 513.0
+Port Protocol: tcp
+Summary: This remote host is running a rlogin service.
+Specific Result: The rlogin service is running on the target system.
+
+Vulnerability Detection Method: 
+Details:
+The rlogin service is running
+(OID: 1.3.6.1.4.1.25623.1.0.901202)
+Version used: 2025-03-05T05:38:53Z
+
+Affected Software/OS: nan
+Product Detection Result: nan
+Solution: Disable the rlogin service and use alternatives like SSH instead.
+
+# Vulnerabilidade 20
+CVEs: CVE-1999-0651
+NVT Name: rsh Unencrypted Cleartext Login
+Port: 514.0
+Port Protocol: tcp
+Summary: This remote host is running a rsh service.
+Specific Result: The rsh service currently has issues with name resolution and is not allowing connections from this host.
+
+Vulnerability Detection Method: 
+Details:
+rsh Unencrypted Cleartext Login
+(OID: 1.3.6.1.4.1.25623.1.0.100080)
+Version used: 2021-10-20T09:03:29Z
+
+Affected Software/OS: nan
+Product Detection Result: nan
+Solution: Disable the rsh service and use alternatives like SSH
+  instead.
+
+# Vulnerabilidade 21
+CVEs: CVE-2014-0224
+NVT Name: SSL/TLS: OpenSSL CCS Man in the Middle Security Bypass Vulnerability
+Port: 5432.0
+Port Protocol: tcp
+Summary: OpenSSL is prone to a security bypass vulnerability.
+Specific Result: Vulnerability was detected according to the Vulnerability Detection Method.
+Vulnerability Detection Method: Send two SSL ChangeCipherSpec request and check the response.
+Details:
+SSL/TLS: OpenSSL CCS Man in the Middle Security Bypass Vulnerability
+(OID: 1.3.6.1.4.1.25623.1.0.105042)
+Version used: 2025-01-17T15:39:18Z
+
+Affected Software/OS: OpenSSL before 0.9.8za, 1.0.0 before 1.0.0m and 1.0.1 before 1.0.1h.
+Product Detection Result: nan
+Solution: Updates are available. Please see the references for more information.
+
+# Vulnerabilidade 22
+CVEs: CVE-2011-0411,CVE-2011-1430,CVE-2011-1431,CVE-2011-1432,CVE-2011-1506,CVE-2011-1575,CVE-2011-1926,CVE-2011-2165
+NVT Name: Multiple Vendors STARTTLS Implementation Plaintext Arbitrary Command Injection Vulnerability
+Port: 25.0
+Port Protocol: tcp
+Summary: Multiple vendors' implementations of 'STARTTLS' are prone to a
+  vulnerability that lets attackers inject arbitrary commands.
+Specific Result: Vulnerability was detected according to the Vulnerability Detection Method.
+Vulnerability Detection Method: Send a special crafted 'STARTTLS' request and check the
+  response.
+Details:
+Multiple Vendors STARTTLS Implementation Plaintext Arbitrary Command Injecti...
+(OID: 1.3.6.1.4.1.25623.1.0.103935)
+Version used: 2023-10-31T05:06:37Z
+
+Affected Software/OS: The following vendors are known to be affected:
+
+  Ipswitch
+
+  Kerio
+
+  Postfix
+
+  Qmail-TLS
+
+  Oracle
+
+  SCO Group
+
+  spamdyke
+
+  ISC
+Product Detection Result: nan
+Solution: Updates are available. Please see the references for more
+  information.
+
+# Vulnerabilidade 23
+CVEs: CVE-2009-4898
+NVT Name: TWiki Cross-Site Request Forgery Vulnerability (Sep 2010)
+Port: 80.0
+Port Protocol: tcp
+Summary: TWiki is prone to a cross-site request forgery (CSRF) vulnerability.
+Specific Result: Installed version: 01.Feb.2003
+Fixed version:     4.3.2
+
+
+Vulnerability Detection Method: 
+Details:
+TWiki Cross-Site Request Forgery Vulnerability (Sep 2010)
+(OID: 1.3.6.1.4.1.25623.1.0.801281)
+Version used: 2024-03-01T14:37:10Z
+
+Affected Software/OS: TWiki version prior to 4.3.2
+Product Detection Result: nan
+Solution: Upgrade to TWiki version 4.3.2 or later.
+
+# Vulnerabilidade 24
+CVEs: CVE-1999-0497
+NVT Name: Anonymous FTP Login Reporting
+Port: 21.0
+Port Protocol: tcp
+Summary: Reports if the remote FTP Server allows anonymous logins.
+Specific Result: It was possible to login to the remote FTP service with the following anonymous account(s):
+
+anonymous:anonymous@example.com
+ftp:anonymous@example.com
+
+
+Vulnerability Detection Method: 
+Details:
+Anonymous FTP Login Reporting
+(OID: 1.3.6.1.4.1.25623.1.0.900600)
+Version used: 2021-10-20T09:03:29Z
+
+Affected Software/OS: nan
+Product Detection Result: nan
+Solution: If you do not want to share files, you should disable anonymous
+  logins.
+
+# Vulnerabilidade 25
+CVEs: CVE-2012-6708
+NVT Name: jQuery < 1.9.0 XSS Vulnerability
+Port: 80.0
+Port Protocol: tcp
+Summary: jQuery is prone to a cross-site scripting (XSS)
+  vulnerability.
+Specific Result: Installed version: 1.3.2
+Fixed version:     1.9.0
+Installation
+path / port:       /mutillidae/javascript/ddsmoothmenu/jquery.min.js
+
+Detection info (see OID: 1.3.6.1.4.1.25623.1.0.150658 for more info):
+- Identified file: http://192.168.100.20/mutillidae/javascript/ddsmoothmenu/jquery.min.js
+- Referenced at:   http://192.168.100.20/mutillidae/
+
+Vulnerability Detection Method: Checks if a vulnerable version is present on the target host.
+Details:
+jQuery < 1.9.0 XSS Vulnerability
+(OID: 1.3.6.1.4.1.25623.1.0.141636)
+Version used: 2023-07-14T05:06:08Z
+
+Affected Software/OS: jQuery prior to version 1.9.0.
+Product Detection Result: nan
+Solution: Update to version 1.9.0 or later.
+
+# Vulnerabilidade 26
+CVEs: CVE-2018-20212
+NVT Name: TWiki < 6.1.0 XSS Vulnerability
+Port: 80.0
+Port Protocol: tcp
+Summary: bin/statistics in TWiki 6.0.2 allows XSS via the webs parameter.
+Specific Result: Installed version: 01.Feb.2003
+Fixed version:     6.1.0
+
+
+Vulnerability Detection Method: Checks if a vulnerable version is present on the target host.
+Details:
+TWiki < 6.1.0 XSS Vulnerability
+(OID: 1.3.6.1.4.1.25623.1.0.141830)
+Version used: 2023-07-14T16:09:27Z
+
+Affected Software/OS: TWiki version 6.0.2 and probably prior.
+Product Detection Result: nan
+Solution: Update to version 6.1.0 or later.
+
+# Vulnerabilidade 27
+CVEs: CVE-2009-1339
+NVT Name: TWiki CSRF Vulnerability
+Port: 80.0
+Port Protocol: tcp
+Summary: TWiki is prone to a cross-site request forgery (CSRF) vulnerability.
+Specific Result: Installed version: 01.Feb.2003
+Fixed version:     4.3.1
+
+
+Vulnerability Detection Method: 
+Details:
+TWiki CSRF Vulnerability
+(OID: 1.3.6.1.4.1.25623.1.0.800400)
+Version used: 2024-06-28T05:05:33Z
+
+Affected Software/OS: TWiki version prior to 4.3.1
+Product Detection Result: nan
+Solution: Upgrade to version 4.3.1 or later.
+
+# Vulnerabilidade 28
+CVEs: CVE-2016-0800,CVE-2014-3566
+NVT Name: SSL/TLS: Deprecated SSLv2 and SSLv3 Protocol Detection
+Port: 5432.0
+Port Protocol: tcp
+Summary: It was possible to detect the usage of the deprecated SSLv2
+  and/or SSLv3 protocol on this system.
+Specific Result: In addition to TLSv1.0+ the service is also providing the deprecated SSLv3 protocol and supports one or more ciphers. Those supported ciphers can be found in the 'SSL/TLS: Report Supported Cipher Suites' (OID: 1.3.6.1.4.1.25623.1.0.802067) VT.
+
+Vulnerability Detection Method: Checks the used SSL protocols of the services provided by this
+  system.
+Details:
+SSL/TLS: Deprecated SSLv2 and SSLv3 Protocol Detection
+(OID: 1.3.6.1.4.1.25623.1.0.111012)
+Version used: 2025-03-27T05:38:50Z
+
+Affected Software/OS: All services providing an encrypted communication using the
+  SSLv2 and/or SSLv3 protocols.
+Product Detection Result: Product: cpe:/a:ietf:transport_layer_security:1.0
+Method: SSL/TLS: Version Detection
+(OID: 1.3.6.1.4.1.25623.1.0.105782)
+
+Solution: It is recommended to disable the deprecated SSLv2 and/or SSLv3
+  protocols in favor of the TLSv1.2+ protocols.
+
+  Please see the references for more resources supporting you with this task.
+
+# Vulnerabilidade 29
+CVEs: CVE-2016-0800,CVE-2014-3566
+NVT Name: SSL/TLS: Deprecated SSLv2 and SSLv3 Protocol Detection
+Port: 25.0
+Port Protocol: tcp
+Summary: It was possible to detect the usage of the deprecated SSLv2
+  and/or SSLv3 protocol on this system.
+Specific Result: In addition to TLSv1.0+ the service is also providing the deprecated SSLv2 and SSLv3 protocols and supports one or more ciphers. Those supported ciphers can be found in the 'SSL/TLS: Report Supported Cipher Suites' (OID: 1.3.6.1.4.1.25623.1.0.802067) VT.
+
+Vulnerability Detection Method: Checks the used SSL protocols of the services provided by this
+  system.
+Details:
+SSL/TLS: Deprecated SSLv2 and SSLv3 Protocol Detection
+(OID: 1.3.6.1.4.1.25623.1.0.111012)
+Version used: 2025-03-27T05:38:50Z
+
+Affected Software/OS: All services providing an encrypted communication using the
+  SSLv2 and/or SSLv3 protocols.
+Product Detection Result: Product: cpe:/a:ietf:transport_layer_security:1.0
+Method: SSL/TLS: Version Detection
+(OID: 1.3.6.1.4.1.25623.1.0.105782)
+
+Solution: It is recommended to disable the deprecated SSLv2 and/or SSLv3
+  protocols in favor of the TLSv1.2+ protocols.
+
+  Please see the references for more resources supporting you with this task.
+
+# Vulnerabilidade 30
+CVEs: CVE-2013-2566,CVE-2015-2808,CVE-2015-4000
+NVT Name: SSL/TLS: Report Weak Cipher Suites
+Port: 5432.0
+Port Protocol: tcp
+Summary: This routine reports all weak SSL/TLS cipher suites accepted by
+  a service.
+Specific Result: 'Weak' cipher suites accepted by this service via the SSLv3 protocol:
+
+TLS_RSA_WITH_RC4_128_SHA
+
+'Weak' cipher suites accepted by this service via the TLSv1.0 protocol:
+
+TLS_RSA_WITH_RC4_128_SHA
+
+
+
+Vulnerability Detection Method: Checks previous collected cipher suites.
+
+  NOTE: No severity for SMTP services with 'Opportunistic TLS' and weak cipher suites on port 25/tcp
+  is reported. If too strong cipher suites are configured for this service the alternative would be
+  to fall back to an even more insecure cleartext communication.
+Details:
+SSL/TLS: Report Weak Cipher Suites
+(OID: 1.3.6.1.4.1.25623.1.0.103440)
+Version used: 2025-03-27T05:38:50Z
+
+Affected Software/OS: All services providing an encrypted communication using weak
+  SSL/TLS cipher suites.
+Product Detection Result: Product: cpe:/a:ietf:transport_layer_security
+Method: SSL/TLS: Report Supported Cipher Suites
+(OID: 1.3.6.1.4.1.25623.1.0.802067)
+
+Solution: The configuration of this services should be changed so that it
+  does not accept the listed weak cipher suites anymore.
+
+  Please see the references for more resources supporting you with this task.
+
+# Vulnerabilidade 31
+CVEs: CVE-2003-1567,CVE-2004-2320,CVE-2004-2763,CVE-2005-3398,CVE-2006-4683,CVE-2007-3008,CVE-2008-7253,CVE-2009-2823,CVE-2010-0386,CVE-2012-2223,CVE-2014-7883
+NVT Name: HTTP Debugging Methods (TRACE/TRACK) Enabled
+Port: 80.0
+Port Protocol: tcp
+Summary: The remote web server supports the TRACE and/or TRACK
+  methods. TRACE and TRACK are HTTP methods which are used to debug web server connections.
+Specific Result: The web server has the following HTTP methods enabled: TRACE
+
+Vulnerability Detection Method: Checks if HTTP methods such as TRACE and TRACK are
+  enabled and can be used.
+Details:
+HTTP Debugging Methods (TRACE/TRACK) Enabled
+(OID: 1.3.6.1.4.1.25623.1.0.11213)
+Version used: 2023-08-01T13:29:10Z
+
+Affected Software/OS: Web servers with enabled TRACE and/or TRACK methods.
+Product Detection Result: nan
+Solution: Disable the TRACE and TRACK methods in your web server
+  configuration.
+
+  Please see the manual of your web server or the references for more information.
+
+# Vulnerabilidade 32
+CVEs: nan
+NVT Name: SSL/TLS: Server Certificate / Certificate in Chain with RSA keys less than 2048 bits
+Port: 25.0
+Port Protocol: tcp
+Summary: The remote SSL/TLS server certificate and/or any of the
+  certificates in the certificate chain is using a RSA key with less than 2048 bits.
+Specific Result: The remote SSL/TLS server is using the following certificate(s) with a RSA key with less than 2048 bits (public-key-size:public-key-algorithm:serial:issuer):
+
+1024:RSA:00FAF93A4C7FB6B9CC:1.2.840.113549.1.9.1=#726F6F74407562756E74753830342D626173652E6C6F63616C646F6D61696E,CN=ubuntu804-base.localdomain,OU=Office for Complication of Otherwise Simple Affairs,O=OCOSA,L=Everywhere,ST=There is no such thing outside US,C=XX (Server certificate)
+
+Vulnerability Detection Method: Checks the RSA keys size of the server certificate and all
+  certificates in chain for a size < 2048 bit.
+Details:
+SSL/TLS: Server Certificate / Certificate in Chain with RSA keys less than 2...
+(OID: 1.3.6.1.4.1.25623.1.0.150710)
+Version used: 2021-12-10T12:48:00Z
+
+Affected Software/OS: nan
+Product Detection Result: nan
+Solution: Replace the certificate with a stronger key and reissue the
+  certificates it signed.
+
+# Vulnerabilidade 33
+CVEs: nan
+NVT Name: SSL/TLS: Server Certificate / Certificate in Chain with RSA keys less than 2048 bits
+Port: 5432.0
+Port Protocol: tcp
+Summary: The remote SSL/TLS server certificate and/or any of the
+  certificates in the certificate chain is using a RSA key with less than 2048 bits.
+Specific Result: The remote SSL/TLS server is using the following certificate(s) with a RSA key with less than 2048 bits (public-key-size:public-key-algorithm:serial:issuer):
+
+1024:RSA:00FAF93A4C7FB6B9CC:1.2.840.113549.1.9.1=#726F6F74407562756E74753830342D626173652E6C6F63616C646F6D61696E,CN=ubuntu804-base.localdomain,OU=Office for Complication of Otherwise Simple Affairs,O=OCOSA,L=Everywhere,ST=There is no such thing outside US,C=XX (Server certificate)
+
+Vulnerability Detection Method: Checks the RSA keys size of the server certificate and all
+  certificates in chain for a size < 2048 bit.
+Details:
+SSL/TLS: Server Certificate / Certificate in Chain with RSA keys less than 2...
+(OID: 1.3.6.1.4.1.25623.1.0.150710)
+Version used: 2021-12-10T12:48:00Z
+
+Affected Software/OS: nan
+Product Detection Result: nan
+Solution: Replace the certificate with a stronger key and reissue the
+  certificates it signed.
+
+# Vulnerabilidade 34
+CVEs: nan
+NVT Name: Weak Key Exchange (KEX) Algorithm(s) Supported (SSH)
+Port: 22.0
+Port Protocol: tcp
+Summary: The remote SSH server is configured to allow / support weak key
+  exchange (KEX) algorithm(s).
+Specific Result: The remote SSH server supports the following weak KEX algorithm(s):
+
+KEX algorithm                      | Reason
+-------------------------------------------------------------------------------------------
+diffie-hellman-group-exchange-sha1 | Using SHA-1
+diffie-hellman-group1-sha1         | Using Oakley Group 2 (a 1024-bit MODP group) and SHA-1
+
+Vulnerability Detection Method: Checks the supported KEX algorithms of the remote SSH server.
+
+  Currently weak KEX algorithms are defined as the following:
+
+  - non-elliptic-curve Diffie-Hellmann (DH) KEX algorithms with 1024-bit MODP group / prime
+
+  - ephemerally generated key exchange groups uses SHA-1
+
+  - using RSA 1024-bit modulus key
+Details:
+Weak Key Exchange (KEX) Algorithm(s) Supported (SSH)
+(OID: 1.3.6.1.4.1.25623.1.0.150713)
+Version used: 2024-06-14T05:05:48Z
+
+Affected Software/OS: nan
+Product Detection Result: Product: cpe:/a:ietf:secure_shell_protocol
+Method: SSH Protocol Algorithms Supported
+(OID: 1.3.6.1.4.1.25623.1.0.105565)
+
+Solution: Disable the reported weak KEX algorithm(s)
+
+  - 1024-bit MODP group / prime KEX algorithms:
+
+  Alternatively use elliptic-curve Diffie-Hellmann in general, e.g. Curve 25519.
+
+# Vulnerabilidade 35
+CVEs: CVE-2008-0149,CVE-2023-49282,CVE-2023-49283,CVE-2024-10486
+NVT Name: phpinfo() Output Reporting (HTTP)
+Port: 80.0
+Port Protocol: tcp
+Summary: Reporting of files containing the output of the phpinfo() PHP
+  function previously detected via HTTP.
+Specific Result: The following files are calling the function phpinfo() which disclose potentially sensitive information:
+
+http://192.168.100.20/mutillidae/phpinfo.php
+Concluded from:
+  <title>phpinfo()</title><meta name="ROBOTS" content="NOINDEX,NOFOLLOW,NOARCHIVE" /></head>
+  <tr><td class="e">Configuration File (php.ini) Path </td><td class="v">/etc/php5/cgi </td></tr>
+  <h2>PHP Variables</h2>
+http://192.168.100.20/phpinfo.php
+Concluded from:
+  <title>phpinfo()</title><meta name="ROBOTS" content="NOINDEX,NOFOLLOW,NOARCHIVE" /></head>
+  <tr><td class="e">Configuration File (php.ini) Path </td><td class="v">/etc/php5/cgi </td></tr>
+  <h2>PHP Variables</h2>
+
+Vulnerability Detection Method: This script reports files identified by the following separate
+  VT: 'phpinfo() Output Detection (HTTP)' (OID: 1.3.6.1.4.1.25623.1.0.108474).
+Details:
+phpinfo() Output Reporting (HTTP)
+(OID: 1.3.6.1.4.1.25623.1.0.11229)
+Version used: 2025-04-10T05:39:37Z
+
+Affected Software/OS: All systems exposing a file containing the output of the
+  phpinfo() PHP function.
+
+  This VT is also reporting if an affected endpoint for the following products have been identified:
+
+  - CVE-2008-0149: TUTOS
+
+  - CVE-2023-49282, CVE-2023-49283: Microsoft Graph PHP SDK
+
+  - CVE-2024-10486: Google for WooCommerce plugin for WordPress
+Product Detection Result: nan
+Solution: Delete the listed files or restrict access to them.
+
+# Vulnerabilidade 36
+CVEs: nan
+NVT Name: Weak Host Key Algorithm(s) (SSH)
+Port: 22.0
+Port Protocol: tcp
+Summary: The remote SSH server is configured to allow / support weak host
+  key algorithm(s).
+Specific Result: The remote SSH server supports the following weak host key algorithm(s):
+
+host key algorithm | Description
+-----------------------------------------------------------------------------------------
+ssh-dss            | Digital Signature Algorithm (DSA) / Digital Signature Standard (DSS)
+
+Vulnerability Detection Method: Checks the supported host key algorithms of the remote SSH
+  server.
+
+  Currently weak host key algorithms are defined as the following:
+
+  - ssh-dss: Digital Signature Algorithm (DSA) / Digital Signature Standard (DSS)
+Details:
+Weak Host Key Algorithm(s) (SSH)
+(OID: 1.3.6.1.4.1.25623.1.0.117687)
+Version used: 2024-06-14T05:05:48Z
+
+Affected Software/OS: nan
+Product Detection Result: Product: cpe:/a:ietf:secure_shell_protocol
+Method: SSH Protocol Algorithms Supported
+(OID: 1.3.6.1.4.1.25623.1.0.105565)
+
+Solution: Disable the reported weak host key algorithm(s).
+
+# Vulnerabilidade 37
+CVEs: nan
+NVT Name: Check if Mailserver answer to VRFY and EXPN requests
+Port: 25.0
+Port Protocol: tcp
+Summary: The Mailserver on this host answers to VRFY and/or EXPN requests.
+Specific Result: 'VRFY root' produces the following answer: 252 2.0.0 root
+
+
+
+Vulnerability Detection Method: 
+Details:
+Check if Mailserver answer to VRFY and EXPN requests
+(OID: 1.3.6.1.4.1.25623.1.0.100072)
+Version used: 2023-10-31T05:06:37Z
+
+Affected Software/OS: nan
+Product Detection Result: nan
+Solution: Disable VRFY and/or EXPN on your Mailserver.
+
+  For postfix add 'disable_vrfy_command=yes' in 'main.cf'.
+
+  For Sendmail add the option 'O PrivacyOptions=goaway'.
+
+  It is suggested that, if you really want to publish this type of information, you use a mechanism
+  that legitimate users actually know about, such as Finger or HTTP.
+
+# Vulnerabilidade 38
+CVEs: CVE-2011-1473,CVE-2011-5094
+NVT Name: SSL/TLS: Renegotiation DoS Vulnerability (CVE-2011-1473, CVE-2011-5094)
+Port: 25.0
+Port Protocol: tcp
+Summary: The remote SSL/TLS service is prone to a denial of service (DoS)
+  vulnerability.
+Specific Result: The following indicates that the remote SSL/TLS service is affected:
+
+Protocol Version | Successful re-done SSL/TLS handshakes (Renegotiation) over an existing / already established SSL/TLS connection
+----------------------------------------------------------------------------------------------------------------------------------
+TLSv1.0          | 10
+
+Vulnerability Detection Method: Checks if the remote service allows to re-do the same SSL/TLS
+  handshake (Renegotiation) over an existing / already established SSL/TLS connection.
+Details:
+SSL/TLS: Renegotiation DoS Vulnerability (CVE-2011-1473, CVE-2011-5094)
+(OID: 1.3.6.1.4.1.25623.1.0.117761)
+Version used: 2024-09-27T05:05:23Z
+
+Affected Software/OS: Every SSL/TLS service which does not properly restrict
+  client-initiated renegotiation.
+Product Detection Result: nan
+Solution: Users should contact their vendors for specific patch information.
+
+  A general solution is to remove/disable renegotiation capabilities altogether from/in the affected
+  SSL/TLS service.
+
+# Vulnerabilidade 39
+CVEs: CVE-2011-1473,CVE-2011-5094
+NVT Name: SSL/TLS: Renegotiation DoS Vulnerability (CVE-2011-1473, CVE-2011-5094)
+Port: 5432.0
+Port Protocol: tcp
+Summary: The remote SSL/TLS service is prone to a denial of service (DoS)
+  vulnerability.
+Specific Result: The following indicates that the remote SSL/TLS service is affected:
+
+Protocol Version | Successful re-done SSL/TLS handshakes (Renegotiation) over an existing / already established SSL/TLS connection
+----------------------------------------------------------------------------------------------------------------------------------
+TLSv1.0          | 10
+
+Vulnerability Detection Method: Checks if the remote service allows to re-do the same SSL/TLS
+  handshake (Renegotiation) over an existing / already established SSL/TLS connection.
+Details:
+SSL/TLS: Renegotiation DoS Vulnerability (CVE-2011-1473, CVE-2011-5094)
+(OID: 1.3.6.1.4.1.25623.1.0.117761)
+Version used: 2024-09-27T05:05:23Z
+
+Affected Software/OS: Every SSL/TLS service which does not properly restrict
+  client-initiated renegotiation.
+Product Detection Result: nan
+Solution: Users should contact their vendors for specific patch information.
+
+  A general solution is to remove/disable renegotiation capabilities altogether from/in the affected
+  SSL/TLS service.
+
+# Vulnerabilidade 40
+CVEs: nan
+NVT Name: SSL/TLS: Certificate Expired
+Port: 25.0
+Port Protocol: tcp
+Summary: The remote server's SSL/TLS certificate has already expired.
+Specific Result: The certificate of the remote service expired on 2010-04-16 14:07:45.
+
+Certificate details:
+fingerprint (SHA-1)             | ED093088706603BFD5DC237399B498DA2D4D31C6
+fingerprint (SHA-256)           | E7A7FA0D63E457C7C4A59B38B70849C6A70BDA6F830C7AF1E32DEE436DE813CC
+issued by                       | 1.2.840.113549.1.9.1=#726F6F74407562756E74753830342D626173652E6C6F63616C646F6D61696E,CN=ubuntu804-base.localdomain,OU=Office for Complication of Otherwise Simple Affairs,O=OCOSA,L=Everywhere,ST=There is no such thing outside US,C=XX
+public key algorithm            | RSA
+public key size (bits)          | 1024
+serial                          | 00FAF93A4C7FB6B9CC
+signature algorithm             | sha1WithRSAEncryption
+subject                         | 1.2.840.113549.1.9.1=#726F6F74407562756E74753830342D626173652E6C6F63616C646F6D61696E,CN=ubuntu804-base.localdomain,OU=Office for Complication of Otherwise Simple Affairs,O=OCOSA,L=Everywhere,ST=There is no such thing outside US,C=XX
+subject alternative names (SAN) | None
+valid from                      | 2010-03-17 14:07:45 UTC
+valid until                     | 2010-04-16 14:07:45 UTC
+
+Vulnerability Detection Method: 
+Details:
+SSL/TLS: Certificate Expired
+(OID: 1.3.6.1.4.1.25623.1.0.103955)
+Version used: 2024-06-14T05:05:48Z
+
+Affected Software/OS: nan
+Product Detection Result: Product: cpe:/a:ietf:transport_layer_security
+Method: SSL/TLS: Collect and Report Certificate Details
+(OID: 1.3.6.1.4.1.25623.1.0.103692)
+
+Solution: Replace the SSL/TLS certificate by a new one.
+
+# Vulnerabilidade 41
+CVEs: nan
+NVT Name: SSL/TLS: Certificate Expired
+Port: 5432.0
+Port Protocol: tcp
+Summary: The remote server's SSL/TLS certificate has already expired.
+Specific Result: The certificate of the remote service expired on 2010-04-16 14:07:45.
+
+Certificate details:
+fingerprint (SHA-1)             | ED093088706603BFD5DC237399B498DA2D4D31C6
+fingerprint (SHA-256)           | E7A7FA0D63E457C7C4A59B38B70849C6A70BDA6F830C7AF1E32DEE436DE813CC
+issued by                       | 1.2.840.113549.1.9.1=#726F6F74407562756E74753830342D626173652E6C6F63616C646F6D61696E,CN=ubuntu804-base.localdomain,OU=Office for Complication of Otherwise Simple Affairs,O=OCOSA,L=Everywhere,ST=There is no such thing outside US,C=XX
+public key algorithm            | RSA
+public key size (bits)          | 1024
+serial                          | 00FAF93A4C7FB6B9CC
+signature algorithm             | sha1WithRSAEncryption
+subject                         | 1.2.840.113549.1.9.1=#726F6F74407562756E74753830342D626173652E6C6F63616C646F6D61696E,CN=ubuntu804-base.localdomain,OU=Office for Complication of Otherwise Simple Affairs,O=OCOSA,L=Everywhere,ST=There is no such thing outside US,C=XX
+subject alternative names (SAN) | None
+valid from                      | 2010-03-17 14:07:45 UTC
+valid until                     | 2010-04-16 14:07:45 UTC
+
+Vulnerability Detection Method: 
+Details:
+SSL/TLS: Certificate Expired
+(OID: 1.3.6.1.4.1.25623.1.0.103955)
+Version used: 2024-06-14T05:05:48Z
+
+Affected Software/OS: nan
+Product Detection Result: Product: cpe:/a:ietf:transport_layer_security
+Method: SSL/TLS: Collect and Report Certificate Details
+(OID: 1.3.6.1.4.1.25623.1.0.103692)
+
+Solution: Replace the SSL/TLS certificate by a new one.
+
+# Vulnerabilidade 42
+CVEs: CVE-2005-0283
+NVT Name: QWikiwiki directory traversal vulnerability
+Port: 80.0
+Port Protocol: tcp
+Summary: The remote host is running QWikiwiki, a Wiki application written in PHP.
+
+  The remote version of this software contains a validation input flaw which may allow an attacker
+  to use it to read arbitrary files on the remote host with the privileges of the web server.
+Specific Result: Vulnerable URL: http://192.168.100.20/mutillidae/index.php?page=../../../../../../../../../../../etc/passwd%00
+
+Vulnerability Detection Method: 
+Details:
+QWikiwiki directory traversal vulnerability
+(OID: 1.3.6.1.4.1.25623.1.0.16100)
+Version used: 2025-04-15T05:54:49Z
+
+Affected Software/OS: nan
+Product Detection Result: nan
+Solution: No known solution was made available for at least one year since the disclosure
+  of this vulnerability. Likely none will be provided anymore. General solution options are to upgrade to a newer
+  release, disable respective features, remove the product or replace the product by another one.
+
+# Vulnerabilidade 43
+CVEs: nan
+NVT Name: awiki <= 20100125 Multiple LFI Vulnerabilities - Active Check
+Port: 80.0
+Port Protocol: tcp
+Summary: awiki is prone to multiple local file include (LFI)
+  vulnerabilities because it fails to properly sanitize user-supplied input.
+Specific Result: Vulnerable URL: http://192.168.100.20/mutillidae/index.php?page=/etc/passwd
+
+Vulnerability Detection Method: Sends a crafted HTTP GET request and checks the response.
+Details:
+awiki <= 20100125 Multiple LFI Vulnerabilities - Active Check
+(OID: 1.3.6.1.4.1.25623.1.0.103210)
+Version used: 2025-04-15T05:54:49Z
+
+Affected Software/OS: awiki version 20100125 and prior.
+Product Detection Result: nan
+Solution: No known solution was made available for at least one year
+  since the disclosure of this vulnerability. Likely none will be provided anymore. General
+  solution options are to upgrade to a newer release, disable respective features, remove the
+  product or replace the product by another one.
+
+# Vulnerabilidade 44
+CVEs: CVE-1999-0678
+NVT Name: /doc directory browsable
+Port: 80.0
+Port Protocol: tcp
+Summary: The /doc directory is browsable.
+  /doc shows the content of the /usr/doc directory and therefore it shows which programs and - important! - the version of the installed programs.
+Specific Result: Vulnerable URL: http://192.168.100.20/doc/
+
+Vulnerability Detection Method: 
+Details:
+/doc directory browsable
+(OID: 1.3.6.1.4.1.25623.1.0.10056)
+Version used: 2023-08-01T13:29:10Z
+
+Affected Software/OS: nan
+Product Detection Result: nan
+Solution: Use access restrictions for the /doc directory.
+  If you use Apache you might use this in your access.conf:
+
+  <Directory /usr/doc>
+  AllowOverride None
+  order deny, allow
+  deny from all
+  allow from localhost
+  </Directory>
+
+# Vulnerabilidade 45
+CVEs: nan
+NVT Name: Telnet Unencrypted Cleartext Login
+Port: 23.0
+Port Protocol: tcp
+Summary: The remote host is running a Telnet service that allows cleartext logins over
+  unencrypted connections.
+Specific Result: Vulnerability was detected according to the Vulnerability Detection Method.
+Vulnerability Detection Method: 
+Details:
+Telnet Unencrypted Cleartext Login
+(OID: 1.3.6.1.4.1.25623.1.0.108522)
+Version used: 2023-10-13T05:06:09Z
+
+Affected Software/OS: nan
+Product Detection Result: nan
+Solution: Replace Telnet with a protocol like SSH which supports encrypted connections.
+
+# Vulnerabilidade 46
+CVEs: nan
+NVT Name: FTP Unencrypted Cleartext Login
+Port: 2121.0
+Port Protocol: tcp
+Summary: The remote host is running a FTP service that allows cleartext logins over
+  unencrypted connections.
+Specific Result: The remote FTP service accepts logins without a previous sent 'AUTH TLS' command. Response(s):
+
+Non-anonymous sessions: 331 Password required for openvasvt
+Anonymous sessions:     331 Password required for anonymous
+
+Vulnerability Detection Method: Tries to login to a non FTPS enabled FTP service without sending a
+  'AUTH TLS' command first and checks if the service is accepting the login without enforcing the use of
+  the 'AUTH TLS' command.
+Details:
+FTP Unencrypted Cleartext Login
+(OID: 1.3.6.1.4.1.25623.1.0.108528)
+Version used: 2023-12-20T05:05:58Z
+
+Affected Software/OS: nan
+Product Detection Result: nan
+Solution: Enable FTPS or enforce the connection via the 'AUTH TLS' command. Please see
+  the manual of the FTP service for more information.
+
+# Vulnerabilidade 47
+CVEs: nan
+NVT Name: VNC Server Unencrypted Data Transmission
+Port: 5900.0
+Port Protocol: tcp
+Summary: The remote host is running a VNC server providing one or more insecure or
+  cryptographically weak Security Type(s) not intended for use on untrusted networks.
+Specific Result: The VNC server provides the following insecure or cryptographically weak Security Type(s):
+
+2 (VNC authentication)
+
+Vulnerability Detection Method: 
+Details:
+VNC Server Unencrypted Data Transmission
+(OID: 1.3.6.1.4.1.25623.1.0.108529)
+Version used: 2023-07-12T05:05:04Z
+
+Affected Software/OS: nan
+Product Detection Result: nan
+Solution: Run the session over an encrypted channel provided by IPsec [RFC4301] or SSH [RFC4254].
+  Some VNC server vendors are also providing more secure Security Types within their products.
+
+# Vulnerabilidade 48
+CVEs: nan
+NVT Name: FTP Unencrypted Cleartext Login
+Port: 21.0
+Port Protocol: tcp
+Summary: The remote host is running a FTP service that allows cleartext logins over
+  unencrypted connections.
+Specific Result: The remote FTP service accepts logins without a previous sent 'AUTH TLS' command. Response(s):
+
+Non-anonymous sessions: 331 Please specify the password.
+Anonymous sessions:     331 Please specify the password.
+
+Vulnerability Detection Method: Tries to login to a non FTPS enabled FTP service without sending a
+  'AUTH TLS' command first and checks if the service is accepting the login without enforcing the use of
+  the 'AUTH TLS' command.
+Details:
+FTP Unencrypted Cleartext Login
+(OID: 1.3.6.1.4.1.25623.1.0.108528)
+Version used: 2023-12-20T05:05:58Z
+
+Affected Software/OS: nan
+Product Detection Result: nan
+Solution: Enable FTPS or enforce the connection via the 'AUTH TLS' command. Please see
+  the manual of the FTP service for more information.
+
+# Vulnerabilidade 49
+CVEs: nan
+NVT Name: Cleartext Transmission of Sensitive Information via HTTP
+Port: 80.0
+Port Protocol: tcp
+Summary: The host / application transmits sensitive information (username, passwords) in
+  cleartext via HTTP.
+Specific Result: The following input fields were identified (URL:input name):
+
+http://192.168.100.20/dvwa/login.php:password
+http://192.168.100.20/phpMyAdmin/:pma_password
+http://192.168.100.20/phpMyAdmin/?D=A:pma_password
+http://192.168.100.20/tikiwiki/tiki-install.php:pass
+http://192.168.100.20/twiki/bin/view/TWiki/TWikiUserAuthentication:oldpassword
+
+Vulnerability Detection Method: Evaluate previous collected information and check if the host / application is not
+  enforcing the transmission of sensitive data via an encrypted SSL/TLS connection.
+
+  The script is currently checking the following:
+
+  - HTTP Basic Authentication (Basic Auth)
+
+  - HTTP Forms (e.g. Login) with input field of type 'password'
+Details:
+Cleartext Transmission of Sensitive Information via HTTP
+(OID: 1.3.6.1.4.1.25623.1.0.108440)
+Version used: 2023-09-07T05:05:21Z
+
+Affected Software/OS: Hosts / applications which doesn't enforce the transmission of sensitive data via an
+  encrypted SSL/TLS connection.
+Product Detection Result: nan
+Solution: Enforce the transmission of sensitive data via an encrypted SSL/TLS connection.
+  Additionally make sure the host / application is redirecting all users to the secured SSL/TLS connection before
+  allowing to input sensitive data into the mentioned functions.
+
+# Vulnerabilidade 50
+CVEs: CVE-2011-3389,CVE-2015-0204,CVE-2023-41928,CVE-2024-41270,CVE-2025-3200
+NVT Name: SSL/TLS: Deprecated TLSv1.0 and TLSv1.1 Protocol Detection
+Port: 5432.0
+Port Protocol: tcp
+Summary: It was possible to detect the usage of the deprecated TLSv1.0
+  and/or TLSv1.1 protocol on this system.
+Specific Result: The service is only providing the deprecated TLSv1.0 protocol and supports one or more ciphers. Those supported ciphers can be found in the 'SSL/TLS: Report Supported Cipher Suites' (OID: 1.3.6.1.4.1.25623.1.0.802067) VT.
+
+Vulnerability Detection Method: Checks the used TLS protocols of the services provided by this
+  system.
+Details:
+SSL/TLS: Deprecated TLSv1.0 and TLSv1.1 Protocol Detection
+(OID: 1.3.6.1.4.1.25623.1.0.117274)
+Version used: 2025-04-30T05:39:51Z
+
+Affected Software/OS: '- All services providing an encrypted communication using the
+  TLSv1.0 and/or TLSv1.1 protocols
+
+  - CVE-2023-41928: Kiloview P1 4G and P2 4G Video Encoder
+
+  - CVE-2024-41270: Gorush v1.18.4
+
+  - CVE-2025-3200: Multiple products from Wiesemann & Theis
+Product Detection Result: Product: cpe:/a:ietf:transport_layer_security:1.0
+Method: SSL/TLS: Version Detection
+(OID: 1.3.6.1.4.1.25623.1.0.105782)
+
+Solution: It is recommended to disable the deprecated TLSv1.0 and/or
+  TLSv1.1 protocols in favor of the TLSv1.2+ protocols.
+
+  Please see the references for more resources supporting you with this task.
+
+# Vulnerabilidade 51
+CVEs: nan
+NVT Name: Weak Encryption Algorithm(s) Supported (SSH)
+Port: 22.0
+Port Protocol: tcp
+Summary: The remote SSH server is configured to allow / support weak
+  encryption algorithm(s).
+Specific Result: The remote SSH server supports the following weak client-to-server encryption algorithm(s):
+
+3des-cbc
+aes128-cbc
+aes192-cbc
+aes256-cbc
+arcfour
+arcfour128
+arcfour256
+blowfish-cbc
+cast128-cbc
+rijndael-cbc@lysator.liu.se
+
+
+The remote SSH server supports the following weak server-to-client encryption algorithm(s):
+
+3des-cbc
+aes128-cbc
+aes192-cbc
+aes256-cbc
+arcfour
+arcfour128
+arcfour256
+blowfish-cbc
+cast128-cbc
+rijndael-cbc@lysator.liu.se
+
+Vulnerability Detection Method: Checks the supported encryption algorithms (client-to-server
+  and server-to-client) of the remote SSH server.
+
+  Currently weak encryption algorithms are defined as the following:
+
+  - Arcfour (RC4) cipher based algorithms
+
+  - 'none' algorithm
+
+  - CBC mode cipher based algorithms
+Details:
+Weak Encryption Algorithm(s) Supported (SSH)
+(OID: 1.3.6.1.4.1.25623.1.0.105611)
+Version used: 2024-06-14T05:05:48Z
+
+Affected Software/OS: nan
+Product Detection Result: Product: cpe:/a:ietf:secure_shell_protocol
+Method: SSH Protocol Algorithms Supported
+(OID: 1.3.6.1.4.1.25623.1.0.105565)
+
+Solution: Disable the reported weak encryption algorithm(s).
+
+# Vulnerabilidade 52
+CVEs: CVE-2012-0053
+NVT Name: Apache HTTP Server httpOnly Cookie Information Disclosure Vulnerability
+Port: 80.0
+Port Protocol: tcp
+Summary: Apache HTTP Server is prone to a cookie information disclosure vulnerability.
+Specific Result: Vulnerability was detected according to the Vulnerability Detection Method.
+Vulnerability Detection Method: 
+Details:
+Apache HTTP Server 'httpOnly' Cookie Information Disclosure Vulnerability
+(OID: 1.3.6.1.4.1.25623.1.0.902830)
+Version used: 2025-03-05T05:38:53Z
+
+Affected Software/OS: Apache HTTP Server versions 2.2.0 through 2.2.21.
+Product Detection Result: Product: cpe:/a:apache:http_server:2.2.8
+Method: Apache HTTP Server Detection Consolidation
+(OID: 1.3.6.1.4.1.25623.1.0.117232)
+
+Solution: Update to Apache HTTP Server version 2.2.22 or later.
+
+# Vulnerabilidade 53
+CVEs: CVE-2010-4480
+NVT Name: phpMyAdmin error.php Cross Site Scripting Vulnerability
+Port: 80.0
+Port Protocol: tcp
+Summary: phpMyAdmin is prone to a cross-site scripting (XSS) vulnerability.
+Specific Result: Vulnerability was detected according to the Vulnerability Detection Method.
+Vulnerability Detection Method: 
+Details:
+phpMyAdmin 'error.php' Cross Site Scripting Vulnerability
+(OID: 1.3.6.1.4.1.25623.1.0.801660)
+Version used: 2023-10-17T05:05:34Z
+
+Affected Software/OS: phpMyAdmin version 3.3.8.1 and prior.
+Product Detection Result: nan
+Solution: No known solution was made available for at least one year since the disclosure
+  of this vulnerability. Likely none will be provided anymore. General solution options are to upgrade to a newer
+  release, disable respective features, remove the product or replace the product by another one.
+
+# Vulnerabilidade 54
+CVEs: CVE-2011-3389,CVE-2015-0204,CVE-2023-41928,CVE-2024-41270,CVE-2025-3200
+NVT Name: SSL/TLS: Deprecated TLSv1.0 and TLSv1.1 Protocol Detection
+Port: 25.0
+Port Protocol: tcp
+Summary: It was possible to detect the usage of the deprecated TLSv1.0
+  and/or TLSv1.1 protocol on this system.
+Specific Result: The service is only providing the deprecated TLSv1.0 protocol and supports one or more ciphers. Those supported ciphers can be found in the 'SSL/TLS: Report Supported Cipher Suites' (OID: 1.3.6.1.4.1.25623.1.0.802067) VT.
+
+Vulnerability Detection Method: Checks the used TLS protocols of the services provided by this
+  system.
+Details:
+SSL/TLS: Deprecated TLSv1.0 and TLSv1.1 Protocol Detection
+(OID: 1.3.6.1.4.1.25623.1.0.117274)
+Version used: 2025-04-30T05:39:51Z
+
+Affected Software/OS: '- All services providing an encrypted communication using the
+  TLSv1.0 and/or TLSv1.1 protocols
+
+  - CVE-2023-41928: Kiloview P1 4G and P2 4G Video Encoder
+
+  - CVE-2024-41270: Gorush v1.18.4
+
+  - CVE-2025-3200: Multiple products from Wiesemann & Theis
+Product Detection Result: Product: cpe:/a:ietf:transport_layer_security:1.0
+Method: SSL/TLS: Version Detection
+(OID: 1.3.6.1.4.1.25623.1.0.105782)
+
+Solution: It is recommended to disable the deprecated TLSv1.0 and/or
+  TLSv1.1 protocols in favor of the TLSv1.2+ protocols.
+
+  Please see the references for more resources supporting you with this task.
+
+# Vulnerabilidade 55
+CVEs: CVE-2011-4969
+NVT Name: jQuery < 1.6.3 XSS Vulnerability
+Port: 80.0
+Port Protocol: tcp
+Summary: jQuery is prone to a cross-site scripting (XSS)
+  vulnerability.
+Specific Result: Installed version: 1.3.2
+Fixed version:     1.6.3
+Installation
+path / port:       /mutillidae/javascript/ddsmoothmenu/jquery.min.js
+
+Detection info (see OID: 1.3.6.1.4.1.25623.1.0.150658 for more info):
+- Identified file: http://192.168.100.20/mutillidae/javascript/ddsmoothmenu/jquery.min.js
+- Referenced at:   http://192.168.100.20/mutillidae/
+
+Vulnerability Detection Method: Checks if a vulnerable version is present on the target host.
+Details:
+jQuery < 1.6.3 XSS Vulnerability
+(OID: 1.3.6.1.4.1.25623.1.0.141637)
+Version used: 2023-07-14T05:06:08Z
+
+Affected Software/OS: jQuery prior to version 1.6.3.
+Product Detection Result: nan
+Solution: Update to version 1.6.3 or later.
+
+# Vulnerabilidade 56
+CVEs: CVE-2015-0204
+NVT Name: SSL/TLS: RSA Temporary Key Handling RSA_EXPORT Downgrade Issue (FREAK)
+Port: 25.0
+Port Protocol: tcp
+Summary: This host is accepting 'RSA_EXPORT' cipher suites and is prone
+  to a man-in-the-middle (MITM) vulnerability.
+Specific Result: 'RSA_EXPORT' cipher suites accepted by this service via the SSLv3 protocol:
+
+TLS_DHE_RSA_EXPORT_WITH_DES40_CBC_SHA
+TLS_RSA_EXPORT_WITH_DES40_CBC_SHA
+TLS_RSA_EXPORT_WITH_RC2_CBC_40_MD5
+TLS_RSA_EXPORT_WITH_RC4_40_MD5
+
+'RSA_EXPORT' cipher suites accepted by this service via the TLSv1.0 protocol:
+
+TLS_DHE_RSA_EXPORT_WITH_DES40_CBC_SHA
+TLS_RSA_EXPORT_WITH_DES40_CBC_SHA
+TLS_RSA_EXPORT_WITH_RC2_CBC_40_MD5
+TLS_RSA_EXPORT_WITH_RC4_40_MD5
+
+
+
+Vulnerability Detection Method: Checks previous collected cipher suites.
+Details:
+SSL/TLS: RSA Temporary Key Handling 'RSA_EXPORT' Downgrade Issue (FREAK)
+(OID: 1.3.6.1.4.1.25623.1.0.805142)
+Version used: 2025-03-27T05:38:50Z
+
+Affected Software/OS: '- Hosts accepting 'RSA_EXPORT' cipher suites.
+
+  - OpenSSL versions prior to 0.9.8zd, 1.0.0 prior to 1.0.0p and 1.0.1 prior to 1.0.1k.
+Product Detection Result: Product: cpe:/a:ietf:transport_layer_security
+Method: SSL/TLS: Report Supported Cipher Suites
+(OID: 1.3.6.1.4.1.25623.1.0.802067)
+
+Solution: '- Remove support for 'RSA_EXPORT' cipher suites from the
+  service. Please see the references for more resources supporting you with this task.
+
+  - If the service is using OpenSSL: Update to version 0.9.8zd, 1.0.0p, 1.0.1k or later.
+
+# Vulnerabilidade 57
+CVEs: nan
+NVT Name: SSL/TLS: Certificate Signed Using A Weak Signature Algorithm
+Port: 5432.0
+Port Protocol: tcp
+Summary: The remote service is using a SSL/TLS certificate in the certificate chain that has been signed using a
+  cryptographically weak hashing algorithm.
+Specific Result: The following certificates are part of the certificate chain but using insecure signature algorithms:
+
+Subject:              1.2.840.113549.1.9.1=#726F6F74407562756E74753830342D626173652E6C6F63616C646F6D61696E,CN=ubuntu804-base.localdomain,OU=Office for Complication of Otherwise Simple Affairs,O=OCOSA,L=Everywhere,ST=There is no such thing outside US,C=XX
+Signature Algorithm:  sha1WithRSAEncryption
+
+
+
+Vulnerability Detection Method: Check which hashing algorithm was used to sign the remote SSL/TLS certificate.
+Details:
+SSL/TLS: Certificate Signed Using A Weak Signature Algorithm
+(OID: 1.3.6.1.4.1.25623.1.0.105880)
+Version used: 2021-10-15T11:13:32Z
+
+Affected Software/OS: nan
+Product Detection Result: nan
+Solution: Servers that use SSL/TLS certificates signed with a weak SHA-1, MD5, MD4 or MD2 hashing algorithm will need to obtain new
+  SHA-2 signed SSL/TLS certificates to avoid web browser SSL/TLS certificate warnings.
+
+# Vulnerabilidade 58
+CVEs: nan
+NVT Name: SSL/TLS: Diffie-Hellman Key Exchange Insufficient DH Group Strength Vulnerability
+Port: 5432.0
+Port Protocol: tcp
+Summary: The SSL/TLS service uses Diffie-Hellman groups with insufficient
+  strength (key size < 2048).
+Specific Result: Server Temporary Key Size: 1024 bits
+
+
+Vulnerability Detection Method: Checks the DHE temporary public key size.
+Details:
+SSL/TLS: Diffie-Hellman Key Exchange Insufficient DH Group Strength Vulnerab...
+(OID: 1.3.6.1.4.1.25623.1.0.106223)
+Version used: 2025-03-27T05:38:50Z
+
+Affected Software/OS: All services providing an encrypted communication using
+  Diffie-Hellman groups with insufficient strength.
+Product Detection Result: nan
+Solution: '- Deploy (Ephemeral) Elliptic-Curve Diffie-Hellman (ECDHE) or use
+  a 2048-bit or stronger Diffie-Hellman group. Please see the references for more resources
+  supporting you with this task.
+
+  - For Apache Web Servers: Beginning with version 2.4.7, mod_ssl will use DH parameters which
+  include primes with lengths of more than 1024 bits.
+
+# Vulnerabilidade 59
+CVEs: nan
+NVT Name: SSL/TLS: Diffie-Hellman Key Exchange Insufficient DH Group Strength Vulnerability
+Port: 25.0
+Port Protocol: tcp
+Summary: The SSL/TLS service uses Diffie-Hellman groups with insufficient
+  strength (key size < 2048).
+Specific Result: Server Temporary Key Size: 1024 bits
+
+
+Vulnerability Detection Method: Checks the DHE temporary public key size.
+Details:
+SSL/TLS: Diffie-Hellman Key Exchange Insufficient DH Group Strength Vulnerab...
+(OID: 1.3.6.1.4.1.25623.1.0.106223)
+Version used: 2025-03-27T05:38:50Z
+
+Affected Software/OS: All services providing an encrypted communication using
+  Diffie-Hellman groups with insufficient strength.
+Product Detection Result: nan
+Solution: '- Deploy (Ephemeral) Elliptic-Curve Diffie-Hellman (ECDHE) or use
+  a 2048-bit or stronger Diffie-Hellman group. Please see the references for more resources
+  supporting you with this task.
+
+  - For Apache Web Servers: Beginning with version 2.4.7, mod_ssl will use DH parameters which
+  include primes with lengths of more than 1024 bits.
+
+# Vulnerabilidade 60
+CVEs: nan
+NVT Name: SSL/TLS: Certificate Signed Using A Weak Signature Algorithm
+Port: 25.0
+Port Protocol: tcp
+Summary: The remote service is using a SSL/TLS certificate in the certificate chain that has been signed using a
+  cryptographically weak hashing algorithm.
+Specific Result: The following certificates are part of the certificate chain but using insecure signature algorithms:
+
+Subject:              1.2.840.113549.1.9.1=#726F6F74407562756E74753830342D626173652E6C6F63616C646F6D61696E,CN=ubuntu804-base.localdomain,OU=Office for Complication of Otherwise Simple Affairs,O=OCOSA,L=Everywhere,ST=There is no such thing outside US,C=XX
+Signature Algorithm:  sha1WithRSAEncryption
+
+
+
+Vulnerability Detection Method: Check which hashing algorithm was used to sign the remote SSL/TLS certificate.
+Details:
+SSL/TLS: Certificate Signed Using A Weak Signature Algorithm
+(OID: 1.3.6.1.4.1.25623.1.0.105880)
+Version used: 2021-10-15T11:13:32Z
+
+Affected Software/OS: nan
+Product Detection Result: nan
+Solution: Servers that use SSL/TLS certificates signed with a weak SHA-1, MD5, MD4 or MD2 hashing algorithm will need to obtain new
+  SHA-2 signed SSL/TLS certificates to avoid web browser SSL/TLS certificate warnings.
+
+# Vulnerabilidade 61
+CVEs: CVE-2015-4000
+NVT Name: SSL/TLS: DHE_EXPORT MITM Security Bypass Vulnerability (LogJam)
+Port: 25.0
+Port Protocol: tcp
+Summary: This host is accepting 'DHE_EXPORT' cipher suites and is prone
+  to a man-in-the-middle (MITM) vulnerability.
+Specific Result: 'DHE_EXPORT' cipher suites accepted by this service via the SSLv3 protocol:
+
+TLS_DHE_RSA_EXPORT_WITH_DES40_CBC_SHA
+TLS_DH_anon_EXPORT_WITH_DES40_CBC_SHA
+TLS_DH_anon_EXPORT_WITH_RC4_40_MD5
+
+'DHE_EXPORT' cipher suites accepted by this service via the TLSv1.0 protocol:
+
+TLS_DHE_RSA_EXPORT_WITH_DES40_CBC_SHA
+TLS_DH_anon_EXPORT_WITH_DES40_CBC_SHA
+TLS_DH_anon_EXPORT_WITH_RC4_40_MD5
+
+
+
+Vulnerability Detection Method: Checks previous collected cipher suites.
+Details:
+SSL/TLS: 'DHE_EXPORT' MITM Security Bypass Vulnerability (LogJam)
+(OID: 1.3.6.1.4.1.25623.1.0.805188)
+Version used: 2025-03-27T05:38:50Z
+
+Affected Software/OS: '- Hosts accepting 'DHE_EXPORT' cipher suites.
+
+  - OpenSSL versions prior to 1.0.1n and 1.0.2 prior to 1.0.2b.
+Product Detection Result: Product: cpe:/a:ietf:transport_layer_security
+Method: SSL/TLS: Report Supported Cipher Suites
+(OID: 1.3.6.1.4.1.25623.1.0.802067)
+
+Solution: '- Remove support for 'DHE_EXPORT' cipher
+  suites from the service. Please see the references for more resources supporting you with this
+  task.
+
+  - If the service is using OpenSSL: Update to version 1.0.1n, 1.0.2b or later.
+
+# Vulnerabilidade 62
+CVEs: CVE-2014-3566
+NVT Name: SSL/TLS: SSLv3 Protocol CBC Cipher Suites Information Disclosure Vulnerability (POODLE)
+Port: 25.0
+Port Protocol: tcp
+Summary: This host is prone to an information disclosure vulnerability.
+Specific Result: Vulnerability was detected according to the Vulnerability Detection Method.
+Vulnerability Detection Method: Evaluate previous collected information about this service.
+Details:
+SSL/TLS: SSLv3 Protocol CBC Cipher Suites Information Disclosure Vulnerabili...
+(OID: 1.3.6.1.4.1.25623.1.0.802087)
+Version used: 2024-09-30T08:38:05Z
+
+Affected Software/OS: nan
+Product Detection Result: Product: cpe:/a:ietf:transport_layer_security
+Method: SSL/TLS: Report Supported Cipher Suites
+(OID: 1.3.6.1.4.1.25623.1.0.802067)
+
+Solution: Possible Mitigations are:
+
+  - Disable SSLv3
+
+  - Disable cipher suites supporting CBC cipher modes
+
+  - Enable TLS_FALLBACK_SCSV if the service is providing TLSv1.0+
+
+# Vulnerabilidade 63
+CVEs: CVE-2014-3566
+NVT Name: SSL/TLS: SSLv3 Protocol CBC Cipher Suites Information Disclosure Vulnerability (POODLE)
+Port: 5432.0
+Port Protocol: tcp
+Summary: This host is prone to an information disclosure vulnerability.
+Specific Result: Vulnerability was detected according to the Vulnerability Detection Method.
+Vulnerability Detection Method: Evaluate previous collected information about this service.
+Details:
+SSL/TLS: SSLv3 Protocol CBC Cipher Suites Information Disclosure Vulnerabili...
+(OID: 1.3.6.1.4.1.25623.1.0.802087)
+Version used: 2024-09-30T08:38:05Z
+
+Affected Software/OS: nan
+Product Detection Result: Product: cpe:/a:ietf:transport_layer_security
+Method: SSL/TLS: Report Supported Cipher Suites
+(OID: 1.3.6.1.4.1.25623.1.0.802067)
+
+Solution: Possible Mitigations are:
+
+  - Disable SSLv3
+
+  - Disable cipher suites supporting CBC cipher modes
+
+  - Enable TLS_FALLBACK_SCSV if the service is providing TLSv1.0+
+
+# Vulnerabilidade 64
+CVEs: nan
+NVT Name: Weak MAC Algorithm(s) Supported (SSH)
+Port: 22.0
+Port Protocol: tcp
+Summary: The remote SSH server is configured to allow / support weak MAC
+  algorithm(s).
+Specific Result: The remote SSH server supports the following weak client-to-server MAC algorithm(s):
+
+hmac-md5
+hmac-md5-96
+hmac-sha1-96
+umac-64@openssh.com
+
+
+The remote SSH server supports the following weak server-to-client MAC algorithm(s):
+
+hmac-md5
+hmac-md5-96
+hmac-sha1-96
+umac-64@openssh.com
+
+Vulnerability Detection Method: Checks the supported MAC algorithms (client-to-server and
+  server-to-client) of the remote SSH server.
+
+  Currently weak MAC algorithms are defined as the following:
+
+  - MD5 based algorithms
+
+  - 96-bit based algorithms
+
+  - 64-bit based algorithms
+
+  - 'none' algorithm
+Details:
+Weak MAC Algorithm(s) Supported (SSH)
+(OID: 1.3.6.1.4.1.25623.1.0.105610)
+Version used: 2024-06-14T05:05:48Z
+
+Affected Software/OS: nan
+Product Detection Result: Product: cpe:/a:ietf:secure_shell_protocol
+Method: SSH Protocol Algorithms Supported
+(OID: 1.3.6.1.4.1.25623.1.0.105565)
+
+Solution: Disable the reported weak MAC algorithm(s).
+
+# Vulnerabilidade 65
+CVEs: nan
+NVT Name: TCP Timestamps Information Disclosure
+Port: nan
+Port Protocol: nan
+Summary: The remote host implements TCP timestamps and therefore allows
+  to compute the uptime.
+Specific Result: It was detected that the host implements RFC1323/RFC7323.
+
+The following timestamps were retrieved with a delay of 1 seconds in-between:
+Packet 1: 95834
+Packet 2: 95943
+
+Vulnerability Detection Method: Special IP packets are forged and sent with a little delay in
+  between to the target IP. The responses are searched for a timestamps. If found, the timestamps
+  are reported.
+Details:
+TCP Timestamps Information Disclosure
+(OID: 1.3.6.1.4.1.25623.1.0.80091)
+Version used: 2023-12-15T16:10:08Z
+
+Affected Software/OS: TCP implementations that implement RFC1323/RFC7323.
+Product Detection Result: nan
+Solution: To disable TCP timestamps on linux add the line
+  'net.ipv4.tcp_timestamps = 0' to /etc/sysctl.conf. Execute 'sysctl -p' to apply the settings at
+  runtime.
+
+  To disable TCP timestamps on Windows execute 'netsh int tcp set global timestamps=disabled'
+
+  Starting with Windows Server 2008 and Vista, the timestamp can not be completely disabled.
+
+  The default behavior of the TCP/IP stack on this Systems is to not use the Timestamp options when
+  initiating TCP connections, but use them if the TCP peer that is initiating communication includes
+  them in their synchronize (SYN) segment.
+
+  See the references for more information.
+
+# Vulnerabilidade 66
+CVEs: CVE-1999-0524
+NVT Name: ICMP Timestamp Reply Information Disclosure
+Port: nan
+Port Protocol: nan
+Summary: The remote host responded to an ICMP timestamp request.
+Specific Result: The following response / ICMP packet has been received:
+- ICMP Type: 14
+- ICMP Code: 0
+
+Vulnerability Detection Method: Sends an ICMP Timestamp (Type 13) request and checks if a
+  Timestamp Reply (Type 14) is received.
+Details:
+ICMP Timestamp Reply Information Disclosure
+(OID: 1.3.6.1.4.1.25623.1.0.103190)
+Version used: 2025-01-21T05:37:33Z
+
+Affected Software/OS: nan
+Product Detection Result: nan
+Solution: Various mitigations are possible:
+
+  - Disable the support for ICMP timestamp on the remote host completely
+
+  - Protect the remote host by a firewall, and block ICMP packets passing through the firewall in
+  either direction (either completely or only for untrusted networks)
+
+    ## REGRAS E RESTRIÇÕES DE SAÍDA
+    1.  **APENAS SCRIPT:** A sua resposta deve conter ÚNICA E EXCLUSIVAMENTE o código do script.
+    2.  **SEM EXPLICAÇÕES:** Não adicione nenhum comentário, explicação, introdução, ou despedida.
+    3.  **SEM BLOCOS DE CÓDIGO MARKDOWN:** Não envolva o script em blocos de código como ` ```bash ` ou ` ```sh `. A resposta deve ser o texto puro do script.
+    4.  **AUTOSSUFICIENTE:** O script deve ser completo, autônomo e não deve exigir interação do usuário para ser executado.
+    5.  **COMPATIBILIDADE:** O script deve ser compatível com o sistema operacional especificado em 'localhost OS'. Se o sistema operacional não for especificado, assuma um sistema baseado em Linux (como Ubuntu/Debian).
+
+>Scripts de correção:
+{type: uploaded file
+fileName: metasploitable66VT_1.txt
+fullContent:
+#!/bin/bash
+# Vulnerabilidade 1 (TWiki): Remover TWiki vulnerável
+rm -rf /var/www/twiki
+
+# Vulnerabilidade 2 (dRuby): Parar serviço DRb
+pkill -f "druby"
+systemctl stop druby 2>/dev/null
+systemctl disable druby 2>/dev/null
+
+# Vulnerabilidades 3,5,6,11,12,13,19,20,24,45,46,47,48: Remover/parar serviços inseguros
+apt purge -y rsh-client rsh-server netkit-rsh rexecd rexec vsftpd distcc telnetd
+apt purge -y vnc4server xtightvncviewer vinagre
+systemctl stop rlogin 2>/dev/null
+systemctl disable rlogin 2>/dev/null
+systemctl stop distcc 2>/dev/null
+systemctl disable distcc 2>/dev/null
+systemctl stop vncserver 2>/dev/null
+systemctl disable vncserver 2>/dev/null
+
+# Vulnerabilidades MySQL/PostgreSQL (8,14): Alterar senhas e bloquear acesso remoto
+mysql -e "ALTER USER 'root'@'localhost' IDENTIFIED BY 'NpSpcF!BZ9Xx&W@o#k'; FLUSH PRIVILEGES;"
+sudo -u postgres psql -c "ALTER USER postgres WITH PASSWORD 'U5erStR0nGp4ss!';"
+
+# Vulnerabilidade 7 (Tomcat): Parar Tomcat e desativar AJP
+systemctl stop tomcat
+sed -i 's/secretRequired="true"/secretRequired="true" address="127.0.0.1"/g' /etc/tomcat*/server.xml
+
+# Vulnerabilidades 9,10 (PHP): Atualizar PHP e remover ini inseguro
+apt install -y php=5.6.30* libapache2-mod-php=5.6.30*
+rm -f /etc/php5/cgi/php.ini /etc/php5/apache2/php.ini
+cp /etc/php5/apache2/php.ini.dpkg-dist /etc/php5/apache2/php.ini
+find /var/www -name phpinfo.php -delete
+
+# Vulnerabilidades Apache (16,31,44): Desativar métodos perigosos
+echo -e "<Location "/">\nAllowMethods GET POST OPTIONS\n</Location>" > /etc/apache2/conf-available/disable-methods.conf
+a2enconf disable-methods
+a2dismod -f autoindex
+sed -i 's/Options Indexes/Options -Indexes/' /etc/apache2/apache2.conf
+systemctl restart apache2
+
+# Vulnerabilidades SSH (34,36,51,64): Segurança SSH
+sed -i '/^KexAlgorithms/d' /etc/ssh/sshd_config
+echo "KexAlgorithms curve25519-sha256@libssh.org,diffie-hellman-group-exchange-sha256" >> /etc/ssh/sshd_config
+echo "HostKeyAlgorithms ssh-ed25519,ssh-rsa" >> /etc/ssh/sshd_config
+echo "Ciphers chacha20-poly1305@openssh.com,aes256-gcm@openssh.com,aes128-gcm@openssh.com" >> /etc/ssh/sshd_config
+echo "MACs hmac-sha2-512-etm@openssh.com,hmac-sha2-256-etm@openssh.com" >> /etc/ssh/sshd_config
+systemctl restart ssh
+
+# Vulnerabilidades TLS (21,22,28,29,30,32,33,38,39,40,41,50,54,56,57,58,59,60,61,62,63)
+update-ca-certificates --fresh
+find /etc/ssl/ -name "*.crt" -mtime +365 -delete
+openssl req -x509 -nodes -days 365 -newkey rsa:4096 -keyout /etc/ssl/private/nginx-selfsigned.key -out /etc/ssl/certs/nginx-selfsigned.crt -subj "/CN=localhost"
+
+# Vulnerabilidade 25,55 (jQuery): Atualizar jQuery
+find /var/www -name 'jquery*.js' -exec rm -f {} \;
+wget -P /var/www/mutillidae/javascript/ https://code.jquery.com/jquery-3.6.0.min.js
+
+# Vulnerabilidade 37 (Servidor de email): Desativar VRFY/EXPN
+postconf -e "disable_vrfy_command=yes"
+systemctl reload postfix
+
+# Vulnerabilidades network (65,66): Configurar sysctl
+echo "net.ipv4.tcp_timestamps=0" >> /etc/sysctl.conf
+echo "net.ipv4.icmp_echo_ignore_all=1" >> /etc/sysctl.conf
+sysctl -p
+
+# Atualizar sistema e limpar
+apt update -y
+apt full-upgrade -y
+apt autoremove -y --purge
+apt clean
+
+# Auditar e reverter vulnerabilidade da porta 1524 (Vulnerabilidade 6)
+netstat -tulpn | awk '$NF ~ /1524/ {system("kill -9 " $7)}'
+crontab -l | grep -v "192.168.100.20" | crontab -}
+{type: uploaded file
+fileName: metasploitable66VT_2.txt
+fullContent:
+#!/bin/bash
+
+# Redefinir senhas padrão e adicionar usuários necessários
+mysql -e "ALTER USER 'root'@'localhost' IDENTIFIED BY 'N0v4_S3nha_S3gur@'; FLUSH PRIVILEGES;" 2>/dev/null
+sudo -u postgres psql -c "ALTER USER postgres WITH PASSWORD 'S3nh4_F0rt3_P0stgr3s';" 2>/dev/null
+(echo "S3nh@_VNC_F0rt3!") | vncpasswd -f > /etc/vncpasswd
+
+# Atualizar pacotes críticos e remover vulnerabilidades conhecidas
+DEBIAN_FRONTEND=noninteractive apt-get update >/dev/null
+DEBIAN_FRONTEND=noninteractive apt-get install --only-upgrade -y openssl >/dev/null
+
+# Desativar serviços vulneráveis
+services=("rlogin" "rexec" "rsh" "vino" "distcc" "druby" "telnet" "ajp" "ingreslock")
+for svc in "${services[@]}"; do
+    [ -f "/etc/init.d/$svc" ] && /etc/init.d/$svc stop >/dev/null
+    update-rc.d -f "$svc" remove >/dev/null 2>&1
+    [ -f "/etc/xinetd.d/$svc" ] && rm -f "/etc/xinetd.d/$svc"  
+done
+
+# Configurar hardening em serviços essenciais
+sed -i '/^PermitRootLogin/c\PermitRootLogin no' /etc/ssh/sshd_config
+sed -i '/^#*PasswordAuthentication/c\PasswordAuthentication no' /etc/ssh/sshd_config
+[ -f /etc/ssh/sshd_config ] && service ssh restart >/dev/null
+
+# Configurar SSL/TLS em serviços críticos
+[ -f /etc/postfix/main.cf ] && postconf -e "smtpd_tls_protocols=!SSLv2,!SSLv3,!TLSv1,!TLSv1.1"
+[ -f /etc/postgresql/*/main/postgresql.conf ] && sed -i "s/ssl_ciphers.*/ssl_ciphers = 'HIGH:!aNULL:!MD5:!3DES'/g" /etc/postgresql/*/main/postgresql.conf
+
+# Configurar hardening do Apache
+[ -f /etc/apache2/apache2.conf ] && {
+    echo -e "<Directory />\nAllowOverride None\nOrder Deny,Allow\nDeny from all\n</Directory>" >> /etc/apache2/conf-enabled/security.conf
+    a2dismod cgi >/dev/null
+    apache2ctl graceful >/dev/null
+}
+
+# Remover arquivos sensíveis
+find /var/www/ -name "phpinfo.php" -exec rm -f {} \; >/dev/null 2>&1
+rm -rf /usr/share/twiki /var/www/html/{mutillidae,dvwa,doc} >/dev/null 2>&1
+
+# Configurar firewall básico
+iptables -A INPUT -p tcp --dport 80 -j ACCEPT
+iptables -A INPUT -p tcp --dport 443 -j ACCEPT
+iptables -A INPUT -p tcp --dport 22 -j ACCEPT
+iptables -A INPUT -j DROP
+
+# Aplicar hardening do kernel contra informações do sistema
+sysctl -w net.ipv4.tcp_timestamps=0 >/dev/null
+sysctl -w net.ipv4.icmp_echo_ignore_all=1 >/dev/null
+echo 'iptables-persistent iptables-persistent/autosave_v4 boolean true' | debconf-set-selections
+echo 'iptables-persistent iptables-persistent/autosave_v6 boolean true' | debconf-set-selections
+DEBIAN_FRONTEND=noninteractive apt-get install -y iptables-persistent >/dev/null
+netfilter-persistent save >/dev/null
+
+# Nota: Atualização do sistema operacional não realizada devido ao EOL - Recomendada migração para versão suportada}
+{type: uploaded file
+fileName: metasploitable66VT_3.txt
+fullContent:
+```bash
+#!/bin/bash
+set -euo pipefail
+
+disable_service() {
+    service_name=$1
+    port=$2
+    echo "Disabling service $service_name on port $port..."
+    if systemctl list-unit-files | grep -q "$service_name.service"; then
+        systemctl stop "$service_name"
+        systemctl disable "$service_name"
+    fi
+    if command -v ufw &>/dev/null; then
+        ufw deny "$port/tcp"
+    fi
+}
+
+update_config() {
+    file=$1
+    key=$2
+    value=$3
+    if [ -f "$file" ]; then
+        if grep -q "^$key" "$file"; then
+            sed -i "s/^$key.*/$key $value/" "$file"
+        else
+            echo "$key $value" >> "$file"
+        fi
+    fi
+}
+
+# Vulnerabilidade 1,23,26,27: TWiki vulnerabilities
+find / -path '*/twiki*' -type d 2>/dev/null | while read -r twikidir; do
+    echo "Removing vulnerable TWiki installation at $twikidir..."
+    rm -rf "$twikidir"
+done
+
+# Vulnerabilidade 2: Distributed Ruby RCE
+disable_service "druby" 8787
+disable_service "dRuby" 8787
+
+# Vulnerabilidade 3,19: rlogin Disable
+update_config /etc/inetd.conf "login" ""
+update_config /etc/xinetd.d/rlogin "disable" "yes"
+pkill -9 -f "rlogind|rlogin"
+if [ -f /etc/securetty ]; then
+    sed -i '/rlogin/d' /etc/securetty
+fi
+
+# Vulnerabilidade 5: rexec Disable
+update_config /etc/inetd.conf "exec" ""
+update_config /etc/xinetd.d/rexec "disable" "yes"
+pkill -9 -f "rexecd|rexec"
+
+# Vulnerabilidade 6: Ingreslock Backdoor
+lsof -i :1524 | awk 'NR>1 {print $2}' | xargs kill -9
+rm -f /tmp/ingreslock
+update_config /etc/inetd.conf "ingreslock" ""
+update_config /etc/xinetd.d/ingreslock "disable" "yes"
+
+# Vulnerabilidade 7: Tomcat Ghostcat
+for tomcat_dir in /opt/tomcat /usr/share/tomcat*; do
+    [ -d "$tomcat_dir" ] && find "$tomcat_dir/conf" -name "server.xml" | while read conf; do
+        sed -i '/<Connector.*8009.*/s/\(port="8009"\)/\1 enableLookups="false" allowTrace="false" maxPostSize="-1"/' "$conf"
+        sed -i '/<Connector.*8009.*/s/ protocol="AJP\/1.3"/ secure="true" allowedRequestAttributesPattern=".*"/' "$conf"
+    done
+done
+
+# Vulnerabilidade 8: MySQL Default Credentials
+if command -v mysql &>/dev/null; then
+    mysql -e "UPDATE mysql.user SET plugin='mysql_native_password' WHERE User='root';"
+    mysql -e "ALTER USER 'root'@'localhost' IDENTIFIED BY 'Q!w2E#r4T%y6'; FLUSH PRIVILEGES;"
+fi
+
+# Vulnerabilidade 9,10: PHP Upgrade & Config
+{ [ -d /etc/php5/apache2 ] && echo "log_errors=On\nexpose_php=Off\ndisable_functions=exec,passthru,shell_exec,system" >> /etc/php5/apache2/php.ini; } || true
+find /var/www /usr/share -name phpinfo.php -exec rm -f {} \;
+
+# Vulnerabilidade 14: PostgreSQL Credentials
+if command -v psql &>/dev/null; then
+    psql -U postgres -c "ALTER USER postgres WITH PASSWORD 'A1b2C3d4E5f6!';"
+fi
+
+# Vulnerabilidade 15: VNC Password
+find / -name "*.vnc" -exec sed -i 's/^[[:space:]]*Password[[:space:]]*=[[:space:]]*.*/Password = ZAQ!2wsx/' {} +
+
+# Vulnerabilidade 16: HTTP Dangerous Methods
+find /etc/apache2 -name "*.conf" -exec sed -i '/<Directory/,/<\/Directory>/s/AllowOverride None/AllowOverride All/' {} +
+find /etc/apache2 -name "*.conf" -exec sed -i '/<Limit PUT DELETE>/c\<Limit PUT DELETE>\nOrder deny,allow\nDeny from all\n</Limit>' {} +
+
+# Vulnerabilidade 24: Anonymous FTP
+if [ -f /etc/vsftpd.conf ]; then
+    sed -i 's/anonymous_enable=.*/anonymous_enable=NO/' /etc/vsftpd.conf
+fi
+echo "This system contains security patches" > /etc/banner-msg
+
+# Vulnerabilidade 45: Telnet Disable
+disable_service "telnet" 23
+update_config /etc/inetd.conf "telnet" ""
+
+# Vulnerabilidade 46,48: FTP Encryption Enforcement
+if [ -f /etc/vsftpd.conf ]; then
+    echo "ssl_enable=YES" >> /etc/vsftpd.conf
+    echo "force_local_logins_ssl=YES" >> /etc/vsftpd.conf
+    echo "force_local_data_ssl=YES" >> /etc/vsftpd.conf
+fi
+
+# Vulnerabilidade 47: VNC Encryption
+find / -name "xstartup" -exec sed -i 's/^exec$/exec \/usr\/bin\/ssh-agent \/usr\/bin\/dbus-launch \/etc\/X11\/Xsession/' {} +
+
+# Vulnerabilidade 49: HTTP to HTTPS Redirect
+if [ -f /etc/apache2/sites-enabled/*.conf ]; then
+    sed -i '/<VirtualHost/,/<\/VirtualHost>/ {
+        /DocumentRoot/i RewriteEngine On\nRewriteCond %{HTTPS} off\nRewriteRule ^/?(.*) https://%{SERVER_NAME}/$1 [R=301,L]
+    }' /etc/apache2/sites-enabled/*.conf || true
+fi
+
+# Vulnerabilidade 35: PHPInfo Removal
+find /var/www -type f -name "phpinfo.php" -exec rm -f {} \;
+
+# Reiniciar serviços críticos
+[ -d /etc/apache2 ] && systemctl restart apache2 || true
+[ -f /etc/init.d/ssh ] && systemctl restart ssh || true
+
+echo "Applied security patches successfully."
+exit 0
+```}
+{type: uploaded file
+fileName: metasploitable66VT_4.txt
+fullContent:
+#!/bin/bash
+
+# Remove vulnerable services
+apt-get remove -y --purge rsh-server rsh-redone-server vsftpd telnetd vnc4server distcc
+
+# Disable unnecessary services
+update-rc.d -f rlogin remove
+update-rc.d -f rexec remove
+update-rc.d -f distcc remove
+update-rc.d -f vncserver remove
+
+# Patch SSH configuration
+sed -i 's/^#Port 22/Port 22/' /etc/ssh/sshd_config
+sed -i 's/^#Protocol 2/Protocol 2/' /etc/ssh/sshd_config
+sed -i 's/^#PermitRootLogin yes/PermitRootLogin no/' /etc/ssh/sshd_config
+echo "KexAlgorithms diffie-hellman-group14-sha1,diffie-hellman-group-exchange-sha256" >> /etc/ssh/sshd_config
+echo "Ciphers aes128-ctr,aes192-ctr,aes256-ctr" >> /etc/ssh/sshd_config
+service ssh restart
+
+# Apache hardening
+a2dismod allowtrace
+echo "TraceEnable off" >> /etc/apache2/apache2.conf
+echo "<Directory /var/www/doc>
+    Require all denied
+</Directory>" > /etc/apache2/conf-available/doc-restriction.conf
+a2enconf doc-restriction
+service apache2 restart
+
+# Remove dangerous files
+find /var/www -name phpinfo.php -exec rm -f {} \;
+rm -rf /var/www/twiki*
+
+# MySQL security
+mysql -e "ALTER USER 'root'@'localhost' IDENTIFIED BY 'SecurePass!123';"
+mysql -e "DELETE FROM mysql.user WHERE User='';"
+mysql -e "FLUSH PRIVILEGES;"
+
+# PostgreSQL security
+sudo -u postgres psql -c "ALTER USER postgres PASSWORD 'PostgresSecure!456';"
+
+# Password changes
+users=("msfadmin" "postgres" "service" "user")
+for user in "${users[@]}"; do
+    if id "$user" &>/dev/null; then
+        echo "$user:NewSecurePassword$RANDOM$RANDOM" | chpasswd
+    fi
+done
+
+# Tomcat AJP mitigation
+sed -i '/<Connector port=\"8009\"/s/\(.*\)/<!-- \1 -->/' /etc/tomcat?/server.xml
+service tomcat restart
+
+# TLS hardening
+echo "ssl_session_cache shared:SSL:10m" >> /etc/postfix/main.cf
+echo "smtpd_tls_security_level = may" >> /etc/postfix/main.cf
+service postfix restart
+
+# Sysctl hardening
+echo "net.ipv4.tcp_timestamps=0" >> /etc/sysctl.conf
+sysctl -p}
+{type: uploaded file
+fileName: metasploitable66VT_5.txt
+fullContent:
+```bash
+#!/bin/bash
+
+# Backup original configuration files
+mkdir -p /backup/{ssh,apache,mysql,postgresql,tomcat,php}
+cp /etc/ssh/sshd_config /backup/ssh/
+cp /etc/apache2/apache2.conf /backup/apache/
+cp -r /etc/mysql /backup/mysql/
+cp -r /etc/postgresql /backup/postgresql/
+cp /etc/default/tomcat* /backup/tomcat/ 2>/dev/null
+cp $CATALINA_HOME/conf/server.xml /backup/tomcat/ 2>/dev/null
+cp /etc/php5/*/php.ini /backup/php/ 2>/dev/null
+
+# Disable insecure services through inetd/xinetd
+sed -i '/rlogin/s/^/#/' /etc/inetd.conf 2>/dev/null
+sed -i '/rsh/s/^/#/' /etc/inetd.conf 2>/dev/null
+sed -i '/rexec/s/^/#/' /etc/inetd.conf 2>/dev/null
+sed -i '/telnet/s/^/#/' /etc/inetd.conf 2>/dev/null
+[ -f /etc/xinetd.d/telnet ] && sed -i '/disable/s/no/yes/' /etc/xinetd.d/telnet
+killall -HUP inetd 2>/dev/null
+service xinetd restart 2>/dev/null
+
+# Stop and disable services using system V init
+services=("vsftpd" "vncserver" "distcc" "tomcat*" "drb-server" "ingreslock")
+for svc in "${services[@]}"; do
+    service "$svc" stop 2>/dev/null
+    update-rc.d -f "$svc" remove 2>/dev/null
+done
+pkill -f ingreslock 2>/dev/null
+
+# Change MySQL default credentials
+mysql -e "ALTER USER 'root'@'localhost' IDENTIFIED BY 'Str0ngP@ssw0rd!';"
+mysql -e "DROP USER ''@'localhost';" 2>/dev/null
+mysql -e "DROP USER ''@'$(hostname)';" 2>/dev/null
+mysql -e "FLUSH PRIVILEGES;"
+
+# Change PostgreSQL default credentials
+sudo -u postgres psql -c "ALTER USER postgres WITH PASSWORD 'Secur3P@ss!';"
+
+# Secure SSH
+sed -i 's/^#Port 22/Port 2222/' /etc/ssh/sshd_config
+sed -i 's/^#*PermitRootLogin.*/PermitRootLogin no/' /etc/ssh/sshd_config
+echo -e "Ciphers chacha20-poly1305@openssh.com,aes256-gcm@openssh.com,aes128-gcm@openssh.com,aes256-ctr,aes192-ctr,aes128-ctr\nMACs hmac-sha2-512-etm@openssh.com,hmac-sha2-256-etm@openssh.com,umac-128-etm@openssh.com\nKexAlgorithms curve25519-sha256@libssh.org,diffie-hellman-group-exchange-sha256" >> /etc/ssh/sshd_config
+service ssh restart
+
+# Harden Apache
+echo -e "<Directory />\n  AllowOverride None\n  <LimitExcept GET POST HEAD OPTIONS>\n    Deny from all\n  </LimitExcept>\n</Directory>\n<Directory /usr/doc>\n  Order deny,allow\n  Deny from all\n</Directory>\nTraceEnable off" >> /etc/apache2/apache2.conf
+a2dismod cgi 2>/dev/null
+service apache2 restart
+
+# Disable Tomcat AJP Connector
+find / -name server.xml -exec sed -i '/<Connector.*protocol="AJP/{s/^/<!--/;s/$/-->/}' {} \;
+
+# Secure PHP configuration
+for ini in $(find /etc/php5 -name php.ini); do
+    sed -i 's/^allow_url_include.*/allow_url_include = Off/' "$ini"
+    sed -i 's/^allow_url_fopen.*/allow_url_fopen = Off/' "$ini"
+    sed -i 's/^cgi.fix_pathinfo.*/cgi.fix_pathinfo=0/' "$ini"
+    sed -i 's/^expose_php.*/expose_php = Off/' "$ini"
+done
+
+# Ensure proper permissions on crontab
+chmod 600 /etc/crontab
+
+# Fix insecure entries in cron
+sed -i '/[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]/d' /etc/crontab 2>/dev/null
+
+# Remove vulnerable components
+rm -f /var/www/html/doc 2>/dev/null
+
+# Restart services
+service mysql restart
+service postgresql restart
+```}
+{type: uploaded file
+fileName: metasploitable66VT_6.txt
+fullContent:
+#!/bin/bash
+
+# Update and Upgrade System
+sed -i 's|http.*ubuntu\.com|http://old-releases.ubuntu.com|g' /etc/apt/sources.list
+apt-get update && apt-get -y upgrade
+apt-get -y dist-upgrade
+
+# Disable Insecure Services
+systemctl stop rlogin rexec rsh rexec.socket rexecd ssh.socket &>/dev/null
+systemctl disable rlogin rexec rsh rexec.socket rexecd ssh.socket &>/dev/null
+apt-get -y remove rsh-client rsh-server &>/dev/null
+
+update-rc.d -f vsftpd remove &>/dev/null
+systemctl stop vsftpd &>/dev/null
+systemctl disable vsftpd &>/dev/null
+pkill vsftpd &>/dev/null
+
+update-rc.d -f distcc remove &>/dev/null
+systemctl stop distcc &>/dev/null
+systemctl disable distcc &>/dev/null
+pkill distcc &>/dev/null
+
+systemctl stop vncserver &>/dev/null
+systemctl disable vncserver &>/dev/null
+pkill vncserver &>/dev/null
+
+systemctl stop telnet.socket &>/dev/null
+systemctl disable telnet.socket &>/dev/null
+apt-get -y remove telnetd &>/dev/null
+
+# Secure MySQL/PostgreSQL
+mysql -e "ALTER USER 'root'@'localhost' IDENTIFIED BY '$(openssl rand -hex 24)'; FLUSH PRIVILEGES;" &>/dev/null
+
+if systemctl is-active postgresql &>/dev/null; then
+    sudo -u postgres psql -c "ALTER USER postgres PASSWORD '$(openssl rand -hex 24)';" &>/dev/null
+fi
+
+# Harden Web Servers
+a2dismod cgi status autoindex &>/dev/null
+for dir in /doc /usr/doc /var/www/doc; do
+    echo -e "<Directory \"$dir\">\n\tRequire all denied\n</Directory>" >> /etc/apache2/conf-available/disable-dir.conf
+done
+a2enconf disable-dir &>/dev/null
+
+sed -i 's/SSLProtocol all -SSLv2$/SSLProtocol all -SSLv2 -SSLv3 -TLSv1 -TLSv1.1/' /etc/apache2/mods-available/ssl.conf
+echo -e "TraceEnable off\n<LimitExcept GET POST HEAD>\n\tRequire all denied\n</LimitExcept>" >> /etc/apache2/conf-available/security.conf
+
+# Secure SSH
+cp /etc/ssh/sshd_config /etc/ssh/sshd_config.bak
+sed -i 's/^#?KexAlgorithms.*/KexAlgorithms curve25519-sha256@libssh.org,diffie-hellman-group-exchange-sha256/' /etc/ssh/sshd_config
+sed -i 's/^#?HostKeyAlgorithms.*/HostKeyAlgorithms ssh-ed25519-cert-v01@openssh.com,ssh-rsa-cert-v01@openssh.com,ssh-ed25519,rsa-sha2-512,rsa-sha2-256/' /etc/ssh/sshd_config
+sed -i 's/^#?Ciphers.*/Ciphers chacha20-poly1305@openssh.com,aes256-gcm@openssh.com,aes128-gcm@openssh.com,aes256-ctr,aes192-ctr,aes128-ctr/' /etc/ssh/sshd_config
+sed -i 's/^#?MACs.*/MACs hmac-sha2-512-etm@openssh.com,hmac-sha2-256-etm@openssh.com,umac-128-etm@openssh.com,hmac-sha2-512,hmac-sha2-256/' /etc/ssh/sshd_config
+systemctl restart ssh
+
+# Disable Unsecure Kernel Features
+echo "net.ipv4.tcp_timestamps=0" >> /etc/sysctl.conf
+sysctl -p
+
+# File Management
+find /var/www/ -iname 'phpinfo.php' -delete &>/dev/null
+find /var/www/ -iname 'test*.html' -delete &>/dev/null
+
+# Service Restarts
+systemctl restart apache2 postgresql mysql &>/dev/null
+
+# Final Cleanup
+apt-get -y autoremove
+apt-get -y clean}
+{type: uploaded file
+fileName: metasploitable66VT_7.txt
+fullContent:
+#!/bin/bash
+
+# Disable inetd services
+inetd_services=("rlogin" "rexec" "rsh" "telnet")
+if [ -f /etc/inetd.conf ]; then
+    for svc in "${inetd_services[@]}"; do
+        sed -i "/$svc/d" /etc/inetd.conf
+    done
+    [ -x /etc/init.d/inetd ] && /etc/init.d/inetd stop && /etc/init.d/inetd start
+fi
+
+# Remove vsftpd
+dpkg -l | grep -q vsftpd && apt-get remove -y --purge vsftpd
+
+# Change MySQL root password
+mysql -u root -e "UPDATE mysql.user SET Password=PASSWORD('$(openssl rand -base64 32)') WHERE User='root'; FLUSH PRIVILEGES;" &>/dev/null
+
+# Change PostgreSQL user password
+sudo -u postgres psql -c "ALTER USER postgres WITH PASSWORD '$(openssl rand -base64 32)';" &>/dev/null
+
+# Disable PHP dangerous functions
+php_ini=$(php5 -i 2>/dev/null | grep 'Loaded Configuration File' | cut -d'>' -f2)
+if [ -f "$php_ini" ]; then
+    sed -i -E "s/^(disable_functions\s*=\s*.*)/\1,exec,passthru,shell_exec,system,proc_open,popen,curl_exec,curl_multi_exec,parse_ini_file,show_source/" "$php_ini"
+fi
+
+# Apache configuration
+mkdir -p /etc/apache2/ssl
+openssl req -x509 -nodes -days 3650 -newkey rsa:2048 -keyout /etc/apache2/ssl/apache.key -out /etc/apache2/ssl/apache.crt -subj "/C=XX/L=Default/O=Unknown/CN=localhost" &>/dev/null
+
+aptitude install -y apache2 apache2.2-common apache2-mpm-prefork apache2-utils libexpat1 ssl-cert
+
+cat <<EOF > /etc/apache2/conf.d/security.conf
+TraceEnable off
+<Location />
+    <LimitExcept GET POST OPTIONS>
+        Deny from all
+    </LimitExcept>
+</Location>
+EOF
+if [ -d "/doc" ]; then
+    echo "<Directory /doc>
+    AllowOverride None
+    Order deny,allow
+    Deny from all
+</Directory>" >> /etc/apache2/conf.d/security.conf
+fi
+echo "SSLProtocol all -SSLv2 -SSLv3
+SSLCipherSuite HIGH:!aNULL:!MD5:!EXP:!RC4:!LOW" > /etc/apache2/conf.d/ssl.conf
+sed -i 's/.*Listen 80.*//g' /etc/apache2/ports.conf
+service apache2 restart &>/dev/null
+
+# SSH configuration
+cat <<EOF >> /etc/ssh/sshd_config
+KexAlgorithms ecdh-sha2-nistp256,ecdh-sha2-nistp384,ecdh-sha2-nistp521,diffie-hellman-group-exchange-sha256
+Ciphers chacha20-poly1305@openssh.com,aes256-gcm@openssh.com,aes128-gcm@openssh.com,aes256-ctr,aes192-ctr,aes128-ctr
+MACs hmac-sha2-512-etm@openssh.com,hmac-sha2-256-etm@openssh.com,hmac-sha2-512,hmac-sha2-256
+HostKeyAlgorithms ssh-ed25519,rsa-sha2-512,rsa-sha2-256
+EOF
+service ssh restart &>/dev/null
+
+# Disable Tomcat AJP connector
+find / -name server.xml -type f -exec sed -i 's/<Connector port="8009" protocol="AJP\/1.3"/<!-- \0 -->/' {} + &>/dev/null
+pkill -f tomcat &>/dev/null
+
+# System parameters and cleanup
+sysctl -w net.ipv4.tcp_timestamps=0
+rm -rf /etc/init.d/vnc4server /etc/init.d/tightvncserver
+dpkg --purge vnc4server tightvncserver &>/dev/null}
+{type: uploaded file
+fileName: metasploitable66VT_8.txt
+fullContent:
+```bash
+#!/bin/bash
+set -e
+
+stop_service() {
+    service_name="$1"
+    if command -v service >/dev/null; then
+        service "$service_name" stop >/dev/null 2>&1 || true
+    fi
+    if command -v systemctl >/dev/null; then
+        systemctl stop "$service_name" >/dev/null 2>&1 || true
+        systemctl disable "$service_name" >/dev/null 2>&1 || true
+    fi
+}
+
+disable_inetd_service() {
+    service_name="$1"
+    if [ -f "/etc/inetd.conf" ]; then
+        sed -i "/$service_name/d" /etc/inetd.conf
+    fi
+    if [ -d "/etc/xinetd.d" ]; then
+        rm -f "/etc/xinetd.d/$service_name"
+    fi
+    stop_service inetd
+    stop_service xinetd
+}
+
+remove_backdoor() {
+    encontrado=false
+    if ss -nltp | grep -q ":1524 "; then
+        encontrado=true
+    fi
+
+    if $encontrado; then
+        pid=$(ss -nltp | awk -F '[ ,=]+' '/:1524 / {print $5}')
+        if [ -n "$pid" ]; then
+            kill -9 "$pid"
+        fi
+
+        find /etc -name "*ingreslock*" -delete
+        find /etc -name "*.sh" -exec grep -l "ingreslock" {} \; -delete
+        
+        disable_inetd_service ingreslock
+        disable_inetd_service 1524
+        
+        echo "Backdoor Ingreslock removida."
+    fi
+}
+
+update_passwords() {
+    novo_mysql_pass="ZxYv83#jK!9pL2$"
+    novo_pgsql_pass="qWer58!Ty3%pOix"
+    novo_vnc_pass="aBc123xYz!$"
+
+    if command -v mysql >/dev/null; then
+        mysql --user=root --password="" -e "ALTER USER 'root'@'localhost' IDENTIFIED BY '$novo_mysql_pass'; FLUSH PRIVILEGES;" >/dev/null 2>&1
+    fi
+
+    if command -v psql >/dev/null; then
+        su - postgres -c "psql -c \"ALTER USER postgres PASSWORD '$novo_pgsql_pass';\"" >/dev/null 2>&1
+    fi
+
+    if command -v vncpasswd >/dev/null; then
+        if [ -f "$HOME/.vnc/passwd" ]; then
+            echo "$novo_vnc_pass" | vncpasswd -f > "$HOME/.vnc/passwd"
+        fi
+    fi
+
+    echo "Senhas padrão alteradas: MySQL, PostgreSQL, VNC."
+}
+
+apply_security_config() {
+    arq_hosts_permitidos="127.0.0.1"
+    pasta_apache="/etc/apache2"
+
+    echo "Restringindo DRb para localhost..."
+    cat > /etc/drb.conf <<EOF
+acl {
+  deny all
+  allow $arq_hosts_permitidos
+}
+EOF
+
+    if [ -d "$pasta_apache" ]; then
+        echo "Desativando métodos HTTP perigosos..."
+        cat > "$pasta_apache/conf-available/disable-methods.conf" <<EOF
+<Directory />
+    <LimitExcept GET POST HEAD>
+        Order allow,deny
+        Deny from all
+    </LimitExcept>
+</Directory>
+EOF
+        a2enconf disable-methods.conf >/dev/null
+
+        echo "Desativando TRACE..."
+        echo "TraceEnable off" >> "$pasta_apache/apache2.conf"
+
+        echo "Reconfigurando SSL..."
+        sed -i 's/^SSLEngine.*/SSLEngine On/' "$pasta_apache/mods-available/ssl.conf"
+        sed -i 's/^SSLProtocol.*/SSLProtocol all -SSLv2 -SSLv3/' "$pasta_apache/mods-available/ssl.conf"
+        sed -i 's/^SSLCipherSuite.*/SSLCipherSuite HIGH:!aNULL:!MD5:!EXP:!RC4:!DES/' "$pasta_apache/mods-available/ssl.conf"
+
+        service apache2 restart >/dev/null 2>&1
+    fi
+
+    echo "Atualizando política SSH..."
+    sed -i $'s/^[#\s]*KexAlgorithms\s.*/KexAlgorithms curve25519-sha256@libssh.org,diffie-hellman-group-exchange-sha256/' /etc/ssh/sshd_config
+    sed -i $'s/^[#\s]*Ciphers\s.*/Ciphers chacha20-poly1305@openssh.com,aes256-gcm@openssh.com/' /etc/ssh/sshd_config
+    sed -i $'s/^[#\s]*MACs\s.*/MACs hmac-sha2-512-etm@openssh.com,hmac-sha2-256-etm@openssh.com/' /etc/ssh/sshd_config
+    service sshd restart >/dev/null 2>&1
+}
+
+remove_unused_packages() {
+    pacotes_para_remover=("rsh*" "rlogin" "rexecd" "vsftpd" "distcc" "telnetd" "twiki" "ingreslock")
+    
+    for pacote in "${pacotes_para_remover[@]}"; do
+        if command -v apt-get >/dev/null; then
+            apt-get purge --auto-remove "$pacote" -y >/dev/null 2>&1 || true
+        elif command -v yum >/dev/null; then
+            yum erase "$pacote" -y >/dev/null 2>&1 || true
+        fi
+        echo "Pacote removido: $pacote"
+    done
+}
+
+if [ "$EUID" -ne 0 ]; then
+    echo "Execute como root!"
+    exit 1
+fi
+
+stop_service rsh >/dev/null 2>&1
+stop_service rlogin >/dev/null 2>&1
+stop_service rexec >/dev/null 2>&1
+stop_service telnet >/dev/null 2>&1
+stop_service vsftpd >/dev/null 2>&1
+stop_service distcc >/dev/null 2>&1
+
+disable_inetd_service shell
+disable_inetd_service login
+disable_inetd_service exec
+disable_inetd_service ftp
+
+remove_backdoor
+update_passwords
+remove_unused_packages
+apply_security_config
+
+echo "Vulnerabilidades corrigidas. Sistema seguro."
+```}
+{type: uploaded file
+fileName: metasploitable66VT_9.txt
+fullContent:
+#!/bin/bash
+set -e
+
+# Atualizar repositórios e pacotes
+apt-get update
+DEBIAN_FRONTEND=noninteractive apt-get -y upgrade
+DEBIAN_FRONTEND=noninteractive apt-get -y dist-upgrade
+apt-get -y --purge autoremove
+
+# Desabilitar e remover serviços inseguros
+services=("rsh-server" "rsh-redone-client" "rsh-client" "rlogin" "telnetd" "inetd")
+for service in "${services[@]}"; do
+    apt-get -y --purge remove "$service" || true
+    systemctl disable "$service" 2>/dev/null || true
+    update-rc.d "$service" remove 2>/dev/null || true
+done
+find /etc/inetd.conf /etc/inetd.d/ -type f -exec sed -i '/\(rexec\|rlogin\|rsh\|rshd\|ingreslock\|distccd\)/d' {} \;
+killall -9 rpc.rexecd 2>/dev/null || true
+systemctl restart inetutils-inetd 2>/dev/null || true
+
+# Fix para distcc
+if dpkg -l | grep -qw distcc; then
+    apt-get -y remove --purge distcc
+fi
+
+# Fix para vsftpd (backdoor)
+if dpkg -l | grep -q 'vsftpd.*2\.3\.4'; then
+    apt-get -y remove --purge vsftpd
+fi
+
+# Fix Tomcat Ghostcat (desabilita ou atualiza)
+if dpkg -l | grep -q tomcat5.5; then
+    apt-get -y remove --purge tomcat5.5
+fi
+rm -f /etc/xinetd.d/tomcat*
+
+# Fix PostgreSQL: Remover senha padrão
+if dpkg -l | grep -q postgresql; then
+    echo "ALTER USER postgres WITH PASSWORD 'SecurePassword123!';" | sudo -u postgres psql
+fi
+
+# Fix MySQL/MariaDB: Remover senha padrão
+if dpkg -l | grep -E 'mysql-server|mariadb-server'; then
+    mysql -e "ALTER USER 'root'@'localhost' IDENTIFIED BY 'SecureRootPass123!'; FLUSH PRIVILEGES;"
+fi
+
+# Fix VNC: Forçar uso de senha e remover backdoors
+if pkill -9 vnc; then
+    sed -i '/^Permissions:/d' ~/.vnc/config
+    vncserver -SecurityTypes VncAuth -localhost yes
+fi
+
+# Disable Ruby RCE
+sed -i '$SAFE = 3' /usr/bin/druby
+
+# Atualizar PHP e derivados
+if dpkg -l | grep -q php5; then
+    apt-get install --only-upgrade php5 php5-cli libapache2-mod-php5 -y
+    systemctl restart apache2
+fi
+
+# Bloqueio físico das portas via iptables
+bad_ports=("21" "23" "80" "110" "135" "139" "445" "512" "513" "514" "1524" "2000" "3306" "3632" "5900" "6000" "6667" "8787" "12345")
+for port in "${bad_ports[@]}"; do
+    iptables -A INPUT -p tcp --dport "$port" -j DROP
+done
+iptables-save > /etc/iptables.rules
+
+# Desabilitar TRACE/TRACK
+if apache2ctl -M 2>/dev/null | grep -q 'headers_module'; then
+    echo -e "<IfModule mod_headers.c>\nRequestHeader unset X-Forwarded-Host\nHeader set X-Content-Type-Options nosniff\n</IfModule>" > /etc/apache2/conf-available/security.conf
+    a2enmod headers
+    echo 'TraceEnable off' >> /etc/apache2/apache2.conf
+    systemctl restart apache2
+fi
+
+# Remover arquivos sensíveis
+rm -f /var/www/*/phpinfo.php /etc/xinetd.d/*ingreslock* /tmp/backdoor /dev/shm/exploit
+find / -name '*.php' -exec sed -i 's/<?php system(id)/<?php/g' {} +
+rm -Rf /usr/lib/ruby/1.8/drb/drb.rb
+
+# Disable unsafe SSH ciphers
+sed -i 's/^HostKeyAli*.*ssh-dss//' /etc/ssh/sshd_config
+echo -e "Ciphers aes256-cbc,aes256-ctr\nHostKeyAlgorithm ssh-rsa,ssh-dss" >> /etc/ssh/sshd_config
+echo "KexAlgorithms ecdh-sha2-nistp256" >> /etc/ssh/sshd_config
+systemctl restart ssh
+
+# Correções SSL/TLS (Apache)
+sed -i 's/SSLProtocol All/SSLProtocol all -SSLv2 -SSLv3/' /etc/apache2/mods-available/ssl.conf
+sed -i 's/SSLCipherSuite .*/SSLCipherSuite HIGH:!aNULL:!MD5:!3DES/' /etc/apache2/mods-available/ssl.conf
+apachectl configtest && systemctl restart apache2
+
+# Final hardening
+touch /etc/cron.allow && echo 'root' > /etc/cron.allow
+chmod 1811 /var/spool/cron/crontabs /var/www && chmod o-rwx /var/www/*
+chattr +i /etc/hosts /etc/inittab /etc/resolv.conf
+lpd fix || true; cupsd fix || true
+echo 'none /dev/shm tmpfs defaults,ro 0 0' >> /etc/fstab && mount -o remount,ro /dev/shm
+
+exit 0}
+{type: uploaded file
+fileName: metasploitable66VT_10.txt
+fullContent:
+```bash
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+# Redefinir senha do MySQL
+MYSQL_NEW_PASS=$(openssl rand -base64 16)
+mysql -u root <<-EOF
+UPDATE mysql.user SET authentication_string=PASSWORD('$MYSQL_NEW_PASS') WHERE User='root';
+FLUSH PRIVILEGES;
+EOF
+
+# Redefinir senha do PostgreSQL
+PG_NEW_PASS=$(openssl rand -base64 16)
+su - postgres -c "psql -c \"ALTER USER postgres WITH PASSWORD '$PG_NEW_PASS';\""
+
+# Lista de serviços para desativar
+declare -a disable_services=(
+    "rlogin"
+    "rsh"
+    "rexec"
+    "telnet"
+    "ingreslock"
+    "druby"
+)
+
+for service in "${disable_services[@]}"; do
+    pkill -9 -f "$service" || true
+    rm -f "/etc/xinetd.d/$service" || true
+    sed -i "/$service/d" /etc/inetd.conf
+done
+
+# Configurações do SSH
+SSHD_CONFIG="/etc/ssh/sshd_config"
+sed -i '/^KexAlgorithms/d;/^Ciphers/d;/^MACs/d' "$SSHD_CONFIG"
+echo 'KexAlgorithms curve25519-sha256@libssh.org,ecdh-sha2-nistp521,diffie-hellman-group18-sha512' >> "$SSHD_CONFIG"
+echo 'Ciphers chacha20-poly1305@openssh.com,aes256-gcm@openssh.com,aes128-gcm@openssh.com' >> "$SSHD_CONFIG"
+echo 'MACs hmac-sha2-512-etm@openssh.com,hmac-sha2-256-etm@openssh.com' >> "$SSHD_CONFIG"
+systemctl restart ssh || service ssh restart
+
+# Correções para Tomcat
+rm -f /usr/share/tomcat*/conf/server.xml /etc/tomcat*/server.xml
+touch /usr/share/tomcat*/conf/server.xml /etc/tomcat*/server.xml
+
+# Correções para VNC
+vncpasswd -u
+update-rc.d vncserver disable || chkconfig vncserver off
+
+# Correções para FTP
+sed -i '/anonymous_enable/d' /etc/vsftpd.conf
+echo 'anonymous_enable=NO' >> /etc/vsftpd.conf
+service vsftpd restart || true
+
+# Correções para Apache
+a2dismod cgi || true
+rm -f /etc/apache2/mods-enabled/cgi.load
+rm -rf /doc
+apache2ctl restart || httpd -k restart
+
+# Correções para PHP
+find /var/www/ -name 'phpinfo.php' -delete
+
+# Impedir scripts CGI perigosos
+rm -f /usr/lib/cgi-bin/php*
+rm -f /cgi-bin/php*
+
+# Atualizar certificados expirados e regenerar com SHA-256
+rm -f /etc/ssl/*.key /etc/ssl/*.crt
+openssl req -x509 -newkey rsa:4096 -sha256 -days 730 -nodes \
+    -out /etc/ssl/server.crt -keyout /etc/ssl/server.key \
+    -subj "/CN=${HOSTNAME}"
+
+# Configurar tempo máximo de exclusão para entrada TCP
+sysctl -w net.ipv4.tcp_fin_timeout=15
+echo "net.ipv4.tcp_fin_timeout=15" >> /etc/sysctl.conf
+
+# Desabilitar protocolos vulneráveis
+openssl_conf="/etc/ssl/openssl.cnf"
+grep -q 'MinProtocol' "$openssl_conf" || \
+    echo 'MinProtocol = TLSv1.2' >> "$openssl_conf"
+grep -q 'CipherString' "$openssl_conf" || \
+    echo 'CipherString = DEFAULT@SECLEVEL=2' >> "$openssl_conf"
+
+# Desativar SSLv3 e TLS inferiores via system-wide
+echo 'SSLProtocol all -SSLv2 -SSLv3 -TLSv1 -TLSv1.1' > /etc/ssl/openssl-custom.conf
+cat /etc/ssl/openssl.conf /etc/ssl/openssl-custom.conf > /etc/ssl/openssl.cnf.new
+mv /etc/ssl/openssl.cnf.new /etc/ssl/openssl.cnf
+```}
+{type: uploaded file
+fileName: metasploitable66VT_11.txt
+fullContent:
+```bash
+#!/bin/bash
+set -e
+
+stop_and_disable_service() {
+    service_name=$1
+    if command -v "$service_name" >/dev/null 2>&1; then
+        update-rc.d -f "$service_name" remove || true
+        service "$service_name" stop || service systcl stop "$service_name" || true
+    fi
+}
+
+purge_packages() {
+    for package in "$@"; do
+        if dpkg-query -W -f='${Status}' "$package" 2>/dev/null | grep -q "ok installed"; then
+            apt-get purge -y "$package" || true
+        fi
+    done
+}
+
+update_sshd_config() {
+    sed -i '/^Ciphers/d' /etc/ssh/sshd_config
+    sed -i '/^MACs/d' /etc/ssh/sshd_config
+    sed -i '/^KexAlgorithms/d' /etc/ssh/sshd_config
+    sed -i '/^HostKeyAlgorithms/d' /etc/ssh/sshd_config
+    sed -i 's/^#*PermitRootLogin.*/PermitRootLogin without-password/' /etc/ssh/sshd_config
+    sed -i 's/^#*Protocol .*/Protocol 2/' /etc/ssh/sshd_config
+    sed -i 's/^#*UsePAM .*/UsePAM yes/' /etc/ssh/sshd_config
+
+    echo "Ciphers aes256-ctr,aes192-ctr,aes128-ctr" >> /etc/ssh/sshd_config
+    echo "MACs hmac-sha2-512,hmac-sha2-256" >> /etc/ssh/sshd_config
+    echo "KexAlgorithms ecdh-sha2-nistp521,ecdh-sha2-nistp384,ecdh-sha2-nistp256,diffie-hellman-group-exchange-sha256" >> /etc/ssh/sshd_config
+    echo "HostKeyAlgorithms ecdsa-sha2-nistp256,rsa-sha2-512,rsa-sha2-256" >> /etc/ssh/sshd_config
+    service ssh restart || systemctl restart ssh || true
+}
+
+secure_mysql() {
+    if command -v mysql &>/dev/null; then
+        new_pass=$(tr -dc A-Za-z0-9 </dev/urandom | head -c 32)
+        mysql -uroot -e "SET PASSWORD FOR 'root'@'localhost' = PASSWORD('$new_pass');" || true
+        echo "root MySQL password changed to: $new_pass" >> /root/secured.log
+    fi
+}
+
+secure_postgresql() {
+    if su - postgres -c 'psql --version' &>/dev/null; then
+        new_pass=$(tr -dc A-Za-z0-9 </dev/urandom | head -c 32)
+        psql -U postgres -d template1 -c "ALTER ROLE postgres WITH PASSWORD '$new_pass';" || true
+        echo "postgres PostgreSQL password changed to: $new_pass" >> /root/secured.log
+    fi
+}
+
+configure_iptables() {
+    iptables -F
+    iptables -A INPUT -i lo -j ACCEPT
+    iptables -A INPUT -p tcp --dport 22 -j ACCEPT
+    iptables -A INPUT -p tcp --dport 80 -j ACCEPT
+    iptables -A INPUT -p tcp --dport 443 -j ACCEPT
+    iptables -A INPUT -m state --state ESTABLISHED,RELATED -j ACCEPT
+    vulnerable_ports=(21 25 23 513 514 1524 5900 3632 2121)
+    for port in ${vulnerable_ports[@]}; do
+        iptables -A INPUT -p tcp --dport $port -j DROP
+    done
+    iptables -P INPUT DROP
+    iptables-save > /etc/iptables.rules
+    cat > /etc/network/if-pre-up.d/iptables <<'EOF'
+#!/bin/sh
+iptables-restore < /etc/iptables.rules
+EOF
+    chmod +x /etc/network/if-pre-up.d/iptables
+}
+
+main() {
+    stop_and_disable_service rlogin
+    stop_and_disable_service rsh
+    stop_and_disable_service rexec
+    stop_and_disable_service telnet
+    stop_and_disable_service vncserver
+    stop_and_disable_service distcc
+    stop_and_disable_service mysql
+    stop_and_disable_service postgresql
+    stop_and_disable_service tomcat5.5
+    stop_and_disable_service vsftpd
+
+    purge_packages rsh-server inetutils-telnetd tightvncserver distccd altenen
+
+    pkill -f '/usr/bin/druby_timeserver.rb' || true
+    rm -f /usr/sbin/druby_timeserver.rb || true
+    rm -f /etc/xinetd.d/* || true
+
+    racoon_vuln_procs=("ingreslock" "rexecd" "rlogind" "druby")
+    for proc in ${racoon_vuln_procs[@]}; do
+        pkill -f "$proc" || true
+    done
+
+    update_sshd_config
+    secure_mysql
+    secure_postgresql
+    configure_iptables
+
+    a2dismod proxy_ajp || true
+    sed -i 's/<Connector port="8009"/<!-- <Connector port="8009"/' /etc/tomcat?/server.xml
+    sed -i 's/<\/Connector>/<\/Connector> -->/' /etc/tomcat?/server.xml
+
+    find /var/www -name 'phpinfo.php' -exec rm -f {} \;
+    find /var/www -name 'bash_history' -exec rm -f {} \;
+
+    rm -f /etc/jwiki.versions.tmp
+    rm -f /usr/bin/tikiwiki.sh
+
+    sed -i 's/^\(.*AcceptEnv.*\)/#\1/' /etc/ssh/sshd_config
+    service ssh restart || systemctl restart ssh || true
+
+    echo "HostExploitPatch applied: $(date)" > /var/log/security_patch.log
+}
+
+main
+```}
+{type: uploaded file
+fileName: metasploitable66VT_12.txt
+fullContent:
+#!/bin/bash
+
+# Ensure script runs with root privileges
+if [ "$(id -u)" != "0" ]; then
+    echo "Este script deve ser executado como root." >&2
+    exit 1
+fi
+
+# Disable and remove insecure services
+declare -a remove_packages=(
+    "rsh-server" "rlogin" "rsh-client" "rexecd"
+    "telnetd" "vnc-server" "tightvncserver"
+    "distcc" "openbsd-inetd" "vsftpd"
+    "twiki"
+)
+declare -a insecure_services=(
+    "rlogin" "rsh" "rexec" "telnet"
+    "distcc" "vncserver" "vsftpd" "twiki"
+)
+
+for service in "${insecure_services[@]}"; do
+    systemctl stop "$service" &>/dev/null
+    systemctl disable "$service" &>/dev/null
+    killall -9 "$service" &>/dev/null
+done
+
+apt-get purge -y "${remove_packages[@]}" &>/dev/null
+
+# Block vulnerable ports using iptables
+declare -a blocked_ports=(21 23 513 514 512 8787 1524 3632 5900 6200)
+for port in "${blocked_ports[@]}"; do
+    iptables -A INPUT -p tcp --dport $port -j DROP
+    iptables -A INPUT -p udp --dport $port -j DROP
+done
+
+# Secure SSHD configuration
+sed -i 's/^#Port 22/Port 2222/' /etc/ssh/sshd_config
+sed -i 's/^PermitRootLogin yes/PermitRootLogin prohibit-password/' /etc/ssh/sshd_config
+echo -e "HostKeyAlgorithms ssh-rsa-sha2-256,ssh-rsa-sha2-512\nKexAlgorithms curve25519-sha256@libssh.org,diffie-hellman-group-exchange-sha256\nCiphers aes256-gcm@openssh.com\nMACs hmac-sha2-512" >> /etc/ssh/sshd_config
+systemctl reload sshd
+
+# Adjust kernel parameters
+echo 0 > /proc/sys/net/ipv4/tcp_timestamps
+echo "net.ipv4.tcp_timestamps = 0" >> /etc/sysctl.conf
+sysctl -p
+
+# Secure FTP services
+sed -i 's/anonymous_enable=.*/anonymous_enable=NO/g' /etc/vsftpd*.conf 2>/dev/null
+sed -i 's/local_enable=.*/local_enable=YES/g' /etc/vsftpd*.conf 2>/dev/null
+sed -i 's/ssl_enable=.*/ssl_enable=YES/g' /etc/vsftpd*.conf 2>/dev/null
+
+# Secure MySQL/MariaDB
+mysql -e "ALTER USER 'root'@'localhost' IDENTIFIED BY 'StrongPassword';"
+mysql -e "DELETE FROM mysql.user WHERE user='';"
+mysql -e "DROP DATABASE test;"
+mysql -e "FLUSH PRIVILEGES;"
+
+# Secure PostgreSQL
+sudo -u postgres psql -c "ALTER USER postgres WITH PASSWORD 'StrongPassword';"
+
+# Disable insecure HTTP methods
+cat > /etc/apache2/mods-enabled/actions.conf <<EOF
+<LimitExcept GET POST HEAD>
+    Deny from all
+</LimitExcept>
+EOF
+
+# Disable SSLv2/SSLv3 and weak algorithms
+sed -i 's/SSLProtocol.*/SSLProtocol all -SSLv2 -SSLv3 -TLSv1 -TLSv1.1/g' /etc/apache2/mods-enabled/ssl.conf
+sed -i 's/SSLCipherSuite.*/SSLCipherSuite HIGH:!aNULL:!MD5:!3DES/g' /etc/apache2/mods-enabled/ssl.conf
+
+# Remove backdoor processes
+backdoor_pid=$(lsof -ti :1524 2>/dev/null)
+if [ -n "$backdoor_pid" ]; then
+    kill -9 $backdoor_pid
+    rm -f /usr/sbin/ingreslock
+fi
+
+# Patch Ghostcat vulnerability
+sed -i 's/Connector port="8009"/<!-- Connector port="8009" /g' /etc/tomcat*/server.xml
+pkill -f tomcat
+
+# Disable dRuby/DRb vulnerability
+find /etc -name '*drb*' -exec sed -i "s/DRb.start_service/DRb.start_service(:security_level => 3)/g" {} +
+
+# Clean PHP vulnerabilities
+find /var/www -name phpinfo.php -delete
+phar=$(find /etc -name php.ini)
+sed -i 's/expose_php=.*/expose_php=Off/' "$phar"
+sed -i 's/allow_url_include=.*/allow_url_include=Off/' "$phar"
+
+# Disable directory browsing
+echo "Options -Indexes" > /var/www/.htaccess
+
+# Prevent cleartext logins (SSH fallback on non-standard port)
+iptables -t nat -A PREROUTING -p tcp --dport 22 -j REDIRECT --to-port 2222
+
+# Configure mail server for VRFY/EXPN
+postfix_cfg=/etc/postfix/main.cf
+[ -f "$postfix_cfg" ] && echo "disable_vrfy_command = yes" >> "$postfix_cfg"
+
+# Apply all changes
+service apache2 restart
+service postfix restart
+service mysql restart
+service postgresql restart
+systemctl restart sshd
+
+echo "Alteracoes concluidas. Recorde-se de atualizar permanentemente seu sistema para uma versão suportada."}
+{type: uploaded file
+fileName: metasploitable66VT_13.txt
+fullContent:
+```sh
+#!/bin/bash
+
+# Desativar serviços vulneráveis
+systemctl stop rlogin.socket rsh.socket rexec.socket tftp.socket
+systemctl disable rlogin.socket rsh.socket rexec.socket tftp.socket
+systemctl mask rlogin.socket rsh.socket rexec.socket tftp.socket
+
+killall -9 druby_timeserver 2>/dev/null
+rm -f /usr/sbin/druby_timeserver.rb
+
+# Desativar outros serviços/protocolos inseguros
+ufw deny 1524/tcp   # Backdoor Ingreslock
+ufw deny 5900/tcp   # VNC
+ufw deny 512:514/tcp # Rexec/Rshell/Rlogin
+ufw deny 21/tcp      # FTP
+ufw deny 2121/tcp    # FTP alternativo
+ufw deny 23/tcp      # Telnet
+ufw deny 8787/tcp    # Ruby DRb
+
+# Alterar senhas padrão (MySQL, PostgreSQL)
+mysql -e "ALTER USER 'root'@'localhost' IDENTIFIED BY 'StrongPassword123!@#'; FLUSH PRIVILEGES;"
+sudo -u postgres psql -c "ALTER USER postgres WITH PASSWORD 'PgSecurePass456#$';"
+
+# Segurança do SSH (modificar configurações)
+sed -i '/^[#]*KexAlgorithms/d' /etc/ssh/sshd_config
+sed -i '/^[#]*HostKeyAlgorithms/d' /etc/ssh/sshd_config
+sed -i '/^[#]*Ciphers/d' /etc/ssh/sshd_config
+sed -i '/^[#]*MACs/d' /etc/ssh/sshd_config
+
+echo -e "KexAlgorithms curve25519-sha256@libssh.org,diffie-hellman-group-exchange-sha256
+HostKeyAlgorithms ssh-ed25519,ssh-ed25519-cert-v01@openssh.com,ssh-rsa
+Ciphers chacha20-poly1305@openssh.com,aes256-gcm@openssh.com,aes128-gcm@openssh.com
+MACs hmac-sha2-512-etm@openssh.com,hmac-sha2-256-etm@openssh.com" >> /etc/ssh/sshd_config
+
+systemctl restart sshd
+
+# Configurações de segurança para servidor web (Apache)
+if [ -f "/etc/apache2/apache2.conf" ]; then
+    echo "LimitRequestBody 102400" >> /etc/apache2/apache2.conf
+
+    # Criar regra global para métodos HTTP
+    cat > /etc/apache2/conf-available/http-methods.conf <<EOF
+<LimitExcept GET POST HEAD>
+    Require all denied
+</LimitExcept>
+EOF
+    a2enconf http-methods
+
+    # Desabilitar TRACE e TRACK
+    echo "TraceEnable off" >> /etc/apache2/apache2.conf
+    a2dismod actions
+
+    # Restringir acesso ao diretório /doc
+    cat > /etc/apache2/conf-available/doc.conf <<EOF
+<Directory /doc>
+    Require all denied
+</Directory>
+EOF
+    a2enconf doc.conf
+
+    # Limpar arquivos críticos
+    rm -f /var/www/phpinfo.php
+    rm -f /var/www/mutillidae/phpinfo.php
+    rm -f /var/www/html/phpinfo.php
+
+    systemctl restart apache2
+fi
+
+# Configurações para Apache Tomcat
+if [ -f "/etc/tomcat/server.xml" ]; then
+    sed -i 's/redirectPort="8443"/redirectPort="8443" restricted="true"/' /etc/tomcat/server.xml
+    sed -i '/connectionTimeout=.*/a allowTrace="false" maxHeaderCount="10" maxTrailerCount="2"' /etc/tomcat/server.xml
+    systemctl restart tomcat
+fi
+
+# Configurações de segurança para MySQL/MariaDB
+mysql -e "DELETE FROM mysql.user WHERE User='';"
+mysql -e "DROP USER ''@'localhost';"
+mysql -e "DROP DATABASE test;"
+mysql -e "FLUSH PRIVILEGES;"
+
+# Configurações de segurança para VNC
+if [ -f "/etc/vnc.conf" ]; then
+    sed -i 's/SecurityTypes=.*/SecurityTypes=TLSVnc,Plain/' /etc/vnc.conf
+    systemctl restart vncserver
+fi
+
+# Alterar versões inseguras do PHP (exemplo prático versão 5.2.4)
+if dpkg -l | grep php5.2; then
+    apt-get remove --purge php5.2 -y
+    apt-get install php5.6 -y
+    systemctl restart apache2
+fi
+
+# Configurações de firewall finais
+ufw default deny incoming
+ufw default allow outgoing
+ufw enable
+```}
+{type: uploaded file
+fileName: metasploitable66VT_14.txt
+fullContent:
+#!/bin/bash
+
+# Atualizar sistema a partir de repositórios legados
+sed -i 's|archive.ubuntu.com|old-releases.ubuntu.com|g' /etc/apt/sources.list
+sed -i 's|security.ubuntu.com|old-releases.ubuntu.com|g' /etc/apt/sources.list
+apt-get update
+apt-get -y upgrade
+apt-get -y dist-upgrade
+
+# Remover serviços inseguros
+apt-get -y purge rsh-server rsh-redone-client rexec rexecd rlogin rlogind vsftpd distcc vnc* xvnc* telnetd ftp
+
+# Desativar serviços via inetd/xinetd
+[ -f /etc/inetd.conf ] && sed -i -e '/\(rlogin\|rsh\|rexec\|telnet\)/s/^/#/' /etc/inetd.conf
+[ -f /etc/init.d/inetd ] && service inetd restart
+find /etc/xinetd.d -type f -exec sed -i 's/disable\s*=\s*no/disable = yes/' {} \;
+[ -f /etc/init.d/xinetd ] && service xinetd restart
+
+# Proteger MySQL
+if command -v mysql >/dev/null; then
+  NEW_MYSQL_PASS=$(openssl rand -hex 16)
+  mysql -e "SET PASSWORD FOR 'root'@'localhost' = PASSWORD('$NEW_MYSQL_PASS'); FLUSH PRIVILEGES;"
+fi
+
+# Proteger PostgreSQL
+if command -v psql >/dev/null; then
+  NEW_PG_PASS=$(openssl rand -hex 16)
+  psql -U postgres -c "ALTER USER postgres WITH PASSWORD '$NEW_PG_PASS';"
+fi
+
+# Desativar conector AJP do Tomcat
+find / -name server.xml -exec sed -i '/protocol="AJP/{s|^|<!-- |; s|$| -->|}' {} \;
+
+# Configurar PHP mitigando riscos
+find / -name php.ini -exec sed -i \
+  -e 's/^expose_php.*/expose_php = Off/' \
+  -e 's/^allow_url_include.*/allow_url_include = Off/' \
+  -e 's/^disable_functions.*/disable_functions = exec,passthru,shell_exec,system,proc_open,popen,curl_exec,curl_multi_exec,parse_ini_file,show_source/' \
+  {} \;
+
+# Hardening SSH
+SSHD_CONFIG="/etc/ssh/sshd_config"
+[ -f "$SSHD_CONFIG" ] && {
+  echo -e "KexAlgorithms curve25519-sha256@libssh.org,ecdh-sha2-nistp521,diffie-hellman-group-exchange-sha256\nHostKeyAlgorithms ssh-ed25519,ssh-rsa\nCiphers chacha20-poly1305@openssh.com,aes256-gcm@openssh.com,aes128-gcm@openssh.com,aes256-ctr\nMACs hmac-sha2-512-etm@openssh.com,hmac-sha2-256-etm@openssh.com" >> "$SSHD_CONFIG"
+  service ssh restart
+}
+
+# Configurar Apache para segurança
+find /etc/apache2 -name '*.conf' -exec sh -c '
+  echo -e "# Security mitigations\nTraceEnable off\n<LimitExcept GET POST HEAD>\n  Deny from all\n</LimitExcept>\n<IfModule mod_rewrite.c>\n  RewriteEngine On\n  RewriteCond %{REQUEST_METHOD} ^(TRACE|TRACK)\n  RewriteRule .* - [F]\n</IfModule>" >> "$1"
+' sh {} \;
+[ -f /etc/init.d/apache2 ] && service apache2 restart
+
+# Remover backdoor Ingreslock
+killall -9 ingreslock 2>/dev/null
+find / -name ingreslock -delete
+iptables -I INPUT -p tcp --dport 1524 -j DROP
+
+# Proteger VNC
+command -v vncpasswd && vncserver -kill :1
+
+# Remover arquivos phpinfo
+find /var/www -name 'phpinfo.php' -delete
+
+# Desabilitar acesso anônimo FTP
+[ -d /var/ftp ] && chmod 000 /var/ftp
+[ -f /etc/ftpusers ] && echo -e "anonymous\nftp" >> /etc/ftpusers}
+{type: uploaded file
+fileName: metasploitable66VT_15.txt
+fullContent:
+#!/bin/bash
+
+# Configurações de segurança globais
+sed -i 's/^\([^#]*\)$SAFE=.*/\1$SAFE=3/' /etc/environment
+echo "net.ipv4.tcp_timestamps=0" >> /etc/sysctl.conf
+sysctl -p >/dev/null
+chmod 0700 /etc/cron* 2>/dev/null
+
+# Desabilitar serviços vulneráveis
+systemctl stop rsh.socket rlogin.socket rexec.socket telnet.socket ingreslock distcc 2>/dev/null
+systemctl disable rsh.socket rlogin.socket rexec.socket telnet.socket ingreslock distcc 2>/dev/null
+update-rc.d -f rsh remove 2>/dev/null
+update-rc.d -f rlogin remove 2>/dev/null
+update-rc.d -f rexec remove 2>/dev/null
+update-rc.d -f telnet remove 2>/dev/null
+update-rc.d -f ingreslock remove 2>/dev/null
+update-rc.d -f distcc remove 2>/dev/null
+
+# Remoção de software vulnerável
+apt-get purge -y --auto-remove twiki vsftpd phpmyadmin mutillidae awiki qwikiwiki 2>/dev/null
+rm -rf /var/www/html/mutillidae /var/www/html/awiki /var/www/html/qwikiwiki 2>/dev/null
+
+# Desabilitar features do Apache
+a2dismod cgi 2>/dev/null
+apache2ctl restart >/dev/null
+
+# Atualização de senhas padrão
+mysql -e "ALTER USER 'root'@'localhost' IDENTIFIED BY 'StrongPassword123!'; FLUSH PRIVILEGES;" 2>/dev/null
+sudo -u postgres psql -c "ALTER USER postgres PASSWORD 'PostgreSecure456@';" 2>/dev/null
+
+# Configurações do SSH
+cp /etc/ssh/sshd_config /etc/ssh/sshd_config.bak
+sed -i 's/^\(#\)\?HostKey.*ssh-dss.*//' /etc/ssh/sshd_config
+echo -e "KexAlgorithms curve25519-sha256\nCiphers chacha20-poly1305@openssh.com,aes256-gcm@openssh.com\nMACs hmac-sha2-512\nHostKeyAlgorithms ecdsa-sha2-nistp256,ssh-rsa" >> /etc/ssh/sshd_config
+systemctl restart ssh 2>/dev/null
+
+# Configurações do TLS
+openssl req -x509 -nodes -days 3650 -newkey rsa:4096 -keyout /etc/ssl/private/server.key -out /etc/ssl/certs/server.crt -subj "/CN=HardenedServer" >/dev/null 2>&1
+find /etc -name '*.conf' -exec sed -i -E 's/SSLProtocol[[:space:]a-zA-Z0-9\.,-]*/SSLProtocol all -SSLv2 -SSLv3 -TLSv1.0 -TLSv1.1/g' {} + 2>/dev/null
+find /etc -name '*.conf' -exec sed -i -E 's/SSLCipherSuite[[:space:]a-zA-Z0-9\.,:\-\+_]*/SSLCipherSuite HIGH:!aNULL:!MD5:!SHA1:!RC4/g' {} + 2>/dev/null
+
+# Remover arquivos sensíveis
+find /var/www -name 'phpinfo.php' -delete 2>/dev/null
+rm -f /var/www/html/phpinfo.php /var/www/html/phpMyAdmin/phpinfo.php 2>/dev/null
+
+# Arquivos jQuery vulneráveis
+jq_files=("/var/www/html/mutillidae/javascript/ddsmoothmenu/jquery.min.js")
+for file in "${jq_files[@]}"; do
+    [ -f "$file" ] && curl -s https://code.jquery.com/jquery-3.6.0.min.js > "$file"
+done
+
+# Desabilitar features perigosas
+sed -i 's/^\( *customLog.*\)/\1\n    TraceEnable off/' /etc/apache2/apache2.conf 2>/dev/null
+echo -e "\n<Directory />\n    Options -Indexes\n</Directory>" >> /etc/apache2/apache2.conf
+sed -i 's/^\( *AllowOverride\).*/\1 None/' /etc/apache2/sites-available/* 2>/dev/null
+apache2ctl restart >/dev/null
+
+# Limpar backdoor detectada
+kill -9 $(lsof -t -i:1524) 2>/dev/null
+sed -i '/ingreslock/d' /etc/inetd.conf 2>/dev/null
+
+# Configurar PostgreSQL
+echo "host all all 0.0.0.0/0 md5" >> /etc/postgresql/*/main/pg_hba.conf
+systemctl restart postgresql 2>/dev/null}
+{type: uploaded file
+fileName: metasploitable66VT_16.txt
+fullContent:
+#!/bin/bash
+
+# Atualização do sistema
+for repo in /etc/apt/sources.list /etc/apt/sources.list.d/*; do
+    [ -f "$repo" ] && sed -i 's|http://.*archive.ubuntu.com|http://old-releases.ubuntu.com|g' "$repo"
+done
+apt-get update -y
+apt-get upgrade -y
+
+# Desativar serviços vulneráveis
+services=(rlogin rexec rsh ingreslock druby)
+for service in "${services[@]}"; do
+    pkill -9 "$service"
+    update-inetd --disable "$service"
+done
+
+# Remover pacotes vulneráveis
+apt-get purge -y rsh-client rsh-server vsftpd distcc xinetd \
+    apache-solr tomcat6 tomcat7
+
+# Configurar MySQL
+mysql_root_pw=$(openssl rand -base64 24)
+mysql -e "ALTER USER 'root'@'localhost' IDENTIFIED BY '$mysql_root_pw'; FLUSH PRIVILEGES;"
+
+# Configurar PostgreSQL
+postgres_pw=$(openssl rand -base64 24)
+sudo -u postgres psql -c "ALTER USER postgres WITH PASSWORD '$postgres_pw';"
+
+# Alterar senhas de usuários comuns
+common_users=(msfadmin postgres service user)
+for user in "${common_users[@]}"; do
+    [ -f "/etc/passwd" ] && grep -q "^$user:" /etc/passwd && \
+        echo "$user:$(openssl rand -base64 24)" | chpasswd
+done
+
+# Configuração do SSH
+ssh_config="/etc/ssh/sshd_config"
+[ -f "$ssh_config" ] && {
+    sed -i 's/^#PermitRootLogin.*/PermitRootLogin no/' "$ssh_config"
+    echo -e "KexAlgorithms diffie-hellman-group-exchange-sha256\nMACs hmac-sha2-512\nHostKeyAlgorithms ssh-rsa-sha256" >> "$ssh_config"
+    systemctl restart ssh
+}
+
+# Configurar TLS/SSL
+a2enmod ssl >/dev/null
+apache_conf="/etc/apache2/apache2.conf"
+[ -f "$apache_conf" ] && {
+    echo "SSLProtocol -all +TLSv1.2" >> "$apache_conf"
+    echo "SSLHonorCipherOrder on" >> "$apache_conf"
+    echo "SSLCipherSuite HIGH:!aNULL:!MD5:!RC4" >> "$apache_conf"
+    systemctl restart apache2
+}
+
+# Remover arquivos de informações sensíveis
+find /var/www/ -type f \( -name phpinfo.php -o -name info.php \) -delete
+find /var/www/ -type d -name /doc -exec chmod 700 {} \;
+
+# Atualizar PHP
+apt-get install -y php5.6
+php_ini=$(find /etc/php/*/apache2/ -name php.ini)
+[ -f "$php_ini" ] && {
+    sed -i 's/allow_url_include = On/allow_url_include = Off/' "$php_ini"
+    sed -i 's/expose_php = On/expose_php = Off/' "$php_ini"
+}
+
+# Remover acesso anônimo FTP
+ftp_config="/etc/vsftpd.conf"
+[ -f "$ftp_config" ] && {
+    sed -i 's/anonymous_enable=.*/anonymous_enable=NO/' "$ftp_config"
+    systemctl restart vsftpd
+}
+
+# Desativar TLS antigo
+openssl_conf="/etc/ssl/openssl.cnf"
+[ -f "$openssl_conf" ] && {
+    sed -i 's/MinProtocol = TLSv1.2/MinProtocol = TLSv1.3/' "$openssl_conf"
+    echo "[system_default]" >> "$openssl_conf"
+    echo "MinProtocol = TLSv1.3" >> "$openssl_conf"
+}
+
+# Reconfigurar sysctl para segurança
+sysctl_conf="/etc/sysctl.conf"
+[ -f "$sysctl_conf" ] && {
+    echo "net.ipv4.tcp_syncookies=1" >> "$sysctl_conf"
+    echo "net.ipv4.tcp_timestamps=0" >> "$sysctl_conf"
+    sysctl -p
+}}
+{type: uploaded file
+fileName: metasploitable66VT_17.txt
+fullContent:
+#!/bin/bash
+
+# Atualização de pacotes e remoção de serviços vulneráveis
+apt-get update
+apt-get upgrade -y
+apt-get install -y openssh-server apache2
+
+# Desabilitar serviços vulneráveis
+systemctl stop rlogin.socket rsh.socket rexec.socket nginx
+systemctl disable rlogin.socket rsh.socket rexec.socket nginx
+systemctl mask rlogin.socket rsh.socket rexec.socket
+systemctl stop telnet.socket
+systemctl disable telnet.socket
+systemctl mask telnet.socket
+systemctl stop distcc
+systemctl disable distcc
+systemctl stop ingreslock
+systemctl disable ingreslock
+systemctl stop vncserver
+systemctl disable vncserver
+
+# Remover pacotes inseguros
+apt-get purge -y vsftpd distcc rsh-client rsh-server rexecd rexec-server telnetd nginx
+apt-get autoremove -y
+
+# Configurar MySQL/MariaDB
+mysql -e "ALTER USER 'root'@'localhost' IDENTIFIED BY 'NovaSenhaForte123!'; FLUSH PRIVILEGES;"
+
+# Configurar PostgreSQL
+sudo -u postgres psql -c "ALTER USER postgres PASSWORD 'NovaSenhaForte456!';"
+
+# Configurações de rede (desabilitar IPv6)
+sysctl -w net.ipv6.conf.all.disable_ipv6=1
+sysctl -w net.ipv6.conf.default.disable_ipv6=1
+
+# Configurações de firewall (iptables básico)
+iptables -F
+iptables -A INPUT -p tcp --dport 22 -j ACCEPT
+iptables -A INPUT -p tcp --dport 80 -j ACCEPT
+iptables -A INPUT -p tcp --dport 443 -j ACCEPT
+iptables -A INPUT -m conntrack --ctstate RELATED,ESTABLISHED -j ACCEPT
+iptables -A INPUT -i lo -j ACCEPT
+iptables -P INPUT DROP
+iptables -P FORWARD DROP
+iptables -P OUTPUT ACCEPT
+iptables-save > /etc/iptables/rules.v4
+
+# Atualizar certificados SSL (exemplo básico)
+mkdir -p /etc/apache2/ssl
+openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout /etc/apache2/ssl/apache.key -out /etc/apache2/ssl/apache.crt -subj "/CN=localhost"
+
+# Configurar PHP
+phpenmod opcache
+echo "expose_php = Off" >> /etc/php/7.4/apache2/php.ini
+systemctl restart apache2
+
+# Remover arquivos sensíveis
+find /var/www/html -name 'phpinfo.php' -delete
+find /var/www/html -name 'test.php' -delete
+
+# Configurar Apache
+a2enmod ssl
+a2ensite default-ssl
+a2enmod headers
+echo "ServerTokens Prod" >> /etc/apache2/apache2.conf
+echo "ServerSignature Off" >> /etc/apache2/apache2.conf
+echo "TraceEnable off" >> /etc/apache2/conf-enabled/security.conf
+a2dismod status
+systemctl restart apache2
+
+# Configurar SSH
+sed -i 's/^#?PermitRootLogin.*/PermitRootLogin prohibit-password/' /etc/ssh/sshd_config
+sed -i 's/^#?PasswordAuthentication.*/PasswordAuthentication no/' /etc/ssh/sshd_config
+sed -i 's/^#?PermitEmptyPasswords.*/PermitEmptyPasswords no/' /etc/ssh/sshd_config
+systemctl restart ssh
+
+# Pós-execução (mensagem final)
+echo "Recomendação CRÍTICA: Atualize todo o sistema operacional para uma versão suportada."
+echo "Execute 'do-release-upgrade' para migrar para uma versão mais recente do Ubuntu."
+echo "Algumas configurações requerem adaptação manual:"
+echo "1. Certificados SSL com chaves >=2048 bits"
+echo "2. Verificações de compatibilidade após atualizações"}
+{type: uploaded file
+fileName: metasploitable66VT_18.txt
+fullContent:
+```bash
+#!/bin/bash
+
+# Stopping and disabling services
+services=("portmap" "rlogin" "rsh" "rexec" "distcc" "tomcat5.5" "druby" "vnc" "ingreslock" "telnet" "vsftpd")
+for svc in "${services[@]}"; do
+    service "$svc" stop 2>/dev/null
+    update-rc.d -f "$svc" remove 2>/dev/null
+done
+
+# Removing packages
+packages=("rsh-server" "rsh-client" "rexecd" "distcc" "tomcat5.5" "vnc-server" "tingres-server" "telnetd" "vsftpd")
+dpkg --purge "${packages[@]}" 2>/dev/null
+apt-get -y remove "${packages[@]}" --purge 2>/dev/null
+
+# Blocking ports
+iptables -F
+unwanted_ports=(21 23 25 80 513 514 512 5900 8787 6200 3632 8009)
+for port in "${unwanted_ports[@]}"; do
+    iptables -A INPUT -p tcp --dport "$port" -j DROP
+done
+iptables-save > /etc/iptables.rules
+
+# Disabling TWiki and phpinfo
+find /var/www /srv/www -type f -wholename "*/phpinfo.php" -delete
+find /var/www /srv/www -type d -name "twiki" -exec rm -rf {} +
+rm -rf /usr/share/twiki
+
+# Database password reset
+mysql_password=$(tr -dc A-Za-z0-9 </dev/urandom | head -c 32)
+mysql -e "SET PASSWORD FOR 'root'@'localhost' = PASSWORD('$mysql_password'); DELETE FROM mysql.user WHERE User=''; FLUSH PRIVILEGES;"
+
+pg_password=$(tr -dc A-Za-z0-9 </dev/urandom | head -c 32)
+service postgresql start
+sudo -u postgres psql -c "ALTER USER postgres PASSWORD '$pg_password';"
+
+# SSH hardening
+sed -i '/^#*Protocol.*/d; /^#*KexAlgorithms.*/d; /^#*Ciphers.*/d; /^#*MACs.*/d; /^#*HostKeyAlgorithms.*/d' /etc/ssh/sshd_config
+echo -e "Protocol 2\nKexAlgorithms curve25519-sha256@libssh.org,diffie-hellman-group-exchange-sha256\nCiphers chacha20-poly1305@openssh.com,aes256-gcm@openssh.com,aes128-gcm@openssh.com\nMACs hmac-sha2-512-etm@openssh.com,hmac-sha2-256-etm@openssh.com\nHostKeyAlgorithms ecdsa-sha2-nistp521-cert-v01@openssh.com,ssh-ed25519-cert-v01@openssh.com" >> /etc/ssh/sshd_config
+service ssh restart
+
+# Apache hardening
+apache_dir=("/etc/apache2" "/etc/httpd")
+for dir in "${apache_dir[@]}"; do
+    if [ -d "$dir" ]; then
+        echo -e "<IfModule mod_ssl.c>\nSSLProtocol TLSv1.3 TLSv1.2\nSSLCipherSuite HIGH:!RC4:!MD5:!DHE:!kRSA\n</IfModule>\n\n<LimitExcept GET POST HEAD>\nDeny from all\n</LimitExcept>\nTraceEnable off\nRequestHeader unset Proxy early\n<Directory /doc>\nRequire all denied\n</Directory>" >> "$dir"/conf.d/security.conf
+    fi
+done
+apache2ctl graceful || httpd -k graceful
+
+# SSL/TLS certificate renewal
+cert_dir="/etc/ssl"
+fqdn=$(hostname -f)
+openssl req -x509 -nodes -days 3650 -newkey rsa:4096 -keyout "$cert_dir"/private/server.key -out "$cert_dir"/certs/server.crt -subj "/CN=$fqdn"
+
+# Final cleanup
+updatedb && find / \( -name "*.bak" -o -name "*.orig" \) -delete
+```}
+{type: uploaded file
+fileName: metasploitable66VT_19.txt
+fullContent:
+```bash
+#!/bin/bash
+
+# Correção para vulnerabilidades de serviços
+service rsh stop
+service rlogin stop
+service rexec stop
+update-rc.d -f rexec remove
+update-rc.d -f rlogin remove
+update-rc.d -f rsh remove
+apt-get purge rsh-client rsh-server rlogin rexec -y
+
+# Desabilitar protocolos inseguros para SSH
+sed -i '/^KexAlgorithms/d' /etc/ssh/sshd_config
+sed -i '/^Ciphers/d' /etc/ssh/sshd_config
+sed -i '/^MACs/d' /etc/ssh/sshd_config
+sed -i '/^HostKeyAlgorithms/d' /etc/ssh/sshd_config
+echo "KexAlgorithms curve25519-sha256,curve25519-sha256@libssh.org,diffie-hellman-group16-sha512,diffie-hellman-group18-sha512,diffie-hellman-group-exchange-sha256" >> /etc/ssh/sshd_config
+echo "Ciphers chacha20-poly1305@openssh.com,aes256-gcm@openssh.com,aes128-gcm@openssh.com,aes256-ctr,aes192-ctr,aes128-ctr" >> /etc/ssh/sshd_config
+echo "MACs hmac-sha2-512-etm@openssh.com,hmac-sha2-256-etm@openssh.com,umac-128-etm@openssh.com" >> /etc/ssh/sshd_config
+echo "HostKeyAlgorithms ssh-ed25519,ssh-ed25519-cert-v01@openssh.com,sk-ssh-ed25519@openssh.com,sk-ssh-ed25519-cert-v01@openssh.com,rsa-sha2-512,rsa-sha2-512-cert-v01@openssh.com" >> /etc/ssh/sshd_config
+service sshd restart
+
+# Remover backdoor Ingreslock e serviços de rede vulneráveis
+fuser -k 1524/tcp
+fuser -k 6200/tcp
+fuser -k 513/tcp
+fuser -k 514/tcp
+fuser -k 512/tcp
+rm -f /usr/sbin/in.ingreslock
+sed -i '/ingreslock/d' /etc/inetd.conf /etc/xinetd.d/*
+pkill -f 'druby_timeserver'
+rm -f /usr/sbin/druby_timeserver.rb
+sed -i '/distccd/d' /etc/inetd.conf /etc/xinetd.d/*
+pkill -f distccd
+
+# Proteger serviços e alterar credenciais padrão
+# PostgreSQL
+service postgresql stop
+update-rc.d postgresql disable
+echo "ALTER USER postgres WITH PASSWORD 'StrongPassword123!';" | sudo -u postgres psql
+service postgresql start
+
+# MySQL
+service mysql stop
+update-rc.d mysql disable
+mysql --user=root -e "ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY 'StrongPassword123!'; FLUSH PRIVILEGES;"
+service mysql start
+
+# Permissões para VNC
+fuser -k 5900/tcp
+sed -i '/vncserver/d' /etc/init.d/*
+pkill -f vncserver
+
+# Apache - Desativar métodos HTTP inseguros
+a2disconf trace
+a2disconf loaded_deflate
+sed -i '/<Directory "\/var\/www">/,/<\/Directory>/s/Options Indexes FollowSymLinks/Options -Indexes +FollowSymLinks/' /etc/apache2/apache2.conf
+sed -i '/<Directory "\/var\/www">/,/<\/Directory>/s/AllowOverride None/AllowOverride None\n\tRedirectMatch 403 \^\\\/doc\\\/\$/' /etc/apache2/apache2.conf
+sed -i '/<Location \/>/,/<\/Location>/s/.*//' /etc/apache2/apache2.conf
+echo "<Location />" >> /etc/apache2/apache2.conf
+echo "    TraceEnable off" >> /etc/apache2/apache2.conf
+echo "    </Location>" >> /etc/apache2/apache2.conf
+echo "<LocationMatch \"^/dav\">" >> /etc/apache2/apache2.conf
+echo "    LimitExcept GET POST HEAD OPTIONS" >> /etc/apache2/apache2.conf
+echo "        Order deny,allow" >> /etc/apache2/apache2.conf
+echo "        Deny from all" >> /etc/apache2/apache2.conf
+echo "    </LimitExcept>" >> /etc/apache2/apache2.conf
+echo "</LocationMatch>" >> /etc/apache2/apache2.conf
+rm -f /var/www/html/phpinfo.php
+rm -f /var/www/mutillidae/phpinfo.php
+rm -f /var/www/html/mutillidae/javascript/ddsmoothmenu/jquery.min.js
+service apache2 restart
+
+# Tomcat - Proteger contra Ghostcat
+service tomcat5.5 stop
+sed -i '/<Connector port=\"8009\"/s/ protocol=\"AJP\/1.3\"/ protocol=\"AJP\/1.3\" secretRequired=\"true\" secret=\"StrongSecret\"/' /etc/tomcat5.5/server.xml
+sed -i '/<Connector port=\"8009\"/s/ / address=\"127.0.0.1\"/' /etc/tomcat5.5/server.xml
+echo '<Valve className="org.apache.catalina.authenticator.SSLAuthenticator" allowIpSourceCheck="true" />' >> /etc/tomcat5.5/server.xml
+mv /var/lib/tomcat5.5/webapps/ROOT/WEB-INF/web.xml /root/web.xml.backup
+service tomcat5.5 start
+
+# Fechando serviços não essenciais
+service vsftpd stop
+update-rc.d vsftpd disable
+fuser -k 21/tcp
+fuser -k 2121/tcp
+service sendmail stop
+update-rc.d sendmail disable
+service telnet stop
+update-rc.d telnet remove
+service inetd stop
+update-rc.d inetd disable
+service xinetd stop
+update-rc.d xinetd disable
+
+# Configurações globais de SSL/TLS
+echo 'ssl_protocols = !SSLv2 !SSLv3 !TLSv1 !TLSv1.1' > /etc/ssl/safe_ssl.conf
+echo 'ssl_ciphers = "EECDH+ECDSA+AESGCM EECDH+aRSA+AESGCM EECDH+ECDSA+SHA384 EECDH+ECDSA+SHA256 EECDH+aRSA+SHA384 EECDH+aRSA+SHA256 EECDH+aRSA+RC4 EECDH !aNULL !eNULL !LOW !3DES !MD5 !EXP !PSK !SRP !DSS !RC4"' >> /etc/ssl/safe_ssl.conf
+
+# Proteção contra time-based attacks
+echo "net.ipv4.tcp_timestamps = 0" >> /etc/sysctl.conf
+sysctl -p
+```}
+{type: uploaded file
+fileName: metasploitable66VT_20.txt
+fullContent:
+```bash
+#!/bin/bash
+set -e
+
+stop_disable_service() {
+    service_name=$1
+    systemctl stop "$service_name" 2>/dev/null || service "$service_name" stop 2>/dev/null
+    systemctl disable "$service_name" 2>/dev/null || update-rc.d -f "$service_name" remove 2>/dev/null || chkconfig "$service_name" off 2>/dev/null
+}
+
+remove_package() {
+    dpkg --get-selections | grep -q "^$1" && apt purge -y "$1" && apt autoremove -y
+}
+
+add_apt_repo() {
+    grep -q "$2" /etc/apt/sources.list || echo "$1" >> /etc/apt/sources.list
+    apt update
+}
+
+disable_apache_module() {
+    a2dismod -q vhost_net
+    rm -f "/etc/apache2/mods-enabled/$1.load" 2>/dev/null
+}
+
+change_db_password() {
+    db_system=$1
+    user=$2
+    new_pass=$(openssl rand -base64 24)
+    if command -v mysql &>/dev/null; then
+        mysql -e "ALTER USER '$user'@'localhost' IDENTIFIED BY '$new_pass'; FLUSH PRIVILEGES;"
+    elif command -v psql &>/dev/null; then
+        sudo -u postgres psql -c "ALTER USER $user WITH PASSWORD '$new_pass';"
+    fi
+}
+
+add_firewall_rule() {
+    if command -v ufw &>/dev/null; then
+        ufw deny "$1"
+    elif command -v iptables &>/dev/null; then
+        iptables -A INPUT -p $2 --dport $1 -j DROP
+    fi
+}
+
+disable_http_methods() {
+    apache_conf="/etc/apache2/apache2.conf"
+    [ -f "$apache_conf" ] && {
+        sed -i '/<Directory \/>/,/<\/Directory>/ s/AllowOverride None/AllowOverride None\n    <LimitExcept GET POST HEAD>\n        Deny from all\n    <\/LimitExcept>/' "$apache_conf"
+        echo "TraceEnable off" >> "$apache_conf"
+    }
+    systemctl restart apache2 2>/dev/null || service apache2 restart 2>/dev/null
+}
+
+fix_tomcat_ajp() {
+    find / -name server.xml -exec sed -i '/<Connector[^>]*protocol="AJP\/1.3"/,/>/ s/^/#/' {} \;
+}
+
+cleanup_phpinfo() {
+    find /var/www -name phpinfo.php -exec rm -f {} +
+}
+
+update_sshd_config() {
+    sshd_conf="/etc/ssh/sshd_config"
+    [ -f "$sshd_conf" ] && {
+        sed -i -e 's/^HostKeyAlgorithms.*/HostKeyAlgorithms ssh-rsa,ssh-ed25519/' \
+               -e 's/^KexAlgorithms.*/KexAlgorithms curve25519-sha256/' \
+               -e 's/^Ciphers.*/Ciphers chacha20-poly1305@openssh.com,aes256-gcm@openssh.com/' \
+               -e 's/^MACs.*/MACs hmac-sha2-512,hmac-sha2-256/' "$sshd_conf"
+        systemctl restart sshd || service ssh restart
+    }
+}
+
+# Update OS
+add_apt_repo "deb http://old-releases.ubuntu.com/ubuntu/ hardy main restricted universe multiverse" "old-releases.ubuntu.com"
+add_apt_repo "deb http://old-releases.ubuntu.com/ubuntu/ hardy-updates main restricted universe multiverse" "old-releases.ubuntu.com"
+add_apt_repo "deb http://old-releases.ubuntu.com/ubuntu/ hardy-security main restricted universe multiverse" "old-releases.ubuntu.com"
+apt update
+DEBIAN_FRONTEND=noninteractive apt -y upgrade
+
+# Remove vulnerable services
+remove_package openbsd-inetd
+remove_package rsh-server
+remove_package rsh-client
+remove_package rexecd
+remove_package telnetd
+remove_package distcc
+remove_package vsftpd
+remove_package twiki
+remove_package tomcat5.5
+
+# Change passwords
+change_db_password mysql root
+change_db_password pgsql postgres
+
+# Security hardening
+stop_disable_service druby
+stop_disable_service ingreslock
+stop_disable_service vncserver
+stop_disable_service tomcat
+
+# Firewall rules
+add_firewall_rule 512/tcp tcp
+add_firewall_rule 513/tcp tcp
+add_firewall_rule 514/tcp tcp
+add_firewall_rule 1524/tcp tcp
+add_firewall_rule 3632/tcp tcp
+add_firewall_rule 8787/tcp tcp
+add_firewall_rule 8009/tcp tcp
+
+# Apache configurations
+disable_apache_module cgi
+disable_http_methods
+
+# Tomcat AJP fix
+fix_tomcat_ajp
+
+# PHP cleanup
+cleanup_phpinfo
+
+# SSH hardening
+update_sshd_config
+
+# TLS/SSL cleanup
+find / -name '*.crt' -exec rm -f {} +
+```
+}
+{type: uploaded file
+fileName: metasploitable66VT_21.txt
+fullContent:
+```bash
+#!/bin/bash
+
+# Configurações iniciais
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+NC='\033[0m'
+export DEBIAN_FRONTEND=noninteractive
+
+# Funções utilitárias
+print_section() {
+    echo -e "\n${GREEN}[*] $1${NC}"
+}
+
+print_critical() {
+    echo -e "\n${RED}[CRITICAL] $1${NC}"
+    echo "   $2"
+}
+
+# 1. Remover/desativar serviços vulneráveis
+print_section "Desativando serviços vulneráveis"
+services=("rlogin" "rsh" "rexec" "telnet" "vncserver" "distcc" "vsftpd")
+for service in "${services[@]}"; do
+    if systemctl list-unit-files | grep -q "$service.service"; then
+        systemctl stop "$service"
+        systemctl disable "$service"
+    fi
+    pkill -9 -f "$service"
+done
+apt-get purge -y rsh-client rsh-server rexecd telnetd tightvncserver distcc vsftpd
+
+# 2. Parar serviço de backdoor Ingreslock
+print_section "Removendo backdoor Ingreslock"
+ingres_pid=$(lsof -ti tcp:1524)
+if [ -n "$ingres_pid" ]; then
+    kill -9 "$ingres_pid"
+fi
+
+# 3. Alterar credenciais padrão do MySQL
+print_section "Mudando senha padrão do MySQL"
+if command -v mysqladmin &> /dev/null; then
+    MYSQL_NEW_PW=$(openssl rand -base64 32)
+    mysqladmin -u root password "$MYSQL_NEW_PW" >/dev/null 2>&1
+    echo "[!] MySQL root password changed to: $MYSQL_NEW_PW"
+fi
+
+# 4. Alterar credenciais padrão do PostgreSQL
+print_section "Mudando senha padrão do PostgreSQL"
+if command -v psql &> /dev/null; then
+    PGSQL_NEW_PW=$(openssl rand -base64 32)
+    sudo -u postgres psql -c "ALTER USER postgres WITH PASSWORD '$PGSQL_NEW_PW';" >/dev/null 2>&1
+    echo "[!] PostgreSQL postgres password changed to: $PGSQL_NEW_PW"
+fi
+
+# 5. Desativar protocolos inseguros (SSLv2, SSLv3, TLSv1.0, TLSv1.1)
+print_section "Desativando protocolos SSL/TLS inseguros"
+find /etc/ -name '*.conf' -exec sed -i -E \
+    's/(SSLProtocol.*)(\bSSLv2\b|\bSSLv3\b|\bTLSv1\b|\bTLSv1\.1\b)//g' {} +
+find /etc/ -name '*.cnf' -exec sed -i -E \
+    's/(min_protocol\s*=\s*)(TLSv1|TLSv1\.0|TLSv1\.1)/\1TLSv1.2/g' {} +
+
+# 6. Correção Ghostcat (Tomcat)
+print_section "Removendo conector AJP vulnerável do Tomcat"
+find / -name 'server.xml' -type f -exec sed -i \
+    's/<Connector.*protocol="AJP\/1.3".*>/<!-- \0 -->/' {} +
+
+# 7. Remover métodos HTTP perigosos
+print_section "Desabilitando métodos HTTP perigosos"
+apache_conf_files=$(find /etc/apache2/ -name '*.conf')
+for conf in $apache_conf_files; do
+    echo -e "<Location />\n  TraceEnable off\n</Location>\n<LimitExcept GET POST HEAD>\n  Deny from all\n</LimitExcept>" >> "$conf"
+done
+systemctl restart apache2 2>/dev/null
+
+# 8. Reforçar configurações SSH
+print_section "Aplicando hardening do SSH"
+ssh_config="/etc/ssh/sshd_config"
+if [ -f "$ssh_config" ]; then
+    sed -i -E \
+        -e 's/^(Port|Protocol|PermitRootLogin|PasswordAuthentication|KexAlgorithms|Ciphers|MACs).*/# Commented_by_security/' \
+        -e 's/^#.*VersionAddendum.*//' "$ssh_config"
+    cat << EOF >> "$ssh_config"
+Port 22
+Protocol 2
+PermitRootLogin no
+PasswordAuthentication no
+KexAlgorithms curve25519-sha256@libssh.org,diffie-hellman-group-exchange-sha256
+Ciphers chacha20-poly1305@openssh.com,aes256-gcm@openssh.com,aes128-gcm@openssh.com
+MACs hmac-sha2-512-etm@openssh.com,hmac-sha2-256-etm@openssh.com
+UsePAM yes
+ClientAliveInterval 300
+ClientAliveCountMax 2
+EOF
+    systemctl restart sshd
+fi
+
+# 9. Desativar login FTP anônimo
+print_section "Removendo acesso FTP anônimo"
+sed -i 's/anonymous_enable=.*/anonymous_enable=NO/g' /etc/vsftpd.conf 2>/dev/null
+rm -rf /srv/ftp/public /var/ftp/pub
+
+# 10. Habilitar modo seguro Ruby (SAFE)
+print_section "Configurando modo seguro do Ruby"
+if command -v gem &> /dev/null; then
+    gem env | grep 'EXECUTABLE DIRECTORY' | cut -d: -f2 >> /etc/environment
+    echo "export RUBYOPT='-r $SAFE -d'" >> /etc/profile
+    echo "$SAFE = 3" >> /etc/ruby/site_ruby/*/safe_mode_config.rb
+fi
+
+# 11. Remover info do PHP
+print_section "Removendo arquivos phpinfo"
+find /var/www/ /srv/ -type f -name '*phpinfo*.php' -delete
+
+# 12. Aplicar hardening do Postfix
+print_section "Desativando VRFY/EXPN no Postfix"
+postfix_conf="/etc/postfix/main.cf"
+if [ -f "$postfix_conf" ]; then
+    echo "disable_vrfy_command = yes" >> "$postfix_conf"
+    echo "smtpd_discard_ehlo_keywords = vrfy, expn" >> "$postfix_conf"
+    systemctl restart postfix
+fi
+
+# 13. Remover configurações de debug do PHP
+print_section "Desativando modo debug PHP"
+sed -i 's/\bps\.debug\b.*=.*1/ps.debug=0/g' /etc/php*/*/php.ini
+
+# 14. Adicionar hardening do kernel
+print_section "Hardening do kernel"
+cat << EOF >> /etc/sysctl.conf
+net.ipv4.tcp_syncookies = 1
+net.ipv4.tcp_timestamps = 0
+net.ipv4.conf.all.rp_filter = 1
+kernel.kptr_restrict = 2
+kernel.dmesg_restrict = 1
+EOF
+sysctl -p
+
+echo -e "\n${GREEN}[+] Configurações de segurança aplicadas!"
+```}
+{type: uploaded file
+fileName: metasploitable66VT_22.txt
+fullContent:
+```bash
+#!/bin/bash
+
+# Correções para vulnerabilidades de serviços desnecessários
+systemctl stop xinetd rsh.socket rlogin.socket rexec.socket distcc vncserver || service xinetd stop
+systemctl disable xinetd rsh.socket rlogin.socket rexec.socket distcc vncserver || update-rc.d -f xinetd remove
+apt-get purge -y rsh-client rsh-redone-client rlogin telnetd distcc tightvncserver xinetd
+
+# Impedir reinicialização de serviços removidos
+rm -f /etc/init.d/distcc /etc/init.d/vncserver /etc/init.d/xinetd
+killall -9 drb_server 2>/dev/null
+
+# Correções para MySQL e PostgreSQL
+mysql -e "ALTER USER 'root'@'localhost' IDENTIFIED BY 'StrongPass123!';" &&
+psql -U postgres -c "ALTER USER postgres WITH PASSWORD 'Secure!5432@Pg';"
+
+# Remoção de backdoors e serviços comprometidos
+rm -rf /usr/lib/ruby/1.8/drb/drb.rb
+pkill -f ingreslock
+rm -f /etc/xinetd.d/rexec /etc/xinetd.d/rlogin /etc/xinetd.d/rsh
+
+# Atualização de pacotes
+apt-get update && apt-get upgrade -y php5 tomcat6 mysql-server postgresql openssl
+
+# Correções de configuração para Apache e outros serviços
+echo "SSLProtocol -all +TLSv1.2" >> /etc/apache2/apache2.conf
+sed -i 's/SSLProtocol.*/SSLProtocol –all +TLSv1.2/' /etc/postgresql-common/ssl.conf
+sed -i 's/CipherSuite.*/CipherSuite HIGH:!aNULL:!MD5:!RC4/' /etc/ssh/sshd_config
+sed -i '/PUT/d; /DELETE/d; /TRACE/d' /etc/apache2/mods-enabled/dav.load
+rm -f /var/www/html/phpinfo.php /var/www/html/mutillidae/phpinfo.php
+
+# Configuração do Firewall
+iptables -A INPUT -p tcp --dport 513 -j DROP
+iptables -A INPUT -p tcp --dport 512 -j DROP
+iptables -A INPUT -p tcp --dport 514 -j DROP
+iptables -A INPUT -p tcp --dport 3632 -j DROP
+iptables -A INPUT -p tcp --dport 1524 -j DROP
+iptables -A INPUT -p tcp --dport 8787 -j DROP
+
+# Reiniciar serviços
+systemctl restart apache2 postgresql ssh mysql || service apache2 restart
+```}
+{type: uploaded file
+fileName: metasploitable66VT_23.txt
+fullContent:
+#!/bin/bash
+
+# Corrige vulnerabilidades relacionadas a serviços
+service rlogin stop
+update-rc.d -f rlogin remove
+service rsh stop
+update-rc.d -f rsh remove
+service rexec stop
+update-rc.d -f rexec remove
+service telnet stop
+update-rc.d -f telnet remove
+service vsftpd stop
+update-rc.d -f vsftpd remove
+service distcc stop
+update-rc.d -f distcc remove
+service vncserver stop
+update-rc.d -f vncserver remove
+
+# Remove backdoor Ingreslock
+pkill -f ingreslock
+find / -name '*ingreslock*' -delete
+
+# Configura o AJP do Tomcat
+sed -i '/<Connector.*protocol="AJP.*"/d' /etc/tomcat*/server.xml
+
+# Define senhas fortes para MySQL e PostgreSQL
+mysql -e "ALTER USER 'root'@'localhost' IDENTIFIED BY 'S3nh@F0rt3!!'; FLUSH PRIVILEGES;"
+sudo -u postgres psql -c "ALTER USER postgres WITH PASSWORD 'P0stgr3s_S3cur3P@ss';"
+
+# Atualiza e configura PHP
+sed -i 's/.*cgi.fix_pathinfo=.*/cgi.fix_pathinfo=0/' /etc/php5*/apache2/php.ini
+sed -i 's/.*allow_url_include =.*/allow_url_include = Off/' /etc/php5*/apache2/php.ini
+find /var/www -name 'phpinfo.php' -delete
+a2dismod cgi
+
+# Configura Apache
+sed -i -e "s/^TraceEnable/#TraceEnable/" /etc/apache2/apache2.conf
+echo -e "\nTraceEnable off\n<DirectoryMatch \"/\">\n    Options -ExecCGI\n    <LimitExcept GET POST HEAD>\n        deny from all\n    </LimitExcept>\n    <Files *.php>\n        Options -ExecCGI\n    </Files>\n</DirectoryMatch>" >> /etc/apache2/apache2.conf
+a2dismod -f userdir
+
+# Configura TLS e SSL
+find /etc -type f -name '*.conf' -exec sed -i -e 's/SSLProtocol.*/SSLProtocol all -SSLv2 -SSLv3 -TLSv1 -TLSv1.1/g' -e 's/SSLCipherSuite.*/SSLCipherSuite HIGH:!aNULL:!MD5:!kRSA:!eNULL/g' {} \;
+
+# Configura SSH
+echo -e "Ciphers aes256-ctr,aes192-ctr,aes128-ctr\nMACs hmac-sha2-512,hmac-sha2-256\nKexAlgorithms ecdh-sha2-nistp521,ecdh-sha2-nistp384,ecdh-sha2-nistp256,diffie-hellman-group-exchange-sha256\nHostKeyAlgorithms ecdsa-sha2-nistp256,rsa-sha2-512,ssh-ed25519" >> /etc/ssh/sshd_config
+service ssh restart
+
+# Configura Postfix
+postconf -e disable_vrfy_command=yes
+
+# Remove diretórios públicos e verbosidade
+rm -rf /doc
+rm -rf /usr/doc/*
+rm -rf /var/www/dav
+
+# Atualiza biblioteca jQuery
+find /var/www -name 'jquery.min.js' -exec sed -i '1s/1\.3\.2/1.9.0/' {} \;
+
+# Aplica hardening geral
+echo "net.ipv4.tcp_timestamps = 0" >> /etc/sysctl.conf
+echo "net.ipv4.icmp_echo_ignore_all = 1" >> /etc/sysctl.conf
+sysctl -p
+chmod 700 /root
+dpkg-reconfigure -f noninteractive --force-unsafe-io tzdata
+
+# Reinicia serviços necessários
+service apache2 restart
+service tomcat6 restart
+service mysql restart
+service postgresql restart}
+{type: uploaded file
+fileName: metasploitable66VT_24.txt
+fullContent:
+#!/bin/bash
+
+# Disable/enable services
+systemctl stop vsftpd.service rlogin.service rsh.service rexec.service distcc.service vncserver.service tomcat.service telnet.service
+systemctl disable vsftpd.service rlogin.service rsh.service rexec.service distcc.service vncserver.service tomcat.service telnet.service
+apt-get purge -y vsftpd rsh-client rsh-server distcc vnc4server tomcat5 telnetd
+
+# Remove vulnerable software
+rm -rf /var/www/html/twiki
+rm -rf /var/www/html/mutillidae
+rm -rf /var/www/html/dvwa
+rm -rf /var/www/html/phpMyAdmin
+rm -rf /var/www/html/tikiwiki
+rm -f /var/www/html/phpinfo.php
+find /var/www -name 'phpinfo.php' -delete
+
+# Secure SSH configuration
+sed -i 's/^#*PermitRootLogin.*/PermitRootLogin prohibit-password/' /etc/ssh/sshd_config
+sed -i 's/^#*PasswordAuthentication.*/PasswordAuthentication yes/' /etc/ssh/sshd_config
+systemctl restart sshd
+
+# Secure MySQL
+mysql -e "ALTER USER 'root'@'localhost' IDENTIFIED BY 'S3cureP@ss'; DELETE FROM mysql.user WHERE User=''; FLUSH PRIVILEGES;"
+
+# Secure Apache
+a2dismod cgi
+echo "<Directory /var/www>
+    AllowMethods GET POST HEAD OPTIONS
+    TraceEnable off
+</Directory>" > /etc/apache2/conf-available/secure.conf
+a2enconf secure
+systemctl restart apache2
+
+# Manage accounts
+for user in msfadmin postgres service user; do
+    if id "$user" &>/dev/null; then
+        echo "Locking and restricting shell for $user"
+        usermod --lock "$user"
+        usermod --shell /usr/sbin/nologin "$user"
+    fi
+done
+
+# Configure Postfix
+postconf -e disable_vrfy_command=yes
+systemctl restart postfix}
+{type: uploaded file
+fileName: metasploitable66VT_25.txt
+fullContent:
+#!/bin/bash
+
+# Atualiza o sistema e remove pacotes não essenciais
+apt-get update
+apt-get upgrade -y
+apt-get autoremove -y --purge
+
+# Remove serviços vulneráveis e desnecessários
+apt-get purge -y rsh-server rsh-client telnetd rexecd nfs-kernel-server nfs-common \
+                 ypserv tftpd atftpd tftpd-hpa osk-sdl principalserver miniserv firebird-* \
+                 tightvncserver xtightvncviewer vino xinetd inetutils-inetd openbsd-inetd
+
+# Instala e configura o UFW (firewall)
+apt-get install -y ufw
+ufw default deny incoming
+ufw default allow outgoing
+ufw --force enable
+
+# Bloqueia portas vulneráveis identificadas
+ufw deny 80/tcp    # TWiki, PHP, HTTP methods
+ufw deny 513/tcp   # rlogin
+ufw deny 514/tcp   # rsh
+ufw deny 512/tcp   # rexec
+ufw deny 3632/tcp  # DistCC
+ufw deny 5900/tcp  # VNC
+ufw deny 2121/tcp  # FTP
+ufw deny 21/tcp    # FTP
+ufw deny 1524/tcp  # Ingreslock backdoor
+ufw deny 8009/tcp  # Apache Ghostcat
+ufw deny 3306/tcp  # MySQL
+ufw deny 5432/tcp  # PostgreSQL
+ufw deny 8787/tcp  # dRuby
+ufw deny 6200/tcp  # vsftpd backdoor
+ufw deny 23/tcp    # Telnet
+ufw deny 25/tcp    # SMTP vulnerabilities
+
+# Desabilita serviços críticos via systemd (se aplicável)
+systemctl stop vsftpd distcc nfs-server rpcbind
+systemctl disable vsftpd distcc nfs-server rpcbind
+
+# Corrige vulnerabilidades de segurança específicas
+## MySQL: Remove acesso root remoto e senhas fracas
+mysql -e "UPDATE mysql.user SET Host='localhost' WHERE User='root';"
+mysql -e "DELETE FROM mysql.user WHERE User='root' AND Host NOT IN ('localhost', '127.0.0.1', '::1');"
+mysql -e "DELETE FROM mysql.user WHERE User='';"
+mysql -e "FLUSH PRIVILEGES;"
+
+## PostgreSQL: Altera senha padrão
+sudo -u postgres psql -c "ALTER ROLE postgres WITH PASSWORD 'P@ssw0rd_3c0rreto##2024';"
+
+## Apache: Desativa métodos HTTP perigosos
+echo "TraceEnable off" >> /etc/apache2/apache2.conf
+sed -i '/<Directory \/var\/www>/,/<\/Directory>/s/Options Indexes FollowSymLinks/Options -Indexes -FollowSymLinks/' /etc/apache2/apache2.conf
+
+## SSH: Configurações seguras
+sed -i 's/^#Protocol 2/Protocol 2/' /etc/ssh/sshd_config
+sed -i 's/^#PermitRootLogin .*/PermitRootLogin no/' /etc/ssh/sshd_config
+sed -i 's/^PasswordAuthentication .*/PasswordAuthentication no/' /etc/ssh/sshd_config
+echo "KexAlgorithms curve25519-sha256@libssh.org" >> /etc/ssh/sshd_config
+systemctl restart sshd
+
+## PHP: Reduz vulnerabilidades
+for version in /etc/php/*; do
+    sed -i 's/expose_php = On/expose_php = Off/' "$version/apache2/php.ini"
+    sed -i "s/disable_functions = .*/disable_functions = exec,system,passthru,shell_exec,proc_open/" "$version/apache2/php.ini"
+done
+
+# Atualiza pacotes críticos manualmente
+wget -O /tmp/tomcat.tar.gz https://archive.apache.org/dist/tomcat/tomcat-9/v9.0.31/bin/apache-tomcat-9.0.31.tar.gz
+tar -xzf /tmp/tomcat.tar.gz -C /opt
+systemctl stop tomcat
+rm -rf /opt/tomcat
+mv /opt/apache-tomcat-9.0.31 /opt/tomcat
+chmod -R 750 /opt/tomcat
+
+# Configura sudoers segur
+echo "Defaults env_reset" > /etc/sudoers.d/secured
+echo "Defaults passwd_timeout=0" >> /etc/sudoers.d/secured
+echo "Defaults timestamp_timeout=3" >> /etc/sudoers.d/secured
+
+# Finaliza com limpeza
+apt-get autoremove -y --purge
+apt-get clean
+rm -rf /tmp/*
+
+# Verificação pós-execução
+echo "Verificando configurações:"
+ufw status verbose
+ss -tuln | grep -E '(80|513|514|512|3632|5900|2121|21|1524|8009|3306|5432|8787|6200|23|25)'}

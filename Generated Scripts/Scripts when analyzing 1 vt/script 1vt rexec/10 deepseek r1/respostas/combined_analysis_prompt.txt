@@ -1,0 +1,507 @@
+>analise esse prompt contendo as vulnerabilidades encontradas em um csv do openvas e analise se os scripts que irei enviar em seguida sao capazes de corrigir esses problemas ou nao, me informando uma porcentagem de correcao das vulnerabilidades
+>Vulnerabilidades:
+    # INSTRUÇÕES PARA O MODELO DE IA
+
+    ## PERSONA
+    Você é um especialista em cibersegurança e automação de sistemas, focado em criar scripts de correção (patching). Sua única função é gerar um script que resolva a vulnerabilidade descrita abaixo.
+
+    ## TAREFA
+    Analise o contexto da vulnerabilidade a seguir e gere um script de shell (compatível com o sistema operacional do localhost) que, ao ser executado, corrija permanentemente a vulnerabilidade descrita.
+
+    ## CONTEXTO DA VULNERABILIDADE
+
+# Vulnerabilidade 1
+CVEs: CVE-1999-0618
+NVT Name: The rexec service is running
+Port: 512
+Port Protocol: tcp
+Summary: This remote host is running a rexec service.
+Specific Result: The rexec service was detected on the target system.
+
+Vulnerability Detection Method: Checks whether an rexec service is exposed on the target
+  host.
+Details:
+The rexec service is running
+(OID: 1.3.6.1.4.1.25623.1.0.100111)
+Version used: 2023-09-12T05:05:19Z
+
+Affected Software/OS: nan
+Product Detection Result: nan
+Solution: Disable the rexec service and use alternatives like SSH
+  instead.
+
+    ## REGRAS E RESTRIÇÕES DE SAÍDA
+    1.  **APENAS SCRIPT:** A sua resposta deve conter ÚNICA E EXCLUSIVAMENTE o código do script.
+    2.  **SEM EXPLICAÇÕES:** Não adicione nenhum comentário, explicação, introdução, ou despedida.
+    3.  **SEM BLOCOS DE CÓDIGO MARKDOWN:** Não envolva o script em blocos de código como ` ```bash ` ou ` ```sh `. A resposta deve ser o texto puro do script.
+    4.  **AUTOSSUFICIENTE:** O script deve ser completo, autônomo e não deve exigir interação do usuário para ser executado.
+    5.  **COMPATIBILIDADE:** O script deve ser compatível com o sistema operacional especificado em 'localhost OS'. Se o sistema operacional não for especificado, assuma um sistema baseado em Linux (como Ubuntu/Debian).
+
+    # INÍCIO DO SCRIPT DE CORREÇÃO
+
+>Scripts de correção:
+{type: uploaded file
+fileName: 1vtrexec_1.txt
+fullContent:
+#!/bin/bash
+set -e
+
+if command -v systemctl >/dev/null 2>&1; then
+    for unit in rexec.socket rexecd.socket rexec.service rexecd.service; do
+        if systemctl is-enabled "$unit" >/dev/null 2>&1; then
+            systemctl stop "$unit"
+            systemctl disable "$unit"
+        fi
+    done
+fi
+
+INETD_CONF="/etc/inetd.conf"
+if [ -f "$INETD_CONF" ] && grep -q '^[[:blank:]]*rexec' "$INETD_CONF"; then
+    sed -i.bak 's/^[[:blank:]]*rexec/#rexec/' "$INETD_CONF"
+    if pgrep inetd >/dev/null; then
+        pkill -HUP inetd
+    fi
+fi
+
+XINETD_DIR="/etc/xinetd.d"
+if [ -d "$XINETD_DIR" ] && [ -f "$XINETD_DIR/rexec" ]; then
+    if grep -q 'disable[[:space:]]*=' "$XINETD_DIR/rexec"; then
+        sed -i.bak 's/disable[[:space:]]*=.*/disable = yes/' "$XINETD_DIR/rexec"
+    else
+        if grep -q '{' "$XINETD_DIR/rexec"; then
+            sed -i.bak '/{/a\  disable = yes' "$XINETD_DIR/rexec"
+        else
+            echo "disable = yes" >> "$XINETD_DIR/rexec"
+        fi
+    fi
+    if pgrep xinetd >/dev/null; then
+        if command -v systemctl >/dev/null 2>&1; then
+            systemctl restart xinetd >/dev/null 2>&1
+        else
+            service xinetd restart >/dev/null 2>&1
+        fi
+    fi
+fi
+
+pgrep rexecd >/dev/null && pkill -9 rexecd}
+{type: uploaded file
+fileName: 1vtrexec_2.txt
+fullContent:
+#!/bin/sh
+[ "$(id -u)" != 0 ] && echo "Necessário executar como root" >&2 && exit 1
+
+# Verifica e desativa serviço rexec via systemd
+for svc in rexec.socket rexecd.service rexec.service; do
+    if systemctl is-active "$svc" >/dev/null 2>&1; then
+        systemctl stop "$svc"
+    fi
+    if systemctl is-enabled "$svc" >/dev/null 2>&1; then
+        systemctl disable "$svc"
+    fi
+done
+
+# Verifica e remove pacotes relacionados
+for pkg in rsh-server netkit-rexecd inetutils-rexecd; do
+    if dpkg -s "$pkg" >/dev/null 2>&1; then
+        DEBIAN_FRONTEND=noninteractive apt-get remove --purge -y "$pkg"
+    fi
+done
+
+# Remove configurações inetd/xinetd para rexec
+[ -f /etc/inetd.conf ] && sed -i '/^[[:space:]]*rexec[cd]*[[:space:]]/d;/^#.*rexec/d' /etc/inetd.conf
+find /etc/xinetd.d/ -type f | xargs sed -i '/service[[:space:]]\+rexe\?c/,/^}/d'
+rm -f /etc/xinetd.d/rexec /etc/xinetd.d/rexecd 2>/dev/null
+
+# Recarrega gerenciadores de serviços se necessário
+pkill -HUP inetd 2>/dev/null
+if systemctl is-active xinetd >/dev/null 2>&1; then
+    systemctl restart xinetd
+elif pgrep xinetd >/dev/null; then
+    pkill -HUP xinetd
+fi
+
+# Finaliza instância remanescente
+pkill -9 rexecd 2>/dev/null}
+{type: uploaded file
+fileName: 1vtrexec_3.txt
+fullContent:
+#!/bin/bash
+systemctl stop inetd.socket 2>/dev/null || true
+systemctl disable inetd.socket 2>/dev/null || true
+systemctl stop rexec.socket 2>/dev/null || true
+systemctl disable rexec.socket 2>/dev/null || true
+systemctl stop rexecd.socket 2>/dev/null || true
+systemctl disable rexecd.socket 2>/dev/null || true
+find /etc/xinetd.d -type f -name '*rexec*' -exec mv {} {}.disabled \; 2>/dev/null
+sed -i '/^[[:space:]]*service[[:space:]]*rexec[[:space:]]*{,*/{:x;N;/}[[:space:]]*$/!bx}; s/^/#/I' /etc/xinetd.conf 2>/dev/null
+if [ -f /etc/inetd.conf ]; then
+   sed -i -E '/^[# ]*rexec[[:space:]]/Id' /etc/inetd.conf
+   if pgrep -x inetd >/dev/null; then
+      pkill -HUP inetd 2>/dev/null
+   fi
+fi
+if systemctl is-active xinetd &>/dev/null; then
+   systemctl restart xinetd 2>/dev/null
+elif pgrep -x xinetd &>/dev/null; then
+   pkill -HUP xinetd 2>/dev/null || pkill -TERM xinetd 2>/dev/null
+fi}
+{type: uploaded file
+fileName: 1vtrexec_4.txt
+fullContent:
+#!/bin/bash
+# Verificar se o serviço rexecd está ativo e desabilitá-lo
+if systemctl is-active rexec.socket &>/dev/null; then
+    systemctl stop rexec.socket
+    systemctl disable rexec.socket
+fi
+if systemctl is-active rexecd &>/dev/null; then
+    systemctl stop rexecd
+    systemctl disable rexecd
+fi
+
+# Remover entrada do rexec no inetd.conf se existir
+if [ -f /etc/inetd.conf ]; then
+    sed -i '/^rexec[[:space:]]/s/^/#/' /etc/inetd.conf
+    kill -HUP "$(cat /var/run/inetd.pid 2>/dev/null)" 2>/dev/null
+fi
+
+# Desabilitar o serviço via xinetd
+if [ -d /etc/xinetd.d ]; then
+    for config in /etc/xinetd.d/*; do
+        if grep -q "service.*rexec" "$config" 2>/dev/null; then
+            sed -i '/disable\s*=/s/no/yes/' "$config"
+            sed -i '/disable\s*=/s/\bno\b/yes/' "$config"
+            kill -HUP "$(pidof xinetd)" 2>/dev/null
+        fi
+    done
+fi
+
+# Remover pacotes relacionados ao rexec
+{ apt-get remove --purge -y rsh-server rsh-redone-server netkit-rsh-server; } 2>/dev/null
+{ yum remove -y rsh-server; } 2>/dev/null
+
+# Finalizar qualquer instância remanescente do rexecd
+pkill -9 rexecd
+exit 0}
+{type: uploaded file
+fileName: 1vtrexec_6.txt
+fullContent:
+#!/bin/sh
+
+# Encerra qualquer instância ativa do serviço rexec
+if command -v systemctl >/dev/null 2>&1; then
+    systemctl stop rexec.service rexec.socket >/dev/null 2>&1
+    systemctl disable rexec.service rexec.socket >/dev/null 2>&1
+elif command -v service >/dev/null 2>&1; then
+    service rexec stop >/dev/null 2>&1
+    update-rc.d -f rexec remove >/dev/null 2>&1 || chkconfig rexec off >/dev/null 2>&1
+fi
+
+# Remove configurações do inetd/xinetd se presentes
+if [ -f /etc/inetd.conf ]; then
+    sed -i '/^rexec[[:space:]]/s/^/#/' /etc/inetd.conf
+    pkill -HUP inetd >/dev/null 2>&1
+fi
+
+if [ -d /etc/xinetd.d ]; then
+    find /etc/xinetd.d -type f -exec sed -i '/rexec/s/\(disable\s*=\s*\)no/\1yes/' {} +
+    pkill -HUP xinetd >/dev/null 2>&1
+fi
+
+# Remove pacotes relacionados ao servidor rexec
+if command -v apt-get >/dev/null 2>&1; then
+    apt-get purge -y rsh-server netkit-rsh-server >/dev/null 2>&1
+elif command -v yum >/dev/null 2>&1; then
+    yum remove -y rsh-server >/dev/null 2>&1
+elif command -v zypper >/dev/null 2>&1; then
+    zypper --non-interactive remove rsh-server >/dev/null 2>&1
+fi
+
+# Garante que o firewalld bloqueie a porta padrão do rexec (512/tcp)
+if command -v firewall-cmd >/dev/null 2>&1; then
+    firewall-cmd --permanent --remove-port=512/tcp >/dev/null 2>&1
+    firewall-cmd --reload >/dev/null 2>&1
+fi
+
+# Identifica e mata processos remanescentes do rexecd
+REXEC_PIDS=$(pgrep -d ' ' -f 'rexecd')
+if [ -n "${REXEC_PIDS}" ]; then
+    kill -9 ${REXEC_PIDS} >/dev/null 2>&1
+fi}
+{type: uploaded file
+fileName: 1vtrexec_7.txt
+fullContent:
+```bash
+#!/bin/bash
+
+if [ "$(id -u)" -ne 0 ]; then
+    echo "This script must be run as root. Use sudo." >&2
+    exit 1
+fi
+
+handle_sysvinit() {
+    service_name=$1
+    if [ ! -f "/etc/init.d/$service_name" ]; then
+        return 1
+    fi
+    if /etc/init.d/"$service_name" status &>/dev/null || pgrep -f "$service_name" &>/dev/null; then
+        /etc/init.d/"$service_name" stop
+    fi
+    if command -v update-rc.d &>/dev/null; then
+        update-rc.d -f "$service_name" remove
+    elif command -v chkconfig &>/dev/null; then
+        chkconfig "$service_name" off
+    else
+        find /etc/rc?.d -name "S*$service_name" -delete
+    fi
+    return 0
+}
+
+if command -v systemctl &>/dev/null; then
+    for service in rexec rexecd; do
+        systemctl stop "${service}" &>/dev/null
+        systemctl disable "${service}" &>/dev/null
+        rm -f "/etc/systemd/system/*.wants/${service}.service" \
+              "/etc/systemd/system/multi-user.target.wants/${service}.service"
+    done
+fi
+
+if [ -d /etc/xinetd.d ]; then
+    for service in rexec rexecd; do
+        conf="/etc/xinetd.d/$service"
+        if [ -f "$conf" ] && grep -q "disable.*no" "$conf"; then
+            sed -i.bak "s/disable[[:space:]]*=[[:space:]]*no/disable = yes/" "$conf"
+            changed_xinetd=true
+        fi
+    done
+    if [ "$changed_xinetd" = true ]; then
+        if command -v systemctl &>/dev/null; then
+            systemctl restart xinetd &>/dev/null
+        elif [ -f /etc/init.d/xinetd ]; then
+            /etc/init.d/xinetd restart &>/dev/null
+        elif [ -e "/proc/$(pgrep xinetd)" ]; then
+            kill -HUP "$(pgrep xinetd)" &>/dev/null
+        fi
+    fi
+fi
+
+if [ -f /etc/inetd.conf ] && grep -q "^[^#]*rexec" /etc/inetd.conf; then
+    sed -i.bak '/^[^#]*rexec/s/^/#/' /etc/inetd.conf
+    if [ -f /etc/init.d/inetd ]; then
+        /etc/init.d/inetd restart &>/dev/null
+    elif [ -e "/proc/$(pgrep inetd)" ]; then
+        kill -HUP "$(pgrep inetd)" &>/dev/null
+    fi
+fi
+
+for service in rexec rexecd; do
+    handle_sysvinit "$service"
+done
+
+if lsof -iTCP:512 | grep -q LISTEN; then
+    lsof -iTCP:512 | awk 'NR>1{system("kill -9 " $2)}'
+    killall -9 rexecd &>/dev/null
+fi
+```}
+{type: uploaded file
+fileName: 1vtrexec_8.txt
+fullContent:
+#!/bin/sh
+
+if [ "$(id -u)" -ne 0 ]; then
+    echo "Requer privilégios de root para executar este script." >&2
+    exit 1
+fi
+
+STOP_INETD=""
+STOP_XINETD=""
+
+if command -v systemctl >/dev/null 2>&1; then
+    SYSTEMD_SERVICES=$(systemctl list-units --all | awk '/rexec|rexecd/ && (/active|inactive/ && !/not-found/) {print $1}')
+    
+    for srv in $SYSTEMD_SERVICES; do
+        if systemctl is-active "$srv" >/dev/null 2>&1; then
+            systemctl stop "$srv"
+        fi
+        systemctl disable "$srv" >/dev/null 2>&1
+    done
+    
+    if systemctl is-active inetd.service >/dev/null 2>&1; then
+        STOP_INETD="yes"
+    fi
+    if systemctl is-active xinetd.service >/dev/null 2>&1; then
+        STOP_XINETD="yes"
+    fi
+else
+    RUNNING_SERVICES="rexecd rexec"
+    for srv in $RUNNING_SERVICES; do
+        if service "$srv" status >/dev/null 2>&1; then
+            service "$srv" stop
+        fi
+        update-rc.d -f "$srv" remove >/dev/null 2>&1 || chkconfig "$srv" off >/dev/null 2>&1
+    done
+    
+    if service xinetd status >/dev/null 2>&1 || service inetd status >/dev/null 2>&1; then
+        RUNNING_SUPER=$(pgrep -x 'inetd|xinetd')
+        for pid in $RUNNING_SUPER; do
+            cmd=$(ps -p "$pid" -o comm=)
+            [ "$cmd" = "xinetd" ] && STOP_XINETD="yes"
+            [ "$cmd" = "inetd" ] && STOP_INETD="yes"
+        done
+    fi
+fi
+
+if [ -f /etc/inetd.conf ]; then
+    sed -i '/^[[:space:]]*re[xx]ec[[:space:]]/s/^/#/' /etc/inetd.conf
+    [ -n "$STOP_INETD" ] && pkill -HUP inetd >/dev/null 2>&1
+fi
+
+if [ -d /etc/xinetd.d ]; then
+    for conf in /etc/xinetd.d/*; do
+        if grep -Eq 'service[[:space:]]+re[xx]ec' "$conf"; then
+            sed -i '/service[[:space:]]\+re[xx]ec/,/{/s/\([[:space:]]*disable[[:space:]]*=[[:space:]]*\)no/\1yes/g' "$conf"
+            [ -n "$STOP_XINETD" ] && pkill -HUP xinetd >/dev/null 2>&1
+        fi
+    done
+fi
+
+PKG_LIST="netkit-rexecd inetutils-rexecd"
+for pkg in $PKG_LIST; do
+    if command -v dpkg >/dev/null 2>&1 && dpkg -l | grep -q "^ii[[:space:]]\+$pkg[[:space:]]"; then
+        apt-get -y purge "$pkg"
+    elif command -v rpm >/dev/null 2>&1 && rpm -q "$pkg" >/dev/null 2>&1; then
+        yum -y remove "$pkg"
+    fi
+done
+
+RUNNING_REXEC_PIDS=$(pgrep -x 'rexecd|rexec')
+if [ -n "$RUNNING_REXEC_PIDS" ]; then
+    kill -9 $RUNNING_REXEC_PIDS
+fi
+
+iptables -D INPUT -p tcp --dport 512 -j DROP >/dev/null 2>&1
+iptables -A INPUT -p tcp --dport 512 -j DROP
+ip6tables -D INPUT -p tcp --dport 512 -j DROP >/dev/null 2>&1
+ip6tables -A INPUT -p tcp --dport 512 -j DROP
+
+exit 0}
+{type: uploaded file
+fileName: 1vtrexec_10.txt
+fullContent:
+#!/bin/bash
+set -euo pipefail
+for procname in in.rexecd rexecd; do
+    pkill "$procname" 2>/dev/null || true
+    sleep 1
+    pkill -9 "$procname" 2>/dev/null || true
+done
+if command -v systemctl &>/dev/null; then
+    for unit in rexec.socket rexec.service; do
+        if systemctl list-unit-files --all | grep -q "$unit"; then
+            systemctl stop "$unit" 2>/dev/null || true
+            systemctl disable "$unit" 2>/dev/null
+            systemctl mask "$unit" 2>/dev/null
+        fi
+    done
+fi
+if command -v apt-get &>/dev/null; then
+    if dpkg -l | grep -q '^ii\s\+rsh-server\b'; then
+        DEBIAN_FRONTEND=noninteractive apt-get remove --purge -y rsh-server || true
+    fi
+fi
+if [ -f /etc/inetd.conf ]; then
+    if grep -q "^rexec" /etc/inetd.conf; then
+        sed -i '/^rexec/d' /etc/inetd.conf
+        pid_inetd=$(pgrep inetd 2>/dev/null || true)
+        [ -n "$pid_inetd" ] && kill -HUP "$pid_inetd"
+    fi
+fi
+if [ -d /etc/inetd.d ] && [ -n "$(find /etc/inetd.d -type f)" ]; then
+    if find /etc/inetd.d -type f | xargs grep -q "^rexec"; then
+        find /etc/inetd.d -type f -exec sed -i '/^rexec/d' {} \;
+        pid_inetd=$(pgrep inetd 2>/dev/null || true)
+        [ -n "$pid_inetd" ] && kill -HUP "$pid_inetd"
+    fi
+fi
+if [ -d /etc/xinetd.d ] && [ -n "$(find /etc/xinetd.d -type f)" ]; then
+    if find /etc/xinetd.d -type f -exec grep -qE 'service\s+(rexec|rexeced)' {} \; -quit; then
+        find /etc/xinetd.d -type f -exec grep -qE 'service\s+(rexec|rexeced)' {} \; -delete
+        if command -v systemctl &>/dev/null && systemctl is-active xinetd.service &>/dev/null; then
+            systemctl try-restart xinetd.service
+        elif service xinetd status &>/dev/null; then
+            service xinetd restart
+        fi
+    fi
+fi}
+{type: uploaded file
+fileName: 1vtrexec_11.txt
+fullContent:
+#!/bin/bash
+systemctl stop rexec rexecd in.rexecd inetutils-rexecd netkit-rexecd 2>/dev/null
+systemctl disable rexec rexecd in.rexecd inetutils-rexecd netkit-rexecd 2>/dev/null
+update-rc.d -f rexec remove 2>/dev/null
+update-rc.d -f rexecd remove 2>/dev/null
+rm -f /etc/init.d/rexec /etc/init.d/rexecd 2>/dev/null
+
+sed -i '/^rexec[[:space:]]/s/^/#/' /etc/inetd.conf 2>/dev/null
+pkill -HUP inetd 2>/dev/null
+
+if [ -d /etc/xinetd.d ]; then
+    for svc in rexec rexecd rexecd-linux in.rexecd; do
+        if [ -f "/etc/xinetd.d/$svc" ]; then
+            sed -i 's/disable[[:space:]]*=[[:space:]]*no/disable = yes/' "/etc/xinetd.d/$svc"
+            pkill -HUP xinetd 2>/dev/null
+        fi
+    done
+fi
+
+if dpkg -l | grep -q 'inetutils-rexecd'; then
+    apt-get remove -y --purge inetutils-rexecd
+elif dpkg -l | grep -q 'netkit-rexecd'; then
+    apt-get remove -y --purge netkit-rexecd
+elif dpkg -l | grep -q 'rsh-server'; then
+    apt-get remove -y --purge rsh-server
+fi
+
+if rpm -q inetutils-rexecd 2>&1 | grep -q 'not installed'; then
+    yum remove -y inetutils-rexecd 2>/dev/null
+fi
+
+if rpm -q netkit-rexecd 2>&1 | grep -q 'not installed'; then
+    yum remove -y netkit-rexecd 2>/dev/null
+fi}
+{type: uploaded file
+fileName: 1vtrexec_12.txt
+fullContent:
+#!/bin/sh
+
+if [ -f "/etc/inetd.conf" ] && grep -q "^rexec" "/etc/inetd.conf"; then
+  sed -i '/^rexec/ s/^/#/' /etc/inetd.conf
+  if command -v systemctl >/dev/null 2>&1 && systemctl status openbsd-inetd >/dev/null 2>&1; then
+    systemctl restart openbsd-inetd
+  else
+    pkill -HUP inetd || true
+  fi
+fi
+
+if [ -d "/etc/inetd.d" ] && grep -q -m1 "^rexec" /etc/inetd.d/*; then
+  find /etc/inetd.d/ -type f -exec sed -i '/^rexec/ s/^/#/' {} +
+  if command -v systemctl >/dev/null 2>&1 && systemctl status openbsd-inetd >/dev/null 2>&1; then
+    systemctl restart openbsd-inetd
+  else
+    pkill -HUP inetd || true
+  fi
+fi
+
+if [ -f "/etc/xinetd.d/rexec" ]; then
+  if grep -q 'disable' "/etc/xinetd.d/rexec"; then
+    sed -i 's/disable.*/disable = yes/' "/etc/xinetd.d/rexec"
+  else
+    echo "disable = yes" >> "/etc/xinetd.d/rexec"
+  fi
+  if command -v systemctl >/dev/null 2>&1 && systemctl status xinetd >/dev/null 2>&1; then
+    systemctl restart xinetd
+  elif [ -f "/etc/init.d/xinetd" ]; then
+    /etc/init.d/xinetd restart
+  fi
+fi}

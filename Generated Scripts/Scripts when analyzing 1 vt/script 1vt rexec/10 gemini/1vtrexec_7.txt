@@ -1,0 +1,24 @@
+#!/bin/bash
+
+# Desabilita o serviço rexecd
+systemctl stop rexecd.socket
+systemctl disable rexecd.socket
+
+# Remove o pacote rexec (opcional, dependendo da distribuição e necessidade)
+apt-get remove --purge -y rexec atd 2>/dev/null || true
+yum remove -y rexec atd 2>/dev/null || true
+dnf remove -y rexec atd 2>/dev/null || true
+zypper remove -y rexec atd 2>/dev/null || true
+
+# Garante que o serviço não será iniciado manualmente
+echo "exit 0" > /etc/init.d/rexec
+
+# Remove entradas desnecessárias
+rm -f /etc/xinetd.d/rexec 2>/dev/null || true
+
+# Reforça a configuração (caso utilize xinetd)
+if command -v xinetd >/dev/null 2>&1; then
+  systemctl restart xinetd
+fi
+
+echo "Serviço rexec desabilitado e removido."

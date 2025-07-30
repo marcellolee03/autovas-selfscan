@@ -1,0 +1,41 @@
+#!/bin/bash
+# Enforce HTTPS and disable HTTP
+CONFIG_FILE="/etc/apache2/sites-available/000-default.conf"
+SSL_CONFIG_FILE="/etc/apache2/sites-available/default-ssl.conf"
+
+# Ensure SSL module is enabled
+a2enmod ssl
+
+# Redirect HTTP to HTTPS
+if ! grep -q "RewriteEngine On" $CONFIG_FILE; then
+    echo "<VirtualHost *:80>" > $CONFIG_FILE
+    echo "    RewriteEngine On" >> $CONFIG_FILE
+    echo "    RewriteCond %{HTTPS} off" >> $CONFIG_FILE
+    echo "    RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]" >> $CONFIG_FILE
+    echo "</VirtualHost>" >> $CONFIG_FILE
+fi
+
+# Configure SSL
+if [ ! -f $SSL_CONFIG_FILE ]; then
+    echo "<IfModule mod_ssl.c>" > $SSL_CONFIG_FILE
+    echo "    <VirtualHost _default_:443>" >> $SSL_CONFIG_FILE
+    echo "        ServerAdmin webmaster@localhost" >> $SSL_CONFIG_FILE
+    echo "        DocumentRoot /var/www/html" >> $SSL_CONFIG_FILE
+    echo "        ErrorLog ${APACHE_LOG_DIR}/error.log" >> $SSL_CONFIG_FILE
+    echo "        CustomLog ${APACHE_LOG_DIR}/access.log combined" >> $SSL_CONFIG_FILE
+    echo "        SSLEngine on" >> $SSL_CONFIG_FILE
+    echo "        SSLCertificateFile /etc/ssl/certs/ssl-cert-snakeoil.pem" >> $SSL_CONFIG_FILE
+    echo "        SSLCertificateKeyFile /etc/ssl/private/ssl-cert-snakeoil.key" >> $SSL_CONFIG_FILE
+    echo "        <FilesMatch \"\.(cgi|shtml|phtml|php)$\">" >> $SSL_CONFIG_FILE
+    echo "            SSLOptions +StdEnvVars" >> $SSL_CONFIG_FILE
+    echo "        </FilesMatch>" >> $SSL_CONFIG_FILE
+    echo "        <Directory /usr/lib/cgi-bin>" >> $SSL_CONFIG_FILE
+    echo "            SSLOptions +StdEnvVars" >> $SSL_CONFIG_FILE
+    echo "        </Directory>" >> $SSL_CONFIG_FILE
+    echo "    </VirtualHost>" >> $SSL_CONFIG_FILE
+    echo "</IfModule>" >> $SSL_CONFIG_FILE
+fi
+
+# Enable SSL site and restart Apache
+a2ensite default-ssl
+systemctl restart apache2

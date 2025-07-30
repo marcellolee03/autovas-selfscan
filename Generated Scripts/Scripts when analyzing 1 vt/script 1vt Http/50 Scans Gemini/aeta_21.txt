@@ -1,0 +1,125 @@
+```bash
+#!/bin/bash
+
+# Este script tenta mitigar a transmissão de informações sensíveis em texto claro via HTTP.
+# Ele assume que o servidor web é Apache ou Nginx e tenta configurar redirecionamentos para HTTPS.
+
+# Variáveis
+WEB_SERVER=$(ps -ef | grep -E 'apache2|nginx' | grep -v grep | awk '{print $8}')
+LETSENCRYPT_INSTALLED=$(command -v certbot)
+
+# Função para verificar se um comando existe
+command_exists() {
+  command -v "$1" >/dev/null 2>&1
+}
+
+# Função para instalar o Certbot se não estiver instalado
+install_certbot() {
+  if [ -z "$LETSENCRYPT_INSTALLED" ]; then
+    echo "Certbot não encontrado. Tentando instalar..."
+    if command_exists apt-get; then
+      apt-get update
+      apt-get install -y certbot python3-certbot-apache python3-certbot-nginx
+    elif command_exists yum; then
+      yum install -y epel-release
+      yum install -y certbot python3-certbot-apache python3-certbot-nginx
+    elif command_exists dnf; then
+      dnf install -y certbot python3-certbot-apache python3-certbot-nginx
+    else
+      echo "Gerenciador de pacotes não suportado. Instale o Certbot manualmente."
+      exit 1
+    fi
+    LETSENCRYPT_INSTALLED=$(command -v certbot)
+    if [ -z "$LETSENCRYPT_INSTALLED" ]; then
+      echo "Falha ao instalar o Certbot. Verifique a saída e tente instalar manualmente."
+      exit 1
+    fi
+  fi
+}
+
+# Redirecionamento para HTTPS para Apache
+apache_redirect_https() {
+  if [ -f /etc/apache2/apache2.conf ]; then
+    echo "Configurando redirecionamento HTTPS para Apache..."
+    # Habilita o módulo rewrite se não estiver habilitado
+    if ! a2enmod rewrite > /dev/null 2>&1; then
+      echo "Habilitando o módulo rewrite para Apache..."
+      a2enmod rewrite
+    fi
+
+    # Adiciona redirecionamento HTTPS para o arquivo de configuração padrão
+    if [ -f /etc/apache2/sites-available/000-default.conf ]; then
+        echo "Adicionando redirecionamento ao arquivo de configuração padrão (000-default.conf)..."
+        sed -i 's/<\/VirtualHost>/  RewriteEngine On\n  RewriteCond %{HTTPS} off\n  RewriteRule ^(.*)$ https:\/\/%{HTTP_HOST}%{REQUEST_URI} [L,R=301]\n<\/VirtualHost>/' /etc/apache2/sites-available/000-default.conf
+    fi
+
+    # Adiciona redirecionamento HTTPS para o arquivo de configuração padrão SSL
+    if [ -f /etc/apache2/sites-available/default-ssl.conf ]; then
+        echo "Adicionando redirecionamento ao arquivo de configuração SSL padrão (default-ssl.conf)..."
+        sed -i 's/<\/VirtualHost>/<\/VirtualHost>/' /etc/apache2/sites-available/default-ssl.conf # Placeholder para garantir que o arquivo existe (sem alterações)
+    fi
+    systemctl restart apache2
+  elif [ -f /etc/httpd/conf/httpd.conf ]; then
+    echo "Configurando redirecionamento HTTPS para Apache (CentOS/RHEL)..."
+
+    # Habilita o módulo rewrite se não estiver habilitado
+    if ! httpd -M | grep -q rewrite_module; then
+      echo "Habilitando o módulo rewrite para Apache..."
+      sed -i 's/^#LoadModule rewrite_module/LoadModule rewrite_module/' /etc/httpd/conf/httpd.conf
+    fi
+
+    # Adiciona redirecionamento HTTPS ao arquivo de configuração
+        echo "Adicionando redirecionamento ao arquivo de configuração..."
+        sed -i 's/<\/VirtualHost>/  RewriteEngine On\n  RewriteCond %{HTTPS} off\n  RewriteRule ^(.*)$ https:\/\/%{HTTP_HOST}%{REQUEST_URI} [L,R=301]\n<\/VirtualHost>/' /etc/httpd/conf/httpd.conf
+    systemctl restart httpd
+  else
+    echo "Configuração do Apache não encontrada."
+    return 1
+  fi
+  return 0
+}
+
+# Redirecionamento para HTTPS para Nginx
+nginx_redirect_https() {
+  if [ -f /etc/nginx/nginx.conf ]; then
+    echo "Configurando redirecionamento HTTPS para Nginx..."
+    # Adiciona redirecionamento HTTPS ao bloco server padrão
+    if [ -f /etc/nginx/conf.d/default.conf ]; then
+      echo "Adicionando redirecionamento ao arquivo de configuração padrão (default.conf)..."
+      sed -i 's/listen 80 default_server;/listen 80 default_server;\n  return 301 https:\/\/$host$request_uri;/' /etc/nginx/conf.d/default.conf
+    elif [ -f /etc/nginx/sites-available/default ]; then
+      echo "Adicionando redirecionamento ao arquivo de configuração padrão (sites-available/default)..."
+      sed -i 's/listen 80 default_server;/listen 80 default_server;\n  return 301 https:\/\/$host$request_uri;/' /etc/nginx/sites-available/default
+    else
+      echo "Arquivo de configuração padrão do Nginx não encontrado."
+      return 1
+    fi
+    systemctl restart nginx
+  else
+    echo "Configuração do Nginx não encontrada."
+    return 1
+  fi
+  return 0
+}
+
+# Lógica principal
+if [ -n "$WEB_SERVER" ]; then
+  if [[ "$WEB_SERVER" == *"apache"* ]]; then
+    apache_redirect_https
+    if [ $? -eq 0 ]; then
+      echo "Redirecionamento HTTPS configurado para Apache. Considere usar Certbot para configurar o HTTPS."
+    fi
+  elif [[ "$WEB_SERVER" == *"nginx"* ]]; then
+    nginx_redirect_https
+    if [ $? -eq 0 ]; then
+      echo "Redirecionamento HTTPS configurado para Nginx. Considere usar Certbot para configurar o HTTPS."
+    fi
+  else
+    echo "Servidor web não reconhecido."
+  fi
+else
+  echo "Nenhum servidor web (Apache ou Nginx) detectado."
+fi
+
+echo "Script finalizado. Verifique a configuração do seu servidor web e considere usar Certbot para configurar o HTTPS."
+```

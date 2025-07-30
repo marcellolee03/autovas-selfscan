@@ -1,0 +1,43 @@
+#!/bin/bash
+# Configura o Apache para redirecionar todo o tráfego HTTP para HTTPS
+CONF_FILE="/etc/apache2/sites-available/000-default.conf"
+SSL_CONF_FILE="/etc/apache2/sites-available/default-ssl.conf"
+
+# Verifica se o módulo SSL está habilitado
+if ! a2query -m ssl; then
+    a2enmod ssl
+fi
+
+# Cria o arquivo de configuração SSL se não existir
+if [ ! -f "$SSL_CONF_FILE" ]; then
+    cat > "$SSL_CONF_FILE" <<EOL
+<IfModule mod_ssl.c>
+    <VirtualHost _default_:443>
+        ServerAdmin webmaster@localhost
+        DocumentRoot /var/www/html
+        ErrorLog \${APACHE_LOG_DIR}/error.log
+        CustomLog \${APACHE_LOG_DIR}/access.log combined
+        SSLEngine on
+        SSLCertificateFile    /etc/ssl/certs/ssl-cert-snakeoil.pem
+        SSLCertificateKeyFile /etc/ssl/private/ssl-cert-snakeoil.key
+        <FilesMatch "\.(cgi|shtml|phtml|php)$">
+            SSLOptions +StdEnvVars
+        </FilesMatch>
+        <Directory /usr/lib/cgi-bin>
+            SSLOptions +StdEnvVars
+        </Directory>
+    </VirtualHost>
+</IfModule>
+EOL
+fi
+
+# Habilita o site SSL
+a2ensite default-ssl.conf
+
+# Configura o redirecionamento HTTP para HTTPS
+if ! grep -q "Redirect permanent / https://" "$CONF_FILE"; then
+    sed -i '/<VirtualHost _default_:80>/a \    Redirect permanent / https://' "$CONF_FILE"
+fi
+
+# Reinicia o Apache para aplicar as mudanças
+systemctl restart apache2

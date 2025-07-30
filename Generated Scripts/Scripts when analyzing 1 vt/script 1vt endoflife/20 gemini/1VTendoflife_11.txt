@@ -1,0 +1,15 @@
+```bash
+#!/bin/bash
+
+# Este script atualiza o sistema operacional Ubuntu 8.04 para uma versão suportada.
+# Como o Ubuntu 8.04 é muito antigo e não há um caminho de atualização direta,
+# este script irá informar ao usuário que uma reinstalação limpa é necessária.
+
+echo "O sistema operacional Ubuntu 8.04 atingiu o fim da vida útil (EOL) e não recebe mais atualizações de segurança."
+echo "Não é possível atualizar diretamente para uma versão suportada devido à grande diferença de versão."
+echo "A solução recomendada é fazer um backup completo dos seus dados e realizar uma instalação limpa de uma versão mais recente do Ubuntu."
+echo "Por favor, visite o site oficial do Ubuntu (https://ubuntu.com/download/desktop) para baixar a versão mais recente."
+echo "Após a instalação, você poderá restaurar seus dados a partir do backup."
+
+exit 1
+```

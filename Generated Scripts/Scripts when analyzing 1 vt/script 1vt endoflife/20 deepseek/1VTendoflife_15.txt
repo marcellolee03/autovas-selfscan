@@ -1,0 +1,3 @@
+#!/bin/bash
+sudo sed -i 's/^Prompt=lts/Prompt=normal/' /etc/update-manager/release-upgrades
+sudo do-release-upgrade -d -f DistUpgradeViewNonInteractive

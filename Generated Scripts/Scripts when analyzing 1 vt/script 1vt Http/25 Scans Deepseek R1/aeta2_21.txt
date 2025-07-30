@@ -1,0 +1,43 @@
+```bash
+#!/bin/bash
+
+# Apache configuration for HTTP to HTTPS redirect
+if [ -d "/etc/apache2" ]; then
+    cat > /etc/apache2/sites-available/000-redirect.conf << 'EOL'
+<VirtualHost *:80>
+    # Redirect entire site to HTTPS
+    RewriteEngine On
+    RewriteCond %{REQUEST_URI} !^/\.well-known/acme-challenge/ [NC]
+    RewriteRule ^(.*)$ https://%{HTTP_HOST}$1 [R=301,L]
+</VirtualHost>
+EOL
+
+    a2ensite 000-redirect.conf > /dev/null 2>&1
+    apache2ctl -t > /dev/null 2>&1 && systemctl restart apache2 > /dev/null 2>&1
+fi
+
+# Nginx configuration for HTTP to HTTPS redirect
+if [ -d "/etc/nginx" ]; then
+    cat > /etc/nginx/conf.d/redirect.conf << 'EOL'
+server {
+    listen 80;
+    server_name _;
+    # Redirect entire site to HTTPS
+    if ($request_uri !~ "^/\.well-known/acme-challenge/") {
+        return 301 https://$host$request_uri;
+    }
+}
+EOL
+
+    nginx -t > /dev/null 2>&1 && systemctl reload nginx > /dev/null 2>&1
+fi
+
+# Firewall configuration to block HTTP traffic
+if command -v ufw > /dev/null 2>&1; then
+    ufw deny http
+    ufw --force reload
+elif command -v firewall-cmd > /dev/null 2>&1; then
+    firewall-cmd --zone=public --remove-service=http --permanent
+    firewall-cmd --reload
+fi
+```

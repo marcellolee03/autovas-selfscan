@@ -1,0 +1,73 @@
+```bash
+#!/bin/bash
+
+# Este script corrige a vulnerabilidade de transmissão de informações sensíveis em texto não criptografado via HTTP,
+# redirecionando todo o tráfego HTTP para HTTPS.
+
+# Variáveis
+HTTP_PORT=80
+HTTPS_PORT=443
+
+# Detecta o sistema operacional (assume-se Debian/Ubuntu se não for detectado)
+OS=$(uname -s)
+
+# Função para configurar o redirecionamento no Apache (Debian/Ubuntu)
+configurar_apache() {
+    # Verifica se o Apache está instalado
+    if command -v apache2 >/dev/null 2>&1; then
+        # Habilita o módulo rewrite se não estiver habilitado
+        if ! a2enmod rewrite >/dev/null 2>&1; then
+            a2enmod rewrite
+        fi
+
+        # Cria um arquivo de configuração virtual host para redirecionamento HTTP para HTTPS
+        cat > /etc/apache2/sites-available/http_to_https.conf <<EOL
+<VirtualHost *:80>
+    ServerName \$(hostname)
+    Redirect permanent / https://\${SERVER_NAME}\${REQUEST_URI}
+</VirtualHost>
+EOL
+
+        # Habilita o site de redirecionamento
+        a2ensite http_to_https.conf
+
+        # Reinicia o Apache para aplicar as mudanças
+        systemctl restart apache2
+        echo "Redirecionamento HTTP para HTTPS configurado no Apache."
+    else
+        echo "Apache não detectado.  Instale o Apache ou adapte o script para outro servidor web."
+    fi
+}
+
+
+# Função para configurar o redirecionamento no Nginx
+configurar_nginx() {
+    # Verifica se o Nginx está instalado
+    if command -v nginx >/dev/null 2>&1; then
+        # Adiciona um bloco de servidor para redirecionamento HTTP para HTTPS
+        cat > /etc/nginx/conf.d/http_to_https.conf <<EOL
+server {
+    listen $HTTP_PORT;
+    server_name \$(hostname);
+    return 301 https://\$host\$request_uri;
+}
+EOL
+        # Reinicia o Nginx para aplicar as mudanças
+        systemctl restart nginx
+        echo "Redirecionamento HTTP para HTTPS configurado no Nginx."
+    else
+        echo "Nginx não detectado. Instale o Nginx ou adapte o script para outro servidor web."
+    fi
+}
+
+# Detecta e configura o servidor web
+if command -v apache2 >/dev/null 2>&1; then
+    configurar_apache
+elif command -v nginx >/dev/null 2>&1; then
+    configurar_nginx
+else
+    echo "Nenhum servidor web (Apache ou Nginx) detectado.  Por favor, instale um ou adapte o script para o seu servidor web."
+fi
+
+exit 0
+```

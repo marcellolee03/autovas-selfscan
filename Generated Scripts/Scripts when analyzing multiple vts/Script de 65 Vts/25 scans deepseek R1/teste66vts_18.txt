@@ -1,0 +1,53 @@
+```pwsh
+# PowerShel
+# PowerSheScript for Updating Python to Fixed Versions
+# Ps1
+```
+# Script for Updating Python to Fixed Versions
+```pwsh
+# Required: Run as administrator
+
+$ErrorActionPreference = "Stop"
+[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+
+$latestVersions = @{
+    '3.10' = '3.10.16'
+    '3.12' = '3.12.13'
+}
+
+$baseURL = "https://www.python.org/ftp/python"
+
+$versionsToUpdate = @('3.10', '3.12')
+foreach ($versionPrefix in $versionsToUpdate) {
+    $hives = @()
+    if ([System.Environment]::Is64BitOperatingSystem) {
+        $hives += "SOFTWARE\Python\PythonCore\$versionPrefix"
+        $hives += "SOFTWARE\WOW6432Node\Python\PythonCore\$versionPrefix"
+    }
+    else {
+        $hives += "SOFTWARE\Python\PythonCore\$versionPrefix"
+    }
+
+    foreach ($regPath in $hives) {
+        $installPathReg = "Registry::HKEY_LOCAL_MACHINE\$regPath\InstallPath"
+        if (Test-Path $installPathReg) {
+            $latestVersion = $latestVersions[$versionPrefix]
+            $arch = if ($regPath -like "*Wow6432Node*") { "win32" } else { "amd64" }
+            $fileName = "python-${latestVersion}-${arch}.exe"
+            $installerPath = Join-Path $env:TEMP $fileName
+            $downloadURL = "${baseURL}/${latestVersion}/${fileName}"
+
+            try {
+                Invoke-WebRequest -Uri $downloadURL -OutFile $installerPath -UseBasicParsing
+                $process = Start-Process -FilePath $installerPath -ArgumentList "/quiet", "InstallAllUsers=1", "PrependPath=0" -PassThru -Wait
+                if ($process.ExitCode -ne 0) {
+                    Write-Error "Installer exit code: $($process.ExitCode)"
+                }
+            }
+            finally {
+                Remove-Item $installerPath -Force -ErrorAction SilentlyContinue
+            }
+        }
+    }
+}
+```

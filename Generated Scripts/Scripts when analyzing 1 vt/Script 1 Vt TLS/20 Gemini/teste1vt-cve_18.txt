@@ -1,0 +1,49 @@
+```bash
+#!/bin/bash
+
+# Identifica o serviço rodando na porta 5432 (PostgreSQL por padrão).
+# Adapte conforme necessário se não for PostgreSQL ou se a porta estiver incorreta.
+SERVICE=$(ss -tulnp | grep ":5432" | awk '{print $6}' | cut -d ',' -f 2 | cut -d '=' -f 2)
+
+# Verifica se o serviço foi encontrado.
+if [ -z "$SERVICE" ]; then
+  echo "Serviço rodando na porta 5432 não encontrado. Verifique a porta e o serviço."
+  exit 1
+fi
+
+# Determina o sistema operacional.
+OS=$(uname -s)
+
+# Função para lidar com a configuração do PostgreSQL (assumindo ser o serviço).
+configure_postgresql() {
+  PG_CONF="/etc/postgresql/*/main/postgresql.conf" # Caminho padrão do arquivo de configuração.
+
+  # Verifica se o arquivo de configuração existe.
+  if [ ! -f "$PG_CONF" ]; then
+    echo "Arquivo de configuração do PostgreSQL não encontrado em $PG_CONF.  Tente encontrar manualmente e ajustar o script."
+    exit 1
+  fi
+
+  # Desabilita TLS 1.0 e 1.1 e força TLS 1.2 e superior.
+  sed -i 's/^#?ssl_min_protocol =.*/ssl_min_protocol = TLSv1.2/g' "$PG_CONF"
+
+  # Reinicia o serviço PostgreSQL para aplicar as alterações.
+  systemctl restart postgresql
+  echo "Serviço PostgreSQL reiniciado para aplicar as configurações TLS."
+}
+
+
+# Executa a configuração baseada no serviço detectado.
+case "$SERVICE" in
+  "postgresql")
+    configure_postgresql
+    ;;
+  *)
+    echo "Serviço não suportado automaticamente.  Ajuste o script para configurar $SERVICE."
+    exit 1
+    ;;
+esac
+
+echo "Correção completa.  Verifique as configurações e o serviço."
+exit 0
+```

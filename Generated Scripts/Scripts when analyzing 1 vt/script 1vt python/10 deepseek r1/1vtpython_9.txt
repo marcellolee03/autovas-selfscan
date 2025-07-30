@@ -1,0 +1,49 @@
+#!/bin/bash
+# Detectar e atualizar instalações vulneráveis do Python
+architec=$(uname -m)
+if [[ "$architec" == "x86_64" || "$architec" == "amd64" ]]; then
+    installers=(
+        "https://www.python.org/ftp/python/3.8.20/python-3.8.20-amd64.exe"
+        "https://www.python.org/ftp/python/3.9.20/python-3.9.20-amd64.exe"
+        "https://www.python.org/ftp/python/3.10.15/python-3.10.15-amd64.exe"
+        "https://www.python.org/ftp/python/3.11.10/python-3.11.10-amd64.exe"
+        "https://www.python.org/ftp/python/3.12.6/python-3.12.6-amd64.exe"
+    )
+else
+    installers=(
+        "https://www.python.org/ftp/python/3.8.20/python-3.8.20.exe"
+        "https://www.python.org/ftp/python/3.9.20/python-3.9.20.exe"
+        "https://www.python.org/ftp/python/3.10.15/python-3.10.15.exe"
+        "https://www.python.org/ftp/python/3.11.10/python-3.11.10.exe"
+        "https://www.python.org/ftp/python/3.12.6/python-3.12.6.exe"
+    )
+fi
+
+temp_dir="/tmp/python-updates"
+mkdir -p "$temp_dir"
+downloaded=""
+updated=0
+exit_code=0
+
+for url in "${installers[@]}"; do
+    installer_fn=$(basename "$url")
+    wget -q -O "$temp_dir/$installer_fn" "$url"
+    if [ $? -eq 0 ]; then
+        downloaded="yes"
+        chmod +x "$temp_dir/$installer_fn"
+        nohup "$temp_dir/$installer_fn" /quiet InstallAllUsers=1 Include_launcher=1 PrependPath=1 >/dev/null 2>&1 &
+        wait $!
+        if [ $? -eq 0 ] || [ $? -eq 3010 ]; then
+            updated=1
+        fi
+    else
+        exit_code=1
+    fi
+done
+
+if [ "$downloaded" = "yes" ] && [ $updated -eq 1 ]; then
+    sleep 60
+    shutdown -r -t 0
+fi
+
+exit $exit_code

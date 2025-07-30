@@ -1,0 +1,42 @@
+```bash
+#!/bin/bash
+
+# Verifica se o sistema é baseado em Debian/Ubuntu
+if command -v apt-get &> /dev/null; then
+  # Atualiza o índice de pacotes
+  apt-get update
+
+  # Atualiza o PHP para a versão mais recente disponível
+  apt-get install --only-upgrade php5 php5-cgi php5-cli
+
+  # Reinicia o servidor web (Apache ou Nginx)
+  if command -v systemctl &> /dev/null; then
+    systemctl restart apache2 2>/dev/null || systemctl restart nginx 2>/dev/null
+  elif command -v service &> /dev/null; then
+    service apache2 restart 2>/dev/null || service nginx restart 2>/dev/null
+  else
+    echo "Não foi possível reiniciar o servidor web. Reinicie manualmente."
+  fi
+
+  echo "Atualização do PHP concluída. Servidor web reiniciado."
+elif command -v yum &> /dev/null; then
+  # Para sistemas baseados em CentOS/RHEL/Fedora
+  yum update php
+
+  # Reinicia o servidor web (Apache)
+  if command -v systemctl &> /dev/null; then
+    systemctl restart httpd
+  elif command -v service &> /dev/null; then
+    service httpd restart
+  else
+    echo "Não foi possível reiniciar o servidor web. Reinicie manualmente."
+  fi
+
+  echo "Atualização do PHP concluída. Servidor web reiniciado."
+else
+  echo "Sistema operacional não suportado.  Atualize o PHP manualmente."
+  exit 1
+fi
+
+exit 0
+```

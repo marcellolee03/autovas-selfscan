@@ -1,0 +1,65 @@
+#!/bin/bash
+
+# Script para mitigar a vulnerabilidade de transmissão de informações sensíveis em texto claro via HTTP.
+# Este script configura um redirecionamento de HTTP para HTTPS no servidor Apache.
+
+# 1. Detectar o sistema operacional
+if command -v systemctl &> /dev/null; then
+  OS="systemd"
+elif command -v service &> /dev/null; then
+  OS="sysvinit"
+else
+  echo "Sistema de init desconhecido. Saindo."
+  exit 1
+fi
+
+# 2. Verificar se o Apache está instalado
+if ! command -v apache2 &> /dev/null && ! command -v httpd &> /dev/null; then
+  echo "Apache não detectado. Por favor, instale o Apache antes de executar este script."
+  exit 1
+fi
+
+# 3. Habilitar o módulo rewrite do Apache
+if a2enmod rewrite &> /dev/null; then
+  echo "Módulo rewrite habilitado."
+else
+  echo "Falha ao habilitar o módulo rewrite. Verifique se o Apache está instalado corretamente."
+  exit 1
+fi
+
+# 4. Configurar o VirtualHost padrão para redirecionar para HTTPS
+VHOST_FILE="/etc/apache2/sites-available/000-default.conf" # Caminho padrão no Debian/Ubuntu
+if [ ! -f "$VHOST_FILE" ]; then
+    VHOST_FILE="/etc/httpd/conf/httpd.conf" #caminho padrao no centos/redhat
+    if [ ! -f "$VHOST_FILE" ]; then
+        echo "Arquivo de configuração do VirtualHost padrão não encontrado. Ajuste a variável VHOST_FILE no script."
+        exit 1
+    fi
+fi
+# Criar um backup do arquivo original
+cp "$VHOST_FILE" "$VHOST_FILE.bak"
+
+# Adicionar o redirecionamento para HTTPS no início do arquivo
+{
+  echo "<VirtualHost *:80>"
+  echo "  ServerName \$(hostname)"
+  echo "  Redirect permanent / https://\${SERVER_NAME}\${REQUEST_URI}"
+  echo "</VirtualHost>"
+  cat "$VHOST_FILE"
+} > "$VHOST_FILE.tmp"
+
+mv "$VHOST_FILE.tmp" "$VHOST_FILE"
+
+# 5. Reiniciar o Apache
+if [ "$OS" == "systemd" ]; then
+  systemctl restart apache2
+elif [ "$OS" == "sysvinit" ]; then
+  service apache2 restart
+else
+  echo "Sistema de init desconhecido. Reinicie o Apache manualmente."
+  exit 1
+fi
+
+echo "Redirecionamento de HTTP para HTTPS configurado. Apache reiniciado."
+
+exit 0

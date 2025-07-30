@@ -1,0 +1,74 @@
+```bash
+#!/bin/bash
+
+# Backup original configuration files
+mkdir -p /backup/{ssh,apache,mysql,postgresql,tomcat,php}
+cp /etc/ssh/sshd_config /backup/ssh/
+cp /etc/apache2/apache2.conf /backup/apache/
+cp -r /etc/mysql /backup/mysql/
+cp -r /etc/postgresql /backup/postgresql/
+cp /etc/default/tomcat* /backup/tomcat/ 2>/dev/null
+cp $CATALINA_HOME/conf/server.xml /backup/tomcat/ 2>/dev/null
+cp /etc/php5/*/php.ini /backup/php/ 2>/dev/null
+
+# Disable insecure services through inetd/xinetd
+sed -i '/rlogin/s/^/#/' /etc/inetd.conf 2>/dev/null
+sed -i '/rsh/s/^/#/' /etc/inetd.conf 2>/dev/null
+sed -i '/rexec/s/^/#/' /etc/inetd.conf 2>/dev/null
+sed -i '/telnet/s/^/#/' /etc/inetd.conf 2>/dev/null
+[ -f /etc/xinetd.d/telnet ] && sed -i '/disable/s/no/yes/' /etc/xinetd.d/telnet
+killall -HUP inetd 2>/dev/null
+service xinetd restart 2>/dev/null
+
+# Stop and disable services using system V init
+services=("vsftpd" "vncserver" "distcc" "tomcat*" "drb-server" "ingreslock")
+for svc in "${services[@]}"; do
+    service "$svc" stop 2>/dev/null
+    update-rc.d -f "$svc" remove 2>/dev/null
+done
+pkill -f ingreslock 2>/dev/null
+
+# Change MySQL default credentials
+mysql -e "ALTER USER 'root'@'localhost' IDENTIFIED BY 'Str0ngP@ssw0rd!';"
+mysql -e "DROP USER ''@'localhost';" 2>/dev/null
+mysql -e "DROP USER ''@'$(hostname)';" 2>/dev/null
+mysql -e "FLUSH PRIVILEGES;"
+
+# Change PostgreSQL default credentials
+sudo -u postgres psql -c "ALTER USER postgres WITH PASSWORD 'Secur3P@ss!';"
+
+# Secure SSH
+sed -i 's/^#Port 22/Port 2222/' /etc/ssh/sshd_config
+sed -i 's/^#*PermitRootLogin.*/PermitRootLogin no/' /etc/ssh/sshd_config
+echo -e "Ciphers chacha20-poly1305@openssh.com,aes256-gcm@openssh.com,aes128-gcm@openssh.com,aes256-ctr,aes192-ctr,aes128-ctr\nMACs hmac-sha2-512-etm@openssh.com,hmac-sha2-256-etm@openssh.com,umac-128-etm@openssh.com\nKexAlgorithms curve25519-sha256@libssh.org,diffie-hellman-group-exchange-sha256" >> /etc/ssh/sshd_config
+service ssh restart
+
+# Harden Apache
+echo -e "<Directory />\n  AllowOverride None\n  <LimitExcept GET POST HEAD OPTIONS>\n    Deny from all\n  </LimitExcept>\n</Directory>\n<Directory /usr/doc>\n  Order deny,allow\n  Deny from all\n</Directory>\nTraceEnable off" >> /etc/apache2/apache2.conf
+a2dismod cgi 2>/dev/null
+service apache2 restart
+
+# Disable Tomcat AJP Connector
+find / -name server.xml -exec sed -i '/<Connector.*protocol="AJP/{s/^/<!--/;s/$/-->/}' {} \;
+
+# Secure PHP configuration
+for ini in $(find /etc/php5 -name php.ini); do
+    sed -i 's/^allow_url_include.*/allow_url_include = Off/' "$ini"
+    sed -i 's/^allow_url_fopen.*/allow_url_fopen = Off/' "$ini"
+    sed -i 's/^cgi.fix_pathinfo.*/cgi.fix_pathinfo=0/' "$ini"
+    sed -i 's/^expose_php.*/expose_php = Off/' "$ini"
+done
+
+# Ensure proper permissions on crontab
+chmod 600 /etc/crontab
+
+# Fix insecure entries in cron
+sed -i '/[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]/d' /etc/crontab 2>/dev/null
+
+# Remove vulnerable components
+rm -f /var/www/html/doc 2>/dev/null
+
+# Restart services
+service mysql restart
+service postgresql restart
+```

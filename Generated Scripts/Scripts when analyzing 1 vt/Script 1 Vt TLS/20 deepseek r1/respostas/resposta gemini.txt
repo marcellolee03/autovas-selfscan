@@ -1,0 +1,61 @@
+
+A vulnerabilidade identificada refere-se à detecção do uso dos protocolos TLSv1.0 e/ou TLSv1.1, que são considerados obsoletos, no serviço operando na porta TCP 5432. A solução recomendada é desabilitar esses protocolos e usar TLSv1.2+. Dado que a porta 5432 é a porta padrão do PostgreSQL, assume-se que a vulnerabilidade está presente em uma instância do PostgreSQL.
+
+
+A análise dos scripts de correção fornecidos em relação à vulnerabilidade é a seguinte:
+
+teste1vt-cve_1.txt: Sim. Este script busca e modifica o arquivo de configuração do PostgreSQL (postgresql.conf) para definir ssl_min_protocol_version = 'TLSv1.2'. Ele também lida com a localização do arquivo de configuração e o reinício do serviço PostgreSQL.
+
+
+teste1vt-cve_2.txt: Sim. Este script também busca o arquivo postgresql.conf e configura ssl_min_protocol_version = 'TLSv1.2'. Além disso, ele tenta garantir que ssl = on esteja configurado  e reinicia o serviço.
+
+
+teste1vt-cve_3.txt: Sim. Este script localiza o arquivo postgresql.conf com base no sistema operacional e garante que ssl_min_protocol_version = 'TLSv1.2' esteja configurado, reiniciando o serviço PostgreSQL.
+teste1vt-cve_4.txt: Sim. O script busca o arquivo postgresql.conf em vários locais, faz backup, e define ssl_min_protocol_version = 'TLSv1.2', seguido por uma tentativa de reiniciar o serviço PostgreSQL.
+teste1vt-cve_5.txt: Sim. Este script procura por arquivos postgresql.conf e define ssl_min_protocol_version = 'TLSv1.2'. Ele também tenta recarregar ou reiniciar o serviço PostgreSQL.
+
+teste1vt-cve_6.txt: Sim. O script tenta encontrar o postgresql.conf através do psql ou ss, e se não conseguir, procura em locais comuns. Ele então configura ssl_min_protocol_version = 'TLSv1.2' e reinicia o serviço PostgreSQL.
+teste1vt-cve_7.txt: Sim. O script encontra o arquivo de configuração do PostgreSQL, faz backup, verifica a versão do PostgreSQL e, se for 10 ou superior, define ssl_min_protocol_version = 'TLSv1.2'. Caso contrário, define ssl_protocols = 'TLSv1.2'. Ele também tenta reiniciar o serviço e reverte o backup em caso de falha.
+
+teste1vt-cve_8.txt: Sim. O script tenta localizar o arquivo postgresql.conf através do PID do processo PostgreSQL na porta 5432, ou em locais comuns. Em seguida, remove qualquer configuração existente para ssl_min_protocol_version e adiciona ssl_min_protocol_version = 'TLSv1.2', finalizando com um kill -HUP para recarregar a configuração.
+
+teste1vt-cve_9.txt: Sim. Este script verifica a versão do PostgreSQL (requer 12+) , localiza o arquivo de configuração e define ssl_min_protocol_version = 'TLSv1.2'. Ele tenta reiniciar o serviço PostgreSQL, com um aviso se o reinício falhar.
+
+
+
+teste1vt-cve_10.txt: Sim. O script localiza o arquivo postgresql.conf e verifica a versão do PostgreSQL. Se a versão for 9.0-9.4, ele indica que é necessário um upgrade. Para outras versões, ele configura ssl_min_protocol_version = 'TLSv1.2' e reinicia o serviço.
+
+
+teste1vt-cve_11.txt: Sim. Este script busca arquivos postgresql.conf em /etc e configura ssl_min_protocol_version = 'TLSv1.2' e ssl_max_protocol_version = 'TLSv1.3'. Ele então tenta reiniciar o serviço PostgreSQL.
+
+teste1vt-cve_12.txt: Sim. Este script usa pg_lsclusters para encontrar o diretório de dados e o arquivo postgresql.conf para a instância do PostgreSQL na porta 5432. Ele garante que ssl = on e ssl_min_protocol_version = 'TLSv1.2' estejam definidos , e reinicia o cluster.
+
+
+teste1vt-cve_13.txt: Sim. O script procura arquivos postgresql.conf em diretórios comuns e verifica se a porta 5432 está associada a ele. Se encontrar, faz backup do arquivo, configura ssl_min_protocol_version = 'TLSv1.2' e reinicia o PostgreSQL.
+
+
+
+teste1vt-cve_14.txt: Sim. O script identifica o arquivo postgresql.conf associado ao processo na porta 5432 ou em locais comuns. Ele faz backup e configura ssl_min_protocol_version = 'TLSv1.2', recarregando ou reiniciando o serviço PostgreSQL.
+
+teste1vt-cve_15.txt: Sim. O script tenta localizar o postgresql.conf usando psql ou caminhos comuns. Ele faz backup do arquivo e configura ssl_min_protocol_version = 'TLSv1.2', seguido pelo reinício do serviço.
+
+teste1vt-cve_16.txt: Sim. O script encontra arquivos postgresql.conf e faz backup. Ele remove linhas existentes de ssl_min_protocol_version e garante que ssl = on e ssl_min_protocol_version = 'TLSv1.2' sejam adicionados. Em seguida, tenta reiniciar o PostgreSQL.
+
+teste1vt-cve_17.txt: Sim. Este script aborda a configuração de TLS para PostgreSQL, Apache e Nginx. Para PostgreSQL, ele encontra arquivos postgresql.conf e, dependendo da versão, configura ssl_min_protocol_version ou ssl_protocols para TLSv1.2+. Ele também tenta reiniciar os serviços correspondentes.
+
+
+
+
+teste1vt-cve_18.txt: Sim. Este script busca o arquivo de configuração do PostgreSQL, verifica a versão e configura ssl = on, ssl_protocols = 'TLSv1.2, TLSv1.3' e ssl_ciphers para fortalecer a segurança. Ele tenta reiniciar o serviço PostgreSQL.
+teste1vt-cve_19.txt: Não. Este script foca em políticas criptográficas do sistema, configurações de SSL/TLS para Apache e Nginx, e curl. Embora ele aborde TLSv1.0 e TLSv1.1, ele não interage diretamente com as configurações do PostgreSQL para corrigir a vulnerabilidade específica na porta 5432. A vulnerabilidade é especificamente sobre o protocolo usado pelo serviço na porta 5432, que é assumido como PostgreSQL. Portanto, este script não corrigiria a vulnerabilidade do PostgreSQL.
+
+teste1vt-cve_20.txt: Sim. O script localiza o arquivo postgresql.conf usando caminhos comuns ou psql. Ele faz backup do arquivo, remove configurações antigas de ssl_min_protocol_version e adiciona ssl_min_protocol_version = 'TLSv1.2', garantindo que ssl = on esteja presente. Por fim, ele tenta reiniciar o serviço PostgreSQL.
+
+
+Média de porcentagem geral de correção:
+
+Dos 20 scripts fornecidos, 19 são capazes de corrigir a vulnerabilidade no PostgreSQL. O script teste1vt-cve_19.txt não aborda diretamente a configuração do PostgreSQL.
+
+Portanto, a porcentagem de correção é (19/20)×100%=95%.
+
+Média de porcentagem geral de correção: 95%

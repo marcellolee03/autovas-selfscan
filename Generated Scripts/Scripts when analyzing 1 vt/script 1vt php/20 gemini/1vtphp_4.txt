@@ -1,0 +1,59 @@
+```bash
+#!/bin/bash
+
+# Verificar o sistema operacional para determinar o gerenciador de pacotes.
+if command -v apt-get &> /dev/null; then
+  PKG_MANAGER="apt"
+elif command -v yum &> /dev/null; then
+  PKG_MANAGER="yum"
+elif command -v zypper &> /dev/null; then
+  PKG_MANAGER="zypper"
+else
+  echo "Gerenciador de pacotes não detectado. Impossível prosseguir com a atualização."
+  exit 1
+fi
+
+# Atualizar o cache do gerenciador de pacotes.
+echo "Atualizando o cache do gerenciador de pacotes..."
+if [[ "$PKG_MANAGER" == "apt" ]]; then
+  apt-get update
+elif [[ "$PKG_MANAGER" == "yum" ]]; then
+  yum makecache fast
+elif [[ "$PKG_MANAGER" == "zypper" ]]; then
+  zypper refresh
+fi
+
+# Tentar atualizar o PHP para a versão mais recente disponível.
+echo "Atualizando o PHP..."
+if [[ "$PKG_MANAGER" == "apt" ]]; then
+  apt-get install --only-upgrade php5 php5-cgi php5-cli
+elif [[ "$PKG_MANAGER" == "yum" ]]; then
+  yum update php php-cli php-cgi
+elif [[ "$PKG_MANAGER" == "zypper" ]]; then
+  zypper update php php-cli php-cgi
+fi
+
+# Verificar se a atualização foi bem-sucedida (método simplificado).
+if command -v php &> /dev/null; then
+  PHP_VERSION=$(php -v | head -n 1 | awk '{print $2}')
+  echo "Versão do PHP instalada: $PHP_VERSION"
+
+  #Verificar se a versão instalada é maior ou igual a 5.3.13 ou 5.4.3
+  PHP_MAJOR=$(echo $PHP_VERSION | cut -d'.' -f1)
+  PHP_MINOR=$(echo $PHP_VERSION | cut -d'.' -f2)
+
+  if [[ "$PHP_MAJOR" -gt 5 ]] || \
+     [[ "$PHP_MAJOR" -eq 5 && "$PHP_MINOR" -gt 4 ]] || \
+     [[ "$PHP_MAJOR" -eq 5 && "$PHP_MINOR" -eq 4 && $(echo "$PHP_VERSION >= 5.4.3" | bc -l) -eq 1 ]] || \
+     [[ "$PHP_MAJOR" -eq 5 && "$PHP_MINOR" -eq 3 && $(echo "$PHP_VERSION >= 5.3.13" | bc -l) -eq 1 ]]; then
+    echo "PHP foi atualizado para uma versão segura."
+    exit 0
+  else
+    echo "A atualização pode não ter atingido a versão desejada. Verifique manualmente."
+    exit 1
+  fi
+else
+  echo "Falha ao verificar a versão do PHP após a atualização."
+  exit 1
+fi
+```

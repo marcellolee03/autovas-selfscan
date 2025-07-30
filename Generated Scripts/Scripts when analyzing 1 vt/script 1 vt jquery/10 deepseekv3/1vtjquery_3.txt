@@ -1,0 +1,4 @@
+#!/bin/bash
+jquery_path="/console/framework/../js/jquery-1.8.3.min.js"
+jquery_url="https://code.jquery.com/jquery-1.9.0.min.js"
+wget -O "${jquery_path}" "${jquery_url}"

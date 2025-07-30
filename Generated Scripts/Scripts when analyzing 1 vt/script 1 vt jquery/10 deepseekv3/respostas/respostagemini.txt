@@ -1,0 +1,23 @@
+Com base na análise da vulnerabilidade de Cross-Site Scripting (XSS) no jQuery  e nos scripts de correção fornecidos, apresento a avaliação da capacidade de cada script em resolver o problema.
+
+A vulnerabilidade específica reside na utilização do jQuery na versão 1.8.3 , sendo a solução a atualização para a versão 1.9.0 ou superior. O arquivo vulnerável está localizado em /console/framework/../js/jquery-1.8.3.min.js.
+
+Análise de Correção dos Scripts
+
+    Script 1: Sim. O script baixa a versão corrigida (1.9.0) e a move para o caminho exato do arquivo vulnerável, resolvendo o problema.
+
+Script 2: Sim. O script utiliza curl para baixar a versão 1.9.0 e a substitui no local correto, corrigindo a vulnerabilidade.
+Script 3: Sim. O script baixa a versão correta do jQuery diretamente para o caminho do arquivo vulnerável, efetuando a correção.
+Script 4: Sim. Este script verifica a versão atual , faz um backup , baixa a versão corrigida , e implementa um mecanismo de verificação e restauração em caso de falha, sendo uma solução robusta.
+Script 5: Sim. O script baixa a versão 1.9.0 para um arquivo temporário e, em caso de sucesso, move-o para o local do arquivo vulnerável.
+Script 6: Não. O script aponta para o diretório de destino incorreto (/console/framework/js/) em vez de /console/framework/../js/. Ele não encontrará o arquivo vulnerável para substituí-lo.
+Script 7: Sim. Embora o script baixe uma versão muito mais recente (3.7.0) , ela é superior à 1.9.0, o que atende ao requisito de atualização para "versão 1.9.0 ou posterior" e corrige a vulnerabilidade.
+Script 8: Sim. O script move o arquivo vulnerável para um backup e baixa a versão 1.9.0 no local correto, solucionando a falha.
+Script 9: Sim. O script usa um arquivo temporário para baixar a versão 1.9.0 e, após a verificação, substitui o arquivo vulnerável.
+Script 10: Sim. O script baixa a versão correta para um diretório temporário e depois a move para o caminho exato do arquivo vulnerável, corrigindo o problema.
+
+Porcentagem Geral de Correção
+
+A análise dos 10 scripts mostra que 9 deles são capazes de corrigir a vulnerabilidade.
+
+Média de porcentagem geral de correção: 90%

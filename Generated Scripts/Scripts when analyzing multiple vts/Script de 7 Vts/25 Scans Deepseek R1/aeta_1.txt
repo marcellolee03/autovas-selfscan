@@ -1,0 +1,66 @@
+#!/bin/bash
+
+# Fix vulnerability 1: Enforce HTTPS for sensitive data
+web_configs=($(find /etc/apache2 /etc/nginx -type f -name "*.conf" 2>/dev/null))
+for config in "${web_configs[@]}"; do
+    if grep -q "listen 80" "$config"; then
+        sed -i.orig '/listen 80/{a \
+\ \ \ \ return 301 https://$host$request_uri;
+        }' "$config"
+    elif grep -q "^server {" "$config" && ! grep -q "443" "$config"; then
+        sed -i.orig '/^server {/a \
+\ \ \ \ listen 443 ssl;\
+\ \ \ \ ssl_certificate /etc/ssl/certs/ssl-cert-snakeoil.pem;\
+\ \ \ \ ssl_certificate_key /etc/ssl/private/ssl-cert-snakeoil.key;
+        ' "$config"
+    fi
+done
+
+# Fix vulnerability 2: Disable DNS recursion
+bind_conf="/etc/bind/named.conf.options"
+if [ -f "$bind_conf" ]; then
+    cp $bind_conf $bind_conf.orig
+    if ! grep -q "allow-recursion" $bind_conf; then
+        sed -i '/options {/a \
+\ \ \ \ allow-recursion { none; }; \
+\ \ \ \ recursion no;' $bind_conf
+    fi
+    systemctl restart bind9 2>/dev/null
+fi
+
+# Fix vulnerability 3: Disable ICMP timestamp responses
+sysctl -w net.ipv4.icmp_echo_ignore_all=1
+sed -i '/^net.ipv4.icmp_echo_ignore_all=/d' /etc/sysctl.conf
+echo "net.ipv4.icmp_echo_ignore_all=1" >> /etc/sysctl.conf
+
+# Fix vulnerabilities 4/5/6: SSL/TLS hardening
+for config in "${web_configs[@]}"; do
+    if grep -q "ssl_protocols" "$config" || grep -q "ssl_ciphers" "$config"; then
+        sed -i.ssl 's/ssl_protocols .*/ssl_protocols TLSv1.2 TLSv1.3;/g;
+        s/ssl_ciphers .*/ssl_ciphers HIGH:!aNULL:!MD5:!RC4;/
+        /ssl_prefer_server_ciphers/ s/off/on/' "$config"
+    else
+        sed -i.orig '/listen 443 ssl/a \
+\ \ \ \ ssl_protocols TLSv1.2 TLSv1.3;\
+\ \ \ \ ssl_ciphers HIGH:!aNULL:!MD5:!RC4;\
+\ \ \ \ ssl_prefer_server_ciphers on;' "$config"
+    fi
+    sed -i '/SSLInsecureRenegotiation/d' "$config"
+    sed -i '/SSLCompression/d' "$config"
+    sed -i '/SSLSessionTickets/d' "$config"
+    sed -i '/SSLOptions +OPTIONS/a SSLOptions +StdEnvVars' "$config"
+done
+
+# Fix vulnerability 7: Disable TCP timestamps
+sysctl -w net.ipv4.tcp_timestamps=0
+sed -i '/^net.ipv4.tcp_timestamps=/d' /etc/sysctl.conf
+echo "net.ipv4.tcp_timestamps=0" >> /etc/sysctl.conf
+sysctl -p &>/dev/null
+
+# Restart web services
+if which apache2 &>/dev/null; then
+    systemctl restart apache2 2>/dev/null
+fi
+if which nginx &>/dev/null; then 
+    systemctl restart nginx 2>/dev/null
+fi

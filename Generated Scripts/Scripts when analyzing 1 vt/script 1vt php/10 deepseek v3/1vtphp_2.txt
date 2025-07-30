@@ -1,0 +1,11 @@
+#!/bin/bash
+if command -v php &> /dev/null; then
+    PHP_VERSION=$(php -v | grep -oP '^PHP \K[0-9]+\.[0-9]+\.[0-9]+')
+    if [[ "$PHP_VERSION" < "5.3.13" ]]; then
+        sudo apt-get update
+        sudo apt-get install --only-upgrade php
+    elif [[ "$PHP_VERSION" == 5.4.* && "$PHP_VERSION" < "5.4.3" ]]; then
+        sudo apt-get update
+        sudo apt-get install --only-upgrade php
+    fi
+fi

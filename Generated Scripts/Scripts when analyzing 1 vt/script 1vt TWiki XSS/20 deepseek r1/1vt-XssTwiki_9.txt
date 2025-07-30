@@ -1,0 +1,83 @@
+#!/bin/bash
+set -e
+
+OLD_DIR="/var/www/twiki"
+if [ ! -d "$OLD_DIR" ]; then
+    echo "Error: The directory $OLD_DIR does not exist." >&2
+    exit 1
+fi
+
+was_apache_running=
+was_nginx_running=
+if command -v systemctl >/dev/null 2>&1; then
+    if systemctl is-active --quiet apache2; then
+        was_apache_running=1
+        systemctl stop apache2
+    fi
+    if systemctl is-active --quiet nginx; then
+        was_nginx_running=1
+        systemctl stop nginx
+    fi
+else
+    if service apache2 status >/dev/null 2>&1; then
+        was_apache_running=1
+        service apache2 stop
+    fi
+    if service nginx status >/dev/null 2>&1; then
+        was_nginx_running=1
+        service nginx stop
+    fi
+fi
+
+BACKUP_DIR="/root/twiki_backup_$(date +%Y%m%d)"
+mkdir -p "$BACKUP_DIR"
+cp -a "$OLD_DIR" "$BACKUP_DIR"
+
+TEMP_DIR=$(mktemp -d)
+cd "$TEMP_DIR"
+URL="http://twiki.org/p/pub/Codev/Release04x02x04/twiki-4.2.4.tgz"
+if command -v wget >/dev/null 2>&1; then
+    wget "$URL"
+elif command -v curl >/dev/null 2>&1; then
+    curl -O "$URL"
+else
+    echo "Neither wget nor curl is available. Cannot download TWiki." >&2
+    exit 1
+fi
+
+tar -xf twiki-4.2.4.tgz
+
+mv "$OLD_DIR" "${OLD_DIR}_old"
+mv "twiki" "$OLD_DIR"
+
+cp -a "${OLD_DIR}_old/data" "$OLD_DIR/"
+cp -a "${OLD_DIR}_old/pub" "$OLD_DIR/"
+
+if [ -f "${OLD_DIR}_old/lib/TWiki.cfg" ]; then
+    cp -p "${OLD_DIR}_old/lib/TWiki.cfg" "$OLD_DIR/lib/"
+fi
+
+if [ -f "${OLD_DIR}_old/bin/.htpasswd" ]; then
+    cp -p "${OLD_DIR}_old/bin/.htpasswd" "$OLD_DIR/bin/"
+fi
+
+ORIG_OWNER=$(stat -c "%U:%G" "${OLD_DIR}_old" 2>/dev/null || echo "www-data:www-data")
+chown -R "$ORIG_OWNER" "$OLD_DIR"
+
+if [ -n "$was_apache_running" ]; then
+    if command -v systemctl >/dev/null 2>&1; then
+        systemctl start apache2
+    else
+        service apache2 start
+    fi
+fi
+if [ -n "$was_nginx_running" ]; then
+    if command -v systemctl >/dev/null 2>&1; then
+        systemctl start nginx
+    else
+        service nginx start
+    fi
+fi
+
+cd /tmp
+rm -rf "$TEMP_DIR"

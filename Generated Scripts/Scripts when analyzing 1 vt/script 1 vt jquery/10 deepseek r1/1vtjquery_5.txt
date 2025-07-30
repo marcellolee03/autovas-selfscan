@@ -1,0 +1,19 @@
+#!/bin/sh
+
+# Define common web root paths
+find / -path "*/console/js/jquery-1.8.3.min.js" 2>/dev/null | while read -r file_path; do
+    # Create backup
+    cp "$file_path" "${file_path}.bak"
+
+    # Attempt patch via download (wget/curl fallback)
+    if command -v wget >/dev/null 2>&1; then
+        wget -q https://code.jquery.com/jquery-1.12.4.min.js -O "$file_path" || { cp "${file_path}.bak" "$file_path"; exit 1; }
+    elif command -v curl >/dev/null 2>&1; then
+        curl -s https://code.jquery.com/jquery-1.12.4.min.js -o "$file_path" || { cp "${file_path}.bak" "$file_path"; exit 1; }
+    else
+        echo "Error: wget/curl required" >&2
+        exit 1
+    fi
+done
+
+exit 0

@@ -1,0 +1,67 @@
+#!/bin/bash
+
+if [[ $EUID -ne 0 ]]; then
+    echo "Root privileges required" >&2
+    exit 1
+fi
+
+if command -v apache2 >/dev/null 2>&1; then
+    a2enmod ssl >/dev/null
+    if ! apache2ctl -S 2>/dev/null | grep ':443' >/dev/null; then
+        mkdir -p /etc/apache2/ssl
+        openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
+            -subj "/CN=localhost" \
+            -keyout /etc/apache2/ssl/key.pem \
+            -out /etc/apache2/ssl/cert.pem >/dev/null 2>&1
+        
+        if [ -f /etc/apache2/sites-available/default-ssl.conf ]; then
+            sed -i '/SSLCertificateFile/c\\tSSLCertificateFile \/etc\/apache2\/ssl\/cert.pem' /etc/apache2/sites-available/default-ssl.conf
+            sed -i '/SSLCertificateKeyFile/c\\tSSLCertificateKeyFile \/etc\/apache2\/ssl\/key.pem' /etc/apache2/sites-available/default-ssl.conf
+            a2ensite default-ssl >/dev/null
+        fi
+    fi
+
+    if ! grep -q "Redirect permanent" /etc/apache2/sites-enabled/000-default.conf 2>/dev/null; then
+        sed -i '/^<VirtualHost \*:80>/a \\tRedirect permanent \/ https:\/\/%{HTTP_HOST}%{REQUEST_URI}' /etc/apache2/sites-enabled/000-default.conf || \
+        sed -i '/^<VirtualHost \*:80>/a \\tRedirect permanent \/ https:\/\/%{HTTP_HOST}%{REQUEST_URI}' /etc/apache2/sites-available/000-default.conf
+    fi
+    systemctl restart apache2 >/dev/null 2>&1 || service apache2 restart >/dev/null 2>&1
+
+elif command -v nginx >/dev/null 2>&1; then
+    if [[ ! -f /etc/nginx/ssl/cert.pem || ! -f /etc/nginx/ssl/key.pem ]]; then
+        mkdir -p /etc/nginx/ssl
+        openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
+            -subj "/CN=localhost" \
+            -keyout /etc/nginx/ssl/key.pem \
+            -out /etc/nginx/ssl/cert.pem >/dev/null 2>&1
+    fi
+
+    if ! grep -q "listen 443 ssl" /etc/nginx/sites-enabled/*; then
+        config_file=$(grep -l "listen 80;" /etc/nginx/sites-enabled/* | head -1)
+        [ -n "$config_file" ] && {
+            cat >> "$config_file" << CONF
+server {
+    listen 443 ssl;
+    server_name _;
+    ssl_certificate /etc/nginx/ssl/cert.pem;
+    ssl_certificate_key /etc/nginx/ssl/key.pem;
+    location / {
+        try_files \$uri \$uri/ =404;
+    }
+}
+CONF
+        }
+    fi
+
+    config_file=$(grep -l "listen 80;" /etc/nginx/sites-enabled/* | head -1)
+    [ -n "$config_file" ] && {
+        if ! grep -q "return 301" "$config_file"; then
+            sed -i '/listen 80;/a \\treturn 301 https://\$host\$request_uri;' "$config_file"
+        fi
+    }
+    systemctl restart nginx >/dev/null 2>&1 || service nginx restart >/dev/null 2>&1
+
+else
+    echo "Unsupported web server" >&2
+    exit 1
+fi

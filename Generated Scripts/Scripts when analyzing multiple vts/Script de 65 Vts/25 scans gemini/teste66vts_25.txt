@@ -1,0 +1,79 @@
+```bash
+#!/bin/bash
+
+# Variáveis para rastreamento de atualizações
+need_python_3_10_13=0
+need_python_3_10_14=0
+need_python_3_10_15=0
+need_python_3_10_16=0
+need_python_3_11_5=0
+need_python_3_11_8=0
+need_python_3_11_9=0
+need_python_3_11_10=0
+need_python_3_12_1=0
+need_python_3_12_2=0
+need_python_3_12_3=0
+need_python_3_12_4=0
+need_python_3_12_5=0
+need_python_3_12_6=0
+need_python_3_12_8=0
+need_python_3_12_9=0
+
+# Detectar qual versão do Python precisa ser atualizada
+if [[ $(python3 -V 2>&1) =~ "Python 3\.10\.12" ]]; then
+  need_python_3_10_13=1
+  need_python_3_10_14=1
+  need_python_3_10_15=1
+  need_python_3_10_16=1
+  need_python_3_11_10=1
+elif [[ $(python3 -V 2>&1) =~ "Python 3\.12\.0" ]]; then
+  need_python_3_12_1=1
+  need_python_3_12_2=1
+  need_python_3_12_3=1
+  need_python_3_12_4=1
+  need_python_3_12_5=1
+  need_python_3_12_6=1
+  need_python_3_12_8=1
+  need_python_3_12_9=1
+fi
+
+# Função para atualizar o Python usando o gerenciador de pacotes apropriado
+update_python() {
+  if command -v apt-get &> /dev/null; then
+    sudo apt-get update
+    sudo apt-get install -y python3.12 python3.11 python3.10
+  elif command -v yum &> /dev/null; then
+    sudo yum update
+    sudo yum install -y python3.12 python3.11 python3.10
+  elif command -v pacman &> /dev/null; then
+    sudo pacman -Syu
+    sudo pacman -S python3.12 python3.11 python3.10
+  elif command -v dnf &> /dev/null; then
+    sudo dnf update
+    sudo dnf install -y python3.12 python3.11 python3.10
+  else
+    echo "Nenhum gerenciador de pacotes suportado encontrado.  Por favor, atualize o Python manualmente."
+    exit 1
+  fi
+}
+
+# Atualizar o Python se necessário
+if [[ $need_python_3_10_13 -eq 1 ]] || [[ $need_python_3_10_14 -eq 1 ]] || [[ $need_python_3_10_15 -eq 1 ]] || [[ $need_python_3_10_16 -eq 1 ]] || [[ $need_python_3_11_5 -eq 1 ]] || [[ $need_python_3_11_8 -eq 1 ]] || [[ $need_python_3_11_9 -eq 1 ]] || [[ $need_python_3_11_10 -eq 1 ]] || [[ $need_python_3_12_1 -eq 1 ]] || [[ $need_python_3_12_2 -eq 1 ]] || [[ $need_python_3_12_3 -eq 1 ]] || [[ $need_python_3_12_4 -eq 1 ]] || [[ $need_python_3_12_5 -eq 1 ]] || [[ $need_python_3_12_6 -eq 1 ]] || [[ $need_python_3_12_8 -eq 1 ]] || [[ $need_python_3_12_9 -eq 1 ]]; then
+  update_python
+fi
+
+# Desativar TLSv1.0 e TLSv1.1 (exemplo usando OpenSSL - adapte conforme necessário)
+# Este é um exemplo e pode precisar de ajustes dependendo da sua configuração
+# sudo sed -i 's/TLSv1.1/No TLSv1.1/g' /etc/ssl/openssl.cnf
+# sudo sed -i 's/TLSv1/No TLSv1/g' /etc/ssh/sshd_config
+
+# Remover certificado SSL/TLS não confiável (isso requer conhecimento do caminho do arquivo)
+# Exemplo:
+# rm /etc/ssl/certs/untrusted_cert.pem
+
+# Reiniciar serviços afetados (exemplo)
+# sudo systemctl restart sshd
+# sudo systemctl restart <seu_servico_python>
+
+echo "Script de patching completo."
+```

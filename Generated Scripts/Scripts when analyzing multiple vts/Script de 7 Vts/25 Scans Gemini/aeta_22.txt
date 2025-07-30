@@ -1,0 +1,144 @@
+```bash
+#!/bin/bash
+
+# Vulnerabilidade 1: Cleartext Transmission of Sensitive Information via HTTP
+# Solução: Implica configurar o servidor web para redirecionar todo o tráfego HTTP para HTTPS.
+# Este script assume que o servidor web é Apache e que o módulo mod_rewrite está habilitado.
+# Adapte conforme necessário para outros servidores web (Nginx, etc.).
+
+# Verifica se o Apache está instalado
+if command -v apache2ctl &> /dev/null; then
+    # Cria um arquivo .htaccess na raiz do site para redirecionar HTTP para HTTPS
+    echo "
+RewriteEngine On
+RewriteCond %{HTTPS} off
+RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+" > /var/www/html/.htaccess
+
+    # Garante que o mod_rewrite está habilitado
+    if ! a2enmod rewrite &> /dev/null; then
+        echo "Módulo mod_rewrite não está habilitado. Habilitando..."
+        a2enmod rewrite
+    fi
+
+    # Reinicia o Apache para aplicar as mudanças
+    systemctl restart apache2
+    echo "Redirecionamento HTTP para HTTPS configurado para Apache. Reiniciei o serviço."
+
+elif command -v nginx &> /dev/null; then
+
+    echo "Nginx detected. Please configure redirection manually."
+    echo "Example configuration (add to your server block):"
+    echo "---------------------------------------------------"
+    echo "server {"
+    echo "  listen 80;"
+    echo "  server_name your_domain.com;"
+    echo "  return 301 https://\$host\$request_uri;"
+    echo "}"
+    echo "---------------------------------------------------"
+
+else
+    echo "Servidor web não detectado. Redirecionamento HTTP para HTTPS não configurado."
+fi
+
+# Vulnerabilidade 2: DNS Cache Snooping Vulnerability (UDP)
+# Solução: Desabilitar a recursão no servidor DNS.
+# Este script assume que o servidor DNS é BIND9.
+# Adapte conforme necessário para outros servidores DNS (dnsmasq, etc.).
+
+# Verifica se o BIND9 está instalado
+if command -v named &> /dev/null; then
+    # Modifica o arquivo de configuração do BIND9 para desabilitar a recursão
+    sed -i 's/recursion yes;/recursion no;/g' /etc/bind/named.conf.options
+
+    # Reinicia o BIND9 para aplicar as mudanças
+    systemctl restart bind9
+    echo "Recursão desabilitada no BIND9. Serviço reiniciado."
+else
+    echo "BIND9 não detectado. Desabilite a recursão no seu servidor DNS manualmente."
+fi
+
+# Vulnerabilidade 3: ICMP Timestamp Reply Information Disclosure
+# Solução: Desabilitar o suporte para ICMP timestamp.
+
+# Desabilita ICMP timestamps no kernel
+echo 0 > /proc/sys/net/ipv4/icmp_echo_ignore_all
+
+# Adiciona a configuração ao sysctl.conf para persistir após o reboot
+echo "net.ipv4.icmp_echo_ignore_all=1" >> /etc/sysctl.conf
+
+# Aplica as configurações do sysctl
+sysctl -p
+echo "ICMP Timestamps desabilitado."
+
+# Vulnerabilidade 4: SSL/TLS: Deprecated TLSv1.0 and TLSv1.1 Protocol Detection
+# Solução: Desabilitar TLSv1.0 e TLSv1.1. Este script assume que o OpenSSL é usado e configura o Apache.
+
+# Editar a configuração do Apache para desabilitar TLSv1.0 e TLSv1.1
+if command -v apache2ctl &> /dev/null; then
+    # Localiza o arquivo de configuração SSL do Apache (pode variar dependendo da distro)
+    SSL_CONF_FILE=$(find /etc/apache2/mods-available/ -name "ssl.conf" | head -n 1)
+
+    # Se o arquivo de configuração SSL foi encontrado, edita para desabilitar TLSv1.0 e TLSv1.1
+    if [ -n "$SSL_CONF_FILE" ]; then
+        # Adiciona a diretiva SSLProtocol ao arquivo de configuração SSL
+        sed -i "s/SSLProtocol all/SSLProtocol all -TLSv1 -TLSv1.1/g" "$SSL_CONF_FILE"
+        
+        # Reinicia o Apache para aplicar as alterações
+        systemctl restart apache2
+        echo "TLSv1.0 e TLSv1.1 desabilitados no Apache. Serviço reiniciado."
+    else
+        echo "Arquivo de configuração SSL do Apache não encontrado.  Configure TLS manualmente."
+    fi
+else
+    echo "Apache não detectado. Configure TLS manualmente."
+fi
+
+# Vulnerabilidade 5: SSL/TLS: Renegotiation DoS Vulnerability (CVE-2011-1473, CVE-2011-5094)
+# Desabilitar renegotiation (mais seguro, mas pode quebrar alguns clientes antigos)
+# Aqui, assumimos que o Apache é usado.
+if command -v apache2ctl &> /dev/null; then
+  SSL_CONF_FILE=$(find /etc/apache2/mods-available/ -name "ssl.conf" | head -n 1)
+  if [ -n "$SSL_CONF_FILE" ]; then
+    sed -i 's/#SSLHonorCipherOrder on/SSLHonorCipherOrder on/' "$SSL_CONF_FILE"  # Assegura que a ordem dos ciphers do servidor seja respeitada
+    sed -i 's/#SSLOptions \+StrictRequire/SSLOptions \+StrictRequire/' "$SSL_CONF_FILE" # Reforça a segurança
+        
+    systemctl restart apache2
+    echo "Renegociação SSL/TLS desabilitada (via Cipher Order) no Apache.  StrictRequire ativado.  Serviço reiniciado."
+  else
+    echo "Arquivo de configuração SSL do Apache não encontrado.  Configure a ordem dos ciphers manualmente."
+  fi
+else
+    echo "Apache não detectado. Configure manualmente."
+fi
+
+# Vulnerabilidade 6: SSL/TLS: Report Weak Cipher Suites
+# Remove cipher suites fracos. Este script novamente assume que o OpenSSL é usado e configura o Apache.
+
+if command -v apache2ctl &> /dev/null; then
+    SSL_CONF_FILE=$(find /etc/apache2/mods-available/ -name "ssl.conf" | head -n 1)
+    if [ -n "$SSL_CONF_FILE" ]; then
+        # Ciphers mais seguros
+        sed -i 's/#SSLCipherSuite HIGH:MEDIUM:!aNULL:!MD5/SSLCipherSuite ECDHE-RSA-AES256-GCM-SHA384:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-RSA-AES256-SHA384:ECDHE-RSA-AES128-SHA256:ECDHE-RSA-AES256-SHA:ECDHE-RSA-AES128-SHA:!aNULL:!eNULL:!EXPORT:!DES:!RC4:!MD5:!PSK/' "$SSL_CONF_FILE"
+        systemctl restart apache2
+        echo "Cipher Suites fracos removidos no Apache. Serviço reiniciado."
+    else
+        echo "Arquivo de configuração SSL do Apache não encontrado. Configure os Cipher Suites manualmente."
+    fi
+else
+    echo "Apache não detectado. Configure manualmente."
+fi
+
+# Vulnerabilidade 7: TCP Timestamps Information Disclosure
+# Solução: Desabilitar TCP timestamps
+
+# Desabilita TCP timestamps
+sysctl -w net.ipv4.tcp_timestamps=0
+
+# Persiste a configuração
+echo "net.ipv4.tcp_timestamps = 0" >> /etc/sysctl.conf
+
+# Aplica as configurações
+sysctl -p
+echo "TCP timestamps desabilitados."
+```

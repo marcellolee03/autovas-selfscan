@@ -1,0 +1,35 @@
+```bash
+#!/bin/bash
+set -e
+if [ "$(id -u)" -ne 0 ]; then
+    echo "This script must be run as root" >&2
+    exit 1
+fi
+if command -v apt-get >/dev/null; then
+    if dpkg -l | grep -qE '^ii.*twiki\b'; then
+        apt-get update
+        apt-get install --only-upgrade twiki -y
+        exit 0
+    fi
+elif command -v rpm >/dev/null; then
+    if rpm -q twiki >/dev/null 2>&1; then
+        if command -v dnf >/dev/null; then
+            dnf -y upgrade twiki
+        elif command -v yum >/dev/null; then
+            yum -y upgrade twiki
+        elif command -v zypper >/dev/null; then
+            zypper -n up twiki
+        fi
+        exit $?
+    fi
+fi
+if command -v find >/dev/null; then
+    install_dir=$(find / -type f -path '*/lib/TWiki.pm' -exec dirname {} \; 2>/dev/null | xargs dirname | head -n1)
+    if [ -n "$install_dir" ]; then
+        echo "Source installation found at $install_dir - Automatic patching not supported" >&2
+        exit 1
+    fi
+fi
+echo "TWiki installation not found" >&2
+exit 1
+```

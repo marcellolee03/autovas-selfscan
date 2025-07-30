@@ -1,0 +1,64 @@
+#!/bin/bash
+
+# Configurações de segurança globais
+sed -i 's/^\([^#]*\)$SAFE=.*/\1$SAFE=3/' /etc/environment
+echo "net.ipv4.tcp_timestamps=0" >> /etc/sysctl.conf
+sysctl -p >/dev/null
+chmod 0700 /etc/cron* 2>/dev/null
+
+# Desabilitar serviços vulneráveis
+systemctl stop rsh.socket rlogin.socket rexec.socket telnet.socket ingreslock distcc 2>/dev/null
+systemctl disable rsh.socket rlogin.socket rexec.socket telnet.socket ingreslock distcc 2>/dev/null
+update-rc.d -f rsh remove 2>/dev/null
+update-rc.d -f rlogin remove 2>/dev/null
+update-rc.d -f rexec remove 2>/dev/null
+update-rc.d -f telnet remove 2>/dev/null
+update-rc.d -f ingreslock remove 2>/dev/null
+update-rc.d -f distcc remove 2>/dev/null
+
+# Remoção de software vulnerável
+apt-get purge -y --auto-remove twiki vsftpd phpmyadmin mutillidae awiki qwikiwiki 2>/dev/null
+rm -rf /var/www/html/mutillidae /var/www/html/awiki /var/www/html/qwikiwiki 2>/dev/null
+
+# Desabilitar features do Apache
+a2dismod cgi 2>/dev/null
+apache2ctl restart >/dev/null
+
+# Atualização de senhas padrão
+mysql -e "ALTER USER 'root'@'localhost' IDENTIFIED BY 'StrongPassword123!'; FLUSH PRIVILEGES;" 2>/dev/null
+sudo -u postgres psql -c "ALTER USER postgres PASSWORD 'PostgreSecure456@';" 2>/dev/null
+
+# Configurações do SSH
+cp /etc/ssh/sshd_config /etc/ssh/sshd_config.bak
+sed -i 's/^\(#\)\?HostKey.*ssh-dss.*//' /etc/ssh/sshd_config
+echo -e "KexAlgorithms curve25519-sha256\nCiphers chacha20-poly1305@openssh.com,aes256-gcm@openssh.com\nMACs hmac-sha2-512\nHostKeyAlgorithms ecdsa-sha2-nistp256,ssh-rsa" >> /etc/ssh/sshd_config
+systemctl restart ssh 2>/dev/null
+
+# Configurações do TLS
+openssl req -x509 -nodes -days 3650 -newkey rsa:4096 -keyout /etc/ssl/private/server.key -out /etc/ssl/certs/server.crt -subj "/CN=HardenedServer" >/dev/null 2>&1
+find /etc -name '*.conf' -exec sed -i -E 's/SSLProtocol[[:space:]a-zA-Z0-9\.,-]*/SSLProtocol all -SSLv2 -SSLv3 -TLSv1.0 -TLSv1.1/g' {} + 2>/dev/null
+find /etc -name '*.conf' -exec sed -i -E 's/SSLCipherSuite[[:space:]a-zA-Z0-9\.,:\-\+_]*/SSLCipherSuite HIGH:!aNULL:!MD5:!SHA1:!RC4/g' {} + 2>/dev/null
+
+# Remover arquivos sensíveis
+find /var/www -name 'phpinfo.php' -delete 2>/dev/null
+rm -f /var/www/html/phpinfo.php /var/www/html/phpMyAdmin/phpinfo.php 2>/dev/null
+
+# Arquivos jQuery vulneráveis
+jq_files=("/var/www/html/mutillidae/javascript/ddsmoothmenu/jquery.min.js")
+for file in "${jq_files[@]}"; do
+    [ -f "$file" ] && curl -s https://code.jquery.com/jquery-3.6.0.min.js > "$file"
+done
+
+# Desabilitar features perigosas
+sed -i 's/^\( *customLog.*\)/\1\n    TraceEnable off/' /etc/apache2/apache2.conf 2>/dev/null
+echo -e "\n<Directory />\n    Options -Indexes\n</Directory>" >> /etc/apache2/apache2.conf
+sed -i 's/^\( *AllowOverride\).*/\1 None/' /etc/apache2/sites-available/* 2>/dev/null
+apache2ctl restart >/dev/null
+
+# Limpar backdoor detectada
+kill -9 $(lsof -t -i:1524) 2>/dev/null
+sed -i '/ingreslock/d' /etc/inetd.conf 2>/dev/null
+
+# Configurar PostgreSQL
+echo "host all all 0.0.0.0/0 md5" >> /etc/postgresql/*/main/pg_hba.conf
+systemctl restart postgresql 2>/dev/null

@@ -1,0 +1,78 @@
+#!/bin/powershell
+
+$ErrorActionPreference = "Stop"
+[Net.ServicePointManager]::SecurityProtocol = "Tls12"
+
+$pythonVersions = @(
+    @{
+        version = "3.10"
+        required = "3.10.16"
+        url = "https://www.python.org/ftp/python/3.10.16/python-3.10.16-amd64.exe"
+        exe = "python-3.10.16-amd64.exe"
+    },
+    @{
+        version = "3.12"
+        required = "3.12.9"
+        url = "https://www.python.org/ftp/python/3.12.9/python-3.12.9-amd64.exe"
+        exe = "python-3.12.9-amd64.exe"
+    }
+)
+
+# Atualizar versões vulneráveis do Python
+$installersPath = "C:/Windows/Temp"
+foreach ($py in $pythonVersions) {
+    $installed = @(Get-ChildItem "C:\Program Files\Python*$($py.version)*" -Directory -ErrorAction SilentlyContinue)
+    
+    if (-not $installed) {
+        $tempInstaller = Join-Path $installersPath $py.exe
+        if (-not (Test-Path $tempInstaller -PathType Leaf)) {
+            Invoke-WebRequest -Uri $py.url -OutFile $tempInstaller
+        }
+        Start-Process -Wait -FilePath $tempInstaller -ArgumentList @(
+            "/quiet", "InstallAllUsers=1", "PrependPath=1", "Include_test=0"
+        )
+    }
+}
+
+# Desativar TLS v1.0 e v1.1 para RDP
+$tlsRegPaths = @(
+    "HKLM:\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Protocols\TLS 1.0\Server",
+    "HKLM:\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Protocols\TLS 1.1\Server"
+)
+
+foreach ($regPath in $tlsRegPaths) {
+    if (-not (Test-Path $regPath)) { New-Item -Path $regPath -Force | Out-Null }
+    New-ItemProperty -Path $regPath -Name "Enabled" -Value 0 -PropertyType DWORD -Force | Out-Null
+    New-ItemProperty -Path $regPath -Name "DisabledByDefault" -Value 1 -PropertyType DWORD -Force | Out-Null
+}
+
+# Reiniciar serviço RDP
+Restart-Service -Name TermService -Force
+
+# Remover MACs inseguros para SSH
+$sshdConfigPath = "C:\ProgramData\ssh\sshd_config"
+if (Test-Path $sshdConfigPath) {
+    # Backup do arquivo
+    $configBackup = "$sshdConfigPath.$(Get-Date -Format 'yyyyMMdd').bak"
+    Copy-Item $sshdConfigPath $configBackup -Force
+    
+    # Remover MACs vulneráveis
+    $configLines = Get-Content $sshdConfigPath
+    $safeMACs = "MACs umac-128-etm@openssh.com,hmac-sha2-256-etm@openssh.com,hmac-sha2-512-etm@openssh.com,hmac-sha1-etm@openssh.com,umac-128@openssh.com,hmac-sha2-256,hmac-sha2-512,hmac-sha1"
+    $updatedLines = $configLines | ForEach-Object {
+        if ($_ -match "^\s*MACs\s+") { $safeMACs }
+        else { $_ }
+    }
+    
+    # Garantir que exista uma configuração válida
+    if ($updatedLines -notcontains $safeMACs) {
+        $updatedLines += $safeMACs
+    }
+    
+    $updatedLines | Set-Content $sshdConfigPath
+    Restart-Service -Name sshd -Force
+}
+
+# Desativar respostas ICMP Timestamp
+$icmpRegPath = "HKLM:\SYSTEM\CurrentControlSet\Services\Tcpip\Parameters"
+Set-ItemProperty -Path $icmpRegPath -Name "EnableICMPTimestamp" -Value 0 -Force

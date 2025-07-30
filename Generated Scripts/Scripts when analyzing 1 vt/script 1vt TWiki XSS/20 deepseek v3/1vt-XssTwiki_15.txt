@@ -1,0 +1,16 @@
+#!/bin/bash
+TWIKI_DIR="/var/www/twiki"
+BACKUP_DIR="/var/www/twiki_backup_$(date +%Y%m%d%H%M%S)"
+TWIKI_URL="https://github.com/TWikiOrg/TWiki/archive/refs/tags/TWikiRelease4.2.4.tar.gz"
+TWIKI_TAR="TWikiRelease4.2.4.tar.gz"
+
+mkdir -p $BACKUP_DIR
+cp -r $TWIKI_DIR/* $BACKUP_DIR/
+wget $TWIKI_URL -O /tmp/$TWIKI_TAR
+tar -xzf /tmp/$TWIKI_TAR -C /tmp/
+rm -rf $TWIKI_DIR/*
+cp -r /tmp/TWiki-TWikiRelease4.2.4/* $TWIKI_DIR/
+chown -R www-data:www-data $TWIKI_DIR
+chmod -R 755 $TWIKI_DIR
+rm -rf /tmp/$TWIKI_TAR /tmp/TWiki-TWikiRelease4.2.4
+systemctl restart apache2

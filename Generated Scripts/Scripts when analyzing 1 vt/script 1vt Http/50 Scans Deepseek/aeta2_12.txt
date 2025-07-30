@@ -1,0 +1,26 @@
+#!/bin/bash
+
+# Enforce HTTPS and redirect HTTP to HTTPS for Apache
+if [[ -f /etc/apache2/sites-available/000-default.conf ]]; then
+    sed -i 's/<VirtualHost \*:80>/<VirtualHost *:80>\n    RewriteEngine On\n    RewriteCond %{HTTPS} off\n    RewriteRule ^ https:\/\/%{HTTP_HOST}%{REQUEST_URI} [L,R=301]/' /etc/apache2/sites-available/000-default.conf
+    a2enmod rewrite ssl
+    systemctl restart apache2
+fi
+
+# Enforce HTTPS and redirect HTTP to HTTPS for Nginx
+if [[ -f /etc/nginx/sites-available/default ]]; then
+    sed -i 's/listen 80 default_server;/listen 80 default_server;\n    return 301 https:\/\/$host$request_uri;/' /etc/nginx/sites-available/default
+    systemctl restart nginx
+fi
+
+# Check if SSL certificates are present and generate self-signed if missing
+if [[ ! -f /etc/ssl/certs/ssl-cert-snakeoil.pem ]] || [[ ! -f /etc/ssl/private/ssl-cert-snakeoil.key ]]; then
+    openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout /etc/ssl/private/ssl-cert-snakeoil.key -out /etc/ssl/certs/ssl-cert-snakeoil.pem -subj "/CN=localhost"
+fi
+
+# Check if UFW is installed and enable HTTPS
+if command -v ufw > /dev/null; then
+    ufw allow 'Apache Full'
+    ufw allow 'Nginx Full'
+    ufw reload
+fi

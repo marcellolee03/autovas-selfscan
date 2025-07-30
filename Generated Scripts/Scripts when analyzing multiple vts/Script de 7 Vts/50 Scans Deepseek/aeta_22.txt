@@ -1,0 +1,30 @@
+#!/bin/bash
+
+# Vulnerabilidade 1: Enforce SSL/TLS for sensitive data transmission
+sed -i 's/^\(.*\)http:\/\//\1https:\/\//g' /etc/nginx/nginx.conf
+systemctl restart nginx
+
+# Vulnerabilidade 2: Configure DNS server to disable recursion
+sed -i 's/^\(.*recursion.*\)yes/\1no/g' /etc/named.conf
+systemctl restart named
+
+# Vulnerabilidade 3: Disable ICMP Timestamp Reply
+sysctl -w net.ipv4.icmp_echo_ignore_all=1
+sysctl -w net.ipv4.icmp_echo_ignore_broadcasts=1
+sysctl -p
+
+# Vulnerabilidade 4: Disable deprecated TLSv1.0 and TLSv1.1
+sed -i 's/^\(.*TLSv1\).*/\1.2 TLSv1.3;/g' /etc/nginx/nginx.conf
+systemctl restart nginx
+
+# Vulnerabilidade 5: Disable SSL/TLS Renegotiation
+sed -i 's/^\(.*ssl_renegotiation_limit.*\)512/\10/g' /etc/nginx/nginx.conf
+systemctl restart nginx
+
+# Vulnerabilidade 6: Disable weak cipher suites
+sed -i 's/^\(.*ssl_ciphers.*\)/\1!aNULL:!eNULL:!LOW:!3DES:!MD5:!EXP:!PSK:!SRP:!DSS;/g' /etc/nginx/nginx.conf
+systemctl restart nginx
+
+# Vulnerabilidade 7: Disable TCP Timestamps
+sysctl -w net.ipv4.tcp_timestamps=0
+sysctl -p

@@ -1,0 +1,96 @@
+```bash
+#!/bin/bash
+
+# Variáveis
+PYTHON_VERSION=$(python --version 2>&1 | awk '{print $2}' | cut -d '.' -f 1,2)
+INSTALLED_VERSION="3.10.12"
+FIXED_VERSION="3.10.15"
+PYTHON_EXECUTABLE=$(which python3)
+
+# Log de ações
+LOG_FILE="/tmp/python_patch.log"
+echo "$(date) - Iniciando script de correção Python." >> $LOG_FILE
+
+# Função para verificar se o Python está instalado
+check_python() {
+  if ! command -v python > /dev/null 2>&1; then
+    echo "$(date) - Python não encontrado. Saindo." >> $LOG_FILE
+    echo "Python não encontrado. Por favor, instale o Python e tente novamente."
+    exit 1
+  fi
+}
+
+# Função para verificar a versão do Python
+check_version() {
+  if [[ "$PYTHON_VERSION" == "3.10" ]]; then
+    echo "$(date) - Versão do Python instalada: $INSTALLED_VERSION" >> $LOG_FILE
+    if [[ $(echo "$INSTALLED_VERSION < $FIXED_VERSION" | bc -l) -eq 1 ]]; then
+      echo "$(date) - Versão vulnerável detectada." >> $LOG_FILE
+    else
+      echo "$(date) - Versão do Python não é vulnerável ou já está atualizada." >> $LOG_FILE
+      echo "Versão do Python não é vulnerável ou já está atualizada."
+      exit 0
+    fi
+  else
+    echo "$(date) - Versão do Python não é 3.10. Saindo." >> $LOG_FILE
+    echo "Versão do Python não é 3.10. Este script é para a versão 3.10."
+    exit 1
+  fi
+}
+
+# Função para atualizar o Python
+update_python() {
+
+  echo "$(date) - Iniciando o processo de atualização do Python." >> $LOG_FILE
+
+  # Determine o gerenciador de pacotes
+  if command -v apt-get > /dev/null 2>&1; then
+    PACKAGE_MANAGER="apt-get"
+    UPDATE_COMMAND="sudo apt-get update && sudo apt-get install python3=$FIXED_VERSION -y"
+  elif command -v yum > /dev/null 2>&1; then
+    PACKAGE_MANAGER="yum"
+    UPDATE_COMMAND="sudo yum update python3 -y"  # Yum não permite especificar a versão diretamente.
+    echo "$(date) - Usando yum para atualizar o Python. A versão exata pode não ser garantida." >> $LOG_FILE
+  elif command -v dnf > /dev/null 2>&1; then
+    PACKAGE_MANAGER="dnf"
+    UPDATE_COMMAND="sudo dnf update python3 -y" # Dnf não permite especificar a versão diretamente.
+    echo "$(date) - Usando dnf para atualizar o Python. A versão exata pode não ser garantida." >> $LOG_FILE
+  else
+    echo "$(date) - Gerenciador de pacotes não suportado. Saindo." >> $LOG_FILE
+    echo "Gerenciador de pacotes não suportado (apt-get, yum, dnf). Por favor, atualize o Python manualmente."
+    exit 1
+  fi
+
+  echo "$(date) - Usando $PACKAGE_MANAGER para atualizar o Python." >> $LOG_FILE
+  echo "$(date) - Executando comando: $UPDATE_COMMAND" >> $LOG_FILE
+
+  # Atualizar o Python
+  if eval $UPDATE_COMMAND; then
+    echo "$(date) - Python atualizado com sucesso para a versão $FIXED_VERSION." >> $LOG_FILE
+    echo "Python atualizado com sucesso para a versão $FIXED_VERSION."
+  else
+    echo "$(date) - Falha ao atualizar o Python." >> $LOG_FILE
+    echo "Falha ao atualizar o Python. Verifique o log em $LOG_FILE para mais detalhes."
+    exit 1
+  fi
+
+  # Verificar a versão após a atualização
+  NEW_PYTHON_VERSION=$(python --version 2>&1 | awk '{print $2}' | cut -d '.' -f 1,2,3)
+    
+  if [[ "$NEW_PYTHON_VERSION" == "$FIXED_VERSION" ]]; then
+    echo "$(date) - Verificação pós-atualização: Python está na versão $FIXED_VERSION" >> $LOG_FILE
+    echo "Verificação pós-atualização: Python está na versão $FIXED_VERSION"
+  else
+    echo "$(date) - Verificação pós-atualização: Python NÃO está na versão $FIXED_VERSION (está na versão $NEW_PYTHON_VERSION)" >> $LOG_FILE
+        echo "Verificação pós-atualização: Python NÃO está na versão $FIXED_VERSION (está na versão $NEW_PYTHON_VERSION).  Verifique manualmente e considere instalar a versão exata."
+  fi
+}
+
+# Execução
+check_python
+check_version
+update_python
+
+echo "$(date) - Script de correção Python concluído." >> $LOG_FILE
+exit 0
+```

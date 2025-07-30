@@ -1,0 +1,47 @@
+#!/bin/bash
+
+# Vulnerabilidade 1: Cleartext Transmission of Sensitive Information via HTTP
+# Forçar HTTPS e redirecionar HTTP para HTTPS
+if ! grep -q "RewriteEngine On" /etc/apache2/sites-available/000-default.conf; then
+    echo "RewriteEngine On" | sudo tee -a /etc/apache2/sites-available/000-default.conf
+    echo "RewriteCond %{HTTPS} off" | sudo tee -a /etc/apache2/sites-available/000-default.conf
+    echo "RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]" | sudo tee -a /etc/apache2/sites-available/000-default.conf
+    sudo systemctl restart apache2
+fi
+
+# Vulnerabilidade 2: DNS Cache Snooping Vulnerability (UDP)
+# Desabilitar recursão no DNS
+if [ -f /etc/bind/named.conf.options ]; then
+    sudo sed -i 's/recursion yes;/recursion no;/' /etc/bind/named.conf.options
+    sudo systemctl restart bind9
+fi
+
+# Vulnerabilidade 3: ICMP Timestamp Reply Information Disclosure
+# Desabilitar resposta a ICMP timestamp
+echo "1" | sudo tee /proc/sys/net/ipv4/icmp_echo_ignore_all
+
+# Vulnerabilidade 4: SSL/TLS: Deprecated TLSv1.0 and TLSv1.1 Protocol Detection
+# Desabilitar TLSv1.0 e TLSv1.1
+if [ -f /etc/apache2/mods-enabled/ssl.conf ]; then
+    sudo sed -i 's/SSLProtocol all -SSLv3/SSLProtocol all -SSLv3 -TLSv1 -TLSv1.1/' /etc/apache2/mods-enabled/ssl.conf
+    sudo systemctl restart apache2
+fi
+
+# Vulnerabilidade 5: SSL/TLS: Renegotiation DoS Vulnerability
+# Desabilitar renegociação SSL/TLS
+if [ -f /etc/apache2/mods-enabled/ssl.conf ]; then
+    sudo sed -i 's/SSLHonorCipherOrder on/SSLHonorCipherOrder on\nSSLInsecureRenegotiation off/' /etc/apache2/mods-enabled/ssl.conf
+    sudo systemctl restart apache2
+fi
+
+# Vulnerabilidade 6: SSL/TLS: Report Weak Cipher Suites
+# Configurar cifras seguras
+if [ -f /etc/apache2/mods-enabled/ssl.conf ]; then
+    sudo sed -i 's/SSLCipherSuite HIGH:!aNULL/SSLCipherSuite ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:DHE-RSA-AES128-GCM-SHA256:DHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:DHE-RSA-CHACHA20-POLY1305/' /etc/apache2/mods-enabled/ssl.conf
+    sudo systemctl restart apache2
+fi
+
+# Vulnerabilidade 7: TCP Timestamps Information Disclosure
+# Desabilitar timestamps TCP
+echo "net.ipv4.tcp_timestamps = 0" | sudo tee -a /etc/sysctl.conf
+sudo sysctl -p

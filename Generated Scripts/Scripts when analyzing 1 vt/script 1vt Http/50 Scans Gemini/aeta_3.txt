@@ -1,0 +1,38 @@
+```bash
+#!/bin/bash
+
+# Script para mitigar a vulnerabilidade de transmissão de informações sensíveis em texto claro via HTTP.
+# Este script configura um redirecionamento automático de HTTP para HTTPS usando Apache.
+
+# 1. Verifica se o Apache está instalado.
+if ! command -v apache2 &> /dev/null
+then
+    echo "Apache não encontrado. Instalando..."
+    apt-get update && apt-get install -y apache2
+fi
+
+# 2. Habilita o módulo rewrite do Apache.
+a2enmod rewrite
+
+# 3. Cria um arquivo de configuração virtual host para redirecionar HTTP para HTTPS.
+cat > /etc/apache2/sites-available/000-default.conf <<EOL
+<VirtualHost *:80>
+    ServerName \${SERVER_NAME}
+
+    Redirect permanent / https://\${SERVER_NAME}\${REQUEST_URI}
+
+    ErrorLog \${APACHE_LOG_DIR}/error.log
+    CustomLog \${APACHE_LOG_DIR}/access.log combined
+</VirtualHost>
+EOL
+
+
+# 4. Reinicia o Apache para aplicar as alterações.
+systemctl restart apache2
+
+# 5. Imprime uma mensagem informativa.
+echo "Redirecionamento HTTP para HTTPS configurado. Certifique-se de configurar o HTTPS corretamente com um certificado SSL/TLS."
+echo "Você pode usar certbot (Let's Encrypt) para obter um certificado gratuito: https://certbot.eff.org/"
+
+exit 0
+```

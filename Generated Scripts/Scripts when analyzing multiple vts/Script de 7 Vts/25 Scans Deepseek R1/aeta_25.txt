@@ -1,0 +1,77 @@
+#!/bin/sh
+
+if [ "$(id -u)" -ne 0 ]; then
+    echo "Este script deve ser executado como root" >&2
+    exit 1
+fi
+
+sysctl_conf="/etc/sysctl.d/99-custom-security.conf"
+if grep -q 'net.ipv4.tcp_timestamps' "$sysctl_conf" 2>/dev/null; then
+    sed -i 's/net.ipv4.tcp_timestamps\s*=.*/net.ipv4.tcp_timestamps = 0/' "$sysctl_conf"
+else
+    echo "net.ipv4.tcp_timestamps = 0" >> "$sysctl_conf"
+fi
+sysctl -p "$sysctl_conf" >/dev/null 2>&1
+
+if command -v iptables >/dev/null 2>&1; then
+    if ! iptables -C INPUT -p icmp --icmp-type timestamp-request -j DROP 2>/dev/null; then
+        iptables -A INPUT -p icmp --icmp-type timestamp-request -j DROP
+    fi
+    if ! iptables -C INPUT -p icmp --icmp-type timestamp-reply -j DROP 2>/dev/null; then
+        iptables -A INPUT -p icmp --icmp-type timestamp-reply -j DROP
+    fi
+    if command -v netfilter-persistent >/dev/null 2>&1; then
+        netfilter-persistent save >/dev/null
+    elif command -v iptables-save >/dev/null 2>&1 && [ -w /etc/iptables/rules.v4 ]; then
+        iptables-save > /etc/iptables/rules.v4
+    fi
+fi
+
+if command -v apache2 >/dev/null 2>&1 || command -v apachectl >/dev/null 2>&1; then
+    a2enmod -q rewrite ssl
+    
+    if [ ! -f /etc/apache2/conf-available/redirect_http.conf ]; then
+        cat > /etc/apache2/conf-available/redirect_http.conf <<'HTTP_REDIR'
+<VirtualHost *:80>
+    <IfModule mod_rewrite.c>
+        RewriteEngine On
+        RewriteCond %{HTTPS} off
+        RewriteRule (.*) https://%{HTTP_HOST}%{REQUEST_URI} [R=301,L]
+    </IfModule>
+</VirtualHost>
+HTTP_REDIR
+        a2enconf -q redirect_http
+    fi
+
+    if [ ! -f /etc/apache2/conf-available/ssl-params.conf ]; then
+        cat > /etc/apache2/conf-available/ssl-params.conf <<'SSL_PARAMS'
+SSLProtocol -all +TLSv1.2 +TLSv1.3
+SSLCipherSuite ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256
+SSLHonorCipherOrder on
+SSLCompression off
+SSLSessionTickets off
+SSLInsecureRenegotiation off
+SSLUseStapling on
+SSLStaplingCache "shmcb:/var/run/ocsp(128000)"
+SSL_PARAMS
+        a2enconf -q ssl-params
+    fi
+
+    if apache2ctl -t >/dev/null 2>&1; then
+        systemctl reload apache2 >/dev/null 2>&1
+    fi
+fi
+
+if command -v named >/dev/null 2>&1 || [ -f /etc/bind/named.conf ]; then
+    bind_conf="/etc/bind/named.conf.options"
+    if [ -f "$bind_conf" ]; then
+        if ! grep -q "recursion no;" "$bind_conf"; then
+            cp "$bind_conf" "${bind_conf}.bak"
+            sed -i '/options {/a \    recursion no;\n    allow-recursion { none; };' "$bind_conf"
+        fi
+        if ! grep -q "dnssec-validation" "$bind_conf"; then
+            [ -z "$(grep "dnssec-validation" "$bind_conf")" ] && sed -i '/options {/a \    dnssec-validation auto;' "$bind_conf"
+        fi
+        systemctl restart bind9 >/dev/null 2>&1
+    fi
+fi

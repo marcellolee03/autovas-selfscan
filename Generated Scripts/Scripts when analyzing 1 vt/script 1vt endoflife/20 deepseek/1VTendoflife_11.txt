@@ -1,0 +1,8 @@
+#!/bin/bash
+OS_VERSION=$(lsb_release -r -s)
+if [ "$OS_VERSION" == "8.04" ]; then
+    sudo sed -i 's/8.04/20.04/g' /etc/apt/sources.list
+    sudo apt-get update
+    sudo apt-get dist-upgrade -y
+    sudo do-release-upgrade -q -f DistUpgradeViewNonInteractive
+fi

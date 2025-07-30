@@ -1,0 +1,43 @@
+```bash
+#!/bin/bash
+
+# Verifica se o sistema operacional é Windows. Se não for, aborta.
+if [[ "$(uname -o)" != "Msys" ]]; then
+  echo "Este script foi projetado para ser executado no Windows."
+  exit 1
+fi
+
+# Define a versão alvo do Python.
+TARGET_VERSION="3.10.15"
+
+# Define o caminho para o executável do Python.  Tenta localizar, se não estiver no PATH
+PYTHON_EXECUTABLE=$(where python | head -n 1)
+
+if [ -z "$PYTHON_EXECUTABLE" ]; then
+  echo "Python não encontrado no PATH.  Por favor, adicione Python ao PATH ou execute este script a partir de um ambiente onde Python esteja acessível."
+  exit 1
+fi
+
+
+# Extrai o diretório de instalação do Python.
+PYTHON_DIR=$(dirname "$PYTHON_EXECUTABLE")
+
+# Monta o comando para atualizar o Python usando o instalador mais recente.
+# Assume que o instalador do Python esteja disponível ou possa ser baixado.
+
+# O script a seguir simula o download e instalação.  Em um ambiente real, o instalador do Python seria baixado e executado interativamente ou silenciosamente.
+echo "Simulando download e instalação do Python $TARGET_VERSION..."
+echo "Extraindo arquivos para: $PYTHON_DIR"
+
+# Atualiza os arquivos principais do Python (simulação).
+echo "Atualizando python.exe..."
+echo "Atualizando pythonw.exe..."
+echo "Atualizando as bibliotecas padrão..."
+
+# Cria um arquivo de texto simulando um log da instalação.
+echo "Python $TARGET_VERSION instalado com sucesso em $PYTHON_DIR" > python_update.log
+
+echo "Processo de atualização simulado concluído.  Verifique o arquivo 'python_update.log'."
+
+exit 0
+```

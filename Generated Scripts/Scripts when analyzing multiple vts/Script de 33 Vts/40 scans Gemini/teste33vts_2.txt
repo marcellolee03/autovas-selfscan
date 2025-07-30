@@ -1,0 +1,104 @@
+```bash
+#!/bin/bash
+
+# Vulnerability 1: Proxmox VE EOL
+# This vulnerability requires a full system upgrade, which is a more complex process.
+# This script will simply output instructions.
+echo "Please upgrade your Proxmox Virtual Environment to a supported version."
+echo "Refer to the Proxmox documentation for instructions: https://www.proxmox.com/en/training/video-tutorials/item/how-to-update-proxmox-ve"
+
+# Vulnerabilities 2-6: jQuery < 1.9.0 XSS
+# Define the target IP and paths
+IP="10.129.4.254"
+JQUERY_PATHS=(
+    "/../js/jquery-1.8.3.min.js"
+    "/opscenter/webcommon/framework/../js/jquery-1.8.3.min.js"
+    "/framesets/../js/jquery-1.8.3.min.js"
+    "/frameset/../js/jquery-1.8.3.min.js"
+    "/console/framework/../js/jquery-1.8.3.min.js"
+)
+
+# Download jQuery 1.9.0
+NEW_JQUERY_URL="https://code.jquery.com/jquery-1.9.0.min.js"
+NEW_JQUERY_FILE="jquery-1.9.0.min.js"
+
+curl -O "$NEW_JQUERY_URL"
+
+# Function to replace jQuery file
+replace_jquery() {
+    local path="$1"
+    local full_path
+    
+    # Construct the full path based on the IP
+    full_path=$(echo "$IP$path" | sed 's/\/\.\.\///g')
+    
+    # Extract the directory from the full path for use in constructing a local path
+    local directory=$(dirname "$path")
+    local local_dir=$(echo "$directory" | sed 's/\/\.\.\///g')
+    
+    #Remove leading '/' so that path is relative
+    local_dir="${local_dir#/}"
+    
+    # Create directory structure if it doesn't exist
+    mkdir -p "$local_dir"
+
+    # Copy new jQuery to the correct location, removing '../'
+    cp "$NEW_JQUERY_FILE" "$local_dir/jquery-1.8.3.min.js"
+
+    echo "Updated jQuery at: $full_path"
+}
+
+# Loop through each path and replace the jQuery file
+for path in "${JQUERY_PATHS[@]}"; do
+    replace_jquery "$path"
+done
+
+# Vulnerabilities 7-9, 13-16, 19, 21, 22: Weak SSH Algorithms
+# Edit sshd_config to disable weak algorithms
+SSH_CONFIG="/etc/ssh/sshd_config"
+
+# Backup the original sshd_config file
+cp "$SSH_CONFIG" "${SSH_CONFIG}.bak"
+
+# Disable weak KEX algorithms
+sed -i 's/^#KexAlgorithms.*/KexAlgorithms curve25519-sha256@libssh.org,ecdh-sha2-nistp256,ecdh-sha2-nistp384,ecdh-sha2-nistp521,diffie-hellman-group-exchange-sha256/g' "$SSH_CONFIG"
+
+# Disable weak MAC algorithms and Ciphers
+sed -i 's/^#Ciphers.*/Ciphers chacha20-poly1305@openssh.com,aes256-gcm@openssh.com,aes128-gcm@openssh.com,aes256-ctr,aes128-ctr/g' "$SSH_CONFIG"
+sed -i 's/^#MACs.*/MACs hmac-sha2-256,hmac-sha2-512/g' "$SSH_CONFIG"
+
+# Disable weak HostKeyAlgorithms
+sed -i 's/^#HostKeyAlgorithms.*/HostKeyAlgorithms ecdsa-sha2-nistp256-cert-v01@openssh.com,ecdsa-sha2-nistp384-cert-v01@openssh.com,ecdsa-sha2-nistp521-cert-v01@openssh.com,ecdsa-sha2-nistp256,ecdsa-sha2-nistp384,ecdsa-sha2-nistp521/g' "$SSH_CONFIG"
+
+#Restart SSH Service
+systemctl restart sshd
+
+echo "SSH configuration updated. Restarted sshd service."
+
+# Vulnerability 10: DCE/RPC and MSRPC Services Enumeration Reporting
+# This vulnerability requires firewall configuration. This script will simply output instructions.
+echo "Please configure your firewall to filter incoming traffic to ports 135 and the listed dynamic RPC ports (e.g., 39710, 49664, etc.)."
+
+# Vulnerability 11: Telnet Unencrypted Cleartext Login
+# Disable Telnet service
+systemctl stop telnet.socket
+systemctl disable telnet.socket
+echo "Telnet service disabled."
+
+# Vulnerability 12: SSL/TLS: Deprecated TLSv1.0 and TLSv1.1 Protocol Detection
+# This vulnerability requires configuration of the specific service using TLS.
+# This script will simply output instructions.
+echo "Please disable TLSv1.0 and TLSv1.1 in your service's configuration (e.g., Apache, Nginx, etc.) and enable TLSv1.2 or higher."
+
+# Vulnerabilities 17, 18, 20, 23-25: TCP Timestamps Information Disclosure
+# Disable TCP timestamps
+echo "net.ipv4.tcp_timestamps = 0" >> /etc/sysctl.conf
+sysctl -p
+echo "TCP timestamps disabled."
+
+# Vulnerabilities 26-32: ICMP Timestamp Reply Information Disclosure
+# Block ICMP timestamp requests using iptables
+iptables -A INPUT -p icmp --icmp-type timestamp-request -j DROP
+iptables -A OUTPUT -p icmp --icmp-type timestamp-reply -j DROP
+echo "ICMP timestamp requests blocked using iptables.  Consider making these rules persistent."
+```

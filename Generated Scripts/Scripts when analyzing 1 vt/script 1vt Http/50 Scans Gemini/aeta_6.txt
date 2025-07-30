@@ -1,0 +1,116 @@
+```bash
+#!/bin/bash
+
+# Script para redirecionar tráfego HTTP para HTTPS e desabilitar HTTP.
+
+# Variáveis
+HTTP_PORT=80
+HTTPS_PORT=443
+WEB_SERVER=$(ps -ef | grep -E 'apache|nginx|httpd' | grep -v grep | awk '{print $8}')
+
+# Função para verificar se um programa está instalado
+command_exists() {
+  command -v "$1" >/dev/null 2>&1
+}
+
+# Detectar o servidor web e executar as ações apropriadas
+if [[ "$WEB_SERVER" == *apache* ]]; then
+  echo "Servidor web Apache detectado."
+
+  # 1. Criar um arquivo .htaccess na raiz do site para redirecionar HTTP para HTTPS.
+  #    Assumindo que o arquivo .htaccess é suportado e AllowOverride All está configurado.
+
+  if command_exists apache2ctl; then
+      VHOST_FILE=$(apache2ctl -S 2>/dev/null | grep "default virtual host" | awk '{print $4}' | sed 's/:80//g')
+  elif command_exists httpd; then
+      VHOST_FILE=$(httpd -V 2>/dev/null | grep "SERVER_CONFIG_FILE" | cut -d\" -f2)
+  else
+      echo "Não foi possível detectar o arquivo de configuração do VirtualHost do Apache. Redirecionamento via .htaccess será tentado."
+      VHOST_FILE=""
+  fi
+
+
+  if [ -n "$VHOST_FILE" ]; then
+    echo "Arquivo VirtualHost detectado: $VHOST_FILE"
+    # Desabilitar o VirtualHost na porta 80
+    if [ -f "$VHOST_FILE" ]; then
+      echo "Comentando as linhas do VirtualHost na porta 80 em $VHOST_FILE"
+      sed -i 's/^<VirtualHost \*:80>/#<VirtualHost *:80>/g' "$VHOST_FILE"
+      sed -i 's/^<\/VirtualHost>/#<\/VirtualHost>/g' "$VHOST_FILE"
+    else
+      echo "Arquivo VirtualHost $VHOST_FILE não encontrado."
+      exit 1
+    fi
+  else
+    echo "Usando .htaccess para redirecionamento."
+    # Tentar criar o arquivo .htaccess se não existir
+    if [ ! -f "/var/www/html/.htaccess" ]; then
+      touch /var/www/html/.htaccess
+      chown www-data:www-data /var/www/html/.htaccess
+      chmod 644 /var/www/html/.htaccess
+    fi
+
+    echo "
+RewriteEngine On
+RewriteCond %{HTTPS} off
+RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+" > /var/www/html/.htaccess
+  fi
+
+  # 2. Reiniciar o Apache para aplicar as mudanças.
+  if command_exists systemctl; then
+      systemctl restart apache2
+  elif command_exists service; then
+      service apache2 restart
+  else
+      echo "Não foi possível reiniciar o Apache. Reinicie manualmente."
+  fi
+
+elif [[ "$WEB_SERVER" == *nginx* ]]; then
+  echo "Servidor web Nginx detectado."
+
+  # 1. Encontrar o arquivo de configuração do Nginx (geralmente em /etc/nginx/sites-available/).
+  #    Este script assume que você tem um arquivo de configuração padrão.
+
+  CONFIG_FILE="/etc/nginx/sites-available/default"
+
+  # 2. Adicionar um bloco de redirecionamento para o arquivo de configuração.
+  if [ -f "$CONFIG_FILE" ]; then
+    echo "Adicionando redirecionamento HTTP para HTTPS em $CONFIG_FILE"
+
+    # Cria um backup do arquivo de configuração
+    cp "$CONFIG_FILE" "$CONFIG_FILE.bak"
+
+    # Adiciona o bloco de redirecionamento ao arquivo de configuração.
+    # Remove o bloco server que escuta na porta 80
+    sed -i '/server {/,/}/d' "$CONFIG_FILE"
+
+    echo "
+server {
+    listen 80;
+    server_name  _; # substitua pelo nome do seu domínio
+    return 301 https://\$host\$request_uri;
+}
+" >> "$CONFIG_FILE"
+  else
+    echo "Arquivo de configuração $CONFIG_FILE não encontrado."
+    exit 1
+  fi
+
+  # 3. Reiniciar o Nginx para aplicar as mudanças.
+  if command_exists systemctl; then
+      systemctl restart nginx
+  elif command_exists service; then
+      service nginx restart
+  else
+      echo "Não foi possível reiniciar o Nginx. Reinicie manualmente."
+  fi
+
+else
+  echo "Servidor web não detectado (Apache ou Nginx).  Redirecionamento manual necessário."
+  exit 1
+fi
+
+echo "Redirecionamento HTTP para HTTPS configurado. Por favor, verifique se o HTTPS está configurado corretamente."
+exit 0
+```

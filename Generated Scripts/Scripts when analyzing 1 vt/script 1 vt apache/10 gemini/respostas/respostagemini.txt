@@ -1,0 +1,41 @@
+Com base na análise da vulnerabilidade e dos scripts de correção fornecidos, aqui está a avaliação de cada script e a média geral de sucesso.
+
+A vulnerabilidade (CVE-2012-0053) afeta as versões 2.2.0 a 2.2.21 do Apache HTTP Server. A solução consiste em atualizar o servidor para a versão 2.2.22 ou posterior. Um script é considerado bem-sucedido se for capaz de executar essa atualização em um sistema compatível.
+
+Análise Individual dos Scripts
+
+    1vtapache_1.txt: Sim
+    O script verifica a versão do Apache e, se for vulnerável, executa os comandos apt-get update e apt-get install --only-upgrade apache2 -y, que atualizam o pacote para a versão mais recente disponível no repositório. Ele também verifica a nova versão para confirmar o sucesso da atualização.
+
+1vtapache_2.txt: Sim
+Este script detecta o sistema operacional (baseado em Debian ou Red Hat) e executa o comando de atualização apropriado (apt-get -y upgrade apache2 ou yum update -y httpd). A abordagem de atualizar o pacote diretamente resolve a vulnerabilidade.
+
+1vtapache_3.txt: Sim
+O script identifica o gerenciador de pacotes (apt-get ou yum) e executa o comando de atualização correspondente para o Apache. A verificação de versão pós-atualização e o reinício do serviço são adequados.
+
+1vtapache_4.txt: Sim
+Apesar da lógica de verificação de versão ser um pouco imprecisa ao truncar a versão, o comando principal de correção, apt-get upgrade -y apache2, é eficaz e atualizará o Apache, resolvendo a vulnerabilidade na prática.
+
+1vtapache_5.txt: Não
+O script possui um erro de sintaxe na linha apache_version=$ (apache2 -v ...). O espaço entre o = e o ( impede a atribuição da variável, o que fará com que o script falhe e não execute a correção.
+
+1vtapache_6.txt: Sim
+Este script identifica corretamente o gerenciador de pacotes do sistema (apt, yum, zypper) e executa o comando de atualização específico para o Apache (--only-upgrade para apt, update para yum e zypper), o que é uma abordagem eficaz para corrigir a vulnerabilidade.
+
+1vtapache_7.txt: Sim
+Embora a verificação inicial para versões mais antigas que a faixa vulnerável seja falha , o script prossegue para a atualização em sistemas vulneráveis e, crucialmente, verifica se a versão pós-atualização é igual ou superior à 2.2.22. A ação corretiva e a verificação final são eficazes.
+
+1vtapache_8.txt: Sim
+O script realiza a detecção de múltiplos sistemas operacionais (Debian/Ubuntu, CentOS/RHEL/Fedora, Arch Linux) e executa os comandos de atualização nativos e corretos para cada um, garantindo uma ampla compatibilidade e a correção da vulnerabilidade.
+
+1vtapache_9.txt: Sim
+A lógica de verificação de versão, que usa sort -V para determinar se a versão está na faixa vulnerável, é robusta. Os comandos de atualização (apt-get install apache2 -y) e a verificação da nova versão contra 2.2.22  são eficazes para resolver o problema.
+
+1vtapache_10.txt: Sim
+Este script detecta o sistema operacional e executa o comando de atualização padrão para o Apache (upgrade para apt, update para yum e zypper), que é uma maneira direta e funcional de aplicar o patch de segurança.
+
+Média de Porcentagem Geral
+
+Dos 10 scripts analisados, 9 são capazes de resolver a vulnerabilidade com sucesso, enquanto 1 falha devido a um erro de sintaxe.
+
+Média de porcentagem geral de correção: 90%

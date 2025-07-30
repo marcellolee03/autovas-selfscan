@@ -1,0 +1,42 @@
+#!/bin/bash
+# Correção para Vulnerabilidade 1: Enforce HTTPS
+if [ -f /etc/apache2/sites-available/default ]; then
+    sed -i 's/^.*<VirtualHost \*:80>.*$/<VirtualHost *:80>\n    RewriteEngine On\n    RewriteCond %{HTTPS} off\n    RewriteRule ^ https:\/\/%{HTTP_HOST}%{REQUEST_URI} [L,R=301]/' /etc/apache2/sites-available/default
+    a2enmod ssl rewrite
+    service apache2 restart
+fi  
+
+# Correção para Vulnerabilidade 2: Disable DNS Recursion
+if [ -f /etc/bind/named.conf.options ]; then
+    sed -i 's/recursion yes;/recursion no;/' /etc/bind/named.conf.options
+    service bind9 restart
+fi
+
+# Correção para Vulnerabilidade 3: Block ICMP Timestamp
+iptables -A INPUT -p icmp --icmp-type timestamp-request -j DROP
+iptables -A OUTPUT -p icmp --icmp-type timestamp-reply -j DROP
+sysctl -w net.ipv4.icmp_echo_ignore_all=1
+
+# Correção para Vulnerabilidade 4: Disable TLSv1.0 and TLSv1.1
+if [ -f /etc/ssl/openssl.cnf ]; then
+    sed -i 's/^MinProtocol = TLSv1.0/MinProtocol = TLSv1.2/' /etc/ssl/openssl.cnf
+    sed -i 's/^CipherString = DEFAULT@SECLEVEL=1/CipherString = DEFAULT@SECLEVEL=2/' /etc/ssl/openssl.cnf
+    update-ca-certificates
+fi
+
+# Correção para Vulnerabilidade 5: Disable SSL/TLS Renegotiation
+if [ -f /etc/apache2/mods-available/ssl.conf ]; then
+    sed -i 's/SSLInsecureRenegotiation on/SSLInsecureRenegotiation off/' /etc/apache2/mods-available/ssl.conf
+    service apache2 restart
+fi
+
+# Correção para Vulnerabilidade 6: Remove Weak Cipher Suites
+if [ -f /etc/ssl/openssl.cnf ]; then
+    sed -i 's/^CipherString = DEFAULT@SECLEVEL=1/CipherString = HIGH:!aNULL:!MD5:!3DES:!DES:!RC4:!SHA1/' /etc/ssl/openssl.cnf
+    update-ca-certificates
+fi
+
+# Correção para Vulnerabilidade 7: Disable TCP Timestamps
+sysctl -w net.ipv4.tcp_timestamps=0
+echo "net.ipv4.tcp_timestamps=0" >> /etc/sysctl.conf
+sysctl -p

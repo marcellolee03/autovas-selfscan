@@ -1,0 +1,70 @@
+```bash
+#!/bin/bash
+
+# Identifica o sistema operacional (assumindo Linux/Debian-based)
+OS=$(uname -s)
+
+# Função para desabilitar TLSv1.0 e TLSv1.1 no PostgreSQL (porta 5432)
+disable_tls_postgres() {
+  # Localiza o arquivo postgresql.conf
+  POSTGRES_CONF=$(find /etc/postgresql/ -name postgresql.conf | head -n 1)
+
+  if [ -z "$POSTGRES_CONF" ]; then
+    echo "Arquivo postgresql.conf não encontrado.  Verifique a instalação do PostgreSQL."
+    exit 1
+  fi
+
+  # Cria um backup do arquivo de configuração
+  cp "$POSTGRES_CONF" "${POSTGRES_CONF}.bak.$(date +%Y%m%d%H%M%S)"
+
+  # Adiciona ou modifica a configuração ssl_min_protocol para 'TLSv1.2'
+  if grep -q "^ssl_min_protocol" "$POSTGRES_CONF"; then
+    sed -i "s/^ssl_min_protocol.*/ssl_min_protocol = 'TLSv1.2'/g" "$POSTGRES_CONF"
+  else
+    echo "ssl_min_protocol = 'TLSv1.2'" >> "$POSTGRES_CONF"
+  fi
+
+  # Reinicia o serviço PostgreSQL
+  systemctl restart postgresql
+
+  echo "TLSv1.0 e TLSv1.1 desabilitados no PostgreSQL (porta 5432).  Serviço reiniciado."
+}
+
+# Função genérica para desabilitar TLS 1.0/1.1 em outros serviços (requer adaptação)
+disable_tls_generic() {
+  echo "Função genérica para desabilitar TLS 1.0/1.1. Requer adaptação para o serviço específico."
+  echo "Verifique a documentação do serviço afetado para desabilitar TLSv1.0 e TLSv1.1 e habilitar TLSv1.2+."
+  echo "Esta função não modifica nenhum arquivo por padrão."
+  # Exemplo (requer adaptação):
+  # SED_COMMAND="s/TLSv1.0/!TLSv1.0/g; s/TLSv1.1/!TLSv1.1/g"
+  # find /etc -name "<nome_do_arquivo_de_configuração>" -exec sed -i "$SED_COMMAND" {} \;
+  # systemctl restart <nome_do_serviço>
+}
+
+# Correções específicas para CVEs (se aplicável e se informações suficientes forem fornecidas)
+fix_cve_2023_41928() {
+  echo "Atenção: A correção para CVE-2023-41928 (Kiloview P1/P2) requer instruções específicas do fabricante."
+  echo "Verifique a documentação da Kiloview para obter as últimas atualizações de firmware e instruções de segurança."
+}
+
+fix_cve_2024_41270() {
+  echo "Atenção: A correção para CVE-2024-41270 (Gorush v1.18.4) pode exigir uma atualização para uma versão mais recente ou configuração específica."
+  echo "Verifique a documentação do Gorush para obter as instruções de segurança mais recentes."
+}
+
+fix_cve_2025_3200() {
+  echo "Atenção: A correção para CVE-2025-3200 (Wiesemann & Theis) requer instruções específicas do produto."
+  echo "Verifique a documentação da Wiesemann & Theis para obter as últimas atualizações de firmware e instruções de segurança."
+}
+
+
+# Executa as funções de correção
+disable_tls_postgres
+
+# Chama as funções de correção específicas para os CVEs (se aplicável).
+fix_cve_2023_41928
+fix_cve_2024_41270
+fix_cve_2025_3200
+
+echo "Script finalizado. Verifique manualmente a configuração dos serviços afetados."
+```

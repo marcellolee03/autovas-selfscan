@@ -1,0 +1,25 @@
+```powershell
+#Requires -RunAsAdministrator
+$ErrorActionPreference = 'Stop'
+$progressPreference = 'silentlyContinue'
+$version = $null
+if (Get-Command python -ErrorAction SilentlyContinue) {
+    $version = (python --version 2>&1) | ForEach-Object { if ($_ -match "Python (\d+\.\d+\.\d+)") { $matches[1] } }
+}
+if (-not $version) {
+    $pyPath = gi 'C:\Windows\py.exe' -ErrorAction SilentlyContinue
+    if ($pyPath) { $version = ((py -3.10 --version 2>&1 | Out-String) | Select-String "\d+\.\d+\.\d+") -replace '\D' }
+}
+if ($version) {
+    if (($version -ge '3.10.0' -and $version -lt '3.10.15') -or ($version -eq '3.10.12')) {
+        $regKey = Get-ItemProperty 'HKLM:\SOFTWARE\Python\PythonCore\3.10\InstallPath' -Name '(Default)' -ErrorAction SilentlyContinue
+        $exeBitness = if ($regKey.'(Default)') { $impl = (Get-Item -Path "$($regKey.'(Default)')\python.exe").VersionInfo.FileVersion; if ($impl -match '64') { 64 } else { 32 } } 
+        $sysBitness = if ([Environment]::Is64BitOperatingSystem) { 64 } else { 32 }
+        $bitness = if ($exeBitness) { $exeBitness } else { $sysBitness }
+        $url = if ($bitness -eq 64) { "https://www.python.org/ftp/python/3.10.15/python-3.10.15-amd64.exe" } else { "https://www.python.org/ftp/python/3.10.15/python-3.10.15.exe" }
+        $installer = Join-Path $env:TEMP "python-upgrade.exe"
+        Invoke-WebRequest -Uri $url -OutFile $installer -UseBasicParsing
+        Start-Process -Wait -FilePath $installer -ArgumentList '/quiet'
+    }
+}
+```

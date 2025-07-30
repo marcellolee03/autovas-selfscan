@@ -1,0 +1,90 @@
+```bash
+#!/bin/bash
+
+# Script para redirecionar HTTP para HTTPS e desabilitar HTTP em servidores Apache ou Nginx.
+# Suporta Ubuntu/Debian (Apache e Nginx) e CentOS/RHEL (Apache e Nginx).
+
+# Detecta o sistema operacional
+if command -v apt-get &> /dev/null; then
+  OS="debian"
+elif command -v yum &> /dev/null; then
+  OS="centos"
+else
+  echo "Sistema operacional não suportado."
+  exit 1
+fi
+
+# Detecta o servidor web
+if command -v apache2 &> /dev/null; then
+  WEB_SERVER="apache"
+elif command -v nginx &> /dev/null; then
+  WEB_SERVER="nginx"
+else
+  echo "Servidor web não detectado (Apache ou Nginx são suportados)."
+  exit 1
+fi
+
+# Configuração para Apache
+if [ "$WEB_SERVER" = "apache" ]; then
+
+  # Habilita o módulo rewrite do Apache
+  if [ "$OS" = "debian" ]; then
+    a2enmod rewrite
+  elif [ "$OS" = "centos" ]; then
+    # No CentOS/RHEL, o mod_rewrite geralmente já está habilitado.
+    :
+  fi
+
+  # Determina o diretório de configuração do Apache
+  if [ "$OS" = "debian" ]; then
+    SITES_AVAILABLE="/etc/apache2/sites-available"
+  elif [ "$OS" = "centos" ]; then
+    SITES_AVAILABLE="/etc/httpd/conf.d"
+  fi
+
+  # Itera sobre os arquivos de configuração do Apache e adiciona o redirecionamento HTTP para HTTPS
+  for SITE_CONFIG in "$SITES_AVAILABLE"/*; do
+    if [ -f "$SITE_CONFIG" ]; then
+      # Adiciona o redirecionamento no início do VirtualHost padrão (porta 80)
+      if grep -q "<VirtualHost *:80>" "$SITE_CONFIG"; then
+        sed -i 's/<VirtualHost \*:80>/<VirtualHost *:80>\n\tRewriteEngine On\n\tRewriteCond %{HTTPS} off\n\tRewriteRule ^(.*)$ https:\/\/%{HTTP_HOST}%{REQUEST_URI} [R=301,L]/g' "$SITE_CONFIG"
+        echo "Redirecionamento HTTP para HTTPS adicionado em $SITE_CONFIG"
+      fi
+    fi
+  done
+
+  # Reinicia o Apache para aplicar as mudanças
+  systemctl restart apache2 || systemctl restart httpd
+
+  echo "Apache reiniciado para aplicar as mudanças."
+fi
+
+# Configuração para Nginx
+if [ "$WEB_SERVER" = "nginx" ]; then
+
+  # Determina o diretório de configuração do Nginx
+  if [ "$OS" = "debian" ]; then
+    SITES_AVAILABLE="/etc/nginx/sites-available"
+  elif [ "$OS" = "centos" ]; then
+    SITES_AVAILABLE="/etc/nginx/conf.d"
+  fi
+
+  # Itera sobre os arquivos de configuração do Nginx e adiciona o redirecionamento HTTP para HTTPS
+  for SITE_CONFIG in "$SITES_AVAILABLE"/*; do
+    if [ -f "$SITE_CONFIG" ]; then
+      # Adiciona o redirecionamento no bloco server que escuta na porta 80
+      if grep -q "listen 80;" "$SITE_CONFIG"; then
+        sed -i 's/listen 80;/listen 80;\n\t\treturn 301 https:\/\/$\host$\request_uri;/g' "$SITE_CONFIG"
+        echo "Redirecionamento HTTP para HTTPS adicionado em $SITE_CONFIG"
+      fi
+    fi
+  done
+
+  # Reinicia o Nginx para aplicar as mudanças
+  systemctl restart nginx
+
+  echo "Nginx reiniciado para aplicar as mudanças."
+fi
+
+echo "Script finalizado."
+```

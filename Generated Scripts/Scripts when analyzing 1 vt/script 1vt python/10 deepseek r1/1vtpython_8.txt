@@ -1,0 +1,12 @@
+```powershell
+$arch = if ([System.Environment]::Is64BitOperatingSystem) { "amd64" } else { "win32" }
+$url = "https://www.python.org/ftp/python/3.10.15/python-3.10.15-$arch.exe"
+$installerPath = Join-Path $env:TEMP "python-3.10.15-$arch.exe"
+Invoke-WebRequest -Uri $url -OutFile $installerPath
+Get-NetTCPConnection -LocalPort 5000 -State Listen | ForEach-Object {
+    Stop-Process -Id $_.OwningProcess -Force
+}
+$installArgs = @("/quiet", "InstallAllUsers=1", "PrependPath=1", "Include_test=0", "Include_doc=0", "Include_pip=1", "Include_launcher=1", "Shortcuts=1")
+Start-Process -FilePath $installerPath -ArgumentList $installArgs -Wait
+Remove-Item $installerPath
+```

@@ -1,0 +1,42 @@
+#!/bin/bash
+
+# Configurar TLS no Apache
+if [ -f /etc/apache2/apache2.conf ]; then
+    sed -i 's/^SSLEngine on$/SSLEngine on/' /etc/apache2/apache2.conf
+    sed -i 's/^SSLProtocol all -SSLv3$/SSLProtocol all -SSLv3 -TLSv1 -TLSv1.1/' /etc/apache2/apache2.conf
+    sed -i 's/^SSLCipherSuite HIGH:!aNULL:!MD5$/SSLCipherSuite HIGH:!aNULL:!MD5:!kRSA:!PSK:!SRP:!3DES:!eNULL:!EXP:!RC4/' /etc/apache2/apache2.conf
+    systemctl restart apache2
+fi
+
+# Configurar TLS no Nginx
+if [ -f /etc/nginx/nginx.conf ]; then
+    sed -i 's/^ssl_protocols TLSv1 TLSv1.1 TLSv1.2;$/ssl_protocols TLSv1.2 TLSv1.3;/' /etc/nginx/nginx.conf
+    sed -i 's/^ssl_ciphers HIGH:!aNULL:!MD5;$/ssl_ciphers HIGH:!aNULL:!MD5:!kRSA:!PSK:!SRP:!3DES:!eNULL:!EXP:!RC4;/' /etc/nginx/nginx.conf
+    systemctl restart nginx
+fi
+
+# Desabilitar ICMP timestamp
+echo "net.ipv4.icmp_echo_ignore_all = 1" >> /etc/sysctl.conf
+sysctl -p
+
+# Desabilitar TCP timestamps
+echo "net.ipv4.tcp_timestamps = 0" >> /etc/sysctl.conf
+sysctl -p
+
+# Configurar DNS para desabilitar recursão
+if [ -f /etc/bind/named.conf.options ]; then
+    sed -i 's/^recursion yes;$/recursion no;/' /etc/bind/named.conf.options
+    systemctl restart bind9
+fi
+
+# Configurar renegociação SSL/TLS
+if [ -f /etc/apache2/apache2.conf ]; then
+    sed -i 's/^SSLHonorCipherOrder on$/SSLHonorCipherOrder on/' /etc/apache2/apache2.conf
+    sed -i 's/^SSLProtocol all -SSLv3$/SSLProtocol all -SSLv3 -TLSv1 -TLSv1.1/' /etc/apache2/apache2.conf
+    systemctl restart apache2
+fi
+
+if [ -f /etc/nginx/nginx.conf ]; then
+    sed -i 's/^ssl_protocols TLSv1 TLSv1.1 TLSv1.2;$/ssl_protocols TLSv1.2 TLSv1.3;/' /etc/nginx/nginx.conf
+    systemctl restart nginx
+fi

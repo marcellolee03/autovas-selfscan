@@ -1,0 +1,427 @@
+>analise esse prompt contendo as vulnerabilidades encontradas em um csv do openvas e analise se os scripts que irei enviar em seguida sao capazes de corrigir esses problemas ou nao, me informando uma porcentagem de correcao das vulnerabilidades
+>Vulnerabilidades:
+    # INSTRUÇÕES PARA O MODELO DE IA
+
+    ## PERSONA
+    Você é um especialista em cibersegurança e automação de sistemas, focado em criar scripts de correção (patching). Sua única função é gerar um script que resolva a vulnerabilidade descrita abaixo.
+
+    ## TAREFA
+    Analise o contexto da vulnerabilidade a seguir e gere um script de shell (compatível com o sistema operacional do localhost) que, ao ser executado, corrija permanentemente a vulnerabilidade descrita.
+
+    ## CONTEXTO DA VULNERABILIDADE
+
+# Vulnerabilidade 1
+CVEs: CVE-1999-0618
+NVT Name: The rexec service is running
+Port: 512
+Port Protocol: tcp
+Summary: This remote host is running a rexec service.
+Specific Result: The rexec service was detected on the target system.
+
+Vulnerability Detection Method: Checks whether an rexec service is exposed on the target
+  host.
+Details:
+The rexec service is running
+(OID: 1.3.6.1.4.1.25623.1.0.100111)
+Version used: 2023-09-12T05:05:19Z
+
+Affected Software/OS: nan
+Product Detection Result: nan
+Solution: Disable the rexec service and use alternatives like SSH
+  instead.
+
+    ## REGRAS E RESTRIÇÕES DE SAÍDA
+    1.  **APENAS SCRIPT:** A sua resposta deve conter ÚNICA E EXCLUSIVAMENTE o código do script.
+    2.  **SEM EXPLICAÇÕES:** Não adicione nenhum comentário, explicação, introdução, ou despedida.
+    3.  **SEM BLOCOS DE CÓDIGO MARKDOWN:** Não envolva o script em blocos de código como ` ```bash ` ou ` ```sh `. A resposta deve ser o texto puro do script.
+    4.  **AUTOSSUFICIENTE:** O script deve ser completo, autônomo e não deve exigir interação do usuário para ser executado.
+    5.  **COMPATIBILIDADE:** O script deve ser compatível com o sistema operacional especificado em 'localhost OS'. Se o sistema operacional não for especificado, assuma um sistema baseado em Linux (como Ubuntu/Debian).
+
+    # INÍCIO DO SCRIPT DE CORREÇÃO
+
+>Scripts de correção:
+{type: uploaded file
+fileName: 1vtrexec_1.txt
+fullContent:
+```bash
+#!/bin/bash
+
+# Desabilita o serviço rexec
+if systemctl is-active rexec.socket > /dev/null 2>&1; then
+  systemctl stop rexec.socket
+  systemctl disable rexec.socket
+  echo "Serviço rexec desabilitado e removido da inicialização."
+else
+  echo "Serviço rexec não está ativo."
+fi
+
+# Remove o pacote rexec (se instalado)
+if dpkg -s rexec &> /dev/null; then
+  apt-get remove --purge -y rexec
+  apt-get autoremove -y
+  echo "Pacote rexec removido."
+elif rpm -q rexec &> /dev/null; then
+  yum remove rexec -y
+  echo "Pacote rexec removido."
+else
+  echo "Pacote rexec não encontrado."
+fi
+
+# Garante que o serviço não está listado no inetd.conf ou xinetd.d/rexec
+if [ -f /etc/inetd.conf ]; then
+  sed -i '/^rexec/d' /etc/inetd.conf
+  echo "Removido rexec de /etc/inetd.conf"
+  systemctl reload inetd
+fi
+
+if [ -d /etc/xinetd.d ]; then
+  if [ -f /etc/xinetd.d/rexec ]; then
+    rm -f /etc/xinetd.d/rexec
+    echo "Removido configuração do xinetd para rexec."
+    systemctl restart xinetd
+  fi
+fi
+
+echo "Verificações e ações completadas para remover/desabilitar o rexec."
+```}
+{type: uploaded file
+fileName: 1vtrexec_2.txt
+fullContent:
+#!/bin/bash
+
+# Desabilita o serviço rexec
+systemctl stop rexec.socket
+systemctl disable rexec.socket
+
+# Remove o pacote rexec (se instalado)
+apt-get remove --purge -y rsh-server rsh-client rexecd
+yum remove -y rsh rsh-server
+
+# Garante que as alterações tenham efeito imediato
+systemctl daemon-reload
+
+# Remove entradas do xinetd (se aplicável)
+if [ -f /etc/xinetd.d/rexec ]; then
+  rm -f /etc/xinetd.d/rexec
+  systemctl restart xinetd
+fi
+
+echo "Serviço rexec desabilitado e removido (se instalado). Utilize SSH para acesso remoto seguro."
+}
+{type: uploaded file
+fileName: 1vtrexec_3.txt
+fullContent:
+```bash
+#!/bin/bash
+
+# Script para desabilitar o serviço rexec (CVE-1999-0618) em sistemas Linux.
+
+# Verifica se o serviço rexec está instalado e habilitado via systemd.
+if systemctl is-active rexec.socket 2>/dev/null; then
+  # Desabilita o serviço rexec.socket para prevenir que inicie no boot.
+  systemctl disable rexec.socket >/dev/null 2>&1
+
+  # Para o serviço rexec.socket imediatamente.
+  systemctl stop rexec.socket >/dev/null 2>&1
+
+  echo "Serviço rexec desabilitado e parado (via systemd)."
+fi
+
+# Verifica se o serviço rexec está instalado e habilitado via xinetd.
+if [[ -f /etc/xinetd.d/rexec ]]; then
+  # Desabilita o serviço rexec no arquivo de configuração do xinetd.
+  sed -i 's/^\s*disable\s*=\s*no/disable = yes/' /etc/xinetd.d/rexec
+
+  # Reinicia o serviço xinetd para aplicar as mudanças.
+  if systemctl is-active xinetd 2>/dev/null; then
+    systemctl restart xinetd >/dev/null 2>&1
+    echo "Serviço rexec desabilitado (via xinetd) e xinetd reiniciado."
+  else
+    service xinetd restart >/dev/null 2>&1
+    echo "Serviço rexec desabilitado (via xinetd) e xinetd reiniciado (via service)."
+  fi
+fi
+
+# Remove o pacote rexec, se existir
+dpkg -s rexec 2>/dev/null >/dev/null && apt-get remove --purge -y rexec >/dev/null 2>&1
+
+# Remove o pacote rsh-server, se existir
+dpkg -s rsh-server 2>/dev/null >/dev/null && apt-get remove --purge -y rsh-server >/dev/null 2>&1
+
+# Garante que o pacote netkit-inetd também seja removido.
+dpkg -s netkit-inetd 2>/dev/null >/dev/null && apt-get remove --purge -y netkit-inetd >/dev/null 2>&1
+
+# Remove o arquivo de configuração /etc/inetd.conf
+if [ -f /etc/inetd.conf ]; then
+  rm -f /etc/inetd.conf
+  echo "Arquivo /etc/inetd.conf removido."
+fi
+
+# Medidas adicionais para garantir a remoção completa (Debian/Ubuntu).
+apt-get autoremove -y >/dev/null 2>&1
+apt-get clean >/dev/null 2>&1
+
+echo "Script concluído.  O serviço rexec (e serviços relacionados) foi desabilitado ou removido."
+exit 0
+```}
+{type: uploaded file
+fileName: 1vtrexec_4.txt
+fullContent:
+```bash
+#!/bin/bash
+
+# Desabilita o serviço rexec
+systemctl stop rexec.socket 2>/dev/null
+systemctl disable rexec.socket 2>/dev/null
+systemctl stop rexecd.service 2>/dev/null
+systemctl disable rexecd.service 2>/dev/null
+
+# Remove o pacote rexec (se instalado)
+apt-get remove --purge -y rexec rsh-server 2>/dev/null
+yum remove -y rexec rsh-server 2>/dev/null
+zypper remove -y rexec rsh-server 2>/dev/null
+pacman -Rns rexec rsh 2>/dev/null
+emerge --unmerge rexec rsh 2>/dev/null
+
+# Garante que não está listado em /etc/inetd.conf ou /etc/xinetd.d/*
+sed -i '/^rexec/d' /etc/inetd.conf 2>/dev/null
+rm -f /etc/xinetd.d/rexec 2>/dev/null
+
+# Reforce o firewall (exemplo com UFW, caso esteja ativo)
+ufw delete allow 512/tcp 2>/dev/null
+ufw deny 512/tcp 2>/dev/null
+ufw reload 2>/dev/null
+
+# Reinicia inetd/xinetd para garantir que as mudanças tenham efeito
+systemctl restart inetd 2>/dev/null
+systemctl restart xinetd 2>/dev/null
+
+echo "Serviço rexec desabilitado e removido. Considere usar SSH em vez de rexec."
+```}
+{type: uploaded file
+fileName: 1vtrexec_5.txt
+fullContent:
+```bash
+#!/bin/bash
+
+# Desabilita o serviço rexec
+systemctl stop rexec.socket 2>/dev/null
+systemctl disable rexec.socket 2>/dev/null
+systemctl stop rexecd 2>/dev/null
+systemctl disable rexecd 2>/dev/null
+
+# Remove o pacote rexec, se instalado (Debian/Ubuntu)
+apt-get remove --purge -y rexec rsh-server rsh-client 2>/dev/null
+
+# Remove o pacote rexec, se instalado (CentOS/RedHat)
+yum remove -y rexec rsh 2>/dev/null
+
+# Garante que o serviço não está listado no inetd.conf (se aplicável)
+if [ -f /etc/inetd.conf ]; then
+  sed -i '/^rexec/d' /etc/inetd.conf
+fi
+
+# Garante que o serviço não está listado no xinetd.d (se aplicável)
+if [ -d /etc/xinetd.d ]; then
+  find /etc/xinetd.d/ -name "*rexec*" -print0 | while IFS= read -r -d $'\0' file; do
+    rm -f "$file"
+  done
+fi
+
+# Reinicia inetd ou xinetd para aplicar as mudanças (se aplicável)
+if pgrep -x inetd > /dev/null; then
+  systemctl restart inetd 2>/dev/null
+elif pgrep -x xinetd > /dev/null; then
+  systemctl restart xinetd 2>/dev/null
+fi
+
+echo "Serviço rexec desabilitado e removido (se instalado)."
+```}
+{type: uploaded file
+fileName: 1vtrexec_6.txt
+fullContent:
+#!/bin/bash
+
+# Script para desabilitar o serviço rexec e removê-lo da inicialização do sistema.
+
+# 1. Parar o serviço rexec (se estiver em execução).
+systemctl stop rexec.socket 2>/dev/null
+systemctl stop rexecd 2>/dev/null
+
+# 2. Desabilitar o serviço rexec para que não inicie na inicialização.
+systemctl disable rexec.socket 2>/dev/null
+systemctl disable rexecd 2>/dev/null
+
+# 3. Remover o pacote rexec (se estiver instalado)
+apt-get remove --purge --auto-remove inetd rexec rsh-server rsh-client 2>/dev/null
+yum remove inetd rexec rsh-server rsh-client 2>/dev/null
+zypper remove inetd rexec rsh-server rsh-client 2>/dev/null
+pacman -Rcs inetd rexec rsh-server rsh-client 2>/dev/null
+
+# 4. Remover entradas rexec do arquivo /etc/inetd.conf (se existir)
+sed -i '/^rexec/d' /etc/inetd.conf 2>/dev/null
+
+# 5. Comentar ou remover linha do rexec em /etc/services (se existir)
+sed -i 's/^rexec/#rexec/g' /etc/services 2>/dev/null
+
+# 6. Garantir que o inetd ou xinetd (super servidores) sejam reiniciados (se aplicável).
+if command -v systemctl &> /dev/null; then
+  systemctl restart inetd 2>/dev/null
+  systemctl restart xinetd 2>/dev/null
+elif [ -f /etc/init.d/inetd ]; then
+  /etc/init.d/inetd restart 2>/dev/null
+elif [ -f /etc/init.d/xinetd ]; then
+  /etc/init.d/xinetd restart 2>/dev/null
+fi
+
+# 7. Remover o serviço rexec dos runlevels (usando update-rc.d se disponível)
+if command -v update-rc.d &> /dev/null; then
+  update-rc.d -f rexec remove 2>/dev/null
+fi
+
+echo "Serviço rexec desabilitado e removido (se instalado)."
+exit 0
+}
+{type: uploaded file
+fileName: 1vtrexec_7.txt
+fullContent:
+#!/bin/bash
+
+# Desabilita o serviço rexecd
+systemctl stop rexecd.socket
+systemctl disable rexecd.socket
+
+# Remove o pacote rexec (opcional, dependendo da distribuição e necessidade)
+apt-get remove --purge -y rexec atd 2>/dev/null || true
+yum remove -y rexec atd 2>/dev/null || true
+dnf remove -y rexec atd 2>/dev/null || true
+zypper remove -y rexec atd 2>/dev/null || true
+
+# Garante que o serviço não será iniciado manualmente
+echo "exit 0" > /etc/init.d/rexec
+
+# Remove entradas desnecessárias
+rm -f /etc/xinetd.d/rexec 2>/dev/null || true
+
+# Reforça a configuração (caso utilize xinetd)
+if command -v xinetd >/dev/null 2>&1; then
+  systemctl restart xinetd
+fi
+
+echo "Serviço rexec desabilitado e removido."
+}
+{type: uploaded file
+fileName: 1vtrexec_8.txt
+fullContent:
+```bash
+#!/bin/bash
+
+# Desabilita o serviço rexec (se estiver rodando via xinetd)
+if systemctl is-active rexec.socket 2>/dev/null; then
+  systemctl stop rexec.socket
+  systemctl disable rexec.socket
+  echo "Serviço rexec (via xinetd) desabilitado."
+fi
+
+# Desabilita o serviço rexecd (se estiver rodando como serviço separado)
+if systemctl is-active rexecd 2>/dev/null; then
+  systemctl stop rexecd
+  systemctl disable rexecd
+  echo "Serviço rexecd desabilitado."
+fi
+
+# Remove o pacote rexec (se estiver instalado)
+if dpkg -s rsh-server 2>/dev/null | grep -q "install ok installed"; then
+  apt-get -y remove rsh-server
+  apt-get -y autoremove
+  echo "Pacote rsh-server removido."
+elif rpm -q rsh-server 2>/dev/null; then
+  yum -y remove rsh-server
+  echo "Pacote rsh-server removido."
+fi
+
+# Garante que o serviço não será iniciado manualmente
+if grep -q "^rexec" /etc/inetd.conf; then
+  sed -i '/^rexec/s/^/#/' /etc/inetd.conf
+  echo "Serviço rexec comentado em /etc/inetd.conf"
+fi
+
+if grep -q "^rexec" /etc/xinetd.conf; then
+  sed -i '/^rexec/s/^/#/' /etc/xinetd.conf
+  echo "Serviço rexec comentado em /etc/xinetd.conf"
+fi
+
+# Remove arquivos de configuração (se existirem)
+rm -f /etc/xinetd.d/rexec 2>/dev/null
+
+echo "Correção para CVE-1999-0618 (rexec) aplicada."
+```}
+{type: uploaded file
+fileName: 1vtrexec_9.txt
+fullContent:
+```bash
+#!/bin/bash
+
+# Descrição: Desabilita o serviço rexec e remove o pacote, se instalado.
+
+# Verifica se o serviço rexec está instalado e o remove.
+if systemctl is-enabled rexec.socket 2>/dev/null; then
+  systemctl stop rexec.socket
+  systemctl disable rexec.socket
+  echo "Serviço rexec desabilitado."
+else
+  echo "Serviço rexec não está habilitado."
+fi
+
+if command -v rexecd &>/dev/null; then
+  apt-get purge --auto-remove -y rexec &>/dev/null
+  echo "Pacote rexec removido."
+elif rpm -q rexec &>/dev/null; then
+  yum remove -y rexec &>/dev/null
+  echo "Pacote rexec removido."
+else
+  echo "Pacote rexec não encontrado."
+fi
+
+# Garante que o serviço não será iniciado na inicialização.
+if [ -f /etc/xinetd.d/rexec ]; then
+  mv /etc/xinetd.d/rexec /etc/xinetd.d/rexec.disabled
+  echo "Serviço rexec desabilitado via xinetd."
+fi
+
+echo "Correção para CVE-1999-0618 (rexec) aplicada."
+```
+}
+{type: uploaded file
+fileName: 1vtrexec_10.txt
+fullContent:
+```bash
+#!/bin/bash
+
+# Descrição: Desabilita o serviço rexec para mitigar a vulnerabilidade CVE-1999-0618.
+
+# Verifica se o serviço rexec está instalado e em execução
+if systemctl is-active rexec.socket 2>/dev/null; then
+  # Desabilita o serviço rexec
+  systemctl stop rexec.socket
+  systemctl disable rexec.socket
+
+  # Remove o pacote inetd, que pode ser responsável por iniciar o rexec
+  apt-get -y remove --purge inetd
+
+  # Garante que o serviço não será iniciado automaticamente na reinicialização.
+  systemctl mask rexec.socket
+
+  echo "Serviço rexec desabilitado e pacote inetd removido. Rexec está mascarado."
+
+else
+  echo "Serviço rexec não encontrado ou não está em execução."
+fi
+
+# Remove qualquer configuração residual relacionada ao rexec
+rm -rf /etc/xinetd.d/rexec
+
+# Finaliza o script
+echo "Script de correção concluído."
+```
+}

@@ -1,0 +1,96 @@
+```bash
+#!/bin/bash
+
+# Vulnerability 1: Proxmox VE EOL
+# This vulnerability requires a system update, which needs to be done manually as it involves upgrading the entire Proxmox VE.
+# The script will only display a warning message.
+echo "WARNING: Proxmox Virtual Environment version 7.3-3 is End of Life (EOL). Please upgrade to a supported version manually."
+
+# Vulnerabilities 2-6: jQuery < 1.9.0 XSS Vulnerability
+# Find and replace vulnerable jQuery files with version 1.9.0
+JQUERY_VERSION="1.9.0"
+JQUERY_FILES=(
+    "/var/www/html/../js/jquery-1.8.3.min.js"
+    "/var/www/html/opscenter/webcommon/framework/../js/jquery-1.8.3.min.js"
+    "/var/www/html/framesets/../js/jquery-1.8.3.min.js"
+    "/var/www/html/frameset/../js/jquery-1.8.3.min.js"
+    "/var/www/html/console/framework/../js/jquery-1.8.3.min.js"
+)
+
+# Download jQuery 1.9.0
+JQUERY_URL="https://code.jquery.com/jquery-${JQUERY_VERSION}.min.js"
+JQUERY_TEMP="/tmp/jquery-${JQUERY_VERSION}.min.js"
+curl -sSL -o "${JQUERY_TEMP}" "${JQUERY_URL}"
+
+for file in "${JQUERY_FILES[@]}"; do
+    if [ -f "$file" ]; then
+        echo "Replacing $file with jQuery ${JQUERY_VERSION}"
+        sudo cp "${JQUERY_TEMP}" "$file"
+    else
+        echo "File not found: $file"
+    fi
+done
+
+rm -f "${JQUERY_TEMP}"
+
+# Vulnerabilities 7, 8, 9, 13, 14, 15, 16, 19, 21, 22: SSH Weak Algorithms
+# Disable weak SSH algorithms
+SSH_CONFIG="/etc/ssh/sshd_config"
+
+# Backup sshd_config
+sudo cp "$SSH_CONFIG" "$SSH_CONFIG.bak"
+
+# Disable weak KEX algorithms
+sudo sed -i "s/^#KexAlgorithms .*/KexAlgorithms curve25519-sha256@libssh.org,ecdh-sha2-nistp256,ecdh-sha2-nistp384,ecdh-sha2-nistp521,diffie-hellman-group-exchange-sha256/" "$SSH_CONFIG"
+
+# Disable weak MAC algorithms
+sudo sed -i "s/^#MACs .*/MACs hmac-sha2-512,hmac-sha2-256,hmac-ripemd160/" "$SSH_CONFIG"
+
+# Disable weak Ciphers
+sudo sed -i "s/^#Ciphers .*/Ciphers chacha20-poly1305@openssh.com,aes256-gcm@openssh.com,aes128-gcm@openssh.com,aes256-ctr,aes192-ctr,aes128-ctr/" "$SSH_CONFIG"
+
+# Disable weak HostKeyAlgorithms
+sudo sed -i "s/^#HostKeyAlgorithms .*/HostKeyAlgorithms ecdsa-sha2-nistp256-cert-v01@openssh.com,ecdsa-sha2-nistp384-cert-v01@openssh.com,ecdsa-sha2-nistp521-cert-v01@openssh.com,ecdsa-sha2-nistp256,ecdsa-sha2-nistp384,ecdsa-sha2-nistp521,rsa-sha2-512,rsa-sha2-256/" "$SSH_CONFIG"
+
+# Restart SSH service
+sudo systemctl restart sshd
+
+# Vulnerability 10: DCE/RPC and MSRPC Services Enumeration Reporting
+# This vulnerability requires firewall configuration.  The script will display a warning message.
+echo "WARNING: DCE/RPC and MSRPC services are exposed. Configure your firewall to filter incoming traffic to port 135 and other RPC ports."
+
+# Vulnerability 11: Telnet Unencrypted Cleartext Login
+# Disable Telnet service
+sudo systemctl stop telnet.socket
+sudo systemctl disable telnet.socket
+echo "Telnet service has been disabled.  Consider using SSH instead."
+
+# Vulnerability 12: SSL/TLS: Deprecated TLSv1.0 and TLSv1.1 Protocol Detection
+# Disable TLS 1.0 and 1.1 (example for Apache, needs adaptation for other services)
+# Adapt this section for specific services (e.g., Apache, Nginx)
+# Example for Apache:
+APACHE_CONFIG_DIR="/etc/apache2/mods-available"
+SSL_CONF="$APACHE_CONFIG_DIR/ssl.conf"
+
+if [ -f "$SSL_CONF" ]; then
+    sudo sed -i "s/^SSLProtocol all.*/SSLProtocol TLSv1.2 TLSv1.3/" "$SSL_CONF"
+    sudo systemctl restart apache2
+    echo "TLSv1.0 and TLSv1.1 have been disabled for Apache.  Please adapt this script for other services as needed."
+else
+    echo "Apache SSL configuration not found.  Please adapt this script for your specific services."
+fi
+
+# Vulnerabilities 17, 18, 20, 23, 24, 25: TCP Timestamps Information Disclosure
+# Disable TCP timestamps
+sudo sysctl -w net.ipv4.tcp_timestamps=0
+echo "net.ipv4.tcp_timestamps = 0" | sudo tee /etc/sysctl.d/99-disable-tcp-timestamps.conf
+sudo sysctl -p /etc/sysctl.d/99-disable-tcp-timestamps.conf
+
+# Vulnerabilities 26, 27, 28, 29, 30, 31, 32: ICMP Timestamp Reply Information Disclosure
+# Disable ICMP Timestamp Replies
+sudo sysctl -w net.ipv4.icmp_echo_ignore_all=1
+echo "net.ipv4.icmp_echo_ignore_all = 1" | sudo tee /etc/sysctl.d/99-disable-icmp-timestamps.conf
+sudo sysctl -p /etc/sysctl.d/99-disable-icmp-timestamps.conf
+
+echo "Vulnerability patching script completed."
+```

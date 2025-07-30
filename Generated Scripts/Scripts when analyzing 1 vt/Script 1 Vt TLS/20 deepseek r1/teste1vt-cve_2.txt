@@ -1,0 +1,41 @@
+#!/bin/bash
+backup_dir="/root/backups"
+mkdir -p "$backup_dir"
+pg_conf_files=$(find /etc/postgresql -name 'postgresql.conf' 2>/dev/null | sort)
+if [ -z "$pg_conf_files" ]; then
+    process_line=$(ps aux | grep "postgres.* -c config_file" | grep -v grep | head -n1)
+    if [[ "$process_line" =~ -c\ config_file=([^ ]+) ]]; then
+        pg_conf_files="${BASH_REMATCH[1]}"
+    elif [ -f "/var/lib/pgsql/data/postgresql.conf" ]; then
+        pg_conf_files="/var/lib/pgsql/data/postgresql.conf"
+    else
+        pg_conf_files="/etc/postgresql/*/main/postgresql.conf"
+    fi
+fi
+
+for conf in $pg_conf_files; do
+    [ ! -f "$conf" ] && continue
+    timestamp=$(date +%Y%m%d%H%M%S)
+    backup_file="${backup_dir}/$(basename $conf).backup_${timestamp}"
+    cp "$conf" "$backup_file"
+
+    if grep -q "^#*\s*ssl\s*=" "$conf"; then
+        sed -i -r 's/^#*\s*(ssl\s*=)\s*off/\1 on/' "$conf"
+    else
+        echo "ssl = on" >> "$conf"
+    fi
+
+    if grep -q "^#*\s*ssl_min_protocol_version\s*=" "$conf"; then
+        sed -i -r 's/^#*\s*(ssl_min_protocol_version\s*=).*/\1 \x27TLSv1.2\x27/' "$conf"
+    else
+        echo "ssl_min_protocol_version = 'TLSv1.2'" >> "$conf"
+    fi
+done
+
+find "$backup_dir" -type f -name "*.backup_*" -mtime +30 -delete >/dev/null 2>&1
+
+if command -v systemctl >/dev/null 2>&1; then
+    systemctl restart postgresql
+elif command -v service >/dev/null 2>&1; then
+    service postgresql restart
+fi

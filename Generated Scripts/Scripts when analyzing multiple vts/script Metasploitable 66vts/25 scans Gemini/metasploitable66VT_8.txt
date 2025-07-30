@@ -1,0 +1,183 @@
+```bash
+#!/bin/bash
+
+# Variáveis Globais
+OS=$(uname -s)
+
+# Funções Auxiliares
+apply_sysctl() {
+  if [ -f /etc/sysctl.conf ]; then
+    sysctl -p
+  else
+    echo "Arquivo /etc/sysctl.conf não encontrado."
+  fi
+}
+
+update_apache_config() {
+  APACHE_CONF=/etc/apache2/apache2.conf # Caminho comum, ajuste se necessário
+  if [ -f "$APACHE_CONF" ]; then
+    # Desabilitar TRACE
+    sed -i 's/TraceEnable On/TraceEnable Off/g' "$APACHE_CONF"
+
+    # Desabilitar métodos PUT/DELETE
+    echo -e "\n<LimitExcept GET POST>\n\tRequire valid-user\n</LimitExcept>" >> "$APACHE_CONF"
+
+    service apache2 restart
+  else
+    echo "Arquivo de configuração do Apache não encontrado em $APACHE_CONF"
+  fi
+}
+
+disable_rlogin_rexec_rsh() {
+  # Desabilitar rlogin, rexec e rsh
+  if systemctl is-active rlogin.socket &>/dev/null; then
+    systemctl stop rlogin.socket
+    systemctl disable rlogin.socket
+  fi
+  if systemctl is-active rexec.socket &>/dev/null; then
+    systemctl stop rexec.socket
+    systemctl disable rexec.socket
+  fi
+  if systemctl is-active rsh.socket &>/dev/null; then
+    systemctl stop rsh.socket
+    systemctl disable rsh.socket
+  fi
+  
+  # Remover pacotes, caso estejam instalados
+  apt remove --purge rsh-server rsh-client rlogin-server rlogin-client rexec-server rexec-client -y
+}
+
+disable_telnet() {
+  # Desabilitar Telnet
+  if systemctl is-active telnet.socket &>/dev/null; then
+    systemctl stop telnet.socket
+    systemctl disable telnet.socket
+  fi
+
+  # Remover pacote, caso esteja instalado
+  apt remove --purge telnetd -y
+}
+
+disable_ftp_anonymous() {
+  # Desabilitar login anônimo no vsftpd (exemplo)
+  VSFTPD_CONF=/etc/vsftpd.conf  # Caminho comum, ajuste se necessário
+  if [ -f "$VSFTPD_CONF" ]; then
+    sed -i 's/anonymous_enable=YES/anonymous_enable=NO/g' "$VSFTPD_CONF"
+    service vsftpd restart
+  else
+    echo "Arquivo de configuração do vsftpd não encontrado em $VSFTPD_CONF"
+  fi
+}
+
+secure_mysql() {
+  # Garante que o MySQL esteja instalado
+  if ! command -v mysql &> /dev/null; then
+      echo "MySQL não está instalado.  Por favor, instale antes de executar este script."
+      return 1
+  fi
+
+  # Script para remover usuário root sem senha no MySQL
+  mysql -u root -e "USE mysql; UPDATE user SET Password=PASSWORD('') WHERE User='root'; DELETE FROM user WHERE User='root' AND Host != 'localhost'; DELETE FROM user WHERE Host='%'; FLUSH PRIVILEGES;"
+
+  # Define uma senha forte para o usuário root (substitua 'SUA_SENHA_FORTE' com uma senha real)
+  mysqladmin -u root password 'SUA_SENHA_FORTE'
+
+  echo "Senha do root do MySQL alterada e usuários anônimos removidos. Reinicie o serviço MySQL."
+  service mysql restart
+}
+
+disable_ajp_connector() {
+    TOMCAT_CONF=/etc/tomcat7/server.xml # Ajuste para a sua versão do Tomcat
+    if [ -f "$TOMCAT_CONF" ]; then
+        # Comentar a linha do AJP Connector
+        sed -i 's/<Connector port="8009" protocol="AJP\/1.3".*/<!-- & -->/' "$TOMCAT_CONF"
+        service tomcat7 restart # Ajuste para a sua versão do Tomcat
+    else
+        echo "Arquivo server.xml do Tomcat não encontrado em $TOMCAT_CONF"
+    fi
+}
+
+# Desabilitar VRFY e EXPN no Postfix
+disable_vrfy_expn() {
+    POSTFIX_CONF=/etc/postfix/main.cf
+    if [ -f "$POSTFIX_CONF" ]; then
+        grep -q "disable_vrfy_command = yes" "$POSTFIX_CONF" || echo "disable_vrfy_command = yes" >> "$POSTFIX_CONF"
+        service postfix restart
+    else
+        echo "Arquivo main.cf do Postfix não encontrado em $POSTFIX_CONF"
+    fi
+}
+
+# Desabilitar TLS 1.0 e 1.1 no Postfix
+disable_tls10_11() {
+    POSTFIX_CONF=/etc/postfix/main.cf
+    if [ -f "$POSTFIX_CONF" ]; then
+        grep -q "smtpd_tls_mandatory_protocols = !SSLv2, !SSLv3, !TLSv1, !TLSv1.1" "$POSTFIX_CONF" || echo "smtpd_tls_mandatory_protocols = !SSLv2, !SSLv3, !TLSv1, !TLSv1.1" >> "$POSTFIX_CONF"
+        grep -q "smtpd_tls_protocols = !SSLv2, !SSLv3, !TLSv1, !TLSv1.1" "$POSTFIX_CONF" || echo "smtpd_tls_protocols = !SSLv2, !SSLv3, !TLSv1, !TLSv1.1" >> "$POSTFIX_CONF"
+        service postfix restart
+    else
+        echo "Arquivo main.cf do Postfix não encontrado em $POSTFIX_CONF"
+    fi
+}
+
+# Desabilitar TLS 1.0 e 1.1 no PostgreSQL
+disable_tls10_11_postgresql() {
+    PG_CONF=/etc/postgresql/*/main/postgresql.conf  # Ajuste para a sua versão do PostgreSQL
+    if [ -f "$PG_CONF" ]; then
+        sed -i "s/#ssl_min_protocol = tls1.0/ssl_min_protocol = tls1.2/g" "$PG_CONF"
+        service postgresql restart
+    else
+        echo "Arquivo postgresql.conf do PostgreSQL não encontrado em $PG_CONF"
+    fi
+}
+
+# Principal
+main() {
+  echo "Iniciando correção de vulnerabilidades..."
+
+  # Vulnerabilidade 3, 19, 20: Desabilitar rlogin, rexec e rsh
+  echo "Desabilitando rlogin, rexec e rsh..."
+  disable_rlogin_rexec_rsh
+
+  # Vulnerabilidade 5, 45: Desabilitar Telnet
+  echo "Desabilitando telnet..."
+  disable_telnet
+
+  # Vulnerabilidade 8: Remover acesso root sem senha do MySQL
+  echo "Removendo acesso root sem senha do MySQL..."
+  secure_mysql
+
+  # Vulnerabilidade 16, 31: Desabilitar TRACE e limitar PUT/DELETE no Apache
+  echo "Atualizando configuração do Apache para desabilitar TRACE e limitar PUT/DELETE..."
+  update_apache_config
+
+  # Vulnerabilidade 24, 48: Desabilitar login anônimo no FTP
+  echo "Desabilitando login anônimo no FTP..."
+  disable_ftp_anonymous
+
+  # Vulnerabilidade 7: Desabilitar AJP Connector no Tomcat (Ghostcat)
+  echo "Desabilitando AJP Connector no Tomcat (Ghostcat)..."
+  disable_ajp_connector
+
+  # Vulnerabilidade 37: Desabilitar VRFY e EXPN no Postfix
+  echo "Desabilitando VRFY e EXPN no Postfix..."
+  disable_vrfy_expn
+
+  # Vulnerabilidade 54, 50: Desabilitar TLS 1.0 e 1.1 no Postfix e PostgreSQL
+  echo "Desabilitando TLS 1.0 e 1.1..."
+  disable_tls10_11
+  disable_tls10_11_postgresql
+
+  # Vulnerabilidade 65: Desabilitar TCP Timestamps
+  echo "Desabilitando TCP Timestamps..."
+  echo "net.ipv4.tcp_timestamps = 0" >> /etc/sysctl.conf
+  apply_sysctl
+
+  # Vulnerabilidade 66: Bloquear ICMP Timestamp Reply
+  echo "Bloqueando ICMP Timestamp Reply (requer configuração de firewall adicional)."
+  
+  echo "Correção de vulnerabilidades concluída."
+}
+
+main
+```

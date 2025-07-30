@@ -1,0 +1,24 @@
+#!/bin/bash
+VULNERABLE_VERSION="1.8.3"
+FIXED_VERSION="1.9.0"
+JS_PATH="/console/framework/../js/jquery-1.8.3.min.js"
+BACKUP_PATH="${JS_PATH}.bak"
+
+if [ -e "$JS_PATH" ]; then
+    CURRENT_VERSION=$(grep -oP "(?<=jQuery v)\d+\.\d+\.\d+" "$JS_PATH" | head -1)
+    if [ "$CURRENT_VERSION" == "$VULNERABLE_VERSION" ]; then
+        mv "$JS_PATH" "$BACKUP_PATH"
+        wget -q "https://code.jquery.com/jquery-$FIXED_VERSION.min.js" -O "$JS_PATH"
+        if [ $? -eq 0 ]; then
+            echo "jQuery updated from $VULNERABLE_VERSION to $FIXED_VERSION."
+            rm -f "$BACKUP_PATH"
+        else
+            mv "$BACKUP_PATH" "$JS_PATH"
+            echo "Failed to update jQuery. Reverting changes."
+        fi
+    else
+        echo "jQuery version $CURRENT_VERSION is not vulnerable."
+    fi
+else
+    echo "jQuery file not found at $JS_PATH."
+fi

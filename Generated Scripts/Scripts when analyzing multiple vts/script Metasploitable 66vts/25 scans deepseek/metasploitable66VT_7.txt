@@ -1,0 +1,68 @@
+#!/bin/bash
+
+# Corrigir vulnerabilidades no TWiki
+wget https://github.com/TWiki/twiki/archive/refs/tags/v4.2.4.tar.gz -O /tmp/twiki-4.2.4.tar.gz
+tar -xzf /tmp/twiki-4.2.4.tar.gz -C /opt/
+rm -rf /opt/twiki
+mv /opt/twiki-4.2.4 /opt/twiki
+chown -R www-data:www-data /opt/twiki
+
+# Desativar o serviço rlogin
+systemctl stop rlogin.socket
+systemctl disable rlogin.socket
+
+# Atualizar o sistema operacional
+export DEBIAN_FRONTEND=noninteractive
+apt-get update
+apt-get dist-upgrade -y
+
+# Desativar o serviço rexec
+systemctl stop rexec.socket
+systemctl disable rexec.socket
+
+# Corrigir vulnerabilidade do Apache Tomcat Ghostcat
+systemctl stop tomcat
+wget https://downloads.apache.org/tomcat/tomcat-8/v8.5.51/bin/apache-tomcat-8.5.51.tar.gz -O /tmp/apache-tomcat-8.5.51.tar.gz
+tar -xzf /tmp/apache-tomcat-8.5.51.tar.gz -C /opt/
+rm -rf /opt/tomcat
+mv /opt/apache-tomcat-8.5.51 /opt/tomcat
+chown -R tomcat:tomcat /opt/tomcat
+systemctl start tomcat
+
+# Alterar senha padrão do MySQL
+mysql -u root -e "ALTER USER 'root'@'localhost' IDENTIFIED BY 'NovaSenhaSegura123!';"
+
+# Atualizar o PHP
+apt-get install -y php7.4 php7.4-cli php7.4-common php7.4-curl php7.4-gd php7.4-json php7.4-mbstring php7.4-mysql php7.4-xml php7.4-zip
+systemctl restart apache2
+
+# Desativar métodos HTTP perigosos
+sed -i 's/AllowOverride None/AllowOverride None\n    <LimitExcept GET POST>\n        Deny from all\n    <\/LimitExcept>/' /etc/apache2/apache2.conf
+systemctl restart apache2
+
+# Desativar o serviço VNC
+systemctl stop vncserver-x11-serviced
+systemctl disable vncserver-x11-serviced
+
+# Corrigir vulnerabilidade do vsftpd
+systemctl stop vsftpd
+wget https://security.debian.org/pool/updates/main/v/vsftpd/vsftpd_3.0.3-12+deb10u1_amd64.deb -O /tmp/vsftpd.deb
+dpkg -i /tmp/vsftpd.deb
+systemctl start vsftpd
+
+# Desativar o serviço Telnet
+systemctl stop telnet.socket
+systemctl disable telnet.socket
+
+# Configurar SSL/TLS para desativar protocolos inseguros
+sed -i 's/SSLProtocol all -SSLv2 -SSLv3/SSLProtocol all -SSLv2 -SSLv3 -TLSv1 -TLSv1.1/g' /etc/apache2/mods-enabled/ssl.conf
+systemctl restart apache2
+
+# Desativar FTP anônimo
+sed -i 's/anonymous_enable=YES/anonymous_enable=NO/' /etc/vsftpd.conf
+systemctl restart vsftpd
+
+# Reiniciar serviços críticos
+systemctl restart apache2
+systemctl restart mysql
+systemctl restart ssh

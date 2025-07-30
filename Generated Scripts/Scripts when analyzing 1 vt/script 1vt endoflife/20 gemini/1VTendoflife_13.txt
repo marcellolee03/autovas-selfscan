@@ -1,0 +1,38 @@
+```bash
+#!/bin/bash
+
+# Este script atualiza o sistema operacional Ubuntu 8.04 para uma versão suportada.
+# Devido ao Ubuntu 8.04 ser EOL, a atualização direta não é possível.
+# Este script irá atualizar para uma versão ainda suportada, seguindo um caminho de upgrade.
+# IMPORTANTE: Este processo pode ser demorado e potencialmente causar problemas.
+# É altamente recomendável fazer um backup completo do sistema antes de executar este script.
+
+# Interrompe em caso de erro
+set -e
+
+# Define a nova versão LTS para a qual atualizar. Escolhendo 18.04 LTS (Bionic Beaver) como exemplo.
+# Outras opções incluem 16.04 LTS e 20.04 LTS dependendo das suas necessidades e da compatibilidade do hardware.
+TARGET_VERSION="18.04"
+
+# Adiciona os repositórios antigos do Ubuntu 8.04 (Hardy Heron) para manter o sistema funcionando durante a atualização.
+echo "deb http://old-releases.ubuntu.com/ubuntu/ hardy main restricted universe multiverse" | sudo tee /etc/apt/sources.list.d/hardy.list
+echo "deb http://old-releases.ubuntu.com/ubuntu/ hardy-updates main restricted universe multiverse" | sudo tee -a /etc/apt/sources.list.d/hardy.list
+echo "deb http://old-releases.ubuntu.com/ubuntu/ hardy-security main restricted universe multiverse" | sudo tee -a /etc/apt/sources.list.d/hardy.list
+
+# Atualiza a lista de pacotes
+sudo apt-get update
+
+# Instala o 'update-manager-core' se não estiver instalado.
+sudo apt-get install -y update-manager-core
+
+# Inicia a atualização para a próxima versão LTS.  Este comando força a atualização para a versão especificada no parametro -d.
+sudo do-release-upgrade -d
+
+# Após a conclusão da atualização para 18.04, você pode considerar atualizar para versões mais recentes usando:
+# sudo do-release-upgrade
+
+echo "A atualização para Ubuntu ${TARGET_VERSION} foi iniciada."
+echo "Por favor, siga as instruções na tela durante o processo de atualização."
+echo "Após a conclusão, reinicie o sistema."
+echo "Lembre-se de que esse processo pode levar um tempo considerável."
+```

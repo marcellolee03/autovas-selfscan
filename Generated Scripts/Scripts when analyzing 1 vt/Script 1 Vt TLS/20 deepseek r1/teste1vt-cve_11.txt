@@ -1,0 +1,23 @@
+#!/bin/sh
+
+MIN_PROTOCOL="TLSv1.2"
+MAX_PROTOCOL="TLSv1.3"
+CONF_FILES=$(find /etc -name postgresql.conf 2>/dev/null | grep -E "/etc/postgresql/[^/]+/main/postgresql.conf")
+
+for conf in $CONF_FILES; do
+  if grep -qE "^\s*ssl_min_protocol_version\s*=" "$conf"; then
+    sed -Ei "s/^\s*ssl_min_protocol_version\s*=.*/ssl_min_protocol_version = '$MIN_PROTOCOL'/" "$conf"
+  else
+    echo "ssl_min_protocol_version = '$MIN_PROTOCOL'" >> "$conf"
+  fi
+
+  if grep -qE "^\s*ssl_max_protocol_version\s*=" "$conf"; then
+    sed -Ei "s/^\s*ssl_max_protocol_version\s*=.*/ssl_max_protocol_version = '$MAX_PROTOCOL'/" "$conf"
+  else
+    echo "ssl_max_protocol_version = '$MAX_PROTOCOL'" >> "$conf"
+  fi
+done
+
+if [ -n "$CONF_FILES" ] && command -v pg_isready >/dev/null; then
+  systemctl restart postgresql || service postgresql restart
+fi

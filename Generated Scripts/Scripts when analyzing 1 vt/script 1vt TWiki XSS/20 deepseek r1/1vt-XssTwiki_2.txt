@@ -1,0 +1,85 @@
+#!/bin/bash
+set -euo pipefail
+
+if [ "$(id -u)" -ne 0 ]; then
+  echo "Error: This script must be run as root" >&2
+  exit 1
+fi
+
+# Attempt package upgrade on Debian/Ubuntu
+if command -v apt >/dev/null 2>&1; then
+  if dpkg -l twiki >/dev/null 2>&1; then
+    apt update
+    apt install -y --only-upgrade twiki
+    exit 0
+  fi
+fi
+
+# Check Red Hat based systems
+if command -v yum >/dev/null 2>&1; then
+  if yum list installed twiki >/dev/null 2>&1; then
+    yum update -y twiki
+    exit 0
+  fi
+fi
+
+# Manual upgrade process
+INSTALL_DIR=""
+declare -a dirs_to_try=(
+  "/var/www/twiki"
+  "/usr/local/twiki"
+  "/opt/twiki"
+  "/var/lib/twiki"
+  "/srv/twiki"
+  "/home/twiki"
+)
+
+for dir in "${dirs_to_try[@]}"; do
+  if [ -d "$dir/bin" ] && [ -d "$dir/lib" ]; then
+    INSTALL_DIR="$dir"
+    break
+  fi
+done
+
+if [ -z "$INSTALL_DIR" ]; then
+  echo "Error: Failed to locate TWiki installation directory" >&2
+  exit 1
+fi
+
+# Install dependencies if missing
+if ! command -v curl >/dev/null 2>&1; then
+  if command -v apt >/dev/null 2>&1; then
+    apt update
+    apt install -y curl
+  elif command -v yum >/dev/null 2>&1; then
+    yum install -y curl
+  else
+    echo "Error: curl required but cannot be installed" >&2
+    exit 1
+  fi
+fi
+
+if ! command -v rsync >/dev/null 2>&1; then
+  if command -v apt >/dev/null 2>&1; then
+    apt update
+    apt install -y rsync
+  elif command -v yum >/dev/null 2>&1; then
+    yum install -y rsync
+  else
+    echo "Error: rsync required but cannot be installed" >&2
+    exit 1
+  fi
+fi
+
+# Download and apply fixes
+BACKUP_DIR="/tmp/twiki_backup_$(date +%Y%m%d%H%M%S)"
+mkdir -p "$BACKUP_DIR"
+cp -a "$INSTALL_DIR" "$BACKUP_DIR/"
+
+TMP_DIR="$(mktemp -d)"
+DOWNLOAD_URL="https://sourceforge.net/projects/twiki/files/TWiki%20for%20all%20platforms/TWiki%204.2.4/twiki-4.2.4.tgz"
+curl -L -o "$TMP_DIR/twiki.tgz" "$DOWNLOAD_URL"
+tar -xzf "$TMP_DIR/twiki.tgz" -C "$TMP_DIR"
+rsync -ac --exclude 'pub' --exclude 'data' "$TMP_DIR/twiki/" "$INSTALL_DIR/"
+
+rm -rf "$TMP_DIR"

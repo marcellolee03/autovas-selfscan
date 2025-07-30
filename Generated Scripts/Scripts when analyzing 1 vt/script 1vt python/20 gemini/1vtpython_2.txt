@@ -1,0 +1,61 @@
+```bash
+#!/bin/bash
+
+# Variáveis
+PYTHON_VERSION=$(python3 --version 2>&1 | awk '{print $2}' | cut -d '.' -f 1,2)
+REQUIRED_VERSION="3.10"
+FIXED_VERSION="3.10.15"
+
+# Função para verificar se o Python está instalado
+check_python() {
+  if ! command -v python3 &> /dev/null; then
+    echo "Python 3 não está instalado. Impossível prosseguir."
+    exit 1
+  fi
+}
+
+# Função para verificar a versão do Python
+check_version() {
+  if [[ "$PYTHON_VERSION" == "3.10" ]]; then
+    CURRENT_MINOR_VERSION=$(python3 --version 2>&1 | awk '{print $2}')
+    if [[ $(echo "$CURRENT_MINOR_VERSION < $FIXED_VERSION" | bc -l) -eq 1 ]]; then
+      echo "Versão vulnerável do Python detectada: $CURRENT_MINOR_VERSION"
+      return 0
+    else
+      echo "Python está atualizado: $CURRENT_MINOR_VERSION"
+      exit 0
+    fi
+  else
+    echo "Versão do Python ($PYTHON_VERSION) não é vulnerável ou não corresponde à versão especificada."
+    exit 0
+  fi
+}
+
+# Função para atualizar o Python (Windows)
+update_python_windows() {
+  echo "Atualizando o Python para a versão $FIXED_VERSION..."
+  
+  # Criar um diretório temporário
+  TEMP_DIR=$(mktemp -d)
+  
+  # Baixar o instalador mais recente do Python 3.10.15
+  # Ajuste o link de acordo com a arquitetura do sistema (32-bit ou 64-bit)
+  # Este exemplo assume que você tem o wget instalado. Se não tiver, use curl.
+  wget https://www.python.org/ftp/python/3.10.15/python-3.10.15-amd64.exe -P $TEMP_DIR
+  
+  # Executar o instalador silenciosamente
+  $TEMP_DIR/python-3.10.15-amd64.exe /quiet InstallAllUsers=1 Include_launcher=1 AddToPath=1
+
+  # Remover o diretório temporário
+  rm -rf $TEMP_DIR
+
+  echo "Python atualizado para a versão $FIXED_VERSION."
+  echo "Por favor, reinicie o sistema para completar a instalação."
+}
+
+# Roteiro principal
+check_python
+if check_version; then
+  update_python_windows
+fi
+```

@@ -1,0 +1,89 @@
+#!/bin/bash
+set -euo pipefail
+
+fixed_jquery_url="https://code.jquery.com/jquery-1.12.4.min.js"
+lock_file="/var/lock/jquery_patch.lock"
+log_file="/var/log/jquery_update_$(date +%Y%m%d_%H%M%S).log"
+
+# Record start message
+echo "Starting jQuery patching script" | tee -a "$log_file"
+
+# Check for concurrent execution
+if [ -f "$lock_file" ]; then
+    echo "Lock file $lock_file exists. Another instance might be running." | tee -a "$log_file"
+    exit 1
+else
+    echo "Creating lock file" | tee -a "$log_file"
+    touch "$lock_file"
+    trap 'rm -f "$lock_file"' EXIT
+fi
+
+# Update package lists silently
+if command -v apt-get &> /dev/null; then
+    echo "Updating package lists for apt" | tee -a "$log_file"
+    apt-get -qq update || true
+fi
+
+# Install wget/curl if missing
+if ! command -v wget &> /dev/null && ! command -v curl &> /dev/null; then
+    echo "No wget or curl - installing dependencies" | tee -a "$log_file"
+    if command -v apt-get &> /dev/null; then
+        apt-get -y -qq install wget >> "$log_file" 2>&1 || {
+            echo "Failed to install wget" | tee -a "$log_file"
+            exit 1
+        }
+    elif command -v yum &> /dev/null; then
+        yum -y -q install wget >> "$log_file" 2>&1 || {
+            echo "Failed to install wget" | tee -a "$log_file"
+            exit 1
+        }
+    fi
+fi
+
+# Find and process vulnerable files
+vulnerable_files=$(find / -type f -path '*/console/js/jquery-1.8.3.min.js' 2>/dev/null || true)
+
+if [ -z "$vulnerable_files" ]; then
+    echo "No vulnerable files found" | tee -a "$log_file"
+    exit 0
+fi
+
+echo "Found vulnerable files: $vulnerable_files" | tee -a "$log_file"
+
+for file in $vulnerable_files; do
+    # Create backup
+    backup_file="${file}.bak_$(date +%Y%m%d_%H%M%S)"
+    echo "Backing up $file to $backup_file" | tee -a "$log_file"
+    cp -p "$file" "$backup_file"
+
+    # Download fixed version
+    temp_file=$(mktemp)
+    trap 'rm -f "$temp_file"' EXIT
+
+    echo "Downloading fixed jQuery" | tee -a "$log_file"
+    if command -v wget &> /dev/null; then
+        wget -qO "$temp_file" "$fixed_jquery_url" || {
+            echo "wget download failed for $file" | tee -a "$log_file"
+            exit 1
+        }
+    elif command -v curl &> /dev/null; then
+        curl -sL -o "$temp_file" "$fixed_jquery_url" || {
+            echo "curl download failed for $file" | tee -a "$log_file"
+            exit 1
+        }
+    fi
+
+    # Preserve permissions and move
+    chown --reference="$backup_file" "$temp_file"
+    chmod --reference="$backup_file" "$temp_file"
+    mv -f "$temp_file" "$file"
+
+    echo "Successfully patched $file" | tee -a "$log_file"
+done
+
+echo "Restarting web services" | tee -a "$log_file"
+pkill -x apache2 &> /dev/null || true
+pkill -x httpd &> /dev/null || true
+pkill -x nginx &> /dev/null || true
+
+echo "Verification successful - jQuery patching complete" | tee -a "$log_file"

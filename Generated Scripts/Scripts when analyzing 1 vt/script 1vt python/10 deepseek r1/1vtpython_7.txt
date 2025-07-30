@@ -1,0 +1,55 @@
+```powershell
+$ErrorActionPreference = "Stop"
+try {
+    if (-not ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) {
+        Start-Process powershell.exe "-NoProfile -ExecutionPolicy Bypass -File `"$PSCommandPath`"" -Verb RunAs
+        exit
+    }
+    $fixedVer = [version]"3.10.15"
+    $regKeyPaths = @(
+        "HKLM:\SOFTWARE\Python\PythonCore\3.10\InstallPath",
+        "HKLM:\SOFTWARE\WOW6432Node\Python\PythonCore\3.10\InstallPath"
+    )
+    $installPath = $null
+    foreach ($path in $regKeyPaths) {
+        if (Test-Path $path) {
+            $installPath = (Get-ItemProperty -Path $path).'(default)'
+            if ($installPath) { break }
+        }
+    }
+    if (-not $installPath) {
+        exit 1
+    }
+    $pythonExe = Join-Path $installPath "python.exe"
+    if (-not (Test-Path $pythonExe)) {
+        exit 1
+    }
+    $currVerOutput = & $pythonExe --version 2>&1
+    if ($currVerOutput -match "Python (\d+\.\d+\.\d+)") {
+        $currVer = [version]$matches[1]
+        if ($currVer -ge $fixedVer) {
+            exit 0
+        }
+    } else {
+        exit 1
+    }
+    $archOutput = & $pythonExe -c "import platform; print(platform.architecture()[0])" 2>$null
+    $arch = if ($archOutput -match "64bit") { "amd64" } else { "win32" }
+    $sourceUrl = "https://www.python.org/ftp/python/3.10.15/python-3.10.15-$arch.exe"
+    $installer = "$env:TEMP\python-3.10.15-$arch.exe"
+    (New-Object System.Net.WebClient).DownloadFile($sourceUrl, $installer)
+    $installArgs = @(
+        "/quiet",
+        "InstallAllUsers=1",
+        "PrependPath=1",
+        "AssociateFiles=0",
+        "CompileAll=1",
+        "Shortcuts=0"
+    )
+    Start-Process -FilePath $installer -ArgumentList $installArgs -Wait
+    Remove-Item -Path $installer -Force
+    exit 0
+} catch {
+    exit 1
+}
+```

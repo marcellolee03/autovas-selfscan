@@ -1,0 +1,103 @@
+```bash
+#!/bin/bash
+
+# Vulnerability 1: Cleartext Transmission of Sensitive Information via HTTP
+# Mitigation: Redirect HTTP to HTTPS. This requires a web server (e.g., Apache, Nginx) already configured with SSL/TLS.
+# This script assumes Apache and enables redirection.  Adapt for other web servers.
+if command -v apache2ctl &> /dev/null; then
+  if ! grep -q "RewriteEngine On" /etc/apache2/sites-available/000-default.conf; then
+    echo "Adding HTTP to HTTPS redirect to Apache default site..."
+    cat <<EOF | tee -a /etc/apache2/sites-available/000-default.conf
+<VirtualHost *:80>
+        ServerName \$(hostname)
+        Redirect permanent / https://\${SERVER_NAME}\${REQUEST_URI}
+</VirtualHost>
+EOF
+    apache2ctl -k graceful
+  else
+    echo "HTTP to HTTPS redirect already configured in Apache default site."
+  fi
+elif command -v nginx &> /dev/null; then
+    echo "Please configure Nginx manually to redirect HTTP to HTTPS."
+    echo "Example configuration (adapt to your needs):"
+    echo "server {"
+    echo "  listen 80;"
+    echo "  server_name your_domain.com;"
+    echo "  return 301 https://\$host\$request_uri;"
+    echo "}"
+
+else
+  echo "No supported web server (Apache, Nginx) found. Please configure HTTP to HTTPS redirection manually."
+fi
+
+
+# Vulnerability 2: DNS Cache Snooping Vulnerability (UDP) - Active Check
+# Mitigation: Disable recursion on the DNS server.  This script assumes BIND9.
+if [ -f /etc/bind/named.conf.options ]; then
+  if ! grep -q "recursion no;" /etc/bind/named.conf.options; then
+    echo "Disabling recursion in BIND9..."
+    sed -i 's/{\n/{\n\trecursion no;\n/' /etc/bind/named.conf.options
+    systemctl restart bind9
+  else
+    echo "Recursion already disabled in BIND9."
+  fi
+else
+  echo "BIND9 configuration file not found. Skipping DNS recursion disabling."
+  echo "If you are using a different DNS server, please configure it manually."
+fi
+
+
+# Vulnerability 3: ICMP Timestamp Reply Information Disclosure
+# Mitigation: Disable ICMP timestamp replies.
+echo "Disabling ICMP timestamp replies..."
+echo 1 > /proc/sys/net/ipv4/icmp_echo_ignore_all
+echo "net.ipv4.icmp_echo_ignore_all = 1" >> /etc/sysctl.conf
+sysctl -p
+
+
+# Vulnerability 4: SSL/TLS: Deprecated TLSv1.0 and TLSv1.1 Protocol Detection
+# Mitigation: Disable TLSv1.0 and TLSv1.1. This script assumes OpenSSL and modifies the global OpenSSL configuration.
+# Adapt for specific service configurations if necessary.
+if [ -f /etc/ssl/openssl.cnf ]; then
+  if ! grep -q "MinProtocol = tls1.2" /etc/ssl/openssl.cnf; then
+    echo "Disabling TLSv1.0 and TLSv1.1 in OpenSSL..."
+    sed -i '/\[system_default_sect\]/a MinProtocol = tls1.2' /etc/ssl/openssl.cnf
+  else
+    echo "TLSv1.0 and TLSv1.1 already disabled in OpenSSL."
+  fi
+else
+  echo "OpenSSL configuration file not found. Skipping TLS version disabling."
+  echo "Please configure TLS versions for individual services manually."
+fi
+
+
+# Vulnerability 5: SSL/TLS: Renegotiation DoS Vulnerability (CVE-2011-1473, CVE-2011-5094)
+# Mitigation: Disable renegotiation. This requires specific configuration changes for each SSL/TLS service.
+# This script provides a general recommendation, but manual configuration is usually required.
+echo "Renegotiation vulnerability requires specific configuration per service."
+echo "Please consult the documentation for your specific SSL/TLS services to disable renegotiation."
+echo "For example, in Apache, you can set 'SSLOptions -StdEnvVars -Renegotiate' in the SSL virtual host configuration."
+
+# Vulnerability 6: SSL/TLS: Report Weak Cipher Suites
+# Mitigation:  Disable weak cipher suites. This script assumes OpenSSL and modifies the global OpenSSL configuration.
+# Adapt for specific service configurations if necessary.
+if [ -f /etc/ssl/openssl.cnf ]; then
+  if ! grep -q "DEFAULT@SECLEVEL=2" /etc/ssl/openssl.cnf; then
+    echo "Setting secure cipher suite defaults in OpenSSL..."
+    sed -i 's/DEFAULT@SECLEVEL=1/DEFAULT@SECLEVEL=2/' /etc/ssl/openssl.cnf
+  else
+    echo "Secure cipher suite defaults already set in OpenSSL."
+  fi
+else
+  echo "OpenSSL configuration file not found. Skipping cipher suite hardening."
+  echo "Please configure cipher suites for individual services manually."
+fi
+
+# Vulnerability 7: TCP Timestamps Information Disclosure
+# Mitigation: Disable TCP timestamps.
+echo "Disabling TCP timestamps..."
+echo "net.ipv4.tcp_timestamps = 0" >> /etc/sysctl.conf
+sysctl -p
+
+echo "Vulnerabilities addressed. Please review and restart affected services."
+```

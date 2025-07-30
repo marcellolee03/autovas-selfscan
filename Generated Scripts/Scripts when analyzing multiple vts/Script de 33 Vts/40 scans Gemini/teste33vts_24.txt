@@ -1,0 +1,123 @@
+```bash
+#!/bin/bash
+
+# Vulnerability 1: Proxmox VE EOL
+# Upgrade Proxmox VE to a supported version.
+# This script provides a general upgrade command, adapt it as needed for your specific environment.
+apt update && apt dist-upgrade -y
+
+# Vulnerability 2-6: jQuery < 1.9.0 XSS Vulnerability
+# Define the target IP address
+TARGET_IP="10.129.4.254"
+
+# Define the list of vulnerable jQuery file paths
+JQUERY_PATHS=(
+    "/../js/jquery-1.8.3.min.js"
+    "/opscenter/webcommon/framework/../js/jquery-1.8.3.min.js"
+    "/framesets/../js/jquery-1.8.3.min.js"
+    "/frameset/../js/jquery-1.8.3.min.js"
+    "/console/framework/../js/jquery-1.8.3.min.js"
+)
+
+# Download jQuery 1.9.0
+wget https://code.jquery.com/jquery-1.9.0.min.js -O /tmp/jquery-1.9.0.min.js
+
+# Loop through each vulnerable path and replace the file
+for path in "${JQUERY_PATHS[@]}"; do
+    # Construct the full URL
+    FULL_URL="http://${TARGET_IP}${path}"
+
+    # Extract the directory path from the full URL
+    DIR_PATH=$(dirname "${path}")
+
+    # Extract filename
+    FILENAME=$(basename "${path}")
+
+    # Create the directory if it doesn't exist
+    if [[ ! -d "${DIR_PATH}" ]]; then
+        mkdir -p "${DIR_PATH}"
+    fi
+   
+    #Replace the vulnerable file
+    echo "Replacing $FULL_URL with jQuery 1.9.0"
+    cp /tmp/jquery-1.9.0.min.js "${DIR_PATH}/${FILENAME}"
+done
+
+# Clean up the downloaded file
+rm /tmp/jquery-1.9.0.min.js
+
+# Vulnerability 7, 8, 9, 13, 14, 15, 16, 19, 21, 22: Weak SSH Algorithms
+# Disable weak SSH algorithms
+# Edit /etc/ssh/sshd_config to remove weak algorithms.
+# This script adds the necessary lines, but manual review of the file is recommended.
+
+# Backup the original sshd_config file
+cp /etc/ssh/sshd_config /etc/ssh/sshd_config.bak
+
+# Disable weak KEX algorithms
+sed -i 's/^#KexAlgorithms.*/KexAlgorithms curve25519-sha256@libssh.org,ecdh-sha2-nistp256,ecdh-sha2-nistp384,ecdh-sha2-nistp521,diffie-hellman-group-exchange-sha256/' /etc/ssh/sshd_config
+
+# Disable weak Ciphers
+sed -i 's/^#Ciphers.*/Ciphers chacha20-poly1305@openssh.com,aes256-gcm@openssh.com,aes128-gcm@openssh.com,aes256-ctr,aes128-ctr/' /etc/ssh/sshd_config
+
+# Disable weak MACs
+sed -i 's/^#MACs.*/MACs hmac-sha2-512-etm@openssh.com,hmac-sha2-256-etm@openssh.com,umac-128-etm@openssh.com,hmac-sha2-512,hmac-sha2-256,umac-128@openssh.com/' /etc/ssh/sshd_config
+
+# Disable weak HostKeyAlgorithms if needed (remove ssh-dss)
+# Check if HostKeyAlgorithms line exists
+if grep -q "^HostKeyAlgorithms" /etc/ssh/sshd_config; then
+  # If it exists, remove ssh-dss from the list
+  sed -i "s/ssh-dss,//g" /etc/ssh/sshd_config
+else
+  # If it doesn't exist, add a new line with preferred algorithms
+  echo "HostKeyAlgorithms ecdsa-sha2-nistp256-cert-v01@openssh.com,ecdsa-sha2-nistp384-cert-v01@openssh.com,ecdsa-sha2-nistp521-cert-v01@openssh.com,ecdsa-sha2-nistp256,ecdsa-sha2-nistp384,ecdsa-sha2-nistp521" >> /etc/ssh/sshd_config
+fi
+
+# Restart SSH service
+systemctl restart sshd
+
+# Vulnerability 10: DCE/RPC and MSRPC Services Enumeration Reporting
+# Filter incoming traffic to port 135 and dynamic RPC ports using firewall.
+# This script uses iptables, adapt it to your firewall.
+
+# Flush existing rules (optional, use with caution)
+iptables -F
+
+# Block incoming traffic to port 135
+iptables -A INPUT -p tcp --dport 135 -j DROP
+
+# Block incoming traffic to dynamic RPC ports (49152-65535)
+iptables -A INPUT -p tcp --dport 49152:65535 -j DROP
+
+# Save iptables rules (Debian/Ubuntu)
+iptables-save > /etc/iptables/rules.v4
+
+# Vulnerability 11: Telnet Unencrypted Cleartext Login
+# Disable Telnet service and suggest using SSH.
+
+# Stop telnet service
+systemctl stop telnet.socket telnet.service
+systemctl disable telnet.socket telnet.service
+
+# Vulnerability 12: SSL/TLS: Deprecated TLSv1.0 and TLSv1.1 Protocol Detection
+# Disable TLS 1.0 and 1.1
+
+# This requires identifying the service using TLS 1.0/1.1 and modifying its configuration.
+# Example for Apache:
+# In /etc/apache2/mods-available/ssl.conf, set:
+# SSLProtocol All -SSLv3 -TLSv1 -TLSv1.1
+# Then restart Apache: systemctl restart apache2
+#Since the vulnerable service isn't identified, provide a general guide, not a specific script.
+
+# Vulnerability 17, 18, 20, 23, 24, 25: TCP Timestamps Information Disclosure
+# Disable TCP timestamps
+echo "net.ipv4.tcp_timestamps = 0" >> /etc/sysctl.conf
+sysctl -p
+
+# Vulnerability 26, 27, 28, 29, 30, 31, 32: ICMP Timestamp Reply Information Disclosure
+# Disable ICMP timestamp replies
+echo 1 > /proc/sys/net/ipv4/icmp_echo_ignore_all
+
+#Make the change permanent
+echo "net.ipv4.icmp_echo_ignore_all=1" >> /etc/sysctl.conf
+```

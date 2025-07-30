@@ -1,0 +1,22 @@
+Request 1: 2.5002 segundos
+Request 2: 2.4889 segundos
+Request 3: 3.3474 segundos
+Request 4: 3.4823 segundos
+Request 5: 2.9694 segundos
+Request 6: 3.0162 segundos
+Request 7: 3.7431 segundos
+Request 8: 2.9707 segundos
+Request 9: 2.2638 segundos
+Request 10: 12.9309 segundos
+Request 11: 4.0719 segundos
+Request 12: 6.5376 segundos
+Request 13: 3.6847 segundos
+Request 14: 3.4822 segundos
+Request 15: 2.8485 segundos
+Request 16: 1.9642 segundos
+Request 17: 2.4571 segundos
+Request 18: 5.6317 segundos
+Request 19: 10.5693 segundos
+Request 20: 5.4083 segundos
+
+Média dos tempos das 20 requisições:94.3544/20 = 4.7177 segundos

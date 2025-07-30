@@ -1,0 +1,15 @@
+#!/bin/bash
+TWIKI_DIR="/path/to/twiki"  # Replace with the actual TWiki installation directory
+BACKUP_DIR="/backup/twiki"  # Replace with the desired backup directory
+TWIKI_VERSION="4.2.4"
+DOWNLOAD_URL="https://github.com/TWikiOrg/twiki/archive/refs/tags/TWikiRelease${TWIKI_VERSION}.tar.gz"
+
+mkdir -p $BACKUP_DIR
+tar -czf "${BACKUP_DIR}/twiki_backup_$(date +%F).tar.gz" -C $(dirname $TWIKI_DIR) $(basename $TWIKI_DIR)
+wget -O /tmp/twiki.tar.gz $DOWNLOAD_URL
+tar -xzf /tmp/twiki.tar.gz -C $(dirname $TWIKI_DIR)
+rm -rf $TWIKI_DIR
+mv $(dirname $TWIKI_DIR)/twiki-TWikiRelease${TWIKI_VERSION} $TWIKI_DIR
+rm /tmp/twiki.tar.gz
+chown -R www-data:www-data $TWIKI_DIR  # Adjust the user and group as per your setup
+systemctl restart apache2  # Adjust the service name as per your setup

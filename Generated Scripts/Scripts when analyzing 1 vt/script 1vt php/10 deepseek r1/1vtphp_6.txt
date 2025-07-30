@@ -1,0 +1,59 @@
+```sh
+#!/bin/sh
+if [ "$(id -u)" -ne 0 ]; then
+    echo "Este script requer privilégios de root." >&2
+    exit 1
+fi
+
+if [ -f /etc/os-release ]; then
+    . /etc/os-release
+    case $ID in
+        debian|ubuntu)
+            DISTRO="debian"
+            ;;
+        rhel|centos|fedora|ol)
+            DISTRO="redhat"
+            ;;
+        *)
+            echo "Distribuição não suportada." >&2
+            exit 1
+            ;;
+    esac
+else
+    echo "Não foi possível detectar a distribuição." >&2
+    exit 1
+fi
+
+if [ "$DISTRO" = "debian" ]; then
+    apt update -y
+    apt --only-upgrade install -y 'php*' '*php*' 2>/dev/null
+elif [ "$DISTRO" = "redhat" ]; then
+    yum clean all
+    yum upgrade -y 'php*' 2>/dev/null
+fi
+
+restart_service() {
+    local service=$1
+    if command -v systemctl >/dev/null 2>&1; then
+        if systemctl is-active "$service" >/dev/null 2>&1; then
+            systemctl restart "$service" >/dev/null 2>&1
+        fi
+    elif command -v service >/dev/null 2>&1; then
+        if service "$service" status >/dev/null 2>&1; then
+            service "$service" restart >/dev/null 2>&1
+        fi
+    else
+        if [ -f "/etc/init.d/$service" ]; then
+            "/etc/init.d/$service" restart >/dev/null 2>&1
+        fi
+    fi
+}
+
+restart_service "apache2"
+restart_service "httpd"
+restart_service "nginx"
+restart_service "lighttpd"
+restart_service "php-fpm"
+
+exit 0
+```

@@ -1,0 +1,36 @@
+#!/bin/bash
+# Enforce HTTPS and disable HTTP
+if [ -f /etc/apache2/sites-available/000-default.conf ]; then
+    sed -i 's/<VirtualHost \*:80>/<VirtualHost \*:80>\n    Redirect permanent \/ https:\/\/'"$(hostname)"'\/\n/' /etc/apache2/sites-available/000-default.conf
+    a2enmod ssl
+    systemctl restart apache2
+fi
+
+if [ -f /etc/nginx/sites-available/default ]; then
+    sed -i 's/listen 80 default_server;/listen 80 default_server;\n    return 301 https:\/\/$host$request_uri;\n/' /etc/nginx/sites-available/default
+    systemctl restart nginx
+fi
+
+# Ensure SSL/TLS is enabled and configured
+if [ -f /etc/apache2/sites-available/default-ssl.conf ]; then
+    sed -i 's/SSLEngine off/SSLEngine on/' /etc/apache2/sites-available/default-ssl.conf
+    a2ensite default-ssl
+    systemctl restart apache2
+fi
+
+if [ -f /etc/nginx/sites-available/default-ssl ]; then
+    sed -i 's/# listen 443 ssl default_server;/listen 443 ssl default_server;\n    ssl_certificate \/etc\/nginx\/ssl\/nginx.crt;\n    ssl_certificate_key \/etc\/nginx\/ssl\/nginx.key;\n/' /etc/nginx/sites-available/default-ssl
+    systemctl restart nginx
+fi
+
+# HSTS Header for Apache
+if [ -f /etc/apache2/sites-available/default-ssl.conf ]; then
+    sed -i 's/<\/VirtualHost>/    Header always set Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"\n<\/VirtualHost>/' /etc/apache2/sites-available/default-ssl.conf
+    systemctl restart apache2
+fi
+
+# HSTS Header for Nginx
+if [ -f /etc/nginx/sites-available/default-ssl ]; then
+    sed -i 's/}/    add_header Strict-Transport-Security "max-age=31536000; includeSubDomains; preload";\n}/' /etc/nginx/sites-available/default-ssl
+    systemctl restart nginx
+fi

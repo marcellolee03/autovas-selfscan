@@ -1,0 +1,130 @@
+```bash
+#!/bin/bash
+
+# Script para atualizar o TWiki para a versão 4.2.4 ou mais recente.
+
+# Variáveis
+TWIKI_VERSION_REQUIRED="4.2.4"
+TWIKI_INSTALL_DIR="/var/www/twiki"  # Ajuste para o diretório de instalação correto
+BACKUP_DIR="/tmp/twiki_backup_$(date +%Y%m%d%H%M%S)"
+
+# Função para verificar se o TWiki está instalado
+is_twiki_installed() {
+  if [ -d "$TWIKI_INSTALL_DIR" ]; then
+    return 0  # TWiki instalado
+  else
+    return 1  # TWiki não instalado
+  fi
+}
+
+# Função para obter a versão atual do TWiki (simplificado, pois a detecção original é falha)
+get_current_twiki_version() {
+  # Este é um placeholder. Em um cenário real, você precisaria de um método confiável para
+  # determinar a versão instalada do TWiki. Isso pode envolver a leitura de um arquivo de versão
+  # ou a execução de um script TWiki que retorna a versão.
+
+  # Por simplicidade, assumimos que a versão é anterior à necessária.
+  echo "0.0.1" 
+}
+
+
+# Função para criar backup
+create_backup() {
+  echo "Criando backup do TWiki em $BACKUP_DIR"
+  mkdir -p "$BACKUP_DIR"
+  cp -r "$TWIKI_INSTALL_DIR" "$BACKUP_DIR"
+  if [ $? -eq 0 ]; then
+    echo "Backup criado com sucesso."
+  else
+    echo "Erro ao criar backup. Saindo."
+    exit 1
+  fi
+}
+
+# Função para atualizar o TWiki
+update_twiki() {
+  echo "Atualizando o TWiki para a versão $TWIKI_VERSION_REQUIRED..."
+
+  # Passo 1: Criar um backup
+  create_backup
+
+  # Passo 2: Baixar a versão mais recente do TWiki (assumindo que o 4.2.4 não está disponível diretamente)
+  # Este script baixa a versão mais recente disponível no site oficial do TWiki.
+  # Adapte a URL se precisar de uma versão específica.
+
+  echo "Baixando a versão mais recente do TWiki..."
+  wget -q https://twiki.org/download/twiki-latest.tgz -O /tmp/twiki-latest.tgz
+
+  if [ ! -f /tmp/twiki-latest.tgz ]; then
+    echo "Erro ao baixar o TWiki. Saindo."
+    exit 1
+  fi
+
+  # Passo 3: Extrair o arquivo baixado
+  echo "Extraindo o arquivo TWiki..."
+  tar -xzf /tmp/twiki-latest.tgz -C /tmp/
+
+  # Passo 4: Remover a instalação antiga e substituir pela nova
+  echo "Removendo a instalação antiga e instalando a nova versão..."
+  rm -rf "$TWIKI_INSTALL_DIR"
+  mv /tmp/twiki/* "$TWIKI_INSTALL_DIR"
+
+  # Passo 5: Ajustar as permissões (importante)
+  echo "Ajustando as permissões..."
+  chown -R www-data:www-data "$TWIKI_INSTALL_DIR" # Substitua www-data:www-data pelo usuário/grupo correto do seu servidor web
+
+  # Passo 6: Limpar arquivos temporários
+  echo "Limpando arquivos temporários..."
+  rm -rf /tmp/twiki /tmp/twiki-latest.tgz
+
+  echo "TWiki atualizado com sucesso!"
+}
+
+# Verificações iniciais
+if ! is_twiki_installed; then
+  echo "TWiki não está instalado em $TWIKI_INSTALL_DIR.  Verifique o diretório de instalação e execute o script novamente."
+  exit 1
+fi
+
+
+# Execução principal
+current_version=$(get_current_twiki_version)
+
+if [[ $(version_compare "$current_version" "$TWIKI_VERSION_REQUIRED") -lt 0 ]]; then
+  update_twiki
+else
+  echo "TWiki já está na versão $current_version ou superior. Nenhuma atualização necessária."
+fi
+
+
+# Função auxiliar para comparar versões (necessária pois 'version_compare' não é nativo em todos os sistemas)
+version_compare() {
+  if [[ "$1" == "$2" ]]; then
+    echo 0
+    return
+  fi
+  local i IFS=.
+  local a b
+  read -ra <<<"$1"
+  read -rb <<<"$2"
+  for ((i=0; i<${#a[@]}; i++)); do
+    if [[ ${b[i]} == "" ]]; then
+      echo 1
+      return
+    fi
+    if (( ${a[i]} > ${b[i]} )); then
+      echo 1
+      return
+    fi
+    if (( ${a[i]} < ${b[i]} )); then
+      echo -1
+      return
+    fi
+  done
+  if (( ${#b[@]} > ${#a[@]} )); then
+    echo -1
+  else
+    echo 0
+  fi
+}
+```

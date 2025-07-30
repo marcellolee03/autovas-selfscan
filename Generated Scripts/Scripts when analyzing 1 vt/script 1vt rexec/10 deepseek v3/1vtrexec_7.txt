@@ -1,0 +1,15 @@
+#!/bin/bash
+systemctl stop rexec
+systemctl disable rexec
+if [ -f /etc/inetd.conf ]; then
+    sed -i '/^rexec/d' /etc/inetd.conf
+fi
+if [ -f /etc/xinetd.d/rexec ]; then
+    rm -f /etc/xinetd.d/rexec
+fi
+iptables -A INPUT -p tcp --dport 512 -j DROP
+iptables-save > /etc/iptables/rules.v4
+if [ -f /etc/ufw/user.rules ]; then
+    ufw deny 512/tcp
+fi
+echo "rexec service has been disabled and port 512 is blocked."

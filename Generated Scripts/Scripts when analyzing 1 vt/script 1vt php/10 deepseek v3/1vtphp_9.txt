@@ -1,0 +1,71 @@
+#!/bin/bash
+
+# Verifica se o sistema possui PHP instalado
+if ! command -v php &> /dev/null; then
+  echo "PHP não está instalado. Nenhuma ação necessária."
+  exit 0
+fi
+
+# Verifica a versão do PHP instalada
+PHP_VERSION=$(php -v | grep -oP '^PHP \K[0-9]+\.[0-9]+\.[0-9]+')
+
+# Função para comparar versões
+version_compare() {
+  if [[ $1 == $2 ]]; then
+    return 0
+  fi
+  local IFS=.
+  local i ver1=($1) ver2=($2)
+  for ((i=${#ver1[@]}; i<${#ver2[@]}; i++)); do
+    ver1[i]=0
+  done
+  for ((i=0; i<${#ver1[@]}; i++)); do
+    if [[ -z ${ver2[i]} ]]; then
+      ver2[i]=0
+    fi
+    if ((10#${ver1[i]} < 10#${ver2[i]})); then
+      return 1
+    elif ((10#${ver1[i]} > 10#${ver2[i]})); then
+      return 2
+    fi
+  done
+  return 0
+}
+
+# Verifica se a versão do PHP é vulnerável
+VULN=0
+version_compare $PHP_VERSION "5.3.13"
+if [[ $? == 1 ]]; then
+  VULN=1
+else
+  version_compare $PHP_VERSION "5.4.0"
+  if [[ $? != 1 ]]; then
+    version_compare $PHP_VERSION "5.4.3"
+    if [[ $? == 1 ]]; then
+      VULN=1
+    fi
+  fi
+fi
+
+# Se a versão for vulnerável, atualiza o PHP
+if [[ $VULN == 1 ]]; then
+  if [[ -f /etc/os-release ]]; then
+    . /etc/os-release
+    if [[ $ID == "ubuntu" || $ID == "debian" ]]; then
+      sudo apt update
+      sudo apt install -y php
+    elif [[ $ID == "centos" || $ID == "rhel" ]]; then
+      sudo yum update -y php
+    elif [[ $ID == "fedora" ]]; then
+      sudo dnf update -y php
+    else
+      echo "Sistema operacional não suportado. Atualize manualmente o PHP para a versão 5.3.13, 5.4.3 ou superior."
+      exit 1
+    fi
+  else
+    echo "Sistema operacional não suportado. Atualize manualmente o PHP para a versão 5.3.13, 5.4.3 ou superior."
+    exit 1
+  fi
+else
+  echo "A versão do PHP já está atualizada e não é vulnerável."
+fi

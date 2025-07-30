@@ -1,0 +1,286 @@
+>analise esse prompt contendo as vulnerabilidades encontradas em um csv do openvas e analise se os scripts que irei enviar em seguida sao capazes de corrigir esses problemas ou nao, me informando uma porcentagem de correcao das vulnerabilidades
+>Vulnerabilidades:
+    # INSTRUÇÕES PARA O MODELO DE IA
+
+    ## PERSONA
+    Você é um especialista em cibersegurança e automação de sistemas, focado em criar scripts de correção (patching). Sua única função é gerar um script que resolva a vulnerabilidade descrita abaixo.
+
+    ## TAREFA
+    Analise o contexto da vulnerabilidade a seguir e gere um script de shell (compatível com o sistema operacional do localhost) que, ao ser executado, corrija permanentemente a vulnerabilidade descrita.
+
+    ## CONTEXTO DA VULNERABILIDADE
+
+# Vulnerabilidade 1
+CVEs: nan
+NVT Name: Operating System (OS) End of Life (EOL) Detection
+Port: nan
+Port Protocol: nan
+Summary: The Operating System (OS) on the remote host has reached the end
+  of life (EOL) and should not be used anymore.
+Specific Result: The "Ubuntu" Operating System on the remote host has reached the end of life.
+
+CPE:               cpe:/o:canonical:ubuntu_linux:8.04
+Installed version,
+build or SP:       8.04
+EOL date:          2013-05-09
+EOL info:          https://wiki.ubuntu.com/Releases
+
+Vulnerability Detection Method: Checks if an EOL version of an OS is present on the target
+  host.
+Details:
+Operating System (OS) End of Life (EOL) Detection
+(OID: 1.3.6.1.4.1.25623.1.0.103674)
+Version used: 2025-05-21T05:40:19Z
+
+Affected Software/OS: nan
+Product Detection Result: Product: cpe:/o:canonical:ubuntu_linux:8.04
+Method: OS Detection Consolidation and Reporting
+(OID: 1.3.6.1.4.1.25623.1.0.105937)
+
+Solution: Update the OS on the remote host to a version which is still
+  supported and receiving security updates by the vendor.
+
+  Note / Important: Please create an override for this result if the target host is a:
+
+  - Windows system with Extended Security Updates (ESU)
+
+  - System with additional 3rd-party / non-vendor security updates like e.g. from 'TuxCare',
+  'Freexian Extended LTS' or similar
+
+    ## REGRAS E RESTRIÇÕES DE SAÍDA
+    1.  **APENAS SCRIPT:** A sua resposta deve conter ÚNICA E EXCLUSIVAMENTE o código do script.
+    2.  **SEM EXPLICAÇÕES:** Não adicione nenhum comentário, explicação, introdução, ou despedida.
+    3.  **SEM BLOCOS DE CÓDIGO MARKDOWN:** Não envolva o script em blocos de código como ` ```bash ` ou ` ```sh `. A resposta deve ser o texto puro do script.
+    4.  **AUTOSSUFICIENTE:** O script deve ser completo, autônomo e não deve exigir interação do usuário para ser executado.
+    5.  **COMPATIBILIDADE:** O script deve ser compatível com o sistema operacional especificado em 'localhost OS'. Se o sistema operacional não for especificado, assuma um sistema baseado em Linux (como Ubuntu/Debian).
+
+    # INÍCIO DO SCRIPT DE CORREÇÃO
+
+>Scripts de correção:
+{type: uploaded file
+fileName: 1VTendoflife_1.txt
+fullContent:
+#!/bin/bash
+sudo apt-get update
+sudo apt-get install -y ubuntu-release-upgrader-core
+sudo do-release-upgrade -d
+sudo reboot}
+{type: uploaded file
+fileName: 1VTendoflife_2.txt
+fullContent:
+#!/bin/bash
+sudo apt-get update -y
+sudo apt-get upgrade -y
+sudo do-release-upgrade -d
+sudo apt-get autoremove -y
+sudo apt-get clean -y}
+{type: uploaded file
+fileName: 1VTendoflife_3.txt
+fullContent:
+#!/bin/bash
+sudo apt-get update
+sudo apt-get install -y ubuntu-release-upgrader-core
+sudo do-release-upgrade -f DistUpgradeViewNonInteractive
+sudo apt-get autoremove -y
+sudo apt-get autoclean -y
+echo "OS upgrade completed. Please reboot the system."}
+{type: uploaded file
+fileName: 1VTendoflife_4.txt
+fullContent:
+#!/bin/bash
+sudo apt-get update
+sudo apt-get dist-upgrade -y
+sudo do-release-upgrade -y
+sudo apt-get autoremove -y
+sudo apt-get autoclean -y}
+{type: uploaded file
+fileName: 1VTendoflife_5.txt
+fullContent:
+#!/bin/bash
+sudo sed -i 's/^Prompt=.*/Prompt=never/' /etc/update-manager/release-upgrades
+sudo do-release-upgrade -f DistUpgradeViewNonInteractive
+sudo apt-get update
+sudo apt-get dist-upgrade -y
+sudo apt-get autoremove -y
+sudo apt-get autoclean -y}
+{type: uploaded file
+fileName: 1VTendoflife_6.txt
+fullContent:
+#!/bin/bash
+sudo apt-get update
+sudo apt-get install -y ubuntu-release-upgrader-core
+sudo do-release-upgrade -m desktop -f DistUpgradeViewNonInteractive
+sudo apt-get autoremove --purge -y
+sudo apt-get autoclean -y
+reboot}
+{type: uploaded file
+fileName: 1VTendoflife_7.txt
+fullContent:
+#!/bin/bash
+sudo apt-get update
+sudo apt-get install -y ubuntu-release-upgrader-core
+sudo do-release-upgrade -d
+sudo apt-get autoremove -y
+sudo apt-get clean}
+{type: uploaded file
+fileName: 1VTendoflife_8.txt
+fullContent:
+#!/bin/bash
+sudo apt-get update
+sudo apt-get install -y update-manager-core
+sudo do-release-upgrade -d
+sudo apt-get dist-upgrade -y
+sudo apt-get autoremove -y
+sudo apt-get autoclean -y}
+{type: uploaded file
+fileName: 1VTendoflife_9.txt
+fullContent:
+#!/bin/bash
+sudo apt-get update
+sudo apt-get upgrade -y
+sudo apt-get dist-upgrade -y
+sudo do-release-upgrade -d -f DistUpgradeViewNonInteractive}
+{type: uploaded file
+fileName: 1VTendoflife_10.txt
+fullContent:
+#!/bin/bash
+sudo apt-get update
+sudo apt-get install -y update-manager-core
+sudo do-release-upgrade -d}
+{type: uploaded file
+fileName: 1VTendoflife_11.txt
+fullContent:
+#!/bin/bash
+OS_VERSION=$(lsb_release -r -s)
+if [ "$OS_VERSION" == "8.04" ]; then
+    sudo sed -i 's/8.04/20.04/g' /etc/apt/sources.list
+    sudo apt-get update
+    sudo apt-get dist-upgrade -y
+    sudo do-release-upgrade -q -f DistUpgradeViewNonInteractive
+fi}
+{type: uploaded file
+fileName: 1VTendoflife_12.txt
+fullContent:
+#!/bin/bash
+OS_NAME=$(lsb_release -si)
+OS_VERSION=$(lsb_release -sr)
+
+if [[ "$OS_NAME" == "Ubuntu" && "$OS_VERSION" == "8.04" ]]; then
+    echo "Upgrading Ubuntu 8.04 to a supported version..."
+    sudo do-release-upgrade
+    if [[ $? -eq 0 ]]; then
+        echo "Upgrade completed successfully."
+    else
+        echo "Upgrade failed. Please check for errors and try again."
+    fi
+else
+    echo "The system is not running Ubuntu 8.04. No action taken."
+fi}
+{type: uploaded file
+fileName: 1VTendoflife_13.txt
+fullContent:
+#!/bin/bash
+sudo apt-get update
+sudo apt-get install -y update-manager-core
+sudo do-release-upgrade -d -f DistUpgradeViewNonInteractive
+sudo apt-get dist-upgrade -y
+sudo apt-get autoremove -y
+sudo apt-get autoclean -y}
+{type: uploaded file
+fileName: 1VTendoflife_14.txt
+fullContent:
+#!/bin/bash
+os_version=$(lsb_release -sr)
+if [[ "$os_version" == "8.04" ]]; then
+    echo "Upgrading Ubuntu 8.04 to a supported version..."
+    export DEBIAN_FRONTEND=noninteractive
+    apt-get update -y
+    apt-get install -y update-manager-core
+    do-release-upgrade -f DistUpgradeViewNonInteractive
+fi}
+{type: uploaded file
+fileName: 1VTendoflife_15.txt
+fullContent:
+#!/bin/bash
+sudo sed -i 's/^Prompt=lts/Prompt=normal/' /etc/update-manager/release-upgrades
+sudo do-release-upgrade -d -f DistUpgradeViewNonInteractive}
+{type: uploaded file
+fileName: 1VTendoflife_16.txt
+fullContent:
+#!/bin/bash
+sudo apt-get update
+sudo apt-get upgrade -y
+sudo do-release-upgrade -y}
+{type: uploaded file
+fileName: 1VTendoflife_17.txt
+fullContent:
+#!/bin/bash
+sudo apt-get update
+sudo apt-get install -y ubuntu-release-upgrader-core
+sudo do-release-upgrade -d -f DistUpgradeViewNonInteractive}
+{type: uploaded file
+fileName: 1VTendoflife_18.txt
+fullContent:
+#!/bin/bash
+REPO_FILE="/etc/apt/sources.list"
+BACKUP_FILE="/etc/apt/sources.list.bak"
+
+# Backup the current sources.list file
+cp $REPO_FILE $BACKUP_FILE
+
+# Remove all existing repositories from sources.list
+> $REPO_FILE
+
+# Add the latest supported Ubuntu repositories
+echo "deb http://archive.ubuntu.com/ubuntu/ focal main restricted universe multiverse" >> $REPO_FILE
+echo "deb http://archive.ubuntu.com/ubuntu/ focal-updates main restricted universe multiverse" >> $REPO_FILE
+echo "deb http://archive.ubuntu.com/ubuntu/ focal-security main restricted universe multiverse" >> $REPO_FILE
+
+# Update package lists and upgrade the system
+apt-get update -y
+apt-get dist-upgrade -y
+apt-get full-upgrade -y
+
+# Clean up unnecessary packages
+apt-get autoremove -y
+apt-get autoclean -y
+
+# Reboot the system to apply all changes
+reboot}
+{type: uploaded file
+fileName: 1VTendoflife_19.txt
+fullContent:
+#!/bin/bash
+if [ "$(lsb_release -rs)" = "8.04" ]; then
+    echo "Ubuntu 8.04 detected. Upgrading to a supported version..."
+    sed -i 's/hardy/trusty/g' /etc/apt/sources.list
+    apt-get update
+    apt-get install -y ubuntu-minimal
+    do-release-upgrade -d
+    if [ "$(lsb_release -rs)" != "8.04" ]; then
+        echo "Upgrade successful. Current version: $(lsb_release -rs)"
+    else
+        echo "Upgrade failed. Please check manually."
+    fi
+else
+    echo "No EOL version detected. Current version: $(lsb_release -rs)"
+fi}
+{type: uploaded file
+fileName: 1VTendoflife_20.txt
+fullContent:
+#!/bin/bash
+if grep -q "Ubuntu 8.04" /etc/issue; then
+    echo "Detected Ubuntu 8.04 (End of Life). Upgrading to Ubuntu 16.04 LTS..."
+    export DEBIAN_FRONTEND=noninteractive
+    apt-get update -y
+    apt-get install update-manager-core -y
+    do-release-upgrade -d -f DistUpgradeViewNonInteractive
+    if grep -q "Ubuntu 16.04" /etc/issue; then
+        echo "Upgrade to Ubuntu 16.04 LTS completed successfully."
+    else
+        echo "Upgrade failed. Manual intervention required."
+        exit 1
+    fi
+else
+    echo "No EOL Ubuntu 8.04 detected. No action needed."
+fi}

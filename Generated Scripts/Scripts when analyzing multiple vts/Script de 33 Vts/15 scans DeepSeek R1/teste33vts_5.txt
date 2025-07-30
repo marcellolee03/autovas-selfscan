@@ -1,0 +1,56 @@
+```sh
+#!/bin/sh
+
+if [ "$(id -u)" -ne 0 ]; then
+   echo "Este script deve ser executado como root" >&2
+   exit 1
+fi
+
+# Atualiza o sistema (corrige vulnerabilidades de EoL e outras)
+apt-get update
+apt-get upgrade -y
+
+# Configurações seguras para SSH
+sed -i '/^HostKeyAlgorithms/d' /etc/ssh/sshd_config
+sed -i '/^KexAlgorithms/d' /etc/ssh/sshd_config
+sed -i '/^Ciphers/d' /etc/ssh/sshd_config
+sed -i '/^MACs/d' /etc/ssh/sshd_config
+
+echo "HostKeyAlgorithms -ssh-dss" >> /etc/ssh/sshd_config
+echo "KexAlgorithms curve25519-sha256@libssh.org,ecdh-sha2-nistp256,ecdh-sha2-nistp384,ecdh-sha2-nistp521,diffie-hellman-group-exchange-sha256,diffie-hellman-group16-sha512,diffie-hellman-group18-sha512,diffie-hellman-group14-sha256" >> /etc/ssh/sshd_config
+echo "Ciphers chacha20-poly1305@openssh.com,aes256-gcm@openssh.com,aes128-gcm@openssh.com,aes256-ctr,aes192-ctr,aes128-ctr" >> /etc/ssh/sshd_config
+echo "MACs hmac-sha2-256-etm@openssh.com,hmac-sha2-256,hmac-sha2-512-etm@openssh.com,hmac-sha2-512" >> /etc/ssh/sshd_config
+systemctl restart sshd
+
+# Bloqueia ICMP Timestamp e portas não seguras
+iptables -A INPUT -p icmp --icmp-type timestamp-request -j DROP
+iptables -A INPUT -p tcp -m multiport --dports 39710,49664,49665,49666,49667,49668,49670,7832,23 -j DROP
+ip6tables -A INPUT -p icmpv6 --icmpv6-type 13 -j DROP
+ip6tables -A INPUT -p tcp -m multiport --dports 39710,49664,49665,49666,49667,49668,49670,7832,23 -j DROP
+iptables-save > /etc/iptables/rules.v4
+ip6tables-save > /etc/iptables/rules.v6
+
+# Atualizar regras persistentes de firewall
+if command -v netfilter-persistent >/dev/null; then
+    netfilter-persistent save
+elif command -v iptables-persistent >/dev/null; then
+    service iptables-persistent save
+fi
+
+# Desativa carimbos TCP
+echo "net.ipv4.tcp_timestamps = 0" >> /etc/sysctl.conf
+sysctl -p
+
+# Remove Telnet
+apt-get remove -y telnetd
+
+# Configura versões TLS seguras para RDP/xRDP
+if [ -f /etc/xrdp/xrdp.ini ]; then
+    if grep -q '^ssl_protocols' /etc/xrdp/xrdp.ini; then
+        sed -i 's/^ssl_protocols.*/ssl_protocols=TLSv1.2,TLSv1.3/' /etc/xrdp/xrdp.ini
+    else
+        sed -i '/^\[globals\]/a ssl_protocols=TLSv1.2,TLSv1.3' /etc/xrdp/xrdp.ini
+    fi
+    systemctl restart xrdp
+fi
+```

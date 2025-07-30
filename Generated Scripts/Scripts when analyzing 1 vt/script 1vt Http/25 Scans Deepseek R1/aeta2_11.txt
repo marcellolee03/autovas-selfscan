@@ -1,0 +1,39 @@
+#!/bin/bash
+
+if [ -d "/etc/apache2" ]; then
+  CONF_FILE="/etc/apache2/sites-available/000-redirect-if-http.conf"
+  if [ ! -f "$CONF_FILE" ]; then
+    cat > "$CONF_FILE" <<'EOL'
+<VirtualHost *:80>
+  ServerName _
+  Redirect permanent / https://%{HTTP_HOST}%{REQUEST_URI}
+</VirtualHost>
+EOL
+    a2ensite 000-redirect-if-http.conf >/dev/null 2>&1
+    apachectl configtest >/dev/null 2>&1 && systemctl restart apache2
+  fi
+elif [ -d "/etc/httpd" ]; then
+  CONF_FILE="/etc/httpd/conf.d/redirect-if-http.conf"
+  if [ ! -f "$CONF_FILE" ]; then
+    cat > "$CONF_FILE" <<'EOL'
+<VirtualHost *:80>
+  ServerName _
+  Redirect permanent / https://%{HTTP_HOST}%{REQUEST_URI}
+</VirtualHost>
+EOL
+    apachectl configtest >/dev/null 2>&1 && systemctl restart httpd
+  fi
+elif [ -d "/etc/nginx" ]; then
+  CONF_FILE="/etc/nginx/conf.d/redirect-if-http.conf"
+  if [ ! -f "$CONF_FILE" ]; then
+    cat > "$CONF_FILE" <<'EOL'
+server {
+  listen 80 default_server;
+  listen [::]:80 default_server;
+  server_name _;
+  return 301 https://$host$request_uri;
+}
+EOL
+    nginx -t >/dev/null 2>&1 && systemctl restart nginx
+  fi
+fi

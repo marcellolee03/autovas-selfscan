@@ -1,0 +1,21 @@
+#!/bin/bash
+# Configura o apache para redirecionar HTTP para HTTPS
+if [ -f /etc/apache2/sites-available/default.conf ]; then
+    sed -i 's/<VirtualHost \*:80>/<VirtualHost *:80>\n    RewriteEngine On\n    RewriteCond %{HTTPS} off\n    RewriteRule (.*) https:\/\/%{HTTP_HOST}%{REQUEST_URI} [R=301,L]/' /etc/apache2/sites-available/default.conf
+fi
+
+if [ -f /etc/apache2/sites-available/000-default.conf ]; then
+    sed -i 's/<VirtualHost \*:80>/<VirtualHost *:80>\n    RewriteEngine On\n    RewriteCond %{HTTPS} off\n    RewriteRule (.*) https:\/\/%{HTTP_HOST}%{REQUEST_URI} [R=301,L]/' /etc/apache2/sites-available/000-default.conf
+fi
+
+# Habilita o módulo SSL e reinicia o apache
+a2enmod ssl
+systemctl restart apache2
+
+# Verifica se o redirecionamento está funcionando
+curl -I http://localhost | grep "Location: https://localhost" > /dev/null 2>&1
+if [ $? -eq 0 ]; then
+    echo "Redirecionamento de HTTP para HTTPS configurado com sucesso."
+else
+    echo "Falha ao configurar o redirecionamento de HTTP para HTTPS."
+fi

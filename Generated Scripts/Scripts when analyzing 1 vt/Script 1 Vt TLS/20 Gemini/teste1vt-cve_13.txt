@@ -1,0 +1,46 @@
+```bash
+#!/bin/bash
+
+# Script para desabilitar TLSv1.0 e TLSv1.1 no PostgreSQL (porta 5432)
+
+# 1. Detectar a configuração atual do TLS no postgresql.conf
+tls_config=$(grep "ssl_min_protocol" /etc/postgresql/*/main/postgresql.conf)
+
+# 2. Verificar se a configuração já existe e agir de acordo
+if [ -z "$tls_config" ]; then
+  # Adicionar a configuração se não existir
+  echo "ssl_min_protocol = 'TLSv1.2'" | sudo tee -a /etc/postgresql/*/main/postgresql.conf
+  echo "Configuração ssl_min_protocol adicionada."
+else
+  # Alterar a configuração existente
+  sudo sed -i "s/ssl_min_protocol =.*/ssl_min_protocol = 'TLSv1.2'/g" /etc/postgresql/*/main/postgresql.conf
+  echo "Configuração ssl_min_protocol alterada para TLSv1.2."
+fi
+
+# 3. Reiniciar o serviço PostgreSQL para aplicar as mudanças
+sudo systemctl restart postgresql
+
+# 4. Verificar se o serviço reiniciou corretamente
+if [ $? -eq 0 ]; then
+  echo "Serviço PostgreSQL reiniciado com sucesso."
+else
+  echo "Erro ao reiniciar o serviço PostgreSQL."
+  exit 1
+fi
+
+# 5. Opcional: Verificar a versão do TLS em uso (requer o pacote sslscan)
+if command -v sslscan &> /dev/null; then
+  echo "Verificando a versão do TLS em uso na porta 5432..."
+  sslscan localhost:5432 | grep "TLSv1.2"
+  if [ $? -eq 0 ]; then
+    echo "TLSv1.2 ou superior detectado."
+  else
+    echo "Atenção: TLSv1.2 ou superior não detectado. Verifique a configuração e reinicie o serviço."
+  fi
+else
+  echo "sslscan não encontrado. Instale-o para verificar a configuração TLS."
+fi
+
+echo "Script de correção finalizado."
+exit 0
+```

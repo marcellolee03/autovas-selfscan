@@ -1,0 +1,50 @@
+```bash
+#!/bin/bash
+
+# Define variáveis
+WEB_SERVER_ROOT="/var/www/html" # Ajuste se necessário
+JQUERY_PATH="/console/framework/../js/jquery-1.8.3.min.js"
+BACKUP_DIR="/tmp/jquery_backup"
+JQUERY_VERSION="1.9.0"
+DOWNLOAD_URL="https://code.jquery.com/jquery-${JQUERY_VERSION}.min.js"
+FULL_PATH="$WEB_SERVER_ROOT/$JQUERY_PATH"
+FULL_DIR=$(dirname "$FULL_PATH")
+
+# Cria diretório de backup, se não existir
+mkdir -p "$BACKUP_DIR"
+
+# Para caso o script seja executado múltiplas vezes, verificar se a versão já foi atualizada.
+if grep -q "jQuery JavaScript Library v1.9.0" "$FULL_PATH"; then
+  echo "jQuery já está na versão 1.9.0. Nada a fazer."
+  exit 0
+fi
+
+# Faz backup do arquivo jQuery existente
+echo "Fazendo backup de $FULL_PATH para $BACKUP_DIR"
+cp "$FULL_PATH" "$BACKUP_DIR/jquery-1.8.3.min.js.bak"
+
+# Baixa a nova versão do jQuery
+echo "Baixando jQuery $JQUERY_VERSION"
+wget -q "$DOWNLOAD_URL" -O "/tmp/jquery-${JQUERY_VERSION}.min.js"
+
+# Verifica se o download foi bem-sucedido
+if [ ! -f "/tmp/jquery-${JQUERY_VERSION}.min.js" ]; then
+  echo "Erro ao baixar jQuery $JQUERY_VERSION. Verifique sua conexão com a internet."
+  exit 1
+fi
+
+# Copia a nova versão para o local correto
+echo "Copiando jQuery $JQUERY_VERSION para $FULL_PATH"
+cp "/tmp/jquery-${JQUERY_VERSION}.min.js" "$FULL_PATH"
+
+# Define permissões (ajuste conforme necessário)
+echo "Definindo permissões em $FULL_PATH"
+chmod 644 "$FULL_PATH"
+chown www-data:www-data "$FULL_PATH" # Assumindo www-data como usuário/grupo do servidor web
+
+# Remove o arquivo temporário
+rm "/tmp/jquery-${JQUERY_VERSION}.min.js"
+
+echo "jQuery atualizado para a versão $JQUERY_VERSION com sucesso."
+exit 0
+```

@@ -1,0 +1,177 @@
+IP,Hostname,Port,Port Protocol,CVSS,Severity,QoD,Solution Type,NVT Name,Summary,Specific Result,NVT OID,CVEs,Task ID,Task Name,Timestamp,Result ID,Impact,Solution,Affected Software/OS,Vulnerability Insight,Vulnerability Detection Method,Product Detection Result,BIDs,CERTs,Other References
+      ,,80,tcp,4.8,Medium,80,"Workaround","Cleartext Transmission of Sensitive Information via HTTP","The host / application transmits sensitive information (username, passwords) in
+  cleartext via HTTP.","Vulnerability was detected according to the Vulnerability Detection Method.",1.3.6.1.4.1.25623.1.0.108440,"",9b4e6ac9-7c66-42bf-bfbf-b5d6ab0ac892,"aeta",,5b25ad4c-03a9-4894-9b9f-c7894fc176a7,"An attacker could use this situation to compromise or eavesdrop on the
+  HTTP communication between the client and the server using a man-in-the-middle attack to get access to
+  sensitive data like usernames or passwords.","Enforce the transmission of sensitive data via an encrypted SSL/TLS connection.
+  Additionally make sure the host / application is redirecting all users to the secured SSL/TLS connection before
+  allowing to input sensitive data into the mentioned functions.","Hosts / applications which doesn't enforce the transmission of sensitive data via an
+  encrypted SSL/TLS connection.","","Evaluate previous collected information and check if the host / application is not
+  enforcing the transmission of sensitive data via an encrypted SSL/TLS connection.
+
+  The script is currently checking the following:
+
+  - HTTP Basic Authentication (Basic Auth)
+
+  - HTTP Forms (e.g. Login) with input field of type 'password'
+Details:
+Cleartext Transmission of Sensitive Information via HTTP
+(OID: 1.3.6.1.4.1.25623.1.0.108440)
+Version used: 2023-09-07T05:05:21Z
+","","","",""
+,,53,udp,5.0,Medium,70,"Mitigation","DNS Cache Snooping Vulnerability (UDP) - Active Check","The DNS server is prone to a cache snooping vulnerability.","Vulnerability was detected according to the Vulnerability Detection Method.",1.3.6.1.4.1.25623.1.0.146591,"",9b4e6ac9-7c66-42bf-bfbf-b5d6ab0ac892,"aeta",,3fd70901-7754-4300-80a4-4b4c4e2cafeb,"Attackers might gain information about cached DNS records
+  which might lead to further attacks.
+
+  Note: This finding might be an acceptable risk if you:
+
+  - trust all clients which can reach the server
+
+  - do not allow recursive queries from outside your trusted client network.","There are multiple possible mitigation steps depending on
+  location and functionality needed by the DNS server:
+
+  - Disable recursion
+
+  - Don't allow public access to DNS Servers doing recursion
+
+  - Leave recursion enabled if the DNS Server stays on a corporate network that cannot be reached
+  by untrusted clients","","DNS cache snooping is when someone queries a DNS server in
+  order to find out (snoop) if the DNS server has a specific DNS record cached, and thereby
+  deduce if the DNS server's owner (or its users) have recently visited a specific site.
+
+  This may reveal information about the DNS server's owner, such as what vendor, bank, service
+  provider, etc. they use. Especially if this is confirmed (snooped) multiple times over a period.
+
+  This method could even be used to gather statistical information - for example at what time does
+  the DNS server's owner typically access his net bank etc. The cached DNS record's remaining TTL
+  value can provide very accurate data for this.
+
+  DNS cache snooping is possible even if the DNS server is not configured to resolve recursively
+  for 3rd parties, as long as it provides records from the cache also to 3rd parties (a.k.a.
+  'lame requests').","Sends a crafted DNS query and checks the response.
+
+  Notes:
+
+  - No scan result is expected if localhost (127.0.0.1) was scanned (self scanning)
+
+  - If the scanned network is e.g. a private LAN which contains systems not accessible to the public
+  (access restricted) and it is accepted that the target host is disclosing information to this
+  network please set the 'Network type' configuration of the following VT to 'Private LAN':
+
+  Global variable settings (OID: 1.3.6.1.4.1.25623.1.0.12288)
+Details:
+DNS Cache Snooping Vulnerability (UDP) - Active Check
+(OID: 1.3.6.1.4.1.25623.1.0.146591)
+Version used: 2025-01-21T05:37:33Z
+","","","",""
+,,,,2.1,Low,80,"Mitigation","ICMP Timestamp Reply Information Disclosure","The remote host responded to an ICMP timestamp request.","Vulnerability was detected according to the Vulnerability Detection Method.",1.3.6.1.4.1.25623.1.0.103190,"CVE-1999-0524",9b4e6ac9-7c66-42bf-bfbf-b5d6ab0ac892,"aeta",,1b888fed-4a39-444c-a5d3-e693fd21ff57,"This information could theoretically be used to exploit weak
+  time-based random number generators in other services.","Various mitigations are possible:
+
+  - Disable the support for ICMP timestamp on the remote host completely
+
+  - Protect the remote host by a firewall, and block ICMP packets passing through the firewall in
+  either direction (either completely or only for untrusted networks)","","The Timestamp Reply is an ICMP message which replies to a
+  Timestamp message. It consists of the originating timestamp sent by the sender of the Timestamp as
+  well as a receive timestamp and a transmit timestamp.","Sends an ICMP Timestamp (Type 13) request and checks if a
+  Timestamp Reply (Type 14) is received.
+Details:
+ICMP Timestamp Reply Information Disclosure
+(OID: 1.3.6.1.4.1.25623.1.0.103190)
+Version used: 2025-01-21T05:37:33Z
+","","","DFN-CERT-2014-0658,CB-K15/1514,CB-K14/0632",""
+,,443,tcp,4.3,Medium,98,"Mitigation","SSL/TLS: Deprecated TLSv1.0 and TLSv1.1 Protocol Detection","It was possible to detect the usage of the deprecated TLSv1.0
+  and/or TLSv1.1 protocol on this system.","Vulnerability was detected according to the Vulnerability Detection Method.",1.3.6.1.4.1.25623.1.0.117274,"CVE-2011-3389,CVE-2015-0204,CVE-2025-3200",9b4e6ac9-7c66-42bf-bfbf-b5d6ab0ac892,"aeta",,27643890-c972-4f6b-9a50-51c82e4ab1cf,"An attacker might be able to use the known cryptographic flaws to
+  eavesdrop the connection between clients and the service to get access to sensitive data
+  transferred within the secured connection.
+
+  Furthermore newly uncovered vulnerabilities in this protocols won't receive security updates
+  anymore.","It is recommended to disable the deprecated TLSv1.0 and/or
+  TLSv1.1 protocols in favor of the TLSv1.2+ protocols.
+
+  Please see the references for more resources supporting you with this task.","'- All services providing an encrypted communication using the
+  TLSv1.0 and/or TLSv1.1 protocols
+
+  - CVE-2025-3200: Multiple products from Wiesemann & Theis","The TLSv1.0 and TLSv1.1 protocols contain known cryptographic
+  flaws like:
+
+  - CVE-2011-3389: Browser Exploit Against SSL/TLS (BEAST)
+
+  - CVE-2015-0204: Factoring Attack on RSA-EXPORT Keys Padding Oracle On Downgraded Legacy
+  Encryption (FREAK)","Checks the used TLS protocols of the services provided by this
+  system.
+Details:
+SSL/TLS: Deprecated TLSv1.0 and TLSv1.1 Protocol Detection
+(OID: 1.3.6.1.4.1.25623.1.0.117274)
+Version used: 2024-09-27T05:05:23Z
+","","","DFN-CERT-2020-0177,DFN-CERT-2020-0111,DFN-CERT-2019-0068,DFN-CERT-2018-1441,DFN-CERT-2018-1408,DFN-CERT-2016-1372,DFN-CERT-2016-1164,DFN-CERT-2016-0388,DFN-CERT-2015-1853,DFN-CERT-2015-1332,DFN-CERT-2015-0884,DFN-CERT-2015-0800,DFN-CERT-2015-0758,DFN-CERT-2015-0567,DFN-CERT-2015-0544,DFN-CERT-2015-0530,DFN-CERT-2015-0396,DFN-CERT-2015-0375,DFN-CERT-2015-0374,DFN-CERT-2015-0305,DFN-CERT-2015-0199,DFN-CERT-2015-0079,DFN-CERT-2015-0021,DFN-CERT-2014-1414,DFN-CERT-2013-1847,DFN-CERT-2013-1792,DFN-CERT-2012-1979,DFN-CERT-2012-1829,DFN-CERT-2012-1530,DFN-CERT-2012-1380,DFN-CERT-2012-1377,DFN-CERT-2012-1292,DFN-CERT-2012-1214,DFN-CERT-2012-1213,DFN-CERT-2012-1180,DFN-CERT-2012-1156,DFN-CERT-2012-1155,DFN-CERT-2012-1039,DFN-CERT-2012-0956,DFN-CERT-2012-0908,DFN-CERT-2012-0868,DFN-CERT-2012-0867,DFN-CERT-2012-0848,DFN-CERT-2012-0838,DFN-CERT-2012-0776,DFN-CERT-2012-0722,DFN-CERT-2012-0638,DFN-CERT-2012-0627,DFN-CERT-2012-0451,DFN-CERT-2012-0418,DFN-CERT-2012-0354,DFN-CERT-2012-0234,DFN-CERT-2012-0221,DFN-CERT-2012-0177,DFN-CERT-2012-0170,DFN-CERT-2012-0146,DFN-CERT-2012-0142,DFN-CERT-2012-0126,DFN-CERT-2012-0123,DFN-CERT-2012-0095,DFN-CERT-2012-0051,DFN-CERT-2012-0047,DFN-CERT-2012-0021,DFN-CERT-2011-1953,DFN-CERT-2011-1946,DFN-CERT-2011-1844,DFN-CERT-2011-1826,DFN-CERT-2011-1774,DFN-CERT-2011-1743,DFN-CERT-2011-1738,DFN-CERT-2011-1706,DFN-CERT-2011-1628,DFN-CERT-2011-1627,DFN-CERT-2011-1619,DFN-CERT-2011-1482,WID-SEC-2023-1435,CB-K18/0799,CB-K16/1289,CB-K16/1096,CB-K15/1751,CB-K15/1266,CB-K15/0850,CB-K15/0764,CB-K15/0720,CB-K15/0548,CB-K15/0526,CB-K15/0509,CB-K15/0493,CB-K15/0384,CB-K15/0365,CB-K15/0364,CB-K15/0302,CB-K15/0192,CB-K15/0079,CB-K15/0016,CB-K14/1342,CB-K14/0231,CB-K13/0845,CB-K13/0796,CB-K13/0790",""
+,,443,tcp,5.0,Medium,70,"VendorFix","SSL/TLS: Renegotiation DoS Vulnerability (CVE-2011-1473, CVE-2011-5094)","The remote SSL/TLS service is prone to a denial of service (DoS)
+  vulnerability.","Vulnerability was detected according to the Vulnerability Detection Method.",1.3.6.1.4.1.25623.1.0.117761,"CVE-2011-1473,CVE-2011-5094",9b4e6ac9-7c66-42bf-bfbf-b5d6ab0ac892,"aeta",,42db9b4e-c3c9-4c97-a958-43a97e63ef4d,"The flaw might make it easier for remote attackers to cause a
+  DoS (CPU consumption) by performing many renegotiations within a single connection.","Users should contact their vendors for specific patch information.
+
+  A general solution is to remove/disable renegotiation capabilities altogether from/in the affected
+  SSL/TLS service.","Every SSL/TLS service which does not properly restrict
+  client-initiated renegotiation.","The flaw exists because the remote SSL/TLS service does not
+  properly restrict client-initiated renegotiation within the SSL and TLS protocols.
+
+  Note: The referenced CVEs are affecting OpenSSL and Mozilla Network Security Services (NSS) but
+  both are in a DISPUTED state with the following rationale:
+
+  > It can also be argued that it is the responsibility of server deployments, not a security
+  library, to prevent or limit renegotiation when it is inappropriate within a specific environment.
+
+  Both CVEs are still kept in this VT as a reference to the origin of this flaw.","Checks if the remote service allows to re-do the same SSL/TLS
+  handshake (Renegotiation) over an existing / already established SSL/TLS connection.
+Details:
+SSL/TLS: Renegotiation DoS Vulnerability (CVE-2011-1473, CVE-2011-5094)
+(OID: 1.3.6.1.4.1.25623.1.0.117761)
+Version used: 2024-09-27T05:05:23Z
+","","","DFN-CERT-2025-0933,DFN-CERT-2017-1013,DFN-CERT-2017-1012,DFN-CERT-2014-0809,DFN-CERT-2013-1928,DFN-CERT-2012-1112,WID-SEC-2024-1591,WID-SEC-2024-0796,WID-SEC-2023-1435,CB-K17/0980,CB-K17/0979,CB-K14/0772,CB-K13/0915,CB-K13/0462",""
+,,443,tcp,5.9,Medium,98,"Mitigation","SSL/TLS: Report Weak Cipher Suites","This routine reports all weak SSL/TLS cipher suites accepted by
+  a service.","Vulnerability was detected according to the Vulnerability Detection Method.",1.3.6.1.4.1.25623.1.0.103440,"CVE-2013-2566,CVE-2015-2808,CVE-2015-4000",9b4e6ac9-7c66-42bf-bfbf-b5d6ab0ac892,"aeta",,51f03c3d-0cdf-44e6-9617-541a1f97569a,"This could allow remote attackers to obtain sensitive information
+  or have other, unspecified impacts.","The configuration of this services should be changed so that it
+  does not accept the listed weak cipher suites anymore.
+
+  Please see the references for more resources supporting you with this task.","All services providing an encrypted communication using weak
+  SSL/TLS cipher suites.","These rules are applied for the evaluation of the cryptographic
+  strength:
+
+  - RC4 is considered to be weak (CVE-2013-2566, CVE-2015-2808)
+
+  - Ciphers using 64 bit or less are considered to be vulnerable to brute force methods and
+  therefore considered as weak (CVE-2015-4000)
+
+  - 1024 bit RSA authentication is considered to be insecure and therefore as weak
+
+  - Any cipher considered to be secure for only the next 10 years is considered as medium
+
+  - Any other cipher is considered as strong","Checks previous collected cipher suites.
+
+  NOTE: No severity for SMTP services with 'Opportunistic TLS' and weak cipher suites on port 25/tcp
+  is reported. If too strong cipher suites are configured for this service the alternative would be
+  to fall back to an even more insecure cleartext communication.
+Details:
+SSL/TLS: Report Weak Cipher Suites
+(OID: 1.3.6.1.4.1.25623.1.0.103440)
+Version used: 2024-09-27T05:05:23Z
+","","","DFN-CERT-2023-2939,DFN-CERT-2021-0775,DFN-CERT-2020-1561,DFN-CERT-2020-1276,DFN-CERT-2017-1821,DFN-CERT-2016-1692,DFN-CERT-2016-1648,DFN-CERT-2016-1168,DFN-CERT-2016-0665,DFN-CERT-2016-0642,DFN-CERT-2016-0184,DFN-CERT-2016-0135,DFN-CERT-2016-0101,DFN-CERT-2016-0035,DFN-CERT-2015-1853,DFN-CERT-2015-1679,DFN-CERT-2015-1632,DFN-CERT-2015-1608,DFN-CERT-2015-1542,DFN-CERT-2015-1518,DFN-CERT-2015-1406,DFN-CERT-2015-1341,DFN-CERT-2015-1194,DFN-CERT-2015-1144,DFN-CERT-2015-1113,DFN-CERT-2015-1078,DFN-CERT-2015-1067,DFN-CERT-2015-1038,DFN-CERT-2015-1016,DFN-CERT-2015-1012,DFN-CERT-2015-0980,DFN-CERT-2015-0977,DFN-CERT-2015-0976,DFN-CERT-2015-0960,DFN-CERT-2015-0956,DFN-CERT-2015-0944,DFN-CERT-2015-0937,DFN-CERT-2015-0925,DFN-CERT-2015-0884,DFN-CERT-2015-0881,DFN-CERT-2015-0879,DFN-CERT-2015-0866,DFN-CERT-2015-0844,DFN-CERT-2015-0800,DFN-CERT-2015-0737,DFN-CERT-2015-0696,DFN-CERT-2014-0977,CB-K21/0067,CB-K19/0812,CB-K17/1750,CB-K16/1593,CB-K16/1552,CB-K16/1102,CB-K16/0617,CB-K16/0599,CB-K16/0168,CB-K16/0121,CB-K16/0090,CB-K16/0030,CB-K15/1751,CB-K15/1591,CB-K15/1550,CB-K15/1517,CB-K15/1514,CB-K15/1464,CB-K15/1442,CB-K15/1334,CB-K15/1269,CB-K15/1136,CB-K15/1090,CB-K15/1059,CB-K15/1022,CB-K15/1015,CB-K15/0986,CB-K15/0964,CB-K15/0962,CB-K15/0932,CB-K15/0927,CB-K15/0926,CB-K15/0907,CB-K15/0901,CB-K15/0896,CB-K15/0889,CB-K15/0877,CB-K15/0850,CB-K15/0849,CB-K15/0834,CB-K15/0827,CB-K15/0802,CB-K15/0764,CB-K15/0733,CB-K15/0667,CB-K14/0935,CB-K13/0942",""
+,,,,2.6,Low,80,"Mitigation","TCP Timestamps Information Disclosure","The remote host implements TCP timestamps and therefore allows
+  to compute the uptime.","Vulnerability was detected according to the Vulnerability Detection Method.",1.3.6.1.4.1.25623.1.0.80091,"",9b4e6ac9-7c66-42bf-bfbf-b5d6ab0ac892,"aeta",,3e153195-2789-4d00-9d16-a7af6c939c60,"A side effect of this feature is that the uptime of the remote
+  host can sometimes be computed.","To disable TCP timestamps on linux add the line
+  'net.ipv4.tcp_timestamps = 0' to /etc/sysctl.conf. Execute 'sysctl -p' to apply the settings at
+  runtime.
+
+  To disable TCP timestamps on Windows execute 'netsh int tcp set global timestamps=disabled'
+
+  Starting with Windows Server 2008 and Vista, the timestamp can not be completely disabled.
+
+  The default behavior of the TCP/IP stack on this Systems is to not use the Timestamp options when
+  initiating TCP connections, but use them if the TCP peer that is initiating communication includes
+  them in their synchronize (SYN) segment.
+
+  See the references for more information.","TCP implementations that implement RFC1323/RFC7323.","The remote host implements TCP timestamps, as defined by
+  RFC1323/RFC7323.","Special IP packets are forged and sent with a little delay in
+  between to the target IP. The responses are searched for a timestamps. If found, the timestamps
+  are reported.
+Details:
+TCP Timestamps Information Disclosure
+(OID: 1.3.6.1.4.1.25623.1.0.80091)
+Version used: 2023-12-15T16:10:08Z
+","","","",""

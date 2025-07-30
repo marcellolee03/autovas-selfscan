@@ -1,0 +1,495 @@
+>analise esse prompt contendo as vulnerabilidades encontradas em um csv do openvas e analise se os scripts que irei enviar em seguida sao capazes de corrigir esses problemas ou nao, me informando uma porcentagem de correcao das vulnerabilidades
+>Vulnerabilidades:
+
+    # INSTRUÇÕES PARA O MODELO DE IA
+
+    ## PERSONA
+    Você é um especialista em cibersegurança e automação de sistemas, focado em criar scripts de correção (patching). Sua única função é gerar um script que resolva a vulnerabilidade descrita abaixo.
+
+    ## TAREFA
+    Analise o contexto da vulnerabilidade a seguir e gere um script de shell (compatível com o sistema operacional do localhost) que, ao ser executado, corrija permanentemente a vulnerabilidade descrita.
+
+    ## CONTEXTO DA VULNERABILIDADE
+
+# Vulnerabilidade 1
+CVEs: CVE-2011-3389,CVE-2015-0204,CVE-2023-41928,CVE-2024-41270,CVE-2025-3200
+NVT Name: SSL/TLS: Deprecated TLSv1.0 and TLSv1.1 Protocol Detection
+Port: 5432
+Port Protocol: tcp
+Summary: It was possible to detect the usage of the deprecated TLSv1.0
+  and/or TLSv1.1 protocol on this system.
+Specific Result: The service is only providing the deprecated TLSv1.0 protocol and supports one or more ciphers. Those supported ciphers can be found in the 'SSL/TLS: Report Supported Cipher Suites' (OID: 1.3.6.1.4.1.25623.1.0.802067) VT.
+
+Vulnerability Detection Method: Checks the used TLS protocols of the services provided by this
+  system.
+Details:
+SSL/TLS: Deprecated TLSv1.0 and TLSv1.1 Protocol Detection
+(OID: 1.3.6.1.4.1.25623.1.0.117274)
+Version used: 2025-04-30T05:39:51Z
+
+Affected Software/OS: '- All services providing an encrypted communication using the
+  TLSv1.0 and/or TLSv1.1 protocols
+
+  - CVE-2023-41928: Kiloview P1 4G and P2 4G Video Encoder
+
+  - CVE-2024-41270: Gorush v1.18.4
+
+  - CVE-2025-3200: Multiple products from Wiesemann & Theis
+Product Detection Result: Product: cpe:/a:ietf:transport_layer_security:1.0
+Method: SSL/TLS: Version Detection
+(OID: 1.3.6.1.4.1.25623.1.0.105782)
+
+Solution: It is recommended to disable the deprecated TLSv1.0 and/or
+  TLSv1.1 protocols in favor of the TLSv1.2+ protocols.
+
+  Please see the references for more resources supporting you with this task.
+
+    ## REGRAS E RESTRIÇÕES DE SAÍDA
+    1.  **APENAS SCRIPT:** A sua resposta deve conter ÚNICA E EXCLUSIVAMENTE o código do script.
+    2.  **SEM EXPLICAÇÕES:** Não adicione nenhum comentário, explicação, introdução, ou despedida.
+    3.  **SEM BLOCOS DE CÓDIGO MARKDOWN:** Não envolva o script em blocos de código como ` ```bash ` ou ` ```sh `. A resposta deve ser o texto puro do script.
+    4.  **AUTOSSUFICIENTE:** O script deve ser completo, autônomo e não deve exigir interação do usuário para ser executado.
+    5.  **COMPATIBILIDADE:** O script deve ser compatível com o sistema operacional especificado em 'localhost OS'. Se o sistema operacional não for especificado, assuma um sistema baseado em Linux (como Ubuntu/Debian).
+
+    # INÍCIO DO SCRIPT DE CORREÇÃO
+
+>Scripts de correção:
+{type: uploaded file
+fileName: teste1vt-cve_1.txt
+fullContent:
+#!/bin/bash
+CONFIG_FILE="/etc/ssl/openssl.cnf"
+BACKUP_FILE="/etc/ssl/openssl.cnf.bak"
+cp $CONFIG_FILE $BACKUP_FILE
+sed -i '/^MinProtocol/d' $CONFIG_FILE
+sed -i '/^CipherString/d' $CONFIG_FILE
+echo 'MinProtocol = TLSv1.2' >> $CONFIG_FILE
+echo 'CipherString = DEFAULT@SECLEVEL=2' >> $CONFIG_FILE
+systemctl restart apache2
+systemctl restart nginx
+systemctl restart postgresql}
+{type: uploaded file
+fileName: teste1vt-cve_2.txt
+fullContent:
+#!/bin/bash
+if [ -f /etc/ssl/openssl.cnf ]; then
+    sed -i '/^MinProtocol =/d' /etc/ssl/openssl.cnf
+    sed -i '/^CipherString =/d' /etc/ssl/openssl.cnf
+    echo "MinProtocol = TLSv1.2" >> /etc/ssl/openssl.cnf
+    echo "CipherString = DEFAULT@SECLEVEL=2" >> /etc/ssl/openssl.cnf
+fi
+
+if [ -f /etc/apache2/mods-enabled/ssl.conf ]; then
+    sed -i '/^SSLProtocol /d' /etc/apache2/mods-enabled/ssl.conf
+    echo "SSLProtocol -all +TLSv1.2 +TLSv1.3" >> /etc/apache2/mods-enabled/ssl.conf
+fi
+
+if [ -f /etc/nginx/nginx.conf ]; then
+    sed -i '/ssl_protocols /d' /etc/nginx/nginx.conf
+    echo "ssl_protocols TLSv1.2 TLSv1.3;" >> /etc/nginx/nginx.conf
+fi
+
+systemctl restart apache2 > /dev/null 2>&1
+systemctl restart nginx > /dev/null 2>&1}
+{type: uploaded file
+fileName: teste1vt-cve_3.txt
+fullContent:
+#!/bin/bash
+CONF_FILE="/etc/ssl/openssl.cnf"
+
+if [ -f "$CONF_FILE" ]; then
+    sed -i '/^MinProtocol =/d' "$CONF_FILE"
+    sed -i '/^CipherString =/d' "$CONF_FILE"
+    echo "MinProtocol = TLSv1.2" >> "$CONF_FILE"
+    echo "CipherString = DEFAULT@SECLEVEL=2" >> "$CONF_FILE"
+    systemctl restart apache2
+    systemctl restart nginx
+    systemctl restart postgresql
+fi}
+{type: uploaded file
+fileName: teste1vt-cve_4.txt
+fullContent:
+#!/bin/bash
+config_file="/etc/ssl/openssl.cnf"
+backup_file="/etc/ssl/openssl.cnf.bak"
+cp $config_file $backup_file
+sed -i '/^MinProtocol =/d' $config_file
+sed -i '/^CipherString =/d' $config_file
+echo "MinProtocol = TLSv1.2" >> $config_file
+echo "CipherString = DEFAULT@SECLEVEL=2" >> $config_file
+systemctl restart apache2
+systemctl restart postgresql
+systemctl restart nginx}
+{type: uploaded file
+fileName: teste1vt-cve_5.txt
+fullContent:
+#!/bin/bash
+NETWORK_SERVICES=$(ss -tln | grep ':5432 ' | awk '{print $4}')
+for SERVICE in $NETWORK_SERVICES; do
+    CONFIG_FILE=$(grep -l "listen_addresses.*${SERVICE%:*}" /etc/postgresql/*/main/postgresql.conf)
+    if [ -n "$CONFIG_FILE" ]; then
+        sed -i 's/^ssl_protocols.*/ssl_protocols = TLSv1.2,TLSv1.3/' "$CONFIG_FILE"
+        systemctl restart postgresql
+    fi
+done}
+{type: uploaded file
+fileName: teste1vt-cve_6.txt
+fullContent:
+#!/bin/bash
+openssl_conf=$(mktemp)
+cat > "$openssl_conf" <<EOL
+[default_conf]
+ssl_conf = ssl_sect
+
+[ssl_sect]
+system_default = system_default_sect
+
+[system_default_sect]
+MinProtocol = TLSv1.2
+CipherString = DEFAULT@SECLEVEL=2
+EOL
+
+sudo cp "$openssl_conf" /etc/ssl/openssl.cnf
+rm "$openssl_conf"
+
+sudo sed -i 's/^SSLProtocol.*/SSLProtocol -all +TLSv1.2 +TLSv1.3/' /etc/apache2/mods-enabled/ssl.conf
+sudo sed -i 's/^ssl_protocols.*/ssl_protocols TLSv1.2 TLSv1.3;/' /etc/nginx/nginx.conf
+sudo systemctl restart apache2
+sudo systemctl restart nginx}
+{type: uploaded file
+fileName: teste1vt-cve_7.txt
+fullContent:
+#!/bin/bash
+openssl_conf="/etc/ssl/openssl.cnf"
+nginx_conf="/etc/nginx/nginx.conf"
+apache_conf="/etc/apache2/apache2.conf"
+
+# Disable TLSv1.0 and TLSv1.1 in OpenSSL
+if [ -f "$openssl_conf" ]; then
+    sed -i '/^MinProtocol = TLSv1.0/d' "$openssl_conf"
+    sed -i '/^MinProtocol = TLSv1.1/d' "$openssl_conf"
+    echo "MinProtocol = TLSv1.2" >> "$openssl_conf"
+fi
+
+# Disable TLSv1.0 and TLSv1.1 in Nginx
+if [ -f "$nginx_conf" ]; then
+    sed -i 's/ssl_protocols.*/ssl_protocols TLSv1.2 TLSv1.3;/' "$nginx_conf"
+fi
+
+# Disable TLSv1.0 and TLSv1.1 in Apache
+if [ -f "$apache_conf" ]; then
+    sed -i 's/SSLProtocol.*/SSLProtocol +TLSv1.2 +TLSv1.3/' "$apache_conf"
+fi
+
+# Restart services to apply changes
+systemctl restart apache2 2>/dev/null
+systemctl restart nginx 2>/dev/null}
+{type: uploaded file
+fileName: teste1vt-cve_8.txt
+fullContent:
+#!/bin/bash
+BACKUP_FILE="/etc/ssl/openssl.cnf.backup"
+openssl_conf="/etc/ssl/openssl.cnf"
+
+# Backup the original configuration file
+cp "$openssl_conf" "$BACKUP_FILE"
+
+# Update the configuration to disable TLSv1.0 and TLSv1.1
+sed -i '/^MinProtocol =/d' "$openssl_conf"
+sed -i '/^CipherString =/d' "$openssl_conf"
+
+echo -e "\n# Disable TLSv1.0 and TLSv1.1\nMinProtocol = TLSv1.2\nCipherString = DEFAULT@SECLEVEL=2" >> "$openssl_conf"
+
+# Restart services that use SSL/TLS
+services=$(systemctl list-units --type=service --state=running | grep -E '(nginx|apache2|httpd|postgresql)' | awk '{print $1}')
+for service in $services; do
+  systemctl restart "$service"
+done
+
+echo "TLSv1.0 and TLSv1.1 have been disabled, and affected services have been restarted."}
+{type: uploaded file
+fileName: teste1vt-cve_9.txt
+fullContent:
+#!/bin/bash
+CONFIG_FILE="/etc/ssl/openssl.cnf"
+BACKUP_FILE="$CONFIG_FILE.backup.$(date +%Y%m%d%H%M%S)"
+
+cp "$CONFIG_FILE" "$BACKUP_FILE"
+
+sed -i '/^MinProtocol =/d' "$CONFIG_FILE"
+sed -i '/^CipherString =/d' "$CONFIG_FILE"
+
+echo "MinProtocol = TLSv1.2" >> "$CONFIG_FILE"
+echo "CipherString = DEFAULT@SECLEVEL=2" >> "$CONFIG_FILE"
+
+systemctl restart apache2
+systemctl restart postgresql
+systemctl restart nginx}
+{type: uploaded file
+fileName: teste1vt-cve_10.txt
+fullContent:
+#!/bin/bash
+CONF_FILE="/etc/ssl/openssl.cnf"
+BACKUP_FILE="${CONF_FILE}.bak"
+
+if [ ! -f "$BACKUP_FILE" ]; then
+    cp "$CONF_FILE" "$BACKUP_FILE"
+fi
+
+sed -i 's/MinProtocol = TLSv1.0/MinProtocol = TLSv1.2/g' "$CONF_FILE"
+sed -i 's/MinProtocol = TLSv1.1/MinProtocol = TLSv1.2/g' "$CONF_FILE"
+
+sed -i 's/CipherString = DEFAULT@SECLEVEL=2/CipherString = HIGH:!aNULL:!MD5:!RC4:!3DES/g' "$CONF_FILE"
+
+systemctl restart apache2.service
+systemctl restart postgresql.service}
+{type: uploaded file
+fileName: teste1vt-cve_11.txt
+fullContent:
+#!/bin/bash
+openssl_conf="/etc/ssl/openssl.cnf"
+if [ -f "$openssl_conf" ]; then
+    sed -i '/^MinProtocol/s/=.*/= TLSv1.2/' "$openssl_conf"
+    sed -i '/^CipherString/s/=.*/= DEFAULT@SECLEVEL=2/' "$openssl_conf"
+fi
+nginx_conf="/etc/nginx/nginx.conf"
+if [ -f "$nginx_conf" ]; then
+    sed -i '/ssl_protocols/s/TLSv1\.0\ TLSv1\.1//g' "$nginx_conf"
+    sed -i '/ssl_protocols/s/;/ TLSv1.2;/' "$nginx_conf"
+fi
+apache_conf="/etc/apache2/mods-enabled/ssl.conf"
+if [ -f "$apache_conf" ]; then
+    sed -i '/SSLProtocol/s/all.*-SSLv3/TLSv1.2/' "$apache_conf"
+    sed -i '/SSLCipherSuite/s/.*/SSLCipherSuite HIGH:!aNULL:!MD5/' "$apache_conf"
+fi
+systemctl restart nginx
+systemctl restart apache2}
+{type: uploaded file
+fileName: teste1vt-cve_12.txt
+fullContent:
+#!/bin/bash
+
+# Backup original configuration files
+cp /etc/ssl/openssl.cnf /etc/ssl/openssl.cnf.bak
+cp /etc/ssl/openssl.cnf /etc/ssl/openssl.cnf.bak_$(date +%F_%T)
+
+# Adjust OpenSSL configuration to disable TLSv1.0 and TLSv1.1
+sed -i '/^MinProtocol/ d; /^CipherString/ d' /etc/ssl/openssl.cnf
+echo "MinProtocol = TLSv1.2" >> /etc/ssl/openssl.cnf
+echo "CipherString = DEFAULT@SECLEVEL=2" >> /etc/ssl/openssl.cnf
+
+# Apply the changes to the system
+update-ca-certificates
+
+# Restart services that might be using TLS
+systemctl restart apache2
+systemctl restart postgresql
+
+# Verify the configuration
+openssl ciphers -v | grep -E 'TLSv1\.0|TLSv1\.1'
+if [ $? -eq 0 ]; then
+    echo "Warning: Some services might still be using deprecated TLS versions."
+else
+    echo "Deprecated TLS versions TLSv1.0 and TLSv1.1 have been disabled successfully."
+fi}
+{type: uploaded file
+fileName: teste1vt-cve_13.txt
+fullContent:
+#!/bin/bash
+CONFIG_FILE="/etc/ssl/openssl.cnf"
+BACKUP_FILE="/etc/ssl/openssl.cnf.bak"
+CIPHERS="ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:DHE-RSA-AES128-GCM-SHA256:DHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:DHE-RSA-CHACHA20-POLY1305"
+
+cp $CONFIG_FILE $BACKUP_FILE
+
+sed -i '/^MinProtocol = .*/d' $CONFIG_FILE
+sed -i '/^CipherString = .*/d' $CONFIG_FILE
+
+echo "MinProtocol = TLSv1.2" >> $CONFIG_FILE
+echo "CipherString = DEFAULT@SECLEVEL=2:$CIPHERS" >> $CONFIG_FILE
+
+systemctl restart apache2
+systemctl restart postgresql}
+{type: uploaded file
+fileName: teste1vt-cve_14.txt
+fullContent:
+#!/bin/bash
+CONFIG_FILE="/etc/ssl/openssl.cnf"
+BACKUP_FILE="${CONFIG_FILE}.bak"
+CIPHERS="ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-SHA384:ECDHE-RSA-AES256-SHA384:ECDHE-ECDSA-AES128-SHA256:ECDHE-RSA-AES128-SHA256"
+PROTOCOLS="TLSv1.2 TLSv1.3"
+
+cp $CONFIG_FILE $BACKUP_FILE
+sed -i '/^MinProtocol =/d' $CONFIG_FILE
+sed -i '/^CipherString =/d' $CONFIG_FILE
+echo "MinProtocol = $PROTOCOLS" >> $CONFIG_FILE
+echo "CipherString = $CIPHERS" >> $CONFIG_FILE
+
+systemctl restart apache2
+systemctl restart nginx
+systemctl restart postgresql
+
+HSTS_CONFIG="/etc/apache2/conf-available/hsts.conf"
+if [ -f "$HSTS_CONFIG" ]; then
+    sed -i 's/Header always set Strict-Transport-Security "max-age=31536000"/Header always set Strict-Transport-Security "max-age=63072000; includeSubDomains; preload"/' $HSTS_CONFIG
+    systemctl restart apache2
+fi
+
+NGINX_CONFIG="/etc/nginx/nginx.conf"
+if [ -f "$NGINX_CONFIG" ]; then
+    sed -i '/ssl_protocols /d' $NGINX_CONFIG
+    sed -i '/ssl_ciphers /d' $NGINX_CONFIG
+    echo "ssl_protocols $PROTOCOLS;" >> $NGINX_CONFIG
+    echo "ssl_ciphers $CIPHERS;" >> $NGINX_CONFIG
+    systemctl restart nginx
+fi
+
+POSTGRES_CONFIG="/etc/postgresql/*/main/postgresql.conf"
+if [ -f "$POSTGRES_CONFIG" ]; then
+    sed -i '/ssl_min_protocol_version /d' $POSTGRES_CONFIG
+    sed -i '/ssl_ciphers /d' $POSTGRES_CONFIG
+    echo "ssl_min_protocol_version = 'TLSv1.2'" >> $POSTGRES_CONFIG
+    echo "ssl_ciphers = '$CIPHERS'" >> $POSTGRES_CONFIG
+    systemctl restart postgresql
+fi}
+{type: uploaded file
+fileName: teste1vt-cve_15.txt
+fullContent:
+#!/bin/bash
+
+# Verifica se o OpenSSL está instalado
+if ! command -v openssl &> /dev/null; then
+    echo "OpenSSL não está instalado. Instalando OpenSSL..."
+    sudo apt-get update && sudo apt-get install -y openssl
+fi
+
+# Verifica se o arquivo de configuração do OpenSSL existe
+OPENSSL_CONF="/etc/ssl/openssl.cnf"
+if [ ! -f "$OPENSSL_CONF" ]; then
+    echo "Arquivo de configuração do OpenSSL não encontrado. Abortando."
+    exit 1
+fi
+
+# Desabilita TLSv1.0 e TLSv1.1 no arquivo de configuração do OpenSSL
+sudo sed -i '/^MinProtocol = TLSv1.0/d' "$OPENSSL_CONF"
+sudo sed -i '/^MaxProtocol = TLSv1.1/d' "$OPENSSL_CONF"
+sudo sed -i '/^MinProtocol = TLSv1.0/d' "$OPENSSL_CONF"
+sudo sed -i '/^MaxProtocol = TLSv1.1/d' "$OPENSSL_CONF"
+echo "MinProtocol = TLSv1.2" | sudo tee -a "$OPENSSL_CONF" > /dev/null
+echo "MaxProtocol = TLSv1.3" | sudo tee -a "$OPENSSL_CONF" > /dev/null
+
+# Reinicia os serviços que utilizam TLS/SSL
+sudo systemctl restart apache2
+sudo systemctl restart nginx
+sudo systemctl restart postgresql
+
+# Verifica a configuração atualizada
+openssl ciphers -v | grep -E "TLSv1\.0|TLSv1\.1"
+if [ $? -eq 0 ]; then
+    echo "Ainda há suporte para TLSv1.0 ou TLSv1.1. Verifique manualmente."
+else
+    echo "TLSv1.0 e TLSv1.1 foram desabilitados com sucesso."
+fi
+
+exit 0}
+{type: uploaded file
+fileName: teste1vt-cve_16.txt
+fullContent:
+#!/bin/bash
+CONFIG_FILE="/etc/ssl/openssl.cnf"
+BACKUP_FILE="$CONFIG_FILE.bak"
+
+if [ -f "$CONFIG_FILE" ]; then
+    cp "$CONFIG_FILE" "$BACKUP_FILE"
+    sed -i '/^MinProtocol = TLSv1.0$/d' "$CONFIG_FILE"
+    sed -i '/^MaxProtocol = TLSv1.1$/d' "$CONFIG_FILE"
+    echo "MinProtocol = TLSv1.2" >> "$CONFIG_FILE"
+    echo "MaxProtocol = TLSv1.3" >> "$CONFIG_FILE"
+    systemctl restart apache2
+    systemctl restart postgresql
+fi}
+{type: uploaded file
+fileName: teste1vt-cve_17.txt
+fullContent:
+#!/bin/bash
+TLS_CONF="/etc/ssl/openssl.cnf"
+BACKUP_DIR="/etc/ssl/backup"
+CURRENT_DATE=$(date +%Y%m%d%H%M%S)
+
+mkdir -p "$BACKUP_DIR"
+cp "$TLS_CONF" "${BACKUP_DIR}/openssl.cnf.backup.${CURRENT_DATE}"
+
+sed -i '/^MinProtocol = TLSv1.0$/d' "$TLS_CONF"
+sed -i '/^MinProtocol = TLSv1.1$/d' "$TLS_CONF"
+sed -i '/^CipherString = DEFAULT$/d' "$TLS_CONF"
+
+echo "MinProtocol = TLSv1.2" >> "$TLS_CONF"
+echo "CipherString = DEFAULT@SECLEVEL=2" >> "$TLS_CONF"
+
+systemctl restart apache2
+systemctl restart postgresql}
+{type: uploaded file
+fileName: teste1vt-cve_18.txt
+fullContent:
+#!/bin/bash
+CONFIG_FILE="/etc/ssl/openssl.cnf"
+
+if [ ! -f "$CONFIG_FILE" ]; then
+    echo "OpenSSL configuration file not found."
+    exit 1
+fi
+
+sed -i '/^MinProtocol/!s/^\(MinProtocol\s*=\s*\).*$/\1TLSv1.2/' "$CONFIG_FILE"
+sed -i '/^MaxProtocol/!s/^\(MaxProtocol\s*=\s*\).*$/\1TLSv1.3/' "$CONFIG_FILE"
+
+systemctl restart apache2
+systemctl restart nginx
+systemctl restart postgresql
+
+echo "TLSv1.0 and TLSv1.1 protocols have been disabled and services have been restarted."}
+{type: uploaded file
+fileName: teste1vt-cve_19.txt
+fullContent:
+#!/bin/bash
+if grep -q "TLSv1.0" /etc/ssl/openssl.cnf || grep -q "TLSv1.1" /etc/ssl/openssl.cnf; then
+    sed -i '/^MinProtocol = TLSv1.0/d' /etc/ssl/openssl.cnf
+    sed -i '/^MaxProtocol = TLSv1.1/d' /etc/ssl/openssl.cnf
+    echo "MinProtocol = TLSv1.2" >> /etc/ssl/openssl.cnf
+    echo "MaxProtocol = TLSv1.3" >> /etc/ssl/openssl.cnf
+fi
+if grep -q "TLSv1.0" /etc/nginx/nginx.conf || grep -q "TLSv1.1" /etc/nginx/nginx.conf; then
+    sed -i 's/TLSv1.0//g' /etc/nginx/nginx.conf
+    sed -i 's/TLSv1.1//g' /etc/nginx/nginx.conf
+    sed -i 's/ssl_protocols.*/ssl_protocols TLSv1.2 TLSv1.3;/g' /etc/nginx/nginx.conf
+fi
+if grep -q "TLSv1.0" /etc/apache2/mods-enabled/ssl.conf || grep -q "TLSv1.1" /etc/apache2/mods-enabled/ssl.conf; then
+    sed -i 's/TLSv1.0//g' /etc/apache2/mods-enabled/ssl.conf
+    sed -i 's/TLSv1.1//g' /etc/apache2/mods-enabled/ssl.conf
+    sed -i 's/SSLProtocol.*/SSLProtocol +TLSv1.2 +TLSv1.3/g' /etc/apache2/mods-enabled/ssl.conf
+fi
+systemctl restart nginx
+systemctl restart apache2}
+{type: uploaded file
+fileName: teste1vt-cve_20.txt
+fullContent:
+#!/bin/bash
+CONFIG_FILE="/etc/ssl/openssl.cnf"
+BACKUP_FILE="$CONFIG_FILE.bak"
+TLS_PROTOCOLS="TLSv1.2:TLSv1.3"
+CIPHER_LIST="HIGH:!aNULL:!eNULL:!EXPORT:!DES:!RC4:!MD5:!PSK:!SRP:!CAMELLIA"
+
+if [ -f "$CONFIG_FILE" ]; then
+    cp "$CONFIG_FILE" "$BACKUP_FILE"
+    sed -i '/^MinProtocol/d' "$CONFIG_FILE"
+    sed -i '/^CipherString/d' "$CONFIG_FILE"
+    echo "MinProtocol = $TLS_PROTOCOLS" >> "$CONFIG_FILE"
+    echo "CipherString = $CIPHER_LIST" >> "$CONFIG_FILE"
+    echo "Configuração do OpenSSL atualizada com sucesso."
+else
+    echo "Arquivo de configuração do OpenSSL não encontrado."
+    exit 1
+fi
+
+systemctl restart apache2
+systemctl restart postgresql
+echo "Serviços reiniciados para aplicar as novas configurações de TLS."}

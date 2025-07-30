@@ -1,0 +1,19 @@
+```sh
+#!/bin/bash
+
+# Identifica o arquivo de configuração do SSH
+SSH_CONFIG_FILE="/etc/ssh/sshd_config"
+
+# Remove a linha que habilita o algoritmo ssh-dss, se existir
+sudo sed -i '/HostKeyAlgorithms.*ssh-dss/s/,ssh-dss//g' "$SSH_CONFIG_FILE"
+sudo sed -i 's/HostKeyAlgorithms.*ssh-dss//g' "$SSH_CONFIG_FILE"
+
+# Remove a linha que habilita o KexAlgorithms com dife-hellman-group1-sha1, se existir
+sudo sed -i '/KexAlgorithms.*diffie-hellman-group1-sha1/s/,diffie-hellman-group1-sha1//g' "$SSH_CONFIG_FILE"
+sudo sed -i 's/KexAlgorithms.*diffie-hellman-group1-sha1//g' "$SSH_CONFIG_FILE"
+
+# Reinicia o serviço SSH para aplicar as alterações
+sudo systemctl restart sshd
+
+echo "Vulnerabilidade SSH corrigida: Algoritmo ssh-dss desabilitado."
+```

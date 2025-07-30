@@ -1,0 +1,37 @@
+```bash
+#!/bin/bash
+
+# Define o arquivo de configuração SSH
+SSH_CONFIG="/etc/ssh/sshd_config"
+
+# Remove a opção KexAlgorithms com ssh-dss (se existir)
+if grep -q "^KexAlgorithms" "$SSH_CONFIG"; then
+    sudo sed -i '/^KexAlgorithms/s/ssh-dss//g' "$SSH_CONFIG"
+else
+    echo "KexAlgorithms não encontrado. Adicionando a configuração padrão."
+fi
+
+# Remove a opção HostKeyAlgorithms com ssh-dss (se existir)
+if grep -q "^HostKeyAlgorithms" "$SSH_CONFIG"; then
+    sudo sed -i '/^HostKeyAlgorithms/s/ssh-dss//g' "$SSH_CONFIG"
+else
+    echo "HostKeyAlgorithms não encontrado. Adicionando a configuração padrão."
+fi
+
+# Adiciona a diretiva HostKeyAlgorithms se não existir, removendo ssh-dss
+if ! grep -q "^HostKeyAlgorithms" "$SSH_CONFIG"; then
+    echo "HostKeyAlgorithms não encontrada. Adicionando..."
+    sudo echo "HostKeyAlgorithms ecdsa-sha2-nistp256,ecdsa-sha2-nistp384,ecdsa-sha2-nistp521,ssh-ed25519,rsa-sha2-512,rsa-sha2-256" | sudo tee -a "$SSH_CONFIG" > /dev/null
+fi
+
+# Garante que ssh-dss não está presente em HostKeyAlgorithms
+sudo sed -i 's/HostKeyAlgorithms.*ssh-dss//g' "$SSH_CONFIG"
+
+# Remove linhas em branco extras (opcional, mas boa prática)
+sudo sed -i '/^$/N;/^\n$/D' "$SSH_CONFIG"
+
+# Reinicia o serviço SSH para aplicar as mudanças
+sudo systemctl restart sshd
+
+echo "Vulnerabilidade corrigida. Serviço SSH reiniciado."
+```

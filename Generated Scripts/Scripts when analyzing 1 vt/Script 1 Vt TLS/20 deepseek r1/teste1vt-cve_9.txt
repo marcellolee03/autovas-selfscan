@@ -1,0 +1,67 @@
+```bash
+#!/bin/bash
+set -euo pipefail
+
+if [ "$EUID" -ne 0 ]; then
+  >&2 echo "ERROR: Script must run as root"
+  exit 1
+fi
+
+version_info=$(psql -V 2>/dev/null || sudo -u postgres psql -V 2>/dev/null)
+if [ -z "$version_info" ]; then
+  >&2 echo "ERROR: Failed to determine PostgreSQL version"
+  exit 1
+fi
+
+version=$(echo "$version_info" | grep -oE '[0-9]+\.[0-9]+')
+major=${version%%.*}
+
+if (( major < 12 )); then
+  >&2 echo "ERROR: PostgreSQL $version is too old (requires 12+)"
+  exit 1
+fi
+
+conf_candidates=(
+  "/etc/postgresql/*/main/postgresql.conf"
+  "/usr/local/pgsql/data/postgresql.conf"
+  "/var/lib/pgsql/data/postgresql.conf"
+  "/var/lib/postgresql/*/data/postgresql.conf"
+)
+conf_found=""
+for conf in "${conf_candidates[@]}"; do
+  candidates=$(shopt -s nullglob; echo $conf)
+  if [ -n "$candidates" ]; then
+    conf_found=$(echo "$candidates" | head -n1)
+    break
+  fi
+done
+
+if [ -z "$conf_found" ] || [ ! -f "$conf_found" ]; then
+  conf_found=$(sudo -u postgres psql -tA -c "SHOW config_file;" 2>/dev/null)
+  if [ -z "$conf_found" ] || [ ! -f "$conf_found" ]; then
+    >&2 echo "ERROR: PostgreSQL config file not found"
+    exit 1
+  fi
+fi
+
+backup_ext=".backup.$(date +%s)"
+cp "$conf_found" "${conf_found}${backup_ext}"
+
+sed -i -E '/ssl_min_protocol_version/d' "$conf_found"
+echo "ssl_min_protocol_version = 'TLSv1.2'" >> "$conf_found"
+
+service_names=("postgresql.service" "postgresql-$version.service")
+for service in "${service_names[@]}"; do
+  if systemctl restart "$service" &>/dev/null; then
+    exit 0
+  fi
+done
+
+if pgrep postgres &>/dev/null; then
+  >&2 echo "NOTICE: Please manually restart PostgreSQL for changes to apply"
+  exit 0
+fi
+
+>&2 echo "WARNING: Config updated in $conf_found but restart failed"
+exit 0
+```

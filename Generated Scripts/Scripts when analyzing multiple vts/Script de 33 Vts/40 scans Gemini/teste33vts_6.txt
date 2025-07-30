@@ -1,0 +1,151 @@
+```bash
+#!/bin/bash
+
+# Vulnerability 1: Proxmox VE EOL
+# This script does not automatically update Proxmox.  A manual upgrade is required.
+# It will, however, check the current version and display instructions.
+# This is due to the complexity and potential for disruption in an automated upgrade.
+
+pveversion=$(pveversion | awk '{print $3}')
+
+echo "Current Proxmox VE version: $pveversion"
+
+if [[ "$pveversion" == "7.3-3" ]]; then
+  echo "Proxmox VE 7.3-3 is installed."
+  echo "This version is nearing End of Life.  Please upgrade to a supported version."
+  echo "Refer to the Proxmox documentation for upgrade instructions:"
+  echo "https://pve.proxmox.com/wiki/Upgrade_from_7_to_8"
+else
+  echo "Proxmox VE version is not 7.3-3.  No action required for this vulnerability."
+fi
+
+# Vulnerabilities 2-6: jQuery < 1.9.0 XSS Vulnerability
+# Addresses multiple instances of vulnerable jQuery 1.8.3
+
+JQUERY_LOCATIONS=(
+  "/var/www/html/js/jquery-1.8.3.min.js"
+  "/var/www/html/opscenter/webcommon/framework/js/jquery-1.8.3.min.js"
+  "/var/www/html/framesets/js/jquery-1.8.3.min.js"
+  "/var/www/html/frameset/js/jquery-1.8.3.min.js"
+  "/var/www/html/console/framework/js/jquery-1.8.3.min.js"
+)
+
+NEW_JQUERY_URL="https://code.jquery.com/jquery-1.9.0.min.js"
+BACKUP_DIR="/opt/security_backups"
+
+# Create backup directory if it doesn't exist
+mkdir -p "$BACKUP_DIR"
+
+for JQUERY_LOCATION in "${JQUERY_LOCATIONS[@]}"; do
+  if [ -f "$JQUERY_LOCATION" ]; then
+    echo "Backing up vulnerable jQuery file: $JQUERY_LOCATION"
+    cp "$JQUERY_LOCATION" "$BACKUP_DIR/$(basename "$JQUERY_LOCATION")_$(date +%Y%m%d%H%M%S).bak"
+
+    echo "Downloading and replacing with jQuery 1.9.0..."
+    wget -q "$NEW_JQUERY_URL" -O "$JQUERY_LOCATION"
+
+    echo "Successfully updated $JQUERY_LOCATION"
+  else
+    echo "Vulnerable jQuery file not found at: $JQUERY_LOCATION"
+  fi
+done
+
+# Vulnerabilities 7, 8, 9, 13, 14, 15, 16, 19, 21, 22: SSH Weak Algorithms
+# Disable weak SSH algorithms by modifying /etc/ssh/sshd_config
+
+SSH_CONFIG="/etc/ssh/sshd_config"
+SSH_CONFIG_BACKUP="$BACKUP_DIR/sshd_config_$(date +%Y%m%d%H%M%S).bak"
+
+echo "Backing up SSH configuration: $SSH_CONFIG to $SSH_CONFIG_BACKUP"
+cp "$SSH_CONFIG" "$SSH_CONFIG_BACKUP"
+
+# Disable weak KEX algorithms
+sed -i '/^KexAlgorithms/s/diffie-hellman-group1-sha1//g' "$SSH_CONFIG"
+
+# Disable weak MAC algorithms
+sed -i '/^MACs/s/umac-64-etm@openssh.com//g' "$SSH_CONFIG"
+sed -i '/^MACs/s/umac-64@openssh.com//g' "$SSH_CONFIG"
+sed -i '/^MACs/s/hmac-md5//g' "$SSH_CONFIG"
+sed -i '/^MACs/s/hmac-sha1-96//g' "$SSH_CONFIG"
+
+# Disable weak Ciphers
+sed -i '/^Ciphers/s/3des-cbc//g' "$SSH_CONFIG"
+sed -i '/^Ciphers/s/aes128-cbc//g' "$SSH_CONFIG"
+sed -i '/^Ciphers/s/aes256-cbc//g' "$SSH_CONFIG"
+sed -i '/^Ciphers/s/twofish-cbc//g' "$SSH_CONFIG"
+sed -i '/^Ciphers/s/twofish128-cbc//g' "$SSH_CONFIG"
+sed -i '/^Ciphers/s/twofish256-cbc//g' "$SSH_CONFIG"
+
+
+# Disable weak HostKeyAlgorithms
+sed -i '/^HostKeyAlgorithms/s/ssh-dss//g' "$SSH_CONFIG"
+
+
+echo "Weak SSH algorithms disabled. Restarting SSH service..."
+systemctl restart sshd
+
+# Vulnerabilities 10: DCE/RPC and MSRPC Services Enumeration Reporting
+# This vulnerability is about information disclosure.  Mitigation involves firewall rules.
+# Since this script cannot reliably configure firewalls across different systems, a warning is issued.
+
+echo "Warning: Vulnerability 10 (DCE/RPC and MSRPC Services Enumeration) requires firewall configuration."
+echo "Please configure your firewall to block access to ports 135 and other RPC ports from untrusted networks."
+
+# Vulnerability 11: Telnet Unencrypted Cleartext Login
+# Disable Telnet
+
+if systemctl is-active --quiet telnet.socket; then
+    systemctl stop telnet.socket
+    systemctl disable telnet.socket
+    echo "Telnet service disabled."
+else
+    echo "Telnet service is not active."
+fi
+
+# Vulnerability 12: SSL/TLS: Deprecated TLSv1.0 and TLSv1.1 Protocol Detection
+# Disable TLS 1.0 and 1.1
+
+# This script will attempt to disable TLS 1.0 and 1.1 globally by modifying /etc/ssl/openssl.cnf
+# This may not be effective for all applications.  It's important to verify that individual applications
+# are not still configured to use TLS 1.0 and 1.1.
+
+OPENSSL_CONFIG="/etc/ssl/openssl.cnf"
+
+if [ -f "$OPENSSL_CONFIG" ]; then
+    echo "Modifying $OPENSSL_CONFIG to disable TLS 1.0 and 1.1..."
+    sed -i 's/DEFAULT@SECLEVEL=2/DEFAULT@SECLEVEL=2\nssl_conf = ssl_sect/' "$OPENSSL_CONFIG"
+    echo "
+[ssl_sect]
+system_default = system_default_sect
+
+[system_default_sect]
+MinProtocol = TLSv1.2
+" >> "$OPENSSL_CONFIG"
+
+    echo "TLS 1.0 and 1.1 disabled in $OPENSSL_CONFIG.  Please verify that individual applications are also configured to use TLS 1.2 or higher."
+else
+    echo "Warning: $OPENSSL_CONFIG not found.  Unable to disable TLS 1.0 and 1.1 globally. You must manually disable them in each application's configuration."
+fi
+
+# Vulnerabilities 17, 18, 20, 23, 24, 25: TCP Timestamps Information Disclosure
+
+echo "Disabling TCP timestamps..."
+echo "net.ipv4.tcp_timestamps = 0" >> /etc/sysctl.conf
+sysctl -p
+
+# Vulnerabilities 26, 27, 28, 29, 30, 31, 32: ICMP Timestamp Reply Information Disclosure
+# Disable ICMP Timestamp Replies.  This is OS-specific.
+# For Linux, we'll use sysctl.  For other OSes, manual configuration is needed.
+
+if [ -f "/etc/sysctl.conf" ]; then
+    echo "Disabling ICMP Timestamp Replies..."
+    echo "net.ipv4.icmp_echo_ignore_all=1" >> /etc/sysctl.conf
+    sysctl -p
+    echo "ICMP Timestamp Replies disabled. Changes applied using sysctl."
+else
+    echo "Warning: /etc/sysctl.conf not found. Unable to disable ICMP Timestamp Replies automatically."
+    echo "Please manually configure your system's firewall to block ICMP Timestamp requests."
+fi
+
+echo "Patching complete."
+```

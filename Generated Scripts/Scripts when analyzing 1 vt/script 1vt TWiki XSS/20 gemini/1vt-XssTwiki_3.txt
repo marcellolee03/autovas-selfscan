@@ -1,0 +1,74 @@
+#!/bin/bash
+
+# Script para atualizar o TWiki para a versão 4.2.4 ou posterior, corrigindo CVE-2008-5304 e CVE-2008-5305.
+
+# Variáveis
+TWIKI_VERSION_INSTALLED=$(grep -oP 'Installed version: \K(.*)' /var/www/twiki/VERSION 2>/dev/null || grep -oP 'Installed version: \K(.*)' /opt/twiki/VERSION 2>/dev/null || echo "0.0.0")
+TWIKI_VERSION_REQUIRED="4.2.4"
+TWIKI_INSTALL_DIR=""
+BACKUP_DIR="/tmp/twiki_backup_$(date +%Y%m%d%H%M%S)"
+
+# Funções
+
+determine_twiki_install_dir() {
+  if [ -d "/var/www/twiki" ]; then
+    TWIKI_INSTALL_DIR="/var/www/twiki"
+  elif [ -d "/opt/twiki" ]; then
+    TWIKI_INSTALL_DIR="/opt/twiki"
+  else
+    echo "Diretório de instalação do TWiki não encontrado.  Por favor, configure TWIKI_INSTALL_DIR manualmente."
+    exit 1
+  fi
+}
+
+backup_twiki() {
+  echo "Fazendo backup do TWiki para $BACKUP_DIR..."
+  mkdir -p "$BACKUP_DIR"
+  cp -r "$TWIKI_INSTALL_DIR" "$BACKUP_DIR"
+  echo "Backup concluído."
+}
+
+download_and_extract_twiki() {
+  echo "Baixando TWiki $TWIKI_VERSION_REQUIRED..."
+  cd /tmp
+  wget "https://sourceforge.net/projects/twiki/files/TWiki%20Release/TWiki-${TWIKI_VERSION_REQUIRED}/TWiki-${TWIKI_VERSION_REQUIRED}.tgz/download" -O TWiki-${TWIKI_VERSION_REQUIRED}.tgz
+
+  if [ $? -ne 0 ]; then
+    echo "Erro ao baixar o TWiki. Verifique a URL e sua conexão com a internet."
+    exit 1
+  fi
+
+  echo "Extraindo TWiki..."
+  tar -xzf TWiki-${TWIKI_VERSION_REQUIRED}.tgz
+  mv TWiki-${TWIKI_VERSION_REQUIRED} twiki_new
+}
+
+update_twiki() {
+  echo "Atualizando TWiki..."
+  rsync -av --delete /tmp/twiki_new/ "$TWIKI_INSTALL_DIR"
+  echo "Atualização concluída."
+}
+
+cleanup() {
+  echo "Limpando arquivos temporários..."
+  rm -rf /tmp/twiki_new
+  rm /tmp/TWiki-${TWIKI_VERSION_REQUIRED}.tgz
+}
+
+
+# Main
+
+determine_twiki_install_dir
+
+if dpkg --compare-versions "$TWIKI_VERSION_INSTALLED" lt "$TWIKI_VERSION_REQUIRED"; then
+  echo "TWiki versão $TWIKI_VERSION_INSTALLED detectada.  Atualizando para $TWIKI_VERSION_REQUIRED."
+  backup_twiki
+  download_and_extract_twiki
+  update_twiki
+  cleanup
+  echo "TWiki atualizado com sucesso para a versão $TWIKI_VERSION_REQUIRED. Reinicie o servidor web."
+else
+  echo "TWiki versão $TWIKI_VERSION_INSTALLED já está na versão $TWIKI_VERSION_REQUIRED ou superior. Nenhuma ação necessária."
+fi
+
+exit 0

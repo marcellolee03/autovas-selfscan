@@ -1,0 +1,41 @@
+#!/bin/bash
+
+# Vulnerabilidade 1: Enforce HTTPS
+if command -v apache2 &> /dev/null; then
+    a2enmod ssl
+    a2ensite default-ssl
+    sed -i 's/#Redirect/RewriteEngine On\nRewriteCond %{HTTPS} off\nRewriteRule ^ https:\/\/%{HTTP_HOST}%{REQUEST_URI} [L,R=301]/' /etc/apache2/sites-available/000-default.conf
+    systemctl restart apache2
+fi
+
+# Vulnerabilidade 2: Disable DNS Recursion
+if command -v named &> /dev/null; then
+    sed -i 's/recursion yes/recursion no/' /etc/named.conf
+    systemctl restart named
+fi
+
+# Vulnerabilidade 3: Disable ICMP Timestamp
+echo 'net.ipv4.icmp_echo_ignore_all = 1' >> /etc/sysctl.conf
+sysctl -p
+
+# Vulnerabilidade 4: Disable TLSv1.0 and TLSv1.1
+if command -v openssl &> /dev/null; then
+    sed -i 's/SSLProtocol all -SSLv2 -SSLv3/SSLProtocol all -SSLv2 -SSLv3 -TLSv1 -TLSv1.1/' /etc/apache2/mods-enabled/ssl.conf
+    systemctl restart apache2
+fi
+
+# Vulnerabilidade 5: Disable SSL/TLS Renegotiation
+if command -v apache2 &> /dev/null; then
+    sed -i 's/SSLInsecureRenegotiation on/SSLInsecureRenegotiation off/' /etc/apache2/mods-enabled/ssl.conf
+    systemctl restart apache2
+fi
+
+# Vulnerabilidade 6: Disable Weak Cipher Suites
+if command -v apache2 &> /dev/null; then
+    sed -i 's/SSLCipherSuite HIGH:!aNULL:!MD5/SSLCipherSuite HIGH:!aNULL:!MD5:!DES:!RC4:!3DES:!CAMELLIA@STRENGTH/' /etc/apache2/mods-enabled/ssl.conf
+    systemctl restart apache2
+fi
+
+# Vulnerabilidade 7: Disable TCP Timestamps
+echo 'net.ipv4.tcp_timestamps = 0' >> /etc/sysctl.conf
+sysctl -p

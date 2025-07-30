@@ -1,0 +1,45 @@
+#!/bin/bash
+
+TWIKI_VERSION="4.2.4"
+TWIKI_DOWNLOAD_URL="http://twiki.org/p/pub/Codev/TWikiRelease${TWIKI_VERSION}/TWiki${TWIKI_VERSION}.tgz"
+INSTALL_DIR="/var/www/html/twiki"
+BACKUP_DIR="/var/www/html/twiki_backup"
+
+if [ -d "$INSTALL_DIR" ]; then
+    echo "Backing up existing TWiki installation to $BACKUP_DIR..."
+    mv "$INSTALL_DIR" "$BACKUP_DIR"
+fi
+
+echo "Downloading TWiki version $TWIKI_VERSION..."
+wget -O /tmp/TWiki${TWIKI_VERSION}.tgz "$TWIKI_DOWNLOAD_URL"
+
+if [ $? -ne 0 ]; then
+    echo "Failed to download TWiki. Please check the URL and try again."
+    exit 1
+fi
+
+echo "Extracting TWiki archive..."
+tar -xzf /tmp/TWiki${TWIKI_VERSION}.tgz -C /var/www/html/
+
+if [ $? -ne 0 ]; then
+    echo "Failed to extract TWiki archive. Please check the file and try again."
+    exit 1
+fi
+
+mv "/var/www/html/TWiki${TWIKI_VERSION}" "$INSTALL_DIR"
+
+if [ -d "$BACKUP_DIR" ]; then
+    echo "Restoring data from backup..."
+    cp -r "$BACKUP_DIR/data" "$INSTALL_DIR/"
+    cp -r "$BACKUP_DIR/pub" "$INSTALL_DIR/"
+    cp -r "$BACKUP_DIR/lib" "$INSTALL_DIR/"
+fi
+
+echo "Fixing permissions..."
+chown -R www-data:www-data "$INSTALL_DIR"
+chmod -R 755 "$INSTALL_DIR"
+
+echo "TWiki has been successfully upgraded to version $TWIKI_VERSION."
+
+rm -rf /tmp/TWiki${TWIKI_VERSION}.tgz
+rm -rf "$BACKUP_DIR"

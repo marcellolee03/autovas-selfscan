@@ -1,0 +1,20 @@
+#!/bin/bash
+TWIKI_INSTALL_DIR="/var/www/twiki"
+LATEST_VERSION="4.2.4"
+
+mkdir -p /tmp/twiki_update
+cd /tmp/twiki_update
+
+wget https://github.com/TWikiOrg/twiki/archive/refs/tags/TWikiRelease${LATEST_VERSION}.tar.gz -O twiki_latest.tar.gz
+
+tar -xzf twiki_latest.tar.gz
+
+rm -rf ${TWIKI_INSTALL_DIR}/*
+
+mv twiki-TWikiRelease${LATEST_VERSION}/* ${TWIKI_INSTALL_DIR}/
+
+chown -R www-data:www-data ${TWIKI_INSTALL_DIR}
+
+systemctl restart apache2
+
+rm -rf /tmp/twiki_update

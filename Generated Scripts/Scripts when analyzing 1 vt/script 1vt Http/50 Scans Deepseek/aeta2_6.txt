@@ -1,0 +1,26 @@
+#!/bin/bash
+# Desabilitar o serviço HTTP e habilitar o HTTPS
+systemctl stop apache2
+systemctl disable apache2
+systemctl enable apache2-ssl
+systemctl start apache2-ssl
+
+# Configurar redirecionamento de HTTP para HTTPS no Apache
+if ! grep -q "RewriteEngine On" /etc/apache2/sites-available/000-default.conf; then
+    echo '<VirtualHost *:80>
+    RewriteEngine On
+    RewriteCond %{HTTPS} off
+    RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+</VirtualHost>' >> /etc/apache2/sites-available/000-default.conf
+fi
+
+# Reiniciar o Apache para aplicar as mudanças
+systemctl restart apache2-ssl
+
+# Verificar se o HTTPS está habilitado
+if curl -s -o /dev/null -I -w "%{http_code}" https://localhost | grep -q "200"; then
+    echo "HTTPS está habilitado e funcionando corretamente."
+else
+    echo "Falha ao habilitar HTTPS. Verifique a configuração."
+    exit 1
+fi

@@ -1,0 +1,13 @@
+#!/bin/bash
+jquery_path="/console/framework/../js/jquery-1.8.3.min.js"
+download_url="https://code.jquery.com/jquery-3.7.0.min.js"
+
+mkdir -p "$(dirname $jquery_path)"
+curl -o $jquery_path $download_url
+
+if [ $? -eq 0 ]; then
+    echo "jQuery updated to version 3.7.0."
+else
+    echo "Failed to update jQuery."
+    exit 1
+fi

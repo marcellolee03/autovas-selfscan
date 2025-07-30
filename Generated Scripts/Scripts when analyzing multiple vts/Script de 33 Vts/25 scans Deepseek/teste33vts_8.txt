@@ -1,0 +1,35 @@
+#!/bin/bash
+
+# Atualizar o Proxmox VE para a versão mais recente
+apt-get update && apt-get dist-upgrade -y
+
+# Atualizar o jQuery para a versão 1.9.0 ou superior
+wget https://code.jquery.com/jquery-1.9.0.min.js -O /var/www/html/js/jquery-1.9.0.min.js
+wget https://code.jquery.com/jquery-1.9.0.min.js -O /var/www/html/opscenter/webcommon/framework/js/jquery-1.9.0.min.js
+wget https://code.jquery.com/jquery-1.9.0.min.js -O /var/www/html/framesets/js/jquery-1.9.0.min.js
+wget https://code.jquery.com/jquery-1.9.0.min.js -O /var/www/html/frameset/js/jquery-1.9.0.min.js
+wget https://code.jquery.com/jquery-1.9.0.min.js -O /var/www/html/console/framework/js/jquery-1.9.0.min.js
+
+# Desabilitar algoritmos fracos no SSH
+sed -i 's/^HostKeyAlgorithms .*/HostKeyAlgorithms ecdsa-sha2-nistp256,ecdsa-sha2-nistp384,ecdsa-sha2-nistp521,ssh-ed25519,rsa-sha2-512,rsa-sha2-256/' /etc/ssh/sshd_config
+sed -i 's/^KexAlgorithms .*/KexAlgorithms curve25519-sha256,curve25519-sha256@libssh.org,diffie-hellman-group-exchange-sha256/' /etc/ssh/sshd_config
+sed -i 's/^Ciphers .*/Ciphers chacha20-poly1305@openssh.com,aes256-gcm@openssh.com,aes128-gcm@openssh.com,aes256-ctr,aes192-ctr,aes128-ctr/' /etc/ssh/sshd_config
+sed -i 's/^MACs .*/MACs hmac-sha2-512-etm@openssh.com,hmac-sha2-256-etm@openssh.com,umac-128-etm@openssh.com/' /etc/ssh/sshd_config
+systemctl restart sshd
+
+# Desabilitar temporizadores TCP
+echo "net.ipv4.tcp_timestamps = 0" >> /etc/sysctl.conf
+sysctl -p
+
+# Desabilitar resposta ICMP timestamp
+echo "net.ipv4.icmp_echo_ignore_all = 1" >> /etc/sysctl.conf
+sysctl -p
+
+# Fechar portas desnecessárias
+iptables -A INPUT -p tcp --dport 135 -j DROP
+iptables -A INPUT -p tcp --dport 23 -j DROP
+iptables-save > /etc/iptables/rules.v4
+
+# Desabilitar TLS 1.0 e 1.1
+sed -i 's/^SSLProtocol .*/SSLProtocol -all +TLSv1.2 +TLSv1.3/' /etc/apache2/mods-enabled/ssl.conf
+systemctl restart apache2

@@ -1,0 +1,127 @@
+```bash
+#!/bin/bash
+
+# Função para verificar se o Chocolatey está instalado
+check_chocolatey() {
+  if command -v choco &> /dev/null; then
+    return 0
+  else
+    return 1
+  fi
+}
+
+# Instalar Chocolatey se não estiver instalado
+install_chocolatey() {
+  if check_chocolatey; then
+    echo "Chocolatey já está instalado."
+  else
+    echo "Instalando Chocolatey..."
+    iex "& { $(irm https://chocolatey.org/install.ps1) } -Force" | powershell.exe
+    echo "Chocolatey instalado. Favor abrir um novo terminal para que as alterações de ambiente sejam aplicadas."
+    exit 1
+  fi
+}
+
+# Atualizar Python para as versões corrigidas
+update_python() {
+  # Define um array com as versões do Python a serem atualizadas e suas respectivas versões corrigidas
+  declare -A python_updates=(
+    [3.10.12]=3.10.16
+    [3.12.0]=3.12.9
+  )
+
+  # Loop através das versões instaladas e atualiza cada uma
+  for installed_version in "${!python_updates[@]}"; do
+    fixed_version="${python_updates[$installed_version]}"
+
+    # Verifica se o Python está instalado e precisa ser atualizado
+    if [[ $(python${installed_version:0:4} --version 2>&1) =~ "Python ${installed_version}" ]]; then
+      echo "Atualizando Python ${installed_version} para ${fixed_version}..."
+	  
+	  # Determina a versão mais recente disponível para atualização
+	  latest_minor=$(echo "$fixed_version" | cut -d '.' -f 1,2)
+	  latest_version=$(choco search python --exact --version "$latest_minor" | awk '/python[0-9.]+/ {print $1}')
+	  
+	  # Verifica se a versão mais recente foi encontrada
+	  if [[ -z "$latest_version" ]]; then
+	    echo "Versão mais recente para Python $latest_minor não encontrada no Chocolatey."
+		continue # Pula para a próxima versão se não encontrar
+	  fi
+
+      # Atualiza o Python usando Chocolatey
+      choco upgrade "$latest_version" -y
+      echo "Python ${installed_version} atualizado para ${fixed_version}."
+    else
+      echo "Python ${installed_version} não encontrado ou já está atualizado."
+    fi
+  done
+}
+
+# Desabilitar TLS 1.0 e 1.1 (requer ajustes manuais no sistema Windows)
+disable_tls10_tls11() {
+  echo "Desabilitando TLS 1.0 e TLS 1.1..."
+  echo "Esta ação requer ajustes manuais nas configurações do sistema Windows."
+  echo "Consulte as instruções da Microsoft para desabilitar TLS 1.0 e TLS 1.1 no registro do Windows."
+  echo "https://learn.microsoft.com/en-us/windows-server/security/tls/tls-registry-settings"
+}
+
+# Remover certificado SSL/TLS autoassinado (requer intervenção manual)
+remove_self_signed_cert() {
+    echo "Removendo certificado SSL/TLS autoassinado..."
+    echo "Esta ação exige intervenção manual para remover o certificado do armazenamento de certificados do Windows."
+    echo "1. Abra o 'Gerenciar certificados de computador' (certlm.msc)."
+    echo "2. Navegue até 'Pessoal' -> 'Certificados'."
+    echo "3. Localize o certificado com 'CN=localhost,O=Luminator,L=Caxias do Sul,ST=RS,C=BR'."
+    echo "4. Exclua o certificado."
+}
+
+# Desabilitar ICMP Timestamp Replies (requer ajustes no firewall do Windows)
+disable_icmp_timestamp() {
+  echo "Desabilitando ICMP Timestamp Replies..."
+  echo "Esta ação requer ajustes manuais no firewall do Windows."
+  echo "1. Abra o 'Firewall do Windows com Segurança Avançada' (wf.msc)."
+  echo "2. Clique com o botão direito em 'Regras de Entrada' e selecione 'Nova Regra'."
+  echo "3. Selecione 'Personalizado' e clique em 'Avançar'."
+  echo "4. Em 'Protocolos e Portas', selecione 'ICMPv4' para 'Tipo de protocolo ICMPv4' e clique em 'Avançar'."
+  echo "5. Deixe o escopo em 'Qualquer endereço IP' e clique em 'Avançar'."
+  echo "6. Selecione 'Bloquear a conexão' e clique em 'Avançar'."
+  echo "7. Aplique a regra para 'Domínio', 'Privado' e 'Público' e clique em 'Avançar'."
+  echo "8. Dê um nome à regra (por exemplo, 'Bloquear ICMP Timestamp') e clique em 'Concluir'."
+}
+
+# Desabilitar algoritmos MAC fracos no SSH (requer edição do arquivo de configuração SSH)
+disable_weak_mac_algorithms() {
+  echo "Desabilitando algoritmos MAC fracos no SSH..."
+  echo "Esta ação requer a edição do arquivo de configuração SSH."
+  echo "1. Localize o arquivo sshd_config (geralmente em C:\ProgramData\ssh\sshd_config)."
+  echo "2. Edite o arquivo e adicione ou modifique a linha 'MACs' para remover os algoritmos fracos:"
+  echo "   MACs curve25519-sha256,curve25519-sha256@libssh.org,hmac-sha2-512-etm@openssh.com,hmac-sha2-256-etm@openssh.com,hmac-sha2-512,hmac-sha2-256"
+  echo "3. Reinicie o serviço SSH."
+}
+
+# Função principal
+main() {
+  # 1. Instalar ou verificar o Chocolatey
+  install_chocolatey
+
+  # 2. Atualizar as versões do Python
+  update_python
+
+  # 3. Desabilitar TLS 1.0 e 1.1
+  disable_tls10_tls11
+
+    # 4. Remover certificado autoassinado
+  remove_self_signed_cert
+
+  # 5. Desabilitar ICMP Timestamp Replies
+  disable_icmp_timestamp
+  
+  # 6. Desabilitar algoritmos MAC fracos no SSH
+  disable_weak_mac_algorithms
+
+  echo "Processo de correção concluído. Algumas ações exigem intervenção manual."
+}
+
+# Executar a função principal
+main
+```

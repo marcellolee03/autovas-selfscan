@@ -1,0 +1,44 @@
+#!/bin/bash
+set -e
+
+OLD_HOME="/var/www/twiki"
+BACKUP_DIR="/tmp/twiki-preserve-$(date +%s)"
+DOWNLOAD_URL="https://sourceforge.net/projects/twiki/files/TWiki/4.2.4/twiki-4.2.4.tgz"
+TMP_FILE="/tmp/twiki-4.2.4.tgz"
+TMP_EXTRACT_DIR="/tmp/twiki_new"
+
+if [ ! -d "$OLD_HOME" ]; then
+    echo "Error: TWiki installation directory not found" >&2
+    exit 1
+fi
+
+mkdir -p "$BACKUP_DIR"
+cp -a "$OLD_HOME/data" "$BACKUP_DIR"
+cp -a "$OLD_HOME/pub" "$BACKUP_DIR"
+[ -f "$OLD_HOME/lib/TWiki.cfg" ] && cp -a "$OLD_HOME/lib/TWiki.cfg" "$BACKUP_DIR"
+[ -f "$OLD_HOME/lib/local.cfg" ] && cp -a "$OLD_HOME/lib/local.cfg" "$BACKUP_DIR"
+
+if ! wget -q "$DOWNLOAD_URL" -O "$TMP_FILE"; then
+    echo "Error: Failed to download TWiki 4.2.4" >&2
+    exit 1
+fi
+
+mkdir -p "$TMP_EXTRACT_DIR"
+tar xzf "$TMP_FILE" -C "$TMP_EXTRACT_DIR" --strip-components=1
+
+rm -rf "$OLD_HOME"
+mv "$TMP_EXTRACT_DIR" "$OLD_HOME"
+cp -a "$BACKUP_DIR/data" "$OLD_HOME"
+cp -a "$BACKUP_DIR/pub" "$OLD_HOME"
+mkdir -p "$OLD_HOME/lib"
+[ -f "$BACKUP_DIR/TWiki.cfg" ] && cp -a "$BACKUP_DIR/TWiki.cfg" "$OLD_HOME/lib"
+[ -f "$BACKUP_DIR/local.cfg" ] && cp -a "$BACKUP_DIR/local.cfg" "$OLD_HOME/lib"
+
+chown -R www-data:www-data "$OLD_HOME"
+
+if command -v apache2 >/dev/null; then
+    systemctl restart apache2 || service apache2 restart || /etc/init.d/apache2 restart || true
+fi
+
+rm -f "$TMP_FILE"
+rm -rf "$BACKUP_DIR"

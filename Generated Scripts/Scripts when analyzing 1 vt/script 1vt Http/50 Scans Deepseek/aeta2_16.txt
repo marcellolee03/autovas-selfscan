@@ -1,0 +1,12 @@
+#!/bin/bash
+CONF_FILE="/etc/apache2/sites-available/default-ssl.conf"
+if [ -f "$CONF_FILE" ]; then
+    sed -i 's/# Redirect/RewriteEngine On\nRewriteCond %{HTTPS} off\nRewriteRule (.*) https:\/\/%{HTTP_HOST}%{REQUEST_URI} [L,R=301]\n&/' "$CONF_FILE"
+    sed -i 's/<\/VirtualHost>/Redirect permanent \/ https:\/\/%{HTTP_HOST}\/\n&/' "$CONF_FILE"
+    a2enmod ssl
+    a2enmod rewrite
+    systemctl restart apache2
+else
+    echo "SSL configuration file not found. Please ensure Apache is installed and configured correctly."
+    exit 1
+fi

@@ -1,0 +1,263 @@
+```bash
+#!/bin/bash
+
+# Variáveis para rastrear se alguma atualização foi necessária
+updated=0
+
+# Função para verificar e atualizar uma instalação do Python
+update_python() {
+    local port="$1"
+    local installed_version="$2"
+    local security_update_version="$3"
+    local command_injection_version="$4"
+    local dos_version="$5"
+    local symlink_version="$6"
+    local connection_race_version="$7"
+    local access_control_version="$8"
+    local input_validation_version="$9"
+    local encoding_output_version="${10}"
+    local ssl_version="${11}"
+    local multiple_version="${12}"
+    local ip_range_version="${13}"
+
+    echo "Verificando Python na porta $port..."
+
+    # CVE-2024-6232, CVE-2024-7592, CVE-2024-8088, CVE-2024-45490, CVE-2024-45491, CVE-2024-45492 (DoS)
+    if [[ "$installed_version" == "3.10.12" ]] && [[ "$security_update_version" == "3.10.15" ]]; then
+        echo "Atualizando Python 3.10.12 para 3.10.15 (DoS)"
+        # Simulação de atualização (substitua pelo comando real)
+        echo "Simulando atualização: apt-get install python3.10=$security_update_version"
+        # apt-get install python3.10="$security_update_version" -y
+        updated=1
+    fi
+
+    if [[ "$installed_version" == "3.12.0" ]] && [[ "$security_update_version" == "3.12.6" ]]; then
+        echo "Atualizando Python 3.12.0 para 3.12.6 (DoS)"
+        # Simulação de atualização (substitua pelo comando real)
+        echo "Simulando atualização: apt-get install python3.12=$security_update_version"
+        # apt-get install python3.12="$security_update_version" -y
+        updated=1
+    fi
+
+    # CVE-2024-9287 (Command Injection)
+    if [[ "$installed_version" == "3.10.12" ]] && [[ "$command_injection_version" == "3.10.16" ]]; then
+        echo "Atualizando Python 3.10.12 para 3.10.16 (Command Injection)"
+        # Simulação de atualização (substitua pelo comando real)
+        echo "Simulando atualização: apt-get install python3.10=$command_injection_version"
+        # apt-get install python3.10="$command_injection_version" -y
+        updated=1
+    fi
+
+    if [[ "$installed_version" == "3.12.0" ]] && [[ "$command_injection_version" == "3.12.8" ]]; then
+        echo "Atualizando Python 3.12.0 para 3.12.8 (Command Injection)"
+        # Simulação de atualização (substitua pelo comando real)
+        echo "Simulando atualização: apt-get install python3.12=$command_injection_version"
+        # apt-get install python3.12="$command_injection_version" -y
+        updated=1
+    fi
+
+    # CVE-2023-52425 (DoS in libexpat)
+    if [[ "$installed_version" == "3.10.12" ]] && [[ "$dos_version" == "3.10.14" ]]; then
+        echo "Atualizando Python 3.10.12 para 3.10.14 (DoS libexpat)"
+        # Simulação de atualização (substitua pelo comando real)
+        echo "Simulando atualização: apt-get install python3.10=$dos_version"
+        # apt-get install python3.10="$dos_version" -y
+        updated=1
+    fi
+
+    if [[ "$installed_version" == "3.12.0" ]] && [[ "$dos_version" == "3.12.3" ]]; then
+        echo "Atualizando Python 3.12.0 para 3.12.3 (DoS libexpat)"
+        # Simulação de atualização (substitua pelo comando real)
+        echo "Simulando atualização: apt-get install python3.12=$dos_version"
+        # apt-get install python3.12="$dos_version" -y
+        updated=1
+    fi
+
+    # CVE-2023-6597 (Symlink Dereference)
+    if [[ "$installed_version" == "3.10.12" ]] && [[ "$symlink_version" == "3.10.14" ]]; then
+        echo "Atualizando Python 3.10.12 para 3.10.14 (Symlink Dereference)"
+        # Simulação de atualização (substitua pelo comando real)
+        echo "Simulando atualização: apt-get install python3.10=$symlink_version"
+        # apt-get install python3.10="$symlink_version" -y
+        updated=1
+    fi
+
+    if [[ "$installed_version" == "3.12.0" ]] && [[ "$symlink_version" == "3.12.1" ]]; then
+        echo "Atualizando Python 3.12.0 para 3.12.1 (Symlink Dereference)"
+        # Simulação de atualização (substitua pelo comando real)
+        echo "Simulando atualização: apt-get install python3.12=$symlink_version"
+        # apt-get install python3.12="$symlink_version" -y
+        updated=1
+    fi
+
+    # CVE-2024-3219 (Connection Race)
+    if [[ "$installed_version" == "3.12.0" ]] && [[ "$connection_race_version" == "3.12.5" ]]; then
+        echo "Atualizando Python 3.12.0 para 3.12.5 (Connection Race)"
+        # Simulação de atualização (substitua pelo comando real)
+        echo "Simulando atualização: apt-get install python3.12=$connection_race_version"
+        # apt-get install python3.12="$connection_race_version" -y
+        updated=1
+    fi
+
+    if [[ "$installed_version" == "3.10.12" ]] && [[ "$connection_race_version" == "3.10.15" ]]; then
+        echo "Atualizando Python 3.10.12 para 3.10.15 (Connection Race)"
+        # Simulação de atualização (substitua pelo comando real)
+        echo "Simulando atualização: apt-get install python3.10=$connection_race_version"
+        # apt-get install python3.10="$connection_race_version" -y
+        updated=1
+    fi
+
+    # CVE-2024-4030 (Access Control)
+    if [[ "$installed_version" == "3.12.0" ]] && [[ "$access_control_version" == "3.12.4" ]]; then
+        echo "Atualizando Python 3.12.0 para 3.12.4 (Access Control)"
+        # Simulação de atualização (substitua pelo comando real)
+        echo "Simulando atualização: apt-get install python3.12=$access_control_version"
+        # apt-get install python3.12="$access_control_version" -y
+        updated=1
+    fi
+
+    if [[ "$installed_version" == "3.10.12" ]] && [[ "$access_control_version" == "3.10.15" ]]; then
+        echo "Atualizando Python 3.10.12 para 3.10.15 (Access Control)"
+        # Simulação de atualização (substitua pelo comando real)
+        echo "Simulando atualização: apt-get install python3.10=$access_control_version"
+        # apt-get install python3.10="$access_control_version" -y
+        updated=1
+    fi
+    
+    # CVE-2025-0938 (Improper Input Validation)
+    if [[ "$installed_version" == "3.10.12" ]] && [[ "$input_validation_version" == "3.12.9" ]]; then
+        echo "Atualizando Python 3.10.12 para 3.12.9 (Improper Input Validation)"
+        # Simulação de atualização (substitua pelo comando real)
+        echo "Simulando atualização: apt-get install python3.10=$input_validation_version"
+        updated=1
+    fi
+
+    if [[ "$installed_version" == "3.12.0" ]] && [[ "$input_validation_version" == "3.12.9" ]]; then
+        echo "Atualizando Python 3.12.0 para 3.12.9 (Improper Input Validation)"
+        # Simulação de atualização (substitua pelo comando real)
+        echo "Simulando atualização: apt-get install python3.12=$input_validation_version"
+        updated=1
+    fi
+
+    # CVE-2025-1795 (Improper Encoding of Output)
+    if [[ "$installed_version" == "3.10.12" ]] && [[ "$encoding_output_version" == "3.11.10" ]]; then
+        echo "Atualizando Python 3.10.12 para 3.11.10 (Improper Encoding of Output)"
+        # Simulação de atualização (substitua pelo comando real)
+        echo "Simulando atualização: apt-get install python3.10=$encoding_output_version"
+        updated=1
+    fi
+
+    if [[ "$installed_version" == "3.12.0" ]] && [[ "$encoding_output_version" == "3.12.4" ]]; then
+        echo "Atualizando Python 3.12.0 para 3.12.4 (Improper Encoding of Output)"
+        # Simulação de atualização (substitua pelo comando real)
+        echo "Simulando atualização: apt-get install python3.12=$encoding_output_version"
+        updated=1
+    fi
+
+    # CVE-2024-0397 (SSL Vulnerability)
+    if [[ "$installed_version" == "3.10.12" ]] && [[ "$ssl_version" == "3.10.14" ]]; then
+        echo "Atualizando Python 3.10.12 para 3.10.14 (SSL Vulnerability)"
+        # Simulação de atualização (substitua pelo comando real)
+        echo "Simulando atualização: apt-get install python3.10=$ssl_version"
+        updated=1
+    fi
+
+    if [[ "$installed_version" == "3.12.0" ]] && [[ "$ssl_version" == "3.12.3" ]]; then
+        echo "Atualizando Python 3.12.0 para 3.12.3 (SSL Vulnerability)"
+        # Simulação de atualização (substitua pelo comando real)
+        echo "Simulando atualização: apt-get install python3.12=$ssl_version"
+        updated=1
+    fi
+        
+    # CVE-2024-0450 (Multiple Vulnerabilities)
+    if [[ "$installed_version" == "3.10.12" ]] && [[ "$multiple_version" == "3.10.14" ]]; then
+        echo "Atualizando Python 3.10.12 para 3.10.14 (Multiple Vulnerabilities)"
+        # Simulação de atualização (substitua pelo comando real)
+        echo "Simulando atualização: apt-get install python3.10=$multiple_version"
+        updated=1
+    fi
+
+    if [[ "$installed_version" == "3.12.0" ]] && [[ "$multiple_version" == "3.12.2" ]]; then
+        echo "Atualizando Python 3.12.0 para 3.12.2 (Multiple Vulnerabilities)"
+        # Simulação de atualização (substitua pelo comando real)
+        echo "Simulando atualização: apt-get install python3.12=$multiple_version"
+        updated=1
+    fi
+
+    # CVE-2024-4032 (IP Ranges Vulnerability)
+    if [[ "$installed_version" == "3.10.12" ]] && [[ "$ip_range_version" == "3.10.15" ]]; then
+        echo "Atualizando Python 3.10.12 para 3.10.15 (IP Ranges Vulnerability)"
+        # Simulação de atualização (substitua pelo comando real)
+        echo "Simulando atualização: apt-get install python3.10=$ip_range_version"
+        updated=1
+    fi
+
+    if [[ "$installed_version" == "3.12.0" ]] && [[ "$ip_range_version" == "3.12.4" ]]; then
+        echo "Atualizando Python 3.12.0 para 3.12.4 (IP Ranges Vulnerability)"
+        # Simulação de atualização (substitua pelo comando real)
+        echo "Simulando atualização: apt-get install python3.12=$ip_range_version"
+        updated=1
+    fi
+
+    # CVE-2024-11168 (SSRF Vulnerability)
+    if [[ "$installed_version" == "3.10.12" ]] && [[ "$command_injection_version" == "3.10.16" ]]; then
+        echo "Atualizando Python 3.10.12 para 3.10.16 (SSRF Vulnerability)"
+        # Simulação de atualização (substitua pelo comando real)
+        echo "Simulando atualização: apt-get install python3.10=$command_injection_version"
+        # apt-get install python3.10="$command_injection_version" -y
+        updated=1
+    fi
+
+     # CVE-2024-6923 (Email Header Injection Vulnerability)
+    if [[ "$installed_version" == "3.10.12" ]] && [[ "$connection_race_version" == "3.10.15" ]]; then
+        echo "Atualizando Python 3.10.12 para 3.10.15 (Email Header Injection Vulnerability)"
+        # Simulação de atualização (substitua pelo comando real)
+        echo "Simulando atualização: apt-get install python3.10=$connection_race_version"
+        # apt-get install python3.10="$connection_race_version" -y
+        updated=1
+    fi
+
+    if [[ "$installed_version" == "3.12.0" ]] && [[ "$connection_race_version" == "3.12.5" ]]; then
+        echo "Atualizando Python 3.12.0 para 3.12.5 (Email Header Injection Vulnerability)"
+        # Simulação de atualização (substitua pelo comando real)
+        echo "Simulando atualização: apt-get install python3.12=$connection_race_version"
+        # apt-get install python3.12="$connection_race_version" -y
+        updated=1
+    fi
+}
+
+# Atualizar os índices do repositório
+echo "Atualizando índices do repositório..."
+# apt-get update -y
+
+# Corrigir vulnerabilidades específicas para cada porta
+update_python "5000" "3.10.12" "3.10.15" "3.10.16" "3.10.14" "3.10.14" "3.10.15" "3.10.15" "3.12.9" "3.11.10" "3.10.14" "3.10.14" "3.10.15"
+update_python "8000" "3.12.0" "3.12.6" "3.12.8" "3.12.3" "3.12.1" "3.12.5" "3.12.4" "3.12.9" "3.12.4" "3.12.3" "3.12.2" "3.12.4"
+update_python "8001" "3.12.0" "3.12.6" "3.12.8" "3.12.3" "3.12.1" "3.12.5" "3.12.4" "3.12.9" "3.12.4" "3.12.3" "3.12.2" "3.12.4"
+update_python "8002" "3.12.0" "3.12.6" "3.12.8" "3.12.3" "3.12.1" "3.12.5" "3.12.4" "3.12.9" "3.12.4" "3.12.3" "3.12.2" "3.12.4"
+
+# Vulnerabilidade 49: SSL/TLS: Known Untrusted / Dangerous Certificate Authority (CA) Detection
+echo "Substituindo certificado auto-assinado por um certificado confiável para a porta 8002..."
+echo "Simulando a substituição do certificado para a porta 8002."
+
+# Vulnerabilidade 54: SSL/TLS: Deprecated TLSv1.0 and TLSv1.1 Protocol Detection
+echo "Desabilitando TLSv1.0 e TLSv1.1 para o serviço SSH na porta 22..."
+echo "Simulando desabilitação de TLSv1.0 e TLSv1.1 para SSH."
+
+# Vulnerabilidade 59: Weak MAC Algorithm(s) Supported (SSH)
+echo "Desabilitando algoritmos MAC fracos para o serviço SSH na porta 22..."
+echo "Simulando a desabilitação de algoritmos MAC fracos para SSH."
+
+# Vulnerabilidade 62: ICMP Timestamp Reply Information Disclosure
+echo "Desabilitando resposta a solicitações ICMP Timestamp..."
+echo "Simulando a desabilitação de respostas ICMP Timestamp."
+
+# Reiniciar serviços afetados (simulação)
+if [[ "$updated" == 1 ]]; then
+    echo "Reiniciando serviços afetados..."
+    echo "Simulando reinicialização dos serviços Python."
+    # systemctl restart <nome_do_servico>
+fi
+
+echo "Script de correção concluído."
+```

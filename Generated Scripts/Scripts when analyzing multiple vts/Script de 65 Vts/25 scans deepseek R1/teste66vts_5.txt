@@ -1,0 +1,63 @@
+```powershell
+$ProgressPreference = 'SilentlyContinue'
+$ErrorActionPreference = 'Stop'
+
+function Install-PythonUpdate {
+    param (
+        [string]$Version,
+        [string]$Build
+    )
+    $url = "https://www.python.org/ftp/python/$Version/python-$Version$Build.exe"
+    $installer = "$env:TEMP\python-$Version-installer.exe"
+    Invoke-WebRequest -Uri $url -OutFile $installer
+    Start-Process -FilePath $installer -ArgumentList "/quiet", "InstallAllUsers=1", "PrependPath=1" -Wait
+    Remove-Item $installer
+}
+
+$python310 = Get-ItemProperty -Path 'HKLM:\Software\Python\PythonCore\3.10\InstallPath' -ErrorAction SilentlyContinue
+if ($python310) {
+    Install-PythonUpdate -Version "3.10.16" -Build "-amd64"
+}
+
+$python312 = Get-ItemProperty -Path 'HKLM:\Software\Python\PythonCore\3.12\InstallPath' -ErrorAction SilentlyContinue
+if ($python312) {
+    Install-PythonUpdate -Version "3.12.9" -Build "-amd64"
+}
+
+function Set-RegKey($path, $name, $value, $type) {
+    if (-not (Test-Path $path)) {
+        New-Item -Path $path -Force | Out-Null
+    }
+    New-ItemProperty -Path $path -Name $name -Value $value -PropertyType $type -Force | Out-Null
+}
+
+$tlsPaths = @(
+    "HKLM:\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Protocols\TLS 1.0\Server",
+    "HKLM:\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Protocols\TLS 1.1\Server"
+)
+foreach ($path in $tlsPaths) {
+    Set-RegKey -path $path -name "Enabled" -value 0 -type "DWord"
+}
+
+Set-RegKey -path "HKLM:\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Protocols\TLS 1.2\Server" -name "Enabled" -value 1 -type "DWord"
+Set-RegKey -path "HKLM:\SYSTEM\CurrentControlSet\Control\Terminal Server\WinStations\RDP-Tcp" -name "SecurityLayer" -value 2 -type "DWord"
+Set-RegKey -path "HKLM:\SYSTEM\CurrentControlSet\Control\Terminal Server\WinStations\RDP-Tcp" -name "SSLCipherSuite" -value "TLS_RSA_WITH_AES_128_GCM_SHA256" -type "String"
+
+Restart-Service -Name TermService -Force
+
+$sshdConfig = "C:\ProgramData\ssh\sshd_config"
+if (Test-Path $sshdConfig) {
+    $content = Get-Content $sshdConfig
+    $newContent = $content | ForEach-Object {
+        if ($_ -match '^MACs\s+(.+)') {
+            $macs = $matches[1].Split(',') | Where-Object { $_ -notmatch 'umac-64-etm@openssh\.com|umac-64@openssh\.com' }
+            "MACs " + ($macs -join ',')
+        }
+        else { $_ }
+    }
+    $newContent | Set-Content $sshdConfig
+    Restart-Service -Name sshd -Force
+}
+
+New-NetFirewallRule -DisplayName "Block ICMP Timestamp" -Direction Inbound -Protocol ICMPv4 -IcmpType 13 -Action Block
+```

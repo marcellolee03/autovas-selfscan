@@ -1,0 +1,18 @@
+#!/bin/bash
+openssl_conf="/etc/ssl/openssl.cnf"
+if [ -f "$openssl_conf" ]; then
+    sed -i '/^MinProtocol/s/=.*/= TLSv1.2/' "$openssl_conf"
+    sed -i '/^CipherString/s/=.*/= DEFAULT@SECLEVEL=2/' "$openssl_conf"
+fi
+nginx_conf="/etc/nginx/nginx.conf"
+if [ -f "$nginx_conf" ]; then
+    sed -i '/ssl_protocols/s/TLSv1\.0\ TLSv1\.1//g' "$nginx_conf"
+    sed -i '/ssl_protocols/s/;/ TLSv1.2;/' "$nginx_conf"
+fi
+apache_conf="/etc/apache2/mods-enabled/ssl.conf"
+if [ -f "$apache_conf" ]; then
+    sed -i '/SSLProtocol/s/all.*-SSLv3/TLSv1.2/' "$apache_conf"
+    sed -i '/SSLCipherSuite/s/.*/SSLCipherSuite HIGH:!aNULL:!MD5/' "$apache_conf"
+fi
+systemctl restart nginx
+systemctl restart apache2

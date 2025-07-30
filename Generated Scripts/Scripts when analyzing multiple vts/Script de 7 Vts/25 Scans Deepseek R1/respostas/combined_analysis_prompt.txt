@@ -1,0 +1,1959 @@
+>analise esse prompt contendo as vulnerabilidades encontradas em um csv do openvas e analise se os scripts que irei enviar em seguida sao capazes de corrigir esses problemas ou nao, me informando uma porcentagem de correcao das vulnerabilidades
+>Vulnerabilidades:
+    # INSTRUÇÕES PARA O MODELO DE IA
+
+    ## PERSONA
+    Você é um especialista em cibersegurança e automação de sistemas, focado em criar scripts de correção (patching). Sua única função é gerar um script que resolva a vulnerabilidade descrita abaixo.
+
+    ## TAREFA
+    Analise o contexto da vulnerabilidade a seguir e gere um script de shell (compatível com o sistema operacional do localhost) que, ao ser executado, corrija permanentemente a vulnerabilidade descrita.
+
+    ## CONTEXTO DA VULNERABILIDADE
+
+# Vulnerabilidade 1
+CVEs: nan
+NVT Name: Cleartext Transmission of Sensitive Information via HTTP
+Port: 80.0
+Port Protocol: tcp
+Summary: The host / application transmits sensitive information (username, passwords) in
+  cleartext via HTTP.
+Specific Result: Vulnerability was detected according to the Vulnerability Detection Method.
+Vulnerability Detection Method: Evaluate previous collected information and check if the host / application is not
+  enforcing the transmission of sensitive data via an encrypted SSL/TLS connection.
+
+  The script is currently checking the following:
+
+  - HTTP Basic Authentication (Basic Auth)
+
+  - HTTP Forms (e.g. Login) with input field of type 'password'
+Details:
+Cleartext Transmission of Sensitive Information via HTTP
+(OID: 1.3.6.1.4.1.25623.1.0.108440)
+Version used: 2023-09-07T05:05:21Z
+
+Affected Software/OS: Hosts / applications which doesn't enforce the transmission of sensitive data via an
+  encrypted SSL/TLS connection.
+Solution: Enforce the transmission of sensitive data via an encrypted SSL/TLS connection.
+  Additionally make sure the host / application is redirecting all users to the secured SSL/TLS connection before
+  allowing to input sensitive data into the mentioned functions.
+
+# Vulnerabilidade 2
+CVEs: nan
+NVT Name: DNS Cache Snooping Vulnerability (UDP) - Active Check
+Port: 53.0
+Port Protocol: udp
+Summary: The DNS server is prone to a cache snooping vulnerability.
+Specific Result: Vulnerability was detected according to the Vulnerability Detection Method.
+Vulnerability Detection Method: Sends a crafted DNS query and checks the response.
+
+  Notes:
+
+  - No scan result is expected if localhost (127.0.0.1) was scanned (self scanning)
+
+  - If the scanned network is e.g. a private LAN which contains systems not accessible to the public
+  (access restricted) and it is accepted that the target host is disclosing information to this
+  network please set the 'Network type' configuration of the following VT to 'Private LAN':
+
+  Global variable settings (OID: 1.3.6.1.4.1.25623.1.0.12288)
+Details:
+DNS Cache Snooping Vulnerability (UDP) - Active Check
+(OID: 1.3.6.1.4.1.25623.1.0.146591)
+Version used: 2025-01-21T05:37:33Z
+
+Affected Software/OS: nan
+Solution: There are multiple possible mitigation steps depending on
+  location and functionality needed by the DNS server:
+
+  - Disable recursion
+
+  - Don't allow public access to DNS Servers doing recursion
+
+  - Leave recursion enabled if the DNS Server stays on a corporate network that cannot be reached
+  by untrusted clients
+
+# Vulnerabilidade 3
+CVEs: CVE-1999-0524
+NVT Name: ICMP Timestamp Reply Information Disclosure
+Port: nan
+Port Protocol: nan
+Summary: The remote host responded to an ICMP timestamp request.
+Specific Result: Vulnerability was detected according to the Vulnerability Detection Method.
+Vulnerability Detection Method: Sends an ICMP Timestamp (Type 13) request and checks if a
+  Timestamp Reply (Type 14) is received.
+Details:
+ICMP Timestamp Reply Information Disclosure
+(OID: 1.3.6.1.4.1.25623.1.0.103190)
+Version used: 2025-01-21T05:37:33Z
+
+Affected Software/OS: nan
+Solution: Various mitigations are possible:
+
+  - Disable the support for ICMP timestamp on the remote host completely
+
+  - Protect the remote host by a firewall, and block ICMP packets passing through the firewall in
+  either direction (either completely or only for untrusted networks)
+
+# Vulnerabilidade 4
+CVEs: CVE-2011-3389,CVE-2015-0204,CVE-2025-3200
+NVT Name: SSL/TLS: Deprecated TLSv1.0 and TLSv1.1 Protocol Detection
+Port: 443.0
+Port Protocol: tcp
+Summary: It was possible to detect the usage of the deprecated TLSv1.0
+  and/or TLSv1.1 protocol on this system.
+Specific Result: Vulnerability was detected according to the Vulnerability Detection Method.
+Vulnerability Detection Method: Checks the used TLS protocols of the services provided by this
+  system.
+Details:
+SSL/TLS: Deprecated TLSv1.0 and TLSv1.1 Protocol Detection
+(OID: 1.3.6.1.4.1.25623.1.0.117274)
+Version used: 2024-09-27T05:05:23Z
+
+Affected Software/OS: '- All services providing an encrypted communication using the
+  TLSv1.0 and/or TLSv1.1 protocols
+
+  - CVE-2025-3200: Multiple products from Wiesemann & Theis
+Solution: It is recommended to disable the deprecated TLSv1.0 and/or
+  TLSv1.1 protocols in favor of the TLSv1.2+ protocols.
+
+  Please see the references for more resources supporting you with this task.
+
+# Vulnerabilidade 5
+CVEs: CVE-2011-1473,CVE-2011-5094
+NVT Name: SSL/TLS: Renegotiation DoS Vulnerability (CVE-2011-1473, CVE-2011-5094)
+Port: 443.0
+Port Protocol: tcp
+Summary: The remote SSL/TLS service is prone to a denial of service (DoS)
+  vulnerability.
+Specific Result: Vulnerability was detected according to the Vulnerability Detection Method.
+Vulnerability Detection Method: Checks if the remote service allows to re-do the same SSL/TLS
+  handshake (Renegotiation) over an existing / already established SSL/TLS connection.
+Details:
+SSL/TLS: Renegotiation DoS Vulnerability (CVE-2011-1473, CVE-2011-5094)
+(OID: 1.3.6.1.4.1.25623.1.0.117761)
+Version used: 2024-09-27T05:05:23Z
+
+Affected Software/OS: Every SSL/TLS service which does not properly restrict
+  client-initiated renegotiation.
+Solution: Users should contact their vendors for specific patch information.
+
+  A general solution is to remove/disable renegotiation capabilities altogether from/in the affected
+  SSL/TLS service.
+
+# Vulnerabilidade 6
+CVEs: CVE-2013-2566,CVE-2015-2808,CVE-2015-4000
+NVT Name: SSL/TLS: Report Weak Cipher Suites
+Port: 443.0
+Port Protocol: tcp
+Summary: This routine reports all weak SSL/TLS cipher suites accepted by
+  a service.
+Specific Result: Vulnerability was detected according to the Vulnerability Detection Method.
+Vulnerability Detection Method: Checks previous collected cipher suites.
+
+  NOTE: No severity for SMTP services with 'Opportunistic TLS' and weak cipher suites on port 25/tcp
+  is reported. If too strong cipher suites are configured for this service the alternative would be
+  to fall back to an even more insecure cleartext communication.
+Details:
+SSL/TLS: Report Weak Cipher Suites
+(OID: 1.3.6.1.4.1.25623.1.0.103440)
+Version used: 2024-09-27T05:05:23Z
+
+Affected Software/OS: All services providing an encrypted communication using weak
+  SSL/TLS cipher suites.
+Solution: The configuration of this services should be changed so that it
+  does not accept the listed weak cipher suites anymore.
+
+  Please see the references for more resources supporting you with this task.
+
+# Vulnerabilidade 7
+CVEs: nan
+NVT Name: TCP Timestamps Information Disclosure
+Port: nan
+Port Protocol: nan
+Summary: The remote host implements TCP timestamps and therefore allows
+  to compute the uptime.
+Specific Result: Vulnerability was detected according to the Vulnerability Detection Method.
+Vulnerability Detection Method: Special IP packets are forged and sent with a little delay in
+  between to the target IP. The responses are searched for a timestamps. If found, the timestamps
+  are reported.
+Details:
+TCP Timestamps Information Disclosure
+(OID: 1.3.6.1.4.1.25623.1.0.80091)
+Version used: 2023-12-15T16:10:08Z
+
+Affected Software/OS: TCP implementations that implement RFC1323/RFC7323.
+Solution: To disable TCP timestamps on linux add the line
+  'net.ipv4.tcp_timestamps = 0' to /etc/sysctl.conf. Execute 'sysctl -p' to apply the settings at
+  runtime.
+
+  To disable TCP timestamps on Windows execute 'netsh int tcp set global timestamps=disabled'
+
+  Starting with Windows Server 2008 and Vista, the timestamp can not be completely disabled.
+
+  The default behavior of the TCP/IP stack on this Systems is to not use the Timestamp options when
+  initiating TCP connections, but use them if the TCP peer that is initiating communication includes
+  them in their synchronize (SYN) segment.
+
+  See the references for more information.
+
+    ## REGRAS E RESTRIÇÕES DE SAÍDA
+    1.  **APENAS SCRIPT:** A sua resposta deve conter ÚNICA E EXCLUSIVAMENTE o código do script.
+    2.  **SEM EXPLICAÇÕES:** Não adicione nenhum comentário, explicação, introdução, ou despedida.
+    3.  **SEM BLOCOS DE CÓDIGO MARKDOWN:** Não envolva o script em blocos de código como ` ```bash ` ou ` ```sh `. A resposta deve ser o texto puro do script.
+    4.  **AUTOSSUFICIENTE:** O script deve ser completo, autônomo e não deve exigir interação do usuário para ser executado.
+    5.  **COMPATIBILIDADE:** O script deve ser compatível com o sistema operacional especificado em 'localhost OS'. Se o sistema operacional não for especificado, assuma um sistema baseado em Linux (como Ubuntu/Debian).
+
+    # INÍCIO DO SCRIPT DE CORREÇÃO
+
+>Scripts de correção:
+{type: uploaded file
+fileName: aeta_1.txt
+fullContent:
+#!/bin/bash
+
+# Fix vulnerability 1: Enforce HTTPS for sensitive data
+web_configs=($(find /etc/apache2 /etc/nginx -type f -name "*.conf" 2>/dev/null))
+for config in "${web_configs[@]}"; do
+    if grep -q "listen 80" "$config"; then
+        sed -i.orig '/listen 80/{a \
+\ \ \ \ return 301 https://$host$request_uri;
+        }' "$config"
+    elif grep -q "^server {" "$config" && ! grep -q "443" "$config"; then
+        sed -i.orig '/^server {/a \
+\ \ \ \ listen 443 ssl;\
+\ \ \ \ ssl_certificate /etc/ssl/certs/ssl-cert-snakeoil.pem;\
+\ \ \ \ ssl_certificate_key /etc/ssl/private/ssl-cert-snakeoil.key;
+        ' "$config"
+    fi
+done
+
+# Fix vulnerability 2: Disable DNS recursion
+bind_conf="/etc/bind/named.conf.options"
+if [ -f "$bind_conf" ]; then
+    cp $bind_conf $bind_conf.orig
+    if ! grep -q "allow-recursion" $bind_conf; then
+        sed -i '/options {/a \
+\ \ \ \ allow-recursion { none; }; \
+\ \ \ \ recursion no;' $bind_conf
+    fi
+    systemctl restart bind9 2>/dev/null
+fi
+
+# Fix vulnerability 3: Disable ICMP timestamp responses
+sysctl -w net.ipv4.icmp_echo_ignore_all=1
+sed -i '/^net.ipv4.icmp_echo_ignore_all=/d' /etc/sysctl.conf
+echo "net.ipv4.icmp_echo_ignore_all=1" >> /etc/sysctl.conf
+
+# Fix vulnerabilities 4/5/6: SSL/TLS hardening
+for config in "${web_configs[@]}"; do
+    if grep -q "ssl_protocols" "$config" || grep -q "ssl_ciphers" "$config"; then
+        sed -i.ssl 's/ssl_protocols .*/ssl_protocols TLSv1.2 TLSv1.3;/g;
+        s/ssl_ciphers .*/ssl_ciphers HIGH:!aNULL:!MD5:!RC4;/
+        /ssl_prefer_server_ciphers/ s/off/on/' "$config"
+    else
+        sed -i.orig '/listen 443 ssl/a \
+\ \ \ \ ssl_protocols TLSv1.2 TLSv1.3;\
+\ \ \ \ ssl_ciphers HIGH:!aNULL:!MD5:!RC4;\
+\ \ \ \ ssl_prefer_server_ciphers on;' "$config"
+    fi
+    sed -i '/SSLInsecureRenegotiation/d' "$config"
+    sed -i '/SSLCompression/d' "$config"
+    sed -i '/SSLSessionTickets/d' "$config"
+    sed -i '/SSLOptions +OPTIONS/a SSLOptions +StdEnvVars' "$config"
+done
+
+# Fix vulnerability 7: Disable TCP timestamps
+sysctl -w net.ipv4.tcp_timestamps=0
+sed -i '/^net.ipv4.tcp_timestamps=/d' /etc/sysctl.conf
+echo "net.ipv4.tcp_timestamps=0" >> /etc/sysctl.conf
+sysctl -p &>/dev/null
+
+# Restart web services
+if which apache2 &>/dev/null; then
+    systemctl restart apache2 2>/dev/null
+fi
+if which nginx &>/dev/null; then 
+    systemctl restart nginx 2>/dev/null
+fi}
+{type: uploaded file
+fileName: aeta_2.txt
+fullContent:
+#!/bin/bash
+
+# Vulnerabilidade 1: Forçar HTTPS para transmissão sensível (Apache/Nginx)
+if command -v apache2 &> /dev/null; then
+    [ ! -f /etc/apache2/sites-available/000-default-le-ssl.conf ] && \
+    a2enmod ssl rewrite && systemctl restart apache2
+    sed -i '/<VirtualHost \*:80>/a \\tRewriteEngine On\n\tRewriteCond %{HTTPS} off\n\tRewriteRule (.*) https://%{HTTP_HOST}%{REQUEST_URI}' /etc/apache2/sites-enabled/000-default.conf
+    systemctl restart apache2
+fi
+
+if command -v nginx &> /dev/null; then
+    grep -q "return 301 https" /etc/nginx/sites-enabled/default || \
+    sed -i '/server {/a \\tif ($scheme = "http") {\n\t\treturn 301 https://$host$request_uri;\n\t}' /etc/nginx/sites-enabled/default
+    systemctl restart nginx
+fi
+
+# Vulnerabilidade 2: Mitigar DNS Cache Snooping (BIND9)
+if [ -f /etc/bind/named.conf.options ]; then
+    grep -q "allow-recursion" /etc/bind/named.conf.options || \
+    sed -i '/options {/a \\tallow-recursion { none; };\n\tallow-query-cache { none; };' /etc/bind/named.conf.options
+    grep -q "allow-query" /etc/bind/named.conf.options || \
+    sed -i '/options {/a \\tallow-query { localhost; };' /etc/bind/named.conf.options
+    systemctl restart bind9
+fi
+
+# Vulnerabilidade 3: Bloquear ICMP Timestamp
+iptables -A INPUT -p icmp --icmp-type timestamp-request -j DROP
+iptables -A INPUT -p icmp --icmp-type timestamp-reply -j DROP
+echo "net.ipv4.icmp_echo_ignore_all=1" >> /etc/sysctl.conf
+
+# Vulnerabilidade 4 e 6: Desativar TLS antigos e cifras fracas (Apache)
+if command -v apache2 &> /dev/null && [ -f /etc/apache2/mods-available/ssl.conf ]; then
+    sed -i 's/SSLProtocol.*/SSLProtocol -all +TLSv1.2 +TLSv1.3/' /etc/apache2/mods-available/ssl.conf
+    sed -i 's/SSLCipherSuite.*/SSLCipherSuite ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-SHA384:ECDHE-RSA-AES256-SHA384:ECDHE-ECDSA-AES128-SHA256:ECDHE-RSA-AES128-SHA256/' /etc/apache2/mods-available/ssl.conf
+    systemctl restart apache2
+fi
+
+# Vulnerabilidade 4 e 6: Desativar TLS antigos e cifras fracas (Nginx)
+if command -v nginx &> /dev/null && [ -f /etc/nginx/nginx.conf ]; then
+    sed -i '/ssl_protocols/s/.*/    ssl_protocols TLSv1.2 TLSv1.3;/' /etc/nginx/nginx.conf
+    sed -i '/ssl_ciphers/s/.*/    ssl_ciphers "ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-SHA384:ECDHE-RSA-AES256-SHA384:ECDHE-ECDSA-AES128-SHA256:ECDHE-RSA-AES128-SHA256";/' /etc/nginx/nginx.conf
+    systemctl restart nginx
+fi
+
+# Vulnerabilidade 5: Desativar renegociação SSL (Apache)
+if command -v apache2 &> /dev/null; then
+    grep -q "SSLInsecureRenegotiation off" /etc/apache2/mods-available/ssl.conf || \
+    echo "SSLInsecureRenegotiation off" >> /etc/apache2/mods-available/ssl.conf
+    systemctl restart apache2
+fi
+
+# Vulnerabilidade 7: Desativar TCP Timestamps
+echo "net.ipv4.tcp_timestamps = 0" >> /etc/sysctl.conf
+sysctl -p &> /dev/null}
+{type: uploaded file
+fileName: aeta_3.txt
+fullContent:
+#!/bin/bash
+
+# Vulnerabilidade 1: Redirecionar HTTP para HTTPS no Apache
+if [ -f /etc/apache2/sites-available/000-default.conf ]; then
+    echo "Redirecting HTTP to HTTPS in Apache..."
+    sed -i '/<VirtualHost \*:80>/a\\tRedirect "/" "https://%{HTTP_HOST}%"' /etc/apache2/sites-available/000-default.conf
+    systemctl restart apache2
+fi
+
+# Vulnerabilidade 2: Restringir recursão DNS no BIND
+if [ -f /etc/bind/named.conf.options ]; then
+    echo "Configurando restrições de recursão DNS..."
+    if ! grep -q "recursion no;" /etc/bind/named.conf.options; then
+        sed -i '/options {/a\\trecursion no;' /etc/bind/named.conf.options
+        systemctl restart bind9
+    fi
+fi
+
+# Vulnerabilidade 3: Bloquear respostas ICMP Timestamp
+echo "Bloqueando respostas ICMP Timestamp..."
+iptables -A OUTPUT -p icmp --icmp-type timestamp-reply -j DROP
+iptables-save > /etc/iptables/rules.v4
+
+# Vulnerabilidade 4 e 6: Desabilitar TLS antigo e cifras fracas
+update_ssl_config() {
+    local conf_file=$1
+    local ssl_protocols="TLSv1.2 TLSv1.3"
+    local strong_ciphers="HIGH:!aNULL:!MD5:!RC4:!3DES"
+
+    if [ -f "$conf_file" ]; then
+        echo "Atualizando configurações TLS em $conf_file..."
+        sed -i "s/SSLProtocol.*/SSLProtocol $ssl_protocols/" "$conf_file"
+        sed -i "s/SSLCipherSuite.*/SSLCipherSuite $strong_ciphers/" "$conf_file"
+        grep -q "SSLInsecureRenegotiation" "$conf_file" || 
+            echo "SSLInsecureRenegotiation off" >> "$conf_file"
+        systemctl restart $(basename "$conf_file" .conf | sed 's/\.//')
+    fi
+}
+
+update_ssl_config /etc/apache2/sites-enabled/default-ssl.conf
+update_ssl_config /etc/apache2/mods-enabled/ssl.conf
+update_ssl_config /etc/nginx/sites-enabled/default
+
+# Vulnerabilidade 7: Desabilitar TCP Timestamps
+echo "Desativando TCP Timestamps..."
+sysctl -w net.ipv4.tcp_timestamps=0
+echo "net.ipv4.tcp_timestamps = 0" >> /etc/sysctl.conf}
+{type: uploaded file
+fileName: aeta_4.txt
+fullContent:
+#!/bin/bash
+
+# Verificar superusuário
+if [ "$EUID" -ne 0 ]; then
+    echo "Necessário executar como root. Utilize sudo." >&2
+    exit 1
+fi
+
+# Corrigir Vulnerabilidade 1: HTTP para HTTPS
+if [ -d "/etc/apache2" ]; then
+    a2enmod ssl rewrite > /dev/null 2>&1
+    cat > /etc/apache2/conf-available/https-redirect.conf << 'EOF'
+<VirtualHost *:80>
+    ServerAdmin webmaster@localhost
+    RewriteEngine On
+    RewriteCond %{HTTPS} off
+    RewriteRule (.*) https://%{HTTP_HOST}%{REQUEST_URI}
+</VirtualHost>
+EOF
+    a2enconf https-redirect > /dev/null 2>&1
+    systemctl restart apache2
+fi
+
+# Corrigir Vulnerabilidade 2: DNS Cache Snooping
+if [ -f "/etc/bind/named.conf" ]; then
+    sed -i '/options {/a \\tallow-recursion { none; };' /etc/bind/named.conf
+    sed -i '/recursion yes/c\recursion no;' /etc/bind/named.conf
+    systemctl restart bind9
+fi
+
+# Corrigir Vulnerabilidade 3: ICMP Timestamp
+iptables -A INPUT -p icmp --icmp-type timestamp-request -j DROP
+iptables -A INPUT -p icmp --icmp-type timestamp-reply -j DROP
+
+# Corrigir Vulnerabilidades 4,5,6: Configurações TLS/SSL
+if [ -d "/etc/apache2" ]; then
+    cat > /etc/apache2/conf-available/ssl-security.conf << 'EOF'
+SSLProtocol all -TLSv1 -TLSv1.1 -SSLv2 -SSLv3
+SSLCipherSuite HIGH:!aNULL:!MD5:!RC4:!3DES
+SSLHonorCipherOrder on
+SSLCompression off
+SSLSessionTickets off
+SSLUseStapling on
+SSLStaplingCache "shmcb:logs/ssl_stapling(32768)"
+EOF
+    a2enconf ssl-security > /dev/null 2>&1
+    systemctl restart apache2
+fi
+
+# Corrigir Vulnerabilidade 7: TCP Timestamps
+sysctl -w net.ipv4.tcp_timestamps=0
+
+# Persistir configurações sysctl
+if [ -d "/etc/sysctl.d" ]; then
+    echo "net.ipv4.tcp_timestamps = 0" > /etc/sysctl.d/50-disable-tcp-timestamps.conf
+    sysctl -p /etc/sysctl.d/50-disable-tcp-timestamps.conf > /dev/null
+fi}
+{type: uploaded file
+fileName: aeta_5.txt
+fullContent:
+```bash
+#!/bin/bash
+
+# Ensure script runs as root
+if [ "$(id -u)" -ne 0 ]; then
+  echo "Requisitos: Execute como root" >&2
+  exit 1
+fi
+
+# Vulnerabilidade 1,4,5,6: Configurações SSL/TLS para Apache
+if command -v apache2 >/dev/null; then
+  apache_dir="/etc/apache2"
+  ssl_conf="$apache_dir/mods-available/ssl.conf"
+  ports_conf="$apache_dir/ports.conf"
+  sites_dir="$apache_dir/sites-enabled"
+  
+  # Backup do SSL conf
+  cp "$ssl_conf" "$ssl_conf.bak"
+
+  # Forçar HTTPS (Vulnerabilidade 1)
+  for site_conf in "$sites_dir"/*; do
+    if [ -f "$site_conf" ] && ! grep -q "RewriteEngine" "$site_conf"; then
+      sed -i "s/<VirtualHost \*:80>/<VirtualHost \*:80>\n    RewriteEngine On\n    RewriteCond %{HTTPS} off\n    RewriteRule ^ https:\/\/%{HTTP_HOST}%{REQUEST_URI} [L,R=301]/" "$site_conf"
+    fi
+  done
+
+  # Atualizar protocolos TLS e cifras (Vulnerabilidade 4,6)
+  sed -i '/^SSLProtocol/s/.*/SSLProtocol -all +TLSv1.2/' "$ssl_conf"
+  sed -i '/^SSLCipherSuite/s/.*/SSLCipherSuite ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:DHE-RSA-AES128-GCM-SHA256:DHE-RSA-AES256-GCM-SHA384/' "$ssl_conf"
+  echo "SSLHonorCipherOrder on" >> "$ssl_conf"
+  
+  # Desabilitar renegociação (Vulnerabilidade 5)
+  echo "SSLInsecureRenegotiation off" >> "$ssl_conf"
+  echo "SSLStrictSNIVHostCheck on" >> "$ssl_conf"
+
+  systemctl restart apache2
+fi
+
+# Vulnerabilidade 1,4,5,6: Configurações SSL/TLS para Nginx
+if command -v nginx >/dev/null; then
+  nginx_dir="/etc/nginx"
+  nginx_conf="$nginx_dir/nginx.conf"
+  
+  # Forçar HTTPS (Vulnerabilidade 1)
+  sed -i '/listen 80;/,/location \// s/location \//return 301 https:\/\/$host$request_uri;\n    } # Forçar HTTPS\n    location \//' "$nginx_conf"
+
+  # Atualizar protocolos TLS e cifras (Vulnerabilidade 4,6)
+  sed -i '/ssl_protocols/s/.*/    ssl_protocols TLSv1.2 TLSv1.3;/' "$nginx_conf"
+  sed -i '/ssl_ciphers/s/.*/    ssl_ciphers "EECDH+AESGCM:EDH+AESGCM:AES256+EECDH:AES256+EDH";/' "$nginx_conf"
+  echo "    ssl_prefer_server_ciphers on;" >> "$nginx_conf"
+  
+  # Desabilitar renegociação (Vulnerabilidade 5)
+  echo "    ssl_renegotiation_limit 0;" >> "$nginx_conf"
+
+  nginx -t && systemctl restart nginx
+fi
+
+# Vulnerabilidade 2: Configuração DNS BIND9
+if command -v named >/dev/null; then
+  bind_conf="/etc/bind/named.conf"
+  if [ -f "$bind_conf" ]; then
+    cp "$bind_conf" "$bind_conf.bak"
+    # Desabilitar recursão e restringir queries
+    if ! grep -q "recursion no;" "$bind_conf"; then
+      echo -e "options {\n    recursion no;\n    allow-query { localhost; };\n};" >> "$bind_conf"
+    fi
+    systemctl restart bind9
+  fi
+fi
+
+# Vulnerabilidade 3: Bloquear mensagens ICMP Timestamp
+iptables -A INPUT -p icmp --icmp-type timestamp-request -j DROP
+iptables -A INPUT -p icmp --icmp-type timestamp-reply -j DROP
+ip6tables -A INPUT -p icmpv6 --icmpv6-type 13 -j DROP
+ip6tables -A INPUT -p icmpv6 --icmpv6-type 14 -j DROP
+
+# Vulnerabilidade 7: Desabilitar TCP Timestamps
+sysctl -w net.ipv4.tcp_timestamps=0
+if ! grep -q "net.ipv4.tcp_timestamps" /etc/sysctl.conf; then
+  echo "net.ipv4.tcp_timestamps = 0" >> /etc/sysctl.conf
+else
+  sed -i 's/^net.ipv4.tcp_timestamps.*/net.ipv4.tcp_timestamps = 0/' /etc/sysctl.conf
+fi
+
+# Salvar regras de firewall persistentemente (adaptar conforme distro)
+if command -v iptables-save >/dev/null; then
+  if command -v netfilter-persistent >/dev/null; then
+    netfilter-persistent save
+  elif command -v iptables-persistent >/dev/null; then
+    /etc/init.d/iptables-persistent save
+  fi
+fi
+
+echo "Aplicado configuracao segura"
+```}
+{type: uploaded file
+fileName: aeta_6.txt
+fullContent:
+```bash
+#!/bin/bash
+
+# Fix DNS Cache Snooping (Vuln2) in BIND
+if [ -e /etc/bind/named.conf ]; then
+    sed -i.bak 's/.*allow-query.*/allow-query { localhost; };/g;
+                s/.*recursion .*/recursion no;/g;
+                s/.*dnssec-validation .*/dnssec-validation auto;/
+                s/.*allow-transfer.*/allow-transfer { none; };/g;
+                s/.*allow-query-cache.*/allow-query-cache { localhost; };/g' /etc/bind/named.conf
+fi
+
+# Fix ICMP Timestamp (Vuln3) with iptables rules
+iptables -A INPUT -p icmp --icmp-type timestamp-request -j DROP
+iptables -A INPUT -p icmp --icmp-type timestamp-reply -j DROP
+iptables -A OUTPUT -p icmp --icmp-type timestamp-reply -j DROP
+iptables-save > /etc/iptables/rules.v4
+
+# Fix TLS Protocols & Ciphers for Apache (Vuln4,6,1,5)
+for dir in /etc/apache2/ /etc/httpd/; do
+    if [ -d "$dir" ]; then
+        find "$dir" -type f -name '*.conf' -exec sed -i.bak \
+            -e 's/^SSLProtocol.*$/SSLProtocol -all +TLSv1.2 +TLSv1.3/g' \
+            -e 's/^SSLCipherSuite.*$/SSLCipherSuite HIGH:!aNULL:!MD5:!RC4:!3DES/g' \
+            -e 's/^SSLInsecureRenegotiation.*$/SSLInsecureRenegotiation off/g' {} +
+        a2enmod ssl &> /dev/null
+    fi
+done
+
+# Fix TLS Protocols & Ciphers for Nginx (Vuln4,6,5)
+if [ -d /etc/nginx/ ]; then
+    grep -rl "ssl_protocols" /etc/nginx/ | xargs sed -i.bak \
+        's/ssl_protocols.*/ssl_protocols TLSv1.2 TLSv1.3;/g'
+    grep -rl "ssl_ciphers" /etc/nginx/ | xargs sed -i.bak \
+        's/ssl_ciphers.*/ssl_ciphers HIGH:!aNULL:!MD5:!RC4:!3DES;/g'
+    grep -rl "ssl_session_cache" /etc/nginx/ | xargs sed -i.bak \
+        's/ssl_session_cache.*/ssl_session_cache off;/g'
+fi
+
+# HTTP to HTTPS Redirect (Vuln1) for Apache
+for conf in $(find /etc/apache2/ /etc/httpd/ -name '*.conf' 2>/dev/null); do
+    sed -i.bak '/<VirtualHost/,/<\/VirtualHost>/ {
+        /DocumentRoot/ {
+        i\
+RewriteEngine On\
+RewriteCond %{HTTPS} off\
+RewriteRule (.*) https://%{HTTP_HOST}%{REQUEST_URI}
+        }
+    }' "$conf"
+done
+
+# HTTP to HTTPS Redirect (Vuln1) for Nginx
+if [ -d /etc/nginx/ ]; then
+    grep -rlF "listen 80;" /etc/nginx/ | xargs sed -i.bak \
+        '/listen 80;/a \    return 301 https://$host$request_uri;'
+fi
+
+# Disable TCP Timestamps (Vuln7)
+sysctl -w net.ipv4.tcp_timestamps=0
+echo "net.ipv4.tcp_timestamps = 0" >> /etc/sysctl.conf
+```}
+{type: uploaded file
+fileName: aeta_7.txt
+fullContent:
+#!/bin/bash
+
+# Configurar Apache (se instalado)
+if command -v apache2 &> /dev/null; then
+    apache_conf="/etc/apache2/apache2.conf"
+    sites_available="/etc/apache2/sites-available"
+    
+    # Vulnerabilidade 1: HTTP -> HTTPS
+    sed -i 's/^\([^#]\)/\0# CVE Mitigation: /' "${sites_available}"/*.conf
+    for conf in ${sites_available}/*.conf; do
+        grep -q "RewriteEngine" "$conf" || \
+        echo -e "<VirtualHost *:80>\n\tRewriteEngine On\n\tRewriteCond %{HTTPS} off\n\tRewriteRule (.*) https://%{HTTP_HOST}%{REQUEST_URI}\n</VirtualHost>" >> "$conf"
+    done
+    
+    # Vulnerabilidades 4,5,6: TLS e cifras
+    tls_conf="/etc/apache2/mods-available/ssl.conf"
+    [ -f "$tls_conf" ] && {
+        sed -i 's/SSLProtocol.*/SSLProtocol -all +TLSv1.2 +TLSv1.3/' "$tls_conf"
+        sed -i 's/SSLInsecureRenegotiation.*/SSLInsecureRenegotiation off/' "$tls_conf"
+        sed -i 's/SSLCipherSuite.*/SSLCipherSuite HIGH:!aNULL:!MD5:!RC4:!DES:!3DES/' "$tls_conf"
+    }
+    systemctl restart apache2
+fi
+
+# Configurar Nginx (se instalado)
+if command -v nginx &> /dev/null; then
+    nginx_conf="/etc/nginx/nginx.conf"
+    
+    # Vulnerabilidade 1: HTTP -> HTTPS
+    for conf in /etc/nginx/sites-enabled/*; do
+        if grep -q "listen 80" "$conf"; then
+            sed -i '/listen 80;/a \ \ \ \ return 301 https://$host$request_uri;' "$conf"
+        fi
+    done
+    
+    # Vulnerabilidades 4,5,6: TLS e cifras
+    if [ -f "$nginx_conf" ]; then
+        sed -i 's/ssl_protocols.*/ssl_protocols TLSv1.2 TLSv1.3;/' "$nginx_conf"
+        sed -i 's/ssl_ciphers.*/ssl_ciphers HIGH:!aNULL:!MD5:!RC4:!DES:!3DES;/' "$nginx_conf"
+        sed -i 's/ssl_prefer_server_ciphers.*/ssl_prefer_server_ciphers on;/' "$nginx_conf"
+    fi
+    systemctl restart nginx
+fi
+
+# Vulnerabilidade 2: Configurar BIND (DNS)
+if command -v named &> /dev/null; then
+    bind_conf="/etc/bind/named.conf.options"
+    [ -f "$bind_conf" ] && {
+        sed -i '/options {/a \\tallow-recursion { none; };' "$bind_conf"
+        sed -i '/options {/a \\trecursion no;' "$bind_conf"
+        systemctl restart bind9
+    }
+fi
+
+# Vulnerabilidade 3: Bloquear ICMP timestamp
+iptables -A INPUT -p icmp --icmp-type timestamp-request -j DROP
+iptables -A OUTPUT -p icmp --icmp-type timestamp-reply -j DROP
+ip6tables -A INPUT -p icmpv6 --icmpv6-type time-exceeded -j DROP
+ip6tables -A OUTPUT -p icmpv6 --icmpv6-type time-exceeded -j DROP
+echo "net.ipv4.icmp_echo_ignore_all=1" >> /etc/sysctl.d/99-sysctl.conf
+sysctl -p /etc/sysctl.d/99-sysctl.conf >/dev/null
+
+# Vulnerabilidade 7: Desativar TCP timestamps
+echo "net.ipv4.tcp_timestamps=0" >> /etc/sysctl.d/99-sysctl.conf
+sysctl -p /etc/sysctl.d/99-sysctl.conf >/dev/null
+
+# Backup e persistência de iptables
+if command -v iptables-save &> /dev/null; then
+    iptables-save > /etc/iptables.rules
+    ip6tables-save > /etc/ip6tables.rules
+    echo -e "#!/bin/sh\n/sbin/iptables-restore < /etc/iptables.rules\n/sbin/ip6tables-restore < /etc/ip6tables.rules" > /etc/network/if-pre-up.d/iptables
+    chmod +x /etc/network/if-pre-up.d/iptables
+fi}
+{type: uploaded file
+fileName: aeta_8.txt
+fullContent:
+#!/bin/bash
+if [ "$EUID" -ne 0 ]; then
+    echo "Execute como root."
+    exit 1
+fi
+iptables -A INPUT -p icmp --icmp-type timestamp-request -j DROP
+iptables -A INPUT -p icmp --icmp-type timestamp-reply -j DROP
+if command -v netfilter-persistent >/dev/null; then
+    netfilter-persistent save
+elif [ -f /etc/iptables/rules.v4 ]; then
+    iptables-save > /etc/iptables/rules.v4
+fi
+echo "net.ipv4.tcp_timestamps=0" >> /etc/sysctl.conf
+sysctl -p
+if command -v apache2 >/dev/null; then
+    a2enmod ssl rewrite >/dev/null
+    for config in $(grep -rl "<VirtualHost .*:80>" /etc/apache2/sites-enabled/); do
+        sed -i '/<VirtualHost .*:80>/a RewriteEngine On\nRewriteCond %{HTTPS} off\nRewriteRule (.*) https://%{HTTP_HOST}%{REQUEST_URI} [R=301,L]' "$config"
+    done
+    for config in $(grep -rl "<VirtualHost .*:443>" /etc/apache2/sites-enabled/); do
+        sed -i '/<VirtualHost .*:443>/a SSLProtocol all -SSLv2 -SSLv3 -TLSv1 -TLSv1.1\nSSLCipherSuite HIGH:!aNULL:!MD5:!RC4:!3DES\nSSLHonorCipherOrder on\nSSLInsecureRenegotiation off' "$config"
+    done
+    systemctl restart apache2
+fi
+if command -v nginx >/dev/null; then
+    for config in $(grep -rl "listen 80;" /etc/nginx/sites-enabled/); do
+        sed -i '/listen 80;/a return 301 https://$host$request_uri;' "$config"
+    done
+    for config in $(grep -rl "listen 443 ssl" /etc/nginx/sites-enabled/); do
+        sed -i '/listen 443 ssl/a ssl_protocols TLSv1.2 TLSv1.3;\nssl_ciphers HIGH:!aNULL:!MD5:!RC4:!3DES;\nssl_prefer_server_ciphers on;' "$config"
+    done
+    nginx -t && systemctl restart nginx
+fi
+if command -v named >/dev/null || command -v bind9 >/dev/null; then
+    bind_dir=$(dirname "$(readlink -f "$(command -v named)")")
+    bind_conf="${bind_dir%/sbin}/etc/named.conf"
+    [ -f "$bind_conf" ] || bind_conf="/etc/bind/named.conf"
+    if [ -f "$bind_conf" ]; then
+        sed -i -e '/options {/,/};/s/^\([[:space:]]*\)allow-query {\([^}]*\)};/\1allow-recursion { none; };\n\1allow-query-cache { none; };/' -e '/options {/a \    recursion no;' "$bind_conf"
+        systemctl restart bind9
+    fi
+fi}
+{type: uploaded file
+fileName: aeta_9.txt
+fullContent:
+```bash
+#!/bin/bash
+
+# ICMP Timestamp Reply Information Disclosure Mitigation
+if grep -q "net.ipv4.icmp_echo_ignore_all" /etc/sysctl.conf; then
+    sed -i 's/^net.ipv4.icmp_echo_ignore_all.*/net.ipv4.icmp_echo_ignore_all = 1/' /etc/sysctl.conf
+else
+    echo "net.ipv4.icmp_echo_ignore_all = 1" >> /etc/sysctl.conf
+fi
+
+# TCP Timestamps Information Disclosure Mitigation
+if grep -q "net.ipv4.tcp_timestamps" /etc/sysctl.conf; then
+    sed -i 's/^net.ipv4.tcp_timestamps.*/net.ipv4.tcp_timestamps = 0/' /etc/sysctl.conf
+else
+    echo "net.ipv4.tcp_timestamps = 0" >> /etc/sysctl.conf
+fi
+
+sysctl -p
+
+# Block ICMP timestamp requests via iptables
+iptables -A INPUT -p icmp --icmp-type timestamp-request -j DROP
+iptables -A OUTPUT -p icmp --icmp-type timestamp-reply -j DROP
+iptables-save > /etc/iptables.rules
+echo -e "#!/bin/sh\niptables-restore < /etc/iptables.rules" > /etc/network/if-pre-up.d/iptables-restore
+chmod +x /etc/network/if-pre-up.d/iptables-restore
+
+# Apply TLS/SSL fixes for web servers
+if command -v apache2 &>/dev/null; then
+    a2enmod ssl rewrite
+    sed -i '/<VirtualHost \*:80>/,/<\/VirtualHost>/s/\(.*\)/&\n    RewriteEngine On\n    RewriteCond %{HTTPS} off\n    RewriteRule (.*) https:\/\/%{HTTP_HOST}%{REQUEST_URI} [L,R=301]/' /etc/apache2/sites-enabled/*.conf
+    
+    echo -e "SSLProtocol -all +TLSv1.2 +TLSv1.3\nSSLHonorCipherOrder on\nSSLCipherSuite 'TLS_AES_128_GCM_SHA256:TLS_AES_256_GCM_SHA384:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-RSA-AES256-GCM-SHA384'\nSSLCompression off\nSSLStrictRequire on" > /etc/apache2/conf-available/tls-policies.conf
+    ln -s /etc/apache2/conf-available/tls-policies.conf /etc/apache2/conf-enabled/
+    systemctl restart apache2
+fi
+
+if command -v nginx &>/dev/null; then
+    sed -i '/listen 80;/a \\t\treturn 301 https://$host$request_uri;' /etc/nginx/sites-enabled/*
+
+    echo -e "ssl_protocols TLSv1.2 TLSv1.3;\nssl_prefer_server_ciphers on;\nssl_ciphers 'TLS_AES_128_GCM_SHA256:TLS_AES_256_GCM_SHA384:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-RSA-AES256-GCM-SHA384';\nssl_session_timeout 1d;\nssl_session_cache shared:MozSSL:10m;\nssl_session_tickets off;\nssl_stapling on;\nssl_stapling_verify on;" > /etc/nginx/conf.d/tls-policies.conf
+    nginx -t && systemctl restart nginx
+fi
+
+# DNS Cache Snooping Mitigation for BIND
+if command -v named &>/dev/null; then
+    sed -i '/options {/,/};/ { 
+        /recursion/ {s/.*/        recursion no;/}
+        /allow-query-cache/ {s/.*/        allow-query-cache { none; };/}
+        /allow-recursion/ {s/.*/        allow-recursion { none; };/}
+    }' /etc/bind/named.conf
+    
+    if ! grep -q "recursion no" /etc/bind/named.conf; then
+        sed -i '/options {/ a\    recursion no;' /etc/bind/named.conf
+    fi
+    rndc reload
+fi
+
+echo "Vulnerability mitigations applied. Note: Review web server configs manually."
+```}
+{type: uploaded file
+fileName: aeta_10.txt
+fullContent:
+#!/bin/bash
+
+if [ "$(id -u)" -ne 0 ]; then
+    echo "Este script deve ser executado como root" >&2
+    exit 1
+fi
+
+if [ -f "/etc/apache2/apache2.conf" ]; then
+    a2enmod ssl
+    if [ ! -f /etc/apache2/sites-available/000-redirect.conf ]; then
+        cat <<EOF > /etc/apache2/sites-available/000-redirect.conf
+<VirtualHost *:80>
+    ServerName localhost
+    Redirect permanent / https://%{HTTP_HOST}%{REQUEST_URI}
+</VirtualHost>
+EOF
+        a2ensite 000-redirect.conf
+    fi
+    systemctl restart apache2
+fi
+
+if [ -f "/etc/bind/named.conf" ]; then
+    cp /etc/bind/named.conf.options /etc/bind/named.conf.options.bak
+    if grep -q "recursion" /etc/bind/named.conf.options; then
+        sed -i '/recursion/c\trecursion no;' /etc/bind/named.conf.options
+        sed -i '/allow-recursion/c\allow-recursion { none; };' /etc/bind/named.conf.options
+    else
+        sed -i '/options {/a \\tallow-recursion { none; };\n\trecursion no;' /etc/bind/named.conf.options
+    fi
+    systemctl restart bind9
+fi
+
+iptables -A INPUT -p icmp --icmp-type timestamp-request -j DROP
+iptables -A OUTPUT -p icmp --icmp-type timestamp-reply -j DROP
+if command -v netfilter-persistent &> /dev/null; then
+    netfilter-persistent save
+elif command -v iptables-save &> /dev/null && [ -d /etc/iptables ]; then
+    iptables-save > /etc/iptables/rules.v4
+fi
+
+if [ -f "/etc/apache2/apache2.conf" ]; then
+    conf_file="/etc/apache2/mods-enabled/ssl.conf"
+    if [ -f "$conf_file" ]; then
+        cp "$conf_file" "$conf_file.bak"
+        if grep -q "SSLProtocol" "$conf_file"; then
+            sed -i 's/^SSLProtocol.*/SSLProtocol all -TLSv1 -TLSv1.1/' "$conf_file"
+        else
+            echo "SSLProtocol all -TLSv1 -TLSv1.1" >> "$conf_file"
+        fi
+        if grep -q "SSLCipherSuite" "$conf_file"; then
+            sed -i 's/^SSLCipherSuite.*/SSLCipherSuite HIGH:!aNULL:!MD5:!RC4:!3DES/' "$conf_file"
+        else
+            echo "SSLCipherSuite HIGH:!aNULL:!MD5:!RC4:!3DES" >> "$conf_file"
+        fi
+        echo "SSLHonorCipherOrder on" >> "$conf_file"
+        echo "SSLCompression off" >> "$conf_file"
+        echo "SSLInsecureRenegotiation off" >> "$conf_file"
+        systemctl restart apache2
+    fi
+fi
+
+if [ -f "/etc/nginx/nginx.conf" ]; then
+    for conf_file in /etc/nginx/sites-enabled/*; do
+        if [ -f "$conf_file" ]; then
+            cp "$conf_file" "$conf_file.bak"
+            if grep -q "listen[[:space:]]*443 ssl" "$conf_file"; then
+                sed -i '/listen[[:space:]]*443 ssl/a \\tssl_protocols TLSv1.2 TLSv1.3;' "$conf_file"
+                sed -i '/listen[[:space:]]*443 ssl/a \\tssl_ciphers "TLS_AES_128_GCM_SHA256:TLS_AES_256_GCM_SHA384:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-RSA-AES256-GCM-SHA384";' "$conf_file"
+                sed -i '/listen[[:space:]]*443 ssl/a \\tssl_prefer_server_ciphers on;' "$conf_file"
+                sed -i '/listen[[:space:]]*443 ssl/a \\tssl_session_tickets off;' "$conf_file"
+            fi
+        fi
+    done
+    systemctl restart nginx
+fi
+
+if grep -q "net.ipv4.tcp_timestamps" /etc/sysctl.conf; then
+    sed -i 's/^net.ipv4.tcp_timestamps.*/net.ipv4.tcp_timestamps=0/' /etc/sysctl.conf
+else
+    echo "net.ipv4.tcp_timestamps=0" >> /etc/sysctl.conf
+fi
+sysctl -p}
+{type: uploaded file
+fileName: aeta_11.txt
+fullContent:
+#!/bin/bash
+
+# Correção Vulnerabilidade 1: Forçar HTTPS para tráfego sensível (Apache)
+apache_conf="/etc/apache2/sites-available/000-default.conf"
+ssl_conf="/etc/apache2/sites-available/default-ssl.conf"
+
+if [ -f "$apache_conf" ]; then
+  sed -i '/<VirtualHost \*:80>/,/<\/VirtualHost>/ {
+    /<VirtualHost \*:80>/a\ \tRewriteEngine On\n\tRewriteCond %{REQUEST_URI} ^/(login|auth|secure) [NC,OR]\n\tRewriteCond %{QUERY_STRING} (user|pass|auth) [NC]\n\tRewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+  }' "$apache_conf"
+fi
+
+# Correção Vulnerabilidade 2: Prevenção de DNS Cache Snooping (BIND9)
+bind_conf="/etc/bind/named.conf.options"
+if [ -f "$bind_conf" ]; then
+  sed -i '/options {/a \
+\tallow-recursion { localhost; localnets; }; \
+\trecursion yes; \
+\tallow-query-cache { localhost; localnets; };' "$bind_conf"
+fi
+
+# Correção Vulnerabilidade 3: Desativar respostas ICMP Timestamp
+sysctl_conf="/etc/sysctl.conf"
+echo "net.ipv4.icmp_echo_ignore_broadcasts = 1" >> "$sysctl_conf"
+echo "net.ipv4.icmp_timestamps = 0" >> "$sysctl_conf"
+
+# Correção Vulnerabilidade 4 e 5: Configurar TLS seguro no Apache
+if [ -f "$ssl_conf" ]; then
+  sed -i '/SSLEngine On/a \
+\tSSLProtocol all -TLSv1 -TLSv1.1 \
+\tSSLHonorCipherOrder on \
+\tSSLCipherSuite "EECDH+ECDSA+AESGCM:EECDH+aRSA+AESGCM:EECDH+ECDSA+SHA384:EECDH+ECDSA+SHA256:EDH+aRSA:!aNULL:!eNULL:!MEDIUM:!LOW:!3DES:!MD5:!EXP:!PSK:!SRP:!DSS:!RC4" \
+\tSSLCompression off \
+\tSSLSessionTickets off' "$ssl_conf"
+fi
+
+# Correção Vulnerabilidade 6: Desativar cifras fracas (Apache)
+if [ -f "$ssl_conf" ]; then
+  sed -i '/SSLCipherSuite/s/.*/\tSSLCipherSuite "EECDH+ECDSA+AESGCM:EECDH+aRSA+AESGCM:EECDH+ECDSA+SHA384:EECDH+ECDSA+SHA256:EDH+aRSA:!aNULL:!eNULL:!MEDIUM:!LOW:!3DES:!MD5:!EXP:!PSK:!SRP:!DSS:!RC4"/' "$ssl_conf"
+fi
+
+# Correção Vulnerabilidade 7: Desativar TCP Timestamps
+echo "net.ipv4.tcp_timestamps = 0" >> "$sysctl_conf"
+
+# Aplicar configurações de sysctl
+sysctl -p &> /dev/null
+
+# Reiniciar serviços se aplicável
+if [ -f "$apache_conf" ]; then
+  systemctl restart apache2 &> /dev/null
+fi
+if [ -f "$bind_conf" ]; then
+  systemctl restart bind9 &> /dev/null
+fi}
+{type: uploaded file
+fileName: aeta_12.txt
+fullContent:
+#!/bin/bash
+
+# Vulnerabilidade 1: Redirecionar HTTP para HTTPS no Apache e Nginx
+if [ -d "/etc/apache2" ]; then
+    sed -i.bak 's|#\?Redirect .*||g; /<VirtualHost/,/<\/VirtualHost/s/\([^#]*\)/\nRedirect permanent \/ https:\/\/%{HTTP_HOST}%{REQUEST_URI}\n/' /etc/apache2/sites-enabled/*.conf
+    echo -e "<IfModule mod_ssl.c>\n  <VirtualHost _default_:443>\n    SSLEngine on\n  </VirtualHost>\n</IfModule>" >> /etc/apache2/sites-enabled/default-ssl.conf
+    a2enmod ssl rewrite > /dev/null
+    systemctl restart apache2
+fi
+
+if [ -d "/etc/nginx" ]; then
+    for CONF in /etc/nginx/sites-enabled/*; do
+        if grep -q "listen 80" "$CONF"; then
+            sed -i.bak '/listen 80;/a \    return 301 https://$host$request_uri;' "$CONF"
+        else
+            sed -i.bak 's/#* *listen *80;/listen 80; return 301 https:\/\/$host$request_uri;/' "$CONF"
+        fi
+    done
+    systemctl restart nginx
+fi
+
+# Vulnerabilidade 2: Configurar BIND (DNS) para bloquear recursão pública
+if [ -f "/etc/bind/named.conf.options" ]; then
+    cp /etc/bind/named.conf.options /etc/bind/named.conf.options.bak
+    sed -i.bak '/options {/a \\tallow-recursion { none; };\n\trecursion no;' /etc/bind/named.conf.options
+    sed -i.bak 's/allow-query .*/allow-query { localhost; };/' /etc/bind/named.conf.options
+    systemctl restart bind9
+fi
+
+# Vulnerabilidade 3: Desativar respostas ICMP Timestamp com iptables
+iptables -A INPUT -p icmp --icmp-type timestamp-request -j DROP
+iptables -A OUTPUT -p icmp --icmp-type timestamp-reply -j DROP
+
+# Vulnerabilidade 4 e 5: Configurar TLS (Apache + Nginx) - Protocolos e Renegociações
+if [ -d "/etc/apache2" ]; then
+    aprx_conf="/etc/apache2/mods-available/ssl.conf"
+    if [ -f "$aprx_conf" ]; then
+        sed -i.bak 's/SSLProtocol .*/SSLProtocol all -SSLv3 -TLSv1 -TLSv1.1/' "$aprx_conf"
+        sed -i.bak 's/SSLCipherSuite .*/SSLCipherSuite HIGH:!aNULL:!MD5:!RC4:!3DES/' "$aprx_conf"
+        sed -i.bak '/SSLProtocol/a SSLInsecureRenegotiation off' "$aprx_conf"
+    fi
+    systemctl restart apache2
+fi
+
+if [ -d "/etc/nginx" ]; then
+    ngx_conf="/etc/nginx/nginx.conf"
+    if [ -f "$ngx_conf" ]; then
+        sed -i.bak '/ssl_protocols/s/.*/ssl_protocols TLSv1.2 TLSv1.3;/' "$ngx_conf"
+        sed -i.bak '/ssl_ciphers/s/.*/ssl_ciphers "ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256";/' "$ngx_conf"
+        echo 'ssl_renegotiate_limit 0;' >> "$ngx_conf"
+    fi
+    systemctl restart nginx
+fi
+
+# Vulnerabilidade 6: Remover CBC-mode ciphers (Implementado junto com vuln4/5 acima)
+
+# Vulnerabilidade 7: Desativar TCP Timestamps via sysctl
+sysctl -w net.ipv4.tcp_timestamps=0
+echo "net.ipv4.tcp_timestamps = 0" >> /etc/sysctl.conf}
+{type: uploaded file
+fileName: aeta_13.txt
+fullContent:
+#!/bin/bash
+if [ "$EUID" -ne 0 ]; then exit 1; fi
+
+ss -ltn | grep -q ':443\b'
+if [ $? -eq 0 ]; then
+  if [ -f /etc/apache2/apache2.conf ] || [ -f /etc/httpd/conf/httpd.conf ]; then
+    APACHE_ROOT=$(grep -q 'Include /etc/apache2/sites-enabled' /etc/apache2/apache2.conf && echo "/etc/apache2" || echo "/etc/httpd")
+    HTTP_CONF="$APACHE_ROOT/conf.d/redirect_http_to_https.conf"
+    if [ ! -f "$HTTP_CONF" ]; then
+      echo '<VirtualHost *:80>' > "$HTTP_CONF"
+      echo '    Redirect permanent / https://%{SERVER_NAME}/' >> "$HTTP_CONF"
+      echo '</VirtualHost>' >> "$HTTP_CONF"
+    fi
+    SSL_CONF="$APACHE_ROOT/conf.d/ssl_patch.conf"
+    echo '# Disable weak protocols' > "$SSL_CONF"
+    echo 'SSLProtocol -all +TLSv1.2 +TLSv1.3' >> "$SSL_CONF"
+    echo '# Enforce strong ciphers' >> "$SSL_CONF"
+    echo 'SSLCipherSuite HIGH:!aNULL:!MD5:!RC4:!3DES' >> "$SSL_CONF"
+    echo 'SSLHonorCipherOrder On' >> "$SSL_CONF"
+    
+    DISTRO=$(grep -oP '^ID=\K\w+' /etc/os-release)
+    if [ "$DISTRO" = "ubuntu" ] || [ "$DISTRO" = "debian" ]; then
+      a2enmod ssl headers proxy_fcgi >/dev/null 2>&1
+      service apache2 restart >/dev/null 2>&1
+    elif [ "$DISTRO" = "centos" ] || [ "$DISTRO" = "rhel" ] || [ "$DISTRO" = "fedora" ]; then
+      systemctl restart httpd >/dev/null 2>&1
+    fi
+  fi
+
+  if [ -f /etc/nginx/nginx.conf ]; then
+    HTTP_CONF="/etc/nginx/conf.d/redirect_http_to_https.conf"
+    if [ ! -f "$HTTP_CONF" ]; then
+      echo 'server {' > "$HTTP_CONF"
+      echo '    listen 80;' >> "$HTTP_CONF"
+      echo '    server_name _;' >> "$HTTP_CONF"
+      echo '    return 301 https://$host$request_uri;' >> "$HTTP_CONF"
+      echo '}' >> "$HTTP_CONF"
+    fi
+    SSL_CONF="/etc/nginx/conf.d/ssl_patch.conf"
+    echo '# Enforce TLS protocols and ciphers' > "$SSL_CONF"
+    echo 'ssl_protocols TLSv1.2 TLSv1.3;' >> "$SSL_CONF"
+    echo 'ssl_ciphers "EECDH+ECDSA+AESGCM:EECDH+aRSA+AESGCM:EECDH+ECDSA+SHA384:EECDH+ECDSA+SHA256:HIGH:!aNULL:!MD5:!RC4:!3DES";' >> "$SSL_CONF"
+    echo 'ssl_prefer_server_ciphers on;' >> "$SSL_CONF"
+    
+    nginx -t >/dev/null 2>&1 && systemctl restart nginx >/dev/null 2>&1
+  fi
+fi
+
+iptables_check_drop() {
+  if ! iptables -C INPUT -p icmp --icmp-type timestamp-request -j DROP >/dev/null 2>&1; then
+    iptables -A INPUT -p icmp --icmp-type timestamp-request -j DROP
+  fi
+}
+iptables_check_drop
+if command -v iptables-save >/dev/null 2>&1; then
+  iptables-save > /etc/iptables/rules.v4
+fi
+
+grep -q 'net.ipv4.tcp_timestamps' /etc/sysctl.conf
+if [ $? -ne 0 ]; then
+  echo 'net.ipv4.tcp_timestamps = 0' >> /etc/sysctl.conf
+  sysctl -p >/dev/null 2>&1
+fi
+
+if [ -f /etc/bind/named.conf.options ]; then
+  backup_file="/etc/bind/named.conf.options.bak_$(date +%s)"
+  cp /etc/bind/named.conf.options "$backup_file"
+  if grep -q 'recursion ' /etc/bind/named.conf.options; then
+    sed -i 's/recursion .*/recursion no;/g' /etc/bind/named.conf.options
+  else
+    sed -i '/options {/a \\trecursion no;' /etc/bind/named.conf.options
+  fi
+  if grep -q 'allow-recursion' /etc/bind/named.conf.options; then
+    sed -i 's/allow-recursion .*//g' /etc/bind/named.conf.options
+  fi
+  systemctl restart named >/dev/null 2>&1
+fi
+
+if [ -f /etc/dnsmasq.conf ]; then
+  if ! grep -q 'no-recursive' /etc/dnsmasq.conf; then
+    echo 'no-recursive' >> /etc/dnsmasq.conf
+    systemctl restart dnsmasq >/dev/null 2>&1
+  fi
+fi}
+{type: uploaded file
+fileName: aeta_14.txt
+fullContent:
+#!/bin/bash
+
+# Aplicar configurações de sysctl para as vulnerabilidades 3 e 7
+sysctl -w net.ipv4.tcp_timestamps=0
+if ! grep -q "net.ipv4.tcp_timestamps = 0" /etc/sysctl.conf; then
+    echo "net.ipv4.tcp_timestamps = 0" >> /etc/sysctl.conf
+fi
+
+iptables -A INPUT -p icmp --icmp-type timestamp-request -j DROP
+iptables -A OUTPUT -p icmp --icmp-type timestamp-reply -j DROP
+
+# Correção para servidores web (vulnerabilidades 1, 4, 5, 6)
+for svc in "apache2" "nginx"; do
+    if [[ $(systemctl is-active $svc 2>/dev/null) == "active" ]]; then
+        case $svc in
+            apache2)
+                a2enmod ssl rewrite
+                conf_file="/etc/apache2/sites-available/default-ssl.conf"
+                if [ ! -f "$conf_file" ]; then
+                    cp /etc/apache2/sites-available/default-ssl.conf.dpkg-dist "$conf_file"
+                fi
+                sed -Ei '/<VirtualHost \*:443>/,/<\/VirtualHost>/ {
+                    /^[[:blank:]]*SSLEngine[[:blank:]]+on/!b
+                    a\
+        SSLCipherSuite ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384\
+        SSLProtocol all -TLSv1 -SSLv2 -SSLv3 -TLSv1.1\
+        SSLHonorCipherOrder on\
+        SSLCompression off\
+        SSLInsecureRenegotiation off
+                    :next
+                    n
+                    b next
+                }' "$conf_file"
+                if [ ! -f /etc/ssl/certs/dummy.crt ]; then
+                    openssl req -newkey rsa:2048 -nodes -keyout /etc/ssl/private/dummy.key -x509 -days 365 -out /etc/ssl/certs/dummy.crt -subj "/CN=localhost"
+                fi
+                sed -i "s|^\([[:blank:]]*SSLCertificateFile\).*|\1 /etc/ssl/certs/dummy.crt|" "$conf_file"
+                sed -i "s|^\([[:blank:]]*SSLCertificateKeyFile\).*|\1 /etc/ssl/private/dummy.key|" "$conf_file"
+                a2ensite default-ssl.conf
+                ;;
+            nginx)
+                conf_file="/etc/nginx/nginx.conf"
+                [ -d /etc/nginx/sites-enabled ] && conf_file="/etc/nginx/sites-enabled/default"
+                sed -i '/listen.*:443/,/server_name/ {
+                    /server_name/a\
+    ssl_protocols TLSv1.2 TLSv1.3;\
+    ssl_prefer_server_ciphers on;\
+    ssl_ciphers "EECDH+AESGCM:EDH+AESGCM:AES128+EEDH:!MD5:!RC4:!3DES";\
+    ssl_session_tickets off;\
+    ssl_session_cache shared:SSL:10m;
+                }' "$conf_file"
+                if [ ! -f /etc/ssl/nginx/dummy.crt ]; then
+                    mkdir -p /etc/ssl/nginx
+                    openssl req -newkey rsa:2048 -nodes -keyout /etc/ssl/nginx/dummy.key -x509 -days 365 -out /etc/ssl/nginx/dummy.crt -subj "/CN=localhost"
+                fi
+                sed -i "s|^\([[:blank:]]*ssl_certificate\).*|\1 /etc/ssl/nginx/dummy.crt;|" "$conf_file"
+                sed -i "s|^\([[:blank:]]*ssl_certificate_key\).*|\1 /etc/ssl/nginx/dummy.key;|" "$conf_file"
+                ;;
+        esac
+        systemctl restart $svc
+    fi
+done
+
+# Correção para servidores DNS (vulnerabilidade 2)
+for svc in "bind9" "named" "dnsmasq"; do
+    if [[ $(systemctl is-active $svc 2>/dev/null) == "active" ]]; then
+        case "$(dpkg -l | grep $svc)" in
+            *bind9*)
+                conf_file="/etc/bind/named.conf.options"
+                sed -i '/options {/,/};/ {
+                    /recursion/s/.*/\trecursion no;/
+                    /allow-recursion/s/.*/\tallow-recursion { none; };/
+                    t
+                    /};/i \
+        recursion no;\
+        allow-recursion { none; };
+                }' "$conf_file"
+                systemctl restart bind9
+                ;;
+            *dnsmasq*)
+                conf_file="/etc/dnsmasq.conf"
+                sed -i '/^[^#]/ {
+                    s/^\(cache-size\)=.*/\1=0/
+                    t
+                    s/^\(no-cache\)=.*/\1=/
+                    t
+                }' "$conf_file"
+                if ! grep -q "^cache-size=0" "$conf_file"; then
+                    echo "cache-size=0" >> "$conf_file"
+                fi
+                if ! grep -q "^no-cache" "$conf_file"; then
+                    echo "no-cache" >> "$conf_file"
+                fi
+                systemctl restart dnsmasq
+                ;;
+        esac
+    fi
+done}
+{type: uploaded file
+fileName: aeta_15.txt
+fullContent:
+#!/bin/bash
+# Correção para vulnerabilidades diversas
+
+# Vulnerabilidade 1: Forçar HTTPS em Apache
+if [ -d "/etc/apache2" ] && command -v apache2 >/dev/null; then
+    APACHE_CONF="/etc/apache2/sites-available/000-default.conf"
+    if [ -f "$APACHE_CONF" ]; then
+        sed -i 's/<VirtualHost \*:80>/<VirtualHost *:80>\n    Redirect permanent \/ https:\/\/$host\//' "$APACHE_CONF"
+        systemctl restart apache2
+    fi
+fi
+
+# Vulnerabilidades 4,5,6: Configuração TLS em Apache/Nginx
+## Apache
+if [ -d "/etc/apache2" ] && command -v apache2 >/dev/null; then
+    SSL_CONF="/etc/apache2/mods-available/ssl.conf"
+    [ -f "$SSL_CONF" ] && {
+        sed -i '/^SSLProtocol/ s/.*/SSLProtocol -all +TLSv1.2 +TLSv1.3/' "$SSL_CONF"
+        sed -i '/^SSLCipherSuite/ s/.*/SSLCipherSuite HIGH:!aNULL:!MD5:!RC4:!3DES:!CAMELLIA:!DES/' "$SSL_CONF"
+        echo "SSLUseStapling On" >> "$SSL_CONF"
+        echo "SSLStaplingCache shmcb:\/var\/run\/ocsp(128000)" >> "$SSL_CONF"
+        sed -i '/<\/IfModule>/ i SSLCompression off' "$SSL_CONF"
+        a2enmod ssl
+        systemctl restart apache2
+    }
+fi
+
+## Nginx
+if [ -d "/etc/nginx" ] && command -v nginx >/dev/null; then
+    NGINX_CONF="/etc/nginx/nginx.conf"
+    if [ -f "$NGINX_CONF" ]; then
+        sed -i '/ssl_protocols/ s/.*/    ssl_protocols TLSv1.2 TLSv1.3;/' "$NGINX_CONF"
+        sed -i '/ssl_ciphers/ s/.*/    ssl_ciphers HIGH:!aNULL:!MD5:!RC4:!3DES:!CAMELLIA:!DES;/' "$NGINX_CONF"
+        sed -i '/ssl_ciphers/a \    ssl_prefer_server_ciphers on;' "$NGINX_CONF"
+        sed -i '/ssl_ciphers/a \    ssl_ecdh_curve secp384r1;' "$NGINX_CONF"
+        sed -i '/ssl_ciphers/a \    ssl_session_cache shared:SSL:10m;' "$NGINX_CONF"
+        sed -i '/ssl_ciphers/a \    ssl_session_timeout 10m;' "$NGINX_CONF"
+        sed -i '/ssl_ciphers/a \    ssl_session_tickets off;' "$NGINX_CONF"
+        sed -i '/ssl_ciphers/a \    ssl_stapling on;' "$NGINX_CONF"
+        sed -i '/ssl_ciphers/a \    ssl_stapling_verify on;' "$NGINX_CONF"
+        systemctl restart nginx
+    fi
+fi
+
+# Vulnerabilidade 2: Desabilitar recursão DNS no BIND
+if [ -f "/etc/bind/named.conf.options" ]; then
+    if grep -q "recursion" /etc/bind/named.conf.options; then
+        sed -i 's/recursion .*/recursion no;/' /etc/bind/named.conf.options
+    else
+        echo "recursion no;" >> /etc/bind/named.conf.options
+    fi
+    systemctl restart bind9
+fi
+
+# Vulnerabilidades de rede via sysctl
+SYSCTL_TMP="/tmp/sysctl_tmp.conf"
+cat > "$SYSCTL_TMP" << EOF
+net.ipv4.tcp_timestamps = 0
+net.ipv4.icmp_echo_ignore_all = 1
+net.ipv4.icmp_ignore_bogus_error_responses = 1
+net.ipv4.icmp_echo_ignore_broadcasts = 1
+EOF
+sysctl -p "$SYSCTL_TMP" >/dev/null 2>&1
+sysctl -p 2>/dev/null
+
+# Aplicar permanentemente as configurações
+[ -f "/etc/sysctl.conf" ] && {
+    grep -q "net.ipv4.tcp_timestamps" /etc/sysctl.conf || echo "net.ipv4.tcp_timestamps = 0" >> /etc/sysctl.conf
+    grep -q "net.ipv4.icmp_echo_ignore_all" /etc/sysctl.conf || echo "net.ipv4.icmp_echo_ignore_all = 1" >> /etc/sysctl.conf
+    grep -q "net.ipv4.icmp_ignore_bogus_error_responses" /etc/sysctl.conf || echo "net.ipv4.icmp_ignore_bogus_error_responses = 1" >> /etc/sysctl.conf
+    grep -q "net.ipv4.icmp_echo_ignore_broadcasts" /etc/sysctl.conf || echo "net.ipv4.icmp_echo_ignore_broadcasts = 1" >> /etc/sysctl.conf
+}
+
+# Reinicializar serviços afetados
+[ -f "/etc/init.d/procps" ] && /etc/init.d/procps restart >/dev/null 2>&1
+
+# Cleanup
+rm -f "$SYSCTL_TMP"}
+{type: uploaded file
+fileName: aeta_16.txt
+fullContent:
+#!/bin/bash
+
+cleanup() {
+    echo "Error occurred in script execution. Exiting..." >&2
+    exit 1
+}
+
+trap cleanup ERR
+
+if [[ $EUID -ne 0 ]]; then
+    echo "This script must be run as root" >&2
+    exit 1
+fi
+
+# Backup important configuration files
+cp /etc/sysctl.conf /etc/sysctl.conf.bak
+if [[ -f /etc/apache2/sites-enabled/000-default.conf ]]; then
+    cp /etc/apache2/sites-enabled/000-default.conf /etc/apache2/sites-enabled/000-default.conf.bak
+fi
+if [[ -f /etc/nginx/sites-enabled/default ]]; then
+    cp /etc/nginx/sites-enabled/default /etc/nginx/sites-enabled/default.bak
+fi
+if [[ -f /etc/bind/named.conf.options ]]; then
+    cp /etc/bind/named.conf.options /etc/bind/named.conf.options.bak
+fi
+
+# Disable TCP timestamps
+echo "net.ipv4.tcp_timestamps = 0" >> /etc/sysctl.conf
+sysctl -p
+
+# Block ICMP timestamp requests/replies with iptables
+iptables -A INPUT -p icmp --icmp-type timestamp-request -j DROP
+iptables -A OUTPUT -p icmp --icmp-type timestamp-reply -j DROP
+iptables-save > /etc/iptables.rules
+
+# Configure DNS server to disable recursion if BIND is present
+if [[ -f /etc/bind/named.conf.options ]]; then
+    if ! grep -q "recursion no;" /etc/bind/named.conf.options; then
+        sed -i '/options {/a \ \tallow-recursion { none; };\n\tallow-query-cache { none; };\n\trecursion no;' /etc/bind/named.conf.options
+        systemctl restart bind9
+    fi
+fi
+
+# Configure web servers for HTTPS redirect and TLS hardening
+disable_weak_ssl() {
+    # Apache modifications
+    if [[ -f /etc/apache2/sites-enabled/000-default.conf ]]; then
+        sed -i '/<\/VirtualHost>/i \\n\tRewriteEngine On\n\tRewriteCond %{HTTPS} off\n\tRewriteRule (.*) https://%{HTTP_HOST}%{REQUEST_URI} [R=301,L]' /etc/apache2/sites-enabled/000-default.conf
+        a2enmod rewrite ssl
+        
+        # Configure TLS settings
+        for conf in /etc/apache2/sites-enabled/*; do
+            if [[ -f "$conf" ]]; then
+                sed -i '/<VirtualHost.*:443>/a \\n\tSSLProtocol all -SSLv3 -TLSv1 -TLSv1.1\n\tSSLHonorCipherOrder on\n\tSSLCipherSuite "EECDH+ECDSA+AESGCM EECDH+aRSA+AESGCM EECDH+ECDSA+SHA384 EECDH+ECDSA+SHA256 EECDH+aRSA+SHA384 EECDH+aRSA+SHA256 EECDH+aRSA+RC4 EECDH EDH+aRSA !RC4 !aNULL !eNULL !LOW !3DES !MD5 !EXP !PSK !SRP !DSS"\n\tSSLInsecureRenegotiation off' "$conf"
+            fi
+        done
+        systemctl restart apache2
+    fi
+
+    # Nginx modifications
+    if [[ -f /etc/nginx/sites-enabled/default ]]; then
+        sed -i '/server {/a \\n\tif ($ssl_protocol = "") {\n\t\treturn 301 https://$host$request_uri;\n\t}' /etc/nginx/sites-enabled/default
+        
+        # Configure TLS settings
+        for conf in /etc/nginx/sites-enabled/*; do
+            if [[ -f "$conf" ]]; then
+                sed -i '/listen .*ssl;/a \\n\tssl_protocols TLSv1.2 TLSv1.3;\n\tssl_ciphers "EECDH+ECDSA+AESGCM:EECDH+aRSA+AESGCM:EECDH+ECDSA+SHA384:EECDH+ECDSA+SHA256:EECDH+aRSA+SHA384:EECDH+aRSA+SHA256:EECDH:EDH+aRSA:!RC4:!aNULL:!eNULL:!LOW:!3DES:!MD5:!EXP:!PSK:!SRP:!DSS";\n\tssl_prefer_server_ciphers on;\n\tssl_session_cache off;\n\tssl_session_tickets off;' "$conf"
+            fi
+        done
+        systemctl restart nginx
+    fi
+}
+
+disable_weak_ssl
+
+echo "System vulnerabilities patched successfully"
+exit 0}
+{type: uploaded file
+fileName: aeta_17.txt
+fullContent:
+```bash
+#!/bin/bash
+
+if [ "$EUID" -ne 0 ]; then
+    echo "Este script deve ser executado como root"
+    exit 1
+fi
+
+# Vulnerabilidade 2 (DNS Cache Snooping)
+if command -v named &>/dev/null && [ -f /etc/named.conf ]; then
+    cp /etc/named.conf /etc/named.conf.bak
+    sed -i '/options {/,/\};/ {/recursion/d}' /etc/named.conf
+    sed -i '/options {/ a\\trecursion no;' /etc/named.conf
+    systemctl restart named
+fi
+
+# Vulnerabilidades 3 (ICMP Timestamp) e 7 (TCP Timestamps)
+cat >>/etc/sysctl.conf <<EOL
+net.ipv4.icmp_echo_ignore_all = 1
+net.ipv4.tcp_timestamps = 0
+EOL
+sysctl -p
+
+# Configuração SSL unificada para Apache e Nginx
+SSL_COMMON=(
+    "TLS 1.2"
+    "TLS 1.3"
+    "!ECDSA-SECP256k1"
+    "!ECDH-SECP256k1"
+    "!3DES"
+    "!RC4"
+    "!CAMELLIA"
+    "!AESCCM"
+    "!DSS"
+    "!aNULL"
+    "!eNULL"
+    "!MD5"
+    "!PSK"
+    "!SRP"
+    "!KRB5"
+)
+
+# Vulnerabilidade 1 (HTTP Redirect) e 4/5/6 (SSL) para Apache
+for apache_dir in /etc/apache2 /etc/httpd; do
+    if [ -d "$apache_dir" ]; then
+        # HTTP para HTTPS
+        if ! grep -q "RewriteRule ^https" "$apache_dir/sites-enabled"/* 2>/dev/null; then
+            cat >"$apache_dir/sites-enabled/000-ssl-redirect.conf" <<EOF
+<VirtualHost *:80>
+    Redirect permanent / https://%{HTTP_HOST}/
+</VirtualHost>
+EOF
+        fi
+
+        # Configuração SSL
+        CONF_LOCATION=$(find "$apache_dir" -name ssl.conf -print -quit)
+        [ -z "$CONF_LOCATION" ] && CONF_LOCATION="$apache_dir/conf.d/ssl.conf"
+
+        # CipherSuite baseado no SO
+        if grep -qi "Amazon Linux" /etc/os-release || grep -qi "CentOS" /etc/os-release; then
+            CIPHER_SUITE="ECDHE:ECDSA:!ADH:!EXP:!LOW:!SSLv2:${SSL_COMMON[*]}"
+        else
+            CIPHER_SUITE="ECDH-ECDSA:ECDH-RSA:!RSA:!DES:${SSL_COMMON[*]}"
+        fi
+
+        cat >"$CONF_LOCATION" <<EOF
+SSLProtocol all -SSLv2 -SSLv3 -TLSv1 -TLSv1.1
+SSLCipherSuite HIGH:!aNULL:$CIPHER_SUITE
+SSLHonorCipherOrder on
+SSLCompression off
+SSLInsecureRenegotiation off
+EOF
+        systemctl restart apache2 httpd
+    fi
+done
+
+# Vulnerabilidade 1 (HTTP Redirect) e 4/5/6 (SSL) para Nginx
+if [ -d /etc/nginx ]; then
+    # HTTP para HTTPS
+    if ! grep -q "return 301 https" /etc/nginx/sites-enabled/*; then
+        cat >/etc/nginx/conf.d/ssl_redirect.conf <<EOF
+server {
+    listen 80 default_server;
+    return 301 https://\$host\$request_uri;
+}
+EOF
+    fi
+
+    # Configuração SSL
+    grep -q "ssl_protocol" /etc/nginx/nginx.conf || sed -i '/http {/a \\tssl_protocols TLSv1.2 TLSv1.3;' /etc/nginx/nginx.conf
+    
+    CIPHER_SUITE="ECDHE:ECDSA:!ADH:!EXP:!LOW:!SSLv2:!3DES:${SSL_COMMON[*]}"
+    grep -q "ssl_ciphers" /etc/nginx/nginx.conf || sed -i '/http {/a \\tssl_ciphers '"'$CIPHER_SUITE';" /etc/nginx/nginx.conf
+    
+    sed -i '/http {/a \\tssl_prefer_server_ciphers on;' /etc/nginx/nginx.conf
+    sed -i '/http {/a \\tssl_session_tickets off;' /etc/nginx/nginx.conf
+    nginx -t && systemctl restart nginx
+fi
+```}
+{type: uploaded file
+fileName: aeta_18.txt
+fullContent:
+```bash
+#!/bin/bash
+
+[ "$(id -u)" -eq 0 ] || exit 1
+
+syscfile="/etc/sysctl.conf"
+echo "net.ipv4.icmp_timestamps = 0" >> "$syscfile"
+echo "net.ipv4.tcp_timestamps = 0" >> "$syscfile"
+sysctl -p "$syscfile"
+
+if [ -d "/etc/apache2" ]; then
+    [ -f "/etc/ssl/certs/ssl-cert-snakeoil.pem" ] && sed -i '/SSLCertificateFile/c\SSLCertificateFile \/etc\/ssl\/certs\/ssl-cert-snakeoil.pem' /etc/apache2/sites-available/default-ssl.conf
+    a2enmod ssl headers rewrite >/dev/null
+    a2ensite default-ssl >/dev/null
+    apache_ssl_conf="/etc/apache2/mods-available/ssl.conf"
+    [ -f "$apache_ssl_conf" ] && {
+        sed -i '/^.*SSLProtocol.*/c\SSLProtocol all -SSLv2 -SSLv3 -TLSv1 -TLSv1.1' "$apache_ssl_conf"
+        sed -i '/^.*SSLCipherSuite.*/c\SSLCipherSuite ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:DHE-RSA-AES256-GCM-SHA384:DHE-RSA-AES128-GCM-SHA256' "$apache_ssl_conf"
+        echo "SSLHonorCipherOrder on" >> "$apache_ssl_conf"
+        echo "Header always set Strict-Transport-Security \"max-age=15768000\"" >> "$apache_ssl_conf"
+    }
+    apache_conf="/etc/apache2/sites-available/000-default.conf"
+    [ -f "$apache_conf" ] {
+        sed -i '/^.*<VirtualHost \*:80>.*/a \    <Location \/>\n        RewriteEngine On\n        RewriteCond %{HTTPS} off\n        RewriteRule ^ https:\/\/%{HTTP_HOST}%{REQUEST_URI} [R=301,L]\n    <\/Location>' "$apache_conf"
+    }
+    systemctl restart apache2
+fi
+
+if [ -d "/etc/nginx" ]; then
+    nginx_conf="/etc/nginx/nginx.conf"
+    [ -f "$nginx_conf" ] && {
+        sed -i '/ssl_protocols/d' "$nginx_conf"
+        echo "ssl_protocols TLSv1.2 TLSv1.3;" >> "$nginx_conf"
+        sed -i '/^.*ssl_ciphers.*/c\    ssl_ciphers ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:DHE-RSA-AES256-GCM-SHA384:DHE-RSA-AES128-GCM-SHA256;' "$nginx_conf"
+        echo "    ssl_prefer_server_ciphers on;" >> "$nginx_conf"
+        echo "    add_header Strict-Transport-Security \"max-age=15768000; includeSubDomains\" always;" >> "$nginx_conf"
+    }
+    nginx_default="/etc/nginx/sites-available/default"
+    [ -f "$nginx_default" ] && {
+        sed -i '/listen 80/,/server_name/ {/listen 80/a \    if ($host = example.com) {\n        return 301 https:\/\/$host$request_uri;\n    }' "$nginx_default"
+    }
+    systemctl restart nginx
+fi
+
+if [ -f "/etc/bind/named.conf.options" ]; then
+    bind_conf="/etc/bind/named.conf.options"
+    sed -i '/recursion/d' "$bind_conf"
+    sed -i '/allow-query-cache/d' "$bind_conf"
+    sed -i '/options {/a \    recursion no;\n    allow-query-cache { none; };' "$bind_conf"
+    systemctl restart bind9
+fi
+```}
+{type: uploaded file
+fileName: aeta_19.txt
+fullContent:
+#!/bin/bash
+
+# Vulnerabilidade 1: Redirecionar HTTP para HTTPS (Apache ou Nginx)
+if command -v apache2 &> /dev/null; then
+    if ! grep -q "Redirect permanent / https://" /etc/apache2/sites-enabled/*; then
+        sed -i '/<VirtualHost \*:80>/a \\tRedirect permanent / https://0.0.0.0/' /etc/apache2/sites-enabled/*
+        systemctl restart apache2
+    fi
+elif command -v nginx &> /dev/null; then
+    if ! grep -q "return 301 https://" /etc/nginx/sites-enabled/*; then
+        sed -i '/listen 80;/a \\treturn 301 https://$host$request_uri;' /etc/nginx/sites-enabled/*
+        systemctl restart nginx
+    fi
+fi
+
+# Vulnerabilidade 2: Desabilitar recursão DNS (BIND)
+if command -v named &> /dev/null; then
+    if grep -q "recursion yes" /etc/bind/named.conf.options; then
+        sed -i 's/recursion yes/recursion no/' /etc/bind/named.conf.options
+        sed -i '/recursion no/a \\tallow-recursion { none; };' /etc/bind/named.conf.options
+        systemctl restart bind9
+    fi
+fi
+
+# Vulnerabilidade 3: Bloquear ICMP timestamp
+iptables -A INPUT -p icmp --icmp-type timestamp-request -j DROP
+iptables -A INPUT -p icmp --icmp-type timestamp-reply -j DROP
+
+# Vulnerabilidade 4 e 6: Configurar TLS (Apache ou Nginx)
+if command -v apache2 &> /dev/null; then
+    conf_file="/etc/apache2/mods-enabled/ssl.conf"
+    if [ -f "$conf_file" ]; then
+        sed -i 's/SSLProtocol all -SSLv3/SSLProtocol all -SSLv3 -TLSv1 -TLSv1.1/' "$conf_file"
+        sed -i 's/SSLCipherSuite .*/SSLCipherSuite ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:DHE-RSA-AES128-GCM-SHA256:DHE-RSA-AES256-GCM-SHA384:!DSS:!aNULL:!eNULL:!EXPORT:!DES:!MD5:!PSK:!RC4:!3DES/' "$conf_file"
+        systemctl restart apache2
+    fi
+elif command -v nginx &> /dev/null; then
+    conf_file="/etc/nginx/nginx.conf"
+    if [ -f "$conf_file" ]; then
+        sed -i '/ssl_protocols/s/.*/\tssl_protocols TLSv1.2 TLSv1.3;/' "$conf_file"
+        sed -i '/ssl_ciphers/s/.*/\tssl_ciphers "ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:DHE-RSA-AES128-GCM-SHA256:DHE-RSA-AES256-GCM-SHA384:!DSS:!aNULL:!eNULL:!EXPORT:!DES:!MD5:!PSK:!RC4:!3DES";/' "$conf_file"
+        systemctl restart nginx
+    fi
+fi
+
+# Vulnerabilidade 5: Desabilitar renegociação TLS (Apache)
+if command -v apache2 &> /dev/null; then
+    conf_file="/etc/apache2/mods-enabled/ssl.conf"
+    if [ -f "$conf_file" ]; then
+        if ! grep -q "SSLInsecureRenegotiation off" "$conf_file"; then
+            echo "SSLInsecureRenegotiation off" >> "$conf_file"
+            systemctl restart apache2
+        fi
+    fi
+fi
+
+# Vulnerabilidade 7: Desabilitar TCP timestamps
+sysctl -w net.ipv4.tcp_timestamps=0
+grep -qxF 'net.ipv4.tcp_timestamps = 0' /etc/sysctl.conf || echo 'net.ipv4.tcp_timestamps = 0' >> /etc/sysctl.conf}
+{type: uploaded file
+fileName: aeta_20.txt
+fullContent:
+#!/bin/bash
+
+# Vulnerabilidade 1: Configurar redirecionamento HTTP para HTTPS no Apache
+if [ -f /etc/apache2/sites-available/000-default.conf ]; then
+    cat > /etc/apache2/sites-available/000-default.conf << 'EOL'
+<VirtualHost *:80>
+    ServerAdmin webmaster@localhost
+    DocumentRoot /var/www/html
+
+    ErrorLog ${APACHE_LOG_DIR}/error.log
+    CustomLog ${APACHE_LOG_DIR}/access.log combined
+
+    # Redirecionamento forçado para HTTPS
+    RewriteEngine On
+    RewriteCond %{HTTPS} off
+    RewriteRule (.*) https://%{HTTP_HOST}%{REQUEST_URI} [R=301,L]
+</VirtualHost>
+EOL
+    systemctl reload apache2
+fi
+
+# Vulnerabilidade 2: Configurar BIND para desabilitar recursão pública
+if [ -f /etc/bind/named.conf.options ]; then
+    sed -i '/options {/a \    recursion no;\n    allow-recursion { none; };' /etc/bind/named.conf.options
+    systemctl restart bind9
+fi
+
+# Vulnerabilidade 3: Bloquear ICMP Timestamp com iptables
+iptables -A INPUT -p icmp --icmp-type timestamp-request -j DROP
+iptables -A INPUT -p icmp --icmp-type timestamp-reply -j DROP
+echo iptables-persistent iptables-persistent/autosave_v4 boolean true | debconf-set-selections
+echo iptables-persistent iptables-persistent/autosave_v6 boolean true | debconf-set-selections
+apt-get install -y iptables-persistent
+
+# Vulnerabilidades 4-6: Configurar SSL/TLS no Apache
+if [ -f /etc/apache2/mods-enabled/ssl.conf ]; then
+    sed -i '/SSLProtocol/s/.*/SSLProtocol -all +TLSv1.2 +TLSv1.3/' /etc/apache2/mods-enabled/ssl.conf
+    sed -i '/SSLCipherSuite/s/.*/SSLCipherSuite ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:DHE-RSA-AES128-GCM-SHA256:DHE-RSA-AES256-GCM-SHA384/' /etc/apache2/mods-enabled/ssl.conf
+    sed -i 's/SSLInsecureRenegotiation on/SSLInsecureRenegotiation off/' /etc/apache2/mods-enabled/ssl.conf
+    a2enmod ssl
+    systemctl restart apache2
+fi
+
+# Vulnerabilidade 7: Desabilitar TCP Timestamps
+echo "net.ipv4.tcp_timestamps = 0" >> /etc/sysctl.conf
+sysctl -p
+
+# Vulnerabilidade 2 alternativo: Configurar firewalls
+if command -v ufw &> /dev/null; then
+    ufw default deny incoming
+    ufw allow 22/tcp
+    ufw allow 80/tcp
+    ufw allow 443/tcp
+    ufw --force enable
+fi}
+{type: uploaded file
+fileName: aeta_21.txt
+fullContent:
+#!/bin/bash
+
+# Vulnerabilidade 1: Redirecionar HTTP para HTTPS no Apache
+if [ -d "/etc/apache2" ]; then
+    cat << EOF > /etc/apache2/conf-enabled/redirect_http.conf
+<VirtualHost *:80>
+    RewriteEngine On
+    RewriteCond %{REQUEST_URI} !^/\.well-known/acme-challenge/
+    RewriteRule ^(.*)$ https://%{HTTP_HOST}\$1 [R=301,L]
+</VirtualHost>
+EOF
+    systemctl restart apache2
+fi
+
+# Vulnerabilidade 2: Prevenir DNS Cache Snooping no BIND
+if [ -f "/etc/bind/named.conf.options" ]; then
+    sed -i '/options {/a \\tallow-query { localhost; localnets; };' /etc/bind/named.conf.options
+    sed -i '/options {/a \\trecursion no;' /etc/bind/named.conf.options
+    systemctl restart bind9
+fi
+
+# Vulnerabilidade 3: Bloquear ICMP timestamp
+iptables -A INPUT -p icmp --icmp-type timestamp-request -j DROP
+iptables -A INPUT -p icmp --icmp-type timestamp-reply -j DROP
+
+# Vulnerabilidades 4,5,6: Configurar TLS no Apache
+SSL_CONF=""
+[ -f /etc/apache2/mods-available/ssl.conf ] && SSL_CONF="/etc/apache2/mods-available/ssl.conf"
+[ -z "$SSL_CONF" ] && [ -f /etc/apache2/mods-enabled/ssl.conf ] && SSL_CONF="/etc/apache2/mods-enabled/ssl.conf"
+
+if [ -n "$SSL_CONF" ]; then
+    # Desabilitar TLS antigos
+    sed -i 's/SSLProtocol.*/SSLProtocol all -SSLv2 -SSLv3 -TLSv1 -TLSv1.1/g' "$SSL_CONF"
+    
+    # Desabilitar renegociação e cifras fracas
+    sed -i '/SSLProtocol/ a \\n# Mitigacao para renegociacao e cifras\nSSLInsecureRenegotiation off\nSSLCipherSuite ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305\nSSLHonorCipherOrder on' "$SSL_CONF"
+    systemctl restart apache2
+fi
+
+# Vulnerabilidade 7: Desabilitar TCP timestamps
+SYSCTL_CONF="/etc/sysctl.conf"
+grep -q "net.ipv4.tcp_timestamps" "$SYSCTL_CONF" && 
+    sed -i 's/^net.ipv4.tcp_timestamps.*/net.ipv4.tcp_timestamps = 0/' "$SYSCTL_CONF" ||
+    echo "net.ipv4.tcp_timestamps = 0" >> "$SYSCTL_CONF"
+sysctl -p &>/dev/null}
+{type: uploaded file
+fileName: aeta_22.txt
+fullContent:
+#!/bin/bash
+
+# Correções do servidor web (vulnerabilidades 1, 4, 5, 6)
+for conf_file in $(find /etc/apache2 -name '*.conf' 2>/dev/null); do
+    if grep -q "Listen 80" "$conf_file"; then
+        sed -i 's/^\(\s*\)\(Listen\s*80\)/\1\2\n\1Redirect permanent \/ https:\/\/%{HTTP_HOST}%{REQUEST_URI}/' "$conf_file"
+    fi
+    sed -i -E '/SSLEngine\s+on/ {
+        a\
+\    SSLProtocol all -SSLv2 -SSLv3 -TLSv1 -TLSv1.1\
+\    SSLHonorCipherOrder on\
+\    SSLCipherSuite ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:DHE-RSA-AES256-GCM-SHA384\
+\    SSLInsecureRenegotiation off
+    }' "$conf_file"
+done
+
+nginx_confs=$(find /etc/nginx -name '*.conf' 2>/dev/null)
+for conf_file in $nginx_confs; do
+    if grep -q "listen\s*80;" "$conf_file"; then
+        sed -i '/listen\s*80;/i return 301 https://$host$request_uri;' "$conf_file"
+    fi
+    sed -i -E '/ssl_certificate\s*[/;]/ {
+        a\
+\    ssl_protocols TLSv1.2 TLSv1.3;\
+\    ssl_ciphers ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:DHE-RSA-AES256-GCM-SHA384;\
+\    ssl_prefer_server_ciphers on;\
+\    ssl_session_tickets off;\
+\    ssl_renegotiate off;
+    }' "$conf_file"
+done
+
+# Reiniciar servidores web se configs foram modificadas
+if command -v apache2 >/dev/null; then
+    systemctl reload apache2
+fi
+if command -v nginx >/dev/null; then
+    systemctl reload nginx
+fi
+
+# Correção DNS (vulnerabilidade 2)
+if command -v named >/dev/null && [ -e /etc/bind/named.conf.options ]; then
+    cp /etc/bind/named.conf.options /etc/bind/named.conf.options.bak
+    if ! grep -q "recursion no;" /etc/bind/named.conf.options; then
+        awk '
+            /options\s*{/ {
+                seen = 1;
+                print;
+                print "        recursion no;";
+                print "        allow-transfer { none; };";
+                next;
+            }
+            /allow-transfer/ { next }
+            /recursion / { next }
+            { print }
+            END {
+                if (!seen) {
+                    print "options {";
+                    print "        recursion no;";
+                    print "        allow-transfer { none; };";
+                    print "};"
+                }
+            }' /etc/bind/named.conf.options > /tmp/named.conf.tmp
+        mv /tmp/named.conf.tmp /etc/bind/named.conf.options
+    fi
+    systemctl restart named
+fi
+
+# Correção ICMP (vulnerabilidade 3)
+iptables -A INPUT -p icmp --icmp-type timestamp-request -j DROP
+iptables -A OUTPUT -p icmp --icmp-type timestamp-reply -j DROP
+ip6tables -A INPUT -p icmpv6 --icmpv6-type time-exceeded -j DROP
+ip6tables -A OUTPUT -p icmpv6 --icmpv6-type time-exceeded -j DROP
+echo iptables-persistent iptables-persistent/autosave_v4 boolean true | debconf-set-selections
+echo iptables-persistent iptables-persistent/autosave_v6 boolean true | debconf-set-selections
+apt-get install -y iptables-persistent
+iptables-save > /etc/iptables/rules.v4
+ip6tables-save > /etc/iptables/rules.v6
+
+# Correção TCP Timestamps (vulnerabilidade 7)
+echo "net.ipv4.tcp_timestamps = 0" >> /etc/sysctl.conf
+sysctl -p}
+{type: uploaded file
+fileName: aeta_23.txt
+fullContent:
+#!/bin/bash
+
+# Fix Vulnerability 1: Enforce HTTPS for sensitive data
+for conf in /etc/nginx/sites-enabled/* /etc/apache2/sites-enabled/*; do
+  if [ -f "$conf" ]; then
+    # Redirect HTTP to HTTPS
+    sed -i '/listen 80/,/server_name/{/return 301 https:\/\/\$host\$request_uri/!s/^\(.*\)/&\n    return 301 https:\/\/\$host\$request_uri;/}' "$conf"
+    
+    # Add HSTS header
+    sed -i '/listen.*ssl/,/server_name/{/add_header Strict-Transport-Security/!s/^\(.*\)/&\n    add_header Strict-Transport-Security "max-age=31536000; includeSubDomains" always;/}' "$conf"
+  fi
+done
+
+# Fix Vulnerability 2: DNS cache snooping mitigation
+if [ -f /etc/bind/named.conf.options ]; then
+  sed -i '/options {/a \\tallow-query { localhost; localnets; };' /etc/bind/named.conf.options
+  sed -i '/options {/a \\tallow-recursion { localhost; localnets; };' /etc/bind/named.conf.options
+  sed -i '/recursion yes/d' /etc/bind/named.conf.options
+  echo "recursion no;" >> /etc/bind/named.conf.options
+  systemctl restart bind9
+fi
+
+# Fix Vulnerability 3: ICMP timestamp protection
+iptables -A INPUT -p icmp --icmp-type timestamp-request -j DROP
+iptables -A INPUT -p icmp --icmp-type timestamp-reply -j DROP
+
+# Fix Vulnerabilities 4-6: TLS configuration hardening
+tls_params="
+ssl_protocols TLSv1.2 TLSv1.3;
+ssl_ciphers 'ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384';
+ssl_prefer_server_ciphers on;
+ssl_session_tickets off;
+"
+
+for conf in /etc/nginx/nginx.conf /etc/nginx/conf.d/* /etc/apache2/mods-enabled/ssl.conf /etc/apache2/conf-enabled/ssl-params.conf; do
+  if [ -f "$conf" ]; then
+    # Remove old TLS versions
+    sed -i 's/SSLProtocol all -SSLv3/SSLProtocol all -SSLv3 -TLSv1 -TLSv1.1/' "$conf"
+    sed -i 's/ssl_protocols.*/'"$tls_params"'/' "$conf"
+    
+    # Disable weak ciphers
+    sed -i '/SSLCipherSuite/d' "$conf"
+    sed -i '/ssl_ciphers/d' "$conf"
+    echo "SSLCipherSuite ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384" >> "$conf"
+    
+    # Disable renegotiation
+    sed -i '/SSLInsecureRenegotiation/d' "$conf"
+    echo "SSLInsecureRenegotiation off" >> "$conf"
+  fi
+done
+
+# Fix Vulnerability 7: TCP timestamp hardening
+sysctl -w net.ipv4.tcp_timestamps=0
+echo "net.ipv4.tcp_timestamps = 0" >> /etc/sysctl.conf
+
+# Restart services
+[ -d /etc/nginx ] && systemctl restart nginx
+[ -d /etc/apache2 ] && systemctl restart apache2}
+{type: uploaded file
+fileName: aeta_24.txt
+fullContent:
+```bash
+#!/bin/bash
+
+# Fix ICMP Timestamp Replies (Vulnerabilidade 3)
+if command -v iptables &> /dev/null; then
+    iptables -A INPUT -p icmp --icmp-type timestamp-request -j DROP
+    iptables -A INPUT -p icmp --icmp-type timestamp-reply -j DROP
+    iptables-save > /etc/iptables/rules.v4
+    ip6tables-save > /etc/iptables/rules.v6
+fi
+
+# Fix TCP Timestamps (Vulnerabilidade 7)
+if grep -q "net.ipv4.tcp_timestamps" /etc/sysctl.conf; then
+    sed -i 's/^.*net.ipv4.tcp_timestamps.*$/net.ipv4.tcp_timestamps = 0/' /etc/sysctl.conf
+else
+    echo "net.ipv4.tcp_timestamps = 0" >> /etc/sysctl.conf
+fi
+sysctl -p
+
+# Configure web servers if present
+# For Apache (Vulnerabilidades 1,4,5,6)
+if command -v apache2 &> /dev/null; then
+    cat > /etc/apache2/conf-available/ssl_hardening.conf << 'EOF'
+SSLProtocol TLSv1.2 TLSv1.3
+SSLHonorCipherOrder on
+SSLCipherSuite "EECDH+AESGCM:EDH+AESGCM"
+SSLInsecureRenegotiation off
+SSLCompression off
+SSLSessionTickets off
+EOF
+    a2enmod ssl
+    a2enconf ssl_hardening >/dev/null
+    cat > /etc/apache2/sites-available/000-redirect-http.conf << 'EOF'
+<VirtualHost *:80>
+    RewriteEngine On
+    RewriteRule ^(.*)$ https://%{HTTP_HOST}$1 [R=301,L]
+</VirtualHost>
+EOF
+    a2ensite 000-redirect-http.conf >/dev/null
+    systemctl restart apache2 >/dev/null
+fi
+
+# For Nginx (Vulnerabilidades 1,4,5,6)
+if command -v nginx &> /dev/null; then
+    cat > /etc/nginx/conf.d/ssl_params << 'EOF'
+ssl_protocols TLSv1.2 TLSv1.3;
+ssl_prefer_server_ciphers on;
+ssl_ciphers 'EECDH+AESGCM:EDH+AESGCM';
+ssl_session_tickets off;
+ssl_renegotiation off;
+EOF
+    sed -i '/listen 80;$/i \    return 301 https://$host$request_uri;' /etc/nginx/sites-enabled/* 2>/dev/null
+    nginx -t && systemctl restart nginx >/dev/null
+fi
+
+# Fix DNS Cache Snooping if BIND installed (Vulnerabilidade 2)
+if command -v named &> /dev/null; then
+    if grep -q "recursion" /etc/bind/named.conf.options; then
+        sed -i 's/recursion .*;/recursion no;/' /etc/bind/named.conf.options
+    else
+        sed -i '/options {/a \    recursion no;' /etc/bind/named.conf.options
+    fi
+    systemctl restart bind9 >/dev/null
+fi
+```}
+{type: uploaded file
+fileName: aeta_25.txt
+fullContent:
+#!/bin/sh
+
+if [ "$(id -u)" -ne 0 ]; then
+    echo "Este script deve ser executado como root" >&2
+    exit 1
+fi
+
+sysctl_conf="/etc/sysctl.d/99-custom-security.conf"
+if grep -q 'net.ipv4.tcp_timestamps' "$sysctl_conf" 2>/dev/null; then
+    sed -i 's/net.ipv4.tcp_timestamps\s*=.*/net.ipv4.tcp_timestamps = 0/' "$sysctl_conf"
+else
+    echo "net.ipv4.tcp_timestamps = 0" >> "$sysctl_conf"
+fi
+sysctl -p "$sysctl_conf" >/dev/null 2>&1
+
+if command -v iptables >/dev/null 2>&1; then
+    if ! iptables -C INPUT -p icmp --icmp-type timestamp-request -j DROP 2>/dev/null; then
+        iptables -A INPUT -p icmp --icmp-type timestamp-request -j DROP
+    fi
+    if ! iptables -C INPUT -p icmp --icmp-type timestamp-reply -j DROP 2>/dev/null; then
+        iptables -A INPUT -p icmp --icmp-type timestamp-reply -j DROP
+    fi
+    if command -v netfilter-persistent >/dev/null 2>&1; then
+        netfilter-persistent save >/dev/null
+    elif command -v iptables-save >/dev/null 2>&1 && [ -w /etc/iptables/rules.v4 ]; then
+        iptables-save > /etc/iptables/rules.v4
+    fi
+fi
+
+if command -v apache2 >/dev/null 2>&1 || command -v apachectl >/dev/null 2>&1; then
+    a2enmod -q rewrite ssl
+    
+    if [ ! -f /etc/apache2/conf-available/redirect_http.conf ]; then
+        cat > /etc/apache2/conf-available/redirect_http.conf <<'HTTP_REDIR'
+<VirtualHost *:80>
+    <IfModule mod_rewrite.c>
+        RewriteEngine On
+        RewriteCond %{HTTPS} off
+        RewriteRule (.*) https://%{HTTP_HOST}%{REQUEST_URI} [R=301,L]
+    </IfModule>
+</VirtualHost>
+HTTP_REDIR
+        a2enconf -q redirect_http
+    fi
+
+    if [ ! -f /etc/apache2/conf-available/ssl-params.conf ]; then
+        cat > /etc/apache2/conf-available/ssl-params.conf <<'SSL_PARAMS'
+SSLProtocol -all +TLSv1.2 +TLSv1.3
+SSLCipherSuite ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256
+SSLHonorCipherOrder on
+SSLCompression off
+SSLSessionTickets off
+SSLInsecureRenegotiation off
+SSLUseStapling on
+SSLStaplingCache "shmcb:/var/run/ocsp(128000)"
+SSL_PARAMS
+        a2enconf -q ssl-params
+    fi
+
+    if apache2ctl -t >/dev/null 2>&1; then
+        systemctl reload apache2 >/dev/null 2>&1
+    fi
+fi
+
+if command -v named >/dev/null 2>&1 || [ -f /etc/bind/named.conf ]; then
+    bind_conf="/etc/bind/named.conf.options"
+    if [ -f "$bind_conf" ]; then
+        if ! grep -q "recursion no;" "$bind_conf"; then
+            cp "$bind_conf" "${bind_conf}.bak"
+            sed -i '/options {/a \    recursion no;\n    allow-recursion { none; };' "$bind_conf"
+        fi
+        if ! grep -q "dnssec-validation" "$bind_conf"; then
+            [ -z "$(grep "dnssec-validation" "$bind_conf")" ] && sed -i '/options {/a \    dnssec-validation auto;' "$bind_conf"
+        fi
+        systemctl restart bind9 >/dev/null 2>&1
+    fi
+fi}

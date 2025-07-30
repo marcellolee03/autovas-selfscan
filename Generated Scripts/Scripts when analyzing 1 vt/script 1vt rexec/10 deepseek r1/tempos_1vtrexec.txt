@@ -1,0 +1,13 @@
+Request 1: 326.6506 segundos
+Request 2: 238.8448 segundos
+Request 3: 408.4049 segundos
+Request 4: 117.4501 segundos
+Request 6: 233.4033 segundos
+Request 7: 313.5836 segundos
+Request 8: 231.9609 segundos
+Request 10: 309.8926 segundos
+Script 11 salvo em: generatedscripts/1vtrexec_11.txt (Tempo: 92.87 segundos)
+Script 12 salvo em: generatedscripts/1vtrexec_12.txt (Tempo: 210.39 segundos)
+
+media = 2483,4508/10 = 248,4508
+

@@ -1,0 +1,72 @@
+```bash
+#!/bin/bash
+
+if [ "$(id -u)" -ne 0 ]; then
+    echo "This script must be run as root. Use sudo." >&2
+    exit 1
+fi
+
+handle_sysvinit() {
+    service_name=$1
+    if [ ! -f "/etc/init.d/$service_name" ]; then
+        return 1
+    fi
+    if /etc/init.d/"$service_name" status &>/dev/null || pgrep -f "$service_name" &>/dev/null; then
+        /etc/init.d/"$service_name" stop
+    fi
+    if command -v update-rc.d &>/dev/null; then
+        update-rc.d -f "$service_name" remove
+    elif command -v chkconfig &>/dev/null; then
+        chkconfig "$service_name" off
+    else
+        find /etc/rc?.d -name "S*$service_name" -delete
+    fi
+    return 0
+}
+
+if command -v systemctl &>/dev/null; then
+    for service in rexec rexecd; do
+        systemctl stop "${service}" &>/dev/null
+        systemctl disable "${service}" &>/dev/null
+        rm -f "/etc/systemd/system/*.wants/${service}.service" \
+              "/etc/systemd/system/multi-user.target.wants/${service}.service"
+    done
+fi
+
+if [ -d /etc/xinetd.d ]; then
+    for service in rexec rexecd; do
+        conf="/etc/xinetd.d/$service"
+        if [ -f "$conf" ] && grep -q "disable.*no" "$conf"; then
+            sed -i.bak "s/disable[[:space:]]*=[[:space:]]*no/disable = yes/" "$conf"
+            changed_xinetd=true
+        fi
+    done
+    if [ "$changed_xinetd" = true ]; then
+        if command -v systemctl &>/dev/null; then
+            systemctl restart xinetd &>/dev/null
+        elif [ -f /etc/init.d/xinetd ]; then
+            /etc/init.d/xinetd restart &>/dev/null
+        elif [ -e "/proc/$(pgrep xinetd)" ]; then
+            kill -HUP "$(pgrep xinetd)" &>/dev/null
+        fi
+    fi
+fi
+
+if [ -f /etc/inetd.conf ] && grep -q "^[^#]*rexec" /etc/inetd.conf; then
+    sed -i.bak '/^[^#]*rexec/s/^/#/' /etc/inetd.conf
+    if [ -f /etc/init.d/inetd ]; then
+        /etc/init.d/inetd restart &>/dev/null
+    elif [ -e "/proc/$(pgrep inetd)" ]; then
+        kill -HUP "$(pgrep inetd)" &>/dev/null
+    fi
+fi
+
+for service in rexec rexecd; do
+    handle_sysvinit "$service"
+done
+
+if lsof -iTCP:512 | grep -q LISTEN; then
+    lsof -iTCP:512 | awk 'NR>1{system("kill -9 " $2)}'
+    killall -9 rexecd &>/dev/null
+fi
+```

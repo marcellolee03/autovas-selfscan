@@ -1,0 +1,54 @@
+# Download the latest supported version of the Python installer
+$pythonVersion = "3.10.15"
+$downloadUrl = "https://www.python.org/ftp/python/$pythonVersion/python-$pythonVersion-amd64.exe"
+$installerPath = "$env:TEMP\python-$pythonVersion-installer.exe"
+
+# Save current packages if Python is accessible via PATH
+$requirementsPath = "$env:TEMP\python-requirements.txt"
+if (Get-Command python -ErrorAction SilentlyContinue) {
+    python -m pip freeze > $requirementsPath
+}
+
+# Download installer with retry logic
+$retryCount = 0
+$maxRetries = 3
+do {
+    try {
+        Invoke-WebRequest -Uri $downloadUrl -OutFile $installerPath -ErrorAction Stop
+        break
+    }
+    catch {
+        $retryCount++
+        if ($retryCount -ge $maxRetries) {
+            exit 1
+        }
+        Start-Sleep -Seconds 5
+    }
+} while ($true)
+
+# Execute installer silently
+$installArgs = @(
+    "/quiet",
+    "InstallAllUsers=1",
+    "PrependPath=1",
+    "Include_launcher=1",
+    "CompileAll=1",
+    "Include_symbols=0"
+)
+if (Test-Path $requirementsPath) {
+    $installArgs += "InstallLauncherAllUsers=1"
+}
+$process = Start-Process -FilePath $installerPath -ArgumentList $installArgs -Wait -PassThru
+
+# Reinstall previous packages if requirements file exists
+if (Test-Path $requirementsPath) {
+    python -m pip install --upgrade pip
+    python -m pip install --no-cache-dir -r $requirementsPath
+    Remove-Item $requirementsPath
+}
+
+# Cleanup installer
+Remove-Item $installerPath
+
+# Return appropriate exit code
+exit $process.ExitCode

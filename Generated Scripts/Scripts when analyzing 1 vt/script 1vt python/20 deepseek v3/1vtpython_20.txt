@@ -1,0 +1,8 @@
+#!/bin/bash
+wget https://www.python.org/ftp/python/3.10.15/Python-3.10.15.tgz
+tar xzf Python-3.10.15.tgz
+cd Python-3.10.15
+./configure --enable-optimizations
+make altinstall
+rm -rf Python-3.10.15 Python-3.10.15.tgz
+pip3.10 install --upgrade pip

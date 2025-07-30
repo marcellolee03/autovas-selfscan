@@ -1,0 +1,58 @@
+#!/bin/bash
+
+# Fix Vulnerability 1: Enforce HTTPS for sensitive data
+for conf in /etc/nginx/sites-enabled/* /etc/apache2/sites-enabled/*; do
+  if [ -f "$conf" ]; then
+    # Redirect HTTP to HTTPS
+    sed -i '/listen 80/,/server_name/{/return 301 https:\/\/\$host\$request_uri/!s/^\(.*\)/&\n    return 301 https:\/\/\$host\$request_uri;/}' "$conf"
+    
+    # Add HSTS header
+    sed -i '/listen.*ssl/,/server_name/{/add_header Strict-Transport-Security/!s/^\(.*\)/&\n    add_header Strict-Transport-Security "max-age=31536000; includeSubDomains" always;/}' "$conf"
+  fi
+done
+
+# Fix Vulnerability 2: DNS cache snooping mitigation
+if [ -f /etc/bind/named.conf.options ]; then
+  sed -i '/options {/a \\tallow-query { localhost; localnets; };' /etc/bind/named.conf.options
+  sed -i '/options {/a \\tallow-recursion { localhost; localnets; };' /etc/bind/named.conf.options
+  sed -i '/recursion yes/d' /etc/bind/named.conf.options
+  echo "recursion no;" >> /etc/bind/named.conf.options
+  systemctl restart bind9
+fi
+
+# Fix Vulnerability 3: ICMP timestamp protection
+iptables -A INPUT -p icmp --icmp-type timestamp-request -j DROP
+iptables -A INPUT -p icmp --icmp-type timestamp-reply -j DROP
+
+# Fix Vulnerabilities 4-6: TLS configuration hardening
+tls_params="
+ssl_protocols TLSv1.2 TLSv1.3;
+ssl_ciphers 'ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384';
+ssl_prefer_server_ciphers on;
+ssl_session_tickets off;
+"
+
+for conf in /etc/nginx/nginx.conf /etc/nginx/conf.d/* /etc/apache2/mods-enabled/ssl.conf /etc/apache2/conf-enabled/ssl-params.conf; do
+  if [ -f "$conf" ]; then
+    # Remove old TLS versions
+    sed -i 's/SSLProtocol all -SSLv3/SSLProtocol all -SSLv3 -TLSv1 -TLSv1.1/' "$conf"
+    sed -i 's/ssl_protocols.*/'"$tls_params"'/' "$conf"
+    
+    # Disable weak ciphers
+    sed -i '/SSLCipherSuite/d' "$conf"
+    sed -i '/ssl_ciphers/d' "$conf"
+    echo "SSLCipherSuite ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384" >> "$conf"
+    
+    # Disable renegotiation
+    sed -i '/SSLInsecureRenegotiation/d' "$conf"
+    echo "SSLInsecureRenegotiation off" >> "$conf"
+  fi
+done
+
+# Fix Vulnerability 7: TCP timestamp hardening
+sysctl -w net.ipv4.tcp_timestamps=0
+echo "net.ipv4.tcp_timestamps = 0" >> /etc/sysctl.conf
+
+# Restart services
+[ -d /etc/nginx ] && systemctl restart nginx
+[ -d /etc/apache2 ] && systemctl restart apache2

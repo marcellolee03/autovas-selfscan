@@ -1,0 +1,51 @@
+#!/bin/bash
+echo "Updating Proxmox Virtual Environment..."
+apt-get update && apt-get install -y proxmox-ve
+
+echo "Removing vulnerable jQuery files..."
+find / -type f -name "jquery-1.8.3.min.js" -delete
+
+echo "Updating jQuery version..."
+wget -O /usr/local/lib/jquery.min.js https://code.jquery.com/jquery-3.6.0.min.js
+
+echo "Configuring SSH to disable weak algorithms..."
+sed -i '/^HostKeyAlgorithms/d' /etc/ssh/sshd_config
+sed -i '/^KexAlgorithms/d' /etc/ssh/sshd_config
+sed -i '/^Ciphers/d' /etc/ssh/sshd_config
+sed -i '/^MACs/d' /etc/ssh/sshd_config
+echo "HostKeyAlgorithms ecdsa-sha2-nistp256-cert-v01@openssh.com,ecdsa-sha2-nistp384-cert-v01@openssh.com,ecdsa-sha2-nistp521-cert-v01@openssh.com,ssh-ed25519-cert-v01@openssh.com,rsa-sha2-512-cert-v01@openssh.com,rsa-sha2-256-cert-v01@openssh.com,ssh-ed25519,rsa-sha2-512,rsa-sha2-256,ssh-rsa" >> /etc/ssh/sshd_config
+echo "KexAlgorithms curve25519-sha256,curve25519-sha256@libssh.org,diffie-hellman-group-exchange-sha256,diffie-hellman-group16-sha512,diffie-hellman-group18-sha512,diffie-hellman-group14-sha256" >> /etc/ssh/sshd_config
+echo "Ciphers chacha20-poly1305@openssh.com,aes256-gcm@openssh.com,aes128-gcm@openssh.com,aes256-ctr,aes192-ctr,aes128-ctr" >> /etc/ssh/sshd_config
+echo "MACs hmac-sha2-512-etm@openssh.com,hmac-sha2-256-etm@openssh.com,umac-128-etm@openssh.com,hmac-sha2-512,hmac-sha2-256,umac-128@openssh.com" >> /etc/ssh/sshd_config
+systemctl restart sshd
+
+echo "Disabling TCP timestamps..."
+echo "net.ipv4.tcp_timestamps = 0" >> /etc/sysctl.conf
+sysctl -p
+
+echo "Blocking ICMP timestamp requests..."
+iptables -A INPUT -p icmp --icmp-type timestamp-request -j DROP
+iptables -A OUTPUT -p icmp --icmp-type timestamp-reply -j DROP
+
+echo "Disabling Telnet service..."
+systemctl stop telnet
+systemctl disable telnet
+
+echo "Configuring TLS to disable deprecated versions..."
+sed -i '/^minProtocol/d' /etc/ssl/openssl.cnf
+sed -i '/^CipherString/d' /etc/ssl/openssl.cnf
+echo "minProtocol = TLSv1.2" >> /etc/ssl/openssl.cnf
+echo "CipherString = DEFAULT@SECLEVEL=2" >> /etc/ssl/openssl.cnf
+
+echo "Filtering DCE/RPC and MSRPC services..."
+iptables -A INPUT -p tcp --dport 135 -j DROP
+iptables -A INPUT -p tcp --dport 39710 -j DROP
+iptables -A INPUT -p tcp --dport 49664 -j DROP
+iptables -A INPUT -p tcp --dport 49665 -j DROP
+iptables -A INPUT -p tcp --dport 49666 -j DROP
+iptables -A INPUT -p tcp --dport 49667 -j DROP
+iptables -A INPUT -p tcp --dport 49668 -j DROP
+iptables -A INPUT -p tcp --dport 49670 -j DROP
+iptables -A INPUT -p tcp --dport 7832 -j DROP
+
+echo "Vulnerability patching completed."

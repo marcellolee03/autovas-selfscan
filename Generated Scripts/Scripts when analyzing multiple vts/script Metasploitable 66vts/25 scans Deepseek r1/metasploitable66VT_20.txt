@@ -1,0 +1,124 @@
+```bash
+#!/bin/bash
+set -e
+
+stop_disable_service() {
+    service_name=$1
+    systemctl stop "$service_name" 2>/dev/null || service "$service_name" stop 2>/dev/null
+    systemctl disable "$service_name" 2>/dev/null || update-rc.d -f "$service_name" remove 2>/dev/null || chkconfig "$service_name" off 2>/dev/null
+}
+
+remove_package() {
+    dpkg --get-selections | grep -q "^$1" && apt purge -y "$1" && apt autoremove -y
+}
+
+add_apt_repo() {
+    grep -q "$2" /etc/apt/sources.list || echo "$1" >> /etc/apt/sources.list
+    apt update
+}
+
+disable_apache_module() {
+    a2dismod -q vhost_net
+    rm -f "/etc/apache2/mods-enabled/$1.load" 2>/dev/null
+}
+
+change_db_password() {
+    db_system=$1
+    user=$2
+    new_pass=$(openssl rand -base64 24)
+    if command -v mysql &>/dev/null; then
+        mysql -e "ALTER USER '$user'@'localhost' IDENTIFIED BY '$new_pass'; FLUSH PRIVILEGES;"
+    elif command -v psql &>/dev/null; then
+        sudo -u postgres psql -c "ALTER USER $user WITH PASSWORD '$new_pass';"
+    fi
+}
+
+add_firewall_rule() {
+    if command -v ufw &>/dev/null; then
+        ufw deny "$1"
+    elif command -v iptables &>/dev/null; then
+        iptables -A INPUT -p $2 --dport $1 -j DROP
+    fi
+}
+
+disable_http_methods() {
+    apache_conf="/etc/apache2/apache2.conf"
+    [ -f "$apache_conf" ] && {
+        sed -i '/<Directory \/>/,/<\/Directory>/ s/AllowOverride None/AllowOverride None\n    <LimitExcept GET POST HEAD>\n        Deny from all\n    <\/LimitExcept>/' "$apache_conf"
+        echo "TraceEnable off" >> "$apache_conf"
+    }
+    systemctl restart apache2 2>/dev/null || service apache2 restart 2>/dev/null
+}
+
+fix_tomcat_ajp() {
+    find / -name server.xml -exec sed -i '/<Connector[^>]*protocol="AJP\/1.3"/,/>/ s/^/#/' {} \;
+}
+
+cleanup_phpinfo() {
+    find /var/www -name phpinfo.php -exec rm -f {} +
+}
+
+update_sshd_config() {
+    sshd_conf="/etc/ssh/sshd_config"
+    [ -f "$sshd_conf" ] && {
+        sed -i -e 's/^HostKeyAlgorithms.*/HostKeyAlgorithms ssh-rsa,ssh-ed25519/' \
+               -e 's/^KexAlgorithms.*/KexAlgorithms curve25519-sha256/' \
+               -e 's/^Ciphers.*/Ciphers chacha20-poly1305@openssh.com,aes256-gcm@openssh.com/' \
+               -e 's/^MACs.*/MACs hmac-sha2-512,hmac-sha2-256/' "$sshd_conf"
+        systemctl restart sshd || service ssh restart
+    }
+}
+
+# Update OS
+add_apt_repo "deb http://old-releases.ubuntu.com/ubuntu/ hardy main restricted universe multiverse" "old-releases.ubuntu.com"
+add_apt_repo "deb http://old-releases.ubuntu.com/ubuntu/ hardy-updates main restricted universe multiverse" "old-releases.ubuntu.com"
+add_apt_repo "deb http://old-releases.ubuntu.com/ubuntu/ hardy-security main restricted universe multiverse" "old-releases.ubuntu.com"
+apt update
+DEBIAN_FRONTEND=noninteractive apt -y upgrade
+
+# Remove vulnerable services
+remove_package openbsd-inetd
+remove_package rsh-server
+remove_package rsh-client
+remove_package rexecd
+remove_package telnetd
+remove_package distcc
+remove_package vsftpd
+remove_package twiki
+remove_package tomcat5.5
+
+# Change passwords
+change_db_password mysql root
+change_db_password pgsql postgres
+
+# Security hardening
+stop_disable_service druby
+stop_disable_service ingreslock
+stop_disable_service vncserver
+stop_disable_service tomcat
+
+# Firewall rules
+add_firewall_rule 512/tcp tcp
+add_firewall_rule 513/tcp tcp
+add_firewall_rule 514/tcp tcp
+add_firewall_rule 1524/tcp tcp
+add_firewall_rule 3632/tcp tcp
+add_firewall_rule 8787/tcp tcp
+add_firewall_rule 8009/tcp tcp
+
+# Apache configurations
+disable_apache_module cgi
+disable_http_methods
+
+# Tomcat AJP fix
+fix_tomcat_ajp
+
+# PHP cleanup
+cleanup_phpinfo
+
+# SSH hardening
+update_sshd_config
+
+# TLS/SSL cleanup
+find / -name '*.crt' -exec rm -f {} +
+```

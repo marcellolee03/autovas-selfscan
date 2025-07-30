@@ -1,0 +1,25 @@
+#!/bin/bash
+openssl_conf="/etc/ssl/openssl.cnf"
+nginx_conf="/etc/nginx/nginx.conf"
+apache_conf="/etc/apache2/apache2.conf"
+
+# Disable TLSv1.0 and TLSv1.1 in OpenSSL
+if [ -f "$openssl_conf" ]; then
+    sed -i '/^MinProtocol = TLSv1.0/d' "$openssl_conf"
+    sed -i '/^MinProtocol = TLSv1.1/d' "$openssl_conf"
+    echo "MinProtocol = TLSv1.2" >> "$openssl_conf"
+fi
+
+# Disable TLSv1.0 and TLSv1.1 in Nginx
+if [ -f "$nginx_conf" ]; then
+    sed -i 's/ssl_protocols.*/ssl_protocols TLSv1.2 TLSv1.3;/' "$nginx_conf"
+fi
+
+# Disable TLSv1.0 and TLSv1.1 in Apache
+if [ -f "$apache_conf" ]; then
+    sed -i 's/SSLProtocol.*/SSLProtocol +TLSv1.2 +TLSv1.3/' "$apache_conf"
+fi
+
+# Restart services to apply changes
+systemctl restart apache2 2>/dev/null
+systemctl restart nginx 2>/dev/null

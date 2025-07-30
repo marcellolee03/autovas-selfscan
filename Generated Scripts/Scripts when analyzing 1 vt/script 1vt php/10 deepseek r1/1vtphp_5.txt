@@ -1,0 +1,61 @@
+#!/bin/bash
+
+set -euo pipefail
+
+# Atualizar repositórios e o sistema
+apt-get update -y
+DEBIAN_FRONTEND=noninteractive apt-get upgrade -y
+
+# Instalar ou atualizar versões específicas do PHP para garantir correção
+php_ver=$(php -v 2>/dev/null | head -n1 | awk '{print $2}')
+major_ver=$(echo "$php_ver" | cut -d'.' -f1)
+minor_ver=$(echo "$php_ver" | cut -d'.' -f2)
+
+# Verificar se é necessário atualizar para versão segura
+if [[ -n "$php_ver" ]]; then
+    if [ "$major_ver" -lt 5 ] || \
+    { [ "$major_ver" -eq 5 ] && [ "$minor_ver" -lt 3 ]; } || \
+    { [ "$major_ver" -eq 5 ] && [ "$minor_ver" -eq 3 ] && [ "$(echo "$php_ver" | cut -d'.' -f3)" -lt 13 ]; } || \
+    { [ "$major_ver" -eq 5 ] && [ "$minor_ver" -eq 4 ] && [ "$(echo "$php_ver" | cut -d'.' -f3)" -lt 3 ]; }; then
+        # Adicionar repositório seguro para versões antigas
+        apt-get install -y apt-transport-https lsb-release ca-certificates
+        apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 3A8FF134
+        echo "deb https://packages.sury.org/php/ $(lsb_release -sc) main" > /etc/apt/sources.list.d/php.list
+        apt-get update -y
+    fi
+fi
+
+# Atualizar todos os pacotes PHP
+apt-get install --only-upgrade "php*" -y
+apt-get install --only-upgrade "libphp*" -y
+
+# Configurações de segurança para CGI
+for php_ini in $(find /etc -name 'php.ini' 2>/dev/null); do
+    # Garantir proteções contra argumentos de linha de comando
+    sed -i 's/^;\(cgi\.force_redirect =\).*/\1 1/' "$php_ini"
+    sed -i 's/^;\(cgi\.redirect_status_env\)/cgi\.redirect_status_env/' "$php_ini"
+    
+    # Desabilitar execução perigosa
+    sed -i 's/^\(allow_url_include =\).*/\1 Off/' "$php_ini"
+    sed -i 's/^\(allow_url_fopen =\).*/\1 Off/' "$php_ini"
+    sed -i 's/^\(register_globals =\).*/\1 Off/' "$php_ini"
+    sed -i 's/^\(expose_php =\).*/\1 Off/' "$php_ini"
+    sed -i 's/^\(enable_dl =\).*/\1 Off/' "$php_ini"
+    sed -i 's/^\(disable_functions =\).*/\1 exec,system,shell_exec,passthru,proc_open/' "$php_ini"
+done
+
+# Reiniciar serviços web
+if systemctl list-units --full -all | grep -q 'apache2\.service'; then
+    systemctl restart apache2
+elif [[ -f "/etc/init.d/apache2" ]]; then
+    service apache2 restart
+fi
+
+if systemctl list-units --full -all | grep -q 'nginx\.service'; then
+    systemctl restart nginx
+elif [[ -f "/etc/init.d/nginx" ]]; then
+    service nginx restart
+fi
+
+# Remover instalações desnecessárias de CGI
+find /usr/lib -name 'cgi-bin' -type d -exec rm -rf {} + >/dev/null 2>&1 || true

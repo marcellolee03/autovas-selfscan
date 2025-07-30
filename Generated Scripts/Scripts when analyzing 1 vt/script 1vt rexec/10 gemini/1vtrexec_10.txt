@@ -1,0 +1,29 @@
+```bash
+#!/bin/bash
+
+# Descrição: Desabilita o serviço rexec para mitigar a vulnerabilidade CVE-1999-0618.
+
+# Verifica se o serviço rexec está instalado e em execução
+if systemctl is-active rexec.socket 2>/dev/null; then
+  # Desabilita o serviço rexec
+  systemctl stop rexec.socket
+  systemctl disable rexec.socket
+
+  # Remove o pacote inetd, que pode ser responsável por iniciar o rexec
+  apt-get -y remove --purge inetd
+
+  # Garante que o serviço não será iniciado automaticamente na reinicialização.
+  systemctl mask rexec.socket
+
+  echo "Serviço rexec desabilitado e pacote inetd removido. Rexec está mascarado."
+
+else
+  echo "Serviço rexec não encontrado ou não está em execução."
+fi
+
+# Remove qualquer configuração residual relacionada ao rexec
+rm -rf /etc/xinetd.d/rexec
+
+# Finaliza o script
+echo "Script de correção concluído."
+```

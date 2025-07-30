@@ -1,0 +1,150 @@
+```bash
+#!/bin/bash
+
+# Vulnerability 1: Cleartext Transmission of Sensitive Information via HTTP
+# Solution: Enforce HTTPS redirection using Apache or Nginx.
+
+# Check if Apache is installed
+if command -v apache2 &> /dev/null; then
+  # Enable mod_rewrite and mod_ssl if not already enabled
+  a2enmod rewrite
+  a2enmod ssl
+
+  # Create a virtual host configuration file for HTTPS redirection
+  cat > /etc/apache2/sites-available/http_redirect.conf <<EOL
+<VirtualHost *:80>
+    ServerName \$(hostname)
+    Redirect permanent / https://\$(hostname)\${REQUEST_URI}
+</VirtualHost>
+EOL
+
+  # Enable the redirect configuration
+  a2ensite http_redirect.conf
+
+  # Restart Apache
+  systemctl restart apache2
+elif command -v nginx &> /dev/null; then
+  # Create a server block for HTTP redirection
+  cat > /etc/nginx/conf.d/http_redirect.conf <<EOL
+server {
+    listen 80;
+    server_name \$(hostname);
+    return 301 https://\$(hostname)\$request_uri;
+}
+EOL
+
+  # Restart Nginx
+  systemctl restart nginx
+else
+  echo "Web server (Apache or Nginx) not found.  Please configure HTTPS redirection manually."
+fi
+
+# Vulnerability 2: DNS Cache Snooping Vulnerability (UDP)
+# Solution: Disable recursion in the DNS server configuration.
+# This script only supports BIND9 DNS server.
+
+if command -v named &> /dev/null; then
+  # Edit the BIND9 configuration file
+  sed -i 's/recursion yes;/recursion no;/g' /etc/bind/named.conf.options
+
+  # Restart BIND9
+  systemctl restart bind9
+else
+  echo "BIND9 DNS server not found. Please configure DNS recursion manually."
+fi
+
+# Vulnerability 3: ICMP Timestamp Reply Information Disclosure
+# Solution: Disable ICMP timestamp replies.
+echo 1 > /proc/sys/net/ipv4/icmp_echo_ignore_all
+
+# Make the change permanent
+echo "net.ipv4.icmp_echo_ignore_all=1" >> /etc/sysctl.conf
+
+# Apply the sysctl settings
+sysctl -p
+
+# Vulnerability 4: SSL/TLS: Deprecated TLSv1.0 and TLSv1.1 Protocol Detection
+# Solution: Disable TLSv1.0 and TLSv1.1 in favor of TLSv1.2+
+# This script only supports Apache and Nginx.
+#Modify the configuration files for each service which serves the web pages on ports 443
+# Apache
+if command -v apache2 &> /dev/null; then
+  # Find all SSL virtual host configurations
+  find /etc/apache2/sites-available/ -name "*.conf" -print0 | while IFS= read -r -d $'\0' file; do
+    # Check if the file contains SSL configuration
+    if grep -q "SSLEngine on" "$file"; then
+      # Add or modify the SSLProtocol directive
+      sed -i "s/^SSLProtocol.*/SSLProtocol All -SSLv3 -TLSv1 -TLSv1.1/g" "$file"
+      if ! grep -q "SSLProtocol All -SSLv3 -TLSv1 -TLSv1.1" "$file"; then
+        sed -i '/SSLEngine on/a \
+  SSLProtocol All -SSLv3 -TLSv1 -TLSv1.1' "$file"
+      fi
+    fi
+  done
+  systemctl restart apache2
+elif command -v nginx &> /dev/null; then
+  # Find the nginx configuration files and add the tls_version and cipher settings
+  find /etc/nginx/conf.d/ /etc/nginx/sites-available/ -name "*.conf" -print0 | while IFS= read -r -d $'\0' file; do
+    # Check if the file contains ssl configuration
+    if grep -q "ssl_certificate" "$file"; then
+        # Add or modify the ssl_protocols directive
+        sed -i "s/^ssl_protocols.*/ssl_protocols TLSv1.2 TLSv1.3;/g" "$file"
+        if ! grep -q "ssl_protocols TLSv1.2 TLSv1.3;" "$file"; then
+            sed -i '/ssl_certificate/a \
+    ssl_protocols TLSv1.2 TLSv1.3;' "$file"
+        fi
+
+        #Add stronger ciphers to disable older ciphers
+        sed -i "s/^ssl_ciphers.*/ssl_ciphers EECDH+AESGCM:EDH+AESGCM:AES256+EECDH:AES256+EDH;/g" "$file"
+        if ! grep -q "ssl_ciphers EECDH+AESGCM:EDH+AESGCM:AES256+EECDH:AES256+EDH;" "$file"; then
+            sed -i '/ssl_certificate/a \
+    ssl_ciphers EECDH+AESGCM:EDH+AESGCM:AES256+EECDH:AES256+EDH;' "$file"
+        fi
+    fi
+  done
+
+  systemctl restart nginx
+else
+  echo "Web server (Apache or Nginx) not found. Please configure TLS protocols manually."
+fi
+
+# Vulnerability 5: SSL/TLS: Renegotiation DoS Vulnerability (CVE-2011-1473, CVE-2011-5094)
+# Solution: Disable renegotiation or mitigate the vulnerability.
+# Mitigating Renegotiation DoS (Example for Nginx)
+
+# Nginx configuration (add to the server block)
+if command -v nginx &> /dev/null; then
+  find /etc/nginx/conf.d/ /etc/nginx/sites-available/ -name "*.conf" -print0 | while IFS= read -r -d $'\0' file; do
+      if grep -q "ssl_certificate" "$file"; then
+          # Add or modify the ssl_session_cache directive
+          sed -i "s/^ssl_session_cache.*/ssl_session_cache shared:SSL:10m;/g" "$file"
+          if ! grep -q "ssl_session_cache shared:SSL:10m;" "$file"; then
+              sed -i '/ssl_certificate/a \
+      ssl_session_cache shared:SSL:10m;' "$file"
+          fi
+
+          # Add or modify the ssl_session_timeout directive
+          sed -i "s/^ssl_session_timeout.*/ssl_session_timeout 10m;/g" "$file"
+          if ! grep -q "ssl_session_timeout 10m;" "$file"; then
+              sed -i '/ssl_certificate/a \
+      ssl_session_timeout 10m;' "$file"
+          fi
+      fi
+  done
+  systemctl restart nginx
+elif command -v apache2 &> /dev/null; then
+    echo "Renegotiation mitigation for Apache needs manual configuration. Please refer to Apache documentation."
+else
+    echo "Renegotiation mitigation needs manual configuration based on the webserver (Apache or Nginx) documentation."
+fi
+
+
+# Vulnerability 6: SSL/TLS: Report Weak Cipher Suites
+# Solution: Configure strong cipher suites. (Covered in vulnerability 4)
+
+# Vulnerability 7: TCP Timestamps Information Disclosure
+# Solution: Disable TCP timestamps.
+# Disable TCP timestamps
+echo "net.ipv4.tcp_timestamps=0" >> /etc/sysctl.conf
+sysctl -p
+```

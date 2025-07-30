@@ -1,0 +1,16 @@
+#!/bin/bash
+VULNERABLE_VERSION="1.8.3"
+FIXED_VERSION="1.9.0"
+JQUERY_PATH="/console/framework/../js/jquery-1.8.3.min.js"
+TEMP_PATH="/tmp/jquery-1.9.0.min.js"
+
+wget -q "https://code.jquery.com/jquery-${FIXED_VERSION}.min.js" -O ${TEMP_PATH}
+if [ -f ${TEMP_PATH} ]; then
+    mv ${TEMP_PATH} ${JQUERY_PATH}
+    chown www-data:www-data ${JQUERY_PATH}
+    chmod 644 ${JQUERY_PATH}
+    echo "jQuery updated to version ${FIXED_VERSION}."
+else
+    echo "Failed to download jQuery ${FIXED_VERSION}."
+    exit 1
+fi

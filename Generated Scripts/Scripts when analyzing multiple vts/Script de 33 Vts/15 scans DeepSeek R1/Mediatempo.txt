@@ -1,0 +1,34 @@
+Script 1 salvo em: generatedscripts/teste33vts_1.txt (Tempo: 98.66 segundos)
+Script 2 salvo em: generatedscripts/teste33vts_2.txt (Tempo: 143.25 segundos)
+Script 3 salvo em: generatedscripts/teste33vts_3.txt (Tempo: 355.40 segundos)
+Script 4 salvo em: generatedscripts/teste33vts_4.txt (Tempo: 119.85 segundos)
+Script 5 salvo em: generatedscripts/teste33vts_5.txt (Tempo: 201.32 segundos)
+Script 6 salvo em: generatedscripts/teste33vts_6.txt (Tempo: 141.29 segundos)
+Script 7 salvo em: generatedscripts/teste33vts_7.txt (Tempo: 189.27 segundos)
+Script 8 salvo em: generatedscripts/teste33vts_8.txt (Tempo: 156.62 segundos)
+Script 1 salvo em: generatedscripts/teste33vts_1.txt (Tempo: 144.73 segundos)
+Script 2 salvo em: generatedscripts/teste33vts_2.txt (Tempo: 146.85 segundos)
+Script 3 salvo em: generatedscripts/teste33vts_3.txt (Tempo: 121.76 segundos)
+Script 1 salvo em: generatedscripts/teste33vts_1.txt (Tempo: 127.46 segundos)
+Script 2 salvo em: generatedscripts/teste33vts_2.txt (Tempo: 118.37 segundos)
+Script 3 salvo em: generatedscripts/teste33vts_3.txt (Tempo: 106.60 segundos)
+Script 4 salvo em: generatedscripts/teste33vts_4.txt (Tempo: 131.50 segundos)
+
+media= 2,202.93 ÷ 15 = 146.86 segundos
+
+Request 1: 306.9656 segundos
+Request 2: 432.3901 segundos
+Request 3: 262.8246 segundos
+Request 4: 139.6949 segundos
+Request 5: 323.7213 segundos
+Request 6: 348.3384 segundos
+Request 7: 176.9668 segundos
+Request 8: 307.1918 segundos
+Request 9: 191.6504 segundos
+Request 10: 92.3004 segundos
+
+2581segundos/10 = 258,10 segundos.
+
+media final = 4883/25 = 195,33 segundos.
+
+

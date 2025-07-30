@@ -1,0 +1,84 @@
+```bash
+#!/bin/bash
+
+# Vulnerabilidade 1: Cleartext Transmission of Sensitive Information via HTTP
+# Solução: Implica em configurar HTTPS e redirecionar HTTP para HTTPS.
+# Como este script não pode configurar um servidor web, apenas oferece um lembrete.
+echo "AVISO: Configure HTTPS e redirecione HTTP para HTTPS no seu servidor web."
+
+# Vulnerabilidade 2: DNS Cache Snooping Vulnerability (UDP) - Active Check
+# Solução: Desabilitar recursão ou restringir acesso público.
+# Para bind9 (comum em Linux):
+if command -v named >/dev/null 2>&1; then
+  echo "options { recursion no; };" >> /etc/bind/named.conf.options.patch
+  cat /etc/bind/named.conf.options | grep -v "recursion no;" > /etc/bind/named.conf.options.tmp
+  mv /etc/bind/named.conf.options.tmp /etc/bind/named.conf.options
+  cat /etc/bind/named.conf.options.patch >> /etc/bind/named.conf.options
+  rm /etc/bind/named.conf.options.patch
+  rndc reload
+  echo "Recursão DNS desabilitada (bind9). Reinicie o serviço DNS se necessário."
+else
+  echo "AVISO: Servidor DNS não detectado. Desabilite a recursão DNS manualmente ou restrinja o acesso."
+fi
+
+# Vulnerabilidade 3: ICMP Timestamp Reply Information Disclosure
+# Solução: Desabilitar ICMP timestamps.
+echo 1 > /proc/sys/net/ipv4/icmp_echo_ignore_all
+sysctl -w net.ipv4.icmp_echo_ignore_all=1
+echo "net.ipv4.icmp_echo_ignore_all = 1" >> /etc/sysctl.conf
+echo "ICMP timestamps desabilitados."
+
+# Vulnerabilidade 4: SSL/TLS: Deprecated TLSv1.0 and TLSv1.1 Protocol Detection
+# Solução: Desabilitar TLSv1.0 e TLSv1.1.  Exige configuração do servidor web/aplicação.
+# Exemplo para Nginx:
+if command -v nginx >/dev/null 2>&1; then
+  TLS_VERSIONS="TLSv1.2 TLSv1.3"
+  sed -i "s/ssl_protocols TLSv1 TLSv1.1 TLSv1.2 TLSv1.3;/ssl_protocols $TLS_VERSIONS;/g" /etc/nginx/nginx.conf
+  sed -i "s/ssl_protocols TLSv1 TLSv1.1 TLSv1.2;/ssl_protocols $TLS_VERSIONS;/g" /etc/nginx/nginx.conf
+  sed -i "s/ssl_protocols TLSv1 TLSv1.1;/ssl_protocols $TLS_VERSIONS;/g" /etc/nginx/nginx.conf
+  systemctl restart nginx
+  echo "TLSv1.0 e TLSv1.1 desabilitados no Nginx. Reinicie o Nginx se necessário."
+else
+  echo "AVISO: Nginx não detectado. Desabilite TLSv1.0 e TLSv1.1 manualmente na configuração do servidor TLS."
+fi
+#Exemplo para Apache:
+if command -v apache2 >/dev/null 2>&1; then
+  TLS_VERSIONS="TLSv1.2,TLSv1.3"
+  sed -i "s/SSLProtocol all -SSLv3/SSLProtocol $TLS_VERSIONS/g" /etc/apache2/mods-available/ssl.conf
+  systemctl restart apache2
+  echo "TLSv1.0 e TLSv1.1 desabilitados no Apache2. Reinicie o Apache2 se necessário."
+else
+  echo "AVISO: Apache2 não detectado. Desabilite TLSv1.0 e TLSv1.1 manualmente na configuração do servidor TLS."
+fi
+
+# Vulnerabilidade 5: SSL/TLS: Renegotiation DoS Vulnerability (CVE-2011-1473, CVE-2011-5094)
+# Solução: Desabilitar renegotiation (depende do servidor).
+
+# Exemplo para Nginx: Adicionar 'ssl_session_tickets off;' no bloco 'http' ou 'server'
+if command -v nginx >/dev/null 2>&1; then
+  echo "AVISO: Verifique se 'ssl_session_tickets off;' está definido na configuração do Nginx (http ou server block). Reinicie o Nginx se necessário."
+else
+  echo "AVISO: Nginx não detectado. Consulte a documentação do servidor TLS para desabilitar a renegotiation."
+fi
+
+# Vulnerabilidade 6: SSL/TLS: Report Weak Cipher Suites
+# Solução: Configurar cipher suites fortes (depende do servidor).
+# Exemplo para Nginx:
+if command -v nginx >/dev/null 2>&1; then
+  CIPHERS="ECDHE-RSA-AES256-GCM-SHA512:DHE-RSA-AES256-GCM-SHA512:ECDHE-RSA-AES256-GCM-SHA384:DHE-RSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-SHA384"
+  sed -i "s/ssl_ciphers .*/ssl_ciphers $CIPHERS;/g" /etc/nginx/nginx.conf
+  systemctl restart nginx
+  echo "Cipher suites fracas removidas do Nginx. Reinicie o Nginx se necessário."
+else
+    echo "AVISO: Nginx não detectado. Configure cipher suites fortes manualmente no seu servidor TLS."
+fi
+
+# Vulnerabilidade 7: TCP Timestamps Information Disclosure
+# Solução: Desabilitar TCP timestamps.
+sysctl -w net.ipv4.tcp_timestamps=0
+echo "net.ipv4.tcp_timestamps = 0" >> /etc/sysctl.conf
+sysctl -p
+echo "TCP timestamps desabilitados."
+
+echo "Script de correção finalizado. Reinicie os serviços afetados se necessário."
+```

@@ -1,0 +1,14 @@
+#!/bin/bash
+SSH_CONFIG="/etc/ssh/sshd_config"
+BACKUP_CONFIG="$SSH_CONFIG.bak"
+
+# Backup the current SSH configuration
+cp "$SSH_CONFIG" "$BACKUP_CONFIG"
+
+# Update the SSH configuration to disable ssh-dss
+sed -i '/^HostKeyAlgorithms/d' "$SSH_CONFIG"
+sed -i '/^HostKey/s/\s*ssh-dss\s*//g' "$SSH_CONFIG"
+echo "HostKeyAlgorithms ecdsa-sha2-nistp256-cert-v01@openssh.com,ecdsa-sha2-nistp384-cert-v01@openssh.com,ecdsa-sha2-nistp521-cert-v01@openssh.com,ssh-ed25519-cert-v01@openssh.com,rsa-sha2-512-cert-v01@openssh.com,rsa-sha2-256-cert-v01@openssh.com,ssh-rsa-cert-v01@openssh.com,ecdsa-sha2-nistp256,ecdsa-sha2-nistp384,ecdsa-sha2-nistp521,ssh-ed25519,rsa-sha2-512,rsa-sha2-256,ssh-rsa" >> "$SSH_CONFIG"
+
+# Restart the SSH service
+systemctl restart sshd

@@ -1,0 +1,48 @@
+#!/bin/bash
+
+# Configura o Apache para redirecionar HTTP para HTTPS
+if ! grep -q "Redirect permanent / https://" /etc/apache2/sites-available/000-default.conf; then
+    echo "<VirtualHost *:80>
+    Redirect permanent / https://\${SERVER_NAME}/
+</VirtualHost>" | sudo tee -a /etc/apache2/sites-available/000-default.conf > /dev/null
+fi
+
+# Habilita o módulo SSL do Apache
+sudo a2enmod ssl
+
+# Configura o Apache para usar SSL
+if [ ! -f /etc/apache2/sites-available/default-ssl.conf ]; then
+    sudo cp /etc/apache2/sites-available/default-ssl.conf /etc/apache2/sites-available/default-ssl.conf.bak
+fi
+
+echo "<IfModule mod_ssl.c>
+    <VirtualHost _default_:443>
+        ServerAdmin webmaster@localhost
+        DocumentRoot /var/www/html
+
+        ErrorLog \${APACHE_LOG_DIR}/error.log
+        CustomLog \${APACHE_LOG_DIR}/access.log combined
+
+        SSLEngine on
+        SSLCertificateFile /etc/ssl/certs/ssl-cert-snakeoil.pem
+        SSLCertificateKeyFile /etc/ssl/private/ssl-cert-snakeoil.key
+
+        <FilesMatch \"\.(cgi|shtml|phtml|php)$\">
+            SSLOptions +StdEnvVars
+        </FilesMatch>
+        <Directory /usr/lib/cgi-bin>
+            SSLOptions +StdEnvVars
+        </Directory>
+
+        BrowserMatch \"MSIE [2-6]\" \\
+            nokeepalive ssl-unclean-shutdown \\
+            downgrade-1.0 force-response-1.0
+        BrowserMatch \"MSIE [17-9]\" ssl-unclean-shutdown
+    </VirtualHost>
+</IfModule>" | sudo tee /etc/apache2/sites-available/default-ssl.conf > /dev/null
+
+# Habilita o site SSL
+sudo a2ensite default-ssl
+
+# Reinicia o Apache para aplicar as mudanças
+sudo systemctl restart apache2

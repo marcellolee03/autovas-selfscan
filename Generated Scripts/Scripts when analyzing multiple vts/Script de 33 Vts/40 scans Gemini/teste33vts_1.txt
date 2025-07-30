@@ -1,0 +1,160 @@
+```bash
+#!/bin/bash
+
+# Vulnerability 1: Proxmox VE EOL
+# Upgrade Proxmox VE to a supported version.  This script assumes the user knows
+# how to properly upgrade Proxmox. It's not possible to automate this fully
+# without specific knowledge of the Proxmox setup and desired upgrade path.
+# This provides a reminder and a starting point.
+echo "#####################################################################"
+echo "# Vulnerability 1: Proxmox VE EOL                                  #"
+echo "# Please upgrade your Proxmox VE installation manually.  Refer to   #"
+echo "# the Proxmox documentation for instructions on upgrading to a     #"
+echo "# supported version.  THIS SCRIPT CANNOT PERFORM THE UPGRADE       #"
+echo "# AUTOMATICALLY.                                                  #"
+echo "#####################################################################"
+
+# Vulnerabilities 2-6: jQuery < 1.9.0 XSS
+# Define the target IP and paths to the vulnerable jQuery files
+IP="10.129.4.254"
+JQUERY_PATHS=(
+    "/../js/jquery-1.8.3.min.js"
+    "/opscenter/webcommon/framework/../js/jquery-1.8.3.min.js"
+    "/framesets/../js/jquery-1.8.3.min.js"
+    "/frameset/../js/jquery-1.8.3.min.js"
+    "/console/framework/../js/jquery-1.8.3.min.js"
+)
+
+# Download jQuery 1.9.0
+NEW_JQUERY_URL="https://code.jquery.com/jquery-1.9.0.min.js"
+NEW_JQUERY_FILE="jquery-1.9.0.min.js"
+
+wget -q "$NEW_JQUERY_URL" -O "$NEW_JQUERY_FILE"
+
+# Function to replace jQuery file
+replace_jquery() {
+    local path="$1"
+    local full_url="http://$IP${path}"
+    local tmp_file="/tmp/jquery_backup_$(echo "$path" | tr / _)"
+
+    # Download the old file, creating a backup
+    wget -q "$full_url" -O "$tmp_file"
+    if [ $? -ne 0 ]; then
+        echo "ERROR: Failed to download $full_url. Skipping."
+        return 1
+    fi
+
+    # Upload the new file. This assumes that the server allows PUT or POST
+    # to replace files. This is a placeholder - the actual method depends
+    # heavily on the web server configuration.  It is unlikely a simple
+    # script can handle this universally.
+    echo "#####################################################################"
+    echo "# Vulnerabilities 2-6: jQuery < 1.9.0 XSS                           #"
+    echo "# Please manually replace the jQuery file at $full_url.             #"
+    echo "# The original file has been backed up to $tmp_file                 #"
+    echo "# The new file is $NEW_JQUERY_FILE                                 #"
+    echo "# THIS SCRIPT CANNOT AUTOMATICALLY REPLACE THE FILE ON THE SERVER. #"
+    echo "#####################################################################"
+
+    #Remove temp file
+    rm -f "$tmp_file"
+
+}
+
+# Loop through each path and replace the jQuery file
+for path in "${JQUERY_PATHS[@]}"; do
+    replace_jquery "$path"
+done
+
+rm -f "$NEW_JQUERY_FILE"
+
+# Vulnerabilities 7, 8, 9, 13, 14, 15, 16, 19, 21, 22: SSH Weak Algorithms
+# Edit sshd_config to disable weak algorithms
+# This script assumes the sshd_config file is located at /etc/ssh/sshd_config
+# and that the OS is using OpenSSH.
+
+SSH_CONFIG="/etc/ssh/sshd_config"
+
+# Create a backup of the original sshd_config file
+cp -p "$SSH_CONFIG" "$SSH_CONFIG.bak"
+
+# Disable weak KEX algorithms
+sed -i '/KexAlgorithms/s/diffie-hellman-group1-sha1//g' "$SSH_CONFIG"
+
+# Disable weak MAC algorithms
+sed -i '/MACs/s/umac-64-etm@openssh.com//g' "$SSH_CONFIG"
+sed -i '/MACs/s/umac-64@openssh.com//g' "$SSH_CONFIG"
+sed -i '/MACs/s/hmac-md5//g' "$SSH_CONFIG"
+sed -i '/MACs/s/hmac-sha1-96//g' "$SSH_CONFIG"
+
+# Disable weak ciphers
+sed -i '/Ciphers/s/3des-cbc//g' "$SSH_CONFIG"
+sed -i '/Ciphers/s/aes128-cbc//g' "$SSH_CONFIG"
+sed -i '/Ciphers/s/aes256-cbc//g' "$SSH_CONFIG"
+sed -i '/Ciphers/s/twofish-cbc//g' "$SSH_CONFIG"
+sed -i '/Ciphers/s/twofish128-cbc//g' "$SSH_CONFIG"
+sed -i '/Ciphers/s/twofish256-cbc//g' "$SSH_CONFIG"
+
+# Disable weak host key algorithms
+# Remove ssh-dss (DSA) support
+sed -i '/HostKeyAlgorithms/s/ssh-dss//g' "$SSH_CONFIG"
+
+#Restart SSH service
+systemctl restart sshd
+
+# Vulnerability 10: DCE/RPC and MSRPC Services Enumeration Reporting
+# Mitigation: Filter incoming traffic to port 135.  This needs to be done through
+# a firewall.  This script only provides a UFW (Uncomplicated Firewall) example.
+
+if command -v ufw &> /dev/null
+then
+    ufw deny 135/tcp
+    ufw reload
+    echo "DCE/RPC and MSRPC: UFW rule added to deny port 135/tcp.  Firewall reloaded."
+else
+    echo "DCE/RPC and MSRPC: Please configure your firewall to block incoming traffic on port 135."
+fi
+
+# Vulnerability 11: Telnet Unencrypted Cleartext Login
+# Disable Telnet service and suggest using SSH
+systemctl stop telnet.socket
+systemctl disable telnet.socket
+systemctl stop telnetd.socket
+systemctl disable telnetd.socket
+
+echo "Telnet service has been stopped and disabled. Please use SSH instead."
+
+# Vulnerability 12: SSL/TLS: Deprecated TLSv1.0 and TLSv1.1 Protocol Detection
+# Mitigation: Disable TLS 1.0 and 1.1. The specific steps depend on the service
+# using TLS.  This script provides a general reminder.
+echo "#####################################################################"
+echo "# Vulnerability 12: SSL/TLS Deprecated Protocols                    #"
+echo "# Please manually disable TLSv1.0 and TLSv1.1 for services on this    #"
+echo "# system.  Refer to the service's documentation for specific        #"
+echo "# instructions. THIS SCRIPT CANNOT PERFORM THIS AUTOMATICALLY.       #"
+echo "#####################################################################"
+
+# Vulnerabilities 17, 18, 20, 23, 24, 25: TCP Timestamps Information Disclosure
+# Disable TCP timestamps by modifying /etc/sysctl.conf
+echo "net.ipv4.tcp_timestamps = 0" >> /etc/sysctl.conf
+sysctl -p
+
+echo "TCP timestamps disabled. Reboot may be required."
+
+# Vulnerabilities 26, 27, 28, 29, 30, 31, 32: ICMP Timestamp Reply Information Disclosure
+# Disable ICMP Timestamp Replies.
+
+# Check if the OS is Linux and has the necessary tools
+if [ -f /etc/sysctl.conf ] && command -v sysctl &> /dev/null; then
+    # Disable ICMP timestamp replies by modifying /etc/sysctl.conf
+    echo "net.ipv4.icmp_echo_ignore_all = 1" >> /etc/sysctl.conf
+    sysctl -p
+    echo "ICMP timestamp replies disabled. Reboot may be required."
+
+else
+    echo "ICMP timestamp replies cannot be automatically disabled on this system."
+    echo "Please configure your firewall to block ICMP timestamp requests."
+fi
+
+exit 0
+```

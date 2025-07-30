@@ -1,0 +1,50 @@
+Com base na análise do prompt e dos scripts de correção fornecidos, aqui está a avaliação se cada script é capaz de resolver a vulnerabilidade do PHP e a porcentagem geral de correção.
+
+A vulnerabilidade principal é a CVE-2012-1823 (e outras relacionadas) , que afeta o PHP-CGI em versões anteriores à 5.3.13 e 5.4.3. A solução é atualizar o PHP para uma versão corrigida. Um script eficaz deve, no mínimo, atualizar os pacotes PHP vulneráveis e reiniciar os serviços web (como Apache, Nginx, etc.) para que a atualização entre em vigor.
+
+Análise Individual dos Scripts
+
+    Script 1 (1vtphp_1.txt): Não
+        O script atualiza corretamente os pacotes PHP em sistemas baseados em Debian. No entanto, ele falha em reiniciar os serviços web após a atualização. Sem reiniciar, o serviço continua usando a versão antiga e vulnerável do PHP em memória, e a falha não é corrigida.
+
+Script 2 (1vtphp_2.txt): Sim
+
+    Este é um script robusto que lida com sistemas baseados em Debian e RedHat. Ele tenta atualizar os pacotes php-cgi , verifica se a versão continua vulnerável e, como alternativa, remove o pacote. Crucialmente, ele reinicia os serviços web (apache2, nginx, httpd) ao final.
+
+Script 3 (1vtphp_3.txt): Sim
+
+    O script foca em sistemas Debian/Ubuntu. Ele atualiza todos os pacotes PHP e possui uma função abrangente para reiniciar múltiplos serviços web, incluindo apache, nginx, httpd e fpm.
+
+Script 4 (1vtphp_4.txt): Sim
+
+    Este script atualiza todos os pacotes php* em sistemas Debian/Ubuntu e realiza uma reinicialização completa dos serviços web e FPM, usando systemctl ou scripts init.d.
+
+Script 5 (1vtphp_5.txt): Sim
+
+    Um script muito completo para sistemas Debian. Ele não apenas atualiza os pacotes, mas também adiciona um repositório PPA para garantir que uma versão segura do PHP esteja disponível. Além disso, aplica configurações de segurança no php.ini e reinicia os serviços web.
+
+Script 6 (1vtphp_6.txt): Sim
+
+    Este script detecta a distribuição (Debian ou RedHat) e usa o gerenciador de pacotes apropriado para atualizar todos os pacotes PHP. Ele finaliza com uma função robusta para reiniciar os principais serviços web.
+
+Script 7 (1vtphp_7.txt): Sim
+
+    Focado em Debian, este script identifica com precisão os pacotes PHP a serem atualizados. Ele reinicia os serviços necessários e ainda tenta desativar o serviço php-cgi como uma medida de segurança adicional.
+
+Script 8 (1vtphp_8.txt): Não
+
+    Este script tenta um apt upgrade -y geral e, em seguida, verifica a versão do php-cgi para removê-lo se for vulnerável. Embora a remoção seja uma forma de correção, o script falha em reiniciar os serviços web, o que significa que a correção não é aplicada ao ambiente em execução.
+
+Script 9 (1vtphp_9.txt): Não
+
+    O script identifica e atualiza corretamente os pacotes php-cgi em sistemas Debian. No entanto, ele termina com exit 0 imediatamente após a atualização, sem reiniciar nenhum serviço web. A falha persiste até uma reinicialização manual.
+
+Script 10 (1vtphp_10.txt): Sim
+
+    Este script identifica o sistema (Debian/Ubuntu) , atualiza os pacotes PHP e reinicia corretamente o Apache e os serviços PHP-FPM.
+
+Conclusão e Porcentagem de Correção
+
+Dos 10 scripts analisados, 7 são capazes de corrigir a vulnerabilidade de forma eficaz, pois cumprem os dois requisitos essenciais: atualizar o software vulnerável e reiniciar os serviços para aplicar a mudança. Os outros 3 falham por não reiniciarem os serviços.
+
+Média de porcentagem geral de correção: 70%

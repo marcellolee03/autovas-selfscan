@@ -1,0 +1,21 @@
+#!/bin/bash
+openssl_conf=$(mktemp)
+cat > "$openssl_conf" <<EOL
+[default_conf]
+ssl_conf = ssl_sect
+
+[ssl_sect]
+system_default = system_default_sect
+
+[system_default_sect]
+MinProtocol = TLSv1.2
+CipherString = DEFAULT@SECLEVEL=2
+EOL
+
+sudo cp "$openssl_conf" /etc/ssl/openssl.cnf
+rm "$openssl_conf"
+
+sudo sed -i 's/^SSLProtocol.*/SSLProtocol -all +TLSv1.2 +TLSv1.3/' /etc/apache2/mods-enabled/ssl.conf
+sudo sed -i 's/^ssl_protocols.*/ssl_protocols TLSv1.2 TLSv1.3;/' /etc/nginx/nginx.conf
+sudo systemctl restart apache2
+sudo systemctl restart nginx

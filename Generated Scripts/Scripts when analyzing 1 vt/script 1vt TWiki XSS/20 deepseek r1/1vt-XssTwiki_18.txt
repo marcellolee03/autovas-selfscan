@@ -1,0 +1,49 @@
+#!/bin/bash
+
+possible_paths=("/var/www/twiki" "/usr/local/twiki" "/home/twiki" "/opt/twiki")
+TWIKI_ROOT_DIR=""
+for path in "${possible_paths[@]}"; do
+    if [ -d "$path" ] && [ -f "$path/lib/TWiki.pm" ]; then
+        TWIKI_ROOT_DIR="$path"
+        break
+    fi
+done
+
+[ -z "$TWIKI_ROOT_DIR" ] && exit 0
+
+version_file="$TWIKI_ROOT_DIR/lib/TWiki.pm"
+skip_version_check=0
+if [ -f "$version_file" ]; then
+    current_version=$(grep -m1 -P '\$VERSION\s*=' "$version_file" | grep -oP '\d+\.\d+\.\d+')
+    if [ -n "$current_version" ]; then
+        [ "$(printf "%s\n" "$current_version" "4.2.4" | sort -V | head -n1)" != "4.2.4" ] || exit 0
+    else
+        skip_version_check=1
+    fi
+else
+    skip_version_check=1
+fi
+
+systemctl stop apache2
+BACKUP_DIR="/tmp/twiki_backup_$(date +%Y%m%d%H%M%S)"
+mkdir -p "$BACKUP_DIR"
+cp -rp "$TWIKI_ROOT_DIR" "$BACKUP_DIR/twiki"
+
+TMP_DIR=$(mktemp -d)
+cd "$TMP_DIR" || exit 1
+wget -q http://twiki.org/p/pub/Codev/Release02x04/TWiki-4.2.4.tgz || exit 1
+tar xzf TWiki-4.2.4.tgz || exit 1
+cd TWiki-4.2.4 || exit 1
+
+cp -r "$TWIKI_ROOT_DIR/data" . || exit 1
+cp -r "$TWIKI_ROOT_DIR/pub" . || exit 1
+[ -f "$TWIKI_ROOT_DIR/lib/LocalSite.cfg" ] && cp "$TWIKI_ROOT_DIR/lib/LocalSite.cfg" ./lib/
+[ -d "$TWIKI_ROOT_DIR/plugins" ] && cp -r "$TWIKI_ROOT_DIR/plugins" .
+
+rm -rf "${TWIKI_ROOT_DIR:?}/"*
+rm -rf "${TWIKI_ROOT_DIR}"/.* 2>/dev/null
+mv ./* "${TWIKI_ROOT_DIR}/"
+mv .[^.]* "${TWIKI_ROOT_DIR}/" 2>/dev/null
+chown -R www-data:www-data "$TWIKI_ROOT_DIR"
+systemctl start apache2
+rm -rf "$TMP_DIR"

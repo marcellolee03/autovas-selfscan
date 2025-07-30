@@ -1,0 +1,60 @@
+```bash
+#!/bin/bash
+
+# Identifica o sistema operacional para adaptar o script
+if command -v systemctl &> /dev/null; then
+    OS="systemd"
+elif [ -f /etc/init.d/postgresql ]; then
+    OS="sysvinit"
+else
+    echo "Sistema operacional não suportado. Saindo."
+    exit 1
+fi
+
+# Define o arquivo de configuração do PostgreSQL
+PG_CONF="/etc/postgresql/*/main/postgresql.conf"
+
+# Define a string para desabilitar TLSv1.0 e TLSv1.1
+TLS_DISABLE="!TLSv1,!TLSv1.1"
+
+# Função para modificar a configuração SSL do PostgreSQL
+configure_postgresql() {
+    if [ ! -f "$PG_CONF" ]; then
+        echo "Arquivo de configuração do PostgreSQL não encontrado: $PG_CONF"
+        return 1
+    fi
+
+    # Verifica se a linha ssl_min_protocol já existe
+    if grep -q "ssl_min_protocol" "$PG_CONF"; then
+        # Se existe, atualiza a linha
+        sed -i "s/ssl_min_protocol = .*/ssl_min_protocol = TLSv1.2/g" "$PG_CONF"
+    else
+        # Se não existe, adiciona a linha
+        echo "ssl_min_protocol = TLSv1.2" >> "$PG_CONF"
+    fi
+
+    # Verifica se a linha ssl_ciphers já existe
+    if grep -q "ssl_ciphers" "$PG_CONF"; then
+        # Se existe, atualiza a linha removendo ciphers fracos
+        # Manter apenas ciphers fortes e modernos é uma prática recomendada
+        sed -i "s/ssl_ciphers = .*/ssl_ciphers = 'HIGH:!aNULL:!MD5'/" "$PG_CONF"
+    else
+        # Se não existe, adiciona a linha
+        echo "ssl_ciphers = 'HIGH:!aNULL:!MD5'" >> "$PG_CONF"
+    fi
+}
+
+# Configura o PostgreSQL
+configure_postgresql
+
+# Reinicia o serviço PostgreSQL dependendo do sistema operacional
+if [ "$OS" = "systemd" ]; then
+    systemctl restart postgresql.service
+elif [ "$OS" = "sysvinit" ]; then
+    /etc/init.d/postgresql restart
+fi
+
+echo "Script de correção completo. PostgreSQL foi configurado para desabilitar TLSv1.0 e TLSv1.1 e o serviço foi reiniciado."
+
+exit 0
+```

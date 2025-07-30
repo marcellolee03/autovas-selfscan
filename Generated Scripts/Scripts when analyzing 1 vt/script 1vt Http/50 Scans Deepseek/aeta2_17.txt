@@ -1,0 +1,23 @@
+#!/bin/bash
+SSL_CONF="/etc/apache2/sites-available/default-ssl.conf"
+HTTP_CONF="/etc/apache2/sites-available/000-default.conf"
+
+if [[ ! -f "$SSL_CONF" ]]; then
+    echo "SSL configuration file not found. Exiting."
+    exit 1
+fi
+
+if [[ ! -f "$HTTP_CONF" ]]; then
+    echo "HTTP configuration file not found. Exiting."
+    exit 1
+fi
+
+a2enmod ssl
+a2ensite default-ssl
+
+sed -i '/<VirtualHost \*:80>/a\\tRedirect permanent / https://%{HTTP_HOST}%{REQUEST_URI}' "$HTTP_CONF"
+
+sed -i 's/SSLCertificateFile \/etc\/ssl\/certs\/ssl-cert-snakeoil.pem/SSLCertificateFile \/etc\/ssl\/certs\/server.crt/' "$SSL_CONF"
+sed -i 's/SSLCertificateKeyFile \/etc\/ssl\/private\/ssl-cert-snakeoil.key/SSLCertificateKeyFile \/etc\/ssl\/private\/server.key/' "$SSL_CONF"
+
+systemctl restart apache2

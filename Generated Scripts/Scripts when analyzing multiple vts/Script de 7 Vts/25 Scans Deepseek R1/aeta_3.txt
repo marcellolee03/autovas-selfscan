@@ -1,0 +1,47 @@
+#!/bin/bash
+
+# Vulnerabilidade 1: Redirecionar HTTP para HTTPS no Apache
+if [ -f /etc/apache2/sites-available/000-default.conf ]; then
+    echo "Redirecting HTTP to HTTPS in Apache..."
+    sed -i '/<VirtualHost \*:80>/a\\tRedirect "/" "https://%{HTTP_HOST}%"' /etc/apache2/sites-available/000-default.conf
+    systemctl restart apache2
+fi
+
+# Vulnerabilidade 2: Restringir recursão DNS no BIND
+if [ -f /etc/bind/named.conf.options ]; then
+    echo "Configurando restrições de recursão DNS..."
+    if ! grep -q "recursion no;" /etc/bind/named.conf.options; then
+        sed -i '/options {/a\\trecursion no;' /etc/bind/named.conf.options
+        systemctl restart bind9
+    fi
+fi
+
+# Vulnerabilidade 3: Bloquear respostas ICMP Timestamp
+echo "Bloqueando respostas ICMP Timestamp..."
+iptables -A OUTPUT -p icmp --icmp-type timestamp-reply -j DROP
+iptables-save > /etc/iptables/rules.v4
+
+# Vulnerabilidade 4 e 6: Desabilitar TLS antigo e cifras fracas
+update_ssl_config() {
+    local conf_file=$1
+    local ssl_protocols="TLSv1.2 TLSv1.3"
+    local strong_ciphers="HIGH:!aNULL:!MD5:!RC4:!3DES"
+
+    if [ -f "$conf_file" ]; then
+        echo "Atualizando configurações TLS em $conf_file..."
+        sed -i "s/SSLProtocol.*/SSLProtocol $ssl_protocols/" "$conf_file"
+        sed -i "s/SSLCipherSuite.*/SSLCipherSuite $strong_ciphers/" "$conf_file"
+        grep -q "SSLInsecureRenegotiation" "$conf_file" || 
+            echo "SSLInsecureRenegotiation off" >> "$conf_file"
+        systemctl restart $(basename "$conf_file" .conf | sed 's/\.//')
+    fi
+}
+
+update_ssl_config /etc/apache2/sites-enabled/default-ssl.conf
+update_ssl_config /etc/apache2/mods-enabled/ssl.conf
+update_ssl_config /etc/nginx/sites-enabled/default
+
+# Vulnerabilidade 7: Desabilitar TCP Timestamps
+echo "Desativando TCP Timestamps..."
+sysctl -w net.ipv4.tcp_timestamps=0
+echo "net.ipv4.tcp_timestamps = 0" >> /etc/sysctl.conf

@@ -1,0 +1,16 @@
+#!/bin/bash
+if ! command -v a2enmod &> /dev/null
+then
+    echo "Apache2 is not installed. Please install Apache2 first."
+    exit 1
+fi
+
+a2enmod ssl
+a2ensite default-ssl
+sed -i 's/^Listen 80$/Listen 443/' /etc/apache2/ports.conf
+sed -i 's/^<VirtualHost \*:80>$/<VirtualHost \*:443>/' /etc/apache2/sites-available/000-default.conf
+echo '<VirtualHost *:80>' > /etc/apache2/sites-available/redirect.conf
+echo '    Redirect permanent / https://localhost/' >> /etc/apache2/sites-available/redirect.conf
+echo '</VirtualHost>' >> /etc/apache2/sites-available/redirect.conf
+a2ensite redirect
+systemctl restart apache2

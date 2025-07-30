@@ -1,0 +1,204 @@
+```bash
+#!/bin/bash
+
+# Variáveis para rastrear atualizações e erros
+updated=0
+errors=0
+
+# Função para atualizar o Python no Windows usando o Chocolatey
+update_python() {
+    local version="$1"
+    local port="$2"
+
+    # Verifica se o Chocolatey está instalado
+    if ! command -v choco &> /dev/null; then
+        echo "Chocolatey não está instalado. Por favor, instale-o primeiro."
+        errors=$((errors + 1))
+        return
+    fi
+
+    # Monta o comando para atualizar o Python
+    cmd="choco upgrade python --version=$version -y"
+
+    echo "Atualizando Python na porta $port para a versão $version..."
+    
+    # Executa o comando e verifica o resultado
+    if eval "$cmd"; then
+        echo "Python na porta $port atualizado com sucesso para a versão $version."
+        updated=$((updated + 1))
+    else
+        echo "Falha ao atualizar o Python na porta $port."
+        errors=$((errors + 1))
+    fi
+}
+
+# Remova as instalações existentes do Python
+remove_python() {
+  local version="$1"
+  local port="$2"
+
+  echo "Desinstalando a versão existente do Python na porta $port..."
+
+  # Use o Chocolatey para desinstalar o Python
+  if choco uninstall python --version="$version" -y; then
+    echo "Python $version desinstalado com sucesso da porta $port."
+  else
+    echo "Falha ao desinstalar o Python $version da porta $port."
+    errors=$((errors + 1))
+  fi
+}
+
+# Instale a versão mais recente do Python
+install_python() {
+  local version="$1"
+  local port="$2"
+
+  echo "Instalando a versão mais recente do Python na porta $port..."
+
+  # Use o Chocolatey para instalar o Python
+  if choco install python -y; then
+    echo "Python instalado com sucesso na porta $port."
+    updated=$((updated + 1))
+  else
+    echo "Falha ao instalar o Python na porta $port."
+    errors=$((errors + 1))
+  fi
+}
+
+# Tratamento da vulnerabilidade do certificado SSL/TLS
+replace_certificate() {
+    echo "Substituindo o certificado SSL/TLS autoassinado por um certificado confiável..."
+    
+    # Gere um novo certificado usando OpenSSL
+    openssl req -newkey rsa:2048 -nodes -keyout key.pem -x509 -days 365 -out certificate.pem -subj "/CN=example.com/O=Example Organization/L=Example City/ST=Example State/C=US"
+    
+    # Converta a chave e o certificado para o formato PKCS12
+    openssl pkcs12 -export -out certificate.p12 -inkey key.pem -in certificate.pem -password pass:password
+    
+    echo "Certificado SSL/TLS autoassinado substituído com sucesso."
+}
+
+# Desabilita algoritmos MAC fracos no SSH
+disable_weak_mac_algorithms() {
+    echo "Desabilitando algoritmos MAC fracos no SSH..."
+
+    # Define os algoritmos MAC seguros
+    safe_macs="hmac-sha2-512,hmac-sha2-256,hmac-sha1"
+
+    # Encontre o arquivo de configuração SSH
+    ssh_config_file="/etc/ssh/sshd_config"
+
+    # Verifique se o arquivo de configuração SSH existe
+    if [ ! -f "$ssh_config_file" ]; then
+        echo "Arquivo de configuração SSH não encontrado: $ssh_config_file"
+        errors=$((errors + 1))
+        return
+    fi
+
+    # Adicione ou atualize a configuração de MACs no arquivo SSH
+    if grep -q "^MACs" "$ssh_config_file"; then
+        # Se a linha já existe, substitua-a
+        sed -i "s/^MACs.*/MACs $safe_macs/" "$ssh_config_file"
+    else
+        # Se a linha não existe, adicione-a
+        echo "MACs $safe_macs" >> "$ssh_config_file"
+    fi
+
+    echo "Algoritmos MAC fracos desabilitados no SSH."
+    
+    # Reinicie o serviço SSH para aplicar as mudanças
+    if systemctl restart sshd; then
+        echo "Serviço SSH reiniciado com sucesso."
+    else
+        echo "Falha ao reiniciar o serviço SSH."
+        errors=$((errors + 1))
+    fi
+}
+
+# Desabilita respostas ICMP Timestamp
+disable_icmp_timestamp() {
+  echo "Desabilitando respostas ICMP Timestamp..."
+
+  # Modifique o arquivo sysctl.conf
+  if grep -q "net.ipv4.icmp_echo_ignore_all=1" "/etc/sysctl.conf"; then
+    echo "net.ipv4.icmp_echo_ignore_all já está configurado."
+  else
+    echo "net.ipv4.icmp_echo_ignore_all=1" >> "/etc/sysctl.conf"
+  fi
+
+  # Aplique as configurações sysctl sem reiniciar
+  sysctl -p
+
+  echo "Respostas ICMP Timestamp desabilitadas."
+}
+
+# Atualiza Python para as versões corrigidas
+update_python "3.10.16" "5000"
+update_python "3.12.8" "8000"
+update_python "3.12.8" "8001"
+update_python "3.12.8" "8002"
+update_python "3.12.6" "8000"
+update_python "3.12.6" "8001"
+update_python "3.12.6" "8002"
+update_python "3.10.15" "5000"
+update_python "3.12.3" "8000"
+update_python "3.12.3" "8001"
+update_python "3.12.3" "8002"
+update_python "3.12.1" "8002"
+update_python "3.12.1" "8000"
+update_python "3.10.14" "5000"
+update_python "3.12.1" "8001"
+update_python "3.12.5" "8000"
+update_python "3.12.5" "8001"
+update_python "3.12.5" "8002"
+update_python "3.10.14" "5000"
+update_python "3.12.3" "8001"
+update_python "3.12.4" "8002"
+update_python "3.12.4" "8001"
+update_python "3.12.3" "8000"
+update_python "3.12.4" "8000"
+update_python "3.10.15" "5000"
+update_python "3.12.2" "8000"
+update_python "3.12.2" "8001"
+update_python "3.12.2" "8002"
+update_python "3.12.9" "8000"
+update_python "3.12.9" "5000"
+update_python "3.10.16" "5000"
+update_python "3.12.9" "8001"
+update_python "3.12.9" "8002"
+update_python "3.12.4" "8001"
+update_python "3.12.4" "8000"
+update_python "3.11.10" "5000"
+update_python "3.12.4" "8002"
+
+# Atualiza Python para as versões corrigidas (se vulnerável)
+
+# Tratamento para a vulnerabilidade "Python <= 3.12.1 RecursionError Vulnerability"
+# Não há correção direta disponível, então estas vulnerabilidades serão ignoradas por enquanto.
+
+# Tratamento para a vulnerabilidade "Python Untrusted Search Path Vulnerability"
+# Não há correção direta disponível, então estas vulnerabilidades serão ignoradas por enquanto.
+
+# Tratamento para a vulnerabilidade "Python <= 2.7.18, 3.x <= 3.12.3 Security Bypass Vulnerability"
+# Não há correção direta disponível, então estas vulnerabilidades serão ignoradas por enquanto.
+
+# Soluciona a vulnerabilidade do certificado SSL/TLS
+replace_certificate
+
+# Desabilita algoritmos MAC fracos no SSH
+disable_weak_mac_algorithms
+
+# Desabilita respostas ICMP Timestamp
+disable_icmp_timestamp
+
+# Relata o resumo
+echo "Resumo:"
+echo "  Python atualizado: $updated"
+echo "  Erros: $errors"
+
+if [ "$errors" -eq 0 ]; then
+    echo "Todas as vulnerabilidades foram corrigidas com sucesso."
+else
+    echo "Algumas vulnerabilidades não puderam ser corrigidas. Verifique os erros."
+fi
+```

@@ -1,0 +1,50 @@
+#!/bin/bash
+
+# Script para mitigar a vulnerabilidade de transmissão de informações sensíveis em texto claro via HTTP.
+# Este script configura o redirecionamento de HTTP para HTTPS e habilita o HTTPS.
+# Assumindo que o servidor web é Apache e o sistema operacional é baseado em Debian/Ubuntu.
+
+# Variáveis
+APACHE_CONFIG_FILE="/etc/apache2/sites-available/000-default.conf"
+APACHE_DEFAULT_SSL_CONFIG_FILE="/etc/apache2/sites-available/default-ssl.conf"
+APACHE_SSL_ENABLED_SITE="/etc/apache2/sites-enabled/default-ssl.conf"
+APACHE_ENABLED_SITE="/etc/apache2/sites-enabled/000-default.conf"
+
+# 1. Habilitar o módulo rewrite do Apache
+sudo a2enmod rewrite
+
+# 2. Criar um arquivo de configuração virtual para redirecionar HTTP para HTTPS
+
+REDIRECT_CONFIG="/tmp/redirect.conf"
+
+cat > "$REDIRECT_CONFIG" <<EOL
+<VirtualHost *:80>
+    ServerName \$(hostname)
+    Redirect permanent / https://\${SERVER_NAME}\${REQUEST_URI}
+</VirtualHost>
+EOL
+
+sudo mv "$REDIRECT_CONFIG" /etc/apache2/sites-available/redirect.conf
+
+# 3. Habilitar o site de redirecionamento
+sudo a2ensite redirect.conf
+
+# 4.  Habilitar SSL (se ainda não estiver habilitado)
+if [ ! -f "$APACHE_SSL_ENABLED_SITE" ]; then
+  sudo a2enmod ssl
+  # Habilitar o site default-ssl (se ele existir)
+  if [ -f "$APACHE_DEFAULT_SSL_CONFIG_FILE" ]; then
+    sudo a2ensite default-ssl.conf
+  else
+    echo "Arquivo de configuração SSL padrão não encontrado. Por favor, configure o SSL manualmente."
+  fi
+fi
+
+# 5. Reiniciar o Apache para aplicar as mudanças
+sudo systemctl restart apache2
+
+echo "Redirecionamento HTTP para HTTPS configurado e Apache reiniciado."
+echo "Por favor, verifique se o SSL está configurado corretamente e se o site está acessível via HTTPS."
+echo "Se você não tiver um certificado SSL, considere usar o Let's Encrypt para gerar um certificado gratuito."
+echo "Instruções para Let's Encrypt:  sudo apt install certbot python3-certbot-apache && sudo certbot --apache"
+exit 0

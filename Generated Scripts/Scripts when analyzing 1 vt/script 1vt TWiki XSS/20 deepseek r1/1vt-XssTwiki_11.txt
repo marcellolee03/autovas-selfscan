@@ -1,0 +1,21 @@
+#!/bin/bash
+INSTALL_DIR="/var/www/twiki"
+if [ ! -d "$INSTALL_DIR" ]; then
+    echo "Error: TWiki directory not found at $INSTALL_DIR. Cannot proceed." >&2
+    exit 1
+fi
+BACKUP_DIR="/root/twiki_backup_$(date +%Y%m%d%H%M%S)"
+mkdir -p "$BACKUP_DIR"
+cp -Rp "$INSTALL_DIR" "$BACKUP_DIR"
+TMPDIR=$(mktemp -d)
+cd "$TMPDIR" || { echo "Failed to change to temporary directory." >&2; exit 1; }
+if ! wget -q --show-progress -O twiki.tgz "https://sourceforge.net/projects/twiki/files/TWiki%20for%20all%20platforms/TWiki%204.2.4/twiki-4.2.4.tgz/download"; then
+    echo "Error: Failed to download TWiki 4.2.4." >&2
+    rm -rf "$TMPDIR"
+    exit 1
+fi
+tar -xzf twiki.tgz
+rsync -a --exclude 'data' --exclude 'pub' "$TMPDIR/twiki/" "$INSTALL_DIR/"
+chown -R www-data:www-data "$INSTALL_DIR"
+find "$INSTALL_DIR/bin" -type f -exec chmod 755 {} \;
+rm -rf "$TMPDIR"

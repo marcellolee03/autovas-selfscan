@@ -1,0 +1,91 @@
+#!/bin/bash
+update_python() {
+    local installed_version=$1
+    local fixed_version=$2
+    if [[ "$installed_version" == "3.10.12" && "$fixed_version" == "3.10.15" ]]; then
+        sudo apt-get update
+        sudo apt-get install --only-upgrade python3.10
+    elif [[ "$installed_version" == "3.12.0" && "$fixed_version" == "3.12.6" ]]; then
+        sudo apt-get update
+        sudo apt-get install --only-upgrade python3.12
+    elif [[ "$installed_version" == "3.10.12" && "$fixed_version" == "3.10.16" ]]; then
+        sudo apt-get update
+        sudo apt-get install --only-upgrade python3.10
+    elif [[ "$installed_version" == "3.12.0" && "$fixed_version" == "3.12.8" ]]; then
+        sudo apt-get update
+        sudo apt-get install --only-upgrade python3.12
+    elif [[ "$installed_version" == "3.10.12" && "$fixed_version" == "3.10.14" ]]; then
+        sudo apt-get update
+        sudo apt-get install --only-upgrade python3.10
+    elif [[ "$installed_version" == "3.12.0" && "$fixed_version" == "3.12.3" ]]; then
+        sudo apt-get update
+        sudo apt-get install --only-upgrade python3.12
+    elif [[ "$installed_version" == "3.12.0" && "$fixed_version" == "3.12.1" ]]; then
+        sudo apt-get update
+        sudo apt-get install --only-upgrade python3.12
+    elif [[ "$installed_version" == "3.10.12" && "$fixed_version" == "3.10.13" ]]; then
+        sudo apt-get update
+        sudo apt-get install --only-upgrade python3.10
+    elif [[ "$installed_version" == "3.12.0" && "$fixed_version" == "3.12.5" ]]; then
+        sudo apt-get update
+        sudo apt-get install --only-upgrade python3.12
+    elif [[ "$installed_version" == "3.10.12" && "$fixed_version" == "3.10.15" ]]; then
+        sudo apt-get update
+        sudo apt-get install --only-upgrade python3.10
+    elif [[ "$installed_version" == "3.12.0" && "$fixed_version" == "3.12.4" ]]; then
+        sudo apt-get update
+        sudo apt-get install --only-upgrade python3.12
+    elif [[ "$installed_version" == "3.12.0" && "$fixed_version" == "3.12.9" ]]; then
+        sudo apt-get update
+        sudo apt-get install --only-upgrade python3.12
+    elif [[ "$installed_version" == "3.10.12" && "$fixed_version" == "3.12.9" ]]; then
+        sudo apt-get update
+        sudo apt-get install --only-upgrade python3.12
+    elif [[ "$installed_version" == "3.10.12" && "$fixed_version" == "3.10.16" ]]; then
+        sudo apt-get update
+        sudo apt-get install --only-upgrade python3.10
+    elif [[ "$installed_version" == "3.12.0" && "$fixed_version" == "3.12.4" ]]; then
+        sudo apt-get update
+        sudo apt-get install --only-upgrade python3.12
+    fi
+}
+
+update_python "3.10.12" "3.10.15"
+update_python "3.12.0" "3.12.6"
+update_python "3.12.0" "3.12.6"
+update_python "3.12.0" "3.12.6"
+update_python "3.12.0" "3.12.8"
+update_python "3.12.0" "3.12.8"
+update_python "3.12.0" "3.12.8"
+update_python "3.10.12" "3.10.16"
+update_python "3.10.12" "3.10.14"
+update_python "3.12.0" "3.12.3"
+update_python "3.12.0" "3.12.3"
+update_python "3.12.0" "3.12.3"
+update_python "3.12.0" "3.12.3"
+update_python "3.12.0" "3.12.1"
+update_python "3.12.0" "3.12.1"
+update_python "3.10.12" "3.10.14"
+update_python "3.12.0" "3.12.1"
+update_python "3.12.0" "3.12.1"
+update_python "3.12.0" "3.12.1"
+update_python "3.12.0" "3.12.5"
+update_python "3.12.0" "3.12.5"
+update_python "3.12.0" "3.12.5"
+update_python "3.10.12" "3.10.15"
+update_python "3.12.0" "3.12.4"
+update_python "3.12.0" "3.12.4"
+update_python "3.12.0" "3.12.4"
+update_python "3.12.0" "3.12.4"
+update_python "3.10.12" "3.10.14"
+update_python "3.12.0" "3.12.2"
+update_python "3.12.0" "3.12.2"
+update_python "3.12.0" "3.12.2"
+update_python "3.12.0" "3.12.2"
+update_python "3.12.0" "3.12.9"
+update_python "3.10.12" "3.12.9"
+update_python "3.12.0" "3.12.9"
+update_python "3.12.0" "3.12.4"
+update_python "3.12.0" "3.12.4"
+update_python "3.10.12" "3.11.10"
+update_python "3.12.0" "3.12.4"

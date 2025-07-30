@@ -1,0 +1,60 @@
+#!/bin/bash
+
+# Remove vulnerable services
+apt-get remove -y --purge rsh-server rsh-redone-server vsftpd telnetd vnc4server distcc
+
+# Disable unnecessary services
+update-rc.d -f rlogin remove
+update-rc.d -f rexec remove
+update-rc.d -f distcc remove
+update-rc.d -f vncserver remove
+
+# Patch SSH configuration
+sed -i 's/^#Port 22/Port 22/' /etc/ssh/sshd_config
+sed -i 's/^#Protocol 2/Protocol 2/' /etc/ssh/sshd_config
+sed -i 's/^#PermitRootLogin yes/PermitRootLogin no/' /etc/ssh/sshd_config
+echo "KexAlgorithms diffie-hellman-group14-sha1,diffie-hellman-group-exchange-sha256" >> /etc/ssh/sshd_config
+echo "Ciphers aes128-ctr,aes192-ctr,aes256-ctr" >> /etc/ssh/sshd_config
+service ssh restart
+
+# Apache hardening
+a2dismod allowtrace
+echo "TraceEnable off" >> /etc/apache2/apache2.conf
+echo "<Directory /var/www/doc>
+    Require all denied
+</Directory>" > /etc/apache2/conf-available/doc-restriction.conf
+a2enconf doc-restriction
+service apache2 restart
+
+# Remove dangerous files
+find /var/www -name phpinfo.php -exec rm -f {} \;
+rm -rf /var/www/twiki*
+
+# MySQL security
+mysql -e "ALTER USER 'root'@'localhost' IDENTIFIED BY 'SecurePass!123';"
+mysql -e "DELETE FROM mysql.user WHERE User='';"
+mysql -e "FLUSH PRIVILEGES;"
+
+# PostgreSQL security
+sudo -u postgres psql -c "ALTER USER postgres PASSWORD 'PostgresSecure!456';"
+
+# Password changes
+users=("msfadmin" "postgres" "service" "user")
+for user in "${users[@]}"; do
+    if id "$user" &>/dev/null; then
+        echo "$user:NewSecurePassword$RANDOM$RANDOM" | chpasswd
+    fi
+done
+
+# Tomcat AJP mitigation
+sed -i '/<Connector port=\"8009\"/s/\(.*\)/<!-- \1 -->/' /etc/tomcat?/server.xml
+service tomcat restart
+
+# TLS hardening
+echo "ssl_session_cache shared:SSL:10m" >> /etc/postfix/main.cf
+echo "smtpd_tls_security_level = may" >> /etc/postfix/main.cf
+service postfix restart
+
+# Sysctl hardening
+echo "net.ipv4.tcp_timestamps=0" >> /etc/sysctl.conf
+sysctl -p

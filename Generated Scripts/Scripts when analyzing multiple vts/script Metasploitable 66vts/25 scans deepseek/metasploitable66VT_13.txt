@@ -1,0 +1,195 @@
+#!/bin/bash
+
+# Vulnerabilidade 1: TWiki XSS and Command Execution Vulnerabilities (CVE-2008-5304, CVE-2008-5305)
+wget https://twiki.org/cgi-bin/view/Codev/ReleaseNote4d2d4 -O /tmp/twiki-4.2.4.tar.gz
+tar -xzf /tmp/twiki-4.2.4.tar.gz -C /opt/
+rm /tmp/twiki-4.2.4.tar.gz
+
+# Vulnerabilidade 3: rlogin Passwordless Login
+systemctl disable rlogin.socket
+systemctl stop rlogin.socket
+
+# Vulnerabilidade 4: Operating System (OS) End of Life (EOL) Detection
+apt-get update
+apt-get dist-upgrade -y
+do-release-upgrade
+
+# Vulnerabilidade 5: The rexec service is running (CVE-1999-0618)
+systemctl disable rexec.socket
+systemctl stop rexec.socket
+
+# Vulnerabilidade 6: Possible Backdoor: Ingreslock
+killall -9 ingreslock
+rm /usr/sbin/ingreslock
+
+# Vulnerabilidade 7: Apache Tomcat AJP RCE Vulnerability (CVE-2020-1938)
+wget https://downloads.apache.org/tomcat/tomcat-9/v9.0.31/bin/apache-tomcat-9.0.31.tar.gz -O /tmp/tomcat-9.0.31.tar.gz
+tar -xzf /tmp/tomcat-9.0.31.tar.gz -C /opt/
+rm /tmp/tomcat-9.0.31.tar.gz
+
+# Vulnerabilidade 8: MySQL / MariaDB Default Credentials (CVE-2015-4669, etc.)
+mysql -u root -e "ALTER USER 'root'@'localhost' IDENTIFIED BY 'StrongPassword123!';"
+
+# Vulnerabilidade 9: PHP < 5.6.30, 7.x < 7.0.15, 7.1.x < 7.1.1 Multiple Vulnerabilities (Jan 2017)
+apt-get install php7.4 -y
+
+# Vulnerabilidade 10: PHP < 5.3.13, 5.4.x < 5.4.3 Multiple Vulnerabilities - Active Check
+apt-get install php7.4 -y
+
+# Vulnerabilidade 11: vsftpd Compromised Source Packages Backdoor Vulnerability (CVE-2011-2523)
+apt-get remove vsftpd -y
+apt-get install vsftpd -y
+
+# Vulnerabilidade 13: DistCC RCE Vulnerability (CVE-2004-2687)
+systemctl disable distcc
+systemctl stop distcc
+
+# Vulnerabilidade 14: PostgreSQL Default Credentials
+psql -U postgres -c "ALTER USER postgres WITH PASSWORD 'StrongPassword123!';"
+
+# Vulnerabilidade 15: VNC Brute Force Login
+vncpasswd /etc/vncpasswd
+
+# Vulnerabilidade 16: Test HTTP dangerous methods
+a2dismod put delete
+systemctl restart apache2
+
+# Vulnerabilidade 17: FTP Brute Force Logins With Default Credentials Reporting
+for user in msfadmin postgres service user; do
+    passwd -l $user
+done
+
+# Vulnerabilidade 19: The rlogin service is running (CVE-1999-0651)
+systemctl disable rlogin.socket
+systemctl stop rlogin.socket
+
+# Vulnerabilidade 20: rsh Unencrypted Cleartext Login (CVE-1999-0651)
+systemctl disable rsh.socket
+systemctl stop rsh.socket
+
+# Vulnerabilidade 21: SSL/TLS: OpenSSL CCS Man in the Middle Security Bypass Vulnerability (CVE-2014-0224)
+apt-get install --only-upgrade openssl -y
+
+# Vulnerabilidade 23: TWiki Cross-Site Request Forgery Vulnerability (CVE-2009-4898)
+wget https://twiki.org/cgi-bin/view/Codev/ReleaseNote4d3d2 -O /tmp/twiki-4.3.2.tar.gz
+tar -xzf /tmp/twiki-4.3.2.tar.gz -C /opt/
+rm /tmp/twiki-4.3.2.tar.gz
+
+# Vulnerabilidade 24: Anonymous FTP Login Reporting (CVE-1999-0497)
+sed -i 's/anonymous_enable=YES/anonymous_enable=NO/' /etc/vsftpd.conf
+systemctl restart vsftpd
+
+# Vulnerabilidade 25: jQuery < 1.9.0 XSS Vulnerability (CVE-2012-6708)
+wget https://code.jquery.com/jquery-1.9.0.min.js -O /var/www/html/mutillidae/javascript/ddsmoothmenu/jquery.min.js
+
+# Vulnerabilidade 26: TWiki < 6.1.0 XSS Vulnerability (CVE-2018-20212)
+wget https://twiki.org/cgi-bin/view/Codev/ReleaseNote6d1d0 -O /tmp/twiki-6.1.0.tar.gz
+tar -xzf /tmp/twiki-6.1.0.tar.gz -C /opt/
+rm /tmp/twiki-6.1.0.tar.gz
+
+# Vulnerabilidade 27: TWiki CSRF Vulnerability (CVE-2009-1339)
+wget https://twiki.org/cgi-bin/view/Codev/ReleaseNote4d3d1 -O /tmp/twiki-4.3.1.tar.gz
+tar -xzf /tmp/twiki-4.3.1.tar.gz -C /opt/
+rm /tmp/twiki-4.3.1.tar.gz
+
+# Vulnerabilidade 28: SSL/TLS: Deprecated SSLv2 and SSLv3 Protocol Detection (CVE-2016-0800, CVE-2014-3566)
+sed -i 's/SSLProtocol all -SSLv2 -SSLv3/SSLProtocol all -SSLv2 -SSLv3/' /etc/apache2/mods-available/ssl.conf
+systemctl restart apache2
+
+# Vulnerabilidade 29: SSL/TLS: Deprecated SSLv2 and SSLv3 Protocol Detection (CVE-2016-0800, CVE-2014-3566)
+sed -i 's/SSLProtocol all -SSLv2 -SSLv3/SSLProtocol all -SSLv2 -SSLv3/' /etc/apache2/mods-available/ssl.conf
+systemctl restart apache2
+
+# Vulnerabilidade 30: SSL/TLS: Report Weak Cipher Suites (CVE-2013-2566, CVE-2015-2808, CVE-2015-4000)
+sed -i 's/SSLCipherSuite HIGH:MEDIUM:!aNULL:!MD5:!RC4/SSLCipherSuite HIGH:!aNULL:!MD5:!RC4/' /etc/apache2/mods-available/ssl.conf
+systemctl restart apache2
+
+# Vulnerabilidade 31: HTTP Debugging Methods (TRACE/TRACK) Enabled
+sed -i 's/TraceEnable On/TraceEnable Off/' /etc/apache2/apache2.conf
+systemctl restart apache2
+
+# Vulnerabilidade 32: SSL/TLS: Server Certificate / Certificate in Chain with RSA keys less than 2048 bits
+openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout /etc/ssl/private/apache-selfsigned.key -out /etc/ssl/certs/apache-selfsigned.crt
+systemctl restart apache2
+
+# Vulnerabilidade 35: phpinfo() Output Reporting (HTTP) (CVE-2008-0149, etc.)
+rm /var/www/html/mutillidae/phpinfo.php
+rm /var/www/html/phpinfo.php
+
+# Vulnerabilidade 36: Weak Host Key Algorithm(s) (SSH)
+sed -i 's/^HostKeyAlgorithms.*/HostKeyAlgorithms ssh-rsa,ssh-dss/' /etc/ssh/sshd_config
+systemctl restart sshd
+
+# Vulnerabilidade 37: Check if Mailserver answer to VRFY and EXPN requests
+sed -i 's/disable_vrfy_command=no/disable_vrfy_command=yes/' /etc/postfix/main.cf
+systemctl restart postfix
+
+# Vulnerabilidade 38: SSL/TLS: Renegotiation DoS Vulnerability (CVE-2011-1473, CVE-2011-5094)
+sed -i 's/SSLHonorCipherOrder On/SSLHonorCipherOrder On/' /etc/apache2/mods-available/ssl.conf
+systemctl restart apache2
+
+# Vulnerabilidade 40: SSL/TLS: Certificate Expired
+openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout /etc/ssl/private/apache-selfsigned.key -out /etc/ssl/certs/apache-selfsigned.crt
+systemctl restart apache2
+
+# Vulnerabilidade 42: QWikiwiki directory traversal vulnerability (CVE-2005-0283)
+rm /var/www/html/mutillidae/index.php
+
+# Vulnerabilidade 43: awiki <= 20100125 Multiple LFI Vulnerabilities - Active Check
+rm /var/www/html/mutillidae/index.php
+
+# Vulnerabilidade 44: /doc directory browsable (CVE-1999-0678)
+sed -i 's/Options Indexes FollowSymLinks/Options -Indexes +FollowSymLinks/' /etc/apache2/apache2.conf
+systemctl restart apache2
+
+# Vulnerabilidade 45: Telnet Unencrypted Cleartext Login
+systemctl disable telnet.socket
+systemctl stop telnet.socket
+
+# Vulnerabilidade 46: FTP Unencrypted Cleartext Login
+sed -i 's/#force_local_logins_ssl=yes/force_local_logins_ssl=yes/' /etc/vsftpd.conf
+systemctl restart vsftpd
+
+# Vulnerabilidade 47: VNC Server Unencrypted Data Transmission
+vncserver -SecurityTypes None, VncAuth -PasswordFile /etc/vncpasswd
+
+# Vulnerabilidade 48: FTP Unencrypted Cleartext Login
+sed -i 's/#force_local_logins_ssl=yes/force_local_logins_ssl=yes/' /etc/vsftpd.conf
+systemctl restart vsftpd
+
+# Vulnerabilidade 49: Cleartext Transmission of Sensitive Information via HTTP
+a2enmod ssl
+systemctl restart apache2
+
+# Vulnerabilidade 50: SSL/TLS: Deprecated TLSv1.0 and TLSv1.1 Protocol Detection (CVE-2011-3389, etc.)
+sed -i 's/SSLProtocol all -SSLv2 -SSLv3/SSLProtocol all -SSLv2 -SSLv3 -TLSv1 -TLSv1.1/' /etc/apache2/mods-available/ssl.conf
+systemctl restart apache2
+
+# Vulnerabilidade 51: Weak Encryption Algorithm(s) Supported (SSH)
+sed -i 's/Ciphers aes128-ctr,aes192-ctr,aes256-ctr/Ciphers chacha20-poly1305@openssh.com,aes256-gcm@openssh.com,aes128-gcm@openssh.com,aes256-ctr,aes192-ctr,aes128-ctr/' /etc/ssh/sshd_config
+systemctl restart sshd
+
+# Vulnerabilidade 52: Apache HTTP Server httpOnly Cookie Information Disclosure Vulnerability (CVE-2012-0053)
+sed -i 's/Header set Set-Cookie/Header set Set-Cookie "HttpOnly; Secure"/' /etc/apache2/apache2.conf
+systemctl restart apache2
+
+# Vulnerabilidade 53: phpMyAdmin error.php Cross Site Scripting Vulnerability (CVE-2010-4480)
+rm /var/www/html/phpMyAdmin/error.php
+
+# Vulnerabilidade 54: SSL/TLS: Deprecated TLSv1.0 and TLSv1.1 Protocol Detection (CVE-2011-3389, etc.)
+sed -i 's/SSLProtocol all -SSLv2 -SSLv3/SSLProtocol all -SSLv2 -SSLv3 -TLSv1 -TLSv1.1/' /etc/apache2/mods-available/ssl.conf
+systemctl restart apache2
+
+# Vulnerabilidade 55: jQuery < 1.6.3 XSS Vulnerability (CVE-2011-4969)
+wget https://code.jquery.com/jquery-1.6.3.min.js -O /var/www/html/mutillidae/javascript/ddsmoothmenu/jquery.min.js
+
+# Vulnerabilidade 56: SSL/TLS: RSA Temporary Key Handling RSA_EXPORT Downgrade Issue (FREAK) (CVE-2015-0204)
+sed -i 's/SSLCipherSuite HIGH:MEDIUM:!aNULL:!MD5:!RC4/SSLCipherSuite HIGH:!aNULL:!MD5:!RC4:!EXPORT/' /etc/apache2/mods-available/ssl.conf
+systemctl restart apache2
+
+# Vulnerabilidade 57: SSL/TLS: Certificate Signed Using A Weak Signature Algorithm
+openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout /etc/ssl/private/apache-selfsigned.key -out /etc/ssl/certs/apache-selfsigned.crt -sha256
+systemctl restart apache2
+
+# Vulnerabilidade 58: SSL/TLS: Diffie-Hellman Key Exchange Insufficient DH Group Strength Vulnerability
+openssl dhparam -out /etc/ssl/private/dhparam.pem

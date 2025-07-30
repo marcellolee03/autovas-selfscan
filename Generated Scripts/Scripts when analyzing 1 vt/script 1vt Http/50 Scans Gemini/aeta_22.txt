@@ -1,0 +1,69 @@
+```bash
+#!/bin/bash
+
+# Script para redirecionar tráfego HTTP para HTTPS e desabilitar HTTP.
+# Assumindo Apache como servidor web. Ajuste conforme necessário para outros servidores.
+
+# 1. Detectar o servidor web utilizado
+SERVER_TYPE=$(ps aux | grep -E 'apache2|httpd|nginx' | awk '{print $11}' | head -n 1)
+
+# 2. Configurar o redirecionamento para Apache
+if [[ "$SERVER_TYPE" == *"apache2"* ]]; then
+  # Verificar se o módulo mod_rewrite está habilitado
+  if ! apache2ctl -M | grep -q rewrite_module; then
+    echo "Habilitando mod_rewrite..."
+    a2enmod rewrite
+  fi
+
+  # Criar/Modificar o arquivo .htaccess na raiz do site para redirecionar HTTP para HTTPS
+  echo "
+RewriteEngine On
+RewriteCond %{HTTPS} off
+RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+" > /var/www/html/.htaccess
+
+  # Configurar o VirtualHost HTTP para redirecionar permanentemente para HTTPS
+  HTTP_VHOST_FILE="/etc/apache2/sites-available/000-default.conf" # Ajuste o nome do arquivo se necessário
+  
+  # Fazer um backup do arquivo de configuração original
+  cp -n "$HTTP_VHOST_FILE" "$HTTP_VHOST_FILE.bak"
+
+  # Desabilitar o VirtualHost HTTP padrão ou redirecionar tudo para HTTPS
+  # O método abaixo é mais robusto: Alterar a porta para uma não utilizada e retornar erro.
+  sed -i 's/Listen 80/Listen 12345/g' "$HTTP_VHOST_FILE" #Altera a porta para uma não utilizada
+
+  # Reiniciar o Apache para aplicar as mudanças
+  echo "Reiniciando Apache..."
+  systemctl restart apache2
+
+# 3. Configurar o redirecionamento para Nginx
+elif [[ "$SERVER_TYPE" == *"nginx"* ]]; then
+  # Editar o arquivo de configuração do Nginx para redirecionar HTTP para HTTPS
+  NGINX_CONFIG_FILE="/etc/nginx/conf.d/default.conf" # Ajuste o nome do arquivo se necessário
+
+  # Fazer um backup do arquivo de configuração original
+  cp -n "$NGINX_CONFIG_FILE" "$NGINX_CONFIG_FILE.bak"
+
+  # Adicionar o bloco de redirecionamento no arquivo de configuração
+  echo "
+server {
+    listen 80;
+    server_name  _; # Escuta em todos os nomes de host.  Altere se necessário para o nome do seu domínio.
+    return 301 https://\$host\$request_uri;
+}
+" >> "$NGINX_CONFIG_FILE"
+
+  # Reiniciar o Nginx para aplicar as mudanças
+  echo "Reiniciando Nginx..."
+  systemctl restart nginx
+
+else
+  echo "Servidor web não detectado automaticamente. Por favor, configure o redirecionamento HTTP para HTTPS manualmente."
+  exit 1
+fi
+
+echo "Redirecionamento HTTP para HTTPS configurado com sucesso."
+echo "Verifique se o site está acessível via HTTPS e se o redirecionamento está funcionando corretamente."
+
+exit 0
+```

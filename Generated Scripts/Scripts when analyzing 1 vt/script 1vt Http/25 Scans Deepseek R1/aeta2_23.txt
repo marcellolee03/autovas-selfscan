@@ -1,0 +1,59 @@
+#!/bin/bash
+
+# Instale o pacote apache2 se não estiver instalado (para garantia)
+if ! dpkg -l | grep -q apache2; then
+    apt update
+    apt install -y apache2
+fi
+
+# Instale o módulo SSL se não estiver instalado
+if ! a2query -m ssl; then
+    apt install -y libapache2-mod-ssl
+    a2enmod ssl
+fi
+
+# Crie diretório SSL se não existir
+mkdir -p /etc/apache2/ssl
+
+# Gere certificado autoassinado se não existir
+if [ ! -f /etc/apache2/ssl/apache-selfsigned.crt ]; then
+    openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
+        -keyout /etc/apache2/ssl/apache-selfsigned.key \
+        -out /etc/apache2/ssl/apache-selfsigned.crt \
+        -subj "/C=XX/ST=Unknown/L=Unknown/O=Unknown/CN=localhost"
+fi
+
+# Configure redirecionamento HTTP->HTTPS
+cat > /etc/apache2/sites-available/000-redirect.conf <<EOL
+<VirtualHost *:80>
+    ServerName _
+    Redirect permanent / https://%{SERVER_NAME}/
+</VirtualHost>
+EOL
+
+# Configure VirtualHost SSL com certificado autoassinado
+cat > /etc/apache2/sites-available/default-ssl.conf <<EOL
+<IfModule mod_ssl.c>
+    <VirtualHost _default_:443>
+        ServerAdmin webmaster@localhost
+        DocumentRoot /var/www/html
+        ServerName _
+        ErrorLog \${APACHE_LOG_DIR}/error.log
+        CustomLog \${APACHE_LOG_DIR}/access.log combined
+        SSLEngine on
+        SSLCertificateFile /etc/apache2/ssl/apache-selfsigned.crt
+        SSLCertificateKeyFile /etc/apache2/ssl/apache-selfsigned.key
+        <FilesMatch "\.(cgi|shtml|phtml|php)$">
+            SSLOptions +StdEnvVars
+        </FilesMatch>
+        BrowserMatch "MSIE [2-6]" nokeepalive ssl-unclean-shutdown
+        BrowserMatch "MSIE [17-9]" ssl-unclean-shutdown
+    </VirtualHost>
+</IfModule>
+EOL
+
+# Habilite sites e reinicie
+a2ensite 000-redirect.conf
+a2ensite default-ssl.conf
+a2dissite 000-default.conf
+systemctl restart apache2

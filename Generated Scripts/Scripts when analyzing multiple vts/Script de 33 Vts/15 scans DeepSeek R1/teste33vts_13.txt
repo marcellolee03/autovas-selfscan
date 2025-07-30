@@ -1,0 +1,74 @@
+#!/bin/bash
+
+# Atualização do Proxmox VE para uma versão suportada
+apt update
+apt -y full-upgrade
+
+# Substituição do jQuery vulnerável por 3.7.1
+replace_jquery() {
+  local path="$1"
+  local jquery_url="https://code.jquery.com/jquery-3.7.1.min.js"
+  local jquery_tmp="$(mktemp)"
+  
+  wget -q "$jquery_url" -O "$jquery_tmp"
+  if [ $? -eq 0 ]; then
+    cp "$jquery_tmp" "$path"
+    chmod 644 "$path"
+    echo "Atualizado: $path"
+  else
+    echo "Falha ao baixar jQuery para $path" >&2
+  fi
+  rm -f "$jquery_tmp"
+}
+
+while read -r jquery_path; do
+  if [ -f "$jquery_path" ]; then
+    replace_jquery "$jquery_path"
+  fi
+done << PATHS
+/var/www/html/js/jquery-1.8.3.min.js
+/var/www/html/opscenter/webcommon/framework/js/jquery-1.8.3.min.js
+/var/www/html/framesets/js/jquery-1.8.3.min.js
+/var/www/html/frameset/js/jquery-1.8.3.min.js
+/var/www/html/console/framework/js/jquery-1.8.3.min.js
+PATHS
+
+# Configurações SSH
+SSHD_CONFIG="/etc/ssh/sshd_config"
+sed -i '/^\s*HostKeyAlgorithms/d' "$SSHD_CONFIG"
+sed -i '/^\s*KexAlgorithms/d' "$SSHD_CONFIG"
+sed -i '/^\s*Ciphers/d' "$SSHD_CONFIG"
+sed -i '/^\s*MACs/d' "$SSHD_CONFIG"
+
+echo "HostKeyAlgorithms ssh-ed25519,rsa-sha2-256,rsa-sha2-512" >> "$SSHD_CONFIG"
+echo "KexAlgorithms curve25519-sha256,curve25519-sha256@libssh.org,diffie-hellman-group-exchange-sha256" >> "$SSHD_CONFIG"
+echo "Ciphers chacha20-poly1305@openssh.com,aes256-gcm@openssh.com,aes128-gcm@openssh.com,aes256-ctr,aes192-ctr,aes128-ctr" >> "$SSHD_CONFIG"
+echo "MACs hmac-sha2-512-etm@openssh.com,hmac-sha2-256-etm@openssh.com,umac-128-etm@openssh.com" >> "$SSHD_CONFIG"
+
+systemctl restart ssh.service
+
+# Configuração de firewall para bloquear portas específicas
+block_ports() {
+  for port in "$@"; do
+    iptables -A INPUT -p tcp --dport "$port" -j DROP
+    echo "Porta $port bloqueada"
+  done
+}
+
+block_ports 39710 49664 49665 49666 49667 49668 49670 7832
+
+# Bloqueio de respostas ICMP timestamp
+iptables -A INPUT -p icmp --icmp-type timestamp-request -j DROP
+echo "Respostas ICMP timestamp bloqueadas"
+
+# Desativação do serviço Telnet
+if command -v telnetd &>/dev/null; then
+  systemctl stop telnet.socket > /dev/null 2>&1
+  systemctl stop telnettelnet.socket > /dev/null 2>&1
+  apt -y purge telnetd > /dev/null 2>&1
+  echo "Serviço Telnet desativado"
+fi
+
+# Configuração sysctl para desativar TCP timestamps
+echo "net.ipv4.tcp_timestamps = 0" >> /etc/sysctl.conf
+sysctl -p

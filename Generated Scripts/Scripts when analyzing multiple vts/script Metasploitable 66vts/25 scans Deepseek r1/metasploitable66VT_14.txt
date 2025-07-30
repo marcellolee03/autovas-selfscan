@@ -1,0 +1,67 @@
+#!/bin/bash
+
+# Atualizar sistema a partir de repositórios legados
+sed -i 's|archive.ubuntu.com|old-releases.ubuntu.com|g' /etc/apt/sources.list
+sed -i 's|security.ubuntu.com|old-releases.ubuntu.com|g' /etc/apt/sources.list
+apt-get update
+apt-get -y upgrade
+apt-get -y dist-upgrade
+
+# Remover serviços inseguros
+apt-get -y purge rsh-server rsh-redone-client rexec rexecd rlogin rlogind vsftpd distcc vnc* xvnc* telnetd ftp
+
+# Desativar serviços via inetd/xinetd
+[ -f /etc/inetd.conf ] && sed -i -e '/\(rlogin\|rsh\|rexec\|telnet\)/s/^/#/' /etc/inetd.conf
+[ -f /etc/init.d/inetd ] && service inetd restart
+find /etc/xinetd.d -type f -exec sed -i 's/disable\s*=\s*no/disable = yes/' {} \;
+[ -f /etc/init.d/xinetd ] && service xinetd restart
+
+# Proteger MySQL
+if command -v mysql >/dev/null; then
+  NEW_MYSQL_PASS=$(openssl rand -hex 16)
+  mysql -e "SET PASSWORD FOR 'root'@'localhost' = PASSWORD('$NEW_MYSQL_PASS'); FLUSH PRIVILEGES;"
+fi
+
+# Proteger PostgreSQL
+if command -v psql >/dev/null; then
+  NEW_PG_PASS=$(openssl rand -hex 16)
+  psql -U postgres -c "ALTER USER postgres WITH PASSWORD '$NEW_PG_PASS';"
+fi
+
+# Desativar conector AJP do Tomcat
+find / -name server.xml -exec sed -i '/protocol="AJP/{s|^|<!-- |; s|$| -->|}' {} \;
+
+# Configurar PHP mitigando riscos
+find / -name php.ini -exec sed -i \
+  -e 's/^expose_php.*/expose_php = Off/' \
+  -e 's/^allow_url_include.*/allow_url_include = Off/' \
+  -e 's/^disable_functions.*/disable_functions = exec,passthru,shell_exec,system,proc_open,popen,curl_exec,curl_multi_exec,parse_ini_file,show_source/' \
+  {} \;
+
+# Hardening SSH
+SSHD_CONFIG="/etc/ssh/sshd_config"
+[ -f "$SSHD_CONFIG" ] && {
+  echo -e "KexAlgorithms curve25519-sha256@libssh.org,ecdh-sha2-nistp521,diffie-hellman-group-exchange-sha256\nHostKeyAlgorithms ssh-ed25519,ssh-rsa\nCiphers chacha20-poly1305@openssh.com,aes256-gcm@openssh.com,aes128-gcm@openssh.com,aes256-ctr\nMACs hmac-sha2-512-etm@openssh.com,hmac-sha2-256-etm@openssh.com" >> "$SSHD_CONFIG"
+  service ssh restart
+}
+
+# Configurar Apache para segurança
+find /etc/apache2 -name '*.conf' -exec sh -c '
+  echo -e "# Security mitigations\nTraceEnable off\n<LimitExcept GET POST HEAD>\n  Deny from all\n</LimitExcept>\n<IfModule mod_rewrite.c>\n  RewriteEngine On\n  RewriteCond %{REQUEST_METHOD} ^(TRACE|TRACK)\n  RewriteRule .* - [F]\n</IfModule>" >> "$1"
+' sh {} \;
+[ -f /etc/init.d/apache2 ] && service apache2 restart
+
+# Remover backdoor Ingreslock
+killall -9 ingreslock 2>/dev/null
+find / -name ingreslock -delete
+iptables -I INPUT -p tcp --dport 1524 -j DROP
+
+# Proteger VNC
+command -v vncpasswd && vncserver -kill :1
+
+# Remover arquivos phpinfo
+find /var/www -name 'phpinfo.php' -delete
+
+# Desabilitar acesso anônimo FTP
+[ -d /var/ftp ] && chmod 000 /var/ftp
+[ -f /etc/ftpusers ] && echo -e "anonymous\nftp" >> /etc/ftpusers

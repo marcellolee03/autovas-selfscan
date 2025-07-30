@@ -1,0 +1,52 @@
+```bash
+#!/bin/bash
+
+# Este script atualiza o sistema operacional Ubuntu 8.04 para uma versão suportada.
+# Devido ao fato de o Ubuntu 8.04 ser extremamente antigo e não ter mais suporte,
+# a atualização direta para a versão mais recente não é possível.
+# Este script realiza uma atualização gradual para versões ainda suportadas,
+# atualizando primeiro para uma versão intermediária e, em seguida, para a versão mais recente LTS.
+
+# AVISO: Este processo pode ser demorado e pode falhar. Recomenda-se fazer backup dos dados importantes antes de prosseguir.
+# Além disso, devido à idade do sistema, algumas dependências podem ser difíceis de resolver.
+
+# Define a versão alvo intermediária (por exemplo, 10.04 ou 12.04)
+INTERMEDIATE_VERSION="12.04" #escolhido 12.04 para garantir que tenha APT funcional e repositórios acessíveis na época
+
+# Define a versão final LTS (Long Term Support) mais recente.
+# Ajuste conforme necessário com base nas versões LTS disponíveis.
+LATEST_LTS="20.04" #escolhido 20.04 por ser uma versão LTS ainda razoavelmente suportada
+
+# Verifica se o sistema é Ubuntu 8.04
+if [ ! -f /etc/lsb-release ]; then
+  echo "Este script só funciona em sistemas Ubuntu."
+  exit 1
+fi
+
+OS_VERSION=$(lsb_release -rs)
+
+if [ "$OS_VERSION" != "8.04" ]; then
+  echo "Este script foi projetado para Ubuntu 8.04. Sua versão é $OS_VERSION."
+  exit 1
+fi
+
+# Atualiza os repositórios para a versão intermediária.
+echo "Atualizando repositórios para Ubuntu $INTERMEDIATE_VERSION..."
+sed -i 's/hardy/precise/g' /etc/apt/sources.list
+apt-get update
+
+# Atualiza o sistema para a versão intermediária.
+echo "Iniciando atualização para Ubuntu $INTERMEDIATE_VERSION..."
+apt-get dist-upgrade -y
+
+# Remove pacotes obsoletos
+apt-get autoremove -y
+
+# Reinicia o sistema
+echo "Reiniciando o sistema para completar a atualização para $INTERMEDIATE_VERSION..."
+shutdown -r now
+
+# Após reiniciar, execute o restante do script (parte 2) manualmente.
+echo "Após a reinicialização, execute a segunda parte do script para continuar a atualização para $LATEST_LTS."
+exit 0
+```

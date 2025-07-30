@@ -1,0 +1,51 @@
+#!/bin/bash
+# Upgrade TWiki to version 4.2.4 or later
+wget http://twiki.org/download/TWiki/TWiki-4.2.4.tgz -O /tmp/TWiki-4.2.4.tgz
+tar -xzf /tmp/TWiki-4.2.4.tgz -C /opt/
+rm /tmp/TWiki-4.2.4.tgz
+systemctl restart apache2
+
+# Disable rlogin service
+systemctl stop rlogin
+systemctl disable rlogin
+
+# Disable rexec service
+systemctl stop rexec
+systemctl disable rexec
+
+# Upgrade PHP to version 5.6.30 or later
+add-apt-repository ppa:ondrej/php -y
+apt-get update
+apt-get install php5.6 -y
+systemctl restart apache2
+
+# Disable VRFY and EXPN on Postfix
+postconf -e "disable_vrfy_command=yes"
+systemctl restart postfix
+
+# Disable SSLv3 protocol
+sed -i 's/SSLProtocol all -SSLv2/SSLProtocol all -SSLv2 -SSLv3/g' /etc/apache2/mods-enabled/ssl.conf
+systemctl restart apache2
+
+# Change default MySQL/MariaDB passwords
+mysql -u root -e "ALTER USER 'root'@'localhost' IDENTIFIED BY 'StrongPassword123!';"
+
+# Disable TRACE and TRACK methods in Apache
+echo "TraceEnable off" >> /etc/apache2/apache2.conf
+systemctl restart apache2
+
+# Disable anonymous FTP logins
+sed -i 's/anonymous_enable=YES/anonymous_enable=NO/g' /etc/vsftpd.conf
+systemctl restart vsftpd
+
+# Disable Telnet service
+systemctl stop telnet
+systemctl disable telnet
+
+# Disable HTTP PUT and DELETE methods
+a2dismod include
+systemctl restart apache2
+
+# Disable ICMP Timestamp Reply
+echo "net.ipv4.icmp_echo_ignore_all = 1" >> /etc/sysctl.conf
+sysctl -p

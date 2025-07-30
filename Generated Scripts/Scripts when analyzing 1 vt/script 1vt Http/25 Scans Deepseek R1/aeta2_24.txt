@@ -1,0 +1,62 @@
+#!/bin/bash
+FQDN=$(hostname -f)
+[ "$FQDN" = "localhost" ] && FQDN=$(hostname) || FQDN=$(echo "$FQDN" | cut -d' ' -f1)
+
+if systemctl is-active --quiet apache2; then
+    a2enmod ssl headers >/dev/null 2>&1
+    mkdir -p /etc/ssl/{private,certs}
+    openssl req -x509 -nodes -days 730 -newkey rsa:2048 \
+        -keyout /etc/ssl/private/vulnfix.key \
+        -out /etc/ssl/certs/vulnfix.crt \
+        -subj "/CN=$FQDN" >/dev/null 2>&1
+
+    cat > /etc/apache2/conf-available/redirect-to-https.conf <<EOF
+<VirtualHost *:80>
+    ServerName $FQDN
+    Redirect permanent / https://$FQDN/
+</VirtualHost>
+
+<VirtualHost _default_:443>
+    ServerName $FQDN
+    SSLEngine on
+    SSLCertificateFile /etc/ssl/certs/vulnfix.crt
+    SSLCertificateKeyFile /etc/ssl/private/vulnfix.key
+    Header always set Strict-Transport-Security "max-age=31536000; includeSubDomains"
+</VirtualHost>
+
+<Directory /var/www/html>
+    SSLOptions +StrictRequire
+</Directory>
+EOF
+    a2enconf redirect-to-https >/dev/null
+    systemctl restart apache2
+
+elif systemctl is-active --quiet nginx; then
+    mkdir -p /etc/ssl/{private,certs}
+    openssl req -x509 -nodes -days 730 -newkey rsa:2048 \
+        -keyout /etc/ssl/private/vulnfix.key \
+        -out /etc/ssl/certs/vulnfix.crt \
+        -subj "/CN=$FQDN" >/dev/null 2>&1
+
+    cat > /etc/nginx/snippets/ssl-redirect.conf <<EOF
+server {
+    listen 80;
+    listen [::]:80;
+    server_name $FQDN;
+    return 301 https://\$host\$request_uri;
+}
+
+server {
+    listen 443 ssl;
+    listen [::]:443 ssl;
+    server_name $FQDN;
+    
+    ssl_certificate /etc/ssl/certs/vulnfix.crt;
+    ssl_certificate_key /etc/ssl/private/vulnfix.key;
+    add_header Strict-Transport-Security "max-age=31536000; includeSubDomains" always;
+}
+EOF
+    grep -q "include snippets/ssl-redirect.conf;" /etc/nginx/sites-enabled/default || \
+        sed -i '/^server {/i include snippets/ssl-redirect.conf;' /etc/nginx/nginx.conf
+    nginx -s reload >/dev/null
+fi

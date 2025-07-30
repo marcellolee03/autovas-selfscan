@@ -1,0 +1,23 @@
+Request 1: 7.3629 segundos
+Request 2: 8.1516 segundos
+Request 3: 9.4165 segundos
+Request 4: 5.1176 segundos
+Request 5: 4.7305 segundos
+Request 6: 6.0225 segundos
+Request 7: 10.8357 segundos
+Request 8: 6.3488 segundos
+Request 9: 7.5382 segundos
+Request 10: 6.6155 segundos
+Request 11: 8.1838 segundos
+Request 12: 6.7785 segundos
+Request 13: 6.5941 segundos
+Request 14: 6.2738 segundos
+Request 15: 8.9080 segundos
+Request 16: 9.8307 segundos
+Request 17: 5.6313 segundos
+Request 18: 6.5542 segundos
+Request 19: 4.6077 segundos
+Request 20: 8.8065 segundos
+
+Total Request Time: 144.3084 seconds
+Average Request Time: 7.2154 seconds

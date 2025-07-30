@@ -1,0 +1,25 @@
+#!/bin/bash
+TWIKI_VERSION=$(curl -s http://localhost/bin/view/Main/WebHome | grep -oP 'TWiki-\K[0-9]+\.[0-9]+\.[0-9]+')
+if [[ -z "$TWIKI_VERSION" ]]; then
+    echo "TWiki installation not found."
+    exit 1
+fi
+
+if [[ "$TWIKI_VERSION" < "4.2.4" ]]; then
+    echo "Upgrading TWiki to version 4.2.4..."
+    wget https://sourceforge.net/projects/twiki/files/TWiki/TWiki%204.2.4/TWiki-4.2.4.tgz
+    if [[ $? -ne 0 ]]; then
+        echo "Failed to download TWiki 4.2.4."
+        exit 1
+    fi
+    tar -xzf TWiki-4.2.4.tgz -C /var/www/html/
+    if [[ $? -ne 0 ]]; then
+        echo "Failed to extract TWiki 4.2.4."
+        exit 1
+    fi
+    chown -R www-data:www-data /var/www/html/TWiki-4.2.4
+    systemctl restart apache2
+    echo "TWiki upgraded to version 4.2.4 successfully."
+else
+    echo "TWiki is already up to date."
+fi

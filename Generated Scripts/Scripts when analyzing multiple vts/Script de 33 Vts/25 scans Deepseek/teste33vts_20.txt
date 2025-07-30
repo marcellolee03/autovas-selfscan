@@ -1,0 +1,39 @@
+#!/bin/bash
+
+# Atualizar Proxmox VE para uma versão suportada
+apt-get update
+apt-get install -y proxmox-ve
+
+# Atualizar jQuery para versão 1.9.0 ou superior
+wget https://code.jquery.com/jquery-3.6.0.min.js -O /var/www/html/js/jquery-1.8.3.min.js
+wget https://code.jquery.com/jquery-3.6.0.min.js -O /var/www/html/opscenter/webcommon/framework/../js/jquery-1.8.3.min.js
+wget https://code.jquery.com/jquery-3.6.0.min.js -O /var/www/html/framesets/../js/jquery-1.8.3.min.js
+wget https://code.jquery.com/jquery-3.6.0.min.js -O /var/www/html/frameset/../js/jquery-1.8.3.min.js
+wget https://code.jquery.com/jquery-3.6.0.min.js -O /var/www/html/console/framework/../js/jquery-1.8.3.min.js
+
+# Desabilitar algoritmos fracos de chave de host SSH
+sed -i '/^HostKeyAlgorithms/d' /etc/ssh/sshd_config
+echo "HostKeyAlgorithms ecdsa-sha2-nistp256-cert-v01@openssh.com,ecdsa-sha2-nistp384-cert-v01@openssh.com,ecdsa-sha2-nistp521-cert-v01@openssh.com,ssh-ed25519-cert-v01@openssh.com,rsa-sha2-512-cert-v01@openssh.com,rsa-sha2-256-cert-v01@openssh.com,ssh-rsa-cert-v01@openssh.com,ecdsa-sha2-nistp256,ecdsa-sha2-nistp384,ecdsa-sha2-nistp521,ssh-ed25519,rsa-sha2-512,rsa-sha2-256,ssh-rsa" >> /etc/ssh/sshd_config
+
+# Desabilitar algoritmos fracos de troca de chave SSH
+sed -i '/^KexAlgorithms/d' /etc/ssh/sshd_config
+echo "KexAlgorithms curve25519-sha256,curve25519-sha256@libssh.org,diffie-hellman-group-exchange-sha256" >> /etc/ssh/sshd_config
+
+# Desabilitar algoritmos fracos de criptografia SSH
+sed -i '/^Ciphers/d' /etc/ssh/sshd_config
+echo "Ciphers chacha20-poly1305@openssh.com,aes256-gcm@openssh.com,aes128-gcm@openssh.com,aes256-ctr,aes192-ctr,aes128-ctr" >> /etc/ssh/sshd_config
+
+# Desabilitar algoritmos fracos de MAC SSH
+sed -i '/^MACs/d' /etc/ssh/sshd_config
+echo "MACs hmac-sha2-512-etm@openssh.com,hmac-sha2-256-etm@openssh.com,umac-128-etm@openssh.com,hmac-sha2-512,hmac-sha2-256,umac-128@openssh.com" >> /etc/ssh/sshd_config
+
+# Desabilitar timestamps TCP
+echo "net.ipv4.tcp_timestamps = 0" >> /etc/sysctl.conf
+sysctl -p
+
+# Desabilitar respostas ICMP timestamp
+echo "net.ipv4.icmp_echo_ignore_all = 1" >> /etc/sysctl.conf
+sysctl -p
+
+# Reiniciar serviço SSH para aplicar as mudanças
+systemctl restart sshd

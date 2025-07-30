@@ -1,0 +1,45 @@
+#!/bin/bash
+set -euo pipefail
+for procname in in.rexecd rexecd; do
+    pkill "$procname" 2>/dev/null || true
+    sleep 1
+    pkill -9 "$procname" 2>/dev/null || true
+done
+if command -v systemctl &>/dev/null; then
+    for unit in rexec.socket rexec.service; do
+        if systemctl list-unit-files --all | grep -q "$unit"; then
+            systemctl stop "$unit" 2>/dev/null || true
+            systemctl disable "$unit" 2>/dev/null
+            systemctl mask "$unit" 2>/dev/null
+        fi
+    done
+fi
+if command -v apt-get &>/dev/null; then
+    if dpkg -l | grep -q '^ii\s\+rsh-server\b'; then
+        DEBIAN_FRONTEND=noninteractive apt-get remove --purge -y rsh-server || true
+    fi
+fi
+if [ -f /etc/inetd.conf ]; then
+    if grep -q "^rexec" /etc/inetd.conf; then
+        sed -i '/^rexec/d' /etc/inetd.conf
+        pid_inetd=$(pgrep inetd 2>/dev/null || true)
+        [ -n "$pid_inetd" ] && kill -HUP "$pid_inetd"
+    fi
+fi
+if [ -d /etc/inetd.d ] && [ -n "$(find /etc/inetd.d -type f)" ]; then
+    if find /etc/inetd.d -type f | xargs grep -q "^rexec"; then
+        find /etc/inetd.d -type f -exec sed -i '/^rexec/d' {} \;
+        pid_inetd=$(pgrep inetd 2>/dev/null || true)
+        [ -n "$pid_inetd" ] && kill -HUP "$pid_inetd"
+    fi
+fi
+if [ -d /etc/xinetd.d ] && [ -n "$(find /etc/xinetd.d -type f)" ]; then
+    if find /etc/xinetd.d -type f -exec grep -qE 'service\s+(rexec|rexeced)' {} \; -quit; then
+        find /etc/xinetd.d -type f -exec grep -qE 'service\s+(rexec|rexeced)' {} \; -delete
+        if command -v systemctl &>/dev/null && systemctl is-active xinetd.service &>/dev/null; then
+            systemctl try-restart xinetd.service
+        elif service xinetd status &>/dev/null; then
+            service xinetd restart
+        fi
+    fi
+fi

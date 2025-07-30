@@ -1,0 +1,32 @@
+#!/bin/bash
+
+if systemctl is-active apache2 >/dev/null 2>&1; then
+    a2enmod rewrite >/dev/null 2>&1
+    for config in /etc/apache2/sites-enabled/*; do
+        if grep -q '<VirtualHost\s*.*:80>' "$config"; then
+            cp -- "$config" "${config}.bak_$(date +%F_%T)"
+            sed -i -E '/<VirtualHost\s*.*:80>/,/<\/VirtualHost>/{
+                /<\/VirtualHost>/i \
+    RewriteEngine On\
+    RewriteCond %{HTTPS} off \
+    RewriteRule (.*) https://%{HTTP_HOST}%{REQUEST_URI} [R=301,L]
+            }' "$config"
+        fi
+    done
+    systemctl restart apache2 >/dev/null 2>&1
+
+elif systemctl is-active nginx >/dev/null 2>&1; then
+    find /etc/nginx/sites-enabled/ -type f | while read -r config; do
+        if grep -q 'listen\s*80;' "$config"; then
+            cp -- "$config" "${config}.bak_$(date +%F_%T)"
+            sed -i '/server {/,/}/ {
+                /listen\s*80;/ {
+                    :a; n; /}/!ba; 
+                    i \
+        return 301 https://$host$request_uri;
+                }
+            }' "$config"
+        fi
+    done
+    systemctl restart nginx >/dev/null 2>&1
+fi

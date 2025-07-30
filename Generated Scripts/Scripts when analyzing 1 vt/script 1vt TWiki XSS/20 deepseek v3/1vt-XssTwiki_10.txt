@@ -1,0 +1,21 @@
+#!/bin/bash
+TWIKI_VERSION="4.2.4"
+TWIKI_DOWNLOAD_URL="https://github.com/TWikiOrg/TWiki/archive/refs/tags/v${TWIKI_VERSION}.tar.gz"
+INSTALL_DIR="/opt/twiki"
+
+if [ -d "$INSTALL_DIR" ]; then
+    CURRENT_VERSION=$(grep -oP '(?<=TWikiRelease\|)[0-9\.]+' "$INSTALL_DIR/lib/TWiki.cfg")
+    if [ "$CURRENT_VERSION" == "$TWIKI_VERSION" ]; then
+        exit 0
+    fi
+    mv "$INSTALL_DIR" "${INSTALL_DIR}_backup_$(date +%Y%m%d%H%M%S)"
+fi
+
+mkdir -p "$INSTALL_DIR"
+wget -qO- "$TWIKI_DOWNLOAD_URL" | tar -xz -C "$INSTALL_DIR" --strip-components=1
+chown -R www-data:www-data "$INSTALL_DIR"
+chmod -R 755 "$INSTALL_DIR"
+
+if [ -f /etc/init.d/apache2 ]; then
+    systemctl restart apache2
+fi

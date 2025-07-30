@@ -1,0 +1,110 @@
+#!/bin/bash
+
+# Detecta o sistema operacional
+OS=$(uname -s)
+
+# Variáveis padrão para sistemas Debian/Ubuntu
+APACHE_CONFIG_FILE="/etc/apache2/sites-available/000-default.conf"
+APACHE_DEFAULT_SITE="/etc/apache2/sites-available/default-ssl.conf"
+APACHE_PORTS_CONFIG="/etc/apache2/ports.conf"
+APACHE_MODULES_DIR="/etc/apache2/mods-available"
+
+# Ajusta as variáveis se o sistema operacional for diferente
+if [[ "$OS" == "CentOS" || "$OS" == "RHEL" ]]; then
+  APACHE_CONFIG_FILE="/etc/httpd/conf/httpd.conf"
+  APACHE_DEFAULT_SITE="/etc/httpd/conf.d/ssl.conf"
+  APACHE_PORTS_CONFIG="/etc/httpd/conf/ports.conf"
+  APACHE_MODULES_DIR="/etc/httpd/mods-available"
+fi
+
+# 1. Instalar o mod_ssl (se não estiver instalado)
+if ! apachectl -M | grep -q ssl_module; then
+  if [[ "$OS" == "Debian" || "$OS" == "Ubuntu" ]]; then
+    apt-get update && apt-get install -y apache2 libapache2-mod-ssl
+  elif [[ "$OS" == "CentOS" || "$OS" == "RHEL" ]]; then
+    yum install -y mod_ssl
+  else
+    echo "Sistema operacional não suportado. Instale o mod_ssl manualmente."
+    exit 1
+  fi
+fi
+
+# 2. Ativar o módulo SSL (se necessário)
+if [[ "$OS" == "Debian" || "$OS" == "Ubuntu" ]]; then
+  a2enmod ssl
+  a2enmod headers # Habilita o módulo headers para redirecionamento
+fi
+
+# 3. Configurar o arquivo de portas para ouvir na porta 443
+if ! grep -q "Listen 443" "$APACHE_PORTS_CONFIG"; then
+  echo "Listen 443" >> "$APACHE_PORTS_CONFIG"
+fi
+
+# 4. Criar um VirtualHost para SSL (se não existir) e configurar o redirecionamento HTTP para HTTPS
+
+if [[ "$OS" == "Debian" || "$OS" == "Ubuntu" ]]; then
+
+  # Cria o arquivo de configuração SSL padrão (se não existir)
+  if [ ! -f "$APACHE_DEFAULT_SITE" ]; then
+    cat > "$APACHE_DEFAULT_SITE" <<EOF
+<VirtualHost *:443>
+    ServerName localhost
+    DocumentRoot /var/www/html
+
+    SSLEngine on
+    SSLCertificateFile /etc/ssl/certs/ssl-cert-snakeoil.pem
+    SSLCertificateKeyFile /etc/ssl/private/ssl-cert-snakeoil.key
+
+    <FilesMatch "\.(cgi|shtml|phtml|php)$">
+            SSLOptions +StdEnvVars
+    </FilesMatch>
+    <Directory /usr/lib/cgi-bin>
+            SSLOptions +StdEnvVars
+    </Directory>
+
+    ErrorLog \${APACHE_LOG_DIR}/error.log
+    CustomLog \${APACHE_LOG_DIR}/access.log combined
+</VirtualHost>
+EOF
+  fi
+
+  # Redirecionamento HTTP para HTTPS no arquivo de configuração padrão
+  if ! grep -q "RewriteEngine On" "$APACHE_CONFIG_FILE"; then
+    sed -i 's/<VirtualHost \*:80>/<VirtualHost *:80>\n\tRewriteEngine On\n\tRewriteCond %{HTTPS} !=on\n\tRewriteRule ^(.*)$ https:\/\/%{HTTP_HOST}\/$1 [R=301,L]/g' "$APACHE_CONFIG_FILE"
+  fi
+
+elif [[ "$OS" == "CentOS" || "$OS" == "RHEL" ]]; then
+  # Cria o arquivo de configuração SSL padrão (se não existir)
+    if [ ! -f "$APACHE_DEFAULT_SITE" ]; then
+    cat > "$APACHE_DEFAULT_SITE" <<EOF
+<VirtualHost *:443>
+    ServerName localhost
+    DocumentRoot /var/www/html
+
+    SSLEngine on
+    SSLCertificateFile /etc/pki/tls/certs/localhost.crt
+    SSLCertificateKeyFile /etc/pki/tls/private/localhost.key
+
+    <Directory /var/www/html>
+        AllowOverride All
+    </Directory>
+
+    ErrorLog logs/ssl_error_log
+    TransferLog logs/ssl_access_log
+</VirtualHost>
+EOF
+  fi
+
+  # Redirecionamento HTTP para HTTPS no arquivo de configuração principal
+  if ! grep -q "RewriteEngine On" "$APACHE_CONFIG_FILE"; then
+    sed -i 's/<VirtualHost \*:80>/<VirtualHost \*:80>\n\tRewriteEngine On\n\tRewriteCond %{HTTPS} !=on\n\tRewriteRule ^(.*)$ https:\/\/%{HTTP_HOST}\/$1 [R=301,L]/g' "$APACHE_CONFIG_FILE"
+  fi
+fi
+# 5. Reiniciar o Apache
+if [[ "$OS" == "Debian" || "$OS" == "Ubuntu" ]]; then
+  systemctl restart apache2
+elif [[ "$OS" == "CentOS" || "$OS" == "RHEL" ]]; then
+  systemctl restart httpd
+fi
+
+echo "Configuração completa. O tráfego HTTP será redirecionado para HTTPS."

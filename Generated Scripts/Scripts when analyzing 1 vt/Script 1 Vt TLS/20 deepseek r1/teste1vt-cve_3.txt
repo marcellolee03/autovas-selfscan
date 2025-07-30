@@ -1,0 +1,42 @@
+#!/bin/bash
+
+# Find PostgreSQL version and configuration file
+if [[ -f /etc/os-release ]]; then
+    . /etc/os-release
+    case $ID in
+        ubuntu|debian)
+            CONF_DIR="/etc/postgresql"
+            ;;
+        rhel|centos|fedora|amzn)
+            CONF_DIR="/var/lib/pgsql"
+            ;;
+        sles|opensuse-leap)
+            CONF_DIR="/var/lib/pgsql"
+            ;;
+        *)
+            CONF_DIR="/etc/postgresql/"
+            ;;
+    esac
+else
+    CONF_DIR="/etc/postgresql/"
+fi
+
+# If multiple configs exist, pick latest version
+if [[ -d $CONF_DIR ]]; then
+    CONF_FILE=$(find $CONF_DIR -name postgresql.conf | sort -Vr | head -n1)
+    if [[ -n "$CONF_FILE" ]]; then
+        # Enable TLS 1.2+ only
+        sed -i -e "s/^#ssl_min_protocol_version/ssl_min_protocol_version/" \
+               -e "s/^\s*ssl_min_protocol_version\s*=.*/ssl_min_protocol_version = 'TLSv1.2'/" "$CONF_FILE"
+        if ! grep -q "ssl_min_protocol_version" "$CONF_FILE"; then
+            echo "ssl_min_protocol_version = 'TLSv1.2'" >> "$CONF_FILE"
+        fi
+    fi
+fi
+
+# Apply changes
+if systemctl -q is-enabled postgresql 2>/dev/null; then
+    systemctl restart postgresql
+elif service --status-all 2>/dev/null | grep -q 'postgresql'; then
+    service postgresql restart
+fi

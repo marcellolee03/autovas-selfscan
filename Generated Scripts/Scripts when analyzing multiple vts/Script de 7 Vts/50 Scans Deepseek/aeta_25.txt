@@ -1,0 +1,32 @@
+#!/bin/bash
+# Correção para Vulnerabilidade 1
+sed -i 's/^#*Listen 80$/Listen 443/' /etc/apache2/ports.conf
+sed -i 's/^#*<VirtualHost \*:80>$/<VirtualHost \*:443>/' /etc/apache2/sites-available/000-default.conf
+a2enmod ssl
+systemctl restart apache2
+
+# Correção para Vulnerabilidade 2
+echo "options bind disable-recursion yes;" > /etc/bind/named.conf.options
+systemctl restart bind9
+
+# Correção para Vulnerabilidade 3
+echo "net.ipv4.icmp_echo_ignore_all = 1" >> /etc/sysctl.conf
+sysctl -p
+
+# Correção para Vulnerabilidade 4
+openssl ciphers -v 'DEFAULT:!TLSv1:!TLSv1.1' > /etc/ssl/ciphers.conf
+sed -i 's/^SSLProtocol all -SSLv3$/SSLProtocol all -SSLv3 -TLSv1 -TLSv1.1/' /etc/apache2/mods-enabled/ssl.conf
+systemctl restart apache2
+
+# Correção para Vulnerabilidade 5
+sed -i 's/^SSLInsecureRenegotiation on$/SSLInsecureRenegotiation off/' /etc/apache2/mods-enabled/ssl.conf
+systemctl restart apache2
+
+# Correção para Vulnerabilidade 6
+openssl ciphers -v 'HIGH:!aNULL:!MD5:!RC4:!3DES' > /etc/ssl/ciphers.conf
+sed -i 's/^SSLCipherSuite HIGH:!aNULL:!MD5$/SSLCipherSuite HIGH:!aNULL:!MD5:!RC4:!3DES/' /etc/apache2/mods-enabled/ssl.conf
+systemctl restart apache2
+
+# Correção para Vulnerabilidade 7
+echo "net.ipv4.tcp_timestamps = 0" >> /etc/sysctl.conf
+sysctl -p

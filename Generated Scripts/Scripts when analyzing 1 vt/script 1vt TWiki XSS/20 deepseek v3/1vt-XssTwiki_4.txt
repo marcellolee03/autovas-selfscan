@@ -1,0 +1,28 @@
+#!/bin/bash
+
+TWIKI_DIR="/var/www/twiki"
+BACKUP_DIR="/var/www/twiki_backup"
+LATEST_VERSION="4.2.4"
+
+# Backup do diretório atual do TWiki
+mkdir -p $BACKUP_DIR
+cp -r $TWIKI_DIR $BACKUP_DIR
+
+# Baixar a versão mais recente do TWiki
+wget -O /tmp/twiki.tar.gz https://github.com/TWikiOrg/twiki/archive/refs/tags/v$LATEST_VERSION.tar.gz
+
+# Extrair o arquivo baixado
+tar -xzf /tmp/twiki.tar.gz -C /tmp
+
+# Substituir os arquivos antigos pelos novos
+cp -r /tmp/twiki-$LATEST_VERSION/* $TWIKI_DIR
+
+# Limpar arquivos temporários
+rm -rf /tmp/twiki-$LATEST_VERSION /tmp/twiki.tar.gz
+
+# Definir permissões corretas
+chown -R www-data:www-data $TWIKI_DIR
+chmod -R 755 $TWIKI_DIR
+
+# Reiniciar o servidor web para aplicar as mudanças
+systemctl restart apache2

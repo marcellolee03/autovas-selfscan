@@ -1,0 +1,27 @@
+#!/bin/bash
+if [ "$EUID" -ne 0 ]; then
+    echo "Por favor, execute como root."
+    exit 1
+fi
+if ! command -v apache2 &> /dev/null; then
+    echo "Apache2 não está instalado. Nada a fazer."
+    exit 0
+fi
+version=$(apache2 -v | grep 'Server version' | awk -F'Apache/' '{print $2}' | awk '{print $1}')
+min_version="2.2.22"
+series=$(echo "$version" | cut -d. -f1,2)
+if [ "$series" = "2.2" ] && dpkg --compare-versions "$version" lt "$min_version"; then
+    apt-get update
+    apt-get install --only-upgrade apache2 -y
+    if command -v systemctl &> /dev/null; then
+        systemctl restart apache2
+    elif command -v service &> /dev/null; then
+        service apache2 restart
+    else
+        /etc/init.d/apache2 restart
+    fi
+    echo "Apache atualizado e reiniciado."
+else
+    echo "Versão do Apache $version não é vulnerável."
+fi
+exit 0

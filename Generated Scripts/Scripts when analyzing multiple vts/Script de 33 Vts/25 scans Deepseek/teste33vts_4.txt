@@ -1,0 +1,42 @@
+#!/bin/bash
+# Atualizar o Proxmox VE para a versão suportada
+apt-get update
+apt-get install -y pve-manager
+
+# Atualizar o jQuery para a versão 1.9.0 ou superior
+wget https://code.jquery.com/jquery-3.6.0.min.js -O /path/to/jquery.min.js
+
+# Configurar o SSH para desabilitar algoritmos fracos
+sed -i 's/^HostKeyAlgorithms.*/HostKeyAlgorithms ssh-rsa,ssh-ed25519/' /etc/ssh/sshd_config
+sed -i 's/^KexAlgorithms.*/KexAlgorithms curve25519-sha256@libssh.org/' /etc/ssh/sshd_config
+sed -i 's/^Ciphers.*/Ciphers chacha20-poly1305@openssh.com,aes256-gcm@openssh.com,aes128-gcm@openssh.com/' /etc/ssh/sshd_config
+sed -i 's/^MACs.*/MACs hmac-sha2-512-etm@openssh.com,hmac-sha2-256-etm@openssh.com/' /etc/ssh/sshd_config
+systemctl restart sshd
+
+# Desabilitar TCP Timestamps
+echo "net.ipv4.tcp_timestamps = 0" >> /etc/sysctl.conf
+sysctl -p
+
+# Bloquear ICMP Timestamp
+iptables -A INPUT -p icmp --icmp-type timestamp-request -j DROP
+iptables -A OUTPUT -p icmp --icmp-type timestamp-reply -j DROP
+
+# Filtrar tráfego para as portas DCE/RPC e MSRPC
+iptables -A INPUT -p tcp --dport 135 -j DROP
+iptables -A INPUT -p tcp --dport 39710 -j DROP
+iptables -A INPUT -p tcp --dport 49664 -j DROP
+iptables -A INPUT -p tcp --dport 49665 -j DROP
+iptables -A INPUT -p tcp --dport 49666 -j DROP
+iptables -A INPUT -p tcp --dport 49667 -j DROP
+iptables -A INPUT -p tcp --dport 49668 -j DROP
+iptables -A INPUT -p tcp --dport 49670 -j DROP
+iptables -A INPUT -p tcp --dport 7832 -j DROP
+
+# Desabilitar Telnet e substituir por SSH
+systemctl stop telnet
+systemctl disable telnet
+apt-get remove -y telnetd
+
+# Desabilitar TLSv1.0 e TLSv1.1
+sed -i 's/^SSLProtocol.*/SSLProtocol -TLSv1 -TLSv1.1 +TLSv1.2 +TLSv1.3/' /etc/apache2/mods-enabled/ssl.conf
+systemctl restart apache2

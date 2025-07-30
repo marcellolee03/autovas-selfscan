@@ -1,0 +1,24 @@
+#!/bin/bash
+# Update Python to the latest version to resolve multiple vulnerabilities
+sudo apt-get update
+sudo apt-get install python3.10.15 -y
+sudo apt-get install python3.12.6 -y
+sudo apt-get install python3.12.8 -y
+sudo apt-get install python3.12.9 -y
+sudo apt-get install python3.13.2 -y
+
+# Replace SSL/TLS certificate with a trusted one
+sudo openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout /etc/ssl/private/localhost.key -out /etc/ssl/certs/localhost.crt -subj "/CN=localhost/O=Luminator/L=Caxias do Sul/ST=RS/C=BR"
+
+# Disable deprecated TLSv1.0 and TLSv1.1 protocols
+sudo sed -i 's/^SSLProtocol.*/SSLProtocol -all +TLSv1.2 +TLSv1.3/' /etc/apache2/mods-enabled/ssl.conf
+sudo systemctl restart apache2
+
+# Disable weak MAC algorithms for SSH
+sudo sed -i 's/^MACs.*/MACs hmac-sha2-256,hmac-sha2-512/' /etc/ssh/sshd_config
+sudo systemctl restart sshd
+
+# Disable ICMP timestamp replies
+sudo sysctl -w net.ipv4.icmp_echo_ignore_broadcasts=1
+sudo sysctl -w net.ipv4.icmp_ignore_bogus_error_responses=1
+sudo sysctl -p

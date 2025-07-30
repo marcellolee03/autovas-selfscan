@@ -1,0 +1,19 @@
+#!/bin/bash
+BACKUP_DIR="/var/twiki_backup"
+INSTALL_PATH=""
+POSSIBLE_PATHS=("/var/www/twiki" "/usr/local/twiki" "/opt/twiki" "/var/www/html/twiki")
+for path in "${POSSIBLE_PATHS[@]}"; do
+    [ -d "$path" ] && INSTALL_PATH="$path"
+    [ -n "$INSTALL_PATH" ] && break
+done
+[ -z "$INSTALL_PATH" ] && exit 1
+mkdir -p "$BACKUP_DIR"
+cp -ap "$INSTALL_PATH" "$BACKUP_DIR"
+cd /tmp || exit 1
+wget -q --show-progress https://sourceforge.net/projects/twiki/files/TWiki%20for%20all%20platforms/TWiki%204.2.4/TWiki-4.2.4.tgz
+tar xf TWiki-4.2.4.tgz
+rsync -a --exclude=data --exclude=pub --exclude=working /tmp/twiki/ "$INSTALL_PATH"
+rm -rf TWiki-4.2.4.tgz /tmp/twiki
+chown -R www-data:www-data "$INSTALL_PATH"
+find "$INSTALL_PATH" -type d -exec chmod 755 {} \;
+find "$INSTALL_PATH" -type f -exec chmod 644 {} \;

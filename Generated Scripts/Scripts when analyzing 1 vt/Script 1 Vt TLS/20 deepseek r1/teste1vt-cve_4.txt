@@ -1,0 +1,53 @@
+#!/bin/sh
+
+if [ "$(id -u)" -ne 0 ]; then
+    exit 1
+fi
+
+CONF_FILE=""
+for pattern in '/etc/postgresql/*/main/postgresql.conf' '/var/lib/pgsql/*/data/postgresql.conf' '/var/lib/postgresql/*/main/postgresql.conf' '/etc/postgresql.conf' '/var/lib/postgres/data/postgresql.conf' '/usr/local/pgsql/data/postgresql.conf'; do
+    for file in $pattern; do
+        if [ -f "$file" ]; then
+            CONF_FILE="$file"
+            break 2
+        fi
+    done
+done
+
+if [ -z "$CONF_FILE" ]; then
+    exit 2
+fi
+
+BACKUP_FILE="${CONF_FILE}.bak.$(date +%Y%m%d%H%M%S)"
+if ! cp "$CONF_FILE" "$BACKUP_FILE"; then
+    exit 3
+fi
+
+if grep -q "ssl_min_protocol_version" "$CONF_FILE"; then
+    sed -i -e "s/^#\?[[:space:]]*ssl_min_protocol_version[[:space:]]*=[[:space:]]*[^[:space:]]*/ssl_min_protocol_version = 'TLSv1.2'/" "$CONF_FILE"
+else
+    echo "ssl_min_protocol_version = 'TLSv1.2'" >> "$CONF_FILE"
+fi
+
+restart_failed=0
+if command -v systemctl >/dev/null; then
+    if systemctl restart postgresql >/dev/null 2>&1 || systemctl restart postgres >/dev/null 2>&1; then
+        : 
+    else
+        restart_failed=1
+    fi
+elif command -v service >/dev/null; then
+    if service postgresql restart >/dev/null 2>&1 || service postgres restart >/dev/null 2>&1; then
+        : 
+    else
+        restart_failed=1
+    fi
+else
+    exit 4
+fi
+
+if [ $restart_failed -ne 0 ]; then
+    exit 4
+fi
+
+exit 0

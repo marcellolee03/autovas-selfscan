@@ -1,0 +1,80 @@
+```bash
+#!/bin/bash
+
+# Descrição: Este script desabilita os protocolos TLSv1.0 e TLSv1.1 para o PostgreSQL,
+# corrigindo as vulnerabilidades CVE-2011-3389, CVE-2015-0204, CVE-2023-41928, CVE-2024-41270 e CVE-2025-3200.
+# Ele modifica o arquivo postgresql.conf para desativar TLSv1.0 e TLSv1.1 e reinicia o serviço PostgreSQL.
+
+# Variáveis
+PG_CONF_FILE=$(find /etc/postgresql/ -name postgresql.conf | head -n 1)
+SERVICE_NAME="postgresql"
+TLS_VERSIONS="!TLSv1,!TLSv1.1"
+
+# Função para verificar se o arquivo de configuração existe
+check_config_file() {
+  if [ ! -f "$PG_CONF_FILE" ]; then
+    echo "Erro: Arquivo de configuração do PostgreSQL não encontrado: $PG_CONF_FILE"
+    exit 1
+  fi
+}
+
+# Função para atualizar as configurações de TLS
+update_tls_config() {
+  # Verificar se o arquivo já contém a configuração ssl_min_protocol
+  if grep -q "^ssl_min_protocol" "$PG_CONF_FILE"; then
+    echo "ssl_min_protocol já configurado. Verificando valor."
+    CURRENT_SSL_MIN_PROTOCOL=$(grep "^ssl_min_protocol" "$PG_CONF_FILE" | awk '{print $3}' | tr -d "'")
+    if [ "$CURRENT_SSL_MIN_PROTOCOL" != "TLSv1.2" ]; then
+      echo "Atualizando ssl_min_protocol para TLSv1.2"
+      sudo sed -i "s/^ssl_min_protocol.*$/ssl_min_protocol = 'TLSv1.2'/" "$PG_CONF_FILE"
+    else
+      echo "ssl_min_protocol já está configurado corretamente (TLSv1.2)."
+    fi
+  else
+      echo "Adicionando ssl_min_protocol = 'TLSv1.2' ao arquivo de configuração."
+      sudo sed -i '$a ssl_min_protocol = \'TLSv1.2\'' "$PG_CONF_FILE"
+  fi
+
+  # Verificar se o arquivo já contém a configuração ssl_ciphers
+  if grep -q "^ssl_ciphers" "$PG_CONF_FILE"; then
+    echo "ssl_ciphers já configurado. Nenhuma alteração necessária."
+  else
+    echo "Adicionando ssl_ciphers (recomendado) ao arquivo de configuração. Ajuste conforme necessário."
+    # Adicione uma configuração ssl_ciphers segura (exemplo; ajuste conforme necessário).
+    sudo sed -i '$a ssl_ciphers = \'HIGH:!SSLv2:!aNULL:!eNULL:!3DES@STRENGTH\'' "$PG_CONF_FILE"
+  fi
+}
+
+# Função para reiniciar o serviço PostgreSQL
+restart_postgresql() {
+  if systemctl is-active --quiet "$SERVICE_NAME"; then
+    echo "Reiniciando o serviço PostgreSQL..."
+    sudo systemctl restart "$SERVICE_NAME"
+    if [ $? -eq 0 ]; then
+      echo "Serviço PostgreSQL reiniciado com sucesso."
+    else
+      echo "Erro ao reiniciar o serviço PostgreSQL."
+      exit 1
+    fi
+  else
+    echo "Serviço PostgreSQL não está em execução. Iniciando..."
+    sudo systemctl start "$SERVICE_NAME"
+    if [ $? -eq 0 ]; then
+      echo "Serviço PostgreSQL iniciado com sucesso."
+    else
+      echo "Erro ao iniciar o serviço PostgreSQL."
+      exit 1
+    fi
+
+  fi
+}
+
+# Main
+check_config_file
+update_tls_config
+restart_postgresql
+
+echo "Script de correção concluído."
+
+exit 0
+```

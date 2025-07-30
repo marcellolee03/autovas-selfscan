@@ -1,0 +1,39 @@
+#!/bin/bash
+
+# Determine PostgreSQL configuration file location
+config_file=$(
+  find /etc/postgresql -name postgresql.conf -print -quit 2>/dev/null;
+  find /var/lib/pgsql -name postgresql.conf -print -quit 2>/dev/null;
+  sudo -u postgres psql -t -c "SHOW config_file;" 2>/dev/null | tr -d '[:space:]'
+) | head -n1
+
+[ -z "$config_file" ] && { echo "Failed to locate PostgreSQL config"; exit 1; }
+
+# Extract PostgreSQL version
+pg_version=$(psql --version 2>/dev/null | awk '{print $3}' | cut -d. -f1,2)
+if [ -z "$pg_version" ]; then
+  pg_service=$(ls -1 /etc/init.d/postgresql* /usr/lib/systemd/system/postgresql* 2>/dev/null | head -n1)
+  [ -n "$pg_service" ] && pg_version=$(basename "$pg_service" | grep -oP '\d+\.\d+')
+fi
+
+if [[ $pg_version =~ ^9\.[0-4]$ ]]; then
+  echo "PostgreSQL version $pg_version doesn't support TLS min configuration. Upgrade required."
+  exit 2
+fi
+
+# Configure minimum TLS version
+tls_setting="ssl_min_protocol_version = 'TLSv1.2'"
+grep -Eq "^#?ssl_min_protocol_version\s*=" "$config_file" && 
+  sed -i -E "s/^#?ssl_min_protocol_version\s*=.*/$tls_setting/" "$config_file" || 
+  echo "$tls_setting" >> "$config_file"
+
+# Restart PostgreSQL service
+if command -v systemctl >/dev/null; then
+  systemctl restart $(basename "$pg_service" | sed 's/\.service$//') 2>/dev/null ||
+  systemctl restart postgresql 2>/dev/null
+elif command -v service >/dev/null; then
+  service postgresql restart 2>/dev/null ||
+  service postgres restart 2>/dev/null
+fi
+
+exit 0

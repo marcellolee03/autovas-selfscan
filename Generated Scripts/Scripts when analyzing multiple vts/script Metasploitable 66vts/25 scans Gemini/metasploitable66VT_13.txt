@@ -1,0 +1,444 @@
+```bash
+#!/bin/bash
+
+# Variáveis globais
+OS=$(uname -s)
+ARCH=$(uname -m)
+export DEBIAN_FRONTEND=noninteractive
+
+# Funções auxiliares
+log() {
+  echo "[$(date +'%Y-%m-%d %H:%M:%S')] $1"
+}
+
+error() {
+  log "ERROR: $1"
+  exit 1
+}
+
+# Vulnerabilidade 1: TWiki XSS and Command Execution Vulnerabilities (CVE-2008-5304, CVE-2008-5305)
+# Solução: Upgrade para a versão 4.2.4 ou posterior.
+log "Iniciando correção para TWiki XSS e Command Execution Vulnerabilities (CVE-2008-5304, CVE-2008-5305)"
+log "Não é possível atualizar o TWiki para uma versão específica automaticamente. Recomenda-se realizar a atualização manualmente para a versão 4.2.4 ou mais recente."
+log "Consulte a documentação oficial do TWiki para obter instruções detalhadas sobre a atualização."
+log "Correção para TWiki XSS e Command Execution Vulnerabilities (CVE-2008-5304, CVE-2008-5305) concluída com instruções."
+
+# Vulnerabilidade 2: Distributed Ruby (dRuby/DRb) Multiple RCE Vulnerabilities
+# Solução: Implementar controles apropriados.
+log "Iniciando correção para Distributed Ruby (dRuby/DRb) Multiple RCE Vulnerabilities"
+log "Não é possível automatizar totalmente a correção para dRuby. Implemente as seguintes medidas manualmente:"
+log "- Implemente taint em entradas não confiáveis."
+log "- Defina níveis $SAFE apropriadamente (>=2 recomendado, >=3 para hosts não confiáveis)."
+log "- Inclua drb/acl.rb para restringir o acesso a hosts confiáveis."
+log "Correção para Distributed Ruby (dRuby/DRb) Multiple RCE Vulnerabilities concluída com instruções."
+
+# Vulnerabilidade 3: rlogin Passwordless Login
+# Solução: Desabilitar o serviço rlogin.
+log "Iniciando correção para rlogin Passwordless Login"
+if systemctl is-active rlogin.socket 2>/dev/null; then
+  systemctl stop rlogin.socket
+  systemctl disable rlogin.socket
+  log "Serviço rlogin desativado com sucesso."
+else
+  log "Serviço rlogin não está ativo."
+fi
+apt-get -y remove rsh-server
+log "Correção para rlogin Passwordless Login concluída."
+
+# Vulnerabilidade 4: Operating System (OS) End of Life (EOL) Detection
+# Solução: Atualizar o sistema operacional.
+log "Sistema operacional atingiu o fim da vida útil (EOL). Recomenda-se fortemente atualizar para uma versão suportada."
+log "A atualização do sistema operacional não pode ser automatizada por este script."
+log "A correção desta vulnerabilidade requer uma atualização completa do sistema operacional."
+
+# Vulnerabilidade 5: The rexec service is running
+# Solução: Desabilitar o serviço rexec.
+log "Iniciando correção para The rexec service is running"
+if systemctl is-active rexec.socket 2>/dev/null; then
+  systemctl stop rexec.socket
+  systemctl disable rexec.socket
+  log "Serviço rexec desativado com sucesso."
+else
+  log "Serviço rexec não está ativo."
+fi
+apt-get -y remove rsh-server
+log "Correção para The rexec service is running concluída."
+
+# Vulnerabilidade 6: Possible Backdoor: Ingreslock
+# Solução: Limpeza completa do sistema infectado.
+log "Possível backdoor Ingreslock detectado. Uma limpeza completa do sistema infectado é altamente recomendada. Este script não pode realizar esta tarefa automaticamente."
+log "Correção requer uma análise e limpeza manual do sistema."
+
+# Vulnerabilidade 7: Apache Tomcat AJP RCE Vulnerability (Ghostcat) (CVE-2020-1938)
+# Solução: Atualizar o Apache Tomcat para a versão 7.0.100, 8.5.51, 9.0.31 ou posterior.
+log "Iniciando correção para Apache Tomcat AJP RCE Vulnerability (Ghostcat) (CVE-2020-1938)"
+log "Não é possível atualizar o Apache Tomcat automaticamente. Recomenda-se atualizar manualmente para a versão 7.0.100, 8.5.51, 9.0.31 ou mais recente."
+log "Alternativamente, desabilite o conector AJP se não for necessário."
+log "Correção para Apache Tomcat AJP RCE Vulnerability (Ghostcat) (CVE-2020-1938) concluída com instruções."
+
+# Vulnerabilidade 8: MySQL / MariaDB Default Credentials (MySQL Protocol)
+# Solução: Alterar a senha do usuário root do MySQL.
+log "Iniciando correção para MySQL / MariaDB Default Credentials"
+mysql -u root -e "ALTER USER 'root'@'localhost' IDENTIFIED BY 'SecurePassword123!';"
+mysql -u root -e "ALTER USER 'root'@'127.0.0.1' IDENTIFIED BY 'SecurePassword123!';"
+mysql -u root -e "ALTER USER 'root'@'::1' IDENTIFIED BY 'SecurePassword123!';"
+mysql -u root -e "FLUSH PRIVILEGES;"
+log "Senha do usuário root do MySQL alterada com sucesso. Certifique-se de usar uma senha forte."
+log "Correção para MySQL / MariaDB Default Credentials concluída."
+
+# Vulnerabilidade 9: PHP < 5.6.30, 7.x < 7.0.15, 7.1.x < 7.1.1 Multiple Vulnerabilities
+# Solução: Atualizar para a versão 5.6.30, 7.0.15, 7.1.1 ou posterior.
+log "Iniciando correção para PHP Multiple Vulnerabilities"
+log "A versão do PHP instalada é muito antiga e vulnerável. É fortemente recomendado atualizar para uma versão suportada."
+log "A atualização do PHP não pode ser totalmente automatizada por este script devido à complexidade envolvida e às dependências do sistema."
+log "Correção para PHP Multiple Vulnerabilities concluída com instruções."
+
+# Vulnerabilidade 10: PHP < 5.3.13, 5.4.x < 5.4.3 Multiple Vulnerabilities - Active Check
+# Solução: Atualizar para a versão 5.3.13, 5.4.3 ou posterior.
+log "Iniciando correção para PHP Multiple Vulnerabilities (Active Check)"
+log "A versão do PHP instalada é muito antiga e vulnerável. É fortemente recomendado atualizar para uma versão suportada."
+log "A atualização do PHP não pode ser totalmente automatizada por este script devido à complexidade envolvida e às dependências do sistema."
+log "Correção para PHP Multiple Vulnerabilities (Active Check) concluída com instruções."
+
+# Vulnerabilidade 11 & 12: vsftpd Compromised Source Packages Backdoor Vulnerability (CVE-2011-2523)
+# Solução: Reinstalar vsftpd a partir de uma fonte confiável.
+log "Iniciando correção para vsftpd Compromised Source Packages Backdoor Vulnerability (CVE-2011-2523)"
+apt-get -y remove --purge vsftpd
+apt-get -y update
+apt-get -y install vsftpd
+log "vsftpd reinstalado a partir dos repositórios oficiais. Certifique-se de validar o pacote com sua assinatura."
+log "Correção para vsftpd Compromised Source Packages Backdoor Vulnerability (CVE-2011-2523) concluída."
+
+# Vulnerabilidade 13: DistCC RCE Vulnerability (CVE-2004-2687)
+# Solução: Remover ou proteger o serviço DistCC.
+log "Iniciando correção para DistCC RCE Vulnerability (CVE-2004-2687)"
+apt-get -y remove --purge distcc
+log "DistCC removido. Se for necessário, proteja-o com um firewall."
+log "Correção para DistCC RCE Vulnerability (CVE-2004-2687) concluída."
+
+# Vulnerabilidade 14: PostgreSQL Default Credentials
+# Solução: Alterar a senha do usuário postgres do PostgreSQL.
+log "Iniciando correção para PostgreSQL Default Credentials"
+PGPASSWORD=postgres psql -U postgres -c "ALTER USER postgres WITH PASSWORD 'SecurePassword123!';"
+log "Senha do usuário postgres do PostgreSQL alterada com sucesso. Certifique-se de usar uma senha forte."
+log "Correção para PostgreSQL Default Credentials concluída."
+
+# Vulnerabilidade 15: VNC Brute Force Login
+# Solução: Alterar a senha do VNC ou habilitar proteção por senha.
+log "Iniciando correção para VNC Brute Force Login"
+log "Não é possível alterar a senha do VNC automaticamente. Recomenda-se alterar manualmente a senha do VNC para algo difícil de adivinhar ou habilitar a proteção por senha."
+log "Correção para VNC Brute Force Login concluída com instruções."
+
+# Vulnerabilidade 16: Test HTTP dangerous methods
+# Solução: Desabilitar ou restringir métodos HTTP perigosos.
+log "Iniciando correção para Test HTTP dangerous methods"
+log "Não é possível desabilitar/restringir os métodos HTTP PUT e DELETE automaticamente. Recomenda-se restringir o acesso a esses métodos ou desabilitá-los completamente na configuração do servidor web."
+log "Correção para Test HTTP dangerous methods concluída com instruções."
+
+# Vulnerabilidade 17 & 18: FTP Brute Force Logins With Default Credentials Reporting
+# Solução: Alterar as senhas das contas vulneráveis.
+log "Iniciando correção para FTP Brute Force Logins With Default Credentials Reporting"
+log "Não é possível alterar as senhas das contas FTP automaticamente. Recomenda-se alterar manualmente as senhas das seguintes contas: msfadmin, postgres, service, user."
+log "Correção para FTP Brute Force Logins With Default Credentials Reporting concluída com instruções."
+
+# Vulnerabilidade 19: The rlogin service is running
+# Solução: Desabilitar o serviço rlogin.
+log "Iniciando correção para The rlogin service is running (2ª ocorrência)"
+if systemctl is-active rlogin.socket 2>/dev/null; then
+  systemctl stop rlogin.socket
+  systemctl disable rlogin.socket
+  log "Serviço rlogin desativado com sucesso."
+else
+  log "Serviço rlogin não está ativo."
+fi
+apt-get -y remove rsh-server
+log "Correção para The rlogin service is running (2ª ocorrência) concluída."
+
+# Vulnerabilidade 20: rsh Unencrypted Cleartext Login
+# Solução: Desabilitar o serviço rsh.
+log "Iniciando correção para rsh Unencrypted Cleartext Login"
+if systemctl is-active rsh.socket 2>/dev/null; then
+  systemctl stop rsh.socket
+  systemctl disable rsh.socket
+  log "Serviço rsh desativado com sucesso."
+else
+  log "Serviço rsh não está ativo."
+fi
+apt-get -y remove rsh-server
+log "Correção para rsh Unencrypted Cleartext Login concluída."
+
+# Vulnerabilidade 21: SSL/TLS: OpenSSL CCS Man in the Middle Security Bypass Vulnerability (CVE-2014-0224)
+# Solução: Atualizar o OpenSSL.
+log "Iniciando correção para SSL/TLS: OpenSSL CCS Man in the Middle Security Bypass Vulnerability (CVE-2014-0224)"
+apt-get -y update
+apt-get -y --only-upgrade install openssl libssl-dev
+log "OpenSSL atualizado. Reinicie os serviços que dependem do OpenSSL para aplicar a correção."
+log "Correção para SSL/TLS: OpenSSL CCS Man in the Middle Security Bypass Vulnerability (CVE-2014-0224) concluída."
+
+# Vulnerabilidade 22: Multiple Vendors STARTTLS Implementation Plaintext Arbitrary Command Injection Vulnerability
+# Solução: Aplicar patches específicos do fornecedor.
+log "Iniciando correção para Multiple Vendors STARTTLS Implementation Plaintext Arbitrary Command Injection Vulnerability"
+log "Aplique os patches específicos do fornecedor para corrigir a vulnerabilidade STARTTLS. Este script não pode aplicar esses patches automaticamente."
+log "Correção para Multiple Vendors STARTTLS Implementation Plaintext Arbitrary Command Injection Vulnerability concluída com instruções."
+
+# Vulnerabilidade 23: TWiki Cross-Site Request Forgery Vulnerability (CVE-2009-4898)
+# Solução: Upgrade para TWiki versão 4.3.2 ou posterior.
+log "Iniciando correção para TWiki Cross-Site Request Forgery Vulnerability (CVE-2009-4898)"
+log "Não é possível atualizar o TWiki para uma versão específica automaticamente. Recomenda-se realizar a atualização manualmente para a versão 4.3.2 ou mais recente."
+log "Consulte a documentação oficial do TWiki para obter instruções detalhadas sobre a atualização."
+log "Correção para TWiki Cross-Site Request Forgery Vulnerability (CVE-2009-4898) concluída com instruções."
+
+# Vulnerabilidade 24: Anonymous FTP Login Reporting
+# Solução: Desabilitar logins anônimos no FTP.
+log "Iniciando correção para Anonymous FTP Login Reporting"
+sed -i 's/anonymous_enable=YES/anonymous_enable=NO/g' /etc/vsftpd.conf
+systemctl restart vsftpd
+log "Logins anônimos desabilitados no FTP."
+log "Correção para Anonymous FTP Login Reporting concluída."
+
+# Vulnerabilidade 25: jQuery < 1.9.0 XSS Vulnerability (e 55: jQuery < 1.6.3 XSS Vulnerability)
+# Solução: Atualizar jQuery para a versão 1.9.0 ou posterior.
+log "Iniciando correção para jQuery < 1.9.0 e < 1.6.3 XSS Vulnerability"
+log "Não é possível atualizar o jQuery automaticamente. Recomenda-se atualizar manualmente a versão do jQuery para 1.9.0 ou posterior no arquivo /mutillidae/javascript/ddsmoothmenu/jquery.min.js."
+log "Correção para jQuery < 1.9.0 e < 1.6.3 XSS Vulnerability concluída com instruções."
+
+# Vulnerabilidade 26: TWiki < 6.1.0 XSS Vulnerability
+# Solução: Atualizar TWiki para a versão 6.1.0 ou posterior.
+log "Iniciando correção para TWiki < 6.1.0 XSS Vulnerability"
+log "Não é possível atualizar o TWiki para uma versão específica automaticamente. Recomenda-se realizar a atualização manualmente para a versão 6.1.0 ou mais recente."
+log "Consulte a documentação oficial do TWiki para obter instruções detalhadas sobre a atualização."
+log "Correção para TWiki < 6.1.0 XSS Vulnerability concluída com instruções."
+
+# Vulnerabilidade 27: TWiki CSRF Vulnerability
+# Solução: Atualizar TWiki para a versão 4.3.1 ou posterior.
+log "Iniciando correção para TWiki CSRF Vulnerability"
+log "Não é possível atualizar o TWiki para uma versão específica automaticamente. Recomenda-se realizar a atualização manualmente para a versão 4.3.1 ou mais recente."
+log "Consulte a documentação oficial do TWiki para obter instruções detalhadas sobre a atualização."
+log "Correção para TWiki CSRF Vulnerability concluída com instruções."
+
+# Vulnerabilidade 28 & 29: SSL/TLS: Deprecated SSLv2 and SSLv3 Protocol Detection
+# Solução: Desabilitar SSLv2 e SSLv3.
+log "Iniciando correção para SSL/TLS: Deprecated SSLv2 and SSLv3 Protocol Detection"
+log "Desabilitar os protocolos SSLv2 e SSLv3. A configuração exata depende do software que está usando SSL/TLS."
+log "Correção para SSL/TLS: Deprecated SSLv2 and SSLv3 Protocol Detection concluída com instruções."
+
+# Vulnerabilidade 30: SSL/TLS: Report Weak Cipher Suites
+# Solução: Desabilitar as cifras fracas.
+log "Iniciando correção para SSL/TLS: Report Weak Cipher Suites"
+log "Desabilitar as cifras fracas reportadas. A configuração exata depende do software que está usando SSL/TLS."
+log "Correção para SSL/TLS: Report Weak Cipher Suites concluída com instruções."
+
+# Vulnerabilidade 31: HTTP Debugging Methods (TRACE/TRACK) Enabled
+# Solução: Desabilitar TRACE e TRACK.
+log "Iniciando correção para HTTP Debugging Methods (TRACE/TRACK) Enabled"
+log "Desabilitar os métodos TRACE e TRACK no seu servidor web. Para Apache, adicione 'TraceEnable off' no arquivo de configuração do servidor."
+log "Correção para HTTP Debugging Methods (TRACE/TRACK) Enabled concluída com instruções."
+
+# Vulnerabilidade 32 & 33: SSL/TLS: Server Certificate / Certificate in Chain with RSA keys less than 2048 bits
+# Solução: Substituir o certificado por um mais forte.
+log "Iniciando correção para SSL/TLS: Server Certificate / Certificate in Chain with RSA keys less than 2048 bits"
+log "Substituir o certificado SSL/TLS por um com uma chave RSA de 2048 bits ou mais. Este script não pode gerar ou instalar um novo certificado."
+log "Correção para SSL/TLS: Server Certificate / Certificate in Chain with RSA keys less than 2048 bits concluída com instruções."
+
+# Vulnerabilidade 34: Weak Key Exchange (KEX) Algorithm(s) Supported (SSH)
+# Solução: Desabilitar algoritmos KEX fracos.
+log "Iniciando correção para Weak Key Exchange (KEX) Algorithm(s) Supported (SSH)"
+sed -i 's/^KexAlgorithms .*/KexAlgorithms curve25519-sha256@libssh.org,ecdh-sha2-nistp256,ecdh-sha2-nistp384,ecdh-sha2-nistp521,diffie-hellman-group14-sha256,diffie-hellman-group16-sha512,diffie-hellman-group18-sha512/g' /etc/ssh/sshd_config
+systemctl restart sshd
+log "Algoritmos KEX fracos desabilitados no SSH. O SSH foi reiniciado."
+log "Correção para Weak Key Exchange (KEX) Algorithm(s) Supported (SSH) concluída."
+
+# Vulnerabilidade 35: phpinfo() Output Reporting (HTTP)
+# Solução: Remover os arquivos phpinfo().
+log "Iniciando correção para phpinfo() Output Reporting (HTTP)"
+rm -f /var/www/html/mutillidae/phpinfo.php /var/www/html/phpinfo.php
+log "Arquivos phpinfo() removidos."
+log "Correção para phpinfo() Output Reporting (HTTP) concluída."
+
+# Vulnerabilidade 36: Weak Host Key Algorithm(s) (SSH)
+# Solução: Desabilitar algoritmos de chave de host fracos.
+log "Iniciando correção para Weak Host Key Algorithm(s) (SSH)"
+sed -i '/^HostKeyAlgorithms/s/ssh-dss,//g' /etc/ssh/sshd_config
+systemctl restart sshd
+log "Algoritmos de chave de host fracos desabilitados no SSH. O SSH foi reiniciado."
+log "Correção para Weak Host Key Algorithm(s) (SSH) concluída."
+
+# Vulnerabilidade 37: Check if Mailserver answer to VRFY and EXPN requests
+# Solução: Desabilitar VRFY e EXPN.
+log "Iniciando correção para Check if Mailserver answer to VRFY and EXPN requests"
+if grep -q "postfix" <<< "$OS"; then
+  echo "disable_vrfy_command = yes" >> /etc/postfix/main.cf
+  systemctl restart postfix
+  log "VRFY e EXPN desabilitados no Postfix. Postfix reiniciado."
+elif grep -q "sendmail" <<< "$OS"; then
+  sed -i 's/^O PrivacyOptions=.*/O PrivacyOptions=goaway/g' /etc/mail/sendmail.cf
+  systemctl restart sendmail
+  log "VRFY e EXPN desabilitados no Sendmail. Sendmail reiniciado."
+else
+  log "Servidor de e-mail não identificado. Desabilite VRFY e EXPN manualmente."
+fi
+log "Correção para Check if Mailserver answer to VRFY and EXPN requests concluída."
+
+# Vulnerabilidade 38 & 39: SSL/TLS: Renegotiation DoS Vulnerability (CVE-2011-1473, CVE-2011-5094)
+# Solução: Desabilitar a renegociação ou aplicar patches.
+log "Iniciando correção para SSL/TLS: Renegotiation DoS Vulnerability (CVE-2011-1473, CVE-2011-5094)"
+log "Desabilite a renegociação ou aplique os patches específicos para mitigar a vulnerabilidade. Este script não pode realizar esta tarefa automaticamente."
+log "Correção para SSL/TLS: Renegotiation DoS Vulnerability (CVE-2011-1473, CVE-2011-5094) concluída com instruções."
+
+# Vulnerabilidade 40 & 41: SSL/TLS: Certificate Expired
+# Solução: Substituir o certificado SSL/TLS por um novo.
+log "Iniciando correção para SSL/TLS: Certificate Expired"
+log "O certificado SSL/TLS expirou. Substitua-o por um novo. Este script não pode gerar ou instalar um novo certificado."
+log "Correção para SSL/TLS: Certificate Expired concluída com instruções."
+
+# Vulnerabilidade 42: QWikiwiki directory traversal vulnerability
+# Solução: Desabilitar/remover QWikiwiki ou aplicar patches.
+log "Iniciando correção para QWikiwiki directory traversal vulnerability"
+log "Remova o QWikiwiki, desabilite ou aplique patches para corrigir a vulnerabilidade de directory traversal. Este script não pode realizar esta tarefa automaticamente."
+log "Correção para QWikiwiki directory traversal vulnerability concluída com instruções."
+
+# Vulnerabilidade 43: awiki <= 20100125 Multiple LFI Vulnerabilities - Active Check
+# Solução: Desabilitar/remover awiki ou aplicar patches.
+log "Iniciando correção para awiki <= 20100125 Multiple LFI Vulnerabilities - Active Check"
+log "Remova o awiki, desabilite ou aplique patches para corrigir a vulnerabilidade LFI. Este script não pode realizar esta tarefa automaticamente."
+log "Correção para awiki <= 20100125 Multiple LFI Vulnerabilities - Active Check concluída com instruções."
+
+# Vulnerabilidade 44: /doc directory browsable
+# Solução: Restringir o acesso ao diretório /doc.
+log "Iniciando correção para /doc directory browsable"
+if command -v apache2ctl >/dev/null 2>&1; then
+  echo "<Directory /usr/share/doc/>
+    Options -Indexes
+    AllowOverride None
+    Require all denied
+  </Directory>" > /etc/apache2/conf-available/no-browsing-doc.conf
+  a2enconf no-browsing-doc
+  systemctl restart apache2
+  log "Acesso ao diretório /doc restrito no Apache. Apache reiniciado."
+elif command -v nginx >/dev/null 2>&1; then
+  log "Configure o Nginx para impedir a listagem de diretórios no /doc manualmente."
+else
+  log "Servidor web não identificado. Restrinja o acesso ao diretório /doc manualmente."
+fi
+log "Correção para /doc directory browsable concluída."
+
+# Vulnerabilidade 45: Telnet Unencrypted Cleartext Login
+# Solução: Desabilitar o serviço Telnet.
+log "Iniciando correção para Telnet Unencrypted Cleartext Login"
+if systemctl is-active telnet.socket 2>/dev/null; then
+  systemctl stop telnet.socket
+  systemctl disable telnet.socket
+  log "Serviço Telnet desativado com sucesso."
+else
+  log "Serviço Telnet não está ativo."
+fi
+apt-get -y remove telnetd
+log "Correção para Telnet Unencrypted Cleartext Login concluída."
+
+# Vulnerabilidade 46 & 48: FTP Unencrypted Cleartext Login
+# Solução: Habilitar FTPS ou forçar o uso de AUTH TLS.
+log "Iniciando correção para FTP Unencrypted Cleartext Login"
+sed -i 's/ssl_enable=NO/ssl_enable=YES/g' /etc/vsftpd.conf
+sed -i 's/force_local_data_ssl=NO/force_local_data_ssl=YES/g' /etc/vsftpd.conf
+sed -i 's/force_local_logins_ssl=NO/force_local_logins_ssl=YES/g' /etc/vsftpd.conf
+systemctl restart vsftpd
+log "FTP configurado para usar FTPS. O FTP foi reiniciado."
+log "Correção para FTP Unencrypted Cleartext Login concluída."
+
+# Vulnerabilidade 47: VNC Server Unencrypted Data Transmission
+# Solução: Criptografar a sessão VNC ou usar túnel SSH.
+log "Iniciando correção para VNC Server Unencrypted Data Transmission"
+log "Criptografe a sessão VNC usando IPsec ou SSH. Ou configure o servidor VNC para usar Security Types mais seguros."
+log "Correção para VNC Server Unencrypted Data Transmission concluída com instruções."
+
+# Vulnerabilidade 49: Cleartext Transmission of Sensitive Information via HTTP
+# Solução: Forçar o uso de HTTPS.
+log "Iniciando correção para Cleartext Transmission of Sensitive Information via HTTP"
+log "Force o uso de HTTPS redirecionando todo o tráfego HTTP para HTTPS. A configuração exata depende do servidor web utilizado."
+log "Correção para Cleartext Transmission of Sensitive Information via HTTP concluída com instruções."
+
+# Vulnerabilidade 50 & 54: SSL/TLS: Deprecated TLSv1.0 and TLSv1.1 Protocol Detection
+# Solução: Desabilitar TLSv1.0 e TLSv1.1.
+log "Iniciando correção para SSL/TLS: Deprecated TLSv1.0 and TLSv1.1 Protocol Detection"
+log "Desabilite os protocolos TLSv1.0 e TLSv1.1. A configuração exata depende do software que está usando SSL/TLS."
+log "Correção para SSL/TLS: Deprecated TLSv1.0 and TLSv1.1 Protocol Detection concluída com instruções."
+
+# Vulnerabilidade 51: Weak Encryption Algorithm(s) Supported (SSH)
+# Solução: Desabilitar algoritmos de criptografia fracos no SSH.
+log "Iniciando correção para Weak Encryption Algorithm(s) Supported (SSH)"
+sed -i '/^Ciphers/s/3des-cbc,aes128-cbc,aes192-cbc,aes256-cbc,arcfour,arcfour128,arcfour256,blowfish-cbc,cast128-cbc,rijndael-cbc@lysator.liu.se,//g' /etc/ssh/sshd_config
+systemctl restart sshd
+log "Algoritmos de criptografia fracos desabilitados no SSH. O SSH foi reiniciado."
+log "Correção para Weak Encryption Algorithm(s) Supported (SSH) concluída."
+
+# Vulnerabilidade 52: Apache HTTP Server httpOnly Cookie Information Disclosure Vulnerability (CVE-2012-0053)
+# Solução: Atualizar o Apache HTTP Server para a versão 2.2.22 ou posterior.
+log "Iniciando correção para Apache HTTP Server httpOnly Cookie Information Disclosure Vulnerability (CVE-2012-0053)"
+apt-get -y update
+apt-get -y --only-upgrade install apache2
+log "Apache HTTP Server atualizado. Verifique se a versão é 2.2.22 ou posterior."
+log "Correção para Apache HTTP Server httpOnly Cookie Information Disclosure Vulnerability (CVE-2012-0053) concluída."
+
+# Vulnerabilidade 53: phpMyAdmin error.php Cross Site Scripting Vulnerability
+# Solução: Atualizar/remover phpMyAdmin ou aplicar patches.
+log "Iniciando correção para phpMyAdmin error.php Cross Site Scripting Vulnerability"
+log "Remova o phpMyAdmin, desabilite ou aplique patches para corrigir a vulnerabilidade XSS. Este script não pode realizar esta tarefa automaticamente."
+log "Correção para phpMyAdmin error.php Cross Site Scripting Vulnerability concluída com instruções."
+
+# Vulnerabilidade 56: SSL/TLS: RSA Temporary Key Handling RSA_EXPORT Downgrade Issue (FREAK)
+# Solução: Remover suporte para RSA_EXPORT.
+log "Iniciando correção para SSL/TLS: RSA Temporary Key Handling RSA_EXPORT Downgrade Issue (FREAK)"
+log "Remover suporte para RSA_EXPORT. A configuração exata depende do software que está usando SSL/TLS."
+log "Correção para SSL/TLS: RSA Temporary Key Handling RSA_EXPORT Downgrade Issue (FREAK) concluída com instruções."
+
+# Vulnerabilidade 57 & 60: SSL/TLS: Certificate Signed Using A Weak Signature Algorithm
+# Solução: Obter um certificado SHA-2.
+log "Iniciando correção para SSL/TLS: Certificate Signed Using A Weak Signature Algorithm"
+log "Obtenha um certificado SSL/TLS assinado com SHA-2. Este script não pode gerar ou instalar um novo certificado."
+log "Correção para SSL/TLS: Certificate Signed Using A Weak Signature Algorithm concluída com instruções."
+
+# Vulnerabilidade 58 & 59: SSL/TLS: Diffie-Hellman Key Exchange Insufficient DH Group Strength Vulnerability
+# Solução: Usar ECDHE ou DH com chave maior.
+log "Iniciando correção para SSL/TLS: Diffie-Hellman Key Exchange Insufficient DH Group Strength Vulnerability"
+log "Use ECDHE ou DH com chave de 2048 bits ou mais. A configuração exata depende do software que está usando SSL/TLS."
+log "Correção para SSL/TLS: Diffie-Hellman Key Exchange Insufficient DH Group Strength Vulnerability concluída com instruções."
+
+# Vulnerabilidade 61: SSL/TLS: DHE_EXPORT MITM Security Bypass Vulnerability (LogJam)
+# Solução: Remover suporte para DHE_EXPORT.
+log "Iniciando correção para SSL/TLS: DHE_EXPORT MITM Security Bypass Vulnerability (LogJam)"
+log "Remover suporte para DHE_EXPORT. A configuração exata depende do software que está usando SSL/TLS."
+log "Correção para SSL/TLS: DHE_EXPORT MITM Security Bypass Vulnerability (LogJam) concluída com instruções."
+
+# Vulnerabilidade 62 & 63: SSL/TLS: SSLv3 Protocol CBC Cipher Suites Information Disclosure Vulnerability (POODLE)
+# Solução: Desabilitar SSLv3.
+log "Iniciando correção para SSL/TLS: SSLv3 Protocol CBC Cipher Suites Information Disclosure Vulnerability (POODLE)"
+log "Desabilite o protocolo SSLv3. A configuração exata depende do software que está usando SSL/TLS."
+log "Correção para SSL/TLS: SSLv3 Protocol CBC Cipher Suites Information Disclosure Vulnerability (POODLE) concluída com instruções."
+
+# Vulnerabilidade 64: Weak MAC Algorithm(s) Supported (SSH)
+# Solução: Desabilitar algoritmos MAC fracos no SSH.
+log "Iniciando correção para Weak MAC Algorithm(s) Supported (SSH)"
+sed -i '/^MACs/s/hmac-md5,hmac-md5-96,hmac-sha1-96,umac-64@openssh.com,//g' /etc/ssh/sshd_config
+systemctl restart sshd
+log "Algoritmos MAC fracos desabilitados no SSH. O SSH foi reiniciado."
+log "Correção para Weak MAC Algorithm(s) Supported (SSH) concluída."
+
+# Vulnerabilidade 65: TCP Timestamps Information Disclosure
+# Solução: Desabilitar TCP timestamps.
+log "Iniciando correção para TCP Timestamps Information Disclosure"
+echo "net.ipv4.tcp_timestamps = 0" >> /etc/sysctl.conf
+sysctl -p
+log "TCP timestamps desabilitados."
+log "Correção para TCP Timestamps Information Disclosure concluída."
+
+# Vulnerabilidade 66: ICMP Timestamp Reply Information Disclosure
+# Solução: Bloquear ICMP timestamp.
+log "Iniciando correção para ICMP Timestamp Reply Information Disclosure"
+iptables -A INPUT -p icmp --icmp-type timestamp-request -j DROP
+iptables -A OUTPUT -p icmp --icmp-type timestamp-reply -j DROP
+log "ICMP timestamp bloqueado no firewall."
+log "Correção para ICMP Timestamp Reply Information Disclosure concluída."
+
+log "Correções concluídas."
+exit 0
+```

@@ -1,0 +1,50 @@
+#!/bin/bash
+
+# Vulnerabilidade 1: Enforce HTTPS for sensitive data
+echo "Redirecting HTTP to HTTPS for sensitive data..."
+if ! grep -q "RewriteEngine On" /etc/apache2/sites-available/000-default.conf; then
+    echo "RewriteEngine On" >> /etc/apache2/sites-available/000-default.conf
+    echo "RewriteCond %{SERVER_PORT} 80" >> /etc/apache2/sites-available/000-default.conf
+    echo "RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]" >> /etc/apache2/sites-available/000-default.conf
+fi
+systemctl restart apache2
+
+# Vulnerabilidade 2: Disable DNS recursion
+echo "Disabling DNS recursion..."
+if [ -f /etc/bind/named.conf.options ]; then
+    sed -i 's/recursion yes;/recursion no;/g' /etc/bind/named.conf.options
+    systemctl restart bind9
+fi
+
+# Vulnerabilidade 3: Block ICMP timestamp requests
+echo "Blocking ICMP timestamp requests..."
+iptables -A INPUT -p icmp --icmp-type timestamp-request -j DROP
+iptables -A OUTPUT -p icmp --icmp-type timestamp-reply -j DROP
+
+# Vulnerabilidade 4: Disable TLSv1.0 and TLSv1.1
+echo "Disabling TLSv1.0 and TLSv1.1..."
+if [ -f /etc/ssl/openssl.cnf ]; then
+    sed -i 's/^MinProtocol = TLSv1.0$/MinProtocol = TLSv1.2/' /etc/ssl/openssl.cnf
+    sed -i 's/^MinProtocol = TLSv1.1$/MinProtocol = TLSv1.2/' /etc/ssl/openssl.cnf
+fi
+systemctl restart apache2
+
+# Vulnerabilidade 5: Disable SSL/TLS renegotiation
+echo "Disabling SSL/TLS renegotiation..."
+if [ -f /etc/apache2/mods-enabled/ssl.conf ]; then
+    echo "SSLInsecureRenegotiation off" >> /etc/apache2/mods-enabled/ssl.conf
+    systemctl restart apache2
+fi
+
+# Vulnerabilidade 6: Disable weak cipher suites
+echo "Disabling weak cipher suites..."
+if [ -f /etc/apache2/mods-enabled/ssl.conf ]; then
+    sed -i 's/^SSLProtocol all -SSLv3$/SSLProtocol all -SSLv3 -TLSv1 -TLSv1.1/' /etc/apache2/mods-enabled/ssl.conf
+    sed -i 's/^SSLCipherSuite HIGH:!aNULL:!MD5$/SSLCipherSuite HIGH:!aNULL:!MD5:!RC4:!3DES/' /etc/apache2/mods-enabled/ssl.conf
+    systemctl restart apache2
+fi
+
+# Vulnerabilidade 7: Disable TCP timestamps
+echo "Disabling TCP timestamps..."
+echo "net.ipv4.tcp_timestamps = 0" >> /etc/sysctl.conf
+sysctl -p

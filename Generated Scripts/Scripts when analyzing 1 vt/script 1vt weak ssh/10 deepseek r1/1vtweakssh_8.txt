@@ -1,0 +1,17 @@
+#!/bin/sh
+BACKUP_FILE="/etc/ssh/sshd_config.bak_$(date +%Y%m%d%H%M%S)"
+cp /etc/ssh/sshd_config "$BACKUP_FILE"
+sed -i 's/^[#]\?HostKeyAlias/\0#/g' /etc/ssh/sshd_config 2>/dev/null
+sed -i 's/^[#]\?HostKeyAlgorithms/\0#/g' /etc/ssh/sshd_config 2>/dev/null
+echo "HostKeyAlgorithms ecdsa-sha2-nistp256,ecdsa-sha2-nistp384,ecdsa-sha2-nistp521,ssh-ed25519,rsa-sha2-256,rsa-sha2-512" >> /etc/ssh/sshd_config
+if /usr/sbin/sshd -t 2>/dev/null; then
+  if command -v systemctl >/dev/null 2>&1; then
+    systemctl reload sshd 2>/dev/null || systemctl reload ssh 2>/dev/null
+  else
+    service ssh reload 2>/dev/null || service sshd reload 2>/dev/null
+  fi
+  exit 0
+else
+  cp "$BACKUP_FILE" /etc/ssh/sshd_config
+  exit 1
+fi

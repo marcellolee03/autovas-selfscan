@@ -1,0 +1,17 @@
+#!/bin/bash
+JQUERY_URL="https://code.jquery.com/jquery-1.9.0.min.js"
+TARGET_DIR="/console/framework/js"
+TARGET_FILE="jquery-1.8.3.min.js"
+BACKUP_DIR="/var/backups/jquery"
+
+mkdir -p "$BACKUP_DIR"
+cp "$TARGET_DIR/$TARGET_FILE" "$BACKUP_DIR/$TARGET_FILE.bak"
+
+wget -O "$TARGET_DIR/$TARGET_FILE" "$JQUERY_URL"
+
+if [ $? -eq 0 ]; then
+    echo "jQuery atualizado com sucesso para a versão 1.9.0."
+else
+    echo "Falha ao atualizar jQuery. Restaurando backup."
+    cp "$BACKUP_DIR/$TARGET_FILE.bak" "$TARGET_DIR/$TARGET_FILE"
+fi

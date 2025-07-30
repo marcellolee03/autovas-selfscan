@@ -1,0 +1,456 @@
+>analise esse prompt contendo as vulnerabilidades encontradas em um csv do openvas e analise se os scripts que irei enviar em seguida sao capazes de corrigir esses problemas ou nao, me informando uma porcentagem de correcao das vulnerabilidades
+>Vulnerabilidades:
+    # INSTRUÇÕES PARA O MODELO DE IA
+
+    ## PERSONA
+    Você é um especialista em cibersegurança e automação de sistemas, focado em criar scripts de correção (patching). Sua única função é gerar um script que resolva a vulnerabilidade descrita abaixo.
+
+    ## TAREFA
+    Analise o contexto da vulnerabilidade a seguir e gere um script de shell (compatível com o sistema operacional do localhost) que, ao ser executado, corrija permanentemente a vulnerabilidade descrita.
+
+    ## CONTEXTO DA VULNERABILIDADE
+
+# Vulnerabilidade 1
+CVEs: CVE-2012-1823,CVE-2012-2311,CVE-2012-2336,CVE-2012-2335
+NVT Name: PHP < 5.3.13, 5.4.x < 5.4.3 Multiple Vulnerabilities - Active Check
+Port: 80
+Port Protocol: tcp
+Summary: PHP is prone to multiple vulnerabilities.
+Specific Result: By doing the following HTTP POST request:
+
+"HTTP POST" body : <?php phpinfo();?>
+URL              : http://192.168.100.20/cgi-bin/php?%2D%64+%61%6C%6C%6F%77%5F%75%72%6C%5F%69%6E%63%6C%75%64%65%3D%6F%6E+%2D%64+%73%61%66%65%5F%6D%6F%64%65%3D%6F%66%66+%2D%64+%73%75%68%6F%73%69%6E%2E%73%69%6D%75%6C%61%74%69%6F%6E%3D%6F%6E+%2D%64+%64%69%73%61%62%6C%65%5F%66%75%6E%63%74%69%6F%6E%73%3D%22%22+%2D%64+%6F%70%65%6E%5F%62%61%73%65%64%69%72%3D%6E%6F%6E%65+%2D%64+%61%75%74%6F%5F%70%72%65%70%65%6E%64%5F%66%69%6C%65%3D%70%68%70%3A%2F%2F%69%6E%70%75%74+%2D%64+%63%67%69%2E%66%6F%72%63%65%5F%72%65%64%69%72%65%63%74%3D%30+%2D%64+%63%67%69%2E%72%65%64%69%72%65%63%74%5F%73%74%61%74%75%73%5F%65%6E%76%3D%30+%2D%6E
+
+it was possible to execute the "<?php phpinfo();?>" command.
+
+Result:
+  <title>phpinfo()</title><meta name="ROBOTS" content="NOINDEX,NOFOLLOW,NOARCHIVE" /></head>
+  <tr><td class="e">Configuration File (php.ini) Path </td><td class="v">/etc/php5/cgi </td></tr>
+  <h2>PHP Variables</h2>
+
+Vulnerability Detection Method: Send multiple a crafted HTTP POST requests and checks the
+  responses.
+
+  Note: This script checks for the presence of CVE-2012-1823 which indicates that the system is also
+  affected by the other included CVEs.
+Details:
+PHP < 5.3.13, 5.4.x < 5.4.3 Multiple Vulnerabilities - Active Check
+(OID: 1.3.6.1.4.1.25623.1.0.103482)
+Version used: 2025-04-24T05:40:00Z
+
+Affected Software/OS: PHP versions prior to 5.3.13 and 5.4.x prior to 5.4.3.
+
+  Other products / applications might be affected by the tested CVE-2012-1823 as well.
+Product Detection Result: nan
+Solution: PHP: Update to version 5.3.13, 5.4.3 or later
+
+  - Other products / applications: Please contact the vendor for a solution
+
+    ## REGRAS E RESTRIÇÕES DE SAÍDA
+    1.  **APENAS SCRIPT:** A sua resposta deve conter ÚNICA E EXCLUSIVAMENTE o código do script.
+    2.  **SEM EXPLICAÇÕES:** Não adicione nenhum comentário, explicação, introdução, ou despedida.
+    3.  **SEM BLOCOS DE CÓDIGO MARKDOWN:** Não envolva o script em blocos de código como ` ```bash ` ou ` ```sh `. A resposta deve ser o texto puro do script.
+    4.  **AUTOSSUFICIENTE:** O script deve ser completo, autônomo e não deve exigir interação do usuário para ser executado.
+    5.  **COMPATIBILIDADE:** O script deve ser compatível com o sistema operacional especificado em 'localhost OS'. Se o sistema operacional não for especificado, assuma um sistema baseado em Linux (como Ubuntu/Debian).
+
+    # INÍCIO DO SCRIPT DE CORREÇÃO
+
+>Scripts de correção:
+{type: uploaded file
+fileName: 1vtphp_1.txt
+fullContent:
+#!/bin/bash
+set -e
+if [ "$(id -u)" -ne 0 ]; then
+  exec sudo "$0" "$@"
+fi
+apt-get update -y
+dpkg -l | awk '/^ii/ && $2 ~ /php/ {print $2}' | xargs -r apt-get --only-upgrade -y install}
+{type: uploaded file
+fileName: 1vtphp_2.txt
+fullContent:
+#!/bin/bash
+if [ "$(id -u)" != "0" ]; then exit 1; fi
+
+if [ -f /etc/debian_version ]; then
+    apt-get update
+    for pkg in $(dpkg -l | awk '/php.*cgi/ {print $2}' | grep -E '^php[0-9]?'); do
+        apt-get install --only-upgrade -y "$pkg"
+    done
+    for pkg in $(dpkg -l | awk '/php.*cgi/ {print $2}'); do
+        ver=$(dpkg -s "$pkg" | grep Version)
+        if [[ "$ver" =~ (5\.3\.) && "${ver#*5.3.}" < 13 ]] || 
+           [[ "$ver" =~ (5\.4\.) && "${ver#*5.4.}" < 3 ]]; then
+            apt-get remove --purge -y "$pkg"
+        fi
+    done
+
+    systemctl restart apache2 >/dev/null 2>&1
+    systemctl restart nginx >/dev/null 2>&1
+
+elif [ -f /etc/redhat-release ] || [ -f /etc/centos-release ]; then
+    yum update -y php*
+    installed=$(rpm -qa '*cgi')
+    if [ -n "$installed" ]; then
+        ver=$(php-cgi -v 2>/dev/null | grep -oP 'PHP \K[0-9.]+')
+        if [[ "$ver" =~ ^5\.3\..* && "${ver#5.3.}" -lt 13 ]] || 
+           [[ "$ver" =~ ^5\.4\..* && "${ver#5.4.}" -lt 3 ]]; then
+            yum remove -y "$installed"
+        fi
+    fi
+    
+    systemctl restart httpd >/dev/null 2>&1
+    systemctl restart nginx >/dev/null 2>&1
+else
+    exit 2
+fi}
+{type: uploaded file
+fileName: 1vtphp_3.txt
+fullContent:
+#!/bin/sh
+set -e
+
+if [ "$(id -u)" != "0" ]; then
+  echo "This script must be run as root" >&2
+  exit 1
+fi
+
+if ! command -v apt-get >/dev/null 2>&1; then
+  echo "This system does not use apt. Only Debian/Ubuntu is supported." >&2
+  exit 1
+fi
+
+DEBIAN_FRONTEND=noninteractive apt-get update
+php_packages=$(dpkg -l | grep '^ii' | awk '{print $2}' | grep -E '^php|libapache2-mod-php')
+if [ -n "$php_packages" ]; then
+  DEBIAN_FRONTEND=noninteractive apt-get -y --only-upgrade install $php_packages
+fi
+
+restart_service() {
+  service_name="$1"
+  if command -v systemctl >/dev/null 2>&1; then
+    if systemctl is-active --quiet "$service_name" 2>/dev/null; then
+      systemctl restart "$service_name" >/dev/null
+    fi
+  else
+    if service "$service_name" status >/dev/null 2>&1; then
+      service "$service_name" restart >/dev/null
+    fi
+  fi
+}
+
+restart_service apache2
+restart_service apache
+restart_service httpd
+restart_service nginx
+restart_service lighttpd
+
+fpm_services=$(systemctl list-units --all --no-legend 'php*-fpm.service' 2>/dev/null | awk '{print $1}' | cut -d. -f1)
+for service in $fpm_services; do
+  restart_service "$service"
+done}
+{type: uploaded file
+fileName: 1vtphp_4.txt
+fullContent:
+```sh
+#!/bin/sh
+set -e
+export PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+
+if [ "$(id -u)" -ne 0 ]; then
+    echo >&2 "Error: This script must be run as root."
+    exit 1
+fi
+
+apt-get update
+apt-get install --only-upgrade 'php*' -y
+
+for service in apache2 nginx lighttpd; do
+    if command -v "$service" >/dev/null 2>&1 || [ -f "/etc/init.d/$service" ]; then
+        if command -v systemctl >/dev/null 2>&1; then
+            systemctl restart "$service" >/dev/null 2>&1 || true
+        else
+            if [ -f "/etc/init.d/$service" ]; then
+                "/etc/init.d/$service" restart >/dev/null 2>&1 || true
+            fi
+        fi
+    fi
+done
+if command -v systemctl >/dev/null 2>&1; then
+    for php_fpm in php*-fpm; do
+        systemctl restart "$php_fpm" >/dev/null 2>&1 || true
+    done
+fi
+```}
+{type: uploaded file
+fileName: 1vtphp_5.txt
+fullContent:
+#!/bin/bash
+
+set -euo pipefail
+
+# Atualizar repositórios e o sistema
+apt-get update -y
+DEBIAN_FRONTEND=noninteractive apt-get upgrade -y
+
+# Instalar ou atualizar versões específicas do PHP para garantir correção
+php_ver=$(php -v 2>/dev/null | head -n1 | awk '{print $2}')
+major_ver=$(echo "$php_ver" | cut -d'.' -f1)
+minor_ver=$(echo "$php_ver" | cut -d'.' -f2)
+
+# Verificar se é necessário atualizar para versão segura
+if [[ -n "$php_ver" ]]; then
+    if [ "$major_ver" -lt 5 ] || \
+    { [ "$major_ver" -eq 5 ] && [ "$minor_ver" -lt 3 ]; } || \
+    { [ "$major_ver" -eq 5 ] && [ "$minor_ver" -eq 3 ] && [ "$(echo "$php_ver" | cut -d'.' -f3)" -lt 13 ]; } || \
+    { [ "$major_ver" -eq 5 ] && [ "$minor_ver" -eq 4 ] && [ "$(echo "$php_ver" | cut -d'.' -f3)" -lt 3 ]; }; then
+        # Adicionar repositório seguro para versões antigas
+        apt-get install -y apt-transport-https lsb-release ca-certificates
+        apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 3A8FF134
+        echo "deb https://packages.sury.org/php/ $(lsb_release -sc) main" > /etc/apt/sources.list.d/php.list
+        apt-get update -y
+    fi
+fi
+
+# Atualizar todos os pacotes PHP
+apt-get install --only-upgrade "php*" -y
+apt-get install --only-upgrade "libphp*" -y
+
+# Configurações de segurança para CGI
+for php_ini in $(find /etc -name 'php.ini' 2>/dev/null); do
+    # Garantir proteções contra argumentos de linha de comando
+    sed -i 's/^;\(cgi\.force_redirect =\).*/\1 1/' "$php_ini"
+    sed -i 's/^;\(cgi\.redirect_status_env\)/cgi\.redirect_status_env/' "$php_ini"
+    
+    # Desabilitar execução perigosa
+    sed -i 's/^\(allow_url_include =\).*/\1 Off/' "$php_ini"
+    sed -i 's/^\(allow_url_fopen =\).*/\1 Off/' "$php_ini"
+    sed -i 's/^\(register_globals =\).*/\1 Off/' "$php_ini"
+    sed -i 's/^\(expose_php =\).*/\1 Off/' "$php_ini"
+    sed -i 's/^\(enable_dl =\).*/\1 Off/' "$php_ini"
+    sed -i 's/^\(disable_functions =\).*/\1 exec,system,shell_exec,passthru,proc_open/' "$php_ini"
+done
+
+# Reiniciar serviços web
+if systemctl list-units --full -all | grep -q 'apache2\.service'; then
+    systemctl restart apache2
+elif [[ -f "/etc/init.d/apache2" ]]; then
+    service apache2 restart
+fi
+
+if systemctl list-units --full -all | grep -q 'nginx\.service'; then
+    systemctl restart nginx
+elif [[ -f "/etc/init.d/nginx" ]]; then
+    service nginx restart
+fi
+
+# Remover instalações desnecessárias de CGI
+find /usr/lib -name 'cgi-bin' -type d -exec rm -rf {} + >/dev/null 2>&1 || true}
+{type: uploaded file
+fileName: 1vtphp_6.txt
+fullContent:
+```sh
+#!/bin/sh
+if [ "$(id -u)" -ne 0 ]; then
+    echo "Este script requer privilégios de root." >&2
+    exit 1
+fi
+
+if [ -f /etc/os-release ]; then
+    . /etc/os-release
+    case $ID in
+        debian|ubuntu)
+            DISTRO="debian"
+            ;;
+        rhel|centos|fedora|ol)
+            DISTRO="redhat"
+            ;;
+        *)
+            echo "Distribuição não suportada." >&2
+            exit 1
+            ;;
+    esac
+else
+    echo "Não foi possível detectar a distribuição." >&2
+    exit 1
+fi
+
+if [ "$DISTRO" = "debian" ]; then
+    apt update -y
+    apt --only-upgrade install -y 'php*' '*php*' 2>/dev/null
+elif [ "$DISTRO" = "redhat" ]; then
+    yum clean all
+    yum upgrade -y 'php*' 2>/dev/null
+fi
+
+restart_service() {
+    local service=$1
+    if command -v systemctl >/dev/null 2>&1; then
+        if systemctl is-active "$service" >/dev/null 2>&1; then
+            systemctl restart "$service" >/dev/null 2>&1
+        fi
+    elif command -v service >/dev/null 2>&1; then
+        if service "$service" status >/dev/null 2>&1; then
+            service "$service" restart >/dev/null 2>&1
+        fi
+    else
+        if [ -f "/etc/init.d/$service" ]; then
+            "/etc/init.d/$service" restart >/dev/null 2>&1
+        fi
+    fi
+}
+
+restart_service "apache2"
+restart_service "httpd"
+restart_service "nginx"
+restart_service "lighttpd"
+restart_service "php-fpm"
+
+exit 0
+```}
+{type: uploaded file
+fileName: 1vtphp_7.txt
+fullContent:
+#!/bin/bash
+# Ensure the script runs with root privileges
+if [ "$(id -u)" != "0" ]; then
+    echo "This script must be run as root. Use sudo or run as root user." >&2
+    exit 1
+fi
+
+# Update package lists
+apt-get update -qq
+
+# Upgrade all installed PHP packages and related modules
+# Priority: Attempt to upgrade all php-related packages, including cgi and apache modules
+PKGS=$(dpkg-query -W -f='${Package}\n' | grep -E '^php|php[0-9.-]*(cgi|apachemodule|fpm)?' | grep -P '^php[0-9.-]?(cgi|apache|fpm|common|cli|dev|mysql|curl|gd|mbstring|xml|zip)?')
+if [ -n "$PKGS" ]; then
+    apt-get install --only-upgrade -y $PKGS
+else
+    echo "No PHP packages found for upgrade. Either PHP is not installed or no vulnerabilities present."
+fi
+
+# Restart necessary services to apply PHP updates
+declare -a SERVICES=("apache2" "httpd" "nginx" "php*-fpm")
+
+for service in "${SERVICES[@]}"; do
+    if command -v systemctl >/dev/null && systemctl list-units --all --type=service | grep -q "$service"; then
+        echo "Restarting $service using systemctl"
+        systemctl restart $service || true  # Force restart even if partially matched service
+    elif service --status-all | grep -q "$service"; then
+        echo "Restarting $service using service command"
+        service $service restart || true
+    fi
+done
+
+# Ensure CGI handler for PHP is removed or disabled if present/vulnerable
+if [ -f "/etc/init.d/php-cgi" ]; then
+    systemctl stop php-cgi 2>/dev/null || service php-cgi stop 2>/dev/null
+    systemctl disable php-cgi 2>/dev/null || update-rc.d php-cgi disable
+    echo "PHP CGI service disabled"
+fi}
+{type: uploaded file
+fileName: 1vtphp_8.txt
+fullContent:
+#!/bin/bash
+# Atualiza pacotes do sistema e remove o pacote php-cgi se a versão for vulnerável
+apt update
+apt upgrade -y
+
+# Verifica se php-cgi está instalado e obtém a versão
+if command -v php-cgi &> /dev/null; then
+    php_version=$(php-cgi -v | head -n1 | awk '{print $2}')
+    
+    # Flag de vulnerabilidade (falso por padrão)
+    vuln=false
+    
+    # Verifica versão < 5.3.13 ou entre >=5.4.0 e <5.4.3
+    IFS='.' read -ra ver_parts <<< "$php_version"
+    major=${ver_parts[0]}
+    minor=${ver_parts[1]}
+    patch=${ver_parts[2]%%-*}
+    
+    if [ "$major" -eq 5 ] && [ "$minor" -eq 3 ] && [ "$patch" -lt 13 ]; then
+        vuln=true
+    elif [ "$major" -eq 5 ] && [ "$minor" -eq 4 ] && [ "$patch" -lt 3 ]; then
+        vuln=true
+    elif [ "$major" -lt 5 ] || ( [ "$major" -eq 5 ] && [ "$minor" -lt 3 ] ); then
+        vuln=true
+    fi
+    
+    # Remove pacotes php-cgi se vulnerável
+    if [ "$vuln" = true ]; then
+        pkg_list=$(dpkg -l | awk '/php.*cgi/ {print $2}')
+        if [ -n "$pkg_list" ]; then
+            echo "$pkg_list" | xargs apt remove --purge -y
+        fi
+    fi
+fi}
+{type: uploaded file
+fileName: 1vtphp_9.txt
+fullContent:
+#!/bin/sh
+set -e
+
+if [ -f /etc/os-release ]; then
+    . /etc/os-release
+    case $ID in
+        debian|ubuntu)
+            if [ "$(id -u)" -ne 0 ]; then
+                echo "Erro: Script requer permissões root. Execute com sudo." >&2
+                exit 1
+            fi
+            apt-get update -qq
+            pkgs=$(dpkg -l | awk '/^ii.*php[0-9\.]*-(cgi|common|core)/ {print $2}' | xargs)
+            if [ -n "$pkgs" ]; then
+                apt-get install --only-upgrade -y $pkgs
+            else
+                echo "Nenhum pacote PHP-CGI vulnerável encontrado. Verifique manualmente."
+            fi
+            exit 0
+            ;;
+        *)
+            ;;
+    esac
+fi
+
+echo "Sistema não suportado ou não Debian/Ubuntu. Use métodos alternativos de atualização." >&2
+exit 1}
+{type: uploaded file
+fileName: 1vtphp_10.txt
+fullContent:
+#!/bin/bash
+if [ "$(id -u)" -ne 0 ]; then
+    echo "Este script requer execução como root. Utilize sudo ou execute como root." >&2
+    exit 1
+fi
+
+if [ ! -f /etc/os-release ]; then
+    echo "Sistema operacional não identificado. Script compatível apenas com Ubuntu e Debian." >&2
+    exit 1
+fi
+
+source /etc/os-release
+if [[ "$ID" != "ubuntu" && "$ID" != "debian" ]]; then
+    echo "Sistema operacional não suportado. Este script é destinado a Ubuntu/Debian." >&2
+    exit 1
+fi
+
+export DEBIAN_FRONTEND=noninteractive
+apt-get update -q=2
+
+PHP_PACKAGES=$(dpkg -l | grep -E '^ii\s+(php[0-9]?.|libapache2-mod-php)' | awk '{print $2}' | tr '\n' ' ')
+if [ -z "$PHP_PACKAGES" ]; then
+    echo "Nenhum pacote PHP encontrado. Nenhuma ação necessária." >&2
+    exit 0
+fi
+
+apt-get install --only-upgrade -q=2 -y $PHP_PACKAGES
+
+if systemctl is-active --quiet apache2; then
+    systemctl restart apache2 >/dev/null 2>&1
+fi
+
+if command -v systemctl >/dev/null && systemctl list-unit-files | grep -q php; then
+    systemctl restart php\*.service >/dev/null 2>&1
+fi}

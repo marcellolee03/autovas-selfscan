@@ -1,0 +1,67 @@
+```bash
+#!/bin/bash
+
+# Script para atualizar o Python para a versão 3.10.15 no Windows
+
+# Verifica se o sistema operacional é Windows
+if [[ "$OSTYPE" != "msys" ]]; then
+  echo "Este script deve ser executado em um sistema Windows."
+  exit 1
+fi
+
+# Define a versão desejada do Python
+PYTHON_VERSION="3.10.15"
+
+# Define o diretório temporário para download
+TEMP_DIR="$TEMP\python_update"
+
+# Cria o diretório temporário, se não existir
+if [ ! -d "$TEMP_DIR" ]; then
+  mkdir "$TEMP_DIR"
+fi
+
+# Define o nome do arquivo do instalador
+INSTALLER_FILE="python-$PYTHON_VERSION-amd64.exe" # Assuming 64-bit
+
+# Define a URL para download do instalador
+DOWNLOAD_URL="https://www.python.org/ftp/python/$PYTHON_VERSION/$INSTALLER_FILE"
+
+# Define o caminho completo para o instalador
+INSTALLER_PATH="$TEMP_DIR/$INSTALLER_FILE"
+
+# Remove o instalador antigo, se existir
+if [ -f "$INSTALLER_PATH" ]; then
+  rm "$INSTALLER_PATH"
+fi
+
+# Download do instalador
+echo "Downloading Python $PYTHON_VERSION installer..."
+curl -o "$INSTALLER_PATH" "$DOWNLOAD_URL"
+
+# Verifica se o download foi bem-sucedido
+if [ ! -f "$INSTALLER_PATH" ]; then
+  echo "Erro ao baixar o instalador."
+  exit 1
+fi
+
+# Instala o Python sem interação do usuário
+echo "Installing Python $PYTHON_VERSION..."
+"$INSTALLER_PATH" /quiet InstallAllUsers=1 Include_test=0
+
+# Verifica se a instalação foi bem-sucedida (maneira simplificada, pode precisar de ajustes)
+python -V
+if [[ $(python -V 2>&1) == *"$PYTHON_VERSION"* ]]; then
+  echo "Python atualizado para a versão $PYTHON_VERSION com sucesso."
+else
+  echo "Falha ao atualizar o Python."
+  exit 1
+fi
+
+# Limpa o diretório temporário
+echo "Cleaning up temporary files..."
+rm -rf "$TEMP_DIR"
+
+echo "Atualização concluída."
+
+exit 0
+```

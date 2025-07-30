@@ -1,0 +1,30 @@
+```sh
+#!/bin/sh
+set -e
+export PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+
+if [ "$(id -u)" -ne 0 ]; then
+    echo >&2 "Error: This script must be run as root."
+    exit 1
+fi
+
+apt-get update
+apt-get install --only-upgrade 'php*' -y
+
+for service in apache2 nginx lighttpd; do
+    if command -v "$service" >/dev/null 2>&1 || [ -f "/etc/init.d/$service" ]; then
+        if command -v systemctl >/dev/null 2>&1; then
+            systemctl restart "$service" >/dev/null 2>&1 || true
+        else
+            if [ -f "/etc/init.d/$service" ]; then
+                "/etc/init.d/$service" restart >/dev/null 2>&1 || true
+            fi
+        fi
+    fi
+done
+if command -v systemctl >/dev/null 2>&1; then
+    for php_fpm in php*-fpm; do
+        systemctl restart "$php_fpm" >/dev/null 2>&1 || true
+    done
+fi
+```

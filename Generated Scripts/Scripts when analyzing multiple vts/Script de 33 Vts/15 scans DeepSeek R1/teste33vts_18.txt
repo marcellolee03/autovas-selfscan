@@ -1,0 +1,77 @@
+#!/bin/bash
+
+# Atualizar Proxmox VE para versão compatível (se instalado)
+if grep -qi "proxmox" /etc/issue || grep -qi "pve-manager" /etc/pve/version; then
+    echo "Atualizando Proxmox VE para versão compatível..."
+    apt-get update
+    apt-get dist-upgrade -y
+    apt-get --only-upgrade install pve-manager -y
+    pveam update
+    systemctl restart pveproxy pvestatd pvedaemon
+fi
+
+# Atualizar arquivos jQuery vulneráveis
+jquery_paths=(
+    "/var/www/html/js/jquery-1.8.3.min.js"
+    "/var/www/html/opscenter/webcommon/framework/../js/jquery-1.8.3.min.js"
+    "/var/www/html/opscenter/webcommon/js/jquery-1.8.3.min.js"
+    "/var/www/html/framesets/../js/jquery-1.8.3.min.js"
+    "/var/www/html/frameset/../js/jquery-1.8.3.min.js"
+    "/var/www/html/console/framework/../js/jquery-1.8.3.min.js"
+    "/var/www/html/console/js/jquery-1.8.3.min.js"
+)
+
+for path in "${jquery_paths[@]}"; do
+    resolved_path=$(realpath -m "$path")
+    if [ -f "$resolved_path" ]; then
+        echo "Atualizando jQuery em $resolved_path"
+        wget -qO "$resolved_path" "https://code.jquery.com/jquery-1.12.4.min.js"
+        chown --reference="$resolved_path" "$resolved_path" 2>/dev/null
+    fi
+done
+
+# Configurar SSH para desativar algoritmos vulneráveis
+backup_sshd_config() {
+    cp /etc/ssh/sshd_config /etc/ssh/sshd_config.bak
+}
+
+update_sshd_config() {
+    sed -i '/KexAlgorithms\|HostKeyAlgorithms\|Ciphers\|MACs/d' /etc/ssh/sshd_config
+    echo "KexAlgorithms curve25519-sha256@libssh.org,ecdh-sha2-nistp256,ecdh-sha2-nistp384,ecdh-sha2-nistp521,diffie-hellman-group-exchange-sha256" >> /etc/ssh/sshd_config
+    echo "HostKeyAlgorithms ssh-ed25519,ssh-ed25519-cert-v01@openssh.com,ecdsa-sha2-nistp256,ecdsa-sha2-nistp256-cert-v01@openssh.com,ecdsa-sha2-nistp384,ecdsa-sha2-nistp384-cert-v01@openssh.com,ecdsa-sha2-nistp521,ecdsa-sha2-nistp521-cert-v01@openssh.com,rsa-sha2-512,rsa-sha2-512-cert-v01@openssh.com,rsa-sha2-256,rsa-sha2-256-cert-v01@openssh.com" >> /etc/ssh/sshd_config
+    echo "Ciphers chacha20-poly1305@openssh.com,aes256-gcm@openssh.com,aes128-gcm@openssh.com,aes256-ctr,aes192-ctr,aes128-ctr" >> /etc/ssh/sshd_config
+    echo "MACs hmac-sha2-512-etm@openssh.com,hmac-sha2-256-etm@openssh.com,umac-128-etm@openssh.com,hmac-sha2-512,hmac-sha2-256,umac-128@openssh.com" >> /etc/ssh/sshd_config
+}
+
+if [ -f /etc/ssh/sshd_config ]; then
+    echo "Reconfigurando SSH..."
+    backup_sshd_config
+    update_sshd_config
+    systemctl restart ssh
+fi
+
+# Remover serviço Telnet
+if dpkg -l | grep -q "telnetd"; then
+    echo "Removendo Telnet..."
+    apt-get remove --purge telnetd -y
+fi
+
+# Configurar TCP para desativar timestamps
+echo "Desativando TCP Timestamps..."
+sysctl -w net.ipv4.tcp_timestamps=0
+echo "net.ipv4.tcp_timestamps = 0" >> /etc/sysctl.conf
+
+# Bloquear respostas ICMP Timestamp usando iptables
+iptables -A INPUT -p icmp --icmp-type timestamp-request -j DROP
+iptables -A INPUT -p icmp --icmp-type timestamp-reply -j DROP
+if ! iptables-save > /etc/iptables/rules.v4; then
+    mkdir -p /etc/iptables
+    iptables-save > /etc/iptables/rules.v4
+fi
+
+# Caso utilize firewalld (padrão RedHat/CentOS)
+if command -v firewall-cmd &>/dev/null; then
+    firewall-cmd --permanent --add-rich-rule='rule protocol value="icmp" icmp-type name="timestamp-request" drop'
+    firewall-cmd --permanent --add-rich-rule='rule protocol value="icmp" icmp-type name="timestamp-reply" drop'
+    firewall-cmd --reload
+fi

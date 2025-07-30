@@ -1,0 +1,346 @@
+```bash
+#!/bin/bash
+
+# Variáveis globais
+OS=$(uname -s)
+
+# Funções de tratamento de erros
+handle_error() {
+  echo "Erro: $1"
+  exit 1
+}
+
+# Vulnerabilidade 1: TWiki XSS and Command Execution Vulnerabilities
+# Solução: Upgrade to version 4.2.4 or later.
+# Não é possível automatizar o upgrade do TWiki sem mais informações sobre sua instalação.
+echo "AVISO: Impossível automatizar o upgrade do TWiki. Atualize manualmente para a versão 4.2.4 ou mais recente."
+
+# Vulnerabilidade 2: Distributed Ruby (dRuby/DRb) Multiple RCE Vulnerabilities
+# Solução: Implementar controles de acesso, taint de entrada não confiável, configurar $SAFE >= 2 ou >=3, usar drb/acl.rb
+echo "AVISO: Impossível automatizar a correção do dRuby. Requer configuração manual das opções de segurança do dRuby."
+
+# Vulnerabilidade 3: rlogin Passwordless Login
+# Solução: Disable the rlogin service and use alternatives like SSH instead.
+if [ "$OS" == "Linux" ]; then
+  if systemctl is-active rlogin.socket > /dev/null 2>&1; then
+    systemctl stop rlogin.socket
+    systemctl disable rlogin.socket
+    echo "Serviço rlogin desativado."
+  else
+    echo "Serviço rlogin não está ativo."
+  fi
+elif [ "$OS" == "Darwin" ]; then
+  launchctl unload -w /System/Library/LaunchDaemons/login.plist 2>/dev/null
+  echo "Serviço rlogin desativado (se instalado)."
+else
+  echo "AVISO: Impossível desativar rlogin. Sistema operacional não suportado."
+fi
+
+# Vulnerabilidade 4: Operating System (OS) End of Life (EOL) Detection
+# Solução: Update the OS on the remote host to a version which is still supported
+echo "AVISO: Ubuntu 8.04 está EOL. Requer upgrade manual do sistema operacional."
+
+# Vulnerabilidade 5: The rexec service is running
+# Solução: Disable the rexec service and use alternatives like SSH instead.
+if [ "$OS" == "Linux" ]; then
+  if systemctl is-active rexec.socket > /dev/null 2>&1; then
+    systemctl stop rexec.socket
+    systemctl disable rexec.socket
+    echo "Serviço rexec desativado."
+  else
+    echo "Serviço rexec não está ativo."
+  fi
+elif [ "$OS" == "Darwin" ]; then
+  launchctl unload -w /System/Library/LaunchDaemons/rexecd.plist 2>/dev/null
+  echo "Serviço rexec desativado (se instalado)."
+else
+  echo "AVISO: Impossível desativar rexec. Sistema operacional não suportado."
+fi
+
+# Vulnerabilidade 6: Possible Backdoor: Ingreslock
+# Solução: A whole cleanup of the infected system is recommended.
+echo "ALERTA: Possível backdoor Ingreslock detectado. Requer limpeza completa do sistema. Não é possível automatizar."
+
+# Vulnerabilidade 7: Apache Tomcat AJP RCE Vulnerability (Ghostcat)
+# Solução: Update Apache Tomcat to version 7.0.100, 8.5.51, 9.0.31 or later.
+echo "AVISO: Impossível automatizar o upgrade do Tomcat. Atualize manualmente para a versão 7.0.100, 8.5.51, 9.0.31 ou mais recente."
+
+# Vulnerabilidade 8: MySQL / MariaDB Default Credentials (MySQL Protocol)
+# Solução: Change the password as soon as possible
+echo "AVISO: Impossível alterar a senha do MySQL automaticamente. Altere a senha do usuário 'root' manualmente."
+
+# Vulnerabilidade 9: PHP < 5.6.30, 7.x < 7.0.15, 7.1.x < 7.1.1 Multiple Vulnerabilities (Jan 2017) - Linux
+# Solução: Update to version 5.6.30, 7.0.15, 7.1.1 or later.
+echo "AVISO: Impossível automatizar o upgrade do PHP. Atualize manualmente para a versão 5.6.30, 7.0.15, 7.1.1 ou mais recente."
+
+# Vulnerabilidade 10: PHP < 5.3.13, 5.4.x < 5.4.3 Multiple Vulnerabilities - Active Check
+# Solução: PHP: Update to version 5.3.13, 5.4.3 or later
+echo "AVISO: Impossível automatizar o upgrade do PHP. Atualize manualmente para a versão 5.3.13, 5.4.3 ou mais recente."
+
+# Vulnerabilidade 11 e 12: vsftpd Compromised Source Packages Backdoor Vulnerability
+# Solução: The repaired package can be downloaded from the referenced vendor homepage.
+echo "AVISO: Impossível automatizar a reinstalação do vsftpd. Baixe o pacote reparado da página do fornecedor e valide a assinatura."
+
+# Vulnerabilidade 13: DistCC RCE Vulnerability (CVE-2004-2687)
+# Solução: Vendor updates are available.
+if [ "$OS" == "Linux" ]; then
+  if systemctl is-active distccd.socket > /dev/null 2>&1; then
+    systemctl stop distccd.socket
+    systemctl disable distccd.socket
+    echo "Serviço distccd desativado."
+  elif systemctl is-active distccd >/dev/null 2>&1; then
+    systemctl stop distccd
+    systemctl disable distccd
+    echo "Serviço distccd desativado."
+  else
+    echo "Serviço distccd não está ativo."
+  fi
+else
+  echo "AVISO: Impossível desativar distccd. Sistema operacional não suportado."
+fi
+
+# Vulnerabilidade 14: PostgreSQL Default Credentials (PostgreSQL Protocol)
+# Solução: Change the password as soon as possible.
+echo "AVISO: Impossível alterar a senha do PostgreSQL automaticamente. Altere a senha do usuário 'postgres' manualmente."
+
+# Vulnerabilidade 15: VNC Brute Force Login
+# Solução: Change the password to something hard to guess or enable password protection at all.
+echo "AVISO: Impossível alterar a senha do VNC automaticamente. Altere a senha do VNC para uma senha forte."
+
+# Vulnerabilidade 16: Test HTTP dangerous methods
+# Solução: Use access restrictions to these dangerous HTTP methods or disable them completely.
+echo "AVISO: Impossível automatizar a desativação dos métodos HTTP PUT e DELETE. Configure seu servidor web para restringir ou desativar esses métodos."
+
+# Vulnerabilidade 17 e 18: FTP Brute Force Logins With Default Credentials Reporting
+# Solução: Change the password as soon as possible.
+echo "AVISO: Impossível alterar a senha dos usuários FTP automaticamente. Altere a senha dos usuários FTP para senhas fortes."
+
+# Vulnerabilidade 19: The rlogin service is running
+# Solução: Disable the rlogin service and use alternatives like SSH instead.
+if [ "$OS" == "Linux" ]; then
+  if systemctl is-active rlogin.socket > /dev/null 2>&1; then
+    systemctl stop rlogin.socket
+    systemctl disable rlogin.socket
+    echo "Serviço rlogin desativado."
+  else
+    echo "Serviço rlogin não está ativo."
+  fi
+elif [ "$OS" == "Darwin" ]; then
+  launchctl unload -w /System/Library/LaunchDaemons/login.plist 2>/dev/null
+  echo "Serviço rlogin desativado (se instalado)."
+else
+  echo "AVISO: Impossível desativar rlogin. Sistema operacional não suportado."
+fi
+
+# Vulnerabilidade 20: rsh Unencrypted Cleartext Login
+# Solução: Disable the rsh service and use alternatives like SSH instead.
+if [ "$OS" == "Linux" ]; then
+  if systemctl is-active rsh.socket > /dev/null 2>&1; then
+    systemctl stop rsh.socket
+    systemctl disable rsh.socket
+    echo "Serviço rsh desativado."
+  else
+    echo "Serviço rsh não está ativo."
+  fi
+elif [ "$OS" == "Darwin" ]; then
+  launchctl unload -w /System/Library/LaunchDaemons/rshd.plist 2>/dev/null
+  echo "Serviço rsh desativado (se instalado)."
+else
+  echo "AVISO: Impossível desativar rsh. Sistema operacional não suportado."
+fi
+
+# Vulnerabilidade 21: SSL/TLS: OpenSSL CCS Man in the Middle Security Bypass Vulnerability
+# Solução: Updates are available.
+echo "AVISO: OpenSSL CCS Man in the Middle Security Bypass Vulnerability. Requer atualização manual do OpenSSL."
+
+# Vulnerabilidade 22: Multiple Vendors STARTTLS Implementation Plaintext Arbitrary Command Injection Vulnerability
+# Solução: Updates are available.
+echo "AVISO: STARTTLS Implementation Plaintext Arbitrary Command Injection Vulnerability. Requer atualização manual dos serviços afetados."
+
+# Vulnerabilidade 23: TWiki Cross-Site Request Forgery Vulnerability (Sep 2010)
+# Solução: Upgrade to TWiki version 4.3.2 or later.
+echo "AVISO: Impossível automatizar o upgrade do TWiki. Atualize manualmente para a versão 4.3.2 ou mais recente."
+
+# Vulnerabilidade 24: Anonymous FTP Login Reporting
+# Solução: If you do not want to share files, you should disable anonymous logins.
+if [ "$OS" == "Linux" ]; then
+  sed -i 's/^anonymous_enable=YES/anonymous_enable=NO/' /etc/vsftpd.conf
+  systemctl restart vsftpd
+  echo "Logins anônimos no FTP desativados."
+else
+  echo "AVISO: Impossível automatizar a desativação de logins anônimos no FTP. Edite a configuração do FTP manualmente."
+fi
+
+# Vulnerabilidade 25: jQuery < 1.9.0 XSS Vulnerability
+# Solução: Update to version 1.9.0 or later.
+echo "AVISO: Impossível automatizar o upgrade do jQuery. Atualize manualmente para a versão 1.9.0 ou mais recente."
+
+# Vulnerabilidade 26: TWiki < 6.1.0 XSS Vulnerability
+# Solução: Update to version 6.1.0 or later.
+echo "AVISO: Impossível automatizar o upgrade do TWiki. Atualize manualmente para a versão 6.1.0 ou mais recente."
+
+# Vulnerabilidade 27: TWiki CSRF Vulnerability
+# Solução: Upgrade to version 4.3.1 or later.
+echo "AVISO: Impossível automatizar o upgrade do TWiki. Atualize manualmente para a versão 4.3.1 ou mais recente."
+
+# Vulnerabilidade 28 e 29: SSL/TLS: Deprecated SSLv2 and SSLv3 Protocol Detection
+# Solução: It is recommended to disable the deprecated SSLv2 and/or SSLv3 protocols in favor of the TLSv1.2+ protocols.
+echo "AVISO: Desabilitar SSLv2 e SSLv3 requer configuração manual dos serviços SSL/TLS."
+
+# Vulnerabilidade 30: SSL/TLS: Report Weak Cipher Suites
+# Solução: The configuration of this services should be changed so that it does not accept the listed weak cipher suites anymore.
+echo "AVISO: A configuração de suites de cifra fracas requer configuração manual dos serviços SSL/TLS."
+
+# Vulnerabilidade 31: HTTP Debugging Methods (TRACE/TRACK) Enabled
+# Solução: Disable the TRACE and TRACK methods in your web server configuration.
+echo "AVISO: Desabilitar os métodos HTTP TRACE e TRACK requer configuração manual do servidor web."
+
+# Vulnerabilidade 32 e 33: SSL/TLS: Server Certificate / Certificate in Chain with RSA keys less than 2048 bits
+# Solução: Replace the certificate with a stronger key and reissue the certificates it signed.
+echo "AVISO: A substituição de certificado SSL/TLS com chave RSA menor que 2048 bits requer substituição manual do certificado."
+
+# Vulnerabilidade 34: Weak Key Exchange (KEX) Algorithm(s) Supported (SSH)
+# Solução: Disable the reported weak KEX algorithm(s)
+if [ "$OS" == "Linux" ]; then
+  sed -i 's/^KexAlgorithms .*/KexAlgorithms curve25519-sha256@libssh.org,ecdh-sha2-nistp256,ecdh-sha2-nistp384,ecdh-sha2-nistp521,diffie-hellman-group14-sha256,diffie-hellman-group16-sha512,diffie-hellman-group18-sha512/' /etc/ssh/sshd_config
+  systemctl restart sshd
+  echo "Algoritmos KEX fracos desabilitados no SSH."
+else
+  echo "AVISO: Impossível automatizar a desativação de algoritmos KEX fracos no SSH. Edite a configuração do SSH manualmente."
+fi
+
+# Vulnerabilidade 35: phpinfo() Output Reporting (HTTP)
+# Solução: Delete the listed files or restrict access to them.
+echo "AVISO: phpinfo() Output Reporting. Requer remoção ou restrição de acesso manual aos arquivos phpinfo.php."
+
+# Vulnerabilidade 36: Weak Host Key Algorithm(s) (SSH)
+# Solução: Disable the reported weak host key algorithm(s).
+if [ "$OS" == "Linux" ]; then
+    sed -i 's/^HostKeyAlgorithms .*/HostKeyAlgorithms ssh-rsa,ssh-ed25519/' /etc/ssh/sshd_config
+    systemctl restart sshd
+    echo "Algoritmos de chave de host fracos desabilitados no SSH."
+else
+    echo "AVISO: Impossível automatizar a desativação de algoritmos de chave de host fracos no SSH. Edite a configuração do SSH manualmente."
+fi
+
+# Vulnerabilidade 37: Check if Mailserver answer to VRFY and EXPN requests
+# Solução: Disable VRFY and/or EXPN on your Mailserver.
+echo "AVISO: Desabilitar VRFY e EXPN requer configuração manual do servidor de e-mail."
+
+# Vulnerabilidade 38 e 39: SSL/TLS: Renegotiation DoS Vulnerability (CVE-2011-1473, CVE-2011-5094)
+# Solução: A general solution is to remove/disable renegotiation capabilities altogether from/in the affected SSL/TLS service.
+echo "AVISO: Impossível automatizar a correção da vulnerabilidade SSL/TLS Renegotiation DoS. Requer configuração manual dos serviços SSL/TLS."
+
+# Vulnerabilidade 40 e 41: SSL/TLS: Certificate Expired
+# Solução: Replace the SSL/TLS certificate by a new one.
+echo "AVISO: Impossível automatizar a substituição do certificado SSL/TLS expirado. Requer substituição manual do certificado."
+
+# Vulnerabilidade 42 e 43: QWikiwiki directory traversal vulnerability e awiki <= 20100125 Multiple LFI Vulnerabilities - Active Check
+# Solução: upgrade to a newer release, disable respective features, remove the product or replace the product by another one.
+echo "AVISO: Falha nas tentativas de correção automatizadas devido à falta de informações de produto. Considere atualizar, remover ou substituir o produto."
+
+# Vulnerabilidade 44: /doc directory browsable
+# Solução: Use access restrictions for the /doc directory.
+echo "AVISO: A restrição de acesso ao diretório /doc requer configuração manual do servidor web."
+
+# Vulnerabilidade 45: Telnet Unencrypted Cleartext Login
+# Solução: Replace Telnet with a protocol like SSH which supports encrypted connections.
+if [ "$OS" == "Linux" ]; then
+  if systemctl is-active telnet.socket > /dev/null 2>&1; then
+    systemctl stop telnet.socket
+    systemctl disable telnet.socket
+    echo "Serviço telnet desativado."
+  else
+    echo "Serviço telnet não está ativo."
+  fi
+elif [ "$OS" == "Darwin" ]; then
+  launchctl unload -w /System/Library/LaunchDaemons/telnetd.plist 2>/dev/null
+  echo "Serviço telnet desativado (se instalado)."
+else
+  echo "AVISO: Impossível desativar telnet. Sistema operacional não suportado."
+fi
+
+# Vulnerabilidade 46 e 48: FTP Unencrypted Cleartext Login
+# Solução: Enable FTPS or enforce the connection via the 'AUTH TLS' command.
+echo "AVISO: Ativar FTPS ou forçar 'AUTH TLS' requer configuração manual do servidor FTP."
+
+# Vulnerabilidade 47: VNC Server Unencrypted Data Transmission
+# Solução: Run the session over an encrypted channel provided by IPsec [RFC4301] or SSH [RFC4254].
+echo "AVISO: A transmissão não criptografada do VNC requer configuração manual de túneis SSH ou IPsec."
+
+# Vulnerabilidade 49: Cleartext Transmission of Sensitive Information via HTTP
+# Solução: Enforce the transmission of sensitive data via an encrypted SSL/TLS connection.
+echo "AVISO: Reforçar a transmissão de dados confidenciais via conexão SSL/TLS criptografada requer configuração manual da aplicação web."
+
+# Vulnerabilidade 50 e 54: SSL/TLS: Deprecated TLSv1.0 and TLSv1.1 Protocol Detection
+# Solução: It is recommended to disable the deprecated TLSv1.0 and/or TLSv1.1 protocols in favor of the TLSv1.2+ protocols.
+echo "AVISO: Desabilitar TLSv1.0 e TLSv1.1 requer configuração manual dos serviços SSL/TLS."
+
+# Vulnerabilidade 51: Weak Encryption Algorithm(s) Supported (SSH)
+# Solução: Disable the reported weak encryption algorithm(s).
+if [ "$OS" == "Linux" ]; then
+  sed -i 's/^Ciphers .*/Ciphers chacha20-poly1305@openssh.com,aes256-gcm@openssh.com,aes128-gcm@openssh.com,aes256-ctr,aes192-ctr,aes128-ctr/' /etc/ssh/sshd_config
+  systemctl restart sshd
+  echo "Algoritmos de criptografia fracos desabilitados no SSH."
+else
+  echo "AVISO: Impossível automatizar a desativação de algoritmos de criptografia fracos no SSH. Edite a configuração do SSH manualmente."
+fi
+
+# Vulnerabilidade 52: Apache HTTP Server httpOnly Cookie Information Disclosure Vulnerability
+# Solução: Update to Apache HTTP Server version 2.2.22 or later.
+echo "AVISO: Apache HTTP Server httpOnly Cookie Information Disclosure Vulnerability. Requer atualização manual do Apache HTTP Server."
+
+# Vulnerabilidade 53: phpMyAdmin error.php Cross Site Scripting Vulnerability
+# Solução: No known solution was made available.
+echo "AVISO: phpMyAdmin error.php Cross Site Scripting Vulnerability. Considere atualizar, remover ou substituir o phpMyAdmin."
+
+# Vulnerabilidade 55: jQuery < 1.6.3 XSS Vulnerability
+# Solução: Update to version 1.6.3 or later.
+echo "AVISO: Impossível automatizar o upgrade do jQuery. Atualize manualmente para a versão 1.6.3 ou mais recente."
+
+# Vulnerabilidade 56 e 61: SSL/TLS: RSA Temporary Key Handling RSA_EXPORT Downgrade Issue (FREAK) e SSL/TLS: 'DHE_EXPORT' MITM Security Bypass Vulnerability (LogJam)
+# Solução: Remove support for 'RSA_EXPORT' cipher suites from the service.
+echo "AVISO: Remoção do suporte para 'RSA_EXPORT' e 'DHE_EXPORT' suites de cifra requer configuração manual dos serviços SSL/TLS."
+
+# Vulnerabilidade 57 e 60: SSL/TLS: Certificate Signed Using A Weak Signature Algorithm
+# Solução: Servers that use SSL/TLS certificates signed with a weak SHA-1 will need to obtain new SHA-2 signed SSL/TLS certificates.
+echo "AVISO: Obtenção de novos certificados SSL/TLS assinados com SHA-2 requer substituição manual do certificado."
+
+# Vulnerabilidade 58 e 59: SSL/TLS: Diffie-Hellman Key Exchange Insufficient DH Group Strength Vulnerability
+# Solução: Deploy (Ephemeral) Elliptic-Curve Diffie-Hellman (ECDHE) or use a 2048-bit or stronger Diffie-Hellman group.
+echo "AVISO: Implantação de (Ephemeral) Elliptic-Curve Diffie-Hellman (ECDHE) ou uso de um grupo Diffie-Hellman de 2048 bits ou mais forte requer configuração manual dos serviços SSL/TLS."
+
+# Vulnerabilidade 62 e 63: SSL/TLS: SSLv3 Protocol CBC Cipher Suites Information Disclosure Vulnerability (POODLE)
+# Solução: Disable SSLv3, Disable cipher suites supporting CBC cipher modes, Enable TLS_FALLBACK_SCSV
+echo "AVISO: As mitigações contra o POODLE requerem configuração manual dos serviços SSL/TLS."
+
+# Vulnerabilidade 64: Weak MAC Algorithm(s) Supported (SSH)
+# Solução: Disable the reported weak MAC algorithm(s).
+if [ "$OS" == "Linux" ]; then
+  sed -i 's/^MACs .*/MACs hmac-sha2-512,hmac-sha2-256,hmac-sha1/' /etc/ssh/sshd_config
+  systemctl restart sshd
+  echo "Algoritmos MAC fracos desabilitados no SSH."
+else
+  echo "AVISO: Impossível automatizar a desativação de algoritmos MAC fracos no SSH. Edite a configuração do SSH manualmente."
+fi
+
+# Vulnerabilidade 65: TCP Timestamps Information Disclosure
+# Solução: To disable TCP timestamps on linux add the line 'net.ipv4.tcp_timestamps = 0' to /etc/sysctl.conf.
+if [ "$OS" == "Linux" ]; then
+  echo "net.ipv4.tcp_timestamps = 0" >> /etc/sysctl.conf
+  sysctl -p
+  echo "Timestamps TCP desativados."
+else
+  echo "AVISO: Impossível automatizar a desativação de timestamps TCP. Edite a configuração do sistema manualmente."
+fi
+
+# Vulnerabilidade 66: ICMP Timestamp Reply Information Disclosure
+# Solução: Disable the support for ICMP timestamp on the remote host completely
+if [ "$OS" == "Linux" ]; then
+  echo "net.ipv4.icmp_echo_ignore_all = 1" >> /etc/sysctl.conf
+  sysctl -p
+  echo "Respostas ICMP timestamp desativadas."
+else
+  echo "AVISO: Impossível automatizar a desativação de respostas ICMP timestamp. Edite a configuração do sistema manualmente."
+fi
+```

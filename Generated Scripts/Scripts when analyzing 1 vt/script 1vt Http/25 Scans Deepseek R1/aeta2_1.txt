@@ -1,0 +1,17 @@
+#!/bin/bash
+
+set -e
+
+if ! grep -q "Redirect permanent / https://%{HTTP_HOST}%{REQUEST_URI}" /etc/apache2/sites-available/000-default.conf; then
+  cp /etc/apache2/sites-available/000-default.conf /etc/apache2/sites-available/000-default.conf.bak
+  server_name=$(hostname -f 2>/dev/null || hostname)
+  cat > /etc/apache2/sites-available/000-default.conf <<EOF
+<VirtualHost *:80>
+    ServerName $server_name
+    Redirect permanent / https://%{HTTP_HOST}%{REQUEST_URI}
+</VirtualHost>
+EOF
+fi
+
+a2enmod ssl &>/dev/null || true
+apachectl configtest && systemctl restart apache2

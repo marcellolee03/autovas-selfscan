@@ -1,0 +1,37 @@
+```bash
+#!/bin/bash
+
+# Define o arquivo de configuração do SSH
+SSH_CONFIG="/etc/ssh/sshd_config"
+
+# Remove a opção KexAlgorithms existente, se houver
+sed -i '/^HostKeyAlgorithms/d' "$SSH_CONFIG"
+
+# Adiciona a opção KexAlgorithms com algoritmos seguros
+echo "HostKeyAlgorithms ssh-ed25519,ecdsa-sha2-nistp256,ecdsa-sha2-nistp384,ecdsa-sha2-nistp521,rsa-sha2-256,rsa-sha2-512" >> "$SSH_CONFIG"
+
+# Remove a opção PubkeyAcceptedKeyTypes existente, se houver
+sed -i '/^PubkeyAcceptedKeyTypes/d' "$SSH_CONFIG"
+
+# Adiciona a opção PubkeyAcceptedKeyTypes com algoritmos seguros
+echo "PubkeyAcceptedKeyTypes ssh-ed25519,ecdsa-sha2-nistp256,ecdsa-sha2-nistp384,ecdsa-sha2-nistp521,rsa-sha2-256,rsa-sha2-512" >> "$SSH_CONFIG"
+
+# Remove a opção HostKey para ssh-dss, se houver
+sed -i '/^HostKey \/etc\/ssh\/ssh_host_dsa_key/d' "$SSH_CONFIG"
+sed -i '/^HostKey \/etc\/ssh\/ssh_host_dsa_key.pub/d' "$SSH_CONFIG"
+
+# Verifica se o arquivo ssh_host_dsa_key existe e, se existir, o remove
+if [ -f "/etc/ssh/ssh_host_dsa_key" ]; then
+    rm -f /etc/ssh/ssh_host_dsa_key
+fi
+
+# Verifica se o arquivo ssh_host_dsa_key.pub existe e, se existir, o remove
+if [ -f "/etc/ssh/ssh_host_dsa_key.pub" ]; then
+    rm -f /etc/ssh/ssh_host_dsa_key.pub
+fi
+
+# Reinicia o serviço SSH
+systemctl restart sshd
+
+echo "Vulnerabilidade SSH corrigida: Algoritmo ssh-dss desabilitado."
+```

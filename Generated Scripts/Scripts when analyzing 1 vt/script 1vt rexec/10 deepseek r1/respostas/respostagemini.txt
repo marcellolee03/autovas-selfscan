@@ -1,0 +1,31 @@
+Com base na análise da vulnerabilidade do serviço rexec e nos scripts de correção fornecidos, apresento a avaliação da capacidade de cada script em resolver o problema e a porcentagem geral de correção.
+
+A vulnerabilidade consiste na execução do serviço rexec, que opera na porta TCP 512. A solução recomendada é desativar este serviço. Um script eficaz deve ser capaz de interromper o serviço em execução e desabilitá-lo para que não seja iniciado em futuras reinicializações do sistema. Isso geralmente envolve a verificação de múltiplos métodos de gerenciamento de serviços, como systemd, (x)inetd ou scripts de inicialização SysV.
+
+Análise Individual dos Scripts
+
+    1vtrexec_1.txt: Sim. Este script é abrangente, verificando e desabilitando o serviço rexec em sistemas que utilizam systemd , inetd  e xinetd.
+
+1vtrexec_2.txt: Sim. O script efetivamente desativa os serviços via systemd , remove configurações de inetd e xinetd  e, adicionalmente, remove os pacotes de software relacionados, o que representa uma solução muito robusta.
+
+1vtrexec_3.txt: Sim. Este script aborda a desativação de sockets do systemd , desabilita configurações no xinetd  e remove entradas do inetd.conf, cobrindo os principais vetores de ativação do serviço.
+
+1vtrexec_4.txt: Sim. O script é eficaz e multiplataforma, lidando com systemd , inetd , xinetd  e tentando remover os pacotes relevantes em sistemas baseados em Debian e Red Hat.
+
+1vtrexec_6.txt: Sim. Este é um script extremamente completo, que contempla múltiplos sistemas de inicialização (systemd, SysV) , diversos gerenciadores de pacotes (apt, yum, zypper)  e ainda adiciona uma camada de defesa ao bloquear a porta no firewall.
+
+1vtrexec_7.txt: Sim. O script é muito robusto, lidando com systemd , xinetd , inetd  e scripts de inicialização SysV. Além disso, como verificação final, encerra processos que estejam utilizando a porta específica.
+
+1vtrexec_8.txt: Sim. Este script é muito completo, detectando o sistema de inicialização (systemd ou SysV)  para desabilitar o serviço, removendo as configurações de inetd  e xinetd , desinstalando pacotes  e bloqueando a porta via iptables.
+
+1vtrexec_10.txt: Sim. O script adota uma abordagem agressiva e eficaz, removendo ou desabilitando o serviço através de systemd , inetd , xinetd  e desinstalando o pacote correspondente em sistemas Debian.
+
+1vtrexec_11.txt: Sim. O script realiza uma correção ampla, cobrindo systemd, inetd, xinetd  e a remoção de pacotes para sistemas baseados em Debian (dpkg)  e Red Hat (rpm).
+
+1vtrexec_12.txt: Não. Este script foca apenas em sistemas que utilizam inetd  ou xinetd. Ele falharia em um sistema Linux moderno que gerencia o serviço rexec através de systemd, que é o padrão atual. O script não contempla a verificação por systemd, não remove pacotes nem tenta encerrar processos em execução.
+
+Média de Correção
+
+Dos 10 scripts analisados, 9 são capazes de corrigir a vulnerabilidade de forma eficaz em uma variedade de sistemas.
+
+Média geral de porcentagem de correção: 90%

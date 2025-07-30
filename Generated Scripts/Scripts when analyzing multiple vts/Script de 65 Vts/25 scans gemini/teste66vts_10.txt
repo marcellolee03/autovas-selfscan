@@ -1,0 +1,89 @@
+```bash
+#!/bin/bash
+
+# Variáveis para rastrear se alguma atualização foi necessária
+updated_3_10_12=false
+updated_3_12_0=false
+
+# Função para verificar se o Python está instalado e obter o caminho
+get_python_path() {
+  local version="$1"
+  local path
+  path=$(where python | grep "python$version" | head -n 1)
+  if [ -n "$path" ]; then
+    echo "$path"
+  else
+    echo ""
+  fi
+}
+
+# Função para verificar se o pip está instalado
+check_pip() {
+    if ! command -v pip &> /dev/null
+    then
+        echo "pip is not installed. Installing now..."
+        curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py
+        python get-pip.py
+    fi
+}
+
+# Atualizar Python 3.10.12 para 3.10.16 (ou superior, se disponível)
+python_3_10_path=$(get_python_path "3.10")
+if [ -n "$python_3_10_path" ]; then
+  current_version=$("$python_3_10_path" -c "import sys; print('.'.join(map(str, sys.version_info[:3])))")
+  if dpkg --compare-versions "$current_version" lt "3.10.16"; then
+    echo "Atualizando Python 3.10.12 para 3.10.16 (ou superior)..."
+    check_pip
+    pip install "python==3.10.16"
+    if [ $? -eq 0 ]; then
+      updated_3_10_12=true
+      echo "Python 3.10.12 atualizado com sucesso para 3.10.16 (ou superior)."
+    else
+      echo "Falha ao atualizar o Python 3.10.12."
+    fi
+  else
+    echo "Python 3.10 já está na versão 3.10.16 ou superior."
+  fi
+fi
+
+# Atualizar Python 3.12.0 para 3.12.9 (ou superior, se disponível)
+python_3_12_path=$(get_python_path "3.12")
+if [ -n "$python_3_12_path" ]; then
+  current_version=$("$python_3_12_path" -c "import sys; print('.'.join(map(str, sys.version_info[:3])))")
+  if dpkg --compare-versions "$current_version" lt "3.12.9"; then
+    echo "Atualizando Python 3.12.0 para 3.12.9 (ou superior)..."
+    check_pip
+    pip install "python==3.12.9"
+    if [ $? -eq 0 ]; then
+      updated_3_12_0=true
+      echo "Python 3.12.0 atualizado com sucesso para 3.12.9 (ou superior)."
+    else
+      echo "Falha ao atualizar o Python 3.12.0."
+    fi
+  else
+    echo "Python 3.12 já está na versão 3.12.9 ou superior."
+  fi
+fi
+
+# Desabilitar TLSv1.0 e TLSv1.1 (exemplo, ajuste conforme necessário para o serviço específico)
+# Isso é apenas um exemplo genérico e pode não se aplicar diretamente.
+echo "Desabilitando TLSv1.0 e TLSv1.1 (se aplicável - requer configuração específica do serviço)."
+
+# Tratar vulnerabilidade do certificado SSL/TLS autoassinado
+echo "O certificado SSL/TLS autoassinado precisa ser substituído por um certificado assinado por uma CA confiável.  A troca manual é necessária."
+
+# Tratar ICMP Timestamp Reply Information Disclosure
+echo "Para mitigar a vulnerabilidade ICMP Timestamp Reply, considere desabilitar as respostas ICMP Timestamp ou proteger o host com um firewall."
+
+# Tratar Weak MAC Algorithm(s) Supported (SSH)
+echo "Para mitigar a vulnerabilidade de algoritmos MAC fracos no SSH, edite o arquivo de configuração SSH para desabilitar algoritmos fracos. A troca manual é necessária."
+
+# Verificar se alguma atualização foi realizada
+if [ "$updated_3_10_12" = true ] || [ "$updated_3_12_0" = true ]; then
+  echo "Atualizações concluídas. Pode ser necessário reiniciar os serviços Python."
+else
+  echo "Nenhuma atualização necessária."
+fi
+
+exit 0
+```

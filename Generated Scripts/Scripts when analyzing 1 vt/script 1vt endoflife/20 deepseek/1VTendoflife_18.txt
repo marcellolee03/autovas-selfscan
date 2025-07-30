@@ -1,0 +1,26 @@
+#!/bin/bash
+REPO_FILE="/etc/apt/sources.list"
+BACKUP_FILE="/etc/apt/sources.list.bak"
+
+# Backup the current sources.list file
+cp $REPO_FILE $BACKUP_FILE
+
+# Remove all existing repositories from sources.list
+> $REPO_FILE
+
+# Add the latest supported Ubuntu repositories
+echo "deb http://archive.ubuntu.com/ubuntu/ focal main restricted universe multiverse" >> $REPO_FILE
+echo "deb http://archive.ubuntu.com/ubuntu/ focal-updates main restricted universe multiverse" >> $REPO_FILE
+echo "deb http://archive.ubuntu.com/ubuntu/ focal-security main restricted universe multiverse" >> $REPO_FILE
+
+# Update package lists and upgrade the system
+apt-get update -y
+apt-get dist-upgrade -y
+apt-get full-upgrade -y
+
+# Clean up unnecessary packages
+apt-get autoremove -y
+apt-get autoclean -y
+
+# Reboot the system to apply all changes
+reboot

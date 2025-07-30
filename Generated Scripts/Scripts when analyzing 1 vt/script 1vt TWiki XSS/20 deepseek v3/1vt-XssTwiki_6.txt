@@ -1,0 +1,17 @@
+#!/bin/bash
+TWIKI_DIR="/var/www/twiki"
+BACKUP_DIR="/var/backups/twiki"
+VERSION="4.2.4"
+
+mkdir -p "$BACKUP_DIR"
+tar -czf "$BACKUP_DIR/twiki_backup_$(date +%Y%m%d%H%M%S).tar.gz" -C "$TWIKI_DIR" .
+
+wget -O /tmp/twiki-$VERSION.tar.gz https://sourceforge.net/projects/twiki/files/TWiki/TWiki%20$VERSION/TWiki-$VERSION.tgz/download -q
+
+tar -xzf /tmp/twiki-$VERSION.tar.gz -C /tmp
+cp -r /tmp/TWiki-$VERSION/* "$TWIKI_DIR/"
+rm -rf /tmp/twiki-$VERSION.tar.gz /tmp/TWiki-$VERSION
+
+chown -R www-data:www-data "$TWIKI_DIR"
+
+service apache2 restart

@@ -1,0 +1,41 @@
+```bash
+#!/bin/bash
+
+# Identifica o serviço rodando na porta 5432 (geralmente PostgreSQL)
+SERVICE=$(ss -lntp | grep ':5432' | awk '{split($5,a,":"); print a[1]}')
+
+# Detecta o sistema operacional
+OS=$(uname -s)
+
+# Função para lidar com diferentes sistemas operacionais
+disable_tls10_11() {
+  if [[ "$OS" == "Linux" ]]; then
+    # Assume PostgreSQL, busca o arquivo de configuração. Ajuste o caminho se necessário.
+    CONFIG_FILE=$(find /etc/postgresql/ -name postgresql.conf 2>/dev/null)
+
+    if [[ -z "$CONFIG_FILE" ]]; then
+      echo "Arquivo de configuração do PostgreSQL não encontrado.  Verifique se o PostgreSQL está instalado e o caminho do arquivo de configuração."
+      exit 1
+    fi
+
+    # Faz um backup do arquivo de configuração
+    cp "$CONFIG_FILE" "${CONFIG_FILE}.bak.$(date +%Y%m%d%H%M%S)"
+
+    # Desabilita TLSv1.0 e TLSv1.1 no arquivo de configuração
+    sed -i "s/^ssl_min_protocol =.*/ssl_min_protocol = 'TLSv1.2'/g" "$CONFIG_FILE"
+
+    # Reinicia o serviço PostgreSQL para aplicar as alterações
+    systemctl restart postgresql
+    echo "TLSv1.0 e TLSv1.1 desabilitados e PostgreSQL reiniciado."
+
+  else
+    echo "Sistema operacional não suportado. Este script foi projetado para Linux."
+    exit 1
+  fi
+}
+
+# Executa a função para desabilitar TLSv1.0 e TLSv1.1
+disable_tls10_11
+
+exit 0
+```

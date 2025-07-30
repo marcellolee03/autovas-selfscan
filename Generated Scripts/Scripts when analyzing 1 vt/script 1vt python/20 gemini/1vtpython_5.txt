@@ -1,0 +1,74 @@
+```powershell
+# Script para atualizar o Python em Windows para a versão 3.10.15 ou mais recente
+# Este script assume que o Python está instalado e acessível através do PATH.
+# Ele baixa o instalador mais recente da versão 3.10.15, instala e remove o instalador.
+
+# Variáveis
+$pythonVersion = "3.10.15"
+$tempDir = "$env:TEMP"
+$installerName = "python-$pythonVersion-amd64.exe" # Adapte para a arquitetura do sistema se necessário (32-bit)
+$installerPath = Join-Path $tempDir $installerName
+$downloadUrl = "https://www.python.org/ftp/python/$pythonVersion/$installerName"
+
+# Função para verificar se um programa está instalado
+function Test-ProgramInstalled {
+    param (
+        [string]$programName
+    )
+    try {
+        Get-Command $programName -ErrorAction Stop | Out-Null
+        return $true
+    }
+    catch {
+        return $false
+    }
+}
+
+# Verificar se o Python está instalado
+if (-not (Test-ProgramInstalled python)) {
+    Write-Host "Python não está instalado ou não está no PATH.  Instale o Python e adicione-o ao PATH antes de executar este script."
+    exit 1
+}
+
+# Parar qualquer processo Python em execução para evitar conflitos
+Write-Host "Parando processos Python..."
+Stop-Process -Name python -ErrorAction SilentlyContinue
+Stop-Process -Name pythonw -ErrorAction SilentlyContinue
+
+# Baixar o instalador
+Write-Host "Baixando o instalador do Python $pythonVersion..."
+try {
+    Invoke-WebRequest -Uri $downloadUrl -OutFile $installerPath -ErrorAction Stop
+}
+catch {
+    Write-Host "Erro ao baixar o instalador: $($_.Exception.Message)"
+    exit 1
+}
+
+# Instalar o Python
+Write-Host "Instalando o Python $pythonVersion..."
+try {
+    Start-Process -FilePath $installerPath -ArgumentList "/quiet InstallAllUsers=1 Include_doc=0 Include_pip=1" -Wait -ErrorAction Stop
+}
+catch {
+    Write-Host "Erro ao instalar o Python: $($_.Exception.Message)"
+    exit 1
+}
+
+# Remover o instalador
+Write-Host "Removendo o instalador..."
+Remove-Item $installerPath
+
+# Verificar a instalação
+Write-Host "Verificando a instalação..."
+$pythonVersionInstalled = python --version
+Write-Host "Versão do Python instalada: $pythonVersionInstalled"
+
+if ($pythonVersionInstalled -like "*$pythonVersion*") {
+    Write-Host "Python atualizado com sucesso para a versão $pythonVersion."
+} else {
+    Write-Host "Falha ao atualizar o Python. Verifique os logs de instalação."
+}
+
+exit 0
+```

@@ -1,0 +1,46 @@
+```bash
+#!/bin/bash
+
+# Este script corrige a vulnerabilidade de transmissão de informações sensíveis em texto claro via HTTP,
+# redirecionando todo o tráfego HTTP para HTTPS.
+
+# Assume-se que o servidor web é Apache e que o módulo mod_rewrite está habilitado.
+# Adapte este script para o seu servidor web específico, se necessário.
+
+# 1. Verifica se o Apache está instalado
+if ! command -v apache2ctl &> /dev/null; then
+  echo "Apache não está instalado. Por favor, instale-o antes de executar este script."
+  exit 1
+fi
+
+# 2. Verifica se o mod_rewrite está habilitado
+if ! apache2ctl -M | grep -q "rewrite_module (shared)"; then
+  echo "mod_rewrite não está habilitado. Habilitando..."
+  sudo a2enmod rewrite
+  if [ $? -ne 0 ]; then
+    echo "Falha ao habilitar mod_rewrite. Verifique as permissões e tente novamente."
+    exit 1
+  fi
+  echo "mod_rewrite habilitado."
+  sudo systemctl restart apache2
+fi
+
+# 3. Configura o Virtual Host padrão (porta 80) para redirecionar para HTTPS
+VHOST_FILE="/etc/apache2/sites-available/000-default.conf"
+
+# Cria um backup do arquivo de configuração original
+sudo cp "$VHOST_FILE" "$VHOST_FILE.bak"
+
+# Adiciona a configuração de redirecionamento
+echo "<VirtualHost *:80>
+    ServerName \$(hostname)
+    Redirect permanent / https://\${SERVER_NAME}\${REQUEST_URI}
+</VirtualHost>" | sudo tee "$VHOST_FILE"
+
+# 4. Reinicia o Apache para aplicar as alterações
+sudo systemctl restart apache2
+
+echo "Redirecionamento HTTP para HTTPS configurado. Reinicie o navegador e teste."
+
+exit 0
+```

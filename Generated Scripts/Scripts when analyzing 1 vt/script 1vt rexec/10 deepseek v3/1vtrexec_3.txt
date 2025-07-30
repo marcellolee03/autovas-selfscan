@@ -1,0 +1,6 @@
+#!/bin/bash
+systemctl stop rexec
+systemctl disable rexec
+ufw deny 512/tcp
+sed -i '/^rexec/s/^/#/' /etc/inetd.conf
+systemctl restart inetd

@@ -1,0 +1,617 @@
+```bash
+#!/bin/bash
+
+# Variáveis globais
+OS=$(uname -s)
+
+# Funções de tratamento de erro
+error_exit() {
+  echo "Erro: $1" >&2
+  exit 1
+}
+
+# Vulnerabilidade 1 & 23 & 26 & 27: TWiki XSS and CSRF Vulnerabilities
+# Solução: TWiki não é mais suportado e deve ser removido.
+remove_twiki() {
+  echo "Removendo TWiki..."
+  if [ -d /var/www/twiki ]; then
+    rm -rf /var/www/twiki
+  elif [ -d /opt/twiki ]; then
+    rm -rf /opt/twiki
+  elif [ -d /usr/local/twiki ]; then
+      rm -rf /usr/local/twiki
+  else
+    echo "TWiki não encontrado. Prosseguindo."
+  fi
+}
+
+# Vulnerabilidade 2: Distributed Ruby (dRuby/DRb) Multiple RCE Vulnerabilities
+# Solução: Desabilitar ou restringir acesso ao serviço DRb.
+disable_drb() {
+  echo "Desabilitando o serviço DRb..."
+  if systemctl is-enabled drb > /dev/null 2>&1; then
+    systemctl stop drb
+    systemctl disable drb
+  else
+    echo "Serviço DRb não encontrado ou não gerenciado pelo systemctl."
+  fi
+}
+
+# Vulnerabilidade 3 & 19: rlogin Passwordless Login
+# Solução: Desabilitar o serviço rlogin.
+disable_rlogin() {
+  echo "Desabilitando o serviço rlogin..."
+  if systemctl is-enabled rlogin > /dev/null 2>&1; then
+    systemctl stop rlogin
+    systemctl disable rlogin
+  else
+    echo "Serviço rlogin não encontrado ou não gerenciado pelo systemctl."
+  fi
+  # Remover também do inetd/xinetd se estiver sendo usado
+  if [ -f /etc/inetd.conf ]; then
+    sed -i '/^rlogin/s/^/#/' /etc/inetd.conf
+    echo "rlogin comentado em /etc/inetd.conf. Reinicie o inetd para aplicar as alterações."
+  elif [ -d /etc/xinetd.d ]; then
+    if [ -f /etc/xinetd.d/rlogin ]; then
+      echo "rlogin encontrado em /etc/xinetd.d. Desabilitando..."
+      echo "disable = yes" >> /etc/xinetd.d/rlogin
+      service xinetd restart
+    fi
+  fi
+}
+
+# Vulnerabilidade 4: Operating System (OS) End of Life (EOL) Detection
+# Solução: Atualizar o sistema operacional. (Fora do escopo de um script genérico).
+eol_warning() {
+  echo "AVISO: O sistema operacional está em fim de vida útil (EOL). Recomenda-se atualizar para uma versão suportada."
+}
+
+# Vulnerabilidade 5: The rexec service is running
+# Solução: Desabilitar o serviço rexec.
+disable_rexec() {
+  echo "Desabilitando o serviço rexec..."
+  if systemctl is-enabled rexec > /dev/null 2>&1; then
+    systemctl stop rexec
+    systemctl disable rexec
+  else
+    echo "Serviço rexec não encontrado ou não gerenciado pelo systemctl."
+  fi
+
+  # Remover também do inetd/xinetd se estiver sendo usado
+  if [ -f /etc/inetd.conf ]; then
+    sed -i '/^rexec/s/^/#/' /etc/inetd.conf
+    echo "rexec comentado em /etc/inetd.conf. Reinicie o inetd para aplicar as alterações."
+  elif [ -d /etc/xinetd.d ]; then
+    if [ -f /etc/xinetd.d/rexec ]; then
+      echo "rexec encontrado em /etc/xinetd.d. Desabilitando..."
+      echo "disable = yes" >> /etc/xinetd.d/rexec
+      service xinetd restart
+    fi
+  fi
+}
+
+# Vulnerabilidade 6: Possible Backdoor: Ingreslock
+# Solução: Remoção da possível backdoor (complexo, fora do escopo genérico).
+ingreslock_warning() {
+  echo "AVISO: Possível backdoor Ingreslock detectada. Recomenda-se uma análise completa do sistema."
+}
+
+# Vulnerabilidade 7: Apache Tomcat AJP RCE Vulnerability (Ghostcat)
+# Solução: Desabilitar ou restringir o AJP Connector.
+disable_ajp() {
+  echo "Desabilitando o AJP Connector no Tomcat..."
+  TOMCAT_CONFIG_FILES=$(find /opt/tomcat* /usr/share/tomcat* /etc/tomcat* -name server.xml)
+  if [ -n "$TOMCAT_CONFIG_FILES" ]; then
+      for CONFIG_FILE in $TOMCAT_CONFIG_FILES; do
+          sed -i '<Connector port="8009" protocol="AJP/1.3" redirectPort="8443" />s/.*/<!-- & -->/' "$CONFIG_FILE"
+          echo "AJP Connector desabilitado em $CONFIG_FILE"
+      done
+  else
+      echo "Nenhum arquivo de configuração do Tomcat (server.xml) encontrado."
+  fi
+}
+
+# Vulnerabilidade 8 & 14: MySQL / MariaDB & PostgreSQL Default Credentials
+# Solução: Alterar as senhas padrão (requer interação, apenas dicas).
+default_credentials_warning() {
+  echo "AVISO: Detectadas senhas padrão no MySQL/MariaDB e PostgreSQL. Altere-as imediatamente!"
+  echo "Instruções MySQL/MariaDB:"
+  echo "mysql -u root -e \"ALTER USER 'root'@'localhost' IDENTIFIED BY 'nova_senha';\""
+  echo "Instruções PostgreSQL:"
+  echo "sudo -u postgres psql -c \"ALTER USER postgres WITH PASSWORD 'nova_senha';\""
+}
+
+# Vulnerabilidade 9 & 10: PHP Multiple Vulnerabilities
+# Solução: Atualizar a versão do PHP (fora do escopo de um script genérico, oferece uma dica).
+update_php_warning() {
+  echo "AVISO: Versão vulnerável do PHP detectada. Recomenda-se atualizar para uma versão segura."
+  if [[ "$OS" == "Debian" || "$OS" == "Ubuntu" ]]; then
+    echo "Tente: sudo apt-get update && sudo apt-get install php"
+  elif [[ "$OS" == "CentOS" || "$OS" == "RHEL" ]]; then
+    echo "Tente: sudo yum update php"
+  fi
+}
+
+# Vulnerabilidade 11 & 12: vsftpd Compromised Source Packages Backdoor Vulnerability
+# Solução: Remover vsftpd e reinstalar a partir de uma fonte confiável.
+reinstall_vsftpd() {
+  echo "Reinstalando vsftpd a partir de uma fonte confiável..."
+  if dpkg -s vsftpd > /dev/null 2>&1; then
+    apt-get purge -y vsftpd
+    apt-get update
+    apt-get install -y vsftpd
+  elif rpm -q vsftpd > /dev/null 2>&1; then
+    yum remove -y vsftpd
+    yum install -y vsftpd
+  else
+    echo "vsftpd não encontrado. Prosseguindo."
+  fi
+}
+
+# Vulnerabilidade 13: DistCC RCE Vulnerability (CVE-2004-2687)
+# Solução: Desabilitar ou remover o DistCC.
+disable_distcc() {
+  echo "Desabilitando o serviço distccd..."
+  if systemctl is-enabled distccd > /dev/null 2>&1; then
+    systemctl stop distccd
+    systemctl disable distccd
+  else
+    echo "Serviço distccd não encontrado ou não gerenciado pelo systemctl."
+  fi
+
+   # Remover também do inetd/xinetd se estiver sendo usado
+  if [ -f /etc/inetd.conf ]; then
+    sed -i '/^distcc/s/^/#/' /etc/inetd.conf
+    echo "distcc comentado em /etc/inetd.conf. Reinicie o inetd para aplicar as alterações."
+  elif [ -d /etc/xinetd.d ]; then
+    if [ -f /etc/xinetd.d/distcc ]; then
+      echo "distcc encontrado em /etc/xinetd.d. Desabilitando..."
+      echo "disable = yes" >> /etc/xinetd.d/distcc
+      service xinetd restart
+    fi
+  fi
+}
+
+# Vulnerabilidade 15: VNC Brute Force Login
+# Solução: Alterar a senha do VNC para uma senha forte.
+vnc_password_warning() {
+    echo "AVISO: A senha do VNC é fraca. Recomenda-se alterar a senha para uma senha forte."
+}
+
+# Vulnerabilidade 16: Test HTTP dangerous methods
+# Solução: Desabilitar os métodos HTTP PUT e DELETE.
+disable_http_methods() {
+  echo "Desabilitando os métodos HTTP PUT e DELETE no Apache..."
+  APACHE_CONFIG_FILES=$(find /etc/apache2 /etc/httpd -name httpd.conf -o -name apache2.conf)
+
+  if [ -n "$APACHE_CONFIG_FILES" ]; then
+        for CONFIG_FILE in $APACHE_CONFIG_FILES; do
+            echo "Aplicando restrições aos métodos HTTP em: $CONFIG_FILE"
+            # Adiciona a configuração para restringir PUT e DELETE
+            echo "<LimitExcept GET POST OPTIONS>" >> "$CONFIG_FILE"
+            echo "    Require all denied" >> "$CONFIG_FILE"
+            echo "</LimitExcept>" >> "$CONFIG_FILE"
+
+            echo "Restrições aplicadas. Reiniciando o Apache..."
+            if systemctl is-active apache2 > /dev/null 2>&1; then
+                systemctl restart apache2
+            elif systemctl is-active httpd > /dev/null 2>&1; then
+                systemctl restart httpd
+            else
+                echo "Serviço Apache não encontrado ou não gerenciado pelo systemctl."
+            fi
+        done
+  else
+      echo "Nenhum arquivo de configuração do Apache encontrado."
+  fi
+}
+
+# Vulnerabilidade 17 & 18: FTP Brute Force Logins With Default Credentials Reporting
+# Solução: Alterar as senhas padrão do FTP.
+ftp_default_credentials_warning() {
+  echo "AVISO: Detectadas senhas padrão no FTP. Altere-as imediatamente!"
+}
+
+# Vulnerabilidade 20: rsh Unencrypted Cleartext Login
+# Solução: Desabilitar o serviço rsh.
+disable_rsh() {
+  echo "Desabilitando o serviço rsh..."
+  if systemctl is-enabled rsh > /dev/null 2>&1; then
+    systemctl stop rsh
+    systemctl disable rsh
+  else
+    echo "Serviço rsh não encontrado ou não gerenciado pelo systemctl."
+  fi
+  # Remover também do inetd/xinetd se estiver sendo usado
+  if [ -f /etc/inetd.conf ]; then
+    sed -i '/^rsh/s/^/#/' /etc/inetd.conf
+    echo "rsh comentado em /etc/inetd.conf. Reinicie o inetd para aplicar as alterações."
+  elif [ -d /etc/xinetd.d ]; then
+    if [ -f /etc/xinetd.d/rsh ]; then
+      echo "rsh encontrado em /etc/xinetd.d. Desabilitando..."
+      echo "disable = yes" >> /etc/xinetd.d/rsh
+      service xinetd restart
+    fi
+  fi
+}
+
+# Vulnerabilidade 21: SSL/TLS: OpenSSL CCS Man in the Middle Security Bypass Vulnerability
+# Requer atualização do OpenSSL (fora do escopo, apenas dica)
+openssl_ccs_warning() {
+  echo "AVISO: Vulnerabilidade no OpenSSL detectada (CCS Injection). Recomenda-se atualizar o OpenSSL."
+  if [[ "$OS" == "Debian" || "$OS" == "Ubuntu" ]]; then
+    echo "Tente: sudo apt-get update && sudo apt-get install openssl"
+  elif [[ "$OS" == "CentOS" || "$OS" == "RHEL" ]]; then
+    echo "Tente: sudo yum update openssl"
+  fi
+}
+
+# Vulnerabilidade 22: Multiple Vendors STARTTLS Implementation Plaintext Arbitrary Command Injection Vulnerability
+# Requer atualização dos serviços afetados (fora do escopo, apenas dica)
+starttls_injection_warning() {
+  echo "AVISO: Vulnerabilidade STARTTLS detectada. Atualize o Postfix ou outro serviço de email afetado."
+}
+
+# Vulnerabilidade 24: Anonymous FTP Login Reporting
+# Solução: Desabilitar o login anônimo no FTP.
+disable_anonymous_ftp() {
+  echo "Desabilitando o login anônimo no FTP..."
+  FTP_CONFIG_FILES=$(find /etc -name vsftpd.conf) # Ajuste conforme o servidor FTP usado
+  if [ -n "$FTP_CONFIG_FILES" ]; then
+    for CONFIG_FILE in $FTP_CONFIG_FILES; do
+      sed -i 's/^anonymous_enable=YES/anonymous_enable=NO/' "$CONFIG_FILE"
+      echo "Login anônimo desabilitado em $CONFIG_FILE"
+    done
+    if systemctl is-active vsftpd > /dev/null 2>&1; then
+      systemctl restart vsftpd
+    else
+      echo "Serviço vsftpd não encontrado ou não gerenciado pelo systemctl."
+    fi
+  else
+    echo "Nenhum arquivo de configuração do FTP (vsftpd.conf) encontrado."
+  fi
+}
+
+# Vulnerabilidade 25 & 55: jQuery < 1.9.0 XSS Vulnerability
+# Solução: Remover ou atualizar jQuery (difícil automatizar a atualização).
+jquery_xss_warning() {
+  echo "AVISO: Versão vulnerável do jQuery detectada. Recomenda-se remover ou atualizar."
+  echo "Arquivo afetado: /mutillidae/javascript/ddsmoothmenu/jquery.min.js"
+}
+
+# Vulnerabilidade 28 & 29 & 50 & 54: SSL/TLS: Deprecated SSLv2, SSLv3, TLSv1.0 and TLSv1.1 Protocol Detection
+# Solução: Desabilitar protocolos SSLv2, SSLv3, TLSv1.0 e TLSv1.1.
+disable_deprecated_tls() {
+  echo "Desabilitando protocolos SSLv2, SSLv3, TLSv1.0 e TLSv1.1..."
+
+  # Postfix (SMTP)
+  if [ -f /etc/postfix/main.cf ]; then
+    echo "Configurando Postfix para desabilitar SSLv2, SSLv3, TLSv1.0 e TLSv1.1..."
+    sed -i 's/^smtpd_tls_protocols =.*/smtpd_tls_protocols = !SSLv2, !SSLv3, !TLSv1, !TLSv1.1/' /etc/postfix/main.cf
+    sed -i 's/^smtp_tls_protocols =.*/smtp_tls_protocols = !SSLv2, !SSLv3, !TLSv1, !TLSv1.1/' /etc/postfix/main.cf
+    systemctl restart postfix
+    echo "Postfix reconfigurado e reiniciado."
+  else
+    echo "Postfix não detectado."
+  fi
+
+  # PostgreSQL
+  if [ -f /etc/postgresql/*/postgresql.conf ]; then
+    echo "Configurando PostgreSQL para desabilitar SSLv2, SSLv3, TLSv1.0 e TLSv1.1..."
+    PG_CONFIG_FILES=$(find /etc/postgresql -name postgresql.conf)
+    for CONFIG_FILE in $PG_CONFIG_FILES; do
+        sed -i "s/^ssl_min_protocol =.*/ssl_min_protocol = 'TLSv1.2'/" "$CONFIG_FILE"
+        echo "PostgreSQL reconfigurado em $CONFIG_FILE."
+    done
+    systemctl restart postgresql
+    echo "PostgreSQL reconfigurado e reiniciado."
+  else
+    echo "PostgreSQL não detectado."
+  fi
+}
+
+# Vulnerabilidade 30: SSL/TLS: Report Weak Cipher Suites
+weak_ciphers_warning() {
+  echo "AVISO: Ciphers Suites fracas detectadas. Recomenda-se desabilitá-las."
+}
+
+# Vulnerabilidade 31: HTTP Debugging Methods (TRACE/TRACK) Enabled
+# Solução: Desabilitar os métodos TRACE e TRACK no Apache.
+disable_http_trace() {
+  echo "Desabilitando o método HTTP TRACE no Apache..."
+  APACHE_CONFIG_FILES=$(find /etc/apache2 /etc/httpd -name httpd.conf -o -name apache2.conf)
+
+  if [ -n "$APACHE_CONFIG_FILES" ]; then
+    for CONFIG_FILE in $APACHE_CONFIG_FILES; do
+      if grep -q "TraceEnable" "$CONFIG_FILE"; then
+        sed -i 's/^TraceEnable On/TraceEnable Off/' "$CONFIG_FILE"
+        echo "TraceEnable desabilitado em $CONFIG_FILE"
+      else
+        echo "Adicionando TraceEnable Off em $CONFIG_FILE"
+        echo "TraceEnable Off" >> "$CONFIG_FILE"
+      fi
+      if systemctl is-active apache2 > /dev/null 2>&1; then
+          systemctl restart apache2
+      elif systemctl is-active httpd > /dev/null 2>&1; then
+          systemctl restart httpd
+      else
+          echo "Serviço Apache não encontrado ou não gerenciado pelo systemctl."
+      fi
+    done
+  else
+    echo "Nenhum arquivo de configuração do Apache encontrado."
+  fi
+}
+
+# Vulnerabilidade 32 & 33: SSL/TLS: Server Certificate / Certificate in Chain with RSA keys less than 2048 bits
+weak_rsa_key_warning() {
+  echo "AVISO: Certificado SSL/TLS com chave RSA menor que 2048 bits detectado. Recomenda-se substituir o certificado."
+}
+
+# Vulnerabilidade 34: Weak Key Exchange (KEX) Algorithm(s) Supported (SSH)
+# Solução: Desabilitar algoritmos KEX fracos no SSH.
+disable_weak_kex() {
+  echo "Desabilitando algoritmos KEX fracos no SSH..."
+  if [ -f /etc/ssh/sshd_config ]; then
+    sed -i '/^KexAlgorithms/s/KexAlgorithms/#KexAlgorithms/' /etc/ssh/sshd_config
+    echo "KexAlgorithms comentado em /etc/ssh/sshd_config. Use uma configuração segura."
+    systemctl restart sshd
+    echo "sshd reiniciado."
+  else
+    echo "Arquivo de configuração do SSH (/etc/ssh/sshd_config) não encontrado."
+  fi
+}
+
+# Vulnerabilidade 35: phpinfo() Output Reporting (HTTP)
+# Solução: Remover os arquivos phpinfo().
+remove_phpinfo() {
+  echo "Removendo arquivos phpinfo() detectados..."
+  if [ -f /var/www/html/mutillidae/phpinfo.php ]; then
+    rm -f /var/www/html/mutillidae/phpinfo.php
+    echo "Arquivo /var/www/html/mutillidae/phpinfo.php removido."
+  fi
+  if [ -f /var/www/html/phpinfo.php ]; then
+    rm -f /var/www/html/phpinfo.php
+    echo "Arquivo /var/www/html/phpinfo.php removido."
+  fi
+}
+
+# Vulnerabilidade 36: Weak Host Key Algorithm(s) (SSH)
+disable_weak_host_key() {
+    echo "Desabilitando algoritmos de chave de host fracos no SSH..."
+    if [ -f /etc/ssh/sshd_config ]; then
+        # Remove a linha existente (se houver) e adiciona uma nova com algoritmos seguros
+        sed -i '/^HostKeyAlgorithms/d' /etc/ssh/sshd_config
+        echo "HostKeyAlgorithms ecdsa-sha2-nistp256-cert-v01@openssh.com,ecdsa-sha2-nistp384-cert-v01@openssh.com,ecdsa-sha2-nistp521-cert-v01@openssh.com,ssh-rsa-cert-v01@openssh.com,ecdsa-sha2-nistp256,ecdsa-sha2-nistp384,ecdsa-sha2-nistp521,ssh-rsa" >> /etc/ssh/sshd_config
+        echo "HostKeyAlgorithms configurado com algoritmos seguros. Reiniciando o sshd."
+        systemctl restart sshd
+    else
+        echo "Arquivo de configuração do SSH (/etc/ssh/sshd_config) não encontrado."
+    fi
+}
+
+# Vulnerabilidade 37: Check if Mailserver answer to VRFY and EXPN requests
+# Solução: Desabilitar VRFY e EXPN no Postfix.
+disable_vrfy_expn() {
+  echo "Desabilitando VRFY e EXPN no Postfix..."
+  if [ -f /etc/postfix/main.cf ]; then
+    sed -i 's/^disable_vrfy_command = no/disable_vrfy_command = yes/' /etc/postfix/main.cf
+    echo "VRFY desabilitado em /etc/postfix/main.cf"
+    systemctl restart postfix
+    echo "Postfix reiniciado."
+  else
+    echo "Arquivo de configuração do Postfix (/etc/postfix/main.cf) não encontrado."
+  fi
+}
+
+# Vulnerabilidade 38 & 39: SSL/TLS: Renegotiation DoS Vulnerability (CVE-2011-1473, CVE-2011-5094)
+# Solução: Desabilitar a renegotiation (requer configuração específica do serviço).
+renegotiation_dos_warning() {
+  echo "AVISO: Vulnerabilidade de Renegotiation DoS detectada. Recomenda-se desabilitar a renegotiation ou aplicar patches específicos do serviço."
+}
+
+# Vulnerabilidade 40 & 41: SSL/TLS: Certificate Expired
+# Solução: Substituir o certificado expirado.
+expired_certificate_warning() {
+  echo "AVISO: Certificado SSL/TLS expirado. Recomenda-se substituir o certificado."
+}
+
+# Vulnerabilidade 42 & 43: QWikiwiki directory traversal vulnerability & awiki <= 20100125 Multiple LFI Vulnerabilities - Active Check
+# Solução: Remover QWikiwiki ou Awiki (software descontinuado).
+remove_qwikiwiki_awiki() {
+  echo "Removendo QWikiwiki e Awiki..."
+  if [ -d /var/www/qwikiwiki ]; then
+    rm -rf /var/www/qwikiwiki
+    echo "Diretório /var/www/qwikiwiki removido."
+  elif [ -d /var/www/awiki ]; then
+    rm -rf /var/www/awiki
+    echo "Diretório /var/www/awiki removido."
+  else
+    echo "QWikiwiki ou Awiki não encontrados."
+  fi
+}
+
+# Vulnerabilidade 44: /doc directory browsable
+# Solução: Restringir acesso ao diretório /doc.
+restrict_doc_directory() {
+    echo "Restringindo acesso ao diretório /doc no Apache..."
+    APACHE_CONFIG_FILES=$(find /etc/apache2 /etc/httpd -name httpd.conf -o -name apache2.conf)
+    if [ -n "$APACHE_CONFIG_FILES" ]; then
+        for CONFIG_FILE in $APACHE_CONFIG_FILES; do
+            echo "Adicionando restrições ao diretório /doc em: $CONFIG_FILE"
+
+            # Adiciona a configuração para restringir o acesso ao diretório /usr/share/doc ou /usr/doc
+            echo "<Directory /usr/share/doc>" >> "$CONFIG_FILE"
+            echo "    Options None" >> "$CONFIG_FILE"
+            echo "    <FilesMatch \"\.([Pp][Hh][Pp]|[Pp][Hh][Tt][Mm][Ll]|[Pp][Hh][Tt][Mm])\">" >> "$CONFIG_FILE"
+            echo "       Require all denied" >> "$CONFIG_FILE"
+            echo "    </FilesMatch>" >> "$CONFIG_FILE"
+            echo "    Require all denied" >> "$CONFIG_FILE"
+            echo "</Directory>" >> "$CONFIG_FILE"
+
+            echo "<Directory /usr/doc>" >> "$CONFIG_FILE"
+            echo "    Options None" >> "$CONFIG_FILE"
+            echo "    <FilesMatch \"\.([Pp][Hh][Pp]|[Pp][Hh][Tt][Mm][Ll]|[Pp][Hh][Tt][Mm])\">" >> "$CONFIG_FILE"
+            echo "       Require all denied" >> "$CONFIG_FILE"
+            echo "    </FilesMatch>" >> "$CONFIG_FILE"
+            echo "    Require all denied" >> "$CONFIG_FILE"
+            echo "</Directory>" >> "$CONFIG_FILE"
+
+            echo "Restrições aplicadas. Reiniciando o Apache..."
+            if systemctl is-active apache2 > /dev/null 2>&1; then
+                systemctl restart apache2
+            elif systemctl is-active httpd > /dev/null 2>&1; then
+                systemctl restart httpd
+            else
+                echo "Serviço Apache não encontrado ou não gerenciado pelo systemctl."
+            fi
+        done
+    else
+        echo "Nenhum arquivo de configuração do Apache encontrado."
+    fi
+}
+
+# Vulnerabilidade 45: Telnet Unencrypted Cleartext Login
+# Solução: Desabilitar o serviço Telnet.
+disable_telnet() {
+  echo "Desabilitando o serviço Telnet..."
+  if systemctl is-enabled telnet.socket > /dev/null 2>&1; then
+    systemctl stop telnet.socket
+    systemctl disable telnet.socket
+  else
+    echo "Serviço Telnet não encontrado ou não gerenciado pelo systemctl."
+  fi
+  # Remover também do inetd/xinetd se estiver sendo usado
+  if [ -f /etc/inetd.conf ]; then
+    sed -i '/^telnet/s/^/#/' /etc/inetd.conf
+    echo "telnet comentado em /etc/inetd.conf. Reinicie o inetd para aplicar as alterações."
+  elif [ -d /etc/xinetd.d ]; then
+    if [ -f /etc/xinetd.d/telnet ]; then
+      echo "telnet encontrado em /etc/xinetd.d. Desabilitando..."
+      echo "disable = yes" >> /etc/xinetd.d/telnet
+      service xinetd restart
+    fi
+  fi
+}
+
+# Vulnerabilidade 46 & 48: FTP Unencrypted Cleartext Login
+# Solução: Forçar uso de FTPS ou desabilitar conexões não criptografadas.
+enforce_ftps() {
+  echo "Forçando o uso de FTPS..."
+  FTP_CONFIG_FILES=$(find /etc -name vsftpd.conf) # Ajuste conforme o servidor FTP usado
+  if [ -n "$FTP_CONFIG_FILES" ]; then
+    for CONFIG_FILE in $FTP_CONFIG_FILES; do
+      sed -i 's/^force_local_data_ssl=NO/force_local_data_ssl=YES/' "$CONFIG_FILE"
+      sed -i 's/^force_local_logins_ssl=NO/force_local_logins_ssl=YES/' "$CONFIG_FILE"
+      echo "FTPS forçado em $CONFIG_FILE"
+    done
+    if systemctl is-active vsftpd > /dev/null 2>&1; then
+      systemctl restart vsftpd
+    else
+      echo "Serviço vsftpd não encontrado ou não gerenciado pelo systemctl."
+    fi
+  else
+    echo "Nenhum arquivo de configuração do FTP (vsftpd.conf) encontrado."
+  fi
+}
+
+# Vulnerabilidade 47: VNC Server Unencrypted Data Transmission
+vnc_encryption_warning() {
+    echo "AVISO: O VNC está transmitindo dados sem criptografia. Configure para usar um tipo de segurança mais forte ou use um túnel SSH."
+}
+
+# Vulnerabilidade 49: Cleartext Transmission of Sensitive Information via HTTP
+http_cleartext_warning() {
+  echo "AVISO: Transmissão de informações sensíveis (senhas) via HTTP detectada. Configure o site para usar HTTPS e redirecione o tráfego HTTP para HTTPS."
+}
+
+# Vulnerabilidade 51: Weak Encryption Algorithm(s) Supported (SSH)
+disable_weak_ssh_ciphers() {
+    echo "Desabilitando algoritmos de criptografia fracos no SSH..."
+    if [ -f /etc/ssh/sshd_config ]; then
+        # Remove a linha existente (se houver) e adiciona uma nova com ciphers seguros
+        sed -i '/^Ciphers/d' /etc/ssh/sshd_config
+        echo "Ciphers chacha20-poly1305@openssh.com,aes256-gcm@openssh.com,aes128-gcm@openssh.com,aes256-ctr,aes192-ctr,aes128-ctr" >> /etc/ssh/sshd_config
+        echo "Ciphers configurado com algoritmos seguros. Reiniciando o sshd."
+        systemctl restart sshd
+    else
+        echo "Arquivo de configuração do SSH (/etc/ssh/sshd_config) não encontrado."
+    fi
+}
+
+# Vulnerabilidade 52: Apache HTTP Server httpOnly Cookie Information Disclosure Vulnerability
+# Solução: Atualizar o Apache HTTP Server.
+update_apache_warning() {
+    echo "AVISO: Vulnerabilidade de Cookie httpOnly no Apache detectada. Recomenda-se atualizar o Apache para a versão 2.2.22 ou superior."
+}
+
+# Vulnerabilidade 53: phpMyAdmin error.php Cross Site Scripting Vulnerability
+# Solução: Remover ou atualizar phpMyAdmin
+remove_phpmyadmin() {
+    echo "Removendo phpMyAdmin..."
+    if [ -d /var/www/phpMyAdmin ]; then
+        rm -rf /var/www/phpMyAdmin
+        echo "Diretório /var/www/phpMyAdmin removido."
+    elif [ -d /usr/share/phpmyadmin ]; then
+        rm -rf /usr/share/phpmyadmin
+        echo "Diretório /usr/share/phpmyadmin removido."
+    else
+        echo "phpMyAdmin não encontrado."
+    fi
+}
+
+# Vulnerabilidade 56 & 61: SSL/TLS: RSA Temporary Key Handling RSA_EXPORT Downgrade Issue (FREAK) & SSL/TLS: DHE_EXPORT MITM Security Bypass Vulnerability (LogJam)
+disable_export_ciphers() {
+    echo "Desabilitando ciphers de exportação (FREAK/Logjam)..."
+
+  # Postfix (SMTP)
+  if [ -f /etc/postfix/main.cf ]; then
+        echo "Configurando Postfix para desabilitar ciphers de exportação..."
+        sed -i 's/^smtpd_tls_exclude_ciphers =.*/smtpd_tls_exclude_ciphers = aNULL, eNULL, EXPORT, DES, RC4, MD5, PSK, aECDH, EDH-DSS-DES-CBC3-SHA, EDH-RSA-DES-CBC3-SHA, kDHd, kDHE, kECDHe, kEECDHe/' /etc/postfix/main.cf
+        sed -i 's/^smtp_tls_exclude_ciphers =.*/smtp_tls_exclude_ciphers = aNULL, eNULL, EXPORT, DES, RC4, MD5, PSK, aECDH, EDH-DSS-DES-CBC3-SHA, EDH-RSA-DES-CBC3-SHA, kDHd, kDHE, kECDHe, kEECDHe/' /etc/postfix/main.cf
+        systemctl restart postfix
+        echo "Postfix reconfigurado e reiniciado."
+  else
+        echo "Postfix não detectado."
+  fi
+
+  # Apache
+  APACHE_CONFIG_FILES=$(find /etc/apache2 /etc/httpd -name ssl.conf -o -name apache2.conf -o -name httpd.conf)
+  if [ -n "$APACHE_CONFIG_FILES" ]; then
+    for CONFIG_FILE in $APACHE_CONFIG_FILES; do
+      echo "Modificando $CONFIG_FILE para remover ciphers de exportação..."
+      if grep -q "SSLProtocol" "$CONFIG_FILE"; then
+        sed -i 's/^SSLProtocol.*/SSLProtocol All -SSLv2 -SSLv3 -TLSv1 -TLSv1.1/' "$CONFIG_FILE"
+      else
+        echo "SSLProtocol All -SSLv2 -SSLv3 -TLSv1 -TLSv1.1" >> "$CONFIG_FILE"
+      fi
+
+      if grep -q "SSLCipherSuite" "$CONFIG_FILE"; then
+        sed -i 's/^SSLCipherSuite.*/SSLCipherSuite EECDH+AESGCM:EDH+AESGCM:AES256+EECDH:AES256+EDH/' "$CONFIG_FILE"
+      else
+        echo "SSLCipherSuite EECDH+AESGCM:EDH+AESGCM:AES256+EECDH:AES256+EDH" >> "$CONFIG_FILE"
+      fi
+      if systemctl is-active apache2 > /dev/null 2>&1; then
+          systemctl restart apache2
+      elif systemctl is-active httpd > /dev/null 2>&1; then
+          systemctl restart httpd
+      else
+          echo "Serviço Apache não encontrado ou não gerenciado pelo systemctl."
+      fi
+    done
+  else
+    echo "Nenhum arquivo de configuração SSL do Apache encontrado."
+  fi
+}
+
+# Vulnerabilidade 57 & 60: SSL/TLS: Certificate Signed Using A Weak Signature Algorithm
+weak_signature_algorithm_warning() {
+  echo "AVISO: Certificado SSL/TLS assinado com algoritmo de hash fraco detectado. Recomenda-se obter um novo certificado SHA-2."
+}
+
+# Vulnerabilidade 58 & 59: SSL/TLS: Diffie-Hellman Key Exchange Insufficient DH Group Strength Vulnerability
+insufficient_dh_group_strength_warning() {
+  echo "AVISO: Chaves Diffie-Hellman com tamanho insuficiente detectadas. Recomenda-se usar ECDHE ou chaves DH maiores (>= 2048 bits)."
+}
+
+# Vulnerabilidade 62 & 63: SSL/TLS: SSLv3 Protocol CBC Cipher Suites Information Disclosure Vulner

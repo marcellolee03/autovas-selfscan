@@ -1,0 +1,35 @@
+#!/bin/bash
+
+apt update -y
+apt full-upgrade -y
+
+declare -a jquery_paths=(
+    "/var/www/html/js/jquery-1.8.3.min.js"
+    "/var/www/html/opscenter/webcommon/js/jquery-1.8.3.min.js"
+    "/var/www/html/console/js/jquery-1.8.3.min.js"
+)
+fixed_js_url="https://code.jquery.com/jquery-1.12.4.min.js"
+
+for path in "${jquery_paths[@]}"; do
+    if [ -f "$path" ]; then
+        wget -qO "${path}" "$fixed_js_url"
+    fi
+done
+
+mkdir -p /etc/ssh/sshd_config.d
+cat > /etc/ssh/sshd_config.d/disable_weak.conf << 'EOL'
+HostKeyAlgorithms ecdsa-sha2-nistp256-cert-v01@openssh.com,ecdsa-sha2-nistp384-cert-v01@openssh.com,ecdsa-sha2-nistp521-cert-v01@openssh.com,rsa-sha2-512,rsa-sha2-256,ssh-rsa
+KexAlgorithms curve25519-sha256,curve25519-sha256@libssh.org,diffie-hellman-group-exchange-sha256
+Ciphers chacha20-poly1305@openssh.com,aes256-gcm@openssh.com,aes128-gcm@openssh.com,aes256-ctr,aes192-ctr,aes128-ctr
+MACs hmac-sha2-256-etm@openssh.com,hmac-sha2-512-etm@openssh.com,umac-128-etm@openssh.com
+EOL
+
+dpkg -l | grep -q '^ii.*telnetd' && apt remove -y telnetd
+
+echo "net.ipv4.tcp_timestamps = 0" > /etc/sysctl.d/99-disable-tcp-timestamps.conf
+
+iptables -A INPUT -p icmp --icmp-type timestamp-request -j DROP >/dev/null 2>&1
+iptables -A INPUT -p tcp --dport 135 -j DROP >/dev/null 2>&1
+
+sysctl -p /etc/sysctl.d/99-disable-tcp-timestamps.conf >/dev/null
+systemctl restart sshd

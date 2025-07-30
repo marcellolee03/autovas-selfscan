@@ -1,0 +1,59 @@
+#!/bin/bash
+
+# Define as variáveis
+arquivo_vulneravel="/console/framework/../js/jquery-1.8.3.min.js"
+url_jquery_novo="https://code.jquery.com/jquery-1.9.0.min.js"
+diretorio_destino=$(dirname "$arquivo_vulneravel")
+nome_arquivo_novo="jquery-1.9.0.min.js"
+caminho_completo_novo="$diretorio_destino/$nome_arquivo_novo"
+
+# Garante que o diretório exista
+mkdir -p "$diretorio_destino"
+
+# Faz o backup do arquivo vulnerável
+if [ -f "$arquivo_vulneravel" ]; then
+  mv "$arquivo_vulneravel" "$arquivo_vulneravel.bak"
+  echo "Backup do arquivo vulnerável '$arquivo_vulneravel' criado como '$arquivo_vulneravel.bak'"
+else
+  echo "Arquivo vulnerável '$arquivo_vulneravel' não encontrado. Verificando se existe em outros caminhos..."
+  find / -name "jquery-1.8.3.min.js" 2>/dev/null | while read -r found_file; do
+    if grep -q "jQuery JavaScript Library v1.8.3" "$found_file"; then
+      arquivo_vulneravel="$found_file"
+      diretorio_destino=$(dirname "$arquivo_vulneravel")
+      mv "$arquivo_vulneravel" "$arquivo_vulneravel.bak"
+      echo "Backup do arquivo vulnerável '$arquivo_vulneravel' criado como '$arquivo_vulneravel.bak'"
+      break
+    fi
+  done
+  if [ ! -f "$arquivo_vulneravel.bak" ]; then
+      echo "Arquivo vulnerável não encontrado em nenhum local conhecido. A correção não pode prosseguir."
+      exit 1
+  fi
+fi
+
+# Baixa a nova versão do jQuery
+wget -q "$url_jquery_novo" -O "$caminho_completo_novo"
+
+# Verifica se o download foi bem-sucedido
+if [ -f "$caminho_completo_novo" ]; then
+  echo "Nova versão do jQuery (1.9.0) baixada com sucesso para '$caminho_completo_novo'"
+  # Atualiza as referências no código
+  find / -type f -name "*.html" -o -name "*.php" -o -name "*.js" 2>/dev/null | while read -r file; do
+    if grep -q "$arquivo_vulneravel" "$file"; then
+      sed -i "s|$arquivo_vulneravel|$caminho_completo_novo|g" "$file"
+      echo "Referência atualizada em: $file"
+    fi
+    if grep -q "$(basename $arquivo_vulneravel)" "$file"; then
+      sed -i "s|$(basename $arquivo_vulneravel)|$(basename $caminho_completo_novo)|g" "$file"
+      echo "Referência atualizada em: $file"
+    fi
+  done
+else
+  echo "Falha ao baixar a nova versão do jQuery."
+  echo "Restaurando o arquivo original."
+  mv "$arquivo_vulneravel.bak" "$arquivo_vulneravel"
+  exit 1
+fi
+
+echo "Vulnerabilidade CVE-2012-6708 corrigida com sucesso."
+exit 0

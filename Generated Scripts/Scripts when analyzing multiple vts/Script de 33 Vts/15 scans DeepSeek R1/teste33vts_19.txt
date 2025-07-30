@@ -1,0 +1,52 @@
+#!/bin/bash
+
+if [ "$(id -u)" != "0" ]; then
+    echo "Este script requer privilégios de superusuário. Execute com sudo." >&2
+    exit 1
+fi
+
+# Atualizar Proxmox VE e sistema (Vulnerabilidade 1)
+grep -q "proxmox" /etc/apt/sources.list && \
+    apt update && \
+    apt-get -y dist-upgrade && \
+    pveam update
+
+# Desativar Telnet (Vulnerabilidade 11)
+systemctl stop telnet.socket 2>/dev/null
+systemctl disable telnet.socket 2>/dev/null
+apt-get remove -y --purge telnetd
+
+# Configurar SSH (Vulnerabilidades 7,8,9,13,14,15,16,19,21,22)
+cp /etc/ssh/sshd_config /etc/ssh/sshd_config.bak
+sed -i '/^\s*HostKeyAlgorithms/d' /etc/ssh/sshd_config
+sed -i '/^\s*KexAlgorithms/d' /etc/ssh/sshd_config
+sed -i '/^\s*Ciphers/d' /etc/ssh/sshd_config
+sed -i '/^\s*MACs/d' /etc/ssh/sshd_config
+
+echo -e "\nHostKeyAlgorithms ecdsa-sha2-nistp256-cert-v01@openssh.com,ecdsa-sha2-nistp384-cert-v01@openssh.com,ecdsa-sha2-nistp521-cert-v01@openssh.com,ssh-ed25519-cert-v01@openssh.com,rsa-sha2-512-cert-v01@openssh.com,rsa-sha2-256-cert-v01@openssh.com,ssh-rsa-cert-v01@openssh.com,ecdsa-sha2-nistp256,ecdsa-sha2-nistp384,ecdsa-sha2-nistp521,ssh-ed25519,rsa-sha2-512,rsa-sha2-256,ssh-rsa" >> /etc/ssh/sshd_config
+echo "KexAlgorithms curve25519-sha256,curve25519-sha256@libssh.org,diffie-hellman-group-exchange-sha256" >> /etc/ssh/sshd_config
+echo "Ciphers chacha20-poly1305@openssh.com,aes256-gcm@openssh.com,aes128-gcm@openssh.com,aes256-ctr,aes192-ctr,aes128-ctr" >> /etc/ssh/sshd_config
+echo "MACs hmac-sha2-512-etm@openssh.com,hmac-sha2-256-etm@openssh.com,umac-128-etm@openssh.com" >> /etc/ssh/sshd_config
+
+systemctl restart ssh
+
+# Configurar TCP (Vulnerabilidades 17,18,20,23,24,25)
+grep -q "net.ipv4.tcp_timestamps" /etc/sysctl.conf || \
+    echo "net.ipv4.tcp_timestamps = 0" >> /etc/sysctl.conf
+sysctl -p
+
+# Bloquear ICMP Timestamp (Vulnerabilidades 26-32)
+iptables -A INPUT -p icmp --icmp-type timestamp-request -j DROP
+iptables -A INPUT -p icmp --icmp-type timestamp-reply -j DROP
+
+# Configurar TLS/SSL (Vulnerabilidade 12)
+if dpkg -s xrdp >/dev/null 2>&1; then
+    sed -i 's/^tses.*/tls_ciphers=HIGH:!aNULL:!TLSv1:!TLSv1.0:!TLSv1.1/' /etc/xrdp/xrdp.ini
+    systemctl restart xrdp
+fi
+
+# Atualizar jQuery manualmente (Vulnerabilidades 2,3,4,5,6)
+find /var/www /usr/share -type f -name 'jquery-1.8.3.min.js' | while read -r file; do
+    cp -- "$file" "${file}.bak"
+    curl -s https://code.jquery.com/jquery-1.9.1.min.js -o "$file"
+done

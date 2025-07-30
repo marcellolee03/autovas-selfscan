@@ -1,0 +1,106 @@
+#!/bin/bash
+# Verifica se o script está sendo executado como root
+if [ "$EUID" -ne 0 ]; then
+  echo "Por favor, execute como root."
+  exit 1
+fi
+
+# Atualiza o TWiki para a versão 4.2.4 ou superior
+apt-get update
+apt-get install -y twiki
+
+# Configura o Distributed Ruby (dRuby/DRb) para usar $SAFE >= 2
+echo "$SAFE >= 2" >> /etc/drb.conf
+
+# Desabilita o serviço rlogin
+systemctl stop rlogin
+systemctl disable rlogin
+
+# Atualiza o sistema operacional para uma versão suportada
+apt-get update
+apt-get dist-upgrade -y
+
+# Desabilita o serviço rexec
+systemctl stop rexec
+systemctl disable rexec
+
+# Limpa o sistema para remover possíveis backdoors usando Ingreslock
+apt-get remove --purge ingreslock
+find / -name ingreslock -exec rm -f {} \;
+
+# Atualiza o Apache Tomcat para a versão 7.0.100, 8.5.51 ou 9.0.31
+apt-get update
+apt-get install -y tomcat9
+
+# Altera a senha padrão do MySQL
+mysql -u root -e "ALTER USER 'root'@'localhost' IDENTIFIED BY 'nova_senha_forte'; FLUSH PRIVILEGES;"
+
+# Atualiza o PHP para a versão 5.6.30 ou superior
+apt-get update
+apt-get install -y php5.6
+
+# Desabilita os métodos HTTP PERIGOSOS (PUT e DELETE) no Apache
+sed -i 's/AllowOverride None/AllowOverride None\n    <LimitExcept GET POST>\n        deny from all\n    <\/LimitExcept>/' /etc/apache2/apache2.conf
+systemctl restart apache2
+
+# Desabilita o serviço vsftpd e remove o pacote
+systemctl stop vsftpd
+systemctl disable vsftpd
+apt-get remove --purge vsftpd
+
+# Desabilita o serviço distcc
+systemctl stop distcc
+systemctl disable distcc
+
+# Changed PostgreSQL Password
+sudo -u postgres psql -c "ALTER USER postgres WITH PASSWORD 'nova_senha_forte';"
+
+# Disable VNC Brute Force Login
+systemctl stop vncserver
+systemctl disable vncserver
+
+# Desabilita FTP Brute Force Logins With Default Credentials
+sed -i 's/anonymous_enable=YES/anonymous_enable=NO/' /etc/vsftpd.conf
+systemctl restart vsftpd
+
+# Desabilita o serviço telnet
+systemctl stop telnet
+systemctl disable telnet
+
+# Desabilita o serviço FTP Unencrypted Cleartext Login
+sed -i 's/ssl_enable=NO/ssl_enable=YES/' /etc/vsftpd.conf
+systemctl restart vsftpd
+
+# Desabilita o serviço VNC Server Unencrypted Data Transmission
+systemctl stop vncserver
+systemctl disable vncserver
+
+# Enforce SSL/TLS for Sensitive Information Transmission
+a2enmod ssl
+systemctl restart apache2
+
+# Disable Weak Encryption Algorithm(s) Supported (SSH)
+echo "Ciphers aes128-ctr,aes192-ctr,aes256-ctr" >> /etc/ssh/sshd_config
+systemctl restart sshd
+
+# Disable Weak MAC Algorithm(s) Supported (SSH)
+echo "MACs hmac-sha2-256,hmac-sha2-512" >> /etc/ssh/sshd_config
+systemctl restart sshd
+
+# Disable Weak Key Exchange (KEX) Algorithm(s) Supported (SSH)
+echo "KexAlgorithms curve25519-sha256@libssh.org" >> /etc/ssh/sshd_config
+systemctl restart sshd
+
+# Disable SSLv3 and TLSv1.0 protocols on Apache
+sed -i 's/SSLProtocol all/SSLProtocol -all +TLSv1.2 +TLSv1.3/' /etc/apache2/mods-enabled/ssl.conf
+systemctl restart apache2
+
+# Disable SSLv3 and TLSv1.0 protocols on Postfix
+postconf -e "smtpd_tls_protocols = !SSLv2, !SSLv3"
+systemctl restart postfix
+
+# Disable SSLv3 and TLSv1.0 protocols on PostgreSQL
+sed -i 's/ssl_min_protocol_version = '\'TLSv1\''/ssl_min_protocol_version = '\'TLSv1.2\''/' /etc/postgresql/*/main/postgresql.conf
+systemctl restart postgresql
+
+exit 0

@@ -1,0 +1,43 @@
+#!/bin/bash
+set -e
+
+if [ -f /etc/os-release ]; then
+    . /etc/os-release
+    if [ "$VERSION_ID" = "11" ]; then
+        sed -i 's/bullseye/bookworm/g' /etc/apt/sources.list
+        [ -f /etc/apt/sources.list.d/pve-enterprise.list ] && sed -i 's/bullseye/bookworm/g' /etc/apt/sources.list.d/pve-enterprise.list
+        [ -f /etc/apt/sources.list.d/ceph.list ] && sed -i 's/bullseye/bookworm/g' /etc/apt/sources.list.d/ceph.list
+        apt-get update -y
+        apt-get upgrade -y
+        apt-get dist-upgrade -y
+        apt-get autoremove -y
+    fi
+fi
+
+cp /etc/ssh/sshd_config /etc/ssh/sshd_config.bak
+settings=(
+    "KexAlgorithms curve25519-sha256,curve25519-sha256@libssh.org,diffie-hellman-group18-sha512,ecdh-sha2-nistp521,ecdh-sha2-nistp384,ecdh-sha2-nistp256"
+    "Ciphers chacha20-poly1305@openssh.com,aes256-gcm@openssh.com,aes128-gcm@openssh.com,aes256-ctr,aes192-ctr,aes128-ctr"
+    "MACs hmac-sha2-512-etm@openssh.com,hmac-sha2-256-etm@openssh.com,umac-128-etm@openssh.com"
+    "HostKeyAlgorithms ssh-ed25519,ssh-ed25519-cert-v01@openssh.com,rsa-sha2-256,rsa-sha2-512,rsa-sha2-256-cert-v01@openssh.com,rsa-sha2-512-cert-v01@openssh.com"
+)
+for param_val in "${settings[@]}"; do
+    param=$(echo "$param_val" | awk '{print $1}')
+    sed -i "/^${param}/Id" /etc/ssh/sshd_config
+    sed -i "/^#\s*${param}/Id" /etc/ssh/sshd_config
+    echo "$param_val" >> /etc/ssh/sshd_config
+done
+systemctl restart ssh
+
+apt-get remove -y --purge telnetd
+
+echo "net.ipv4.tcp_timestamps = 0" >> /etc/sysctl.conf
+sysctl -p
+
+iptables -A INPUT -p icmp --icmp-type 13 -j DROP
+if command -v netfilter-persistent &> /dev/null; then
+    netfilter-persistent save
+else
+    mkdir -p /etc/iptables
+    iptables-save > /etc/iptables/rules.v4
+fi

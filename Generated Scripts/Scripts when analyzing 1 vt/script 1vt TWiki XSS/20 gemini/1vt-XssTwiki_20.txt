@@ -1,0 +1,85 @@
+```sh
+#!/bin/bash
+
+# Verifica se o TWiki está instalado (uma verificação básica)
+if ! which twiki > /dev/null; then
+  echo "TWiki não encontrado. Verifique se está instalado corretamente."
+  exit 1
+fi
+
+# Obtém a versão atual do TWiki (método simplificado, pode precisar ajuste)
+current_version=$(grep -oP '(?<= \$TWiki::cfg{Release} = \').*?(?=\';)' /var/www/twiki/lib/TWiki.cfg 2>/dev/null | head -n 1)
+
+# Define a versão fixa
+fixed_version="4.2.4"
+
+# Função para comparar versões (simplificada para este contexto)
+compare_versions() {
+  local v1="$1"
+  local v2="$2"
+  local IFS=.
+  local -a arr1 arr2
+  read -ra arr1 <<< "$v1"
+  read -ra arr2 <<< "$v2"
+  local i
+  for ((i=0; i<${#arr1[@]}; i++)); do
+    if [[ ${arr1[$i]} -gt ${arr2[$i]} ]]; then
+      echo 1 # v1 > v2
+      return
+    elif [[ ${arr1[$i]} -lt ${arr2[$i]} ]]; then
+      echo -1 # v1 < v2
+      return
+    fi
+  done
+  echo 0 # v1 == v2
+}
+
+# Compara a versão atual com a versão fixa
+comparison=$(compare_versions "$current_version" "$fixed_version")
+
+# Atualiza o TWiki se a versão atual for anterior à versão fixa
+if [[ "$comparison" -lt 0 ]]; then
+  echo "Atualizando TWiki para a versão $fixed_version..."
+
+  # 1. Backup da instalação existente (importante!)
+  backup_dir="/var/www/twiki_backup_$(date +%Y%m%d%H%M%S)"
+  mkdir -p "$backup_dir"
+  cp -r /var/www/twiki "$backup_dir"
+  echo "Backup da instalação atual criado em: $backup_dir"
+
+  # 2. Download da versão 4.2.4 (ou uma versão mais recente se disponível)
+  #    Esta parte é crítica e pode precisar de adaptação dependendo
+  #    de onde e como o TWiki é distribuído. O exemplo abaixo usa SourceForge.
+  download_url="https://sourceforge.net/projects/twiki/files/TWiki%204.2.x/TWiki-4.2.4.tgz/download"
+  downloaded_file="TWiki-4.2.4.tgz"
+
+  cd /tmp
+  wget -O "$downloaded_file" "$download_url"
+
+  # 3. Extrai o arquivo
+  tar -xzf "$downloaded_file"
+
+  # 4. Remove a instalação antiga (APÓS O BACKUP!)
+  rm -rf /var/www/twiki
+
+  # 5. Move a nova instalação para o diretório correto
+  mv /tmp/twiki /var/www/twiki # Assumindo que a pasta extraída é chamada 'twiki'
+
+  # 6. Define as permissões corretas (adapte conforme necessário)
+  chown -R www-data:www-data /var/www/twiki
+  chmod -R 755 /var/www/twiki/pub
+  chmod -R 777 /var/www/twiki/data
+  chmod -R 777 /var/www/twiki/templates
+
+  echo "TWiki atualizado para a versão $fixed_version com sucesso."
+
+  # 7. Limpa os arquivos temporários
+  rm -f "$downloaded_file"
+  rm -rf /tmp/twiki
+
+else
+  echo "TWiki já está na versão $fixed_version ou superior. Nenhuma ação necessária."
+fi
+
+exit 0
+```

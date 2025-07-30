@@ -1,0 +1,44 @@
+```bash
+#!/bin/bash
+
+# Identifica o serviço que está usando TLSv1.0 na porta 5432
+# Este script assume que o serviço é o PostgreSQL, que usa a porta 5432 por padrão.
+# Se não for PostgreSQL, ajuste os comandos abaixo conforme necessário.
+
+# 1. Localiza o arquivo de configuração do PostgreSQL.
+PG_CONF=$(find /etc/postgresql/ -name postgresql.conf | head -n 1)
+
+if [ -z "$PG_CONF" ]; then
+  echo "Arquivo postgresql.conf não encontrado. Verifique a instalação do PostgreSQL."
+  exit 1
+fi
+
+# 2. Modifica o arquivo postgresql.conf para desabilitar TLSv1.0 e TLSv1.1 e habilitar TLSv1.2 e TLSv1.3.
+# Adiciona ou modifica a linha ssl_min_protocol para 'TLSv1.2'.
+if grep -q "ssl_min_protocol" "$PG_CONF"; then
+  sed -i "s/^ssl_min_protocol.*/ssl_min_protocol = 'TLSv1.2'/g" "$PG_CONF"
+else
+  echo "ssl_min_protocol = 'TLSv1.2'" >> "$PG_CONF"
+fi
+
+# Garante que o SSL esteja habilitado
+if ! grep -q "ssl = on" "$PG_CONF"; then
+  if grep -q "ssl =" "$PG_CONF"; then
+    sed -i "s/^ssl =.*/ssl = on/g" "$PG_CONF"
+  else
+    echo "ssl = on" >> "$PG_CONF"
+  fi
+fi
+
+# 3. Reinicia o serviço PostgreSQL para aplicar as alterações.
+if systemctl is-active postgresql > /dev/null 2>&1; then
+  systemctl restart postgresql
+  echo "Serviço PostgreSQL reiniciado."
+else
+  echo "Serviço PostgreSQL não está em execução. Verifique a instalação."
+  exit 1
+fi
+
+echo "Correção aplicada. TLSv1.0 e TLSv1.1 desabilitados para PostgreSQL."
+exit 0
+```

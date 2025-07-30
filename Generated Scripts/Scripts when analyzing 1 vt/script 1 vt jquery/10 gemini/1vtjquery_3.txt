@@ -1,0 +1,46 @@
+```bash
+#!/bin/bash
+
+# Define as variáveis
+TARGET_FILE="/var/www/html/console/framework/js/jquery-1.8.3.min.js"
+BACKUP_FILE="${TARGET_FILE}.bak"
+NEW_VERSION_URL="https://code.jquery.com/jquery-1.9.0.min.js"
+
+# Cria um diretório de backup se não existir
+BACKUP_DIR="/var/www/html/console/framework/js/backup"
+if [ ! -d "$BACKUP_DIR" ]; then
+  mkdir -p "$BACKUP_DIR"
+fi
+
+# Verifica se o arquivo existe
+if [ ! -f "$TARGET_FILE" ]; then
+  echo "Arquivo jQuery vulnerável não encontrado em: $TARGET_FILE"
+  exit 1
+fi
+
+# Faz backup do arquivo existente
+cp "$TARGET_FILE" "$BACKUP_FILE"
+echo "Backup do arquivo existente criado em: $BACKUP_FILE"
+
+# Remove o arquivo vulnerável
+rm -f "$TARGET_FILE"
+
+# Baixa a nova versão do jQuery
+wget -q "$NEW_VERSION_URL" -O "$TARGET_FILE"
+
+# Verifica se o download foi bem-sucedido
+if [ -f "$TARGET_FILE" ]; then
+  echo "jQuery atualizado com sucesso para a versão 1.9.0 em: $TARGET_FILE"
+else
+  echo "Falha ao baixar a nova versão do jQuery."
+  echo "Restaurando o arquivo de backup..."
+  cp "$BACKUP_FILE" "$TARGET_FILE"
+  echo "Arquivo restaurado para a versão anterior."
+  exit 1
+fi
+
+# Limpeza: remover arquivo de backup
+rm -f "$BACKUP_FILE"
+
+exit 0
+```

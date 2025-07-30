@@ -1,0 +1,38 @@
+#!/bin/bash
+set -e
+
+TWIKI_PATHS=("/var/www/twiki" "/usr/local/twiki" "/home/twiki")
+BACKUP_DIR="/var/backups"
+TWIKI_URL="https://sourceforge.net/projects/twiki/files/TWiki%20for%20all%20Platforms/TWiki%204.2.4/twiki-4.2.4.tar.gz"
+
+# Encontrar instalação do TWiki
+twiki_path=""
+for path in "${TWIKI_PATHS[@]}"; do
+    if [ -d "$path" ]; then
+        twiki_path="$path"
+        break
+    fi
+done
+
+if [ -z "$twiki_path" ]; then
+    echo "TWiki installation not found" >&2
+    exit 1
+fi
+
+backup_dir="$BACKUP_DIR/twiki_backup_$(date +%Y%m%d_%H%M%S)"
+mkdir -p "$backup_dir"
+cp -a "$twiki_path" "$backup_dir"
+
+temp_dir=$(mktemp -d)
+cd "$temp_dir"
+wget -q "$TWIKI_URL"
+tar xzf twiki-*.tar.gz
+rm twiki-*.tar.gz
+upgrade_dir=$(find . -type d -name 'twiki-*' | head -1)
+
+cp -a "$twiki_path/data" "$upgrade_dir/"
+cp -a "$twiki_path/pub" "$upgrade_dir/"
+[ -e "$twiki_path/lib/LocalSite.cfg" ] && cp "$twiki_path/lib/LocalSite.cfg" "$upgrade_dir/lib/"
+
+rm -rf "$twiki_path"
+mv "$upgrade_dir" "$twiki_path"

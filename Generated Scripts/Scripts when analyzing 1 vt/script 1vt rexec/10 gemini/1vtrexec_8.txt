@@ -1,0 +1,43 @@
+```bash
+#!/bin/bash
+
+# Desabilita o serviço rexec (se estiver rodando via xinetd)
+if systemctl is-active rexec.socket 2>/dev/null; then
+  systemctl stop rexec.socket
+  systemctl disable rexec.socket
+  echo "Serviço rexec (via xinetd) desabilitado."
+fi
+
+# Desabilita o serviço rexecd (se estiver rodando como serviço separado)
+if systemctl is-active rexecd 2>/dev/null; then
+  systemctl stop rexecd
+  systemctl disable rexecd
+  echo "Serviço rexecd desabilitado."
+fi
+
+# Remove o pacote rexec (se estiver instalado)
+if dpkg -s rsh-server 2>/dev/null | grep -q "install ok installed"; then
+  apt-get -y remove rsh-server
+  apt-get -y autoremove
+  echo "Pacote rsh-server removido."
+elif rpm -q rsh-server 2>/dev/null; then
+  yum -y remove rsh-server
+  echo "Pacote rsh-server removido."
+fi
+
+# Garante que o serviço não será iniciado manualmente
+if grep -q "^rexec" /etc/inetd.conf; then
+  sed -i '/^rexec/s/^/#/' /etc/inetd.conf
+  echo "Serviço rexec comentado em /etc/inetd.conf"
+fi
+
+if grep -q "^rexec" /etc/xinetd.conf; then
+  sed -i '/^rexec/s/^/#/' /etc/xinetd.conf
+  echo "Serviço rexec comentado em /etc/xinetd.conf"
+fi
+
+# Remove arquivos de configuração (se existirem)
+rm -f /etc/xinetd.d/rexec 2>/dev/null
+
+echo "Correção para CVE-1999-0618 (rexec) aplicada."
+```

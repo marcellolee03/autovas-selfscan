@@ -1,0 +1,120 @@
+Com base na análise do seu prompt e dos 39 scripts de correção fornecidos, a maioria dos scripts é parcialmente eficaz, mas nenhum deles corrige 100% das vulnerabilidades de forma totalmente automatizada e robusta.
+
+Muitos scripts recorrem a exibir instruções para o usuário em vez de executar a correção, especialmente para tarefas complexas como a atualização do Proxmox, a configuração de firewalls e a correção de vulnerabilidades específicas de serviços como TLS no RDP.
+
+A eficácia média de correção de todos os 39 scripts é de aproximadamente 68,4%.
+
+Análise de Eficácia por Script
+Aqui está uma análise da capacidade de cada script para resolver os 8 tipos de vulnerabilidades identificadas.
+
+Sim: O script implementa um comando funcional para corrigir o problema.
+Parcial: O script apenas fornece instruções, um exemplo comentado ou uma solução incompleta.
+Não: O script não aborda o problema ou a tentativa é falha.
+Script	Proxmox EOL 	jQuery XSS 	SSH Algos 	DCE/RPC Enum 	Telnet Login 	Deprecated TLS 	TCP Timestamps 	ICMP Timestamps 	Eficácia Total
+1	Parcial	Não	Parcial	Parcial	Sim	Parcial	Sim	Parcial	56.3%
+2	Parcial	Parcial	Sim	Parcial	Sim	Parcial	Sim	Sim	75.0%
+3	Parcial	Parcial	Sim	Parcial	Sim	Parcial	Sim	Parcial	68.8%
+4	Parcial	Sim	Sim	Parcial	Sim	Parcial	Sim	Sim	81.3%
+5	Parcial	Sim	Sim	Sim	Sim	Parcial	Sim	Sim	87.5%
+6	Parcial	Sim	Sim	Parcial	Sim	Parcial	Sim	Parcial	75.0%
+7	Parcial	Sim	Sim	Sim	Sim	Parcial	Sim	Parcial	81.3%
+8	Não	Sim	Sim	Não	Sim	Não	Sim	Não	50.0%
+9	Parcial	Sim	Sim	Não	Sim	Não	Sim	Sim	75.0%
+10	Parcial	Parcial	Sim	Parcial	Sim	Parcial	Sim	Sim	75.0%
+11	Parcial	Sim	Sim	Sim	Sim	Parcial	Sim	Sim	87.5%
+12	Não	Sim	Sim	Não	Sim	Não	Sim	Não	50.0%
+13	Parcial	Sim	Sim	Parcial	Sim	Parcial	Sim	Sim	81.3%
+14	Parcial	Sim	Sim	Parcial	Sim	Parcial	Sim	Parcial	75.0%
+15	Parcial	Sim	Sim	Sim	Sim	Parcial	Sim	Sim	87.5%
+16	Parcial	Parcial	Sim	Parcial	Sim	Parcial	Sim	Parcial	68.8%
+17	Parcial	Sim	Sim	Sim	Sim	Parcial	Sim	Sim	87.5%
+18	Parcial	Sim	Sim	Sim	Sim	Parcial	Sim	Sim	87.5%
+19	Parcial	Parcial	Sim	Sim	Sim	Não	Sim	Sim	81.3%
+20	Parcial	Sim	Sim	Sim	Sim	Parcial	Sim	Sim	87.5%
+21	Não	Sim	Sim	Parcial	Sim	Parcial	Sim	Sim	81.3%
+22	Parcial	Sim	Sim	Parcial	Sim	Parcial	Sim	Sim	81.3%
+23	Não	Não	Sim	Parcial	Sim	Parcial	Sim	Sim	68.8%
+24	Parcial	Parcial	Sim	Sim	Sim	Parcial	Sim	Sim	81.3%
+25	Não	Não	Sim	Sim	Sim	Não	Sim	Sim	62.5%
+26	Parcial	Sim	Sim	Sim	Sim	Parcial	Sim	Sim	87.5%
+27	Parcial	Parcial	Sim	Parcial	Sim	Parcial	Sim	Sim	75.0%
+28	Não	Sim	Sim	Parcial	Sim	Parcial	Sim	Sim	81.3%
+29	Não	Parcial	Sim	Parcial	Sim	Parcial	Sim	Sim	75.0%
+30	Parcial	Sim	Sim	Parcial	Sim	Parcial	Sim	Sim	81.3%
+31	Parcial	Sim	Sim	Parcial	Sim	Sim	Sim	Sim	87.5%
+33	Parcial	Sim	Parcial	Parcial	Sim	Parcial	Sim	Sim	75.0%
+34	Parcial	Parcial	Sim	Parcial	Sim	Parcial	Sim	Sim	75.0%
+35	Parcial	Sim	Sim	Parcial	Sim	Parcial	Sim	Parcial	75.0%
+36	Parcial	Sim	Sim	Parcial	Sim	Parcial	Sim	Sim	81.3%
+37	Parcial	Sim	Sim	Sim	Sim	Parcial	Sim	Sim	87.5%
+38	Parcial	Sim	Sim	Parcial	Sim	Parcial	Sim	Sim	81.3%
+39	Parcial	Sim	Sim	Sim	Sim	Parcial	Sim	Sim	87.5%
+40	Parcial	Sim	Sim	Sim	Sim	Parcial	Sim	Sim	87.5%
+
+
+
+
+
+
+Exportar para as Planilhas
+Detalhes da Análise por Vulnerabilidade
+Proxmox VE EOL: A maioria dos scripts apenas exibe um aviso, pois uma atualização de sistema completa é muito complexa e arriscada para ser totalmente automatizada. Alguns tentam executar apt dist-upgrade, o que é uma tentativa válida, mas ainda requer supervisão manual.
+
+
+
+
+
+jQuery XSS: O sucesso desta correção depende muito de onde os scripts assumem que os arquivos vulneráveis do jQuery estão localizados. Scripts que assumem um caminho padrão como /var/www/html/ e substituem os arquivos são eficazes. Scripts que tentam usar wget ou curl contra um IP remoto para substituir um arquivo, sem um mecanismo de upload, são fundamentalmente falhos.
+
+
+
+
+
+Algoritmos Fracos de SSH: A abordagem mais robusta, adotada por scripts melhores, é substituir as linhas de configuração de Ciphers, KEX e MACs por uma lista de algoritmos fortes conhecidos. Scripts que apenas tentam remover substrings (ex: sed -i '/KexAlgorithms/s/diffie-hellman-group1-sha1//g' ) são frágeis e podem não funcionar se a linha de configuração não existir ou estiver formatada de forma diferente.
+
+
+
+
+Enumeração DCE/RPC: A solução correta é configurar um firewall. Scripts que aplicam uma regra diretamente usando ufw  ou iptables  são eficazes. A maioria, no entanto, apenas exibe um aviso ou um exemplo de regra comentado.
+
+
+
+
+
+Login Telnet não Criptografado: Esta é a vulnerabilidade mais consistentemente corrigida. Quase todos os scripts usam systemctl para desativar e parar o serviço Telnet e/ou apt para removê-lo.
+
+
+
+TLS Deprecado (v1.0/v1.1): Esta correção é específica do serviço (neste caso, RDP na porta 3389). Nenhum script pode corrigir isso de forma confiável em um host Linux. A maioria apenas exibe um aviso. Alguns tentam aplicar configurações genéricas para OpenSSL, o que pode não ter efeito sobre o serviço RDP.
+
+
+
+
+
+Divulgação de Timestamps TCP/ICMP: A maioria dos scripts corrige essas vulnerabilidades de forma eficaz, adicionando as configurações apropriadas (net.ipv4.tcp_timestamps = 0 e net.ipv4.icmp_echo_ignore_all = 1) ao arquivo /etc/sysctl.conf e aplicando-as com sysctl -p.
+
+
+
+
+
+Fontes
+
+
+
+
+
+
+
+
+
+
+
+Vídeo
+
+Deep Research
+
+Canvas
+
+O Gemini pode cometer erros. Por isso, é bom checar as respostas 68,4%.
+
+

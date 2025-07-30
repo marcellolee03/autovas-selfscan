@@ -1,0 +1,47 @@
+#!/bin/sh
+set -e
+os_release_file="/etc/os-release"
+if [ -f "$os_release_file" ] && grep -q 'PRETTY_NAME=.*Ubuntu 8.04' "$os_release_file"; then
+    sed -i 's/archive.ubuntu.com/old-releases.ubuntu.com/g' /etc/apt/sources.list
+    sed -i 's/security.ubuntu.com/old-releases.ubuntu.com/g' /etc/apt/sources.list
+    apt-get update
+    apt-get upgrade -y
+    apt-get install -y update-manager-core
+    echo '1' > /update-in-progress
+    echo '#!/bin/sh' > /etc/rc.local
+    echo 'if [ -f /update-in-progress ]; then' >> /etc/rc.local
+    echo '    rm /update-in-progress' >> /etc/rc.local
+    echo '    do-release-upgrade -f DistUpgradeViewNonInteractive -d' >> /etc/rc.local
+    echo '    mv /etc/rc.local.orig /etc/rc.local 2>/dev/null || true' >> /etc/rc.local
+    echo '    reboot' >> /etc/rc.local
+    echo 'fi' >> /etc/rc.local
+    echo 'exit 0' >> /etc/rc.local
+    if [ ! -f /etc/rc.local.orig ]; then
+        cp /etc/rc.local /etc/rc.local.orig
+    fi
+    reboot
+elif [ -f "$os_release_file" ] && grep -q 'PRETTY_NAME=.*Ubuntu' "$os_release_file"; then
+    current_version=$(grep 'VERSION_ID=' "$os_release_file" | cut -d= -f2 | tr -d '"')
+    if [ -n "$current_version" ] && printf '%s\n' "$current_version" | grep -Eq '^(8\.10|9\.04|9\.10|10\.04|12\.04|14\.04|16\.04|18\.04)$'; then
+        sed -i 's/archive.ubuntu.com/old-releases.ubuntu.com/g' /etc/apt/sources.list
+        sed -i 's/security.ubuntu.com/old-releases.ubuntu.com/g' /etc/apt/sources.list
+        apt-get update
+        apt-get upgrade -y
+        apt-get install -y update-manager-core
+        echo '1' > /update-in-progress
+        echo '#!/bin/sh' > /etc/rc.local
+        echo 'if [ -f /update-in-progress ]; then' >> /etc/rc.local
+        echo '    rm /update-in-progress' >> /etc/rc.local
+        echo '    do-release-upgrade -f DistUpgradeViewNonInteractive -d' >> /etc/rc.local
+        echo '    mv /etc/rc.local.orig /etc/rc.local 2>/dev/null || true' >> /etc/rc.local
+        echo '    reboot' >> /etc/rc.local
+        echo 'fi' >> /etc/rc.local
+        echo 'exit 0' >> /etc/rc.local
+        if [ ! -f /etc/rc.local.orig ]; then
+            cp /etc/rc.local /etc/rc.local.orig
+        fi
+        reboot
+    else
+        do-release-upgrade -f DistUpgradeViewNonInteractive
+    fi
+fi

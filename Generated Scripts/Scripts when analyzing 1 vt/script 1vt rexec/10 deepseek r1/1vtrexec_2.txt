@@ -1,0 +1,35 @@
+#!/bin/sh
+[ "$(id -u)" != 0 ] && echo "Necessário executar como root" >&2 && exit 1
+
+# Verifica e desativa serviço rexec via systemd
+for svc in rexec.socket rexecd.service rexec.service; do
+    if systemctl is-active "$svc" >/dev/null 2>&1; then
+        systemctl stop "$svc"
+    fi
+    if systemctl is-enabled "$svc" >/dev/null 2>&1; then
+        systemctl disable "$svc"
+    fi
+done
+
+# Verifica e remove pacotes relacionados
+for pkg in rsh-server netkit-rexecd inetutils-rexecd; do
+    if dpkg -s "$pkg" >/dev/null 2>&1; then
+        DEBIAN_FRONTEND=noninteractive apt-get remove --purge -y "$pkg"
+    fi
+done
+
+# Remove configurações inetd/xinetd para rexec
+[ -f /etc/inetd.conf ] && sed -i '/^[[:space:]]*rexec[cd]*[[:space:]]/d;/^#.*rexec/d' /etc/inetd.conf
+find /etc/xinetd.d/ -type f | xargs sed -i '/service[[:space:]]\+rexe\?c/,/^}/d'
+rm -f /etc/xinetd.d/rexec /etc/xinetd.d/rexecd 2>/dev/null
+
+# Recarrega gerenciadores de serviços se necessário
+pkill -HUP inetd 2>/dev/null
+if systemctl is-active xinetd >/dev/null 2>&1; then
+    systemctl restart xinetd
+elif pgrep xinetd >/dev/null; then
+    pkill -HUP xinetd
+fi
+
+# Finaliza instância remanescente
+pkill -9 rexecd 2>/dev/null

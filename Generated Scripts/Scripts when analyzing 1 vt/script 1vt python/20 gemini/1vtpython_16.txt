@@ -1,0 +1,84 @@
+```bash
+#!/bin/bash
+
+# Script para atualizar o Python para a versão 3.10.15 no Windows
+
+# Verificar se o sistema operacional é Windows
+if [[ "$OSTYPE" != "msys" ]]; then
+  echo "Este script foi projetado para ser executado no Windows."
+  exit 1
+fi
+
+# Função para verificar se um programa está instalado
+is_installed() {
+  if command -v "$1" &> /dev/null; then
+    return 0
+  else
+    return 1
+  fi
+}
+
+# Função para obter a arquitetura do sistema
+get_arch() {
+  if [[ "$(uname -m)" == "x86_64" ]]; then
+    echo "x64"
+  else
+    echo "x86"
+  fi
+}
+
+# Define a versão alvo
+TARGET_VERSION="3.10.15"
+
+# Define o nome base do arquivo de instalação
+INSTALLER_BASE_NAME="python-${TARGET_VERSION}-"
+
+# Determina a arquitetura
+ARCH=$(get_arch)
+
+# Define o nome completo do arquivo de instalação baseado na arquitetura
+INSTALLER_FILE_NAME="${INSTALLER_BASE_NAME}amd64.exe"
+
+# Define o URL para download do instalador
+DOWNLOAD_URL="https://www.python.org/ftp/python/${TARGET_VERSION}/${INSTALLER_FILE_NAME}"
+
+# Define o caminho para salvar o instalador
+INSTALLER_PATH="$HOME/Downloads/${INSTALLER_FILE_NAME}"
+
+# Define o diretório de instalação do Python
+PYTHON_INSTALL_DIR="/c/Program Files/Python310"
+
+# Verificar se o wget está instalado
+if ! is_installed wget; then
+  echo "wget não está instalado. Por favor, instale-o (ex: choco install wget)."
+  exit 1
+fi
+
+# Baixar o instalador
+echo "Baixando o instalador do Python ${TARGET_VERSION}..."
+wget -q "$DOWNLOAD_URL" -O "$INSTALLER_PATH"
+
+if [ ! -f "$INSTALLER_PATH" ]; then
+  echo "Falha ao baixar o instalador."
+  exit 1
+fi
+
+# Instalar o Python
+echo "Instalando o Python ${TARGET_VERSION}..."
+"$INSTALLER_PATH" /quiet InstallAllUsers=1 Include_doc=0 Include_pip=1 Include_test=0 CompileAll=1 PrependPath=1
+
+# Verificar se a instalação foi bem-sucedida
+if [ -d "$PYTHON_INSTALL_DIR" ]; then
+  echo "Python ${TARGET_VERSION} instalado com sucesso."
+else
+  echo "Falha ao instalar o Python."
+  exit 1
+fi
+
+# Remover o instalador
+echo "Removendo o instalador..."
+rm -f "$INSTALLER_PATH"
+
+echo "Atualização concluída."
+exit 0
+```

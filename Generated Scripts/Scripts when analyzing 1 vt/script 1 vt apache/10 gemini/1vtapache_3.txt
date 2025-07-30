@@ -1,0 +1,53 @@
+#!/bin/bash
+
+# Script para corrigir a vulnerabilidade CVE-2012-0053 no Apache HTTP Server
+
+# Verificar se o Apache está instalado
+if ! command -v apache2 &> /dev/null && ! command -v httpd &> /dev/null; then
+  echo "Apache HTTP Server não encontrado. Verifique se está instalado."
+  exit 1
+fi
+
+# Determinar o gerenciador de pacotes
+if command -v apt-get &> /dev/null; then
+  package_manager="apt-get"
+elif command -v yum &> /dev/null; then
+  package_manager="yum"
+else
+  echo "Gerenciador de pacotes não suportado. Use apt-get ou yum."
+  exit 1
+fi
+
+# Atualizar a lista de pacotes e atualizar o Apache
+if [ "$package_manager" == "apt-get" ]; then
+  apt-get update
+  apt-get upgrade apache2 -y
+elif [ "$package_manager" == "yum" ]; then
+  yum update httpd -y
+fi
+
+# Verificar a versão do Apache após a atualização
+apache_version=$(apache2 -v 2>&1 | grep "Server version:" | awk '{print $3}' | cut -d '/' -f2)
+if [ -z "$apache_version" ]; then
+  apache_version=$(httpd -v 2>&1 | grep "Server version:" | awk '{print $3}' | cut -d '/' -f2)
+fi
+
+
+# Comparar a versão atual com a versão corrigida (2.2.22)
+if [[ $(printf '%s\n' "$apache_version" "2.2.22" | sort -V | head -n1) == "2.2.22" ]]; then
+  echo "Apache HTTP Server foi atualizado para a versão 2.2.22 ou superior."
+else
+  echo "A atualização do Apache HTTP Server pode ter falhado. Verifique a versão."
+fi
+
+# Reiniciar o Apache para aplicar as alterações
+if command -v systemctl &> /dev/null; then
+  systemctl restart apache2
+elif command -v service &> /dev/null; then
+  service apache2 restart
+else
+  echo "Não foi possível reiniciar o Apache. Reinicie manualmente."
+fi
+
+echo "Script concluído."
+exit 0

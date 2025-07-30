@@ -1,0 +1,56 @@
+```bash
+#!/bin/bash
+
+# Verifica se o sistema é baseado em Debian/Ubuntu para usar apt-get
+if command -v apt-get &> /dev/null; then
+  # Atualiza o índice de pacotes
+  apt-get update
+
+  # Tenta atualizar o PHP para a versão mais recente disponível
+  apt-get install --only-upgrade php5 php5-cli php5-cgi php5-common
+
+  # Verifica se o PHP 5.3 ou 5.4 está instalado e tenta atualizar para uma versão mais recente disponível.
+  if dpkg -s php5-common 2>/dev/null | grep -q "Version: 5\.3\." || dpkg -s php5-common 2>/dev/null | grep -q "Version: 5\.4\."; then
+
+    # Verifica se o repositório Sury está adicionado e o adiciona se não estiver.
+    if ! grep -q "ppa:ondrej/php" /etc/apt/sources.list.d/* 2>/dev/null; then
+        add-apt-repository ppa:ondrej/php -y
+        apt-get update
+    fi
+
+    # Tenta instalar o PHP 7.4 (ou superior, se preferível) e remove as versões antigas. Adapte a versão conforme necessário.
+    apt-get install php7.4 php7.4-cli php7.4-cgi php7.4-common -y
+    apt-get remove php5 php5-cli php5-cgi php5-common -y --purge
+    apt-get autoremove -y
+  fi
+
+  # Reinicia o serviço do servidor web (Apache ou Nginx) para aplicar as mudanças.
+  if command -v systemctl &> /dev/null; then
+    systemctl restart apache2 2>/dev/null
+    systemctl restart nginx 2>/dev/null
+  elif command -v service &> /dev/null; then
+    service apache2 restart 2>/dev/null
+    service nginx restart 2>/dev/null
+  fi
+
+# Se não for Debian/Ubuntu, tenta usar yum (CentOS/RHEL)
+elif command -v yum &> /dev/null; then
+  # Atualiza o sistema
+  yum update -y
+
+  # Instala a versão mais recente do PHP disponível
+  yum install php -y
+
+  # Reinicia o serviço do servidor web (Apache)
+  systemctl restart httpd 2>/dev/null
+  service httpd restart 2>/dev/null
+
+else
+  echo "Sistema operacional não suportado. Por favor, atualize o PHP manualmente."
+  exit 1
+fi
+
+echo "Atualização do PHP concluída. Reinicie o servidor web se necessário."
+
+exit 0
+```

@@ -1,0 +1,110 @@
+```bash
+#!/bin/bash
+
+# Vulnerabilidade 1: Cleartext Transmission of Sensitive Information via HTTP
+# Solução: Impossível de corrigir via script genérico. Requer configuração do servidor web para HTTPS e redirecionamento.
+# Ações recomendadas: Configurar o servidor web (Apache, Nginx, etc.) para usar HTTPS.
+# Exemplo para Apache:
+# 1. Habilitar o módulo SSL: sudo a2enmod ssl
+# 2. Configurar um VirtualHost para HTTPS (porta 443).
+# 3. Redirecionar HTTP para HTTPS no VirtualHost da porta 80.
+# Exemplo de redirecionamento no VirtualHost da porta 80 (Apache):
+# Redirect permanent / https://seu_dominio.com/
+
+# Vulnerabilidade 2: DNS Cache Snooping Vulnerability (UDP) - Active Check
+# Solução: Desabilitar recursão ou restringir acesso público ao servidor DNS.
+# Assume-se que o servidor DNS é o BIND9.
+# Editar /etc/bind/named.conf.options
+# options {
+#       recursion no;
+# };
+if grep -q "recursion no;" /etc/bind/named.conf.options; then
+  echo "Recursion already disabled in /etc/bind/named.conf.options"
+else
+  echo "options {" >> /etc/bind/named.conf.options
+  echo "       recursion no;" >> /etc/bind/named.conf.options
+  echo "};" >> /etc/bind/named.conf.options
+  
+  #Remover a linha options se ela estiver duplicada, mantendo apenas a primeira instância.
+  sed -i '1,/options {/! s/options {/options {/g' /etc/bind/named.conf.options
+
+  echo "Recursion disabled in /etc/bind/named.conf.options"
+fi
+systemctl restart bind9
+
+# Vulnerabilidade 3: ICMP Timestamp Reply Information Disclosure
+# Solução: Desabilitar respostas a timestamp ICMP.
+echo 1 > /proc/sys/net/ipv4/icmp_echo_ignore_all
+echo "net.ipv4.icmp_echo_ignore_all = 1" >> /etc/sysctl.conf
+sysctl -p
+
+# Vulnerabilidade 4: SSL/TLS: Deprecated TLSv1.0 and TLSv1.1 Protocol Detection
+# Solução: Desabilitar TLSv1.0 e TLSv1.1. Requer configuração do servidor web.
+# Exemplo para Nginx:
+# ssl_protocols TLSv1.2 TLSv1.3;
+# Exemplo para Apache:
+# SSLProtocol all -SSLv3 -TLSv1 -TLSv1.1
+
+# Assume-se que o servidor web é Nginx e a configuração SSL está em /etc/nginx/nginx.conf ou /etc/nginx/conf.d/default.conf.
+if grep -q "ssl_protocols TLSv1.2 TLSv1.3;" /etc/nginx/nginx.conf || grep -q "ssl_protocols TLSv1.2 TLSv1.3;" /etc/nginx/conf.d/default.conf; then
+  echo "TLSv1.0 and TLSv1.1 are already disabled in Nginx configuration."
+else
+  if grep -q "ssl_protocols" /etc/nginx/nginx.conf; then
+    sed -i "s/ssl_protocols .*/ssl_protocols TLSv1.2 TLSv1.3;/" /etc/nginx/nginx.conf
+  elif grep -q "ssl_protocols" /etc/nginx/conf.d/default.conf; then
+    sed -i "s/ssl_protocols .*/ssl_protocols TLSv1.2 TLSv1.3;/" /etc/nginx/conf.d/default.conf
+  else
+    echo "ssl_protocols TLSv1.2 TLSv1.3;" >> /etc/nginx/nginx.conf
+    echo "TLSv1.0 and TLSv1.1 disabled in Nginx configuration."
+  fi
+  systemctl restart nginx
+fi
+
+# Vulnerabilidade 5: SSL/TLS: Renegotiation DoS Vulnerability (CVE-2011-1473, CVE-2011-5094)
+# Solução: Desabilitar renegotiation.  Requer configuração do servidor web.
+# Exemplo para Nginx:
+# ssl_prefer_server_ciphers on;
+# ssl_session_cache shared:SSL:10m;
+
+# Assume-se que o servidor web é Nginx.
+if grep -q "ssl_prefer_server_ciphers on;" /etc/nginx/nginx.conf || grep -q "ssl_prefer_server_ciphers on;" /etc/nginx/conf.d/default.conf; then
+    echo "ssl_prefer_server_ciphers already configured in Nginx configuration."
+else
+    if grep -q "ssl_session_cache shared:SSL:10m;" /etc/nginx/nginx.conf || grep -q "ssl_session_cache shared:SSL:10m;" /etc/nginx/conf.d/default.conf; then
+        echo "ssl_session_cache already configured in Nginx configuration (likely mitigating renegotiation)."
+    else
+        echo "ssl_prefer_server_ciphers on;" >> /etc/nginx/nginx.conf
+        echo "ssl_session_cache shared:SSL:10m;" >> /etc/nginx/nginx.conf
+        echo "ssl_prefer_server_ciphers and ssl_session_cache configured in Nginx configuration."
+    fi
+    systemctl restart nginx
+fi
+
+# Vulnerabilidade 6: SSL/TLS: Report Weak Cipher Suites
+# Solução: Configurar cipher suites fortes. Requer configuração do servidor web.
+# Exemplo para Nginx:
+# ssl_ciphers 'EECDH+AESGCM:EDH+AESGCM:AES256+EECDH:AES256+EDH';
+
+# Assume-se que o servidor web é Nginx.
+if grep -q "ssl_ciphers" /etc/nginx/nginx.conf; then
+    sed -i "s/ssl_ciphers .*/ssl_ciphers 'EECDH+AESGCM:EDH+AESGCM:AES256+EECDH:AES256+EDH';/" /etc/nginx/nginx.conf
+    echo "Cipher suites configured in Nginx configuration."
+elif grep -q "ssl_ciphers" /etc/nginx/conf.d/default.conf; then
+    sed -i "s/ssl_ciphers .*/ssl_ciphers 'EECDH+AESGCM:EDH+AESGCM:AES256+EECDH:AES256+EDH';/" /etc/nginx/conf.d/default.conf
+    echo "Cipher suites configured in Nginx configuration."
+else
+    echo "ssl_ciphers 'EECDH+AESGCM:EDH+AESGCM:AES256+EECDH:AES256+EDH';" >> /etc/nginx/nginx.conf
+    echo "Cipher suites configured in Nginx configuration."
+fi
+systemctl restart nginx
+
+# Vulnerabilidade 7: TCP Timestamps Information Disclosure
+# Solução: Desabilitar TCP timestamps.
+if grep -q "net.ipv4.tcp_timestamps = 0" /etc/sysctl.conf; then
+    echo "TCP timestamps already disabled."
+else
+    echo "net.ipv4.tcp_timestamps = 0" >> /etc/sysctl.conf
+    sysctl -p
+    echo "TCP timestamps disabled."
+fi
+```

@@ -1,0 +1,111 @@
+```bash
+#!/bin/bash
+
+# Define a versão alvo do TWiki
+TARGET_VERSION="4.2.4"
+
+# Define o diretório de instalação do TWiki (pode precisar ser ajustado)
+TWIKI_INSTALL_DIR="/var/www/twiki"
+
+# Função para verificar se o TWiki está instalado e obter a versão atual
+get_twiki_version() {
+  if [ -d "$TWIKI_INSTALL_DIR" ]; then
+    # Tenta detectar a versão baseado em um arquivo de versão (ajuste conforme necessário)
+    if [ -f "$TWIKI_INSTALL_DIR/lib/TWiki/Version.pm" ]; then
+      VERSION=$(grep 'our $VERSION =' "$TWIKI_INSTALL_DIR/lib/TWiki/Version.pm" | awk '{print $4}' | tr -d ';\'')
+      echo "$VERSION"
+    else
+      echo "Versão não detectada automaticamente. Verifique a instalação."
+      return 1
+    fi
+  else
+    echo "TWiki não encontrado no diretório: $TWIKI_INSTALL_DIR"
+    return 1
+  fi
+}
+
+# Obtém a versão atual do TWiki
+CURRENT_VERSION=$(get_twiki_version)
+
+# Verifica se a versão foi detectada com sucesso
+if [ -z "$CURRENT_VERSION" ]; then
+  echo "Falha ao detectar a versão atual do TWiki. Verifique a instalação e o script."
+  exit 1
+fi
+
+echo "Versão atual do TWiki: $CURRENT_VERSION"
+
+# Verifica se a atualização é necessária
+if [[ "$CURRENT_VERSION" == "$TARGET_VERSION" ]]; then
+  echo "TWiki já está na versão $TARGET_VERSION. Nenhuma ação necessária."
+  exit 0
+fi
+
+# Função para realizar o backup do diretório TWiki
+backup_twiki() {
+  BACKUP_DIR="/tmp/twiki_backup_$(date +%Y%m%d%H%M%S)"
+  echo "Criando backup do TWiki em: $BACKUP_DIR"
+  mkdir -p "$BACKUP_DIR"
+  cp -R "$TWIKI_INSTALL_DIR" "$BACKUP_DIR"
+  if [ $? -eq 0 ]; then
+    echo "Backup criado com sucesso."
+  else
+    echo "Falha ao criar o backup. Abortando."
+    exit 1
+  fi
+}
+
+# Função para realizar a atualização do TWiki
+update_twiki() {
+  echo "Iniciando o processo de atualização para a versão $TARGET_VERSION..."
+
+  # Exemplo de atualização: Download e extração da nova versão (adaptar conforme necessário)
+  # Este script assume que você tem um arquivo .tgz da versão 4.2.4 disponível.
+  # Substitua 'twiki_4.2.4.tgz' pelo nome real do seu arquivo.
+
+  #Certifique-se que o wget ou curl esteja instalado
+  if ! command -v wget &> /dev/null
+  then
+    echo "wget não está instalado. Instalando..."
+    apt-get update && apt-get install -y wget
+  fi
+
+  if [ ! -f "twiki_4.2.4.tgz" ]; then
+      echo "Arquivo twiki_4.2.4.tgz não encontrado.  Baixando..."
+      wget "http://ftp.tu-chemnitz.de/pub/linux/TWiki/TWiki-4.2.4.tgz"
+  fi
+
+  if [ -f "TWiki-4.2.4.tgz" ]; then
+    tar -xzf TWiki-4.2.4.tgz
+    rm -rf "$TWIKI_INSTALL_DIR/*" #Remove o diretório atual
+    cp -R "TWiki" "$TWIKI_INSTALL_DIR" #Copia os novos arquivos
+    chown -R www-data:www-data "$TWIKI_INSTALL_DIR" #Define o proprietário dos arquivos
+
+    echo "Atualização concluída com sucesso!"
+  else
+    echo "Falha ao encontrar o arquivo twiki_4.2.4.tgz ou TWiki-4.2.4.tgz."
+    echo "Certifique-se de que o arquivo exista no diretório atual ou ajuste o comando wget para baixar o arquivo correto."
+    exit 1
+  fi
+
+}
+
+# Realiza o backup
+backup_twiki
+
+# Realiza a atualização
+update_twiki
+
+#Verifica a versão após a atualização
+NEW_VERSION=$(get_twiki_version)
+
+echo "Versão do TWiki após a atualização: $NEW_VERSION"
+
+if [[ "$NEW_VERSION" == "$TARGET_VERSION" ]]; then
+  echo "Atualização bem-sucedida para a versão $TARGET_VERSION."
+else
+  echo "Falha na atualização.  A versão atual é $NEW_VERSION, esperava-se $TARGET_VERSION."
+fi
+
+exit 0
+```

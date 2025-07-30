@@ -1,0 +1,102 @@
+Com base na análise das 32 vulnerabilidades detalhadas e dos 25 scripts de correção fornecidos, a média geral de correção de todos os scripts é de 88,5%.
+
+Três scripts (teste33vts_9.txt, teste33vts_22.txt e teste33vts_23.txt) alcançaram uma taxa de correção de 100%, abordando com sucesso todas as 32 vulnerabilidades identificadas.
+
+Análise Individual dos Scripts de Correção
+A seguir, uma avaliação detalhada da capacidade de cada script para corrigir as vulnerabilidades listadas, juntamente com sua respectiva porcentagem de sucesso.
+
+Script	Vulnerabilidades Corrigidas	Vulnerabilidades Não Corrigidas	% de Correção
+teste33vts_1.txt	30 de 32	RPC (V10), TLS (V12)	93.75%
+teste33vts_2.txt	24 de 32	Proxmox (V1), jQuery (V2-6), RPC (V10), TLS (V12)	75.00%
+teste33vts_3.txt	31 de 32	RPC (V10)	96.88%
+teste33vts_4.txt	30 de 32	RPC (V10), TLS (V12)	93.75%
+teste33vts_5.txt	27 de 32	jQuery (V2-6)	84.38%
+teste33vts_6.txt	25 de 32	jQuery (V2-6), RPC (V10), TLS (V12)	78.13%
+teste33vts_7.txt	31 de 32	RPC (V10)	96.88%
+teste33vts_8.txt	23 de 32	RPC (V10), TLS (V12), ICMP (V26-32)	71.88%
+teste33vts_9.txt	32 de 32	Nenhuma	100.00%
+teste33vts_10.txt	30 de 32	jQuery (parcial, 2 de 5 instâncias não corrigidas)	93.75%
+teste33vts_11.txt	29 de 32	Proxmox (V1), RPC (V10), TLS (V12)	90.63%
+teste33vts_12.txt	30 de 32	RPC (V10), TLS (V12)	93.75%
+teste33vts_13.txt	31 de 32	TLS (V12)	96.88%
+teste33vts_14.txt	29 de 32	jQuery (parcial, 2 de 5 instâncias não corrigidas), RPC (V10)	90.63%
+teste33vts_15.txt	18 de 32	jQuery (V2-6), RPC (V10), TLS (V12), ICMP (V26-32)	56.25%
+teste33vts_16.txt	28 de 32	jQuery (parcial, 2 de 5 instâncias não corrigidas), RPC (V10), TLS (V12)	87.50%
+teste33vts_17.txt	25 de 32	jQuery (V2-6), RPC (V10), TLS (V12)	78.13%
+teste33vts_18.txt	30 de 32	RPC (V10), TLS (V12)	93.75%
+teste33vts_19.txt	31 de 32	RPC (V10)	96.88%
+teste33vts_20.txt	28 de 32	jQuery (parcial), RPC (parcial), TLS (V12)	87.50%
+teste33vts_21.txt	31 de 32	TLS (V12)	96.88%
+teste33vts_22.txt	32 de 32	Nenhuma	100.00%
+teste33vts_23.txt	32 de 32	Nenhuma	100.00%
+teste33vts_24.txt	31 de 32	TLS (V12)	96.88%
+teste33vts_25.txt	20 de 32	SSH (V7-9, 13-16, 19, 21-22), RPC (V10), TLS (V12)	62.50%
+
+Exportar para as Planilhas
+Detalhamento da Análise por Script
+&lt;details>
+&lt;summary>Clique para expandir a análise detalhada de cada script.&lt;/summary>
+
+teste33vts_1.txt (93.75%): Corrige Proxmox , jQuery , todas as de SSH , Telnet , Timestamps TCP e ICMP. Falha: Não aborda a enumeração de portas RPC (V10) nem a configuração de TLS para RDP (V12).
+
+
+
+
+teste33vts_2.txt (75.00%): Corrige todas as de SSH, Telnet , Timestamps TCP e ICMP. Falha: Não atualiza o Proxmox (V1), não corrige o jQuery (V2-6), não bloqueia portas RPC (V10) nem configura o TLS (V12).
+
+teste33vts_3.txt (96.88%): Script quase perfeito. Corrige Proxmox, jQuery , SSH, Telnet , TLS para RDP (V12), e Timestamps. Falha: Não bloqueia as portas RPC (V10).
+
+teste33vts_4.txt (93.75%): Corrige Proxmox , jQuery , SSH, Telnet e Timestamps. Falha: Não bloqueia portas RPC (V10) nem configura o TLS (V12).
+
+
+teste33vts_5.txt (84.38%): Corrige Proxmox (parcialmente ), SSH, bloqueia portas RPC , remove Telnet , configura TLS para RDP  e corrige Timestamps. Falha: Não aborda as vulnerabilidades do jQuery (V2-6).
+
+
+teste33vts_6.txt (78.13%): Corrige Proxmox, todas as de SSH , Telnet e Timestamps. Falha: Não corrige o jQuery (V2-6), não bloqueia portas RPC (V10) nem configura o TLS (V12).
+
+teste33vts_7.txt (96.88%): Script muito robusto. Corrige Proxmox , jQuery , SSH, Telnet , TLS para RDP  e Timestamps. Falha: Não bloqueia as portas RPC (V10).
+
+
+
+
+teste33vts_8.txt (71.88%): Corrige Proxmox , jQuery, SSH e Telnet, além dos Timestamps TCP. Falha: Não bloqueia portas RPC (V10), não configura o TLS (V12) e não aborda os Timestamps ICMP (V26-32).
+
+teste33vts_9.txt (100.00%): Script perfeito. Aborda todas as 32 vulnerabilidades de forma eficaz, incluindo Proxmox , jQuery , SSH , bloqueio de portas RPC , Telnet , configuração de TLS para múltiplos serviços  e Timestamps.
+
+
+
+
+teste33vts_10.txt (93.75%): Script bastante completo, mas falha em corrigir todas as instâncias do jQuery. Falha: Corrige apenas 3 dos 5 arquivos jQuery vulneráveis.
+teste33vts_11.txt (90.63%): Corrige jQuery, SSH, Telnet e Timestamps. Falha: Não atualiza o Proxmox (V1), não bloqueia portas RPC (V10) nem configura o TLS (V12).
+teste33vts_12.txt (93.75%): Usa uma abordagem complexa mas eficaz para jQuery e corrige a maioria das outras vulnerabilidades. Falha: Não bloqueia portas RPC (V10) nem configura o TLS (V12).
+teste33vts_13.txt (96.88%): Script muito completo. Corrige Proxmox, jQuery , SSH, bloqueia portas RPC , remove Telnet  e corrige Timestamps. Falha: Não configura o TLS para RDP (V12).
+
+
+teste33vts_14.txt (90.63%): Script eficaz, mas com cobertura incompleta do jQuery. Falha: Corrige apenas 3 dos 5 arquivos jQuery  e não bloqueia portas RPC (V10).
+teste33vts_15.txt (56.25%): Corrige Proxmox, SSH, Telnet e Timestamps TCP. Falha: Não corrige jQuery (V2-6), RPC (V10), TLS (V12) nem Timestamps ICMP (V26-32).
+teste33vts_16.txt (87.50%): Boa cobertura, mas incompleta para jQuery. Falha: Corrige apenas 3 dos 5 arquivos jQuery, não bloqueia portas RPC (V10) nem configura TLS (V12).
+teste33vts_17.txt (78.13%): Focado em sistema e SSH. Corrige Proxmox , SSH , Telnet e Timestamps. Falha: Não corrige jQuery (V2-6), RPC (V10) nem TLS (V12).
+
+
+teste33vts_18.txt (93.75%): Script robusto com boa lógica de detecção. Corrige Proxmox , jQuery , SSH , Telnet  e Timestamps. Falha: Não bloqueia portas RPC (V10) nem configura TLS (V12).
+
+
+
+
+teste33vts_19.txt (96.88%): Quase perfeito. Corrige Proxmox, jQuery , SSH, Telnet, TLS para RDP  e Timestamps. Falha: Não bloqueia as portas RPC (V10).
+
+
+teste33vts_20.txt (87.50%): Usa métodos modernos como sshd_config.d, mas a cobertura é incompleta. Falha: Corrige parcialmente o jQuery  e o bloqueio de portas RPC, e não aborda o TLS (V12).
+teste33vts_21.txt (96.88%): Script muito completo e seguro, com backups. Corrige quase tudo. Falha: Não configura o TLS para RDP (V12).
+teste33vts_22.txt (100.00%): Script perfeito. Aborda todas as vulnerabilidades, usando métodos eficazes como a reescrita do sshd_config, find para o jQuery , e configuração global de OpenSSL para TLS.
+
+teste33vts_23.txt (100.00%): Script perfeito. Cobre todas as 32 vulnerabilidades de forma clara e direta, desde a atualização do Proxmox  até o bloqueio de portas RPC  e configuração de TLS.
+
+
+teste33vts_24.txt (96.88%): Script muito abrangente. Corrige Proxmox , jQuery , SSH, bloqueio de portas RPC , Telnet  e Timestamps. Falha: Não configura o TLS para RDP (V12).
+
+
+
+
+teste33vts_25.txt (62.50%): A lógica para correção do SSH é falha, pois adiciona os algoritmos fracos em vez de removê-los. Falha: Não corrige nenhuma das vulnerabilidades SSH (V7-9, 13-16, 19, 21-22), RPC (V10) nem TLS (V12).
+&lt;/details>

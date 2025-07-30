@@ -1,0 +1,32 @@
+#!/bin/sh
+
+if [ -f "/etc/inetd.conf" ] && grep -q "^rexec" "/etc/inetd.conf"; then
+  sed -i '/^rexec/ s/^/#/' /etc/inetd.conf
+  if command -v systemctl >/dev/null 2>&1 && systemctl status openbsd-inetd >/dev/null 2>&1; then
+    systemctl restart openbsd-inetd
+  else
+    pkill -HUP inetd || true
+  fi
+fi
+
+if [ -d "/etc/inetd.d" ] && grep -q -m1 "^rexec" /etc/inetd.d/*; then
+  find /etc/inetd.d/ -type f -exec sed -i '/^rexec/ s/^/#/' {} +
+  if command -v systemctl >/dev/null 2>&1 && systemctl status openbsd-inetd >/dev/null 2>&1; then
+    systemctl restart openbsd-inetd
+  else
+    pkill -HUP inetd || true
+  fi
+fi
+
+if [ -f "/etc/xinetd.d/rexec" ]; then
+  if grep -q 'disable' "/etc/xinetd.d/rexec"; then
+    sed -i 's/disable.*/disable = yes/' "/etc/xinetd.d/rexec"
+  else
+    echo "disable = yes" >> "/etc/xinetd.d/rexec"
+  fi
+  if command -v systemctl >/dev/null 2>&1 && systemctl status xinetd >/dev/null 2>&1; then
+    systemctl restart xinetd
+  elif [ -f "/etc/init.d/xinetd" ]; then
+    /etc/init.d/xinetd restart
+  fi
+fi

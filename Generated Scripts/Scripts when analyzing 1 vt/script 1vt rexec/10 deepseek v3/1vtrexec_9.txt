@@ -1,0 +1,9 @@
+#!/bin/bash
+systemctl stop rexec
+systemctl disable rexec
+sed -i '/^rexec/d' /etc/inetd.conf
+sed -i '/^rexec/d' /etc/xinetd.d/rexec
+killall -9 rexecd >/dev/null 2>&1
+iptables -A INPUT -p tcp --dport 512 -j DROP
+iptables-save > /etc/iptables/rules.v4
+systemctl restart iptables >/dev/null 2>&1

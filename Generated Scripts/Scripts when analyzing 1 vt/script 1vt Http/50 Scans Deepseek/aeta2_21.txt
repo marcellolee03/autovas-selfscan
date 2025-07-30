@@ -1,0 +1,21 @@
+#!/bin/bash
+if ! command -v certbot &> /dev/null
+then
+    apt-get update
+    apt-get install -y certbot python3-certbot-nginx
+fi
+
+if ! command -v nginx &> /dev/null
+then
+    apt-get install -y nginx
+fi
+
+certbot --nginx -d $(hostname) --non-interactive --agree-tos -m admin@$(hostname)
+
+nginx_conf="/etc/nginx/sites-available/default"
+if grep -q "listen 80;" "$nginx_conf"
+then
+    sed -i 's/listen 80;/listen 80;\n    return 301 https:\/\/$host$request_uri;/g' "$nginx_conf"
+fi
+
+nginx -t && systemctl reload nginx

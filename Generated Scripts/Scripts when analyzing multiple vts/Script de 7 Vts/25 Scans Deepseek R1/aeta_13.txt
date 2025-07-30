@@ -1,0 +1,84 @@
+#!/bin/bash
+if [ "$EUID" -ne 0 ]; then exit 1; fi
+
+ss -ltn | grep -q ':443\b'
+if [ $? -eq 0 ]; then
+  if [ -f /etc/apache2/apache2.conf ] || [ -f /etc/httpd/conf/httpd.conf ]; then
+    APACHE_ROOT=$(grep -q 'Include /etc/apache2/sites-enabled' /etc/apache2/apache2.conf && echo "/etc/apache2" || echo "/etc/httpd")
+    HTTP_CONF="$APACHE_ROOT/conf.d/redirect_http_to_https.conf"
+    if [ ! -f "$HTTP_CONF" ]; then
+      echo '<VirtualHost *:80>' > "$HTTP_CONF"
+      echo '    Redirect permanent / https://%{SERVER_NAME}/' >> "$HTTP_CONF"
+      echo '</VirtualHost>' >> "$HTTP_CONF"
+    fi
+    SSL_CONF="$APACHE_ROOT/conf.d/ssl_patch.conf"
+    echo '# Disable weak protocols' > "$SSL_CONF"
+    echo 'SSLProtocol -all +TLSv1.2 +TLSv1.3' >> "$SSL_CONF"
+    echo '# Enforce strong ciphers' >> "$SSL_CONF"
+    echo 'SSLCipherSuite HIGH:!aNULL:!MD5:!RC4:!3DES' >> "$SSL_CONF"
+    echo 'SSLHonorCipherOrder On' >> "$SSL_CONF"
+    
+    DISTRO=$(grep -oP '^ID=\K\w+' /etc/os-release)
+    if [ "$DISTRO" = "ubuntu" ] || [ "$DISTRO" = "debian" ]; then
+      a2enmod ssl headers proxy_fcgi >/dev/null 2>&1
+      service apache2 restart >/dev/null 2>&1
+    elif [ "$DISTRO" = "centos" ] || [ "$DISTRO" = "rhel" ] || [ "$DISTRO" = "fedora" ]; then
+      systemctl restart httpd >/dev/null 2>&1
+    fi
+  fi
+
+  if [ -f /etc/nginx/nginx.conf ]; then
+    HTTP_CONF="/etc/nginx/conf.d/redirect_http_to_https.conf"
+    if [ ! -f "$HTTP_CONF" ]; then
+      echo 'server {' > "$HTTP_CONF"
+      echo '    listen 80;' >> "$HTTP_CONF"
+      echo '    server_name _;' >> "$HTTP_CONF"
+      echo '    return 301 https://$host$request_uri;' >> "$HTTP_CONF"
+      echo '}' >> "$HTTP_CONF"
+    fi
+    SSL_CONF="/etc/nginx/conf.d/ssl_patch.conf"
+    echo '# Enforce TLS protocols and ciphers' > "$SSL_CONF"
+    echo 'ssl_protocols TLSv1.2 TLSv1.3;' >> "$SSL_CONF"
+    echo 'ssl_ciphers "EECDH+ECDSA+AESGCM:EECDH+aRSA+AESGCM:EECDH+ECDSA+SHA384:EECDH+ECDSA+SHA256:HIGH:!aNULL:!MD5:!RC4:!3DES";' >> "$SSL_CONF"
+    echo 'ssl_prefer_server_ciphers on;' >> "$SSL_CONF"
+    
+    nginx -t >/dev/null 2>&1 && systemctl restart nginx >/dev/null 2>&1
+  fi
+fi
+
+iptables_check_drop() {
+  if ! iptables -C INPUT -p icmp --icmp-type timestamp-request -j DROP >/dev/null 2>&1; then
+    iptables -A INPUT -p icmp --icmp-type timestamp-request -j DROP
+  fi
+}
+iptables_check_drop
+if command -v iptables-save >/dev/null 2>&1; then
+  iptables-save > /etc/iptables/rules.v4
+fi
+
+grep -q 'net.ipv4.tcp_timestamps' /etc/sysctl.conf
+if [ $? -ne 0 ]; then
+  echo 'net.ipv4.tcp_timestamps = 0' >> /etc/sysctl.conf
+  sysctl -p >/dev/null 2>&1
+fi
+
+if [ -f /etc/bind/named.conf.options ]; then
+  backup_file="/etc/bind/named.conf.options.bak_$(date +%s)"
+  cp /etc/bind/named.conf.options "$backup_file"
+  if grep -q 'recursion ' /etc/bind/named.conf.options; then
+    sed -i 's/recursion .*/recursion no;/g' /etc/bind/named.conf.options
+  else
+    sed -i '/options {/a \\trecursion no;' /etc/bind/named.conf.options
+  fi
+  if grep -q 'allow-recursion' /etc/bind/named.conf.options; then
+    sed -i 's/allow-recursion .*//g' /etc/bind/named.conf.options
+  fi
+  systemctl restart named >/dev/null 2>&1
+fi
+
+if [ -f /etc/dnsmasq.conf ]; then
+  if ! grep -q 'no-recursive' /etc/dnsmasq.conf; then
+    echo 'no-recursive' >> /etc/dnsmasq.conf
+    systemctl restart dnsmasq >/dev/null 2>&1
+  fi
+fi

@@ -1,0 +1,21 @@
+#!/bin/sh
+
+BACKUP_FILE="/etc/ssh/sshd_config.$(date +%Y%m%d%H%M%S).bak"
+if [ ! -f /etc/ssh/sshd_config ]; then
+    echo "Arquivo /etc/ssh/sshd_config não encontrado." >&2
+    exit 1
+fi
+cp /etc/ssh/sshd_config "$BACKUP_FILE"
+
+echo "HostKeyAlgorithms -ssh-dss" >> /etc/ssh/sshd_config
+
+if command -v systemctl >/dev/null 2>&1; then
+    systemctl restart sshd.service >/dev/null 2>&1 || systemctl restart ssh.service >/dev/null 2>&1
+elif command -v service >/dev/null 2>&1; then
+    service ssh restart >/dev/null 2>&1 || service sshd restart >/dev/null 2>&1
+else
+    echo "Não foi possível reiniciar o SSH. Reinicie manualmente." >&2
+    exit 1
+fi
+
+exit 0

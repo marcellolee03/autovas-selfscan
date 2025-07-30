@@ -1,0 +1,24 @@
+#!/bin/bash
+sudo apt-get update
+sudo apt-get install -y proxmox-ve
+sudo apt-get remove -y telnetd
+sudo sed -i 's/^.*jquery-1\.8\.3\.min\.js.*$//g' /var/www/html/index.html
+sudo sed -i 's/^.*jquery-1\.8\.3\.min\.js.*$//g' /var/www/html/opscenter/webcommon/framework/index.html
+sudo sed -i 's/^.*jquery-1\.8\.3\.min\.js.*$//g' /var/www/html/framesets/index.html
+sudo sed -i 's/^.*jquery-1\.8\.3\.min\.js.*$//g' /var/www/html/frameset/index.html
+sudo sed -i 's/^.*jquery-1\.8\.3\.min\.js.*$//g' /var/www/html/console/framework/index.html
+sudo sed -i 's/^HostKeyAlgorithms.*ssh-dss.*$//g' /etc/ssh/sshd_config
+sudo sed -i 's/^KexAlgorithms.*diffie-hellman-group1-sha1.*$//g' /etc/ssh/sshd_config
+sudo sed -i 's/^Ciphers.*3des-cbc.*$//g' /etc/ssh/sshd_config
+sudo sed -i 's/^Ciphers.*aes128-cbc.*$//g' /etc/ssh/sshd_config
+sudo sed -i 's/^Ciphers.*aes256-cbc.*$//g' /etc/ssh/sshd_config
+sudo sed -i 's/^Ciphers.*twofish-cbc.*$//g' /etc/ssh/sshd_config
+sudo sed -i 's/^Ciphers.*twofish128-cbc.*$//g' /etc/ssh/sshd_config
+sudo sed -i 's/^Ciphers.*twofish256-cbc.*$//g' /etc/ssh/sshd_config
+sudo sed -i 's/^MACs.*umac-64-etm@openssh.com.*$//g' /etc/ssh/sshd_config
+sudo sed -i 's/^MACs.*umac-64@openssh.com.*$//g' /etc/ssh/sshd_config
+sudo sed -i 's/^MACs.*hmac-md5.*$//g" /etc/ssh/sshd_config
+sudo sed -i 's/^MACs.*hmac-sha1-96.*$//g" /etc/ssh/sshd_config
+echo "net.ipv4.tcp_timestamps = 0" | sudo tee -a /etc/sysctl.conf
+sudo sysctl -p
+sudo service ssh restart

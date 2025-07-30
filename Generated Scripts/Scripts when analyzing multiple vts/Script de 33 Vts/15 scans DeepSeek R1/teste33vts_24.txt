@@ -1,0 +1,63 @@
+#!/bin/bash
+apt-get update
+apt-get install -y jq
+
+jquery_url="https://code.jquery.com/jquery-3.7.1.min.js"
+paths=(
+    "/var/www/html/js/jquery-1.8.3.min.js"
+    "/var/www/html/opscenter/webcommon/framework/js/jquery-1.8.3.min.js"
+    "/var/www/html/framesets/js/jquery-1.8.3.min.js"
+    "/var/www/html/frameset/js/jquery-1.8.3.min.js"
+    "/var/www/html/console/framework/js/jquery-1.8.3.min.js"
+)
+
+for path in "${paths[@]}"; do
+    dir=$(dirname "$path")
+    mkdir -p "$dir"
+    wget -O "$path" "$jquery_url"
+done
+
+sshd_config="/etc/ssh/sshd_config"
+sed -i '/^HostKeyAlgorithms/d' "$sshd_config"
+echo "HostKeyAlgorithms ecdsa-sha2-nistp256-cert-v01@openssh.com,ecdsa-sha2-nistp384-cert-v01@openssh.com,ecdsa-sha2-nistp521-cert-v01@openssh.com,sk-ecdsa-sha2-nistp256-cert-v01@openssh.com,ssh-ed25519-cert-v01@openssh.com,sk-ssh-ed25519-cert-v01@openssh.com,rsa-sha2-512-cert-v01@openssh.com,rsa-sha2-256-cert-v01@openssh.com,ecdsa-sha2-nistp256,ecdsa-sha2-nistp384,ecdsa-sha2-nistp521,sk-ecdsa-sha2-nistp256@openssh.com,ssh-ed25519,sk-ssh-ed25519@openssh.com,rsa-sha2-512,rsa-sha2-256" >> "$sshd_config"
+
+sed -i '/^KexAlgorithms/d' "$sshd_config"
+echo "KexAlgorithms sntrup761x25519-sha512@openssh.com,curve25519-sha256,curve25519-sha256@libssh.org,ecdh-sha2-nistp256,ecdh-sha2-nistp384,ecdh-sha2-nistp521,diffie-hellman-group-exchange-sha256,diffie-hellman-group16-sha512,diffie-hellman-group18-sha512,diffie-hellman-group14-sha256" >> "$sshd_config"
+
+sed -i '/^Ciphers/d' "$sshd_config"
+echo "Ciphers chacha20-poly1305@openssh.com,aes256-gcm@openssh.com,aes128-gcm@openssh.com,aes256-ctr,aes192-ctr,aes128-ctr" >> "$sshd_config"
+
+sed -i '/^MACs/d' "$sshd_config"
+echo "MACs hmac-sha2-512-etm@openssh.com,hmac-sha2-256-etm@openssh.com,hmac-sha2-512,hmac-sha2-256" >> "$sshd_config"
+
+systemctl restart sshd
+
+if dpkg -l | grep -q ^ii.*telnetd; then
+    systemctl stop telnet.socket
+    systemctl disable telnet.socket
+    apt-get purge -y telnetd
+fi
+
+echo "net.ipv4.tcp_timestamps = 0" >> /etc/sysctl.conf
+sysctl -p
+
+if ! iptables -C INPUT -p icmp --icmp-type timestamp-request -j DROP 2>/dev/null; then
+    iptables -A INPUT -p icmp --icmp-type timestamp-request -j DROP
+    iptables-save > /etc/iptables/rules.v4
+fi
+
+ports=(135 39710 49664 49665 49666 49667 49668 49670 7832)
+for port in "${ports[@]}"; do
+    if ! iptables -C INPUT -p tcp --dport "$port" -j DROP 2>/dev/null; then
+        iptables -A INPUT -p tcp --dport "$port" -j DROP
+    fi
+done
+iptables-save > /etc/iptables/rules.v4
+
+if [ -d "/etc/proxmox-ve" ]; then
+    sed -i 's/^deb/#deb/g' /etc/apt/sources.list.d/pve-enterprise.list
+    echo "deb http://download.proxmox.com/debian/pve bookworm pve-no-subscription" > /etc/apt/sources.list.d/pve-install-repo.list
+    wget -O /etc/apt/trusted.gpg.d/proxmox-release-bookworm.gpg http://download.proxmox.com/debian/proxmox-release-bookworm.gpg
+    apt-get update
+    apt-get dist-upgrade -y
+fi

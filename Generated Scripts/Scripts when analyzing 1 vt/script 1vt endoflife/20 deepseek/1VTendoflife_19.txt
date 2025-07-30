@@ -1,0 +1,15 @@
+#!/bin/bash
+if [ "$(lsb_release -rs)" = "8.04" ]; then
+    echo "Ubuntu 8.04 detected. Upgrading to a supported version..."
+    sed -i 's/hardy/trusty/g' /etc/apt/sources.list
+    apt-get update
+    apt-get install -y ubuntu-minimal
+    do-release-upgrade -d
+    if [ "$(lsb_release -rs)" != "8.04" ]; then
+        echo "Upgrade successful. Current version: $(lsb_release -rs)"
+    else
+        echo "Upgrade failed. Please check manually."
+    fi
+else
+    echo "No EOL version detected. Current version: $(lsb_release -rs)"
+fi

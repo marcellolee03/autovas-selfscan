@@ -1,0 +1,33 @@
+#!/bin/bash
+# Corrigindo vulnerabilidades de segurança
+
+# Vulnerabilidade 1: Cleartext Transmission of Sensitive Information via HTTP
+sudo sed -i 's/^#Listen 80/Listen 443/' /etc/apache2/ports.conf
+sudo sed -i 's/^<VirtualHost \*:80>/<VirtualHost \*:443>/' /etc/apache2/sites-available/000-default.conf
+sudo a2enmod ssl
+sudo systemctl restart apache2
+
+# Vulnerabilidade 2: DNS Cache Snooping Vulnerability (UDP)
+sudo sed -i 's/^recursion yes/recursion no/' /etc/named.conf
+sudo systemctl restart named
+
+# Vulnerabilidade 3: ICMP Timestamp Reply Information Disclosure
+sudo sysctl -w net.ipv4.icmp_echo_ignore_all=1
+echo "net.ipv4.icmp_echo_ignore_all=1" | sudo tee -a /etc/sysctl.conf
+sudo sysctl -p
+
+# Vulnerabilidade 4: SSL/TLS: Deprecated TLSv1.0 and TLSv1.1 Protocol Detection
+sudo sed -i 's/^SSLProtocol all -SSLv3/SSLProtocol all -SSLv3 -TLSv1 TLSv1.1/' /etc/apache2/mods-available/ssl.conf
+sudo systemctl restart apache2
+
+# Vulnerabilidade 5: SSL/TLS: Renegotiation DoS Vulnerability (CVE-2011-1473, CVE-2011-5094)
+sudo sed -i 's/^SSLInsecureRenegotiation off/SSLInsecureRenegotiation on/' /etc/apache2/mods-available/ssl.conf
+sudo systemctl restart apache2
+
+# Vulnerabilidade 6: SSL/TLS: Report Weak Cipher Suites
+sudo sed -i 's/^SSLCipherSuite HIGH:!aNULL/SSLCipherSuite HIGH:!aNULL:!MD5:!RC4/' /etc/apache2/mods-available/ssl.conf
+sudo systemctl restart apache2
+
+# Vulnerabilidade 7: TCP Timestamps Information Disclosure
+echo "net.ipv4.tcp_timestamps = 0" | sudo tee -a /etc/sysctl.conf
+sudo sysctl -p

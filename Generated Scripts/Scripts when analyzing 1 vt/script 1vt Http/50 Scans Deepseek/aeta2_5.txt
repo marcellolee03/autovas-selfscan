@@ -1,0 +1,25 @@
+#!/bin/bash
+# Enforce HTTPS for sensitive data transmission
+if ! grep -q "RewriteEngine On" /etc/apache2/sites-available/000-default.conf; then
+    sed -i '/<VirtualHost \*:80>/a \\tRewriteEngine On\n\tRewriteCond %{HTTPS} off\n\tRewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]' /etc/apache2/sites-available/000-default.conf
+    systemctl restart apache2
+fi
+
+# Disable HTTP Basic Authentication if not using HTTPS
+if grep -q "AuthType Basic" /etc/apache2/sites-available/000-default.conf; then
+    sed -i '/AuthType Basic/d' /etc/apache2/sites-available/000-default.conf
+    systemctl restart apache2
+fi
+
+# Ensure SSL is enabled
+if ! a2query -s default-ssl | grep -q "enabled"; then
+    a2enmod ssl
+    a2ensite default-ssl
+    systemctl restart apache2
+fi
+
+# Redirect all HTTP traffic to HTTPS
+if ! grep -q "Redirect permanent / https://" /etc/apache2/sites-available/000-default.conf; then
+    sed -i '/<VirtualHost \*:80>/a \\tRedirect permanent / https://%{HTTP_HOST}%{REQUEST_URI}' /etc/apache2/sites-available/000-default.conf
+    systemctl restart apache2
+fi

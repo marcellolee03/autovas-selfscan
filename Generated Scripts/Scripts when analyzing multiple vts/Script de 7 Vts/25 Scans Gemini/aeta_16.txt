@@ -1,0 +1,137 @@
+```bash
+#!/bin/bash
+
+# Vulnerability 1: Cleartext Transmission of Sensitive Information via HTTP
+# Mitigation: Redirect HTTP to HTTPS.  This requires a web server (e.g., Apache, Nginx)
+#  and a valid SSL/TLS certificate.  This script assumes Apache is used.
+
+# Check if Apache is installed
+if command -v apache2 &> /dev/null
+then
+    # Enable mod_rewrite and mod_ssl
+    sudo a2enmod rewrite
+    sudo a2enmod ssl
+
+    # Create a virtual host configuration file for HTTPS (if it doesn't exist)
+    if [ ! -f /etc/apache2/sites-available/default-ssl.conf ]; then
+        echo "<VirtualHost *:443>
+    ServerName localhost
+    DocumentRoot /var/www/html
+
+    SSLEngine on
+    SSLCertificateFile /etc/ssl/certs/ssl-cert-snakeoil.pem
+    SSLCertificateKeyFile /etc/ssl/private/ssl-cert-snakeoil.key
+
+    <FilesMatch \"\.(cgi|shtml|phtml|php)\$\">
+            SSLOptions +StdEnvVars
+    </FilesMatch>
+    <Directory /usr/lib/cgi-bin>
+            SSLOptions +StdEnvVars
+    </Directory>
+
+    <Directory /var/www/>
+        Options Indexes FollowSymLinks
+        AllowOverride All
+        Require all granted
+    </Directory>
+
+
+    ErrorLog $\{APACHE_LOG_DIR}/error.log
+    CustomLog $\{APACHE_LOG_DIR}/access.log combined
+</VirtualHost>" | sudo tee /etc/apache2/sites-available/default-ssl.conf
+    fi
+
+    # Enable the HTTPS virtual host
+    sudo a2ensite default-ssl.conf
+
+    # Create a virtual host configuration file for HTTP to redirect to HTTPS
+    echo "<VirtualHost *:80>
+    ServerName localhost
+    Redirect permanent / https://localhost/
+</VirtualHost>" | sudo tee /etc/apache2/sites-available/http-redirect.conf
+
+    # Enable the HTTP redirect virtual host
+    sudo a2ensite http-redirect.conf
+
+    # Restart Apache
+    sudo systemctl restart apache2
+else
+    echo "Apache not found.  Please install Apache or configure your web server to redirect HTTP to HTTPS."
+fi
+
+# Vulnerability 2: DNS Cache Snooping Vulnerability (UDP)
+# Mitigation: Disable recursion in the DNS server.  This script assumes BIND9 is used.
+
+# Check if BIND9 is installed
+if command -v named &> /dev/null
+then
+    # Modify the BIND9 configuration file to disable recursion
+    sudo sed -i 's/recursion yes;/recursion no;/g' /etc/bind/named.conf.options
+
+    # Restart BIND9
+    sudo systemctl restart bind9
+else
+    echo "BIND9 not found. Please install BIND9 or configure your DNS server to disable recursion."
+fi
+
+# Vulnerability 3: ICMP Timestamp Reply Information Disclosure
+# Mitigation: Disable ICMP timestamp replies.
+
+sudo sysctl -w net.ipv4.icmp_echo_ignore_all=1
+echo "net.ipv4.icmp_echo_ignore_all = 1" | sudo tee -a /etc/sysctl.conf
+
+# Vulnerability 4: SSL/TLS: Deprecated TLSv1.0 and TLSv1.1 Protocol Detection
+# Mitigation: Disable TLSv1.0 and TLSv1.1.  This script assumes OpenSSL is used.
+#  and that the configurations are in /etc/ssl/openssl.cnf. This is a general case,
+# adjust according to the specific service.
+
+sudo sed -i 's/TLSv1.3/MinProtocol = tls1.2/g' /etc/ssl/openssl.cnf
+sudo sed -i 's/TLSv1.2/MinProtocol = tls1.2/g' /etc/ssl/openssl.cnf
+
+# Restart services that use OpenSSL (e.g., Apache, Nginx, Postfix)
+# In this general script, restart Apache and Nginx (if installed).
+if command -v apache2 &> /dev/null
+then
+    sudo systemctl restart apache2
+fi
+
+if command -v nginx &> /dev/null
+then
+    sudo systemctl restart nginx
+fi
+
+
+# Vulnerability 5: SSL/TLS: Renegotiation DoS Vulnerability (CVE-2011-1473, CVE-2011-5094)
+# Mitigation: Disable renegotiation.  This is dependent on the specific service.
+# For Apache:
+
+if command -v apache2 &> /dev/null
+then
+    echo "SSLHonorCipherOrder On
+<Directory /var/www/>
+    SSLOptions -StdEnvVars -Renegotiate
+</Directory>" | sudo tee /etc/apache2/conf-available/security.conf
+    sudo a2enconf security
+    sudo systemctl restart apache2
+fi
+
+# Vulnerability 6: SSL/TLS: Report Weak Cipher Suites
+# Mitigation: Disable weak cipher suites. This example uses a strong set for Apache.
+if command -v apache2 &> /dev/null
+then
+    sudo sed -i "s/^SSLCipherSuite .*/SSLCipherSuite ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:DHE-RSA-AES128-GCM-SHA256:DHE-RSA-AES256-GCM-SHA384/g" /etc/apache2/conf-available/security.conf
+    sudo systemctl restart apache2
+fi
+
+
+# Vulnerability 7: TCP Timestamps Information Disclosure
+# Mitigation: Disable TCP timestamps.
+
+sudo sysctl -w net.ipv4.tcp_timestamps=0
+echo "net.ipv4.tcp_timestamps = 0" | sudo tee -a /etc/sysctl.conf
+
+# Apply sysctl settings
+sudo sysctl -p
+
+echo "Vulnerabilities mitigated.  Please verify the configuration of your services."
+```

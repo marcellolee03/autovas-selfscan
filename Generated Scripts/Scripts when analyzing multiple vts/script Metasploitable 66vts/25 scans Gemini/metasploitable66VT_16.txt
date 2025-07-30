@@ -1,0 +1,612 @@
+```bash
+#!/bin/bash
+
+# Variáveis Globais
+OS=$(uname -s)
+ARCH=$(uname -m)
+
+# Funções Auxiliares
+log_message() {
+    echo "$(date '+%Y-%m-%d %H:%M:%S') - $1"
+}
+
+# Correção para Vulnerabilidade 1: TWiki XSS and Command Execution
+correct_twiki() {
+    log_message "Iniciando correção para vulnerabilidade TWiki (CVE-2008-5304, CVE-2008-5305)."
+    log_message "A atualização para a versão 4.2.4 ou posterior é recomendada."
+
+    # Como não temos detalhes sobre onde TWiki está instalado, apenas indicaremos a necessidade de atualização.
+    echo "Atualize o TWiki para a versão 4.2.4 ou mais recente. Consulte a documentação do TWiki para obter instruções."
+}
+
+# Correção para Vulnerabilidade 2: Distributed Ruby (dRuby/DRb) Multiple RCE
+correct_druby() {
+    log_message "Iniciando correção para vulnerabilidade dRuby (Distributed Ruby)."
+    log_message "Implemente controles apropriados, como taint em entradas não confiáveis e ajuste dos níveis de segurança $SAFE (>=2 recomendado)."
+
+    # Exemplo de como configurar $SAFE (isso pode variar dependendo da aplicação)
+    echo "Configure o nível de segurança \$SAFE para >=2 no seu script dRuby."
+    echo "Exemplo: \$SAFE = 2"
+
+    echo "Considere usar drb/acl.rb para restringir o acesso a hosts confiáveis."
+    # Instruções adicionais ou ações automatizadas podem ser incluídas aqui se aplicável
+}
+
+# Correção para Vulnerabilidade 3: rlogin Passwordless Login
+disable_rlogin() {
+    log_message "Iniciando correção para vulnerabilidade rlogin."
+    log_message "Desativando o serviço rlogin."
+
+    if systemctl is-active rlogin.socket >/dev/null 2>&1; then
+        systemctl stop rlogin.socket
+        systemctl disable rlogin.socket
+        log_message "Serviço rlogin desativado via systemd."
+    else
+        if [ -x /etc/init.d/rlogin ]; then
+            /etc/init.d/rlogin stop
+            update-rc.d -f rlogin remove
+            log_message "Serviço rlogin desativado via init.d."
+        else
+            log_message "Serviço rlogin não encontrado. Verifique a instalação."
+        fi
+    fi
+}
+
+# Correção para Vulnerabilidade 4: Operating System (OS) End of Life (EOL) Detection
+eol_os_message() {
+    log_message "Sistema Operacional atingiu o fim da vida útil (EOL)."
+    log_message "Atualize o sistema operacional para uma versão suportada."
+
+    echo "Atenção: O sistema operacional Ubuntu 8.04 atingiu o fim da vida útil em 2013-05-09."
+    echo "Atualize para uma versão do Ubuntu ainda suportada para receber atualizações de segurança."
+}
+
+# Correção para Vulnerabilidade 5: The rexec service is running
+disable_rexec() {
+    log_message "Iniciando correção para vulnerabilidade rexec."
+    log_message "Desativando o serviço rexec."
+
+    if systemctl is-active rexec.socket >/dev/null 2>&1; then
+        systemctl stop rexec.socket
+        systemctl disable rexec.socket
+        log_message "Serviço rexec desativado via systemd."
+    else
+        if [ -x /etc/init.d/rexec ]; then
+            /etc/init.d/rexec stop
+            update-rc.d -f rexec remove
+            log_message "Serviço rexec desativado via init.d."
+        else
+            log_message "Serviço rexec não encontrado. Verifique a instalação."
+        fi
+    fi
+}
+
+# Correção para Vulnerabilidade 6: Possible Backdoor: Ingreslock
+clean_ingreslock() {
+    log_message "Possível backdoor detectado (Ingreslock)."
+    log_message "Recomendada uma limpeza completa do sistema infectado."
+
+    echo "Alerta: Possível backdoor Ingreslock detectado. Execute uma análise completa do sistema e remova quaisquer arquivos suspeitos."
+    echo "Considere reinstalar o sistema a partir de uma mídia limpa."
+}
+
+# Correção para Vulnerabilidade 7: Apache Tomcat AJP RCE Vulnerability (Ghostcat)
+correct_tomcat_ajp() {
+    log_message "Iniciando correção para vulnerabilidade AJP RCE (Ghostcat) no Tomcat."
+    log_message "Atualize o Apache Tomcat para a versão 7.0.100, 8.5.51, 9.0.31 ou mais recente."
+
+    echo "Atualize o Apache Tomcat para uma versão segura. Consulte a documentação do Tomcat para obter instruções detalhadas."
+    echo "Alternativamente, desative o conector AJP se não estiver em uso."
+}
+
+# Correção para Vulnerabilidade 8: MySQL / MariaDB Default Credentials
+correct_mysql_default_credentials() {
+    log_message "Iniciando correção para credenciais padrão MySQL/MariaDB."
+    log_message "Alterando a senha do usuário 'root'."
+
+    if [ -x /usr/bin/mysqladmin ]; then
+        mysqladmin -u root password "NovaSenhaSegura"
+        log_message "Senha do usuário 'root' alterada com sucesso."
+    else
+        log_message "mysqladmin não encontrado. Verifique a instalação do MySQL/MariaDB."
+    fi
+}
+
+# Correção para Vulnerabilidade 9: PHP < 5.6.30, 7.x < 7.0.15, 7.1.x < 7.1.1 Multiple Vulnerabilities
+correct_php_version() {
+    log_message "Iniciando correção para vulnerabilidades PHP."
+    log_message "Atualize o PHP para a versão 5.6.30, 7.0.15, 7.1.1 ou mais recente."
+
+    echo "Atenção: A versão do PHP está desatualizada e contém vulnerabilidades."
+    echo "Atualize o PHP utilizando o gerenciador de pacotes do sistema (apt, yum, etc.)."
+}
+
+# Correção para Vulnerabilidade 10: PHP < 5.3.13, 5.4.x < 5.4.3 Multiple Vulnerabilities - Active Check
+correct_php_cgi() {
+    log_message "Corrigindo vulnerabilidade na configuração CGI do PHP."
+    log_message "Removendo arquivos potencialmente vulneráveis."
+
+    rm -f /cgi-bin/php
+    rm -f /mutillidae/cgi-bin/php
+
+    echo "Remova ou reconfigure o manipulador CGI para PHP para evitar execução arbitrária de código."
+    echo "Verifique as configurações do servidor web (Apache, Nginx) para garantir que arquivos PHP sejam processados corretamente."
+}
+
+# Correção para Vulnerabilidade 11 & 12: vsftpd Compromised Source Packages Backdoor Vulnerability
+correct_vsftpd_backdoor() {
+    log_message "Detectada vulnerabilidade de backdoor no vsftpd."
+    log_message "Recomenda-se reinstalar o vsftpd a partir de uma fonte confiável."
+
+    apt-get update && apt-get --reinstall install vsftpd -y
+    log_message "vsftpd reinstalado a partir dos repositórios."
+}
+
+# Correção para Vulnerabilidade 13: DistCC RCE Vulnerability (CVE-2004-2687)
+disable_distcc() {
+    log_message "Desativando serviço DistCC devido a vulnerabilidade RCE."
+    log_message "Parando e desativando o serviço distccd."
+
+    if systemctl is-active distccd >/dev/null 2>&1; then
+        systemctl stop distccd
+        systemctl disable distccd
+        log_message "Serviço distccd desativado via systemd."
+    else
+        if [ -x /etc/init.d/distccd ]; then
+            /etc/init.d/distccd stop
+            update-rc.d -f distccd remove
+            log_message "Serviço distccd desativado via init.d."
+        else
+            log_message "Serviço distccd não encontrado. Verifique a instalação."
+        fi
+    fi
+}
+
+# Correção para Vulnerabilidade 14: PostgreSQL Default Credentials
+correct_postgres_default_credentials() {
+    log_message "Iniciando correção para credenciais padrão PostgreSQL."
+    log_message "Alterando a senha do usuário 'postgres'."
+
+    PGPASSWORD=postgres psql -U postgres -c "ALTER USER postgres WITH PASSWORD 'NovaSenhaSegura';"
+    log_message "Senha do usuário 'postgres' alterada com sucesso."
+}
+
+# Correção para Vulnerabilidade 15: VNC Brute Force Login
+correct_vnc_password() {
+    log_message "Detectada vulnerabilidade de força bruta no VNC."
+    log_message "Altere a senha do VNC para algo complexo."
+
+    echo "Altere a senha do VNC. Dependendo do servidor VNC, isso pode ser feito editando um arquivo de configuração ou através de uma ferramenta administrativa."
+}
+
+# Correção para Vulnerabilidade 16: Test HTTP dangerous methods
+correct_http_methods() {
+    log_message "Desativando métodos HTTP perigosos (PUT, DELETE)."
+    log_message "Modifique a configuração do servidor web (Apache, Nginx) para desativar ou restringir esses métodos."
+
+    echo "Modifique a configuração do seu servidor web para desabilitar os métodos HTTP PUT e DELETE."
+    echo "Em Apache, você pode usar <Limit> diretivas no arquivo .htaccess ou na configuração do VirtualHost."
+}
+
+# Correção para Vulnerabilidade 17 & 18: FTP Brute Force Logins With Default Credentials Reporting
+correct_ftp_default_credentials() {
+    log_message "Corrigindo logins de força bruta FTP com credenciais padrão."
+    log_message "Alterando as senhas para as contas 'msfadmin', 'postgres', 'service' e 'user'."
+
+    for user in msfadmin postgres service user; do
+        if id "$user" >/dev/null 2>&1; then
+            passwd "$user"
+            log_message "Senha para o usuário '$user' alterada."
+        else
+            log_message "Usuário '$user' não encontrado."
+        fi
+    done
+}
+
+# Correção para Vulnerabilidade 19: The rlogin service is running
+disable_rlogin_again() {
+    log_message "Desativando o serviço rlogin."
+
+    if systemctl is-active rlogin.socket >/dev/null 2>&1; then
+        systemctl stop rlogin.socket
+        systemctl disable rlogin.socket
+        log_message "Serviço rlogin desativado via systemd."
+    else
+        if [ -x /etc/init.d/rlogin ]; then
+            /etc/init.d/rlogin stop
+            update-rc.d -f rlogin remove
+            log_message "Serviço rlogin desativado via init.d."
+        else
+            log_message "Serviço rlogin não encontrado. Verifique a instalação."
+        fi
+    fi
+}
+
+# Correção para Vulnerabilidade 20: rsh Unencrypted Cleartext Login
+disable_rsh() {
+    log_message "Desativando o serviço rsh."
+
+    if systemctl is-active rsh.socket >/dev/null 2>&1; then
+        systemctl stop rsh.socket
+        systemctl disable rsh.socket
+        log_message "Serviço rsh desativado via systemd."
+    else
+        if [ -x /etc/init.d/rsh ]; then
+            /etc/init.d/rsh stop
+            update-rc.d -f rsh remove
+            log_message "Serviço rsh desativado via init.d."
+        else
+            log_message "Serviço rsh não encontrado. Verifique a instalação."
+        fi
+    fi
+}
+
+# Correção para Vulnerabilidade 21: SSL/TLS: OpenSSL CCS Man in the Middle Security Bypass Vulnerability
+correct_openssl_ccs() {
+    log_message "Corrigindo vulnerabilidade OpenSSL CCS (CVE-2014-0224)."
+    log_message "Atualize o OpenSSL para a versão 0.9.8za, 1.0.0m, 1.0.1h ou mais recente."
+
+    apt-get update && apt-get --only-upgrade install openssl libssl-dev -y
+    log_message "OpenSSL atualizado para a versão mais recente."
+}
+
+# Correção para Vulnerabilidade 22: Multiple Vendors STARTTLS Implementation Plaintext Arbitrary Command Injection Vulnerability
+correct_starttls() {
+    log_message "Corrigindo vulnerabilidade STARTTLS."
+    log_message "Aplique as atualizações fornecidas pelo fornecedor do serviço afetado (Ipswitch, Kerio, Postfix, Qmail-TLS, Oracle, SCO Group, spamdyke, ISC)."
+
+    echo "Verifique as atualizações de segurança do seu servidor de e-mail (Postfix, Sendmail, etc.) e aplique as correções fornecidas pelo fornecedor."
+}
+
+# Correção para Vulnerabilidade 23 & 26 & 27: TWiki CSRF and XSS Vulnerabilities
+correct_twiki_again() {
+    log_message "Iniciando correção para vulnerabilidades TWiki (CSRF e XSS)."
+    log_message "A atualização para a versão 6.1.0 ou posterior é recomendada."
+
+    # Como não temos detalhes sobre onde TWiki está instalado, apenas indicaremos a necessidade de atualização.
+    echo "Atualize o TWiki para a versão 6.1.0 ou mais recente. Consulte a documentação do TWiki para obter instruções."
+}
+
+# Correção para Vulnerabilidade 24: Anonymous FTP Login Reporting
+disable_anonymous_ftp() {
+    log_message "Desativando login anônimo no FTP."
+    log_message "Modifique a configuração do servidor FTP (vsftpd, ProFTPD) para desativar o login anônimo."
+
+    echo "Modifique a configuração do servidor FTP para desativar o login anônimo."
+    echo "Em vsftpd, comente a linha 'anonymous_enable=YES' no arquivo /etc/vsftpd.conf."
+}
+
+# Correção para Vulnerabilidade 25 & 55: jQuery < 1.9.0 XSS Vulnerability
+correct_jquery_version() {
+    log_message "Corrigindo vulnerabilidade XSS no jQuery."
+    log_message "Atualizando o jQuery para a versão 1.9.0 ou mais recente."
+
+    echo "Atualize a biblioteca jQuery para a versão 1.9.0 ou superior. Substitua o arquivo jquery.min.js vulnerável pela versão mais recente."
+    echo "Localização do arquivo vulnerável: /mutillidae/javascript/ddsmoothmenu/jquery.min.js"
+}
+
+# Correção para Vulnerabilidade 28 & 29: SSL/TLS: Deprecated SSLv2 and SSLv3 Protocol Detection
+disable_sslv2_sslv3() {
+    log_message "Desativando protocolos SSLv2 e SSLv3."
+    log_message "Modifique a configuração do serviço (Postfix, PostgreSQL) para desativar SSLv2 e SSLv3."
+
+    echo "Desative os protocolos SSLv2 e SSLv3 na configuração do serviço."
+    echo "Para Postfix, adicione 'smtpd_tls_mandatory_protocols = !SSLv2, !SSLv3' no arquivo main.cf."
+    echo "Para PostgreSQL, defina 'ssl_min_protocol = 'tls1.2'' no arquivo postgresql.conf."
+}
+
+# Correção para Vulnerabilidade 30: SSL/TLS: Report Weak Cipher Suites
+correct_weak_ciphers() {
+    log_message "Removendo cipher suites fracas."
+    log_message "Modifique a configuração do serviço (Postfix, PostgreSQL) para remover as cipher suites listadas."
+
+    echo "Remova as cipher suites fracas da configuração do serviço."
+    echo "Para Postfix, modifique a configuração 'smtpd_tls_ciphers' no arquivo main.cf."
+    echo "Para PostgreSQL, modifique a configuração 'ssl_ciphers' no arquivo postgresql.conf."
+}
+
+# Correção para Vulnerabilidade 31: HTTP Debugging Methods (TRACE/TRACK) Enabled
+disable_http_trace() {
+    log_message "Desativando os métodos HTTP TRACE/TRACK."
+    log_message "Modifique a configuração do servidor web (Apache, Nginx) para desativar esses métodos."
+
+    echo "Desative os métodos HTTP TRACE/TRACK na configuração do servidor web."
+    echo "Para Apache, adicione 'TraceEnable Off' no arquivo de configuração do VirtualHost."
+}
+
+# Correção para Vulnerabilidade 32 & 33: SSL/TLS: Server Certificate / Certificate in Chain with RSA keys less than 2048 bits
+replace_weak_certificate() {
+    log_message "Substituindo certificado SSL/TLS com chave RSA menor que 2048 bits."
+    log_message "Gere um novo certificado com uma chave RSA de 2048 bits ou mais."
+
+    echo "Gere um novo certificado SSL/TLS com uma chave RSA de 2048 bits ou mais e substitua o certificado atual."
+}
+
+# Correção para Vulnerabilidade 34: Weak Key Exchange (KEX) Algorithm(s) Supported (SSH)
+correct_ssh_kex() {
+    log_message "Removendo algoritmos KEX fracos no SSH."
+    log_message "Modifique a configuração do SSH (/etc/ssh/sshd_config) para remover os algoritmos KEX listados."
+
+    echo "Remova os algoritmos KEX fracos da configuração do SSH."
+    echo "Edite o arquivo /etc/ssh/sshd_config e remova os algoritmos listados da diretiva 'KexAlgorithms'."
+}
+
+# Correção para Vulnerabilidade 35: phpinfo() Output Reporting (HTTP)
+remove_phpinfo() {
+    log_message "Removendo arquivos phpinfo()."
+    log_message "Remova os arquivos phpinfo.php e mutillidae/phpinfo.php."
+
+    rm -f /var/www/html/phpinfo.php
+    rm -f /var/www/html/mutillidae/phpinfo.php
+}
+
+# Correção para Vulnerabilidade 36: Weak Host Key Algorithm(s) (SSH)
+correct_ssh_host_key() {
+    log_message "Removendo algoritmos de chave de host fracos no SSH."
+    log_message "Modifique a configuração do SSH (/etc/ssh/sshd_config) para remover os algoritmos de chave de host listados."
+
+    echo "Remova os algoritmos de chave de host fracos da configuração do SSH."
+    echo "Edite o arquivo /etc/ssh/sshd_config e remova os algoritmos listados da diretiva 'HostKeyAlgorithms'."
+}
+
+# Correção para Vulnerabilidade 37: Check if Mailserver answer to VRFY and EXPN requests
+disable_vrfy_expn() {
+    log_message "Desativando VRFY e EXPN no servidor de e-mail."
+    log_message "Modifique a configuração do servidor de e-mail (Postfix, Sendmail) para desativar VRFY e EXPN."
+
+    echo "Desative VRFY e EXPN na configuração do servidor de e-mail."
+    echo "Para Postfix, adicione 'disable_vrfy_command = yes' no arquivo main.cf."
+    echo "Para Sendmail, adicione a opção 'O PrivacyOptions=goaway'."
+}
+
+# Correção para Vulnerabilidade 38 & 39: SSL/TLS: Renegotiation DoS Vulnerability (CVE-2011-1473, CVE-2011-5094)
+disable_ssl_renegotiation() {
+    log_message "Desativando renegotiation SSL/TLS."
+    log_message "Consulte a documentação do serviço para desativar ou limitar a renegotiation."
+
+    echo "Desative ou limite a renegotiation SSL/TLS. Consulte a documentação do seu servidor para obter instruções."
+}
+
+# Correção para Vulnerabilidade 40 & 41: SSL/TLS: Certificate Expired
+replace_expired_certificate() {
+    log_message "Substituindo certificado SSL/TLS expirado."
+    log_message "Gere um novo certificado e substitua o certificado expirado."
+
+    echo "Gere um novo certificado SSL/TLS e substitua o certificado expirado."
+}
+
+# Correção para Vulnerabilidade 42 & 43: QWikiwiki & awiki directory traversal vulnerability
+disable_vulnerable_apps() {
+    log_message "Desativando QWikiwiki e awiki devido a vulnerabilidades de directory traversal."
+    log_message "Remova ou desative as aplicações QWikiwiki e awiki."
+
+    echo "Remova ou desative as aplicações QWikiwiki e awiki. Não há correções disponíveis."
+}
+
+# Correção para Vulnerabilidade 44: /doc directory browsable
+restrict_doc_directory() {
+    log_message "Restringindo acesso ao diretório /doc."
+    log_message "Modifique a configuração do servidor web (Apache, Nginx) para restringir o acesso ao diretório /doc."
+
+    echo "Restrinja o acesso ao diretório /doc na configuração do servidor web."
+    echo "Para Apache, adicione as seguintes linhas no arquivo .htaccess ou na configuração do VirtualHost:"
+    echo "<Directory /usr/doc>"
+    echo "  AllowOverride None"
+    echo "  Order deny,allow"
+    echo "  Deny from all"
+    echo "  Allow from localhost"
+    echo "</Directory>"
+}
+
+# Correção para Vulnerabilidade 45: Telnet Unencrypted Cleartext Login
+disable_telnet() {
+    log_message "Desativando o serviço Telnet."
+
+    if systemctl is-active telnet.socket >/dev/null 2>&1; then
+        systemctl stop telnet.socket
+        systemctl disable telnet.socket
+        log_message "Serviço Telnet desativado via systemd."
+    else
+        if [ -x /etc/init.d/telnetd ]; then
+            /etc/init.d/telnetd stop
+            update-rc.d -f telnetd remove
+            log_message "Serviço Telnet desativado via init.d."
+        else
+            log_message "Serviço Telnet não encontrado. Verifique a instalação."
+        fi
+    fi
+}
+
+# Correção para Vulnerabilidade 46 & 48: FTP Unencrypted Cleartext Login
+enforce_ftps() {
+    log_message "Forçando conexões FTPS (FTP sobre TLS)."
+    log_message "Modifique a configuração do servidor FTP (vsftpd, ProFTPD) para forçar conexões FTPS."
+
+    echo "Modifique a configuração do servidor FTP para forçar conexões FTPS."
+    echo "Para vsftpd, adicione as seguintes linhas no arquivo /etc/vsftpd.conf:"
+    echo "ssl_enable=YES"
+    echo "force_local_data_ssl=YES"
+    echo "force_local_logins_ssl=YES"
+}
+
+# Correção para Vulnerabilidade 47: VNC Server Unencrypted Data Transmission
+secure_vnc() {
+    log_message "Protegendo a transmissão de dados do VNC."
+    log_message "Use um túnel SSH ou IPsec para criptografar a conexão VNC."
+
+    echo "Use um túnel SSH ou IPsec para criptografar a conexão VNC."
+    echo "Exemplo de túnel SSH: ssh -L 5901:localhost:5900 usuario@servidor_vnc"
+}
+
+# Correção para Vulnerabilidade 49: Cleartext Transmission of Sensitive Information via HTTP
+enforce_https() {
+    log_message "Forçando a transmissão de dados sensíveis via HTTPS."
+    log_message "Configure o servidor web para redirecionar todas as conexões HTTP para HTTPS."
+
+    echo "Configure o servidor web para redirecionar todas as conexões HTTP para HTTPS."
+    echo "Para Apache, você pode usar um arquivo .htaccess com as seguintes linhas:"
+    echo "RewriteEngine On"
+    echo "RewriteCond %{HTTPS} off"
+    echo "RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]"
+}
+
+# Correção para Vulnerabilidade 50 & 54: SSL/TLS: Deprecated TLSv1.0 and TLSv1.1 Protocol Detection
+disable_tlsv1_tlsv11() {
+    log_message "Desativando protocolos TLSv1.0 e TLSv1.1."
+    log_message "Modifique a configuração do serviço (Postfix, PostgreSQL) para desativar TLSv1.0 e TLSv1.1."
+
+    echo "Desative os protocolos TLSv1.0 e TLSv1.1 na configuração do serviço."
+    echo "Para Postfix, adicione 'smtpd_tls_mandatory_protocols = !SSLv2, !SSLv3, !TLSv1, !TLSv1.1' no arquivo main.cf."
+    echo "Para PostgreSQL, defina 'ssl_min_protocol = 'tls1.2'' no arquivo postgresql.conf."
+}
+
+# Correção para Vulnerabilidade 51: Weak Encryption Algorithm(s) Supported (SSH)
+correct_ssh_encryption() {
+    log_message "Removendo algoritmos de criptografia fracos no SSH."
+    log_message "Modifique a configuração do SSH (/etc/ssh/sshd_config) para remover os algoritmos de criptografia listados."
+
+    echo "Remova os algoritmos de criptografia fracos da configuração do SSH."
+    echo "Edite o arquivo /etc/ssh/sshd_config e remova os algoritmos listados das diretivas 'Ciphers' e 'MACs'."
+}
+
+# Correção para Vulnerabilidade 52: Apache HTTP Server httpOnly Cookie Information Disclosure Vulnerability
+upgrade_apache() {
+    log_message "Atualizando o Apache HTTP Server para corrigir a vulnerabilidade httpOnly Cookie."
+    log_message "Atualize o Apache para a versão 2.2.22 ou mais recente."
+
+    apt-get update && apt-get --only-upgrade install apache2 -y
+    log_message "Apache HTTP Server atualizado para a versão mais recente."
+}
+
+# Correção para Vulnerabilidade 53: phpMyAdmin error.php Cross Site Scripting Vulnerability
+remove_phpmyadmin() {
+    log_message "Removendo phpMyAdmin devido a vulnerabilidade XSS."
+    log_message "Remova ou desative o phpMyAdmin."
+
+    echo "Remova ou desative o phpMyAdmin. Não há correções disponíveis para a versão vulnerável."
+}
+
+# Correção para Vulnerabilidade 56 & 61: SSL/TLS: RSA Temporary Key Handling & DHE_EXPORT MITM Security Bypass Vulnerability
+disable_export_ciphers() {
+    log_message "Desativando cipher suites de exportação (RSA_EXPORT e DHE_EXPORT)."
+    log_message "Modifique a configuração do serviço (Postfix, PostgreSQL) para remover as cipher suites de exportação."
+
+    echo "Remova as cipher suites de exportação da configuração do serviço."
+    echo "Para Postfix, modifique a configuração 'smtpd_tls_ciphers' no arquivo main.cf."
+    echo "Para PostgreSQL, modifique a configuração 'ssl_ciphers' no arquivo postgresql.conf."
+}
+
+# Correção para Vulnerabilidade 57 & 60: SSL/TLS: Certificate Signed Using A Weak Signature Algorithm
+replace_weak_signature_certificate() {
+    log_message "Substituindo certificado SSL/TLS assinado com algoritmo de hash fraco."
+    log_message "Gere um novo certificado com um algoritmo de hash SHA-2 e substitua o certificado atual."
+
+    echo "Gere um novo certificado SSL/TLS com um algoritmo de hash SHA-2 e substitua o certificado atual."
+}
+
+# Correção para Vulnerabilidade 58 & 59: SSL/TLS: Diffie-Hellman Key Exchange Insufficient DH Group Strength Vulnerability
+correct_dh_group_strength() {
+    log_message "Aumentando a força do grupo Diffie-Hellman (DH)."
+    log_message "Use DH de 2048 bits ou ECDHE."
+
+    echo "Use DH de 2048 bits ou ECDHE. Consulte a documentação do seu servidor para obter instruções."
+}
+
+# Correção para Vulnerabilidade 62 & 63: SSL/TLS: SSLv3 Protocol CBC Cipher Suites Information Disclosure Vulnerability (POODLE)
+disable_sslv3_poodle() {
+    log_message "Desativando SSLv3 para mitigar a vulnerabilidade POODLE."
+    log_message "Modifique a configuração do serviço (Postfix, PostgreSQL) para desativar SSLv3."
+
+    echo "Desative o protocolo SSLv3 na configuração do serviço."
+    echo "Para Postfix, adicione 'smtpd_tls_mandatory_protocols = !SSLv2, !SSLv3' no arquivo main.cf."
+    echo "Para PostgreSQL, defina 'ssl_min_protocol = 'tls1.0' no arquivo postgresql.conf (ou superior, se possível)."
+}
+
+# Correção para Vulnerabilidade 64: Weak MAC Algorithm(s) Supported (SSH)
+correct_ssh_mac() {
+    log_message "Removendo algoritmos MAC fracos no SSH."
+    log_message "Modifique a configuração do SSH (/etc/ssh/sshd_config) para remover os algoritmos MAC listados."
+
+    echo "Remova os algoritmos MAC fracos da configuração do SSH."
+    echo "Edite o arquivo /etc/ssh/sshd_config e remova os algoritmos listados da diretiva 'MACs'."
+}
+
+# Correção para Vulnerabilidade 65: TCP Timestamps Information Disclosure
+disable_tcp_timestamps() {
+    log_message "Desativando TCP timestamps."
+    log_message "Adicione 'net.ipv4.tcp_timestamps = 0' em /etc/sysctl.conf e execute 'sysctl -p'."
+
+    echo "Adicione 'net.ipv4.tcp_timestamps = 0' em /etc/sysctl.conf e execute 'sysctl -p'."
+    echo "Para Windows, execute 'netsh int tcp set global timestamps=disabled'."
+}
+
+# Correção para Vulnerabilidade 66: ICMP Timestamp Reply Information Disclosure
+block_icmp_timestamps() {
+    log_message "Bloqueando respostas ICMP timestamp."
+    log_message "Configure o firewall para bloquear respostas ICMP timestamp."
+
+    echo "Configure o firewall para bloquear respostas ICMP timestamp (Type 14)."
+    echo "Exemplo com iptables: iptables -A INPUT -p icmp --icmp-type timestamp-reply -j DROP"
+}
+
+# Função principal para executar as correções
+main() {
+    log_message "Iniciando script de correção de vulnerabilidades."
+
+    correct_twiki
+    correct_druby
+    disable_rlogin
+    eol_os_message
+    disable_rexec
+    clean_ingreslock
+    correct_tomcat_ajp
+    correct_mysql_default_credentials
+    correct_php_version
+    correct_php_cgi
+    correct_vsftpd_backdoor
+    disable_distcc
+    correct_postgres_default_credentials
+    correct_vnc_password
+    correct_http_methods
+    correct_ftp_default_credentials
+    disable_rlogin_again
+    disable_rsh
+    correct_openssl_ccs
+    correct_starttls
+    correct_twiki_again
+    disable_anonymous_ftp
+    correct_jquery_version
+    disable_sslv2_sslv3
+    correct_weak_ciphers
+    disable_http_trace
+    replace_weak_certificate
+    correct_ssh_kex
+    remove_phpinfo
+    correct_ssh_host_key
+    disable_vrfy_expn
+    disable_ssl_renegotiation
+    replace_expired_certificate
+    disable_vulnerable_apps
+    restrict_doc_directory
+    disable_telnet
+    enforce_ftps
+    secure_vnc
+    enforce_https
+    disable_tlsv1_tlsv11
+    correct_ssh_encryption
+    upgrade_apache
+    remove_phpmyadmin
+    disable_export_ciphers
+    replace_weak_signature_certificate
+    correct_dh_group_strength
+    disable_sslv3_poodle
+    correct_ssh_mac
+    disable_tcp_timestamps
+    block_icmp_timestamps
+
+    log_message "Script de correção de vulnerabilidades concluído."
+}
+
+# Executa a função principal
+main
+```

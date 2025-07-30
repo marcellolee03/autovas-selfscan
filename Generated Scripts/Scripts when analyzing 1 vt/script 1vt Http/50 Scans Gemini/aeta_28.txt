@@ -1,0 +1,103 @@
+```bash
+#!/bin/bash
+
+# Este script tem como objetivo mitigar a vulnerabilidade de transmissão de informações sensíveis em texto puro via HTTP.
+# Ele configura um redirecionamento de HTTP para HTTPS no servidor web Apache ou Nginx.
+
+# Variáveis
+SERVER_TYPE=""
+DOMAIN=""
+
+# Função para detectar o tipo de servidor web (Apache ou Nginx)
+detect_server_type() {
+  if command -v apache2ctl &> /dev/null; then
+    SERVER_TYPE="apache"
+    echo "Servidor web detectado: Apache"
+  elif command -v nginx &> /dev/null; then
+    SERVER_TYPE="nginx"
+    echo "Servidor web detectado: Nginx"
+  else
+    echo "Servidor web não detectado. Apache ou Nginx devem estar instalados."
+    exit 1
+  fi
+}
+
+# Função para obter o nome do domínio do usuário
+get_domain() {
+  read -p "Por favor, insira o nome do domínio (ex: example.com): " DOMAIN
+  if [ -z "$DOMAIN" ]; then
+    echo "Nome do domínio não pode ser vazio."
+    exit 1
+  fi
+}
+
+# Configuração para Apache
+configure_apache() {
+  # Habilitar mod_rewrite
+  if ! a2enmod rewrite &> /dev/null; then
+    echo "Falha ao habilitar mod_rewrite. Verifique se o Apache está instalado corretamente."
+    exit 1
+  fi
+
+  # Criar arquivo de configuração VirtualHost para redirecionamento HTTP para HTTPS
+  VHOST_FILE="/etc/apache2/sites-available/000-default.conf" # Ajuste para o nome do arquivo VirtualHost padrão.
+  if [ ! -f "$VHOST_FILE" ]; then
+    echo "Arquivo VirtualHost padrão não encontrado: $VHOST_FILE"
+    echo "Por favor, ajuste a variável VHOST_FILE no script."
+    exit 1
+  fi
+
+  # Fazer backup do arquivo original
+  cp "$VHOST_FILE" "$VHOST_FILE.backup"
+
+  # Adicionar a configuração de redirecionamento no início do arquivo VirtualHost
+  sed -i '1i\
+<VirtualHost *:80>\n\
+        ServerName '"$DOMAIN"'\n\
+        Redirect permanent / https://'"$DOMAIN"'\n\
+</VirtualHost>\n' "$VHOST_FILE"
+
+  # Reiniciar Apache
+  systemctl restart apache2
+  echo "Apache configurado para redirecionar HTTP para HTTPS."
+}
+
+# Configuração para Nginx
+configure_nginx() {
+  # Encontrar o arquivo de configuração do servidor padrão
+  CONFIG_FILE="/etc/nginx/conf.d/default.conf" # Ajuste para o nome do arquivo de configuração padrão do Nginx.
+  if [ ! -f "$CONFIG_FILE" ]; then
+    CONFIG_FILE="/etc/nginx/sites-available/default"
+    if [ ! -f "$CONFIG_FILE" ]; then
+      echo "Arquivo de configuração padrão do Nginx não encontrado. Verifique a instalação."
+      exit 1
+    fi
+  fi
+
+  # Fazer backup do arquivo original
+  cp "$CONFIG_FILE" "$CONFIG_FILE.backup"
+
+  # Adicionar a configuração de redirecionamento
+  sed -i 's/listen 80;/listen 80;\n\
+\n\
+    server_name '"$DOMAIN"';\n\
+    return 301 https://$host$request_uri;/' "$CONFIG_FILE"
+
+  # Reiniciar Nginx
+  systemctl restart nginx
+  echo "Nginx configurado para redirecionar HTTP para HTTPS."
+}
+
+# Execução principal
+detect_server_type
+get_domain
+
+if [ "$SERVER_TYPE" == "apache" ]; then
+  configure_apache
+elif [ "$SERVER_TYPE" == "nginx" ]; then
+  configure_nginx
+fi
+
+echo "Redirecionamento HTTP para HTTPS configurado com sucesso para o domínio $DOMAIN."
+exit 0
+```

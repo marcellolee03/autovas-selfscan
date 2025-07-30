@@ -1,0 +1,39 @@
+```bash
+#!/bin/bash
+
+# Este script atualiza o sistema operacional Ubuntu para uma versão suportada.
+# Este script é fornecido SEM GARANTIA e deve ser executado com cautela.
+# Use por sua conta e risco.
+
+# Variáveis
+NEW_VERSION="20.04" # Versão LTS mais recente no momento da criação deste script. Ajuste conforme necessário.
+
+# Checa se o usuário é root
+if [[ $EUID -ne 0 ]]; then
+  echo "Este script precisa ser executado como root."
+  exit 1
+fi
+
+# Atualiza a lista de pacotes
+apt update
+
+# Faz o upgrade da distribuição
+apt upgrade -y
+
+# Instala o utilitário do upgrade da distribuição
+apt install update-manager-core -y
+
+# Inicia o upgrade da distribuição para a nova versão
+do-release-upgrade -f DistUpgradeViewNonInteractive
+
+# Remove pacotes obsoletos
+apt autoremove -y
+
+# Limpa o apt cache
+apt clean
+
+echo "A atualização para o Ubuntu $NEW_VERSION foi iniciada. O sistema será reiniciado automaticamente."
+echo "Por favor, aguarde a conclusão do processo."
+
+# O script termina aqui, pois o do-release-upgrade lida com o restante do processo e reinicialização.
+```

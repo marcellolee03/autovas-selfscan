@@ -1,0 +1,45 @@
+#!/bin/bash
+set -e
+
+TWIKI_DIR=""
+if [ -d "/var/www/twiki" ]; then
+    TWIKI_DIR="/var/www/twiki"
+elif [ -d "/usr/local/twiki" ]; then
+    TWIKI_DIR="/usr/local/twiki"
+elif [ -d "/opt/twiki" ]; then
+    TWIKI_DIR="/opt/twiki"
+elif [ -d "$HOME/twiki" ]; then
+    TWIKI_DIR="$HOME/twiki"
+else
+    echo "TWiki installation directory not found. Aborting." >&2
+    exit 1
+fi
+
+BACKUP_DIR="/tmp/twiki-backup-$(date +%Y%m%d%H%M%S)"
+mkdir -p "$BACKUP_DIR"
+cp -R "$TWIKI_DIR" "$BACKUP_DIR"
+
+TMP_DIR=$(mktemp -d)
+wget -O "$TMP_DIR/twiki-4.2.4.tgz" "https://sourceforge.net/projects/twiki/files/TWiki%20for%20all%20Platforms/TWiki%204.2.4/twiki-4.2.4.tgz/download"
+tar -xzf "$TMP_DIR/twiki-4.2.4.tgz" -C "$TMP_DIR"
+TWIKI_NEW_DIR="$TMP_DIR/twiki"
+
+[ -d "$TWIKI_DIR/data" ] && mv "$TWIKI_DIR/data" "$TMP_DIR/data.bak"
+[ -d "$TWIKI_DIR/pub" ] && mv "$TWIKI_DIR/pub" "$TMP_DIR/pub.bak"
+[ -d "$TWIKI_DIR/local" ] && mv "$TWIKI_DIR/local" "$TMP_DIR/local.bak"
+
+rm -rf "${TWIKI_DIR:?}"/*
+mv "$TWIKI_NEW_DIR"/* "$TWIKI_DIR"
+
+[ -d "$TMP_DIR/data.bak" ] && mv "$TMP_DIR/data.bak" "$TWIKI_DIR/data"
+[ -d "$TMP_DIR/pub.bak" ] && mv "$TMP_DIR/pub.bak" "$TWIKI_DIR/pub"
+[ -d "$TMP_DIR/local.bak" ] && mv "$TMP_DIR/local.bak" "$TWIKI_DIR/local"
+
+WEB_USER="www-data"
+WEB_GROUP="www-data"
+chown -R $WEB_USER:$WEB_GROUP "$TWIKI_DIR/data"
+chown -R $WEB_USER:$WEB_GROUP "$TWIKI_DIR/pub"
+
+cd "$TWIKI_DIR/bin" && printf "y\nn\n" | ./upgrade.pl >/dev/null 2>&1 || true
+find "$TWIKI_DIR" -type d -exec chmod 755 {} \;
+find "$TWIKI_DIR" -type f -exec chmod 644 {} \;

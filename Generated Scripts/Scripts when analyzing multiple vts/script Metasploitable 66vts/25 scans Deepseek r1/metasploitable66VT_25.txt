@@ -1,0 +1,89 @@
+#!/bin/bash
+
+# Atualiza o sistema e remove pacotes não essenciais
+apt-get update
+apt-get upgrade -y
+apt-get autoremove -y --purge
+
+# Remove serviços vulneráveis e desnecessários
+apt-get purge -y rsh-server rsh-client telnetd rexecd nfs-kernel-server nfs-common \
+                 ypserv tftpd atftpd tftpd-hpa osk-sdl principalserver miniserv firebird-* \
+                 tightvncserver xtightvncviewer vino xinetd inetutils-inetd openbsd-inetd
+
+# Instala e configura o UFW (firewall)
+apt-get install -y ufw
+ufw default deny incoming
+ufw default allow outgoing
+ufw --force enable
+
+# Bloqueia portas vulneráveis identificadas
+ufw deny 80/tcp    # TWiki, PHP, HTTP methods
+ufw deny 513/tcp   # rlogin
+ufw deny 514/tcp   # rsh
+ufw deny 512/tcp   # rexec
+ufw deny 3632/tcp  # DistCC
+ufw deny 5900/tcp  # VNC
+ufw deny 2121/tcp  # FTP
+ufw deny 21/tcp    # FTP
+ufw deny 1524/tcp  # Ingreslock backdoor
+ufw deny 8009/tcp  # Apache Ghostcat
+ufw deny 3306/tcp  # MySQL
+ufw deny 5432/tcp  # PostgreSQL
+ufw deny 8787/tcp  # dRuby
+ufw deny 6200/tcp  # vsftpd backdoor
+ufw deny 23/tcp    # Telnet
+ufw deny 25/tcp    # SMTP vulnerabilities
+
+# Desabilita serviços críticos via systemd (se aplicável)
+systemctl stop vsftpd distcc nfs-server rpcbind
+systemctl disable vsftpd distcc nfs-server rpcbind
+
+# Corrige vulnerabilidades de segurança específicas
+## MySQL: Remove acesso root remoto e senhas fracas
+mysql -e "UPDATE mysql.user SET Host='localhost' WHERE User='root';"
+mysql -e "DELETE FROM mysql.user WHERE User='root' AND Host NOT IN ('localhost', '127.0.0.1', '::1');"
+mysql -e "DELETE FROM mysql.user WHERE User='';"
+mysql -e "FLUSH PRIVILEGES;"
+
+## PostgreSQL: Altera senha padrão
+sudo -u postgres psql -c "ALTER ROLE postgres WITH PASSWORD 'P@ssw0rd_3c0rreto##2024';"
+
+## Apache: Desativa métodos HTTP perigosos
+echo "TraceEnable off" >> /etc/apache2/apache2.conf
+sed -i '/<Directory \/var\/www>/,/<\/Directory>/s/Options Indexes FollowSymLinks/Options -Indexes -FollowSymLinks/' /etc/apache2/apache2.conf
+
+## SSH: Configurações seguras
+sed -i 's/^#Protocol 2/Protocol 2/' /etc/ssh/sshd_config
+sed -i 's/^#PermitRootLogin .*/PermitRootLogin no/' /etc/ssh/sshd_config
+sed -i 's/^PasswordAuthentication .*/PasswordAuthentication no/' /etc/ssh/sshd_config
+echo "KexAlgorithms curve25519-sha256@libssh.org" >> /etc/ssh/sshd_config
+systemctl restart sshd
+
+## PHP: Reduz vulnerabilidades
+for version in /etc/php/*; do
+    sed -i 's/expose_php = On/expose_php = Off/' "$version/apache2/php.ini"
+    sed -i "s/disable_functions = .*/disable_functions = exec,system,passthru,shell_exec,proc_open/" "$version/apache2/php.ini"
+done
+
+# Atualiza pacotes críticos manualmente
+wget -O /tmp/tomcat.tar.gz https://archive.apache.org/dist/tomcat/tomcat-9/v9.0.31/bin/apache-tomcat-9.0.31.tar.gz
+tar -xzf /tmp/tomcat.tar.gz -C /opt
+systemctl stop tomcat
+rm -rf /opt/tomcat
+mv /opt/apache-tomcat-9.0.31 /opt/tomcat
+chmod -R 750 /opt/tomcat
+
+# Configura sudoers segur
+echo "Defaults env_reset" > /etc/sudoers.d/secured
+echo "Defaults passwd_timeout=0" >> /etc/sudoers.d/secured
+echo "Defaults timestamp_timeout=3" >> /etc/sudoers.d/secured
+
+# Finaliza com limpeza
+apt-get autoremove -y --purge
+apt-get clean
+rm -rf /tmp/*
+
+# Verificação pós-execução
+echo "Verificando configurações:"
+ufw status verbose
+ss -tuln | grep -E '(80|513|514|512|3632|5900|2121|21|1524|8009|3306|5432|8787|6200|23|25)'

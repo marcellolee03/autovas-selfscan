@@ -1,0 +1,5 @@
+#!/bin/bash
+sudo apt-get update
+sudo apt-get install --only-upgrade php5 -y
+sudo apt-get install --only-upgrade libapache2-mod-php5 -y
+sudo service apache2 restart

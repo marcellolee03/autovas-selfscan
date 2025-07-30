@@ -1,0 +1,48 @@
+Com base na análise da vulnerabilidade e dos scripts fornecidos, a capacidade geral de correção dos scripts é de 49%.
+
+A vulnerabilidade identificada é crítica: o uso do Ubuntu 8.04, um sistema operacional que atingiu o fim de sua vida útil (End of Life - EOL) em 9 de maio de 2013. A solução recomendada é atualizar o sistema para uma versão que ainda receba atualizações de segurança. Uma correção eficaz exige uma série de atualizações sequenciais para chegar a uma versão moderna e suportada, como a 22.04 (Jammy Jellyfish) ou mais recente.
+
+
+Análise Individual dos Scripts
+Aqui está a avaliação de cada script e sua capacidade de corrigir a vulnerabilidade de forma autônoma e completa.
+
+Script 1 (1VTendoflife_1.txt): Ineficaz (20%)
+Este script inicia o processo corretamente, ajustando os repositórios para old-releases.ubuntu.com e executando do-release-upgrade. No entanto, ele realiza apenas a primeira etapa da atualização (de 8.04 para 10.04) e não continua a sequência necessária, deixando o sistema em outra versão desatualizada.
+
+Script 2 (1VTendoflife_2.txt): Eficaz (100%)
+É um script robusto que mapeia todo o caminho de atualização do Ubuntu 8.04 ("hardy") até o 22.04 ("jammy"). Ele executa as atualizações em um loop, verificando o sucesso de cada etapa antes de prosseguir, o que o torna uma solução completa e confiável.
+
+
+Script 3 (1VTendoflife_3.txt): Ineficaz (50%)
+A tentativa de usar ubuntu-dist-upgrade-path.sh para automatizar o caminho é uma boa ideia. Contudo, a lógica para alterar os repositórios em cada etapa é frágil e propensa a erros, especialmente ao não diferenciar os repositórios old-releases dos arquivos padrão, tornando a falha provável no meio do processo.
+
+Script 4 (1VTendoflife_4.txt): Eficaz (100%)
+Semelhante ao script 2, este define uma cadeia de atualização clara, iterando através de uma lista de versões para garantir que o sistema chegue a um estado moderno e suportado. A lógica de alternar para os arquivos principais do Ubuntu após sair das versões antigas é sólida.
+
+Script 5 (1VTendoflife_5.txt): Ineficaz (20%)
+Assim como o script 1, este apenas executa a primeira atualização de versão e para. Não resolve a vulnerabilidade fundamental, pois deixa o sistema operacional em uma versão ainda sem suporte.
+
+Script 6 (1VTendoflife_6.txt): Eficaz (100%)
+Este script utiliza uma abordagem inteligente e resiliente. Ele executa a primeira atualização e, em seguida, cria um script secundário (/root/upgrade_os.sh) que é acionado a cada reinicialização via /etc/rc.local para continuar a cadeia de atualizações de forma autônoma até a versão final.
+
+
+Script 7 (1VTendoflife_7.txt): Eficaz (100%)
+Adota uma estratégia robusta semelhante à do script 6, usando o /etc/rc.local para garantir que o processo de atualização continue após as reinicializações necessárias. Ele verifica a versão atual e aplica a próxima atualização na sequência, tornando-o uma solução completa.
+
+
+Scripts 8, 9, 10 (1VTendoflife_8.txt, 1VTendoflife_9.txt, 1VTendoflife_10.txt): Falha (0%)
+Esses arquivos não contêm scripts. Em vez disso, registram um erro de "Rate limit exceeded", indicando uma falha na geração do código. Portanto, sua eficácia é nula.
+
+Média de Correção Geral
+Script	Eficácia
+1	20%
+2	100%
+3	50%
+4	100%
+5	20%
+6	100%
+7	100%
+8	0%
+9	0%
+10	0%
+Média Total	49%

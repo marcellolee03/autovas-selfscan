@@ -1,0 +1,114 @@
+```bash
+#!/bin/bash
+
+# Vulnerabilidade 1: Cleartext Transmission of Sensitive Information via HTTP
+# Mitigation: This requires application-level changes to enforce HTTPS.  A script cannot directly fix this.
+# The script will install and configure Apache to redirect HTTP to HTTPS if Apache is installed.
+# This is a partial mitigation as it relies on proper application config.
+
+if command -v apache2 &> /dev/null; then
+  echo "Apache detected. Configuring HTTP to HTTPS redirection."
+  a2enmod rewrite
+  
+  # Create a virtual host file for HTTP to HTTPS redirection.
+  cat <<EOF > /etc/apache2/sites-available/http_redirect.conf
+<VirtualHost *:80>
+    ServerName \$(hostname)  # Set the server name to the hostname
+    Redirect permanent / https://\${SERVER_NAME}\${REQUEST_URI}
+</VirtualHost>
+EOF
+  
+  a2ensite http_redirect.conf
+  systemctl restart apache2
+else
+  echo "Apache not detected.  Please configure your web server to enforce HTTPS redirects."
+fi
+
+# Vulnerabilidade 2: DNS Cache Snooping Vulnerability (UDP)
+# Mitigation: Disable recursion on the DNS server.
+
+# Check if bind9 is installed
+if command -v named &> /dev/null; then
+  echo "BIND9 DNS server detected. Disabling recursion."
+  sed -i 's/recursion yes;/recursion no;/g' /etc/bind/named.conf.options
+  systemctl restart bind9
+elif command -v dnsmasq &> /dev/null; then
+    echo "dnsmasq detected.  Disabling DNSSEC and limiting interface"
+    #Disable DNSSEC and limit interface
+    sed -i 's/^dnssec/#dnssec/g' /etc/dnsmasq.conf
+    echo "interface=lo" >> /etc/dnsmasq.conf
+    echo "bind-interfaces" >> /etc/dnsmasq.conf
+    systemctl restart dnsmasq
+else
+  echo "No common DNS server (BIND9 or dnsmasq) detected. Please configure your DNS server to disable recursion or restrict access."
+fi
+
+# Vulnerabilidade 3: ICMP Timestamp Reply Information Disclosure
+# Mitigation: Disable ICMP timestamp replies.
+echo "Disabling ICMP timestamp replies."
+echo "net.ipv4.icmp_echo_ignore_all=1" >> /etc/sysctl.conf
+sysctl -p
+
+# Vulnerabilidade 4: SSL/TLS: Deprecated TLSv1.0 and TLSv1.1 Protocol Detection
+# Mitigation: Disable TLSv1.0 and TLSv1.1.  This requires updating the SSL configuration of the web server.
+
+# Check if Apache is installed and disable TLS 1.0 and 1.1
+if command -v apache2 &> /dev/null; then
+  echo "Updating Apache SSL configuration to disable TLSv1.0 and TLSv1.1."
+  sed -i 's/SSLProtocol All -SSLv2 -SSLv3/SSLProtocol All -SSLv2 -SSLv3 -TLSv1 -TLSv1.1/g' /etc/apache2/mods-available/ssl.conf
+  systemctl restart apache2
+elif command -v nginx &> /dev/null; then
+    echo "Updating Nginx SSL configuration to disable TLSv1.0 and TLSv1.1"
+    sed -i 's/ssl_protocols TLSv1 TLSv1.1 TLSv1.2 TLSv1.3;/ssl_protocols TLSv1.2 TLSv1.3;/g' /etc/nginx/nginx.conf
+    systemctl restart nginx
+else
+  echo "No common web server (Apache or Nginx) detected.  Please update your web server's SSL configuration to disable TLSv1.0 and TLSv1.1."
+fi
+
+
+# Vulnerabilidade 5: SSL/TLS: Renegotiation DoS Vulnerability (CVE-2011-1473, CVE-2011-5094)
+# Mitigation: Disable renegotiation.
+
+#For Apache
+if command -v apache2 &> /dev/null; then
+ echo "Disabling Renegotiation on Apache"
+ #Append the following line to /etc/apache2/mods-available/ssl.conf inside <IfModule ssl_module> block
+ sed -i '/<IfModule ssl_module>/a SSLOptions -StdEnvVars +ExportCertData +StrictRequire' /etc/apache2/mods-available/ssl.conf
+ systemctl restart apache2
+#For Nginx
+elif command -v nginx &> /dev/null; then
+ echo "Disabling Renegotiation on Nginx. This requires recompiling Nginx with the --without-http_ssl_module option, which cannot be done automatically."
+ echo "Please recompile Nginx without the SSL module to fully mitigate this vulnerability."
+else
+  echo "No common web server (Apache or Nginx) detected. Please refer to the vendor documentation for specific instructions on disabling renegotiation."
+fi
+
+
+# Vulnerabilidade 6: SSL/TLS: Report Weak Cipher Suites
+# Mitigation: Update cipher suite configuration to remove weak ciphers.
+# This is a complex task and requires careful selection of cipher suites.
+
+# Check if Apache is installed.
+if command -v apache2 &> /dev/null; then
+  echo "Updating Apache SSL configuration to remove weak cipher suites."
+  # Example configuration - adjust as needed!  This is a *MINIMAL* example.
+  sed -i 's/SSLCipherSuite DEFAULT:!aNULL:!eNULL:!EXPORT:!DES:!RC4:!MD5/SSLCipherSuite TLSv1.2+HIGH:!aNULL:!eNULL:!EXPORT:!DES:!RC4:!MD5/g' /etc/apache2/mods-available/ssl.conf
+  systemctl restart apache2
+elif command -v nginx &> /dev/null; then
+    echo "Updating Nginx SSL configuration to remove weak cipher suites."
+    # Example configuration - adjust as needed! This is a *MINIMAL* example.
+    sed -i 's/ssl_ciphers HIGH:!aNULL:!MD5;/ssl_ciphers TLSv1.2+HIGH:!aNULL:!MD5;/g' /etc/nginx/nginx.conf
+    systemctl restart nginx
+else
+  echo "No common web server (Apache or Nginx) detected. Please update your web server's SSL configuration to remove weak cipher suites."
+fi
+
+
+# Vulnerabilidade 7: TCP Timestamps Information Disclosure
+# Mitigation: Disable TCP timestamps.
+echo "Disabling TCP timestamps."
+echo "net.ipv4.tcp_timestamps = 0" >> /etc/sysctl.conf
+sysctl -p
+
+echo "Vulnerability mitigation script completed."
+```

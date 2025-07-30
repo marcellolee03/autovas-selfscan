@@ -1,0 +1,255 @@
+#!/bin/bash
+
+# Atualiza o sistema
+sudo apt-get update
+sudo apt-get upgrade -y
+
+# Correções específicas para as vulnerabilidades
+
+# Vulnerabilidade 1: TWiki XSS and Command Execution Vulnerabilities
+sudo apt-get install -y twiki=4.2.4
+
+# Vulnerabilidade 2: Distributed Ruby (dRuby/DRb) Multiple RCE Vulnerabilities
+sudo apt-get install -y ruby=2.7.0
+echo "$SAFE >= 2" | sudo tee -a /etc/ruby/safe_mode.conf
+
+# Vulnerabilidade 3: rlogin Passwordless Login
+sudo systemctl disable rlogin
+sudo systemctl stop rlogin
+sudo apt-get remove -y rsh-client
+
+# Vulnerabilidade 4: Operating System (OS) End of Life (EOL) Detection
+sudo do-release-upgrade
+
+# Vulnerabilidade 5: The rexec service is running
+sudo systemctl disable rexec
+sudo systemctl stop rexec
+sudo apt-get remove -y rsh-client
+
+# Vulnerabilidade 6: Possible Backdoor: Ingreslock
+sudo apt-get remove -y ingreslock
+sudo rm -rf /etc/ingreslock
+
+# Vulnerabilidade 7: Apache Tomcat AJP RCE Vulnerability (Ghostcat)
+sudo apt-get install -y tomcat9=9.0.31
+sudo systemctl restart tomcat9
+
+# Vulnerabilidade 8: MySQL / MariaDB Default Credentials (MySQL Protocol)
+sudo mysql -e "ALTER USER 'root'@'localhost' IDENTIFIED BY 'new_password';"
+
+# Vulnerabilidade 9: PHP < 5.6.30, 7.x < 7.0.15, 7.1.x < 7.1.1 Multiple Vulnerabilities
+sudo apt-get install -y php7.4
+
+# Vulnerabilidade 10: PHP < 5.3.13, 5.4.x < 5.4.3 Multiple Vulnerabilities
+sudo apt-get install -y php7.4
+
+# Vulnerabilidade 11: vsftpd Compromised Source Packages Backdoor Vulnerability
+sudo apt-get install -y vsftpd=3.0.3
+
+# Vulnerabilidade 12: vsftpd Compromised Source Packages Backdoor Vulnerability
+sudo apt-get install -y vsftpd=3.0.3
+
+# Vulnerabilidade 13: DistCC RCE Vulnerability (CVE-2004-2687)
+sudo apt-get remove -y distcc
+
+# Vulnerabilidade 14: PostgreSQL Default Credentials (PostgreSQL Protocol)
+sudo -u postgres psql -c "ALTER USER postgres WITH PASSWORD 'new_password';"
+
+# Vulnerabilidade 15: VNC Brute Force Login
+sudo apt-get install -y vnc4server
+vncpasswd
+
+# Vulnerabilidade 16: Test HTTP dangerous methods
+sudo a2dismod include
+sudo a2dismod cgi
+sudo systemctl restart apache2
+
+# Vulnerabilidade 17: FTP Brute Force Logins With Default Credentials Reporting
+sudo apt-get install -y vsftpd=3.0.3
+sudo systemctl restart vsftpd
+
+# Vulnerabilidade 18: FTP Brute Force Logins With Default Credentials Reporting
+sudo apt-get install -y vsftpd=3.0.3
+sudo systemctl restart vsftpd
+
+# Vulnerabilidade 19: The rlogin service is running
+sudo systemctl disable rlogin
+sudo systemctl stop rlogin
+sudo apt-get remove -y rsh-client
+
+# Vulnerabilidade 20: rsh Unencrypted Cleartext Login
+sudo systemctl disable rsh
+sudo systemctl stop rsh
+sudo apt-get remove -y rsh-client
+
+# Vulnerabilidade 21: SSL/TLS: OpenSSL CCS Man in the Middle Security Bypass Vulnerability
+sudo apt-get install -y openssl=1.1.1
+
+# Vulnerabilidade 22: Multiple Vendors STARTTLS Implementation Plaintext Arbitrary Command Injection Vulnerability
+sudo apt-get install -y postfix=3.4.13
+
+# Vulnerabilidade 23: TWiki Cross-Site Request Forgery Vulnerability (Sep 2010)
+sudo apt-get install -y twiki=4.3.2
+
+# Vulnerabilidade 24: Anonymous FTP Login Reporting
+sudo sed -i 's/anonymous_enable=YES/anonymous_enable=NO/' /etc/vsftpd.conf
+sudo systemctl restart vsftpd
+
+# Vulnerabilidade 25: jQuery < 1.9.0 XSS Vulnerability
+sudo apt-get install -y jquery=1.9.0
+
+# Vulnerabilidade 26: TWiki < 6.1.0 XSS Vulnerability
+sudo apt-get install -y twiki=6.1.0
+
+# Vulnerabilidade 27: TWiki CSRF Vulnerability
+sudo apt-get install -y twiki=4.3.1
+
+# Vulnerabilidade 28: SSL/TLS: Deprecated SSLv2 and SSLv3 Protocol Detection
+sudo sed -i 's/SSLProtocol all -SSLv2 -SSLv3/SSLProtocol all -SSLv2 -SSLv3/' /etc/apache2/mods-enabled/ssl.conf
+sudo systemctl restart apache2
+
+# Vulnerabilidade 29: SSL/TLS: Deprecated SSLv2 and SSLv3 Protocol Detection
+sudo sed -i 's/SSLProtocol all -SSLv2 -SSLv3/SSLProtocol all -SSLv2 -SSLv3/' /etc/apache2/mods-enabled/ssl.conf
+sudo systemctl restart apache2
+
+# Vulnerabilidade 30: SSL/TLS: Report Weak Cipher Suites
+sudo sed -i 's/SSLCipherSuite HIGH:!aNULL/SSLCipherSuite HIGH:!aNULL:!MD5:!RC4/' /etc/apache2/mods-enabled/ssl.conf
+sudo systemctl restart apache2
+
+# Vulnerabilidade 31: HTTP Debugging Methods (TRACE/TRACK) Enabled
+sudo a2dismod trace
+sudo a2dismod track
+sudo systemctl restart apache2
+
+# Vulnerabilidade 32: SSL/TLS: Server Certificate / Certificate in Chain with RSA keys less than 2048 bits
+sudo openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout /etc/ssl/private/apache-selfsigned.key -out /etc/ssl/certs/apache-selfsigned.crt
+
+# Vulnerabilidade 33: SSL/TLS: Server Certificate / Certificate in Chain with RSA keys less than 2048 bits
+sudo openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout /etc/ssl/private/apache-selfsigned.key -out /etc/ssl/certs/apache-selfsigned.crt
+
+# Vulnerabilidade 34: Weak Key Exchange (KEX) Algorithm(s) Supported (SSH)
+sudo sed -i 's/KexAlgorithms curve25519-sha256@libssh.org,ecdh-sha2-nistp256,ecdh-sha2-nistp384,ecdh-sha2-nistp521,diffie-hellman-group-exchange-sha256,diffie-hellman-group14-sha1/KexAlgorithms curve25519-sha256@libssh.org,ecdh-sha2-nistp256,ecdh-sha2-nistp384,ecdh-sha2-nistp521,diffie-hellman-group-exchange-sha256/' /etc/ssh/sshd_config
+sudo systemctl restart sshd
+
+# Vulnerabilidade 35: phpinfo() Output Reporting (HTTP)
+sudo rm -rf /var/www/html/phpinfo.php
+
+# Vulnerabilidade 36: Weak Host Key Algorithm(s) (SSH)
+sudo sed -i 's/HostKeyAlgorithms ssh-rsa,ssh-dss,ecdsa-sha2-nistp256,ssh-ed25519/HostKeyAlgorithms ssh-rsa,ecdsa-sha2-nistp256,ssh-ed25519/' /etc/ssh/sshd_config
+sudo systemctl restart sshd
+
+# Vulnerabilidade 37: Check if Mailserver answer to VRFY and EXPN requests
+sudo sed -i 's/smtpd_discard_ehlo_keywords =/smtpd_discard_ehlo_keywords = vrfy, expn/' /etc/postfix/main.cf
+sudo systemctl restart postfix
+
+# Vulnerabilidade 38: SSL/TLS: Renegotiation DoS Vulnerability (CVE-2011-1473, CVE-2011-5094)
+sudo sed -i 's/SSLHonorCipherOrder On/SSLHonorCipherOrder On\nSSLInsecureRenegotiation off/' /etc/apache2/mods-enabled/ssl.conf
+sudo systemctl restart apache2
+
+# Vulnerabilidade 39: SSL/TLS: Renegotiation DoS Vulnerability (CVE-2011-1473, CVE-2011-5094)
+sudo sed -i 's/SSLHonorCipherOrder On/SSLHonorCipherOrder On\nSSLInsecureRenegotiation off/' /etc/apache2/mods-enabled/ssl.conf
+sudo systemctl restart apache2
+
+# Vulnerabilidade 40: SSL/TLS: Certificate Expired
+sudo openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout /etc/ssl/private/apache-selfsigned.key -out /etc/ssl/certs/apache-selfsigned.crt
+
+# Vulnerabilidade 41: SSL/TLS: Certificate Expired
+sudo openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout /etc/ssl/private/apache-selfsigned.key -out /etc/ssl/certs/apache-selfsigned.crt
+
+# Vulnerabilidade 42: QWikiwiki directory traversal vulnerability
+sudo rm -rf /var/www/html/mutillidae
+
+# Vulnerabilidade 43: awiki <= 20100125 Multiple LFI Vulnerabilities - Active Check
+sudo rm -rf /var/www/html/mutillidae
+
+# Vulnerabilidade 44: /doc directory browsable
+sudo sed -i 's/Options Indexes FollowSymLinks/Options FollowSymLinks/' /etc/apache2/apache2.conf
+sudo systemctl restart apache2
+
+# Vulnerabilidade 45: Telnet Unencrypted Cleartext Login
+sudo systemctl disable telnet
+sudo systemctl stop telnet
+sudo apt-get remove -y telnetd
+
+# Vulnerabilidade 46: FTP Unencrypted Cleartext Login
+sudo sed -i 's/ssl_enable=NO/ssl_enable=YES/' /etc/vsftpd.conf
+sudo systemctl restart vsftpd
+
+# Vulnerabilidade 47: VNC Server Unencrypted Data Transmission
+sudo apt-get install -y vnc4server
+vncpasswd
+
+# Vulnerabilidade 48: FTP Unencrypted Cleartext Login
+sudo sed -i 's/ssl_enable=NO/ssl_enable=YES/' /etc/vsftpd.conf
+sudo systemctl restart vsftpd
+
+# Vulnerabilidade 49: Cleartext Transmission of Sensitive Information via HTTP
+sudo a2enmod ssl
+sudo a2ensite default-ssl
+sudo systemctl restart apache2
+
+# Vulnerabilidade 50: SSL/TLS: Deprecated TLSv1.0 and TLSv1.1 Protocol Detection
+sudo sed -i 's/SSLProtocol all -SSLv2 -SSLv3/SSLProtocol all -SSLv2 -SSLv3 -TLSv1 -TLSv1.1/' /etc/apache2/mods-enabled/ssl.conf
+sudo systemctl restart apache2
+
+# Vulnerabilidade 51: Weak Encryption Algorithm(s) Supported (SSH)
+sudo sed -i 's/Ciphers aes128-ctr,aes192-ctr,aes256-ctr,arcfour,arcfour128,arcfour256,blowfish-cbc,cast128-cbc,3des-cbc/Ciphers aes128-ctr,aes192-ctr,aes256-ctr/' /etc/ssh/sshd_config
+sudo systemctl restart sshd
+
+# Vulnerabilidade 52: Apache HTTP Server httpOnly Cookie Information Disclosure Vulnerability
+sudo sed -i 's/#Header edit Set-Cookie ^(.*)$ "$1; HttpOnly; Secure"/Header edit Set-Cookie ^(.*)$ "$1; HttpOnly; Secure"/' /etc/apache2/conf-enabled/security.conf
+sudo systemctl restart apache2
+
+# Vulnerabilidade 53: phpMyAdmin error.php Cross Site Scripting Vulnerability
+sudo apt-get install -y phpmyadmin=4.9.5
+
+# Vulnerabilidade 54: SSL/TLS: Deprecated TLSv1.0 and TLSv1.1 Protocol Detection
+sudo sed -i 's/SSLProtocol all -SSLv2 -SSLv3/SSLProtocol all -SSLv2 -SSLv3 -TLSv1 -TLSv1.1/' /etc/apache2/mods-enabled/ssl.conf
+sudo systemctl restart apache2
+
+# Vulnerabilidade 55: jQuery < 1.6.3 XSS Vulnerability
+sudo apt-get install -y jquery=1.6.3
+
+# Vulnerabilidade 56: SSL/TLS: RSA Temporary Key Handling RSA_EXPORT Downgrade Issue (FREAK)
+sudo sed -i 's/SSLCipherSuite HIGH:!aNULL:!MD5:!RC4/SSLCipherSuite HIGH:!aNULL:!MD5:!RC4:!EXPORT/' /etc/apache2/mods-enabled/ssl.conf
+sudo systemctl restart apache2
+
+# Vulnerabilidade 57: SSL/TLS: Certificate Signed Using A Weak Signature Algorithm
+sudo openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout /etc/ssl/private/apache-selfsigned.key -out /etc/ssl/certs/apache-selfsigned.crt
+
+# Vulnerabilidade 58: SSL/TLS: Diffie-Hellman Key Exchange Insufficient DH Group Strength Vulnerability
+sudo openssl dhparam -out /etc/ssl/certs/dhparam.pem 2048
+sudo sed -i 's/#SSLHonorCipherOrder On/SSLHonorCipherOrder On\nSSLOpenSSLConfCmd DHParameters \/etc\/ssl\/certs\/dhparam.pem/' /etc/apache2/mods-enabled/ssl.conf
+sudo systemctl restart apache2
+
+# Vulnerabilidade 59: SSL/TLS: Diffie-Hellman Key Exchange Insufficient DH Group Strength Vulnerability
+sudo openssl dhparam -out /etc/ssl/certs/dhparam.pem 2048
+sudo sed -i 's/#SSLHonorCipherOrder On/SSLHonorCipherOrder On\nSSLOpenSSLConfCmd DHParameters \/etc\/ssl\/certs\/dhparam.pem/' /etc/apache2/mods-enabled/ssl.conf
+sudo systemctl restart apache2
+
+# Vulnerabilidade 60: SSL/TLS: Certificate Signed Using A Weak Signature Algorithm
+sudo openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout /etc/ssl/private/apache-selfsigned.key -out /etc/ssl/certs/apache-selfsigned.crt
+
+# Vulnerabilidade 61: SSL/TLS: DHE_EXPORT MITM Security Bypass Vulnerability (LogJam)
+sudo sed -i 's/SSLCipherSuite HIGH:!aNULL:!MD5:!RC4:!EXPORT/SSLCipherSuite HIGH:!aNULL:!MD5:!RC4:!EXPORT:!DHE/' /etc/apache2/mods-enabled/ssl.conf
+sudo systemctl restart apache2
+
+# Vulnerabilidade 62: SSL/TLS: SSLv3 Protocol CBC Cipher Suites Information Disclosure Vulnerability (POODLE)
+sudo sed -i 's/SSLProtocol all -SSLv2 -SSLv3 -TLSv1 -TLSv1.1/SSLProtocol all -SSLv2 -SSLv3 -TLSv1 -TLSv1.1\nSSLInsecureRenegotiation off/' /etc/apache2/mods-enabled/ssl.conf
+sudo systemctl restart apache2
+
+# Vulnerabilidade 63: SSL/TLS: SSLv3 Protocol CBC Cipher Suites Information Disclosure Vulnerability (POODLE)
+sudo sed -i 's/SSLProtocol all -SSLv2 -SSLv3 -TLSv1 -TLSv1.1/SSLProtocol all -SSLv2 -SSLv3 -TLSv1 -TLSv1.1\nSSLInsecureRenegotiation off/' /etc/apache2/mods-enabled/ssl.conf
+sudo systemctl restart apache2
+
+# Vulnerabilidade 64: Weak MAC Algorithm(s) Supported (SSH)
+sudo sed -i 's/MACs hmac-sha1,umac-64@openssh.com,hmac-sha2-256,hmac-sha2-512,hmac-ripemd160,hmac-ripemd160@openssh.com,hmac-sha1-96,hmac-md5,hmac-md5-96/MACs hmac-sha2-256,hmac-sha2-512,hmac-ripemd160,hmac-ripemd160@openssh.com/' /etc/ssh/sshd_config
+sudo systemctl restart sshd
+
+# Vulnerabilidade 65: TCP Timestamps Information Disclosure
+sudo sed -i 's/#net.ipv4.tcp_timestamps = 1/net.ipv4.tcp_timestamps = 0/' /etc/sysctl.conf
+sudo sysctl -p
+
+# Vulnerabilidade 66: ICMP Timestamp Reply Information Disclosure
+sudo sed -i 's/net.ipv4.icmp_echo_ignore_all = 0/net.ipv4.icmp_echo_ignore_all = 1/' /etc/sysctl.conf
+sudo sysctl -p

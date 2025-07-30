@@ -1,0 +1,87 @@
+```bash
+#!/bin/bash
+
+# Variáveis para rastrear o estado das atualizações
+python3_10_updated=false
+python3_12_updated=false
+
+# Função para verificar se o Python está instalado e obter a versão
+check_python_version() {
+  python_version=$("$1" --version 2>&1 | awk '{print $2}' | cut -d'.' -f1,2)
+  if [ -z "$python_version" ]; then
+    echo "Python não está instalado ou não pode ser detectado."
+    return 1
+  else
+    echo "Versão do Python detectada: $python_version"
+    return 0
+  fi
+}
+
+# Função para atualizar o Python usando o gerenciador de pacotes do sistema
+update_python() {
+  if check_python_version "$1"; then
+    if [[ "$python_version" == "Python 3.10" ]]; then
+      echo "Atualizando Python 3.10..."
+      apt-get update
+      apt-get install --only-upgrade python3.10 python3.10-venv python3.10-dev -y
+      python3_10_updated=true
+    elif [[ "$python_version" == "Python 3.12" ]]; then
+      echo "Atualizando Python 3.12..."
+      apt-get update
+      apt-get install --only-upgrade python3.12 python3.12-venv python3.12-dev -y
+      python3_12_updated=true
+    else
+      echo "Versão do Python não suportada para atualização automática."
+    fi
+  else
+    echo "Não foi possível verificar a versão do Python."
+  fi
+}
+
+# Vulnerabilidade 36, 37, 40, 46, 50, 56, 57, 64: Atualizar Python 3.10 para 3.10.16
+# Vulnerabilidade 1, 21, 22, 23, 24, 26, 29, 30, 31, 38, 39, 41, 43, 44, 47, 51, 52, 53, 55, 58, 60, 61, 63, 65: Atualizar Python 3.12 para versões >= 3.12.9 e 3.11.10
+
+# Atualizar Python usando apt (para sistemas Debian/Ubuntu)
+if command -v apt-get &> /dev/null; then
+  update_python "python3"
+fi
+
+# Solução alternativa para CVE-2023-36632 e CVE-2023-27043 (sem solução direta de atualização)
+echo "Para CVE-2023-36632 (RecursionError) e CVE-2023-27043 (Security Bypass), não há solução de atualização direta."
+echo "Considere desabilitar os recursos afetados (email.utils.parseaddr) ou migrar para versões mais recentes (>=3.13), se possível."
+
+# Solução para CVE-2024-3220 (Untrusted Search Path Vulnerability)
+echo "Para CVE-2024-3220 (Untrusted Search Path), não há solução automática."
+echo "Verifique e corrija as configurações de pesquisa de caminho do Python manualmente."
+
+# Solução para CVE-2024-3220 (Untrusted Search Path Vulnerability)
+echo "Para CVE-2023-27043, considere a migração para uma versão com correção (>=3.13)."
+
+# Solução para CVE-1999-0524 (ICMP Timestamp Reply)
+echo "Para CVE-1999-0524 (ICMP Timestamp Reply), considere desabilitar as respostas ICMP Timestamp no firewall ou no sistema."
+
+# Solução para CVE-2025-3200, CVE-2011-3389, CVE-2015-0204 (TLSv1.0 e TLSv1.1)
+echo "Para CVE-2025-3200, CVE-2011-3389, CVE-2015-0204 (TLSv1.0 e TLSv1.1), desabilite TLSv1.0 e TLSv1.1 na configuração do serviço."
+
+# Solução para algoritmos MAC fracos (SSH)
+echo "Para algoritmos MAC fracos (SSH), edite /etc/ssh/sshd_config e remova os algoritmos fracos (umac-64-etm@openssh.com, umac-64@openssh.com)."
+echo "Adicione a seguinte linha em /etc/ssh/sshd_config:"
+echo "# Ciphers and keying"
+echo "KexAlgorithms curve25519-sha256,curve25519-sha256@libssh.org,diffie-hellman-group-exchange-sha256"
+echo "Ciphers chacha20-poly1305@openssh.com,aes256-gcm@openssh.com,aes128-gcm@openssh.com"
+echo "MACs hmac-sha2-512-etm@openssh.com,hmac-sha2-256-etm@openssh.com,umac-128-etm@openssh.com"
+echo "Após a alteração, reinicie o serviço SSH com:"
+echo "systemctl restart sshd"
+
+# Solução para a Vulnerabilidade 49 (Certificado SSL/TLS não confiável)
+echo "Para a vulnerabilidade do certificado SSL/TLS não confiável:"
+echo "Substitua o certificado SSL/TLS por um certificado assinado por uma CA confiável."
+
+if $python3_10_updated || $python3_12_updated; then
+  echo "Atualizações do Python concluídas. Pode ser necessário reiniciar o sistema para aplicar todas as alterações."
+else
+  echo "Nenhuma atualização do Python foi necessária ou possível."
+fi
+
+exit 0
+```

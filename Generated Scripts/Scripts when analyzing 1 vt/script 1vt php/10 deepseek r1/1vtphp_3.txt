@@ -1,0 +1,42 @@
+#!/bin/sh
+set -e
+
+if [ "$(id -u)" != "0" ]; then
+  echo "This script must be run as root" >&2
+  exit 1
+fi
+
+if ! command -v apt-get >/dev/null 2>&1; then
+  echo "This system does not use apt. Only Debian/Ubuntu is supported." >&2
+  exit 1
+fi
+
+DEBIAN_FRONTEND=noninteractive apt-get update
+php_packages=$(dpkg -l | grep '^ii' | awk '{print $2}' | grep -E '^php|libapache2-mod-php')
+if [ -n "$php_packages" ]; then
+  DEBIAN_FRONTEND=noninteractive apt-get -y --only-upgrade install $php_packages
+fi
+
+restart_service() {
+  service_name="$1"
+  if command -v systemctl >/dev/null 2>&1; then
+    if systemctl is-active --quiet "$service_name" 2>/dev/null; then
+      systemctl restart "$service_name" >/dev/null
+    fi
+  else
+    if service "$service_name" status >/dev/null 2>&1; then
+      service "$service_name" restart >/dev/null
+    fi
+  fi
+}
+
+restart_service apache2
+restart_service apache
+restart_service httpd
+restart_service nginx
+restart_service lighttpd
+
+fpm_services=$(systemctl list-units --all --no-legend 'php*-fpm.service' 2>/dev/null | awk '{print $1}' | cut -d. -f1)
+for service in $fpm_services; do
+  restart_service "$service"
+done

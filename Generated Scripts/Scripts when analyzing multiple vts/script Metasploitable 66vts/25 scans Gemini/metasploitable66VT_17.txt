@@ -1,0 +1,415 @@
+```bash
+#!/bin/bash
+
+# Vulnerability 1: TWiki XSS and Command Execution Vulnerabilities (CVE-2008-5304, CVE-2008-5305)
+# Solution: Upgrade to version 4.2.4 or later.
+# This requires manual intervention as TWiki is likely a web application
+# and the upgrade process is specific to its installation.
+echo "Please upgrade TWiki to version 4.2.4 or later."
+
+# Vulnerability 2: Distributed Ruby (dRuby/DRb) Multiple RCE Vulnerabilities
+# Solution: Implement appropriate controls, taint untrusted input, set $SAFE levels, use drb/acl.rb.
+echo "Please configure Distributed Ruby (dRuby/DRb) with appropriate security controls."
+echo "Consider setting $SAFE levels >=2 and using drb/acl.rb to restrict access."
+
+# Vulnerability 3: rlogin Passwordless Login
+# Solution: Disable the rlogin service and use alternatives like SSH instead.
+if systemctl is-active rlogin.socket > /dev/null 2>&1; then
+  systemctl stop rlogin.socket
+  systemctl disable rlogin.socket
+  echo "rlogin service stopped and disabled."
+else
+  echo "rlogin service is not running or managed by systemd."
+  if [ -x "$(command -v inetd)" ]; then
+        sed -i '/^rlogin/s/^/#/' /etc/inetd.conf
+        /etc/init.d/inetd reload
+        echo "rlogin disabled in inetd.conf"
+  elif [ -x "$(command -v xinetd)" ]; then
+        if [ -f /etc/xinetd.d/rlogin ]; then
+            echo "Disabling rlogin in /etc/xinetd.d/rlogin"
+            sed -i 's/^\s*disable\s*=\s*no/disable = yes/' /etc/xinetd.d/rlogin
+            service xinetd reload
+        else
+            echo "rlogin configuration not found in /etc/xinetd.d/"
+        fi
+  else
+    echo "Please manually disable the rlogin service.  It appears inetd/xinetd is not being used."
+  fi
+fi
+
+# Vulnerability 4: Operating System (OS) End of Life (EOL) Detection
+# Solution: Update the OS to a supported version.
+echo "Operating System is End of Life (Ubuntu 8.04). Please upgrade to a supported version."
+
+# Vulnerability 5: The rexec service is running
+# Solution: Disable the rexec service and use alternatives like SSH instead.
+if systemctl is-active rexec.socket > /dev/null 2>&1; then
+  systemctl stop rexec.socket
+  systemctl disable rexec.socket
+  echo "rexec service stopped and disabled."
+else
+  echo "rexec service is not running or managed by systemd."
+  if [ -x "$(command -v inetd)" ]; then
+        sed -i '/^rexec/s/^/#/' /etc/inetd.conf
+        /etc/init.d/inetd reload
+        echo "rexec disabled in inetd.conf"
+  elif [ -x "$(command -v xinetd)" ]; then
+        if [ -f /etc/xinetd.d/rexec ]; then
+            echo "Disabling rexec in /etc/xinetd.d/rexec"
+            sed -i 's/^\s*disable\s*=\s*no/disable = yes/' /etc/xinetd.d/rexec
+            service xinetd reload
+        else
+            echo "rexec configuration not found in /etc/xinetd.d/"
+        fi
+  else
+    echo "Please manually disable the rexec service. It appears inetd/xinetd is not being used."
+  fi
+fi
+
+# Vulnerability 6: Possible Backdoor: Ingreslock
+# Solution: A whole cleanup of the infected system is recommended.
+echo "Possible Backdoor: Ingreslock detected.  A full system cleanup is highly recommended."
+
+# Vulnerability 7: Apache Tomcat AJP RCE Vulnerability (Ghostcat) (CVE-2020-1938)
+# Solution: Update Apache Tomcat to version 7.0.100, 8.5.51, 9.0.31 or later.
+echo "Please update Apache Tomcat to a version >= 7.0.100, 8.5.51, or 9.0.31, or disable the AJP connector."
+
+# Vulnerability 8: MySQL / MariaDB Default Credentials (MySQL Protocol) (CVE-2015-4669, CVE-2001-0645, etc.)
+# Solution: Change the password as soon as possible.
+echo "Please change the MySQL root password immediately."
+echo "Execute: mysqladmin -u root password 'new_password'"
+
+# Vulnerability 9: PHP < 5.6.30, 7.x < 7.0.15, 7.1.x < 7.1.1 Multiple Vulnerabilities (Jan 2017) (CVE-2017-11147, etc.)
+# Solution: Update to version 5.6.30, 7.0.15, 7.1.1 or later.
+echo "PHP version is vulnerable. Please upgrade to PHP 5.6.30, 7.0.15, 7.1.1 or later."
+
+# Vulnerability 10: PHP < 5.3.13, 5.4.x < 5.4.3 Multiple Vulnerabilities - Active Check (CVE-2012-1823, etc.)
+# Solution: Update to version 5.3.13, 5.4.3 or later
+echo "PHP version is vulnerable. Please upgrade to PHP 5.3.13 or 5.4.3 or later."
+
+# Vulnerability 11 & 12: vsftpd Compromised Source Packages Backdoor Vulnerability (CVE-2011-2523)
+# Solution: Download the repaired package and validate the signature.
+echo "Please ensure vsftpd 2.3.4 is from a trusted source and validate its signature.  Reinstall if necessary."
+
+# Vulnerability 13: DistCC RCE Vulnerability (CVE-2004-2687)
+# Solution: Vendor updates are available, see references.
+echo "Please update or disable DistCC. If not needed disable the service: systemctl stop distccd ; systemctl disable distccd"
+if systemctl is-active distccd > /dev/null 2>&1; then
+   systemctl stop distccd
+   systemctl disable distccd
+   echo "DistCC service stopped and disabled."
+else
+   echo "Distcc service is not running or managed by systemd."
+fi
+
+# Vulnerability 14: PostgreSQL Default Credentials (PostgreSQL Protocol)
+# Solution: Change the password as soon as possible.
+echo "Please change the PostgreSQL 'postgres' user password immediately."
+echo "Execute: sudo -u postgres psql -c \"ALTER USER postgres WITH PASSWORD 'new_password';\""
+
+# Vulnerability 15: VNC Brute Force Login
+# Solution: Change the password to something hard to guess or enable password protection at all.
+echo "Please change the VNC password to a strong password."
+
+# Vulnerability 16: Test HTTP dangerous methods
+# Solution: Use access restrictions to these dangerous HTTP methods or disable them completely.
+echo "Please disable PUT and DELETE HTTP methods on the web server."
+echo "This typically involves configuring the web server (e.g., Apache, Nginx) to disallow these methods."
+echo "For Apache, you might add '<Limit PUT DELETE> deny from all </Limit>' to the relevant <Directory> block in your configuration."
+
+# Vulnerability 17 & 18: FTP Brute Force Logins With Default Credentials Reporting (CVE-1999-0501, etc.)
+# Solution: Change the password as soon as possible.
+echo "Please change the FTP passwords for users: msfadmin, postgres, service, and user."
+
+# Vulnerability 19: The rlogin service is running (CVE-1999-0651)
+# Solution: Disable the rlogin service and use alternatives like SSH instead.
+# Duplicate of Vulnerability 3, skipping.
+
+# Vulnerability 20: rsh Unencrypted Cleartext Login (CVE-1999-0651)
+# Solution: Disable the rsh service and use alternatives like SSH instead.
+if systemctl is-active rsh.socket > /dev/null 2>&1; then
+    systemctl stop rsh.socket
+    systemctl disable rsh.socket
+    echo "rsh service stopped and disabled."
+else
+  echo "rsh service is not running or managed by systemd."
+  if [ -x "$(command -v inetd)" ]; then
+        sed -i '/^rsh/s/^/#/' /etc/inetd.conf
+        /etc/init.d/inetd reload
+        echo "rsh disabled in inetd.conf"
+  elif [ -x "$(command -v xinetd)" ]; then
+        if [ -f /etc/xinetd.d/rsh ]; then
+            echo "Disabling rsh in /etc/xinetd.d/rsh"
+            sed -i 's/^\s*disable\s*=\s*no/disable = yes/' /etc/xinetd.d/rsh
+            service xinetd reload
+        else
+            echo "rsh configuration not found in /etc/xinetd.d/"
+        fi
+  else
+    echo "Please manually disable the rsh service.  It appears inetd/xinetd is not being used."
+  fi
+fi
+
+# Vulnerability 21: SSL/TLS: OpenSSL CCS Man in the Middle Security Bypass Vulnerability (CVE-2014-0224)
+# Solution: Updates are available. Please see the references for more information.
+echo "Please update OpenSSL to a version >= 0.9.8za, 1.0.0m, or 1.0.1h."
+apt-get update && apt-get install --only-upgrade openssl -y
+
+# Vulnerability 22: Multiple Vendors STARTTLS Implementation Plaintext Arbitrary Command Injection Vulnerability (CVE-2011-0411, etc.)
+# Solution: Updates are available. Please see the references for more information.
+echo "Please update mail server software to address STARTTLS vulnerabilities."
+
+# Vulnerability 23, 26, 27: TWiki CSRF/XSS Vulnerabilities (CVE-2009-4898, CVE-2018-20212, CVE-2009-1339)
+# Solution: Upgrade to TWiki version 4.3.2 or later (for CSRF), 6.1.0 or later (for XSS)
+echo "Please upgrade TWiki to version 6.1.0 or later."
+
+# Vulnerability 24: Anonymous FTP Login Reporting (CVE-1999-0497)
+# Solution: If you do not want to share files, you should disable anonymous logins.
+echo "Please disable anonymous FTP login if it is not required."
+if [ -f /etc/vsftpd.conf ]; then
+    sed -i 's/^anonymous_enable=YES/anonymous_enable=NO/' /etc/vsftpd.conf
+    systemctl restart vsftpd
+    echo "Anonymous FTP login disabled in /etc/vsftpd.conf"
+elif [ -x "$(command -v inetd)" ]; then
+        echo "Please manually disable anonymous ftp in /etc/inetd.conf"
+elif [ -x "$(command -v xinetd)" ]; then
+        echo "Please manually disable anonymous ftp in /etc/xinetd.conf"
+else
+    echo "Please manually disable anonymous FTP login by editing FTP configuration."
+fi
+
+# Vulnerability 25 & 55: jQuery < 1.9.0 / 1.6.3 XSS Vulnerability (CVE-2012-6708, CVE-2011-4969)
+# Solution: Update to version 1.9.0 or later
+echo "Please update jQuery to version 1.9.0 or later in /mutillidae/javascript/ddsmoothmenu/jquery.min.js"
+
+# Vulnerability 28 & 29: SSL/TLS: Deprecated SSLv2 and SSLv3 Protocol Detection (CVE-2016-0800, CVE-2014-3566)
+# Solution: It is recommended to disable the deprecated SSLv2 and/or SSLv3 protocols.
+echo "Please disable SSLv2 and SSLv3 protocols on SMTP (port 25) and PostgreSQL (port 5432)."
+echo "This typically requires modifying the service's configuration files."
+
+# Vulnerability 30: SSL/TLS: Report Weak Cipher Suites (CVE-2013-2566, CVE-2015-2808, CVE-2015-4000)
+# Solution: The configuration of this services should be changed so that it does not accept the listed weak cipher suites anymore.
+echo "Please disable weak cipher suites (TLS_RSA_WITH_RC4_128_SHA) on SMTP (port 25) and PostgreSQL (port 5432)."
+echo "This typically requires modifying the service's configuration files."
+
+# Vulnerability 31: HTTP Debugging Methods (TRACE/TRACK) Enabled (CVE-2003-1567, etc.)
+# Solution: Disable the TRACE and TRACK methods in your web server configuration.
+echo "Please disable TRACE and TRACK HTTP methods on the web server."
+if [ -f /etc/apache2/conf.d/options ]; then
+    sed -i 's/TraceEnable On/TraceEnable Off/g' /etc/apache2/conf.d/options
+    service apache2 restart
+    echo "TRACE method disabled in /etc/apache2/conf.d/options"
+elif [ -f /etc/httpd/conf/httpd.conf ]; then
+    sed -i 's/TraceEnable On/TraceEnable Off/g' /etc/httpd/conf/httpd.conf
+    service httpd restart
+    echo "TRACE method disabled in /etc/httpd/conf/httpd.conf"
+
+else
+    echo "Please manually disable TRACE and TRACK HTTP methods by editing the web server configuration."
+fi
+# Vulnerability 32 & 33: SSL/TLS: Server Certificate / Certificate in Chain with RSA keys less than 2048 bits
+# Solution: Replace the certificate with a stronger key and reissue the certificates it signed.
+echo "Please replace the SSL/TLS certificate on SMTP (port 25) and PostgreSQL (port 5432) with a certificate using a RSA key of 2048 bits or greater."
+
+# Vulnerability 34: Weak Key Exchange (KEX) Algorithm(s) Supported (SSH)
+# Solution: Disable the reported weak KEX algorithm(s).
+echo "Please disable weak KEX algorithms (diffie-hellman-group-exchange-sha1, diffie-hellman-group1-sha1) in /etc/ssh/sshd_config."
+echo "Add or modify the KexAlgorithms line to exclude these algorithms."
+if [ -f /etc/ssh/sshd_config ]; then
+  sed -i 's/^KexAlgorithms .*/KexAlgorithms curve25519-sha256@libssh.org,ecdh-sha2-nistp256,ecdh-sha2-nistp384,ecdh-sha2-nistp521,diffie-hellman-group14-sha256,diffie-hellman-group16-sha512,diffie-hellman-group18-sha512/' /etc/ssh/sshd_config
+  systemctl restart sshd
+  echo "Weak KEX Algorithms Disabled"
+fi
+
+# Vulnerability 35: phpinfo() Output Reporting (HTTP) (CVE-2008-0149, etc.)
+# Solution: Delete the listed files or restrict access to them.
+echo "Please delete or restrict access to phpinfo.php files."
+
+# Vulnerability 36: Weak Host Key Algorithm(s) (SSH)
+# Solution: Disable the reported weak host key algorithm(s).
+echo "Please disable weak host key algorithm ssh-dss in /etc/ssh/sshd_config."
+echo "Add or modify the HostKeyAlgorithms line to exclude ssh-dss."
+if [ -f /etc/ssh/sshd_config ]; then
+  sed -i 's/^HostKeyAlgorithms .*/HostKeyAlgorithms ecdsa-sha2-nistp256-cert-v01@openssh.com,ecdsa-sha2-nistp384-cert-v01@openssh.com,ecdsa-sha2-nistp521-cert-v01@openssh.com,ecdsa-sha2-nistp256,ecdsa-sha2-nistp384,ecdsa-sha2-nistp521,ssh-rsa-cert-v01@openssh.com,rsa-sha2-512-cert-v01@openssh.com,rsa-sha2-256-cert-v01@openssh.com,ssh-rsa,rsa-sha2-512,rsa-sha2-256/' /etc/ssh/sshd_config
+  systemctl restart sshd
+  echo "Weak Host Key Algorithms Disabled"
+fi
+# Vulnerability 37: Check if Mailserver answer to VRFY and EXPN requests
+# Solution: Disable VRFY and/or EXPN on your Mailserver.
+echo "Please disable VRFY and EXPN commands on the mail server."
+if [ -f /etc/postfix/main.cf ]; then
+    sed -i 's/^disable_vrfy_command = no/disable_vrfy_command = yes/' /etc/postfix/main.cf
+    service postfix reload
+    echo "VRFY command disabled in /etc/postfix/main.cf"
+else
+    echo "Please manually disable VRFY and EXPN commands by editing the mail server configuration."
+fi
+
+# Vulnerability 38 & 39: SSL/TLS: Renegotiation DoS Vulnerability (CVE-2011-1473, CVE-2011-5094)
+# Solution: Remove/disable renegotiation capabilities altogether from/in the affected SSL/TLS service.
+echo "Please disable or mitigate SSL/TLS renegotiation on SMTP (port 25) and PostgreSQL (port 5432) to prevent DoS attacks."
+echo "This typically involves modifying the service's configuration files."
+
+# Vulnerability 40 & 41: SSL/TLS: Certificate Expired
+# Solution: Replace the SSL/TLS certificate by a new one.
+echo "Please replace the expired SSL/TLS certificate on SMTP (port 25) and PostgreSQL (port 5432) with a valid certificate."
+
+# Vulnerability 42 & 43: QWikiwiki & awiki LFI Vulnerabilities (CVE-2005-0283)
+# Solution: Remove the product or replace the product by another one.
+echo "Please remove QWikiwiki & awiki or ensure all files are secure."
+
+# Vulnerability 44: /doc directory browsable (CVE-1999-0678)
+# Solution: Use access restrictions for the /doc directory.
+echo "Please restrict access to the /doc directory in the web server configuration."
+if [ -f /etc/apache2/conf.d/security ]; then
+    echo "<Directory /usr/share/doc/>" >> /etc/apache2/conf.d/security
+    echo "  Options None" >> /etc/apache2/conf.d/security
+    echo "  <Limit GET POST OPTIONS>" >> /etc/apache2/conf.d/security
+    echo "    Order allow,deny" >> /etc/apache2/conf.d/security
+    echo "    Deny from all" >> /etc/apache2/conf.d/security
+    echo "  </Limit>" >> /etc/apache2/conf.d/security
+    echo "</Directory>" >> /etc/apache2/conf.d/security
+    service apache2 restart
+    echo "/doc directory access restricted in /etc/apache2/conf.d/security"
+elif [ -f /etc/httpd/conf/httpd.conf ]; then
+    echo "<Directory /usr/share/doc/>" >> /etc/httpd/conf/httpd.conf
+    echo "  Options None" >> /etc/httpd/conf/httpd.conf
+    echo "  <Limit GET POST OPTIONS>" >> /etc/httpd/conf/httpd.conf
+    echo "    Order allow,deny" >> /etc/httpd/conf/httpd.conf
+    echo "    Deny from all" >> /etc/httpd/conf/httpd.conf
+    echo "  </Limit>" >> /etc/httpd/conf/httpd.conf
+    echo "</Directory>" >> /etc/httpd/conf/httpd.conf
+    service httpd restart
+    echo "/doc directory access restricted in /etc/httpd/conf/httpd.conf"
+else
+    echo "Please manually restrict access to the /doc directory by editing the web server configuration."
+fi
+
+# Vulnerability 45: Telnet Unencrypted Cleartext Login
+# Solution: Replace Telnet with a protocol like SSH which supports encrypted connections.
+if systemctl is-active telnet.socket > /dev/null 2>&1; then
+    systemctl stop telnet.socket
+    systemctl disable telnet.socket
+    echo "Telnet service stopped and disabled."
+else
+  echo "Telnet service is not running or managed by systemd."
+  if [ -x "$(command -v inetd)" ]; then
+        sed -i '/^telnet/s/^/#/' /etc/inetd.conf
+        /etc/init.d/inetd reload
+        echo "telnet disabled in inetd.conf"
+  elif [ -x "$(command -v xinetd)" ]; then
+        if [ -f /etc/xinetd.d/telnet ]; then
+            echo "Disabling telnet in /etc/xinetd.d/telnet"
+            sed -i 's/^\s*disable\s*=\s*no/disable = yes/' /etc/xinetd.d/telnet
+            service xinetd reload
+        else
+            echo "telnet configuration not found in /etc/xinetd.d/"
+        fi
+  else
+    echo "Please manually disable the telnet service.  It appears inetd/xinetd is not being used."
+  fi
+fi
+
+# Vulnerability 46 & 48: FTP Unencrypted Cleartext Login
+# Solution: Enable FTPS or enforce the connection via the 'AUTH TLS' command.
+echo "Please enable FTPS or require AUTH TLS on FTP servers."
+if [ -f /etc/vsftpd.conf ]; then
+   sed -i 's/^ssl_enable=NO/ssl_enable=YES/' /etc/vsftpd.conf
+   sed -i 's/^force_local_data_ssl=NO/force_local_data_ssl=YES/' /etc/vsftpd.conf
+   sed -i 's/^force_local_logins_ssl=NO/force_local_logins_ssl=YES/' /etc/vsftpd.conf
+   systemctl restart vsftpd
+   echo "FTPS enabled"
+else
+    echo "Please manually enable FTPS or require AUTH TLS on FTP servers by editing the ftp configuration file."
+fi
+
+# Vulnerability 47: VNC Server Unencrypted Data Transmission
+# Solution: Run the session over an encrypted channel provided by IPsec or SSH.
+echo "Please configure VNC to use an encrypted channel, such as SSH tunneling."
+
+# Vulnerability 49: Cleartext Transmission of Sensitive Information via HTTP
+# Solution: Enforce the transmission of sensitive data via an encrypted SSL/TLS connection.
+echo "Please enable HTTPS and redirect all HTTP traffic to HTTPS."
+echo "Also ensure that the PHP login forms are properly encoded and secured"
+if [ -f /etc/apache2/sites-available/default ]; then
+    echo "Add a redirect to /etc/apache2/sites-available/default"
+    a2enmod rewrite
+    sed -i 's/VirtualHost \*:80/\<VirtualHost \*:80\>\nRewriteEngine On\nRewriteRule \^\(\.\*\)\$ https\:\/\/%\{\HTTP_HOST\}\$1 \[R\=301,L\]/' /etc/apache2/sites-available/default
+    service apache2 restart
+    echo "Redirected port 80 to HTTPS. Ensure HTTPS is properly configured."
+else
+    echo "Please manually configure HTTPS and redirect HTTP traffic."
+fi
+
+# Vulnerability 50 & 54: SSL/TLS: Deprecated TLSv1.0 and TLSv1.1 Protocol Detection
+# Solution: It is recommended to disable the deprecated TLSv1.0 and/or TLSv1.1 protocols in favor of the TLSv1.2+ protocols.
+echo "Please disable TLSv1.0 and TLSv1.1 protocols on SMTP (port 25) and PostgreSQL (port 5432)."
+echo "This typically requires modifying the service's configuration files."
+
+# Vulnerability 51: Weak Encryption Algorithm(s) Supported (SSH)
+# Solution: Disable the reported weak encryption algorithm(s).
+echo "Please disable weak encryption algorithms in /etc/ssh/sshd_config."
+echo "Add or modify the Ciphers line to exclude CBC and RC4 algorithms."
+if [ -f /etc/ssh/sshd_config ]; then
+  sed -i 's/^Ciphers .*/Ciphers chacha20-poly1305@openssh.com,aes256-gcm@openssh.com,aes128-gcm@openssh.com,aes256-ctr,aes192-ctr,aes128-ctr/' /etc/ssh/sshd_config
+  systemctl restart sshd
+  echo "Weak Ciphers Disabled"
+fi
+# Vulnerability 52: Apache HTTP Server httpOnly Cookie Information Disclosure Vulnerability (CVE-2012-0053)
+# Solution: Update to Apache HTTP Server version 2.2.22 or later.
+echo "Please upgrade Apache HTTP Server to version 2.2.22 or later."
+apt-get update && apt-get install --only-upgrade apache2 -y
+
+# Vulnerability 53: phpMyAdmin error.php Cross Site Scripting Vulnerability (CVE-2010-4480)
+# Solution: Upgrade phpMyAdmin, disable the app, remove the app.
+echo "Please upgrade phpMyAdmin to address XSS vulnerability."
+
+# Vulnerability 56: SSL/TLS: RSA Temporary Key Handling RSA_EXPORT Downgrade Issue (FREAK) (CVE-2015-0204)
+# Solution: Remove support for 'RSA_EXPORT' cipher suites from the service.
+echo "Please remove support for RSA_EXPORT cipher suites on SMTP (port 25)."
+echo "This typically requires modifying the service's configuration files."
+
+# Vulnerability 57 & 60: SSL/TLS: Certificate Signed Using A Weak Signature Algorithm
+# Solution: Servers that use SSL/TLS certificates signed with a weak SHA-1, MD5, MD4 or MD2 hashing algorithm will need to obtain new
+#  SHA-2 signed SSL/TLS certificates to avoid web browser SSL/TLS certificate warnings.
+echo "Please replace certificates using SHA-1 for signing with certificates using SHA-256 or better."
+
+# Vulnerability 58 & 59: SSL/TLS: Diffie-Hellman Key Exchange Insufficient DH Group Strength Vulnerability
+# Solution: '- Deploy (Ephemeral) Elliptic-Curve Diffie-Hellman (ECDHE) or use
+# a 2048-bit or stronger Diffie-Hellman group.
+echo "Please configure SMTP (port 25) and PostgreSQL (port 5432) to use a Diffie-Hellman group with a key size of 2048 bits or greater."
+
+# Vulnerability 61: SSL/TLS: DHE_EXPORT MITM Security Bypass Vulnerability (LogJam) (CVE-2015-4000)
+# Solution: '- Remove support for 'DHE_EXPORT' cipher
+#  suites from the service.
+echo "Please remove support for DHE_EXPORT cipher suites on SMTP (port 25)."
+
+# Vulnerability 62 & 63: SSL/TLS: SSLv3 Protocol CBC Cipher Suites Information Disclosure Vulnerability (POODLE) (CVE-2014-3566)
+# Solution:  Disable SSLv3
+echo "Please disable SSLv3 protocol on SMTP (port 25) and PostgreSQL (port 5432)."
+
+# Vulnerability 64: Weak MAC Algorithm(s) Supported (SSH)
+# Solution: Disable the reported weak MAC algorithm(s).
+echo "Please disable weak MAC algorithms in /etc/ssh/sshd_config."
+echo "Add or modify the MACs line to exclude MD5, 96bit and 64bit algorithms."
+if [ -f /etc/ssh/sshd_config ]; then
+  sed -i 's/^MACs .*/MACs hmac-sha2-512-etm@openssh.com,hmac-sha2-256-etm@openssh.com,umac-128-etm@openssh.com,hmac-sha2-512,hmac-sha2-256,umac-128@openssh.com/' /etc/ssh/sshd_config
+  systemctl restart sshd
+  echo "Weak MACs Disabled"
+fi
+# Vulnerability 65: TCP Timestamps Information Disclosure
+# Solution: To disable TCP timestamps on linux add the line 'net.ipv4.tcp_timestamps = 0' to /etc/sysctl.conf.
+echo "Please disable TCP timestamps."
+echo "Adding net.ipv4.tcp_timestamps = 0 to /etc/sysctl.conf"
+echo "net.ipv4.tcp_timestamps = 0" >> /etc/sysctl.conf
+sysctl -p
+
+# Vulnerability 66: ICMP Timestamp Reply Information Disclosure
+# Solution: Disable the support for ICMP timestamp on the remote host completely.
+echo "Please disable ICMP timestamp replies."
+echo "Adding net.ipv4.icmp_echo_ignore_all=1 to /etc/sysctl.conf"
+echo "net.ipv4.icmp_echo_ignore_all=1" >> /etc/sysctl.conf
+sysctl -p
+
+echo "Finished applying security recommendations. Please review logs and configurations for any errors."
+```

@@ -1,0 +1,50 @@
+```bash
+#!/bin/bash
+
+if [ "$(id -u)" != "0" ]; then
+    echo "O script precisa ser executado como root" >&2
+    exit 1
+fi
+
+if [ -d "/etc/apache2" ]; then
+    if [ ! -f "/etc/apache2/mods-enabled/rewrite.load" ]; then
+        a2enmod rewrite >/dev/null
+    fi
+    cat <<EOF > /etc/apache2/conf-available/http_to_https_global.conf
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteCond %{HTTPS} !=on
+    RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [R=301,L]
+</IfModule>
+EOF
+    a2enconf http_to_https_global >/dev/null
+    systemctl reload apache2 >/dev/null 2>&1 || service apache2 reload >/dev/null 2>&1
+
+elif [ -d "/etc/httpd" ]; then
+    if ! grep -q "LoadModule rewrite_module" /etc/httpd/conf.modules.d/*.conf; then
+        echo "LoadModule rewrite_module modules/mod_rewrite.so" > /etc/httpd/conf.modules.d/00-rewrite.conf
+    fi
+    cat <<EOF > /etc/httpd/conf.d/http_to_https_global.conf
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteCond %{HTTPS} !=on
+    RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [R=301,L]
+</IfModule>
+EOF
+    systemctl reload httpd >/dev/null 2>&1 || service httpd reload >/dev/null 2>&1
+
+elif [ -d "/etc/nginx" ]; then
+    cat <<EOF > /etc/nginx/conf.d/http_to_https_redirect.conf
+server {
+    listen 80;
+    server_name _;
+    return 301 https://\$host\$request_uri;
+}
+EOF
+    nginx -t >/dev/null 2>&1 && (systemctl reload nginx >/dev/null 2>&1 || service nginx reload >/dev/null 2>&1)
+
+else
+    echo "Nenhum servidor web detectado. Não foi possível corrigir a vulnerabilidade." >&2
+    exit 1
+fi
+```

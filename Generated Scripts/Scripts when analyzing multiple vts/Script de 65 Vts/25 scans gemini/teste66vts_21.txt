@@ -1,0 +1,130 @@
+```powershell
+# Este script foi gerado automaticamente para corrigir vulnerabilidades do Python no Windows.
+# Ele irá baixar e instalar as versões mais recentes do Python para mitigar os CVEs reportados.
+# Execute este script com privilégios de administrador.
+
+# Define um dicionário para armazenar as versões e portas associadas do Python.
+$pythonVersions = @{
+    "3.10.12" = @{
+        "ports" = @(5000);
+        "fixedVersion" = "3.10.16";
+        "installerURL" = "https://www.python.org/ftp/python/3.10.16/python-3.10.16-amd64.exe"
+    }
+    "3.12.0" = @{
+        "ports" = @(8000, 8001, 8002);
+        "fixedVersion" = "3.12.9";
+        "installerURL" = "https://www.python.org/ftp/python/3.12.9/python-3.12.9-amd64.exe"
+    }
+}
+
+# Define o diretório temporário para baixar os instaladores.
+$tempDir = "$env:TEMP\PythonPatch"
+if (!(Test-Path -Path $tempDir)) {
+    New-Item -ItemType Directory -Force -Path $tempDir
+}
+
+# Função para verificar se o Python está instalado e obter a versão.
+function Get-PythonVersion {
+    param (
+        [string]$port
+    )
+    try {
+        # Procura pela instalação do Python usando o registro do Windows.
+        $pythonPath = (Get-ItemProperty "HKLM:\SOFTWARE\Python\PythonCore\*\InstallPath" | Where-Object {$_.GetValue("Port") -eq $port}).InstallPath
+        if ($pythonPath) {
+            # Monta o caminho completo para o executável do Python.
+            $pythonExePath = Join-Path -Path $pythonPath -ChildPath "python.exe"
+            
+            # Executa o Python para obter a versão.
+            $versionInfo = & $pythonExePath --version 2>&1
+            
+            # Analisa a saída para extrair a versão.
+            if ($versionInfo -match "Python (\d+\.\d+\.\d+)") {
+                return $Matches[1]
+            } else {
+                Write-Warning "Não foi possível determinar a versão do Python na porta $port"
+                return $null
+            }
+        } else {
+            Write-Warning "Python não encontrado no registro para a porta $port."
+            return $null
+        }
+    } catch {
+        Write-Error "Erro ao obter a versão do Python: $($_.Exception.Message)"
+        return $null
+    }
+}
+
+# Função para baixar o instalador do Python.
+function Download-PythonInstaller {
+    param (
+        [string]$url,
+        [string]$outputPath
+    )
+    try {
+        Write-Host "Baixando instalador do Python de $url para $outputPath..."
+        Invoke-WebRequest -Uri $url -OutFile $outputPath
+        Write-Host "Download concluído."
+    } catch {
+        Write-Error "Erro ao baixar o instalador: $($_.Exception.Message)"
+        return $false
+    }
+    return $true
+}
+
+# Função para instalar o Python.
+function Install-Python {
+    param (
+        [string]$installerPath
+    )
+    try {
+        Write-Host "Iniciando a instalação do Python a partir de $installerPath..."
+        # Executa o instalador com parâmetros silenciosos para uma instalação não interativa.
+        Start-Process -FilePath $installerPath -ArgumentList "/quiet InstallAllUsers=1 Include_doc=0 Include_tcltk=0 Include_test=0" -Wait
+        Write-Host "Instalação do Python concluída."
+    } catch {
+        Write-Error "Erro ao instalar o Python: $($_.Exception.Message)"
+        return $false
+    }
+    return $true
+}
+
+# Itera sobre as versões do Python e instala as versões corrigidas.
+foreach ($installedVersion in $pythonVersions.Keys) {
+    $versionInfo = $pythonVersions[$installedVersion]
+    foreach ($port in $versionInfo.ports) {
+        Write-Host "Verificando a versão do Python na porta $port..."
+        $currentVersion = Get-PythonVersion -port $port
+        
+        if ($currentVersion -eq $installedVersion) {
+            Write-Host "Versão vulnerável do Python detectada na porta $port: $currentVersion"
+            
+            # Define o caminho do instalador.
+            $installerPath = Join-Path -Path $tempDir -ChildPath "python-$($versionInfo.fixedVersion)-amd64.exe"
+            
+            # Baixa o instalador, se necessário.
+            if (!(Test-Path -Path $installerPath)) {
+                if (!(Download-PythonInstaller -url $versionInfo.installerURL -outputPath $installerPath)) {
+                    Write-Error "Falha ao baixar o instalador para a versão $($versionInfo.fixedVersion). Pulando esta atualização."
+                    continue
+                }
+            }
+            
+            # Instala a versão corrigida.
+            if (Install-Python -installerPath $installerPath) {
+                Write-Host "Python atualizado com sucesso para a versão $($versionInfo.fixedVersion) na porta $port."
+            } else {
+                Write-Error "Falha ao atualizar o Python na porta $port."
+            }
+        } else {
+            Write-Host "Versão do Python na porta $port está atualizada ou não foi detectada uma versão vulnerável."
+        }
+    }
+}
+
+# Limpa o diretório temporário.
+Write-Host "Limpando o diretório temporário..."
+Remove-Item -Path $tempDir -Recurse -Force
+
+Write-Host "Correção de vulnerabilidades do Python concluída."
+```

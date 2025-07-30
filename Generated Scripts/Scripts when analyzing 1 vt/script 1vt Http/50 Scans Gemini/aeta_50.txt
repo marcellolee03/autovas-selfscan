@@ -1,0 +1,73 @@
+```bash
+#!/bin/bash
+
+# Este script corrige a vulnerabilidade de transmissão de informações sensíveis em texto claro via HTTP,
+# implementando redirecionamento para HTTPS.
+
+# Variáveis
+HTTP_PORT=80
+HTTPS_PORT=443
+VHOST_DIR="/etc/apache2/sites-available" # Altere para o diretório correto do seu vhost
+DEFAULT_VHOST="000-default.conf" # Nome do arquivo de configuração do vhost padrão
+TEMP_FILE="/tmp/redirect_temp.conf"
+APACHE_CONFIG_TEST="apachectl -t"
+APACHE_RESTART="systemctl restart apache2"
+# Funções
+
+# Detecta o sistema operacional (assume-se que é um sistema Debian/Ubuntu se não for detectado)
+detect_os() {
+  if command -v lsb_release > /dev/null 2>&1; then
+    OS=$(lsb_release -si)
+    VERSION=$(lsb_release -sr)
+    echo "Sistema operacional detectado: $OS $VERSION"
+  else
+    OS="Debian"
+    echo "Sistema operacional não detectado, assumindo Debian/Ubuntu."
+  fi
+}
+
+# Cria o arquivo de configuração para redirecionamento HTTP para HTTPS
+create_redirect_config() {
+  echo "<VirtualHost *:$HTTP_PORT>
+    ServerName \$(hostname -f)
+    Redirect permanent / https://\${SERVER_NAME}\${REQUEST_URI}
+  </VirtualHost>" > "$TEMP_FILE"
+}
+
+# Aplica a configuração de redirecionamento (método para Debian/Ubuntu)
+apply_redirect_config() {
+  if [ -f "$VHOST_DIR/$DEFAULT_VHOST" ]; then
+    cp "$VHOST_DIR/$DEFAULT_VHOST" "$VHOST_DIR/$DEFAULT_VHOST.bak"
+  else
+    echo "Arquivo de configuração padrão não encontrado: $VHOST_DIR/$DEFAULT_VHOST"
+    exit 1
+  fi
+
+  cat "$TEMP_FILE" > "$VHOST_DIR/000-default.conf" #Sobrescreve o arquivo padrão
+  a2enmod rewrite
+
+  # Testar a configuração do Apache
+  if ! $APACHE_CONFIG_TEST > /dev/null 2>&1; then
+    echo "Erro: Configuração do Apache inválida. Restaurando configuração anterior."
+    mv "$VHOST_DIR/$DEFAULT_VHOST.bak" "$VHOST_DIR/$DEFAULT_VHOST"
+    exit 1
+  fi
+
+  # Reiniciar o Apache
+  $APACHE_RESTART
+
+  echo "Redirecionamento HTTP para HTTPS configurado com sucesso."
+}
+
+# Função principal
+main() {
+  detect_os
+  create_redirect_config
+  apply_redirect_config
+  rm -f "$TEMP_FILE"
+}
+
+# Executa a função principal
+main
+exit 0
+```

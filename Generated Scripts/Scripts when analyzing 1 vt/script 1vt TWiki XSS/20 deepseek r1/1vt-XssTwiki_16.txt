@@ -1,0 +1,58 @@
+#!/bin/bash
+
+# Localizações comuns para instalação do TWiki
+candidates=(
+  "/var/www/twiki"
+  "/usr/local/twiki"
+  "/opt/twiki"
+  "/home/*/public_html/twiki"
+  "/home/*/twiki"
+)
+
+# URL de download da versão corrigida
+TWIKI_URL="https://downloads.sourceforge.net/project/twiki/TWiki%20for%20all%20platforms/4.2.4/TWiki-4.2.4.tgz"
+
+# Procurar instalação vulnerável (versão "01 Feb 2003")
+found_dir=""
+shopt -s extglob
+for candidate in ${candidates[@]}; do
+  for path in $candidate; do
+    [[ -f "$path/lib/TWiki.pm" ]] && grep -qF '01 Feb 2003' "$path/lib/TWiki.pm" 2>/dev/null && found_dir="$path" && break
+  done
+  [[ -n "$found_dir" ]] && break
+done
+
+# Sai se não encontrar instalação vulnerável
+[[ -z "$found_dir" ]] && exit 0
+
+# Backup da instalação atual
+backup_dir="${found_dir}_backup_$(date +%Y%m%d%H%M%S)"
+mkdir -p "$(dirname "$backup_dir")"
+cp -Rp "$found_dir" "$backup_dir"
+
+# Área de trabalho temporária
+tmp_dir=$(mktemp -d)
+cd "$tmp_dir"
+
+# Download e extração da versão corrigida
+wget --no-check-certificate -O twiki.tgz "$TWIKI_URL"
+tar -xzf twiki.tgz
+
+# Atualização preservando dados/configurações
+cd TWiki-4.2.4
+rsync -a \
+  --exclude='data' \
+  --exclude='pub' \
+  --exclude='lib/LocalSite.cfg' \
+  --exclude='workspaces' \
+  --exclude='.htaccess' \
+  --exclude='bin/.htaccess' \
+  "$tmp_dir/TWiki-4.2.4"/ \
+  "$found_dir"
+
+# Restaurar permissões originais
+user_group=$(stat -c '%U:%G' "$found_dir")
+chown -R "$user_group" "$found_dir"
+
+# Limpeza
+rm -rf "$tmp_dir"

@@ -1,0 +1,39 @@
+#!/bin/bash
+
+# Diretórios comuns onde aplicativos web podem ser encontrados
+webroots=("/var/www" "/srv/www" "/usr/share/nginx" "/var/www/html" "/opt/lampp/htdocs")
+found_file=""
+
+# Procurar o arquivo vulnerável em locais comuns
+for root in "${webroots[@]}"; do
+    candidate="$root/console/js/jquery-1.8.3.min.js"
+    if [[ -f "$candidate" ]]; then
+        found_file="$candidate"
+        break
+    fi
+done
+
+# Se não encontrado, procurar no sistema de arquivos
+if [[ -z "$found_file" ]]; then
+    found_file=$(find / -type f -path '*/console/js/jquery-1.8.3.min.js' 2>/dev/null | head -n 1)
+fi
+
+# Sair se o arquivo não for localizado
+[[ -z "$found_file" ]] && exit 1
+
+# Preservar atributos originais
+target_dir=$(dirname "$found_file")
+cd "$target_dir" || exit 1
+file_owner=$(stat -c %U:%G "jquery-1.8.3.min.js")
+file_perms=$(stat -c %a "jquery-1.8.3.min.js")
+
+# Criar backup e aplicar a correção
+cp -p "jquery-1.8.3.min.js" "jquery-1.8.3.min.js.bak"
+wget -qO "jquery-1.8.3.min.js" "https://code.jquery.com/jquery-1.9.0.min.js" || {
+    cp "jquery-1.8.3.min.js.bak" "jquery-1.8.3.min.js"
+    exit 1
+}
+
+# Restaurar atributos
+chown "$file_owner" "jquery-1.8.3.min.js"
+chmod "$file_perms" "jquery-1.8.3.min.js"

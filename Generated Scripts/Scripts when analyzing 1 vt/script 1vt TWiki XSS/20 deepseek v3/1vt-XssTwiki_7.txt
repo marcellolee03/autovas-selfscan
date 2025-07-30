@@ -1,0 +1,20 @@
+#!/bin/bash
+TWIKI_VERSION="4.2.4"
+DOWNLOAD_URL="http://twiki.org/pub/TWiki/TWikiRelease/TWiki-$TWIKI_VERSION.tgz"
+INSTALL_DIR="/opt/twiki"
+BACKUP_DIR="/opt/twiki_backup_$(date +%Y%m%d_%H%M%S)"
+
+if [ -d "$INSTALL_DIR" ]; then
+    mkdir -p "$BACKUP_DIR"
+    cp -r "$INSTALL_DIR" "$BACKUP_DIR"
+    rm -rf "$INSTALL_DIR"
+fi
+
+mkdir -p "$INSTALL_DIR"
+cd /tmp
+wget "$DOWNLOAD_URL"
+tar -xvzf "TWiki-$TWIKI_VERSION.tgz" -C "$INSTALL_DIR" --strip-components=1
+rm "TWiki-$TWIKI_VERSION.tgz"
+
+chown -R www-data:www-data "$INSTALL_DIR"
+systemctl restart apache2

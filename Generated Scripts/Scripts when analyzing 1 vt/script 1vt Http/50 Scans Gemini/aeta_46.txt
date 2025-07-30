@@ -1,0 +1,66 @@
+```bash
+#!/bin/bash
+
+# Este script corrige a vulnerabilidade de transmissão de informações sensíveis em texto claro via HTTP.
+# Ele configura o redirecionamento de HTTP para HTTPS usando Apache ou Nginx.
+
+# Variáveis
+APACHE_CONFIG="/etc/apache2/sites-available/000-default.conf"
+NGINX_CONFIG="/etc/nginx/sites-available/default"
+
+# Função para verificar se o Apache está instalado
+is_apache_installed() {
+  command -v apache2 >/dev/null 2>&1
+}
+
+# Função para verificar se o Nginx está instalado
+is_nginx_installed() {
+  command -v nginx >/dev/null 2>&1
+}
+
+# Função para configurar o redirecionamento HTTP para HTTPS no Apache
+configure_apache_redirect() {
+  if [ -f "$APACHE_CONFIG" ]; then
+    # Ativar o módulo rewrite
+    sudo a2enmod rewrite
+
+    # Adicionar redirecionamento ao arquivo de configuração
+    sudo sed -i 's/<VirtualHost \*:80>/<VirtualHost *:80>\n\tRewriteEngine On\n\tRewriteCond %{HTTPS} !=on\n\tRewriteRule ^(.*)$ https:\/\/%{HTTP_HOST}\/$1 [R=301,L]/g' "$APACHE_CONFIG"
+
+    # Reiniciar o Apache
+    sudo systemctl restart apache2
+    echo "Redirecionamento HTTP para HTTPS configurado para Apache."
+  else
+    echo "Arquivo de configuração do Apache não encontrado: $APACHE_CONFIG"
+  fi
+}
+
+# Função para configurar o redirecionamento HTTP para HTTPS no Nginx
+configure_nginx_redirect() {
+  if [ -f "$NGINX_CONFIG" ]; then
+    # Adicionar redirecionamento ao arquivo de configuração
+    sudo sed -i 's/listen 80 default_server;/listen 80 default_server;\n\treturn 301 https:\/\/${host}${uri};/g' "$NGINX_CONFIG"
+
+    # Reiniciar o Nginx
+    sudo systemctl restart nginx
+    echo "Redirecionamento HTTP para HTTPS configurado para Nginx."
+  else
+    echo "Arquivo de configuração do Nginx não encontrado: $NGINX_CONFIG"
+  fi
+}
+
+# Função principal
+main() {
+  if is_apache_installed; then
+    configure_apache_redirect
+  elif is_nginx_installed; then
+    configure_nginx_redirect
+  else
+    echo "Nenhum servidor web (Apache ou Nginx) detectado.  Instale um servidor web e um certificado SSL/TLS antes de executar este script."
+    exit 1
+  fi
+}
+
+# Executar a função principal
+main
+```

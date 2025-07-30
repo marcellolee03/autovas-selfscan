@@ -1,0 +1,41 @@
+#!/bin/bash
+set -euxo pipefail
+apt-get update
+if dpkg -s twiki &> /dev/null; then
+    available_version=$(apt-cache policy twiki | grep -oP 'Candidate: \K.*')
+    if [[ -n "$available_version" ]] && 
+        [ "$(printf '%s\n' "4.2.4" "$available_version" | sort -V | head -n1)" = "4.2.4" ]; then
+        apt-get install --only-upgrade -y twiki
+        exit 0
+    fi
+fi
+common_locations=("/var/www/twiki" "/usr/local/twiki" "/home/twiki" "/opt/twiki")
+for dir in "${common_locations[@]}"; do
+    if [[ -d "$dir/bin" && -d "$dir/data" ]]; then
+        found_location="$dir"
+        backup_dir="/var/twiki-backup-$(date +%Y%m%d%H%M%S)"
+        mkdir -p "$backup_dir"
+        systemctl stop apache2
+        cp -a "$found_location" "$backup_dir/"
+        temp_dir=$(mktemp -d)
+        cd "$temp_dir"
+        wget -q "https://github.com/TWiki/twikicore/archive/refs/tags/TWikiRelease04x02x04.tar.gz"
+        tar xf TWikiRelease04x02x04.tar.gz
+        rm -rf "$found_location"
+        mv twikicore-TWikiRelease04x02x04 "$found_location"
+        cp -a "$backup_dir/$(basename "$found_location")/data" "$found_location/"
+        cp -a "$backup_dir/$(basename "$found_location")/pub" "$found_location/"
+        if [[ -d "$backup_dir/$(basename "$found_location")/lib" ]]; then
+            cp -a "$backup_dir/$(basename "$found_location")/lib"/* "$found_location/lib/"
+        fi
+        if [[ -d "$backup_dir/$(basename "$found_location")/bin" ]]; then
+            find "$backup_dir/$(basename "$found_location")/bin" -maxdepth 1 -name '*.cfg' -exec cp {} "$found_location/bin/" \;
+            [[ -f "$backup_dir/$(basename "$found_location")/bin/.htusers" ]] && 
+                cp "$backup_dir/$(basename "$found_location")/bin/.htusers" "$found_location/bin/"
+        fi
+        chown -R www-data:www-data "$found_location"
+        systemctl start apache2
+        exit 0
+    fi
+done
+exit 1

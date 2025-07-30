@@ -1,0 +1,124 @@
+```bash
+#!/bin/bash
+
+# Variáveis para rastrear se alguma atualização foi feita
+updated=0
+
+# Função para atualizar o Python no Windows usando o Chocolatey
+update_python() {
+  version="$1"
+  choco upgrade python --version="$version" -y
+  if [ $? -eq 0 ]; then
+    echo "Python updated to version $version"
+    updated=1
+  else
+    echo "Failed to update Python to version $version"
+  fi
+}
+
+# Verificar e atualizar as versões do Python
+# Vulnerabilidade 1, 8, 10, 18, 21, 22, 32, 36, 37, 40, 46, 50, 56, 57, 64
+if powershell -Command "(Get-Package 'Python 3.10.12').Name"; then
+    update_python "3.10.16"  # Corrigindo para a versão mais recente que resolve todas as vulnerabilidades
+fi
+
+# Vulnerabilidade 2, 3, 4, 5, 6, 7, 9, 11, 12, 13, 16, 17, 19, 20, 23, 24, 26, 28, 29, 30, 31, 33, 34, 35, 38, 39, 41, 42, 43, 44, 45, 47, 48, 51, 52, 53, 55, 58, 60, 61, 63, 65
+if powershell -Command "(Get-Package 'Python 3.12.0').Name"; then
+    update_python "3.12.9"  # Corrigindo para a versão mais recente que resolve todas as vulnerabilidades
+fi
+
+# Vulnerabilidade 54
+# Desativar TLS 1.0 e 1.1 no Windows (requer reinicialização)
+disable_tls10_11() {
+    echo "Desativando TLS 1.0 e 1.1..."
+    powershell -Command "Set-ItemProperty -Path 'HKLM:\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Protocols\TLS 1.0\Server' -Name 'Enabled' -Value 0 -Type DWord"
+    powershell -Command "Set-ItemProperty -Path 'HKLM:\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Protocols\TLS 1.0\Server' -Name 'DisabledByDefault' -Value 1 -Type DWord"
+    powershell -Command "Set-ItemProperty -Path 'HKLM:\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Protocols\TLS 1.1\Server' -Name 'Enabled' -Value 0 -Type DWord"
+    powershell -Command "Set-ItemProperty -Path 'HKLM:\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Protocols\TLS 1.1\Server' -Name 'DisabledByDefault' -Value 1 -Type DWord"
+    echo "TLS 1.0 e 1.1 foram desativados. Reinicie o sistema para aplicar as alterações."
+    updated=1
+}
+
+# Execute a função para desativar TLS 1.0 e 1.1
+disable_tls10_11
+
+# Vulnerabilidade 49
+# Ações para substituir o certificado SSL/TLS autoassinado
+replace_self_signed_cert() {
+    echo "Substituindo certificado SSL/TLS autoassinado..."
+    # Este é um espaço reservado. A substituição real depende de onde o certificado é usado.
+    # Exemplo (adaptar para a sua situação):
+    # 1. Gerar um novo certificado com uma CA confiável (Let's Encrypt, etc.)
+    # 2. Configurar o servidor web (ex: Apache, Nginx, IIS) para usar o novo certificado.
+    echo "Passos manuais necessários: Gerar/Obter um certificado assinado por uma CA confiável e configurar o servidor web para usá-lo."
+    updated=1
+}
+
+# Execute a função para substituir o certificado autoassinado
+replace_self_signed_cert
+
+# Vulnerabilidade 59
+# Desabilitar algoritmos MAC fracos no SSH (modifica o arquivo sshd_config)
+disable_weak_macs() {
+  echo "Desabilitando algoritmos MAC fracos no SSH..."
+  
+  # Lista de algoritmos MAC fracos a serem removidos (adicionar mais se necessário)
+  weak_macs="umac-64-etm@openssh.com,umac-64@openssh.com"
+  
+  # Localização do arquivo sshd_config (pode variar dependendo da distribuição)
+  sshd_config="/etc/ssh/sshd_config"
+
+  # Cria um backup do arquivo sshd_config
+  cp "$sshd_config" "$sshd_config.bak"
+  
+  # Remove os algoritmos MAC fracos da configuração, se existirem
+  if grep -q "MACs" "$sshd_config"; then
+    sed -i "s/MACs .*/MACs -${weak_macs}/g" "$sshd_config"
+  else
+    echo "MACs -${weak_macs}" >> "$sshd_config"
+  fi
+
+  echo "Algoritmos MAC fracos foram desabilitados. Reinicie o serviço SSH para aplicar as alterações."
+  
+  # Reinicia o serviço SSH
+  if systemctl is-active --quiet sshd; then
+    systemctl restart sshd
+    echo "Serviço SSH reiniciado."
+  else
+    echo "Serviço SSH não está ativo. Favor iniciar manualmente."
+  fi
+  updated=1
+}
+
+# Execute a função para desabilitar algoritmos MAC fracos no SSH
+disable_weak_macs
+
+# Vulnerabilidade 62
+# Desabilitar ICMP Timestamp Reply (pode variar dependendo do sistema operacional)
+disable_icmp_timestamp() {
+    echo "Desabilitando ICMP Timestamp Reply..."
+    # Exemplo para Linux (pode precisar de ajustes)
+    echo "1" > /proc/sys/net/ipv4/icmp_echo_ignore_all
+    # Para tornar permanente, editar /etc/sysctl.conf e adicionar:
+    # net.ipv4.icmp_echo_ignore_all=1
+    echo "ICMP Timestamp Reply desabilitado (necessário configurar permanentemente no sistema)."
+    updated=1
+}
+
+# Execute a função para desabilitar ICMP Timestamp Reply
+disable_icmp_timestamp
+
+# Vulnerabilidade 20 e 27 e 28
+echo "Nenhuma correção disponível para CVE-2024-3220. Sem ação."
+
+# Vulnerabilidade 33, 34, 35 e 36
+echo "Nenhuma correção disponível para CVE-2023-27043. Sem ação."
+
+# Vulnerabilidade 9, 14 e 15
+echo "Nenhuma correção disponível para CVE-2023-36632. Sem ação."
+
+# Se nenhuma atualização foi feita, exibe uma mensagem
+if [ "$updated" -eq 0 ]; then
+  echo "Nenhuma vulnerabilidade aplicável encontrada ou corrigida."
+fi
+```

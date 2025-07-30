@@ -1,0 +1,80 @@
+#!/bin/bash
+
+# Descrição: Este script configura o redirecionamento HTTP para HTTPS em um servidor web Apache ou Nginx.
+# Ele detecta automaticamente o servidor web em uso e aplica as configurações apropriadas.
+
+# Variáveis
+APACHE_CONFIG_FILE="/etc/apache2/sites-available/000-default.conf"
+APACHE_DEFAULT_SSL_CONFIG_FILE="/etc/apache2/sites-available/default-ssl.conf"
+NGINX_CONFIG_FILE="/etc/nginx/conf.d/default.conf"
+SERVER_TYPE=""
+
+# Funções
+
+detect_server() {
+  if command -v apache2 >/dev/null 2>&1; then
+    SERVER_TYPE="apache"
+  elif command -v nginx >/dev/null 2>&1; then
+    SERVER_TYPE="nginx"
+  else
+    echo "Servidor web não detectado. Apache ou Nginx devem estar instalados."
+    exit 1
+  fi
+}
+
+configure_apache() {
+  echo "Configurando redirecionamento HTTP para HTTPS no Apache..."
+
+  # 1. Habilitar o módulo rewrite do Apache
+  sudo a2enmod rewrite >/dev/null 2>&1
+
+  # 2. Adicionar redirecionamento ao arquivo de configuração padrão do Apache
+  if grep -q "RewriteEngine On" "$APACHE_CONFIG_FILE"; then
+      echo "RewriteEngine já está habilitado."
+  else
+      sudo sed -i 's|<VirtualHost \*:80>|<VirtualHost *:80>\n\tRewriteEngine On\n\tRewriteCond %{HTTPS} off\n\tRewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [R=301,L]|' "$APACHE_CONFIG_FILE"
+  fi
+
+  # Opcional: Forçar HTTPS em default-ssl.conf
+  if [ -f "$APACHE_DEFAULT_SSL_CONFIG_FILE" ]; then
+     if grep -q "Header always set Strict-Transport-Security" "$APACHE_DEFAULT_SSL_CONFIG_FILE"; then
+        echo "HSTS já está configurado em $APACHE_DEFAULT_SSL_CONFIG_FILE."
+     else
+        sudo sed -i 's|<VirtualHost \*:443>|<VirtualHost *:443>\n\tHeader always set Strict-Transport-Security "max-age=31536000"|' "$APACHE_DEFAULT_SSL_CONFIG_FILE"
+     fi
+  fi
+
+  # 3. Reiniciar o Apache
+  sudo systemctl restart apache2
+  echo "Redirecionamento HTTP para HTTPS configurado no Apache. Reiniciei o servidor."
+}
+
+configure_nginx() {
+  echo "Configurando redirecionamento HTTP para HTTPS no Nginx..."
+
+  # 1. Adicionar redirecionamento ao arquivo de configuração do Nginx
+  if grep -q "return 301 https" "$NGINX_CONFIG_FILE"; then
+      echo "Redirecionamento já está configurado."
+  else
+      sudo sed -i 's/listen 80 default_server;/listen 80 default_server;\n\treturn 301 https:\/\/${host}${uri};/' "$NGINX_CONFIG_FILE"
+  fi
+
+  # 2. Reiniciar o Nginx
+  sudo systemctl restart nginx
+  echo "Redirecionamento HTTP para HTTPS configurado no Nginx. Reiniciei o servidor."
+}
+
+# Programa principal
+detect_server
+
+if [ "$SERVER_TYPE" == "apache" ]; then
+  configure_apache
+elif [ "$SERVER_TYPE" == "nginx" ]; then
+  configure_nginx
+else
+  echo "Servidor web não suportado."
+  exit 1
+fi
+
+echo "Processo de configuração de redirecionamento HTTP para HTTPS concluído."
+exit 0

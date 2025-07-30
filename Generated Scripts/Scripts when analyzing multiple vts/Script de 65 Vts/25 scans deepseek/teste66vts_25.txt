@@ -1,0 +1,16 @@
+#!/bin/bash
+# Atualiza as versões do Python para corrigir as vulnerabilidades
+sudo apt-get update
+sudo apt-get install -y python3.10=3.10.15-1+b1 python3.12=3.12.6-1+b1
+sudo apt-get install -y python3.10-dev=3.10.15-1+b1 python3.12-dev=3.12.6-1+b1
+sudo apt-get install -y python3.10-venv=3.10.15-1+b1 python3.12-venv=3.12.6-1+b1
+sudo apt-get install -y python3.10-distutils=3.10.15-1+b1 python3.12-distutils=3.12.6-1+b1
+sudo apt-get install -y python3.10-lib2to3=3.10.15-1+b1 python3.12-lib2to3=3.12.6-1+b1
+sudo apt-get install -y python3.10-gdbm=3.10.15-1+b1 python3.12-gdbm=3.12.6-1+b1
+sudo apt-get install -y python3.10-tk=3.10.15-1+b1 python3.12-tk=3.12.6-1+b1
+# Desativa o suporte a TLSv1.0 e TLSv1.1
+sudo sed -i 's/^\(MinProtocol\s*=\s*\).*$/\1TLSv1.2/' /etc/ssl/openssl.cnf
+sudo sed -i 's/^\(CipherString\s*=\s*\).*$/\1DEFAULT@SECLEVEL=2/' /etc/ssl/openssl.cnf
+# Reinicia serviços para aplicar as alterações
+sudo systemctl restart apache2
+sudo systemctl restart ssh

@@ -1,0 +1,114 @@
+```bash
+#!/bin/bash
+
+# Vulnerability 1: Proxmox VE EOL
+# Solution: Update Proxmox VE to a supported version.
+# This script cannot automatically upgrade Proxmox VE.  A manual upgrade is required.
+# Please refer to the Proxmox VE documentation for upgrade instructions.
+echo "Please upgrade Proxmox VE to a supported version (>= 8). Refer to the Proxmox VE documentation."
+
+# Vulnerabilities 2-6: jQuery < 1.9.0 XSS Vulnerability (CVE-2012-6708)
+# Solution: Update jQuery to version 1.9.0 or later.
+# Define the vulnerable jQuery file paths.
+jquery_files=(
+    "/var/www/html/../js/jquery-1.8.3.min.js"
+    "/var/www/html/opscenter/webcommon/framework/../js/jquery-1.8.3.min.js"
+    "/var/www/html/framesets/../js/jquery-1.8.3.min.js"
+    "/var/www/html/frameset/../js/jquery-1.8.3.min.js"
+    "/var/www/html/console/framework/../js/jquery-1.8.3.min.js"
+)
+
+# Function to download and replace jQuery file.
+update_jquery() {
+    filepath="$1"
+    # Create directory if it doesn't exist
+    dir=$(dirname "$filepath")
+    mkdir -p "$dir"
+
+    if [ -f "$filepath" ]; then
+        echo "Updating jQuery at $filepath"
+        # Download jQuery 1.9.0
+        curl -s -o /tmp/jquery-1.9.0.min.js https://code.jquery.com/jquery-1.9.0.min.js
+        if [ -f /tmp/jquery-1.9.0.min.js ]; then
+            # Backup the old file
+            mv "$filepath" "${filepath}.bak"
+            # Replace the old file with the new one
+            mv /tmp/jquery-1.9.0.min.js "$filepath"
+            echo "jQuery updated successfully at $filepath"
+        else
+            echo "Failed to download jQuery 1.9.0.min.js"
+        fi
+    else
+        echo "File not found: $filepath"
+    fi
+}
+
+# Loop through the jQuery files and update them.
+for file in "${jquery_files[@]}"; do
+    update_jquery "$file"
+done
+
+# Vulnerabilities 7-9, 13-16, 19, 21-22: Weak SSH algorithms
+# Solution: Disable weak SSH algorithms.
+# Edit /etc/ssh/sshd_config to remove weak algorithms.
+# Backup the original sshd_config file
+cp /etc/ssh/sshd_config /etc/ssh/sshd_config.bak
+
+# Remove potentially vulnerable options and add secure ones.
+sed -i '/^HostKeyAlgorithms/d' /etc/ssh/sshd_config
+sed -i '/^KexAlgorithms/d' /etc/ssh/sshd_config
+sed -i '/^Ciphers/d' /etc/ssh/sshd_config
+sed -i '/^MACs/d' /etc/ssh/sshd_config
+
+# Append secure options.  These are just examples - adjust as needed for compatibility.
+echo "
+# Added by security script to disable weak algorithms
+HostKeyAlgorithms ssh-ed25519,ecdsa-sha2-nistp256,ecdsa-sha2-nistp384,ecdsa-sha2-nistp521
+KexAlgorithms curve25519-sha256,curve25519-sha256@libssh.org,ecdh-sha2-nistp256,ecdh-sha2-nistp384,ecdh-sha2-nistp521,diffie-hellman-group-exchange-sha256
+Ciphers chacha20-poly1305@openssh.com,aes256-gcm@openssh.com,aes128-gcm@openssh.com,aes256-ctr,aes192-ctr,aes128-ctr
+MACs hmac-sha2-256,hmac-sha2-512,hmac-ripemd160
+" >> /etc/ssh/sshd_config
+
+# Restart SSH service
+systemctl restart sshd
+echo "SSH configuration updated and service restarted."
+
+# Vulnerability 10: DCE/RPC and MSRPC Services Enumeration Reporting
+# Solution: Filter incoming traffic to port 135.
+# This script adds a ufw rule to block incoming traffic on port 135.
+# Adjust as necessary if you are not using ufw, or want a different rule.
+if command -v ufw &> /dev/null; then
+    ufw deny 135/tcp
+    ufw reload
+    echo "Firewall rule added to block incoming traffic on port 135 (DCE/RPC). UFW reloaded."
+else
+    echo "ufw not found. Please configure your firewall to block incoming traffic on port 135 (DCE/RPC)."
+fi
+
+# Vulnerability 11: Telnet Unencrypted Cleartext Login
+# Solution: Disable Telnet and replace with SSH.
+# This script stops and disables the telnet service.
+systemctl stop telnet.socket
+systemctl disable telnet.socket
+systemctl stop inetd
+systemctl disable inetd
+echo "Telnet service disabled.  Consider using SSH instead."
+
+# Vulnerability 12: SSL/TLS: Deprecated TLSv1.0 and TLSv1.1 Protocol Detection
+# Solution: Disable TLSv1.0 and TLSv1.1 in favor of TLSv1.2+.
+# This script provides guidance as this needs to be configured on a per-application basis
+echo "Please disable TLSv1.0 and TLSv1.1 in your applications and services that use SSL/TLS.  Refer to documentation for each specific service."
+
+# Vulnerabilities 17-18, 20, 23-25: TCP Timestamps Information Disclosure
+# Solution: Disable TCP timestamps.
+echo "net.ipv4.tcp_timestamps = 0" >> /etc/sysctl.conf
+sysctl -p
+echo "TCP Timestamps disabled. Edit /etc/sysctl.conf to re-enable."
+
+# Vulnerabilities 26-32: ICMP Timestamp Reply Information Disclosure
+# Solution: Disable ICMP timestamp replies.
+# This script disables ICMP timestamp replies via sysctl.
+echo "net.ipv4.icmp_echo_ignore_all = 1" >> /etc/sysctl.conf
+sysctl -p
+echo "ICMP timestamp replies disabled. Edit /etc/sysctl.conf to re-enable."
+```

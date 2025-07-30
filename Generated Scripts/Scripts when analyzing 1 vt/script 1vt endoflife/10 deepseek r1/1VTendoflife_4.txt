@@ -1,0 +1,38 @@
+#!/bin/bash
+# Backup current sources.list
+cp /etc/apt/sources.list /etc/apt/sources.list.bak
+
+# Replace repository sources with old-releases for Hardy
+sed -i 's|http://[a-z0-9./-]*\.ubuntu\.com/ubuntu|http://old-releases.ubuntu.com/ubuntu|g' /etc/apt/sources.list
+sed -i 's|http://security\.ubuntu\.com/ubuntu|http://old-releases.ubuntu.com/ubuntu|g' /etc/apt/sources.list
+
+# Setup for non-interactive upgrades
+export DEBIAN_FRONTEND=noninteractive
+
+# Update package lists and install prerequisites
+apt-get -qq update
+apt-get install -y update-manager-core
+
+# Perform release upgrade to Lucid (10.04)
+do-release-upgrade -f DistUpgradeViewNonInteractive -q
+
+# Continue upgrade chain through supported releases
+releases=("precise" "trusty" "xenial" "bionic" "focal" "jammy")
+for release in "${releases[@]}"; do
+  sed -i "s|http://old-releases\.ubuntu\.com/ubuntu|http://archive.ubuntu.com/ubuntu|g" /etc/apt/sources.list &>/dev/null
+  apt-get -qq update
+  do-release-upgrade -f DistUpgradeViewNonInteractive -q
+done
+
+# Ensure latest security updates
+apt-get -qq update
+apt-get upgrade -y
+apt-get dist-upgrade -y
+
+# Final upgrade to Noble (24.04 LTS) if possible
+do-release-upgrade -f DistUpgradeViewNonInteractive -q
+apt-get autoremove -y
+
+# Replace with standard repositories in final state
+sed -i 's|http://old-releases\.ubuntu\.com/ubuntu|http://archive.ubuntu.com/ubuntu|g' /etc/apt/sources.list
+echo "All upgrades completed. System is now at Ubuntu 24.04 LTS."

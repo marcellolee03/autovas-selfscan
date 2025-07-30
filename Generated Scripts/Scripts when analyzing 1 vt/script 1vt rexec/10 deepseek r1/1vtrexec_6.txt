@@ -1,0 +1,42 @@
+#!/bin/sh
+
+# Encerra qualquer instância ativa do serviço rexec
+if command -v systemctl >/dev/null 2>&1; then
+    systemctl stop rexec.service rexec.socket >/dev/null 2>&1
+    systemctl disable rexec.service rexec.socket >/dev/null 2>&1
+elif command -v service >/dev/null 2>&1; then
+    service rexec stop >/dev/null 2>&1
+    update-rc.d -f rexec remove >/dev/null 2>&1 || chkconfig rexec off >/dev/null 2>&1
+fi
+
+# Remove configurações do inetd/xinetd se presentes
+if [ -f /etc/inetd.conf ]; then
+    sed -i '/^rexec[[:space:]]/s/^/#/' /etc/inetd.conf
+    pkill -HUP inetd >/dev/null 2>&1
+fi
+
+if [ -d /etc/xinetd.d ]; then
+    find /etc/xinetd.d -type f -exec sed -i '/rexec/s/\(disable\s*=\s*\)no/\1yes/' {} +
+    pkill -HUP xinetd >/dev/null 2>&1
+fi
+
+# Remove pacotes relacionados ao servidor rexec
+if command -v apt-get >/dev/null 2>&1; then
+    apt-get purge -y rsh-server netkit-rsh-server >/dev/null 2>&1
+elif command -v yum >/dev/null 2>&1; then
+    yum remove -y rsh-server >/dev/null 2>&1
+elif command -v zypper >/dev/null 2>&1; then
+    zypper --non-interactive remove rsh-server >/dev/null 2>&1
+fi
+
+# Garante que o firewalld bloqueie a porta padrão do rexec (512/tcp)
+if command -v firewall-cmd >/dev/null 2>&1; then
+    firewall-cmd --permanent --remove-port=512/tcp >/dev/null 2>&1
+    firewall-cmd --reload >/dev/null 2>&1
+fi
+
+# Identifica e mata processos remanescentes do rexecd
+REXEC_PIDS=$(pgrep -d ' ' -f 'rexecd')
+if [ -n "${REXEC_PIDS}" ]; then
+    kill -9 ${REXEC_PIDS} >/dev/null 2>&1
+fi

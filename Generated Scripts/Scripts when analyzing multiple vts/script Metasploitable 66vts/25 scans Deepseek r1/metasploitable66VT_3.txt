@@ -1,0 +1,126 @@
+```bash
+#!/bin/bash
+set -euo pipefail
+
+disable_service() {
+    service_name=$1
+    port=$2
+    echo "Disabling service $service_name on port $port..."
+    if systemctl list-unit-files | grep -q "$service_name.service"; then
+        systemctl stop "$service_name"
+        systemctl disable "$service_name"
+    fi
+    if command -v ufw &>/dev/null; then
+        ufw deny "$port/tcp"
+    fi
+}
+
+update_config() {
+    file=$1
+    key=$2
+    value=$3
+    if [ -f "$file" ]; then
+        if grep -q "^$key" "$file"; then
+            sed -i "s/^$key.*/$key $value/" "$file"
+        else
+            echo "$key $value" >> "$file"
+        fi
+    fi
+}
+
+# Vulnerabilidade 1,23,26,27: TWiki vulnerabilities
+find / -path '*/twiki*' -type d 2>/dev/null | while read -r twikidir; do
+    echo "Removing vulnerable TWiki installation at $twikidir..."
+    rm -rf "$twikidir"
+done
+
+# Vulnerabilidade 2: Distributed Ruby RCE
+disable_service "druby" 8787
+disable_service "dRuby" 8787
+
+# Vulnerabilidade 3,19: rlogin Disable
+update_config /etc/inetd.conf "login" ""
+update_config /etc/xinetd.d/rlogin "disable" "yes"
+pkill -9 -f "rlogind|rlogin"
+if [ -f /etc/securetty ]; then
+    sed -i '/rlogin/d' /etc/securetty
+fi
+
+# Vulnerabilidade 5: rexec Disable
+update_config /etc/inetd.conf "exec" ""
+update_config /etc/xinetd.d/rexec "disable" "yes"
+pkill -9 -f "rexecd|rexec"
+
+# Vulnerabilidade 6: Ingreslock Backdoor
+lsof -i :1524 | awk 'NR>1 {print $2}' | xargs kill -9
+rm -f /tmp/ingreslock
+update_config /etc/inetd.conf "ingreslock" ""
+update_config /etc/xinetd.d/ingreslock "disable" "yes"
+
+# Vulnerabilidade 7: Tomcat Ghostcat
+for tomcat_dir in /opt/tomcat /usr/share/tomcat*; do
+    [ -d "$tomcat_dir" ] && find "$tomcat_dir/conf" -name "server.xml" | while read conf; do
+        sed -i '/<Connector.*8009.*/s/\(port="8009"\)/\1 enableLookups="false" allowTrace="false" maxPostSize="-1"/' "$conf"
+        sed -i '/<Connector.*8009.*/s/ protocol="AJP\/1.3"/ secure="true" allowedRequestAttributesPattern=".*"/' "$conf"
+    done
+done
+
+# Vulnerabilidade 8: MySQL Default Credentials
+if command -v mysql &>/dev/null; then
+    mysql -e "UPDATE mysql.user SET plugin='mysql_native_password' WHERE User='root';"
+    mysql -e "ALTER USER 'root'@'localhost' IDENTIFIED BY 'Q!w2E#r4T%y6'; FLUSH PRIVILEGES;"
+fi
+
+# Vulnerabilidade 9,10: PHP Upgrade & Config
+{ [ -d /etc/php5/apache2 ] && echo "log_errors=On\nexpose_php=Off\ndisable_functions=exec,passthru,shell_exec,system" >> /etc/php5/apache2/php.ini; } || true
+find /var/www /usr/share -name phpinfo.php -exec rm -f {} \;
+
+# Vulnerabilidade 14: PostgreSQL Credentials
+if command -v psql &>/dev/null; then
+    psql -U postgres -c "ALTER USER postgres WITH PASSWORD 'A1b2C3d4E5f6!';"
+fi
+
+# Vulnerabilidade 15: VNC Password
+find / -name "*.vnc" -exec sed -i 's/^[[:space:]]*Password[[:space:]]*=[[:space:]]*.*/Password = ZAQ!2wsx/' {} +
+
+# Vulnerabilidade 16: HTTP Dangerous Methods
+find /etc/apache2 -name "*.conf" -exec sed -i '/<Directory/,/<\/Directory>/s/AllowOverride None/AllowOverride All/' {} +
+find /etc/apache2 -name "*.conf" -exec sed -i '/<Limit PUT DELETE>/c\<Limit PUT DELETE>\nOrder deny,allow\nDeny from all\n</Limit>' {} +
+
+# Vulnerabilidade 24: Anonymous FTP
+if [ -f /etc/vsftpd.conf ]; then
+    sed -i 's/anonymous_enable=.*/anonymous_enable=NO/' /etc/vsftpd.conf
+fi
+echo "This system contains security patches" > /etc/banner-msg
+
+# Vulnerabilidade 45: Telnet Disable
+disable_service "telnet" 23
+update_config /etc/inetd.conf "telnet" ""
+
+# Vulnerabilidade 46,48: FTP Encryption Enforcement
+if [ -f /etc/vsftpd.conf ]; then
+    echo "ssl_enable=YES" >> /etc/vsftpd.conf
+    echo "force_local_logins_ssl=YES" >> /etc/vsftpd.conf
+    echo "force_local_data_ssl=YES" >> /etc/vsftpd.conf
+fi
+
+# Vulnerabilidade 47: VNC Encryption
+find / -name "xstartup" -exec sed -i 's/^exec$/exec \/usr\/bin\/ssh-agent \/usr\/bin\/dbus-launch \/etc\/X11\/Xsession/' {} +
+
+# Vulnerabilidade 49: HTTP to HTTPS Redirect
+if [ -f /etc/apache2/sites-enabled/*.conf ]; then
+    sed -i '/<VirtualHost/,/<\/VirtualHost>/ {
+        /DocumentRoot/i RewriteEngine On\nRewriteCond %{HTTPS} off\nRewriteRule ^/?(.*) https://%{SERVER_NAME}/$1 [R=301,L]
+    }' /etc/apache2/sites-enabled/*.conf || true
+fi
+
+# Vulnerabilidade 35: PHPInfo Removal
+find /var/www -type f -name "phpinfo.php" -exec rm -f {} \;
+
+# Reiniciar serviços críticos
+[ -d /etc/apache2 ] && systemctl restart apache2 || true
+[ -f /etc/init.d/ssh ] && systemctl restart ssh || true
+
+echo "Applied security patches successfully."
+exit 0
+```

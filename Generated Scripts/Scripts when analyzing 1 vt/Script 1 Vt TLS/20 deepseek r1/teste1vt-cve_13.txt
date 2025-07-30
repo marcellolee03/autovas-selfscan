@@ -1,0 +1,48 @@
+```bash
+#!/bin/bash
+set -e
+
+if [ "$EUID" -ne 0 ]; then
+    echo "Este script requer privilégios root para execução. Utilize sudo ou execute como root." >&2
+    exit 1
+fi
+
+config_dirs=(
+    "/etc/postgresql"
+    "/var/lib/pgsql"
+    "/var/lib/postgresql"
+)
+
+configure_ssl_settings() {
+    local conf_file=$1
+    grep -q "ssl_min_protocol_version" "$conf_file" && 
+        sed -i "/ssl_min_protocol_version/c\ssl_min_protocol_version = 'TLSv1.2'" "$conf_file" ||
+        echo "ssl_min_protocol_version = 'TLSv1.2'" >> "$conf_file"
+}
+
+restart_postgresql() {
+    if systemctl list-unit-files | grep -q 'postgres'; then
+        systemctl restart postgresql
+    elif [ -f "/etc/init.d/postgresql" ]; then
+        service postgresql restart
+    fi
+}
+
+for dir in "${config_dirs[@]}"; do
+    if [ -d "$dir" ]; then
+        while IFS= read -r conf_file; do
+            port_setting=$(grep "port" "$conf_file" | grep -ohE '[0-9]+' | head -1)
+            if [ -n "$port_setting" ] && [ "$port_setting" -eq 5432 ]; then
+                backup="${conf_file}.backup_$(date +%Y%m%d%H%M%S)"
+                cp -p "$conf_file" "$backup"
+                configure_ssl_settings "$conf_file"
+                restart_postgresql
+                exit 0
+            fi
+        done < <(find "$dir" -name postgresql.conf -type f)
+    fi
+done
+
+echo "Não foi possível localizar o arquivo de configuração do PostgreSQL na porta 5432." >&2
+exit 1
+```

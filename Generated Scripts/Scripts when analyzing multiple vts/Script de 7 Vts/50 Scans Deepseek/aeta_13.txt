@@ -1,0 +1,41 @@
+#!/bin/bash
+# Corrige Vulnerabilidade 1: Enforce HTTPS
+if ! grep -q "RewriteEngine On" /etc/apache2/sites-available/000-default.conf; then
+    echo "RewriteEngine On" >> /etc/apache2/sites-available/000-default.conf
+    echo "RewriteCond %{HTTPS} off" >> /etc/apache2/sites-available/000-default.conf
+    echo "RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]" >> /etc/apache2/sites-available/000-default.conf
+    systemctl restart apache2
+fi
+
+# Corrige Vulnerabilidade 2: Configurar DNS para mitigar cache snooping
+if ! grep -q "recursion no;" /etc/bind/named.conf.options; then
+    echo "recursion no;" >> /etc/bind/named.conf.options
+    systemctl restart bind9
+fi
+
+# Corrige Vulnerabilidade 3: Desabilitar ICMP timestamp
+echo "net.ipv4.tcp_timestamps = 0" >> /etc/sysctl.conf
+sysctl -p
+
+# Corrige Vulnerabilidade 4: Desabilitar TLSv1.0 e TLSv1.1
+if ! grep -q "SSLProtocol all -TLSv1 -TLSv1.1" /etc/apache2/mods-enabled/ssl.conf; then
+    echo "SSLProtocol all -TLSv1 -TLSv1.1" >> /etc/apache2/mods-enabled/ssl.conf
+    systemctl restart apache2
+fi
+
+# Corrige Vulnerabilidade 5: Desabilitar renegociação SSL/TLS
+if ! grep -q "SSLHonorCipherOrder on" /etc/apache2/mods-enabled/ssl.conf; then
+    echo "SSLHonorCipherOrder on" >> /etc/apache2/mods-enabled/ssl.conf
+    echo "SSLInsecureRenegotiation off" >> /etc/apache2/mods-enabled/ssl.conf
+    systemctl restart apache2
+fi
+
+# Corrige Vulnerabilidade 6: Remover cifras fracas
+if ! grep -q "SSLCipherSuite HIGH:!aNULL:!MD5:!RC4" /etc/apache2/mods-enabled/ssl.conf; then
+    echo "SSLCipherSuite HIGH:!aNULL:!MD5:!RC4" >> /etc/apache2/mods-enabled/ssl.conf
+    systemctl restart apache2
+fi
+
+# Corrige Vulnerabilidade 7: Desabilitar timestamps TCP
+echo "net.ipv4.tcp_timestamps = 0" >> /etc/sysctl.conf
+sysctl -p

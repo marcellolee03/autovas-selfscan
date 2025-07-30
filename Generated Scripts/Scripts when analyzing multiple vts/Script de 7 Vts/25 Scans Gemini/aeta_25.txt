@@ -1,0 +1,115 @@
+```bash
+#!/bin/bash
+
+# Vulnerability 1: Cleartext Transmission of Sensitive Information via HTTP
+# Mitigation: Redirect HTTP to HTTPS and enforce SSL/TLS
+
+# Install Apache if not already installed (common on many systems)
+if ! command -v apache2 &> /dev/null; then
+  apt-get update && apt-get install -y apache2
+fi
+
+# Enable SSL module
+a2enmod ssl
+
+# Create a virtual host configuration file for HTTPS (example: /etc/apache2/sites-available/default-ssl.conf)
+# Ensure the file contains the correct SSL certificate paths and configurations
+# Example content (adjust paths as needed):
+# <VirtualHost _default_:443>
+#   ServerName yourdomain.com
+#   DocumentRoot /var/www/html
+#   SSLEngine on
+#   SSLCertificateFile /etc/ssl/certs/yourdomain.com.crt
+#   SSLCertificateKeyFile /etc/ssl/private/yourdomain.com.key
+#   <FilesMatch "\.(cgi|shtml|phtml|php)$">
+#       SSLOptions +StdEnvVars
+#   </FilesMatch>
+#   <Directory /usr/lib/cgi-bin>
+#       SSLOptions +StdEnvVars
+#   </Directory>
+# </VirtualHost>
+
+# Enable the HTTPS virtual host
+# a2ensite default-ssl # Use this if you created a default-ssl.conf or similar
+# Adjust the a2ensite command to enable your specific HTTPS virtual host configuration file.
+
+# Create/Edit .htaccess file in DocumentRoot for HTTP to HTTPS redirection
+echo "RewriteEngine On" > /var/www/html/.htaccess
+echo "RewriteCond %{HTTPS} off" >> /var/www/html/.htaccess
+echo "RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]" >> /var/www/html/.htaccess
+
+# Restart Apache to apply changes
+systemctl restart apache2
+
+# Vulnerability 2: DNS Cache Snooping Vulnerability (UDP)
+# Mitigation: Disable recursion (if appropriate)
+
+# Check if bind9 is installed (common DNS server software)
+if command -v named &> /dev/null; then
+  # Edit the named.conf.options file
+  sed -i 's/recursion yes;/recursion no;/g' /etc/bind/named.conf.options
+
+  # Restart bind9
+  systemctl restart bind9
+fi
+
+# Vulnerability 3: ICMP Timestamp Reply Information Disclosure
+# Mitigation: Disable ICMP timestamp replies
+
+# Disable ICMP timestamp replies
+echo "net.ipv4.icmp_echo_ignore_all = 1" >> /etc/sysctl.conf
+sysctl -p
+
+# Vulnerability 4: SSL/TLS: Deprecated TLSv1.0 and TLSv1.1 Protocol Detection
+# Mitigation: Disable TLSv1.0 and TLSv1.1
+
+# Edit the SSL configuration file (example: /etc/ssl/openssl.cnf or /etc/apache2/conf-available/ssl-params.conf)
+# This depends on the server software being used. This example assumes Apache.
+
+SSL_CONFIG_FILE="/etc/apache2/conf-available/ssl-params.conf"
+
+if [ -f "$SSL_CONFIG_FILE" ]; then
+  # Disable TLSv1.0 and TLSv1.1, enable TLSv1.2 and TLSv1.3
+  sed -i 's/SSLProtocol All -SSLv3/SSLProtocol All -SSLv3 -TLSv1 -TLSv1.1/g' "$SSL_CONFIG_FILE"
+  systemctl restart apache2
+else
+  echo "Warning: SSL Configuration file not found: $SSL_CONFIG_FILE. Please manually disable TLSv1.0 and TLSv1.1."
+fi
+
+# Vulnerability 5: SSL/TLS: Renegotiation DoS Vulnerability (CVE-2011-1473, CVE-2011-5094)
+# Mitigation: Disable renegotiation (requires server-specific configuration)
+
+# This mitigation is highly server-dependent.  The following is an example for Apache.
+# Create a file (e.g., /etc/apache2/conf-available/disable-renegotiation.conf)
+# and add the following lines:
+# <Directory /var/www/html>
+#   SSLOptions -StdEnvVars -StrictRequire
+# </Directory>
+
+# a2enconf disable-renegotiation # Enable the configuration
+# systemctl restart apache2       # Restart Apache
+
+# The specific steps needed depend on the server software.
+
+# Vulnerability 6: SSL/TLS: Report Weak Cipher Suites
+# Mitigation: Disable weak cipher suites
+
+# Edit the SSL configuration file to use strong cipher suites
+if [ -f "$SSL_CONFIG_FILE" ]; then
+  # Example strong cipher suite list (adjust as needed)
+  STRONG_CIPHERS="EECDH+AESGCM:EDH+AESGCM:AES256+EECDH:AES256+EDH"
+  sed -i "s/SSLCipherSuite.*/SSLCipherSuite $STRONG_CIPHERS/g" "$SSL_CONFIG_FILE"
+  systemctl restart apache2
+else
+  echo "Warning: SSL Configuration file not found: $SSL_CONFIG_FILE. Please manually configure strong cipher suites."
+fi
+
+# Vulnerability 7: TCP Timestamps Information Disclosure
+# Mitigation: Disable TCP timestamps
+
+# Disable TCP timestamps
+echo "net.ipv4.tcp_timestamps = 0" >> /etc/sysctl.conf
+sysctl -p
+
+echo "Vulnerabilities mitigated. Please check the configuration files and restart services if necessary."
+```

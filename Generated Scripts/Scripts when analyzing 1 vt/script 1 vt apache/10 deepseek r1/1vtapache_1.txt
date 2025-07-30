@@ -1,0 +1,16 @@
+#!/bin/bash
+
+if [ "$EUID" -ne 0 ]; then
+    exec sudo "$0" "$@"
+fi
+
+if command -v apt-get &> /dev/null; then
+    export DEBIAN_FRONTEND=noninteractive
+    apt-get update
+    apt-get install --only-upgrade -y apache2
+elif command -v yum &> /dev/null; then
+    yum update -y httpd
+else
+    echo "Gerenciador de pacotes não suportado." >&2
+    exit 1
+fi

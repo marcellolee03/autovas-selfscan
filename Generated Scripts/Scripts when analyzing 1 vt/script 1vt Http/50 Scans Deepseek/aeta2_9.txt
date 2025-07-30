@@ -1,0 +1,19 @@
+#!/bin/bash
+SERVER_CONF="/etc/apache2/sites-available/000-default.conf"
+SSL_CONF="/etc/apache2/sites-available/default-ssl.conf"
+
+# Instalar o módulo SSL do Apache e gerar certificado autoassinado
+apt-get update && apt-get install -y apache2 openssl
+a2enmod ssl
+openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout /etc/ssl/private/apache-selfsigned.key -out /etc/ssl/certs/apache-selfsigned.crt -subj "/CN=localhost"
+
+# Configurar o site SSL
+sed -i 's/SSLCertificateFile\t\$.*/SSLCertificateFile\t\/etc\/ssl\/certs\/apache-selfsigned.crt/' $SSL_CONF
+sed -i 's/SSLCertificateKeyFile \$.*/SSLCertificateKeyFile \/etc\/ssl\/private\/apache-selfsigned.key/' $SSL_CONF
+a2ensite default-ssl
+
+# Redirecionar todo tráfego HTTP para HTTPS
+sed -i '/<VirtualHost \*:80>/a \\tRedirect permanent \/ https:\/\/localhost\/' $SERVER_CONF
+
+# Restart Apache to apply changes
+systemctl restart apache2

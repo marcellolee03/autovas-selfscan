@@ -1,0 +1,43 @@
+#!/bin/bash
+# Atualizar Proxmox Virtual Environment
+apt-get update
+apt-get install -y proxmox-ve
+
+# Atualizar jQuery para versão 1.9.0 ou superior
+jquery_paths=(
+    "/../js/jquery-1.8.3.min.js"
+    "/opscenter/webcommon/framework/../js/jquery-1.8.3.min.js"
+    "/framesets/../js/jquery-1.8.3.min.js"
+    "/frameset/../js/jquery-1.8.3.min.js"
+    "/console/framework/../js/jquery-1.8.3.min.js"
+)
+for path in "${jquery_paths[@]}"; do
+    wget -O "$path" https://code.jquery.com/jquery-3.6.0.min.js
+done
+
+# Configurar SSH para desativar algoritmos fracos
+ssh_config="/etc/ssh/sshd_config"
+sed -i 's/^HostKeyAlgorithms.*/HostKeyAlgorithms ecdsa-sha2-nistp256-cert-v01@openssh.com,ecdsa-sha2-nistp384-cert-v01@openssh.com,ecdsa-sha2-nistp521-cert-v01@openssh.com,ssh-ed25519-cert-v01@openssh.com,rsa-sha2-512-cert-v01@openssh.com,rsa-sha2-256-cert-v01@openssh.com,ssh-rsa-cert-v01@openssh.com,ecdsa-sha2-nistp256,ecdsa-sha2-nistp384,ecdsa-sha2-nistp521,ssh-ed25519,rsa-sha2-512,rsa-sha2-256,ssh-rsa/' "$ssh_config"
+sed -i 's/^KexAlgorithms.*/KexAlgorithms curve25519-sha256,curve25519-sha256@libssh.org,ecdh-sha2-nistp256,ecdh-sha2-nistp384,ecdh-sha2-nistp521,diffie-hellman-group-exchange-sha256,diffie-hellman-group16-sha512,diffie-hellman-group18-sha512,diffie-hellman-group14-sha256/' "$ssh_config"
+sed -i 's/^Ciphers.*/Ciphers chacha20-poly1305@openssh.com,aes256-gcm@openssh.com,aes128-gcm@openssh.com,aes256-ctr,aes192-ctr,aes128-ctr/' "$ssh_config"
+sed -i 's/^MACs.*/MACs hmac-sha2-512-etm@openssh.com,hmac-sha2-256-etm@openssh.com,hmac-sha2-512,hmac-sha2-256/' "$ssh_config"
+systemctl restart ssh
+
+# Desativar TLSv1.0 e TLSv1.1
+ssl_config="/etc/ssl/openssl.cnf"
+sed -i 's/^MinProtocol = TLSv1.0/MinProtocol = TLSv1.2/' "$ssl_config"
+sed -i 's/^CipherString = DEFAULT/CipherString = DEFAULT@SECLEVEL=2/' "$ssl_config"
+systemctl restart apache2
+
+# Desativar TCP Timestamps
+echo "net.ipv4.tcp_timestamps = 0" >> /etc/sysctl.conf
+sysctl -p
+
+# Bloquear ICMP Timestamp Requests
+iptables -A INPUT -p icmp --icmp-type timestamp-request -j DROP
+iptables -A OUTPUT -p icmp --icmp-type timestamp-reply -j DROP
+
+# Reiniciar serviços para aplicar as mudanças
+systemctl restart networking
+systemctl restart apache2
+systemctl restart ssh

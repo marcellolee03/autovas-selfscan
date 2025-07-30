@@ -1,0 +1,65 @@
+```sh
+#!/bin/bash
+
+# Variáveis para rastrear atualizações e erros
+updated=0
+errors=0
+
+# Função para atualizar o Python no Windows usando o Chocolatey
+update_python() {
+    local version="$1"
+    choco upgrade python --version "$version" -y
+    if [ $? -eq 0 ]; then
+        echo "Python atualizado para a versão $version com sucesso."
+        updated=$((updated+1))
+    else
+        echo "Falha ao atualizar o Python para a versão $version."
+        errors=$((errors+1))
+    fi
+}
+
+# Função para lidar com vulnerabilidades sem solução conhecida
+handle_no_solution() {
+    echo "Vulnerabilidade sem solução disponível. Considere desativar/remover o componente."
+}
+
+# Vulnerabilidade 1, 8, 10, 18, 21, 22, 32, 37, 40, 46, 50, 56, 57, 64 : Atualizar Python 3.10.12 para 3.10.16 (ou 3.10.14 quando especificado)
+echo "Atualizando Python 3.10.12..."
+update_python "3.10.16"
+
+# Vulnerabilidade 2, 3, 4, 5, 6, 7, 9, 11, 12, 13, 16, 17, 19, 20, 23, 24, 25, 26, 28, 29, 30, 31, 33, 34, 35, 38, 39, 41, 42, 43, 44, 45, 47, 48, 51, 52, 53, 55, 58, 60, 61, 63, 65: Atualizar Python 3.12.0 para 3.12.9 (ou 3.12.8/3.12.5/3.12.4/3.12.3/3.12.2/3.12.1 quando especificado)
+echo "Atualizando Python 3.12.0..."
+update_python "3.12.9"
+
+# Vulnerabilidade 14, 15, 27, 36: Sem solução para RecursionError e Security Bypass (<= 3.12.3)
+echo "Lidando com vulnerabilidades sem solução para RecursionError e Security Bypass (<= 3.12.3)..."
+handle_no_solution
+
+# Vulnerabilidade 49:  Substituir certificado SSL/TLS auto-assinado por um assinado por uma CA confiável
+echo "Substituindo certificado SSL/TLS auto-assinado..."
+echo "Ação manual necessária: Substitua o certificado 'localhost' por um certificado assinado por uma CA confiável."
+errors=$((errors+1))
+
+# Vulnerabilidade 54: Desativar TLSv1.0 e TLSv1.1
+echo "Desativando TLSv1.0 e TLSv1.1..."
+echo "Ação manual necessária: Desative TLSv1.0 e TLSv1.1 na configuração do servidor para o qual a porta 3389 está configurada."
+errors=$((errors+1))
+
+# Vulnerabilidade 59: Desabilitar algoritmos MAC fracos no SSH
+echo "Desabilitando algoritmos MAC fracos no SSH..."
+echo "Ação manual necessária: Edite o arquivo de configuração SSH (/etc/ssh/sshd_config) e remova os algoritmos MAC fracos (umac-64-etm@openssh.com, umac-64@openssh.com) da lista 'MACs'. Reinicie o serviço SSH após a modificação."
+errors=$((errors+1))
+
+# Vulnerabilidade 62: Desabilitar ICMP Timestamp Reply
+echo "Desabilitando ICMP Timestamp Reply..."
+echo "Ação manual necessária: A configuração para desabilitar ICMP Timestamp Reply depende do sistema operacional e firewall utilizado. Consulte a documentação específica do sistema."
+errors=$((errors+1))
+
+# Resultados
+echo "------------------------"
+echo "Relatório de Patching:"
+echo "Atualizações bem-sucedidas: $updated"
+echo "Erros/Ações manuais necessárias: $errors"
+
+exit 0
+```

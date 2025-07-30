@@ -1,0 +1,54 @@
+```bash
+#!/bin/bash
+
+# Verifica se o sistema é baseado em Debian/Ubuntu
+if command -v apt-get &> /dev/null; then
+  # Atualiza o índice de pacotes
+  apt-get update
+
+  # Tenta atualizar o PHP para a versão mais recente disponível
+  apt-get install --only-upgrade php5 php5-cgi php5-cli
+
+  # Verifica se a atualização foi bem-sucedida (opcional)
+  if dpkg -s php5 | grep -q "Version: 5\.[4-9]\.*\|Version: 5\.[5-9][0-9]\.*\|Version: [6-9]\.*"; then
+    echo "PHP atualizado com sucesso."
+  else
+    echo "Falha ao atualizar o PHP. Verifique se há erros e tente atualizar manualmente."
+  fi
+
+# Verifica se o sistema é baseado em CentOS/RHEL/Fedora
+elif command -v yum &> /dev/null; then
+  # Atualiza o índice de pacotes
+  yum update
+
+  # Tenta atualizar o PHP para a versão mais recente disponível
+  yum update php php-cli php-cgi
+
+  # Verifica se a atualização foi bem-sucedida (opcional)
+  php -v
+  #Analise manual da versão do php
+
+  # Exemplo de verificação (pode precisar ser ajustado dependendo da versão instalada)
+  #if php -v | grep -q "PHP 5\.[4-9]\.*\|PHP 5\.[5-9][0-9]\.*\|PHP [6-9]\.*"; then
+  #  echo "PHP atualizado com sucesso."
+  #else
+  #  echo "Falha ao atualizar o PHP. Verifique se há erros e tente atualizar manualmente."
+  #fi
+
+else
+  echo "Sistema operacional não suportado.  Atualize o PHP manualmente."
+  exit 1
+fi
+
+# Reinicia o serviço web para aplicar as alterações (adapte para o seu servidor web)
+if command -v systemctl &> /dev/null; then
+  systemctl restart apache2  # Para Apache em sistemas com systemd
+elif command -v service &> /dev/null; then
+  service apache2 restart  # Para Apache em sistemas com service
+  service httpd restart  #Para httpd em sistemas com service
+else
+  echo "Reinicie o servidor web manualmente para aplicar as atualizações."
+fi
+
+exit 0
+```

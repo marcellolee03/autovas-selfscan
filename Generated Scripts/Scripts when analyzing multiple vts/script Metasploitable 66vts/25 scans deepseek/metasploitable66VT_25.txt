@@ -1,0 +1,45 @@
+#!/bin/bash
+# Atualiza o sistema operacional
+sudo apt update && sudo apt upgrade -y
+
+# Desabilita serviços inseguros
+sudo systemctl stop rlogin
+sudo systemctl disable rlogin
+sudo systemctl stop rsh
+sudo systemctl disable rsh
+sudo systemctl stop rexec
+sudo systemctl disable rexec
+
+# Instala e configura o SSH
+sudo apt install openssh-server -y
+sudo systemctl enable ssh
+sudo systemctl start ssh
+
+# Atualiza o Apache Tomcat para a versão mais recente
+sudo apt install tomcat9 -y
+sudo systemctl restart tomcat9
+
+# Altera senhas padrão do MySQL e PostgreSQL
+sudo mysql -e "ALTER USER 'root'@'localhost' IDENTIFIED BY 'NovaSenhaSegura123!';"
+sudo -u postgres psql -c "ALTER USER postgres WITH PASSWORD 'NovaSenhaSegura123!';"
+
+# Desabilita o VNC
+sudo systemctl stop vncserver
+sudo systemctl disable vncserver
+
+# Configura firewall para bloquear portas inseguras
+sudo ufw default deny incoming
+sudo ufw default allow outgoing
+sudo ufw allow ssh
+sudo ufw allow http
+sudo ufw allow https
+sudo ufw enable
+
+# Remove arquivos e diretórios inseguros
+sudo rm -rf /doc
+sudo rm -rf /usr/share/phpMyAdmin/test
+
+# Reinicia os serviços para aplicar as mudanças
+sudo systemctl restart apache2
+sudo systemctl restart mysql
+sudo systemctl restart postgresql

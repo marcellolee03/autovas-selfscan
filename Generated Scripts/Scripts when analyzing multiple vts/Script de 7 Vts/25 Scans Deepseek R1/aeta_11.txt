@@ -1,0 +1,54 @@
+#!/bin/bash
+
+# Correção Vulnerabilidade 1: Forçar HTTPS para tráfego sensível (Apache)
+apache_conf="/etc/apache2/sites-available/000-default.conf"
+ssl_conf="/etc/apache2/sites-available/default-ssl.conf"
+
+if [ -f "$apache_conf" ]; then
+  sed -i '/<VirtualHost \*:80>/,/<\/VirtualHost>/ {
+    /<VirtualHost \*:80>/a\ \tRewriteEngine On\n\tRewriteCond %{REQUEST_URI} ^/(login|auth|secure) [NC,OR]\n\tRewriteCond %{QUERY_STRING} (user|pass|auth) [NC]\n\tRewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+  }' "$apache_conf"
+fi
+
+# Correção Vulnerabilidade 2: Prevenção de DNS Cache Snooping (BIND9)
+bind_conf="/etc/bind/named.conf.options"
+if [ -f "$bind_conf" ]; then
+  sed -i '/options {/a \
+\tallow-recursion { localhost; localnets; }; \
+\trecursion yes; \
+\tallow-query-cache { localhost; localnets; };' "$bind_conf"
+fi
+
+# Correção Vulnerabilidade 3: Desativar respostas ICMP Timestamp
+sysctl_conf="/etc/sysctl.conf"
+echo "net.ipv4.icmp_echo_ignore_broadcasts = 1" >> "$sysctl_conf"
+echo "net.ipv4.icmp_timestamps = 0" >> "$sysctl_conf"
+
+# Correção Vulnerabilidade 4 e 5: Configurar TLS seguro no Apache
+if [ -f "$ssl_conf" ]; then
+  sed -i '/SSLEngine On/a \
+\tSSLProtocol all -TLSv1 -TLSv1.1 \
+\tSSLHonorCipherOrder on \
+\tSSLCipherSuite "EECDH+ECDSA+AESGCM:EECDH+aRSA+AESGCM:EECDH+ECDSA+SHA384:EECDH+ECDSA+SHA256:EDH+aRSA:!aNULL:!eNULL:!MEDIUM:!LOW:!3DES:!MD5:!EXP:!PSK:!SRP:!DSS:!RC4" \
+\tSSLCompression off \
+\tSSLSessionTickets off' "$ssl_conf"
+fi
+
+# Correção Vulnerabilidade 6: Desativar cifras fracas (Apache)
+if [ -f "$ssl_conf" ]; then
+  sed -i '/SSLCipherSuite/s/.*/\tSSLCipherSuite "EECDH+ECDSA+AESGCM:EECDH+aRSA+AESGCM:EECDH+ECDSA+SHA384:EECDH+ECDSA+SHA256:EDH+aRSA:!aNULL:!eNULL:!MEDIUM:!LOW:!3DES:!MD5:!EXP:!PSK:!SRP:!DSS:!RC4"/' "$ssl_conf"
+fi
+
+# Correção Vulnerabilidade 7: Desativar TCP Timestamps
+echo "net.ipv4.tcp_timestamps = 0" >> "$sysctl_conf"
+
+# Aplicar configurações de sysctl
+sysctl -p &> /dev/null
+
+# Reiniciar serviços se aplicável
+if [ -f "$apache_conf" ]; then
+  systemctl restart apache2 &> /dev/null
+fi
+if [ -f "$bind_conf" ]; then
+  systemctl restart bind9 &> /dev/null
+fi

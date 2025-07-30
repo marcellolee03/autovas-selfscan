@@ -1,0 +1,103 @@
+#!/usr/bin/env bash
+
+# Detectar se o servidor é Apache ou Nginx
+if [[ -d /etc/apache2 ]]; then
+    readonly web_server="apache"
+elif [[ -d /etc/nginx ]]; then
+    readonly web_server="nginx"
+else
+    echo "Servidor web não identificado (apenas Apache/Nginx suportados)" >&2
+    exit 1
+fi
+
+# Criar diretório de backups
+readonly backup_dir="/tmp/conf_backup_$(date +%s)"
+mkdir -p "$backup_dir"
+
+# Caso Apache
+if [[ "$web_server" == "apache" ]]; then
+    # Verificar e habilitar módulos necessários
+    a2enmod ssl rewrite headers --quiet 2>/dev/null
+    
+    # Backup dos arquivos de configuração
+    cp -a /etc/apache2/sites-available/ "$backup_dir/apache_sites"
+    cp -a /etc/apache2/conf-enabled/ "$backup_dir/apache_conf"
+    
+    # Criar virtualhost de redirecionamento HTTPS
+    cat <<'APACHE_REDIRECT' > /etc/apache2/sites-available/000-redirect.conf
+<VirtualHost *:80>
+    RewriteEngine On
+    RewriteCond %{HTTPS} !=on
+    RewriteRule ^(.*)$ https://%{SERVER_NAME}$1 [R=301,L]
+</VirtualHost>
+APACHE_REDIRECT
+    
+    # Habilitar virtualhost de redirecionamento
+    a2ensite 000-redirect.conf --quiet
+    
+    # Adicionar HTTP Strict Transport Security (HSTS)
+    echo '<IfModule mod_headers.c>
+    Header always set Strict-Transport-Security "max-age=31536000; includeSubDomains"
+</IfModule>' > /etc/apache2/conf-available/hsts.conf
+    a2enconf hsts.conf --quiet
+    
+    # Reiniciar Apache
+    systemctl reload apache2.service
+
+# Caso Nginx
+else
+    # Configurações padrão
+    [[ -f /etc/nginx/sites-available/default ]] && mv /etc/nginx/sites-available/default "$backup_dir"
+    
+    # Novo arquivo de configuração com SSL enforcement
+    cat <<'NGINX_CONFIG' > /etc/nginx/sites-available/default
+server {
+    listen 80;
+    listen [::]:80;
+    server_name _;
+    return 301 https://$host$request_uri;
+}
+
+server {
+    listen 443 ssl;
+    listen [::]:443 ssl;
+    ssl_certificate /etc/ssl/certs/nginx-selfsigned.crt;
+    ssl_certificate_key /etc/ssl/private/nginx-selfsigned.key;
+    
+    # Configuração global para campos de senha
+    if ($request_uri ~* "/login|/auth") {
+        set $password_forms 1;
+    }
+    
+    if ($request_method = POST) {
+        set $password_forms "${password_forms}1";
+    }
+    
+    # Bloqueia POST não-HTTPS em formulários sensíveis
+    if ($password_forms = 11) {
+        return 403;
+    }
+    
+    add_header Strict-Transport-Security "max-age=31536000; includeSubDomains" always;
+    
+    # Configurações básicas do site
+    root /var/www/html;
+    index index.html index.htm;
+    
+    location / {
+        try_files $uri $uri/ =404;
+    }
+}
+NGINX_CONFIG
+    
+    # Gerar certificado autoassinado se necessário
+    if [[ ! -f /etc/ssl/certs/nginx-selfsigned.crt ]]; then
+        openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
+        -keyout /etc/ssl/private/nginx-selfsigned.key \
+        -out /etc/ssl/certs/nginx-selfsigned.crt \
+        -subj "/CN=localhost" 2>/dev/null
+    fi
+    
+    # Reiniciar Nginx
+    systemctl reload nginx.service
+fi

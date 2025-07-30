@@ -1,0 +1,66 @@
+```bash
+#!/bin/bash
+
+# Este script tem como objetivo mitigar a vulnerabilidade de transmissão de informações sensíveis em texto claro via HTTP,
+# redirecionando o tráfego HTTP para HTTPS.  Ele assume que um servidor web (Apache ou Nginx) está instalado e configurado.
+# Ajuste as configurações conforme necessário para o seu ambiente específico.
+
+# Variáveis
+HTTP_PORT=80
+HTTPS_PORT=443
+WEB_SERVER=$(ps -ef | grep -E 'apache2|nginx' | grep -v grep | awk '{print $8}')
+
+# Funções
+
+redirect_http_to_https_apache() {
+  # Cria um arquivo de configuração virtualhost para redirecionar HTTP para HTTPS
+  echo "<VirtualHost *:${HTTP_PORT}>
+    ServerName \$(hostname)
+    Redirect permanent / https://\$(hostname)/
+  </VirtualHost>" > /etc/apache2/sites-available/http_redirect.conf
+
+  # Habilita o site
+  a2ensite http_redirect.conf
+
+  # Desabilita o site padrão (se existir) para evitar conflitos
+  a2dissite 000-default.conf 2>/dev/null
+
+  # Reinicia o Apache
+  systemctl restart apache2
+}
+
+redirect_http_to_https_nginx() {
+  # Cria um arquivo de configuração para redirecionar HTTP para HTTPS
+  echo "server {
+    listen ${HTTP_PORT};
+    server_name \$(hostname);
+    return 301 https://\$host\$request_uri;
+  }" > /etc/nginx/conf.d/http_redirect.conf
+
+  # Reinicia o Nginx
+  systemctl restart nginx
+}
+
+# Lógica principal
+
+if [[ "$WEB_SERVER" == *"apache2"* ]]; then
+  echo "Servidor web detectado: Apache"
+  # Verifica se o mod_rewrite está habilitado
+  if ! apache2ctl -M | grep -q rewrite_module; then
+    echo "Habilitando mod_rewrite..."
+    a2enmod rewrite
+  fi
+
+  redirect_http_to_https_apache
+elif [[ "$WEB_SERVER" == *"nginx"* ]]; then
+  echo "Servidor web detectado: Nginx"
+  redirect_http_to_https_nginx
+else
+  echo "Nenhum servidor web (Apache ou Nginx) detectado.  Por favor, configure o redirecionamento manualmente."
+  exit 1
+fi
+
+echo "Redirecionamento de HTTP para HTTPS configurado.  Por favor, teste a configuração."
+
+exit 0
+```

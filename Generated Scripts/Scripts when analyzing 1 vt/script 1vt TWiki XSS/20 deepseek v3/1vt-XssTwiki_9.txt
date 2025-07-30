@@ -1,0 +1,35 @@
+#!/bin/bash
+TWIKI_DIR="/var/www/twiki"
+BACKUP_DIR="/var/www/twiki_backup"
+TWIKI_URL="https://github.com/TWikiOrg/twiki/archive/refs/tags/TWikiRelease4p2p4.tar.gz"
+TWIKI_ARCHIVE="TWikiRelease4p2p4.tar.gz"
+
+# Backup do diretório TWiki atual
+if [ -d "$TWIKI_DIR" ]; then
+  mkdir -p "$BACKUP_DIR"
+  cp -r "$TWIKI_DIR" "$BACKUP_DIR"
+  echo "Backup realizado em $BACKUP_DIR"
+else
+  echo "Diretório TWiki não encontrado em $TWIKI_DIR"
+  exit 1
+fi
+
+# Baixar e extrair a versão corrigida do TWiki
+wget "$TWIKI_URL" -O "$TWIKI_ARCHIVE"
+if [ $? -eq 0 ]; then
+  tar -xzf "$TWIKI_ARCHIVE" -C /var/www/
+  mv "/var/www/twiki-TWikiRelease4p2p4" "$TWIKI_DIR"
+  rm "$TWIKI_ARCHIVE"
+  echo "TWiki atualizado para a versão 4.2.4"
+else
+  echo "Falha ao baixar a versão corrigida do TWiki"
+  exit 1
+fi
+
+# Configurar permissões
+chown -R www-data:www-data "$TWIKI_DIR"
+chmod -R 755 "$TWIKI_DIR"
+
+# Reiniciar o servidor web para aplicar as mudanças
+systemctl restart apache2
+echo "Servidor web reiniciado"

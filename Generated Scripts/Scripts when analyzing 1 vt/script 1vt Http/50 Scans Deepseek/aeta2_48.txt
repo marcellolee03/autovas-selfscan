@@ -1,0 +1,8 @@
+#!/bin/bash
+if ! command -v certbot &> /dev/null; then
+    apt-get update
+    apt-get install -y certbot python3-certbot-nginx
+fi
+certbot --nginx --non-interactive --agree-tos --email admin@example.com --domains $(hostname -f)
+sed -i 's/listen 80 default_server;/listen 80 default_server;\n    return 301 https:\/\/$host$request_uri;/' /etc/nginx/sites-available/default
+systemctl restart nginx

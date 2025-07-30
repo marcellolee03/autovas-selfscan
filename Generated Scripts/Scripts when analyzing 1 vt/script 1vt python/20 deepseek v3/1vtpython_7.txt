@@ -1,0 +1,4 @@
+#!/bin/bash
+sudo apt-get update
+sudo apt-get install --only-upgrade python3.10=3.10.15-1+b1
+sudo systemctl restart python3.10

@@ -1,0 +1,33 @@
+#!/bin/bash
+if [[ $EUID -ne 0 ]]; then
+   echo "This script must be run as root" 
+   exit 1
+fi
+
+# Disable HTTP and enforce HTTPS
+sed -i 's/^Listen 80$/Listen 80\nRewriteEngine On\nRewriteCond %{HTTPS} off\nRewriteRule ^ https:\/\/%{HTTP_HOST}%{REQUEST_URI} [L,R=301]/' /etc/apache2/ports.conf
+systemctl restart apache2
+
+# Disable DNS recursion
+sed -i 's/^recursion yes$/recursion no/' /etc/named.conf
+systemctl restart named
+
+# Disable ICMP timestamp
+echo "net.ipv4.icmp_echo_ignore_all = 1" >> /etc/sysctl.conf
+sysctl -p
+
+# Disable TLS 1.0 and 1.1
+sed -i 's/^SSLProtocol all -SSLv3$/SSLProtocol all -SSLv3 -TLSv1 -TLSv1.1/' /etc/apache2/mods-enabled/ssl.conf
+systemctl restart apache2
+
+# Disable SSL/TLS renegotiation
+sed -i 's/^SSLHonorCipherOrder On$/SSLHonorCipherOrder On\nSSLInsecureRenegotiation off/' /etc/apache2/mods-enabled/ssl.conf
+systemctl restart apache2
+
+# Disable weak cipher suites
+sed -i 's/^SSLCipherSuite HIGH:!aNULL$/SSLCipherSuite HIGH:!aNULL:!MD5:!RC4:!DES/' /etc/apache2/mods-enabled/ssl.conf
+systemctl restart apache2
+
+# Disable TCP timestamps
+echo "net.ipv4.tcp_timestamps = 0" >> /etc/sysctl.conf
+sysctl -p

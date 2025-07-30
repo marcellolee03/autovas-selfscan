@@ -1,0 +1,20 @@
+#!/bin/bash
+
+# Desabilita o serviço rexec
+systemctl stop rexec.socket
+systemctl disable rexec.socket
+
+# Remove o pacote rexec (se instalado)
+apt-get remove --purge -y rsh-server rsh-client rexecd
+yum remove -y rsh rsh-server
+
+# Garante que as alterações tenham efeito imediato
+systemctl daemon-reload
+
+# Remove entradas do xinetd (se aplicável)
+if [ -f /etc/xinetd.d/rexec ]; then
+  rm -f /etc/xinetd.d/rexec
+  systemctl restart xinetd
+fi
+
+echo "Serviço rexec desabilitado e removido (se instalado). Utilize SSH para acesso remoto seguro."

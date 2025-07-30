@@ -1,0 +1,49 @@
+#!/bin/bash
+
+# Script para corrigir a vulnerabilidade CVE-2012-0053 no Apache HTTP Server
+
+# Verificar se o Apache está instalado
+if ! command -v apache2 &> /dev/null; then
+  echo "Apache HTTP Server não está instalado. Nada a fazer."
+  exit 0
+fi
+
+# Verificar a versão do Apache
+apache_version=$ (apache2 -v 2>&1 | grep "Server version:" | awk '{print $3}' | cut -d '/' -f1)
+
+# Função para comparar versões (adaptada para lidar com versões como 2.2.8)
+version_gt() {
+  test "$(printf '%s\n' "$1" "$2" | sort -V | head -n 1)" != "$1"
+}
+
+# Verificar se a versão é vulnerável (inferior a 2.2.22)
+if version_gt "2.2.22" "$apache_version"; then
+  echo "A versão do Apache HTTP Server ($apache_version) é vulnerável (CVE-2012-0053)."
+
+  # Atualizar o sistema e o Apache
+  echo "Atualizando o sistema e o Apache HTTP Server..."
+  apt-get update
+  apt-get upgrade -y apache2
+
+  # Verificar a nova versão após a atualização
+  new_apache_version=$ (apache2 -v 2>&1 | grep "Server version:" | awk '{print $3}' | cut -d '/' -f1)
+
+  # Verificar se a atualização foi bem-sucedida
+  if version_gt "2.2.22" "$new_apache_version"; then
+    echo "Apache HTTP Server atualizado para a versão $new_apache_version."
+    echo "Vulnerabilidade CVE-2012-0053 corrigida."
+  else
+    echo "A atualização do Apache HTTP Server falhou. A vulnerabilidade pode não ter sido corrigida."
+    exit 1
+  fi
+
+  # Reiniciar o Apache para aplicar as alterações
+  echo "Reiniciando o Apache HTTP Server..."
+  systemctl restart apache2
+
+  echo "Script de correção concluído."
+else
+  echo "A versão do Apache HTTP Server ($apache_version) não é vulnerável (CVE-2012-0053)."
+fi
+
+exit 0

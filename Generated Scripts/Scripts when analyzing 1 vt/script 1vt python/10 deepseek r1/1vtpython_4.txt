@@ -1,0 +1,19 @@
+```powershell
+$ErrorActionPreference = "Stop"
+$pythonCheck = @('python', 'py') | ForEach-Object {
+    try { 
+        $version = (& $_ --version 2>&1 | Out-String).Trim() 
+        if ($version -match 'Python (\d+\.\d+\.\d+)') { return $matches[1] }
+    } catch {}
+}
+$targetVersion = [System.Version]"3.10.15"
+if ($pythonCheck -and ($v = [System.Version]($pythonCheck -split '-' | Select-Object -First 1)) -and $v.Major -eq 3 -and $v.Minor -eq 10 -and $v.Build -lt 15) {
+    $is64Bit = [System.Environment]::Is64BitOperatingSystem
+    $installerURL = if ($is64Bit) { 'https://www.python.org/ftp/python/3.10.15/python-3.10.15-amd64.exe' } else { 'https://www.python.org/ftp/python/3.10.15/python-3.10.15.exe' }
+    $installerPath = Join-Path $env:TEMP "python-$targetVersion-installer.exe"
+    Invoke-WebRequest -Uri $installerURL -OutFile $installerPath
+    $installArgs = @('/quiet', 'InstallAllUsers=1', 'PrependPath=1', 'IncludeTests=0', 'CompileAll=1')
+    Start-Process -FilePath $installerPath -ArgumentList $installArgs -Wait -NoNewWindow
+    Remove-Item -Path $installerPath -Force
+}
+```

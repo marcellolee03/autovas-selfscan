@@ -1,0 +1,75 @@
+#!/bin/bash
+
+# Verifica se o script está sendo executado como root
+if [[ $EUID -ne 0 ]]; then
+    echo "Este script deve ser executado como root." >&2
+    exit 1
+fi
+
+# Verifica se o Apache está ativo
+apache_active=false
+if systemctl is-active --quiet apache2; then
+    apache_active=true
+fi
+
+# Verifica se o Nginx está ativo
+nginx_active=false
+if systemctl is-active --quiet nginx; then
+    nginx_active=true
+fi
+
+# Processa configuração do Apache se estiver ativo
+if $apache_active; then
+    a2enmod rewrite &>/dev/null
+    file_path="/etc/apache2/sites-available/000-default.conf"
+    
+    # Localiza arquivo de configuração principal se o padrão não existir
+    if [[ ! -f $file_path ]]; then
+        alt_file="$(grep -rE "<VirtualHost.*:80>" /etc/apache2/sites-enabled/ 2>/dev/null | head -1 | cut -d: -f1)"
+        [[ -n $alt_file ]] && file_path="$alt_file"
+    fi
+    
+    if [[ -f $file_path ]]; then
+        cp "$file_path" "${file_path}.bak"
+        # Insere regras de rewite se não existirem
+        if ! grep -q "RewriteRule.*https" "$file_path"; then
+            gawk '
+            /<VirtualHost.*:80>/ {
+                print $0
+                print "\tRewriteEngine On"
+                print "\tRewriteCond %{HTTPS} off"
+                print "\tRewriteRule (.*) https://%{HTTP_HOST}%{REQUEST_URI} [R=301,L]"
+                inserted=1
+                next
+            }
+            1' "$file_path" > "${file_path}.tmp" && mv "${file_path}.tmp" "$file_path"
+        fi
+        systemctl restart apache2
+    fi
+fi
+
+# Processa configuração do Nginx se estiver ativo
+if $nginx_active; then
+    file_path="/etc/nginx/sites-enabled/default"
+    [[ ! -f $file_path ]] && file_path="$(grep -rlF "listen 80" /etc/nginx/sites-enabled/ | head -1)"
+    
+    if [[ -f $file_path ]]; then
+        cp "$file_path" "${file_path}.bak"
+        # Adiciona redirecionamento padrão se não existir
+        if ! grep -q "return 301 https" "$file_path"; then
+            gawk '
+            /listen 80;/ && !processed {
+                sub(/listen 80;/, "&\n    return 301 https://$host$request_uri;")
+                processed=1
+            }
+            1' "$file_path" > "${file_path}.tmp" && mv "${file_path}.tmp" "$file_path"
+        fi
+        nginx -t &>/dev/null && systemctl reload nginx
+    fi
+fi
+
+# Sai com erro se nenhum servidor web ativo for detectado
+if ! $apache_active && ! $nginx_active; then
+    echo "Nenhum servidor web (Apache/Nginx) ativo detectado." >&2
+    exit 1
+fi

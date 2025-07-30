@@ -1,0 +1,109 @@
+#!/bin/bash
+
+# Ensure script runs with root privileges
+if [ "$(id -u)" != "0" ]; then
+    echo "Este script deve ser executado como root." >&2
+    exit 1
+fi
+
+# Disable and remove insecure services
+declare -a remove_packages=(
+    "rsh-server" "rlogin" "rsh-client" "rexecd"
+    "telnetd" "vnc-server" "tightvncserver"
+    "distcc" "openbsd-inetd" "vsftpd"
+    "twiki"
+)
+declare -a insecure_services=(
+    "rlogin" "rsh" "rexec" "telnet"
+    "distcc" "vncserver" "vsftpd" "twiki"
+)
+
+for service in "${insecure_services[@]}"; do
+    systemctl stop "$service" &>/dev/null
+    systemctl disable "$service" &>/dev/null
+    killall -9 "$service" &>/dev/null
+done
+
+apt-get purge -y "${remove_packages[@]}" &>/dev/null
+
+# Block vulnerable ports using iptables
+declare -a blocked_ports=(21 23 513 514 512 8787 1524 3632 5900 6200)
+for port in "${blocked_ports[@]}"; do
+    iptables -A INPUT -p tcp --dport $port -j DROP
+    iptables -A INPUT -p udp --dport $port -j DROP
+done
+
+# Secure SSHD configuration
+sed -i 's/^#Port 22/Port 2222/' /etc/ssh/sshd_config
+sed -i 's/^PermitRootLogin yes/PermitRootLogin prohibit-password/' /etc/ssh/sshd_config
+echo -e "HostKeyAlgorithms ssh-rsa-sha2-256,ssh-rsa-sha2-512\nKexAlgorithms curve25519-sha256@libssh.org,diffie-hellman-group-exchange-sha256\nCiphers aes256-gcm@openssh.com\nMACs hmac-sha2-512" >> /etc/ssh/sshd_config
+systemctl reload sshd
+
+# Adjust kernel parameters
+echo 0 > /proc/sys/net/ipv4/tcp_timestamps
+echo "net.ipv4.tcp_timestamps = 0" >> /etc/sysctl.conf
+sysctl -p
+
+# Secure FTP services
+sed -i 's/anonymous_enable=.*/anonymous_enable=NO/g' /etc/vsftpd*.conf 2>/dev/null
+sed -i 's/local_enable=.*/local_enable=YES/g' /etc/vsftpd*.conf 2>/dev/null
+sed -i 's/ssl_enable=.*/ssl_enable=YES/g' /etc/vsftpd*.conf 2>/dev/null
+
+# Secure MySQL/MariaDB
+mysql -e "ALTER USER 'root'@'localhost' IDENTIFIED BY 'StrongPassword';"
+mysql -e "DELETE FROM mysql.user WHERE user='';"
+mysql -e "DROP DATABASE test;"
+mysql -e "FLUSH PRIVILEGES;"
+
+# Secure PostgreSQL
+sudo -u postgres psql -c "ALTER USER postgres WITH PASSWORD 'StrongPassword';"
+
+# Disable insecure HTTP methods
+cat > /etc/apache2/mods-enabled/actions.conf <<EOF
+<LimitExcept GET POST HEAD>
+    Deny from all
+</LimitExcept>
+EOF
+
+# Disable SSLv2/SSLv3 and weak algorithms
+sed -i 's/SSLProtocol.*/SSLProtocol all -SSLv2 -SSLv3 -TLSv1 -TLSv1.1/g' /etc/apache2/mods-enabled/ssl.conf
+sed -i 's/SSLCipherSuite.*/SSLCipherSuite HIGH:!aNULL:!MD5:!3DES/g' /etc/apache2/mods-enabled/ssl.conf
+
+# Remove backdoor processes
+backdoor_pid=$(lsof -ti :1524 2>/dev/null)
+if [ -n "$backdoor_pid" ]; then
+    kill -9 $backdoor_pid
+    rm -f /usr/sbin/ingreslock
+fi
+
+# Patch Ghostcat vulnerability
+sed -i 's/Connector port="8009"/<!-- Connector port="8009" /g' /etc/tomcat*/server.xml
+pkill -f tomcat
+
+# Disable dRuby/DRb vulnerability
+find /etc -name '*drb*' -exec sed -i "s/DRb.start_service/DRb.start_service(:security_level => 3)/g" {} +
+
+# Clean PHP vulnerabilities
+find /var/www -name phpinfo.php -delete
+phar=$(find /etc -name php.ini)
+sed -i 's/expose_php=.*/expose_php=Off/' "$phar"
+sed -i 's/allow_url_include=.*/allow_url_include=Off/' "$phar"
+
+# Disable directory browsing
+echo "Options -Indexes" > /var/www/.htaccess
+
+# Prevent cleartext logins (SSH fallback on non-standard port)
+iptables -t nat -A PREROUTING -p tcp --dport 22 -j REDIRECT --to-port 2222
+
+# Configure mail server for VRFY/EXPN
+postfix_cfg=/etc/postfix/main.cf
+[ -f "$postfix_cfg" ] && echo "disable_vrfy_command = yes" >> "$postfix_cfg"
+
+# Apply all changes
+service apache2 restart
+service postfix restart
+service mysql restart
+service postgresql restart
+systemctl restart sshd
+
+echo "Alteracoes concluidas. Recorde-se de atualizar permanentemente seu sistema para uma versão suportada."

@@ -1,0 +1,62 @@
+#!/bin/bash
+# Atualizar o Python para versões seguras
+update_python() {
+    # Verificar a versão atual do Python
+    PYTHON_VERSION=$(python3 --version 2>&1 | awk '{print $2}')
+    echo "Versão atual do Python: $PYTHON_VERSION"
+
+    # Definir as versões fixas para cada série
+    declare -A FIXED_VERSIONS
+    FIXED_VERSIONS["3.8"]="3.8.20"
+    FIXED_VERSIONS["3.9"]="3.9.20"
+    FIXED_VERSIONS["3.10"]="3.10.15"
+    FIXED_VERSIONS["3.11"]="3.11.10"
+    FIXED_VERSIONS["3.12"]="3.12.6"
+
+    # Extrair a série da versão atual
+    MAJOR_MINOR=$(echo $PYTHON_VERSION | cut -d. -f1-2)
+
+    # Verificar se a versão atual é vulnerável
+    if [[ -n "${FIXED_VERSIONS[$MAJOR_MINOR]}" ]]; then
+        FIXED_VERSION=${FIXED_VERSIONS[$MAJOR_MINOR]}
+        if [[ "$PYTHON_VERSION" < "$FIXED_VERSION" ]]; then
+            echo "Atualizando Python para a versão fixa $FIXED_VERSION"
+            sudo apt-get update
+            sudo apt-get install --only-upgrade python$MAJOR_MINOR
+        else
+            echo "A versão do Python já está atualizada."
+        fi
+    else
+        echo "Versão do Python não suportada para atualização automática."
+    fi
+}
+
+# Verificar se o sistema usa TLSv1.0 ou TLSv1.1
+disable_old_tls() {
+    if grep -q "TLSv1.0" /etc/ssl/openssl.cnf || grep -q "TLSv1.1" /etc/ssl/openssl.cnf; then
+        echo "Desabilitando TLSv1.0 e TLSv1.1"
+        sudo sed -i '/TLSv1.0/d' /etc/ssl/openssl.cnf
+        sudo sed -i '/TLSv1.1/d' /etc/ssl/openssl.cnf
+        sudo systemctl restart apache2
+    else
+        echo "TLSv1.0 e TLSv1.1 já estão desabilitados."
+    fi
+}
+
+# Verificar e trocar o certificado SSL
+replace_ssl_certificate() {
+    CERT_PATH="/etc/ssl/certs/ssl-cert-snakeoil.pem"
+    KEY_PATH="/etc/ssl/private/ssl-cert-snakeoil.key"
+    if [[ -f "$CERT_PATH" && -f "$KEY_PATH" ]]; then
+        echo "Substituindo o certificado SSL"
+        sudo openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout "$KEY_PATH" -out "$CERT_PATH" -subj "/CN=localhost"
+        sudo systemctl restart apache2
+    else
+        echo "Certificado SSL não encontrado."
+    fi
+}
+
+# Executar as funções
+update_python
+disable_old_tls
+replace_ssl_certificate

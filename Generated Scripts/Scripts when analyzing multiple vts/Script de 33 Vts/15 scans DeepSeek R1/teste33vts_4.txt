@@ -1,0 +1,46 @@
+#!/bin/bash
+
+# Fix Proxmox EOL upgrade
+if grep -q "proxmox" /etc/issue; then
+    cp /etc/apt/sources.list /etc/apt/sources.list.bak
+    sed -i 's/bullseye/bookworm/g' /etc/apt/sources.list
+    echo "deb http://download.proxmox.com/debian/pve bookworm pve-no-subscription" > /etc/apt/sources.list.d/pve-no-subscription.list
+    apt update
+    DEBIAN_FRONTEND=noninteractive apt full-upgrade -yq
+fi
+
+# Download updated jQuery
+TMP_JS=$(mktemp)
+wget -qO "$TMP_JS" https://code.jquery.com/jquery-3.6.4.min.js
+
+# Replace vulnerable jQuery files
+find /var/www /usr/share -type f -name 'jquery-1.8.3.min.js' -print0 | while IFS= read -r -d $'\0' file; do
+    cp "$TMP_JS" "$file"
+done
+rm "$TMP_JS"
+
+# Configure secure SSH settings
+SSHD_CONFIG="/etc/ssh/sshd_config"
+cp "$SSHD_CONFIG" "${SSHD_CONFIG}.bak"
+sed -i '/^KexAlgorithms/d; /^Ciphers/d; /^MACs/d; /^HostKeyAlgorithms/d; /^HostKey/d' "$SSHD_CONFIG"
+
+echo -e "KexAlgorithms curve25519-sha256@libssh.org,diffie-hellman-group-exchange-sha256
+Ciphers chacha20-poly1305@openssh.com,aes256-gcm@openssh.com,aes128-gcm@openssh.com
+MACs hmac-sha2-512-etm@openssh.com,hmac-sha2-256-etm@openssh.com
+HostKeyAlgorithms ssh-ed25519,rsa-sha2-512,rsa-sha2-256" >> "$SSHD_CONFIG"
+
+# Disable Telnet service
+systemctl stop telnet.socket 2>/dev/null
+systemctl disable telnet.socket 2>/dev/null
+apt purge -y telnetd 2>/dev/null
+
+# Configure firewall rules for ICMP
+iptables -A INPUT -p icmp --icmp-type timestamp-request -j DROP
+iptables -A OUTPUT -p icmp --icmp-type timestamp-reply -j DROP
+
+# Apply TCP hardening
+echo -e "net.ipv4.tcp_timestamps = 0" >> /etc/sysctl.conf
+sysctl -p
+
+# Restart services
+systemctl restart sshd.service

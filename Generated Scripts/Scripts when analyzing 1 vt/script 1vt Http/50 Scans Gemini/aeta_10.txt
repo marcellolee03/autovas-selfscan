@@ -1,0 +1,114 @@
+```bash
+#!/bin/bash
+
+# Este script corrige a vulnerabilidade de transmissão de informações sensíveis em texto claro via HTTP.
+# Ele configura o redirecionamento de HTTP para HTTPS e habilita o HTTPS no servidor web Apache.
+
+# Variáveis
+WEB_SERVER="apache2" # Pode ser 'nginx' ou outro servidor web
+HTTP_PORT="80"
+HTTPS_PORT="443"
+DOMAIN_NAME=$(hostname) # Tenta obter o nome do domínio do sistema
+
+# Função para detectar o sistema operacional
+detect_os() {
+  if command -v apt >/dev/null 2>&1; then
+    OS="debian"
+  elif command -v yum >/dev/null 2>&1; then
+    OS="redhat"
+  elif command -v pacman >/dev/null 2>&1; then
+    OS="arch"
+  else
+    OS="unknown"
+  fi
+  echo "$OS"
+}
+
+OS=$(detect_os)
+
+# Função para instalar pacotes, adaptada ao sistema operacional
+install_package() {
+  package="$1"
+  case "$OS" in
+    "debian")
+      apt-get update
+      apt-get install -y "$package"
+      ;;
+    "redhat")
+      yum install -y "$package"
+      ;;
+    "arch")
+      pacman -S --noconfirm "$package"
+      ;;
+    *)
+      echo "Sistema operacional não suportado. Instale o pacote '$package' manualmente."
+      exit 1
+      ;;
+  esac
+}
+
+
+# 1. Instalar o Certbot (Let's Encrypt) para obter um certificado SSL
+install_package certbot
+
+# Ajustar o nome do pacote do apache para certbot
+if [ "$WEB_SERVER" = "apache2" ]; then
+  apache_package="python3-certbot-apache"
+elif [ "$WEB_SERVER" = "nginx" ]; then
+  apache_package="python3-certbot-nginx"
+else
+  echo "Servidor web não suportado.  Aguardando a criação do certificado SSL."
+  apache_package=""
+fi
+
+if [ -n "$apache_package" ]; then
+  install_package "$apache_package"
+fi
+
+
+# 2. Obter o certificado SSL usando Certbot
+certbot --nginx --non-interactive --agree-tos --email seu_email@example.com -d "$DOMAIN_NAME"
+#certbot --apache --non-interactive --agree-tos --email seu_email@example.com -d "$DOMAIN_NAME" #original
+
+# 3. Configurar o redirecionamento HTTP para HTTPS
+
+if [ "$WEB_SERVER" = "apache2" ]; then
+  # Para Apache:
+  # a) Ativar o módulo rewrite
+  a2enmod rewrite
+  # b) Editar o virtual host padrão (ou o virtual host do seu site) para redirecionar HTTP para HTTPS
+  # Este bloco cria um arquivo de configuração temporário com o redirecionamento.
+  REDIRECT_CONFIG="
+<VirtualHost *:80>
+    ServerName $DOMAIN_NAME
+    Redirect permanent / https://$DOMAIN_NAME/
+</VirtualHost>
+"
+  echo "$REDIRECT_CONFIG" > /tmp/redirect.conf
+  # Move o arquivo de configuração temporário para o diretório de configuração do Apache.
+  mv /tmp/redirect.conf /etc/apache2/sites-available/000-default-le-ssl.conf
+  # Desabilita o site padrão.
+  a2dissite 000-default.conf
+  # Habilita o novo site com o redirecionamento.
+  a2ensite 000-default-le-ssl.conf
+
+
+elif [ "$WEB_SERVER" = "nginx" ]; then
+  # Para Nginx:
+  # a) Editar o bloco server HTTP (porta 80) no arquivo de configuração do seu site para redirecionar para HTTPS
+  # (Exemplo: /etc/nginx/sites-available/default)
+  # Adicionar dentro do bloco server { ... } o seguinte:
+  # return 301 https://$host$request_uri;
+  echo "Edite o arquivo de configuração do Nginx para redirecionar HTTP para HTTPS."
+  echo "Exemplo: return 301 https://\$host\$request_uri; dentro do bloco server na porta 80"
+
+else
+  echo "Servidor web não suportado. Configure o redirecionamento HTTP para HTTPS manualmente."
+fi
+
+
+# 4. Reiniciar o servidor web
+systemctl restart "$WEB_SERVER"
+
+echo "Configuração concluída. O servidor web foi configurado para redirecionar HTTP para HTTPS."
+```

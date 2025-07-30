@@ -1,0 +1,45 @@
+#!/bin/bash
+
+# Disable/enable services
+systemctl stop vsftpd.service rlogin.service rsh.service rexec.service distcc.service vncserver.service tomcat.service telnet.service
+systemctl disable vsftpd.service rlogin.service rsh.service rexec.service distcc.service vncserver.service tomcat.service telnet.service
+apt-get purge -y vsftpd rsh-client rsh-server distcc vnc4server tomcat5 telnetd
+
+# Remove vulnerable software
+rm -rf /var/www/html/twiki
+rm -rf /var/www/html/mutillidae
+rm -rf /var/www/html/dvwa
+rm -rf /var/www/html/phpMyAdmin
+rm -rf /var/www/html/tikiwiki
+rm -f /var/www/html/phpinfo.php
+find /var/www -name 'phpinfo.php' -delete
+
+# Secure SSH configuration
+sed -i 's/^#*PermitRootLogin.*/PermitRootLogin prohibit-password/' /etc/ssh/sshd_config
+sed -i 's/^#*PasswordAuthentication.*/PasswordAuthentication yes/' /etc/ssh/sshd_config
+systemctl restart sshd
+
+# Secure MySQL
+mysql -e "ALTER USER 'root'@'localhost' IDENTIFIED BY 'S3cureP@ss'; DELETE FROM mysql.user WHERE User=''; FLUSH PRIVILEGES;"
+
+# Secure Apache
+a2dismod cgi
+echo "<Directory /var/www>
+    AllowMethods GET POST HEAD OPTIONS
+    TraceEnable off
+</Directory>" > /etc/apache2/conf-available/secure.conf
+a2enconf secure
+systemctl restart apache2
+
+# Manage accounts
+for user in msfadmin postgres service user; do
+    if id "$user" &>/dev/null; then
+        echo "Locking and restricting shell for $user"
+        usermod --lock "$user"
+        usermod --shell /usr/sbin/nologin "$user"
+    fi
+done
+
+# Configure Postfix
+postconf -e disable_vrfy_command=yes
+systemctl restart postfix

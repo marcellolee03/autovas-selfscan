@@ -1,0 +1,54 @@
+```sh
+#!/bin/bash
+
+# Verifica se o sistema é baseado em Debian/Ubuntu (para usar apt-get)
+if command -v apt-get &> /dev/null; then
+  # Atualiza a lista de pacotes
+  apt-get update
+
+  # Tenta atualizar o PHP para a versão mais recente disponível.
+  # Isso pode não garantir a versão exata necessária (5.3.13 ou 5.4.3),
+  # mas irá atualizar para a versão mais recente fornecida pelos repositórios.
+  apt-get install --only-upgrade php5 php5-cli php5-cgi
+
+  # Reinicia o serviço web para carregar a nova versão do PHP
+  if command -v service &> /dev/null; then
+    service apache2 restart
+    service nginx restart # Caso esteja usando nginx
+  elif command -v systemctl &> /dev/null; then
+    systemctl restart apache2
+    systemctl restart nginx # Caso esteja usando nginx
+  else
+    echo "Não foi possível reiniciar o servidor web automaticamente. Reinicie manualmente."
+  fi
+
+  echo "Atualização do PHP concluída. Verifique a versão do PHP para confirmar."
+
+# Verifica se o sistema é baseado em CentOS/RHEL (para usar yum)
+elif command -v yum &> /dev/null; then
+  # Atualiza a lista de pacotes
+  yum update
+
+  # Tenta atualizar o PHP para a versão mais recente disponível.
+  # Isso pode não garantir a versão exata necessária (5.3.13 ou 5.4.3),
+  # mas irá atualizar para a versão mais recente fornecida pelos repositórios.
+  yum update php php-cli php-cgi
+
+  # Reinicia o serviço web para carregar a nova versão do PHP
+  if command -v service &> /dev/null; then
+    service httpd restart
+  elif command -v systemctl &> /dev/null; then
+    systemctl restart httpd
+  else
+    echo "Não foi possível reiniciar o servidor web automaticamente. Reinicie manualmente."
+  fi
+
+  echo "Atualização do PHP concluída. Verifique a versão do PHP para confirmar."
+
+else
+  echo "Sistema operacional não suportado.  Atualize o PHP manualmente para a versão 5.3.13 ou 5.4.3 ou superior."
+  exit 1
+fi
+
+exit 0
+```

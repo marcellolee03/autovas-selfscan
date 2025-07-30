@@ -1,0 +1,36 @@
+#!/bin/bash
+
+if systemctl is-active --quiet apache2; then
+    CONF="/etc/apache2/sites-available/000-default.conf"
+    if [ -f "$CONF" ]; then
+        cp "$CONF" "$CONF.bak"
+        if grep -q '<VirtualHost \*:80>' "$CONF"; then
+            sed -i -e '/<VirtualHost \*:80>/a Redirect permanent "/" "https://%{HTTP_HOST}/"' "$CONF"
+        else
+            echo -e "\n<VirtualHost *:80>\n    Redirect permanent \"/\" \"https://%{HTTP_HOST}/\"\n</VirtualHost>" >> "$CONF"
+        fi
+        systemctl restart apache2
+    else
+        echo "Arquivo de configuração do Apache não encontrado: $CONF" >&2
+        exit 1
+    fi
+
+elif systemctl is-active --quiet nginx; then
+    CONF="/etc/nginx/sites-available/default"
+    if [ -f "$CONF" ]; then
+        cp "$CONF" "$CONF.bak"
+        if grep -q 'listen 80;' "$CONF"; then
+            sed -i -e '/listen 80;/a return 301 https://$host$request_uri;' "$CONF"
+        else
+            echo "server { listen 80; return 301 https://\$host\$request_uri; }" >> "$CONF"
+        fi
+        systemctl restart nginx
+    else
+        echo "Arquivo de configuração do Nginx não encontrado: $CONF" >&2
+        exit 1
+    fi
+
+else
+    echo "Nenhum servidor web (Apache ou Nginx) ativo." >&2
+    exit 1
+fi

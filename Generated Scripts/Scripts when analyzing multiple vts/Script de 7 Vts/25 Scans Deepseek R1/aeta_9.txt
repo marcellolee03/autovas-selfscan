@@ -1,0 +1,59 @@
+```bash
+#!/bin/bash
+
+# ICMP Timestamp Reply Information Disclosure Mitigation
+if grep -q "net.ipv4.icmp_echo_ignore_all" /etc/sysctl.conf; then
+    sed -i 's/^net.ipv4.icmp_echo_ignore_all.*/net.ipv4.icmp_echo_ignore_all = 1/' /etc/sysctl.conf
+else
+    echo "net.ipv4.icmp_echo_ignore_all = 1" >> /etc/sysctl.conf
+fi
+
+# TCP Timestamps Information Disclosure Mitigation
+if grep -q "net.ipv4.tcp_timestamps" /etc/sysctl.conf; then
+    sed -i 's/^net.ipv4.tcp_timestamps.*/net.ipv4.tcp_timestamps = 0/' /etc/sysctl.conf
+else
+    echo "net.ipv4.tcp_timestamps = 0" >> /etc/sysctl.conf
+fi
+
+sysctl -p
+
+# Block ICMP timestamp requests via iptables
+iptables -A INPUT -p icmp --icmp-type timestamp-request -j DROP
+iptables -A OUTPUT -p icmp --icmp-type timestamp-reply -j DROP
+iptables-save > /etc/iptables.rules
+echo -e "#!/bin/sh\niptables-restore < /etc/iptables.rules" > /etc/network/if-pre-up.d/iptables-restore
+chmod +x /etc/network/if-pre-up.d/iptables-restore
+
+# Apply TLS/SSL fixes for web servers
+if command -v apache2 &>/dev/null; then
+    a2enmod ssl rewrite
+    sed -i '/<VirtualHost \*:80>/,/<\/VirtualHost>/s/\(.*\)/&\n    RewriteEngine On\n    RewriteCond %{HTTPS} off\n    RewriteRule (.*) https:\/\/%{HTTP_HOST}%{REQUEST_URI} [L,R=301]/' /etc/apache2/sites-enabled/*.conf
+    
+    echo -e "SSLProtocol -all +TLSv1.2 +TLSv1.3\nSSLHonorCipherOrder on\nSSLCipherSuite 'TLS_AES_128_GCM_SHA256:TLS_AES_256_GCM_SHA384:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-RSA-AES256-GCM-SHA384'\nSSLCompression off\nSSLStrictRequire on" > /etc/apache2/conf-available/tls-policies.conf
+    ln -s /etc/apache2/conf-available/tls-policies.conf /etc/apache2/conf-enabled/
+    systemctl restart apache2
+fi
+
+if command -v nginx &>/dev/null; then
+    sed -i '/listen 80;/a \\t\treturn 301 https://$host$request_uri;' /etc/nginx/sites-enabled/*
+
+    echo -e "ssl_protocols TLSv1.2 TLSv1.3;\nssl_prefer_server_ciphers on;\nssl_ciphers 'TLS_AES_128_GCM_SHA256:TLS_AES_256_GCM_SHA384:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-RSA-AES256-GCM-SHA384';\nssl_session_timeout 1d;\nssl_session_cache shared:MozSSL:10m;\nssl_session_tickets off;\nssl_stapling on;\nssl_stapling_verify on;" > /etc/nginx/conf.d/tls-policies.conf
+    nginx -t && systemctl restart nginx
+fi
+
+# DNS Cache Snooping Mitigation for BIND
+if command -v named &>/dev/null; then
+    sed -i '/options {/,/};/ { 
+        /recursion/ {s/.*/        recursion no;/}
+        /allow-query-cache/ {s/.*/        allow-query-cache { none; };/}
+        /allow-recursion/ {s/.*/        allow-recursion { none; };/}
+    }' /etc/bind/named.conf
+    
+    if ! grep -q "recursion no" /etc/bind/named.conf; then
+        sed -i '/options {/ a\    recursion no;' /etc/bind/named.conf
+    fi
+    rndc reload
+fi
+
+echo "Vulnerability mitigations applied. Note: Review web server configs manually."
+```

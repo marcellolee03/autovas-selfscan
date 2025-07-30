@@ -1,0 +1,105 @@
+```sh
+#!/bin/bash
+
+# Variáveis
+TWIKI_DIR="/var/www/twiki"  # Ajuste este caminho se a instalação do TWiki for diferente
+BACKUP_DIR="/tmp/twiki_backup_$(date +%Y%m%d%H%M%S)"
+TWIKI_VERSION_FILE="$TWIKI_DIR/VERSION" #Arquivo onde se encontra a versão do TWiki
+CURRENT_VERSION=$(cat "$TWIKI_VERSION_FILE" | awk '{print $1}')
+DESIRED_VERSION="4.2.4"
+
+# Função para exibir mensagem de erro e sair
+error_exit() {
+  echo "Erro: $1" >&2
+  exit 1
+}
+
+# 1. Verificar se o diretório do TWiki existe
+if [ ! -d "$TWIKI_DIR" ]; then
+  error_exit "Diretório do TWiki não encontrado: $TWIKI_DIR"
+fi
+
+# 2. Verificar se o arquivo de versão existe
+if [ ! -f "$TWIKI_VERSION_FILE" ]; then
+    error_exit "Arquivo de versão do TWiki não encontrado: $TWIKI_VERSION_FILE"
+fi
+
+# 3. Verificar a versão atual do TWiki
+echo "Versão atual do TWiki: $CURRENT_VERSION"
+
+# 4. Comparar a versão atual com a versão desejada
+if [[ "$CURRENT_VERSION" == "$DESIRED_VERSION" ]]; then
+  echo "TWiki já está na versão $DESIRED_VERSION. Nenhuma ação necessária."
+  exit 0
+fi
+
+# 5. Criar backup do diretório TWiki
+echo "Criando backup do diretório TWiki em $BACKUP_DIR"
+mkdir -p "$BACKUP_DIR"
+cp -rp "$TWIKI_DIR"/* "$BACKUP_DIR"/ || error_exit "Falha ao criar backup."
+
+# 6. Download da versão 4.2.4 do TWiki
+echo "Baixando TWiki versão $DESIRED_VERSION"
+cd /tmp
+wget "https://sourceforge.net/projects/twiki/files/TWiki%20Release/TWiki-4.2.4/TWiki-4.2.4.zip/download" -O TWiki-4.2.4.zip
+
+if [ ! -f "TWiki-4.2.4.zip" ]; then
+  error_exit "Falha ao baixar o arquivo ZIP do TWiki."
+fi
+
+# 7. Extrair o arquivo ZIP
+echo "Extraindo o arquivo ZIP"
+unzip TWiki-4.2.4.zip -d /tmp/twiki_extract
+
+if [ ! -d "/tmp/twiki_extract/TWiki-4.2.4" ]; then
+  error_exit "Falha ao extrair o arquivo ZIP."
+fi
+
+# 8. Parar o servidor web (Apache, Nginx, etc.)
+echo "Parando o servidor web..."
+if command -v systemctl &> /dev/null
+then
+    systemctl stop apache2 2>/dev/null || systemctl stop httpd 2>/dev/null
+else
+    service apache2 stop 2>/dev/null || service httpd stop 2>/dev/null
+fi
+
+# 9. Remover o diretório TWiki existente
+echo "Removendo o diretório TWiki existente"
+rm -rf "$TWIKI_DIR"
+
+# 10. Mover os arquivos da nova versão para o diretório TWiki
+echo "Movendo os arquivos da nova versão para $TWIKI_DIR"
+mv /tmp/twiki_extract/TWiki-4.2.4 "$TWIKI_DIR"
+
+# 11. Restaurar a configuração local (opcional - ajustar conforme necessário)
+# Este passo é crucial para manter as configurações específicas do seu TWiki.
+# Adapte os comandos abaixo para copiar os arquivos de configuração relevantes
+# do backup para a nova instalação.
+# Exemplo:
+# cp "$BACKUP_DIR/lib/LocalLib.cfg" "$TWIKI_DIR/lib/"
+# cp "$BACKUP_DIR/LocalSettings.cfg" "$TWIKI_DIR/"
+
+# 12. Definir as permissões corretas (ajuste conforme necessário)
+echo "Definindo as permissões corretas"
+chown -R www-data:www-data "$TWIKI_DIR" # Ajuste www-data para o usuário/grupo do seu servidor web
+find "$TWIKI_DIR" -type d -exec chmod 755 {} \;
+find "$TWIKI_DIR" -type f -exec chmod 644 {} \;
+
+# 13. Reiniciar o servidor web
+echo "Reiniciando o servidor web..."
+
+if command -v systemctl &> /dev/null
+then
+    systemctl start apache2 2>/dev/null || systemctl start httpd 2>/dev/null
+else
+    service apache2 start 2>/dev/null || service httpd start 2>/dev/null
+fi
+
+# 14. Limpeza (opcional)
+echo "Limpeza..."
+rm -rf /tmp/TWiki-4.2.4.zip /tmp/twiki_extract
+
+echo "Atualização do TWiki para a versão $DESIRED_VERSION concluída com sucesso."
+exit 0
+```

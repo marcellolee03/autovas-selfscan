@@ -1,0 +1,79 @@
+```bash
+#!/bin/bash
+
+# Vulnerabilidad 1: Actualizar Proxmox VE
+if grep -q "proxmox" /etc/os-release; then
+    echo "Actualizando Proxmox VE"
+    sed -i 's/bullseye/bookworm/g' /etc/apt/sources.list
+    sed -i 's/bullseye/bookworm/g' /etc/apt/sources.list.d/pve-enterprise.list 2>/dev/null
+    sed -i 's/bullseye/bookworm/g' /etc/apt/sources.list.d/pve-no-subscription.list 2>/dev/null
+    apt-get update -qq
+    DEBIAN_FRONTEND=noninteractive apt-get dist-upgrade -y -qq
+    apt-get --purge autoremove -y -qq
+    systemctl restart pve-cluster pvedaemon pveproxy pve-firewall
+fi
+
+# Vulnerabilidades 2-6: Parchear archivos jQuery vulnerables
+wget -O /tmp/jquery-1.12.4.min.js https://code.jquery.com/jquery-1.12.4.min.gz --quiet >/dev/null 2>&1 || wget -O /tmp/jquery-1.12.4.min.js https://code.jquery.com/jquery-1.12.4.min.js --quiet
+declare -a jquery_paths=(
+    "/var/www/html/js/jquery-1.8.3.min.js"
+    "/var/www/html/opscenter/webcommon/js/jquery-1.8.3.min.js"
+    "/var/www/html/framesets/js/jquery-1.8.3.min.js"
+    "/var/www/html/frameset/js/jquery-1.8.3.min.js"
+    "/var/www/html/console/framework/js/jquery-1.8.3.min.js"
+)
+for path in "${jquery_paths[@]}"; do
+    if [ -f "$path" ]; then
+        cp /tmp/jquery-1.12.4.min.js "$path"
+        chown www-data:www-data "$path"
+    fi
+done
+
+# Vulnerabilidades relacionadas con SSH (7,8,9,13,14,15,16,19,21,22)
+if [ -f /etc/ssh/sshd_config ]; then
+    cp /etc/ssh/sshd_config /etc/ssh/sshd_config.backup
+    # Ajustes de configuración SSH
+    sed -i '/^HostKeyAlgorithms/d' /etc/ssh/sshd_config
+    sed -i '/^KexAlgorithms/d' /etc/ssh/sshd_config
+    sed -i '/^Ciphers/d' /etc/ssh/sshd_config
+    sed -i '/^MACs/d' /etc/ssh/sshd_config
+    
+    echo "HostKeyAlgorithms ecdsa-sha2-nistp256,ecdsa-sha2-nistp384,ssh-ed25519,rsa-sha2-512,rsa-sha2-256,ssh-rsa" >> /etc/ssh/sshd_config
+    echo "KexAlgorithms curve25519-sha256,ecdh-sha2-nistp256,diffie-hellman-group16-sha512,diffie-hellman-group18-sha512" >> /etc/ssh/sshd_config
+    echo "Ciphers chacha20-poly1305@openssh.com,aes256-gcm@openssh.com,aes128-gcm@openssh.com" >> /etc/ssh/sshd_config
+    echo "MACs umac-128-etm@openssh.com,hmac-sha2-256-etm@openssh.com,hmac-sha2-512-etm@openssh.com" >> /etc/ssh/sshd_config
+    
+    systemctl restart sshd
+fi
+
+# Vulnerabilidad 10: Bloquear puertos DCE/RPC usando UFW
+which ufw >/dev/null && for port in 39710 49664 49665 49666 49667 49668 49670 7832; do
+    ufw deny "$port/tcp" >/dev/null
+done || for port in 39710 49664 49665 49666 49667 49668 49670 7832; do
+    iptables -A INPUT -p tcp --dport $port -j DROP
+    ip6tables -A INPUT -p tcp --dport $port -j DROP >/dev/null 2>&1
+done
+
+# Vulnerabilidad 11: Desinstalar telnetd
+apt-get purge -y telnetd inetutils-telnetd >/dev/null 2>&1 || yum remove -y telnet-server >/dev/null 2>&1
+
+# Vulnerabilidad 12: Desactivar TLSv1.0 y TLSv1.1 para aplicaciones comunes
+# Apache
+find /etc/apache2/sites-enabled /etc/apache2/mods-enabled /etc/apache2/apache2.conf -type f -exec sed -i 's/SSLProtocol .*/SSLProtocol +TLSv1.2 +TLSv1.3/' {} 2>/dev/null \;
+# Nginx
+find /etc/nginx/sites-enabled /etc/nginx/conf.d /etc/nginx/nginx.conf -type f -exec sed -i 's/ssl_protocols .*/ssl_protocols TLSv1.2 TLSv1.3;/' {} 2>/dev/null \;
+# xrdp (RDP)
+[ -f /etc/xrdp/xrdp.ini ] && sed -i 's/^ssl_protocols=.*/ssl_protocols=TLSv1.2,TLSv1.3/' /etc/xrdp/xrdp.ini
+# Reinicios condicionales
+[ -d /etc/apache2 ] && systemctl restart apache2 >/dev/null 2>&1
+[ -d /etc/nginx ] && systemctl restart nginx >/dev/null 2>&1
+[ -f /etc/xrdp/xrdp.ini ] && systemctl restart xrdp >/dev/null 2>&1
+
+# Vulnerabilidades 17,18,20,23,24,25: Deshabilitar marcas de tiempo TCP
+echo "net.ipv4.tcp_timestamps = 0" >> /etc/sysctl.conf
+sysctl -p >/dev/null
+
+# Vulnerabilidades 26-32: Bloquear solicitudes ICMP de marca de tiempo
+iptables -A INPUT -p icmp --icmp-type timestamp-request -j DROP
+ip6tables -A INPUT -p icmpv6 --icmpv6-type 13 -j DROP >/dev/null 2>&1
+```

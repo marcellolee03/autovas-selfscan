@@ -1,0 +1,67 @@
+Com base na análise do relatório de vulnerabilidades do OpenVAS e dos 25 scripts de correção fornecidos, aqui está a avaliação da capacidade de cada script em resolver os problemas identificados e a porcentagem média geral de correção.
+
+Existem 11 categorias de vulnerabilidades únicas identificadas no relatório:
+
+Proxmox VE EOL: Versão desatualizada que atingiu o fim da vida (EOL).
+jQuery XSS: Versão do jQuery anterior a 1.9.0 vulnerável a Cross-Site Scripting (XSS).
+
+
+
+
+SSH Weak Host Key Algorithm: Suporte ao algoritmo ssh-dss.
+
+SSH Weak KEX Algorithm: Suporte ao algoritmo de troca de chaves diffie-hellman-group1-sha1.
+
+SSH Weak Encryption Ciphers: Suporte a cifras baseadas em CBC (3des-cbc, aes128-cbc, etc.).
+SSH Weak MAC Algorithms: Suporte a algoritmos MAC fracos (umac-64*, hmac-md5, hmac-sha1-96).
+
+DCE/RPC and MSRPC Enumeration: Serviços RPC enumeráveis na porta 135 e outras portas altas.
+
+Telnet Unencrypted Login: Serviço Telnet ativo permitindo login em texto claro.
+
+Deprecated TLSv1.0/1.1: Suporte aos protocolos TLS 1.0 e 1.1, que são obsoletos.
+
+TCP Timestamps Disclosure: Divulgação de informações através de timestamps TCP, permitindo calcular o uptime do host.
+
+ICMP Timestamp Reply: Resposta a requisições de timestamp ICMP, revelando informações do sistema.
+Análise Individual dos Scripts
+Script	Vulnerabilidades Corrigidas	Porcentagem de Correção
+teste33vts_1.txt	Corrige 10 de 11. Falha ao atualizar o jQuery devido a um caminho de arquivo de placeholder (/path/to/jquery-latest.min.js).	90.9%
+teste33vts_2.txt	Corrige 11 de 11. Aborda todas as categorias de vulnerabilidade de forma eficaz.	100%
+teste33vts_3.txt	Corrige 8 de 11. Não aborda o filtro de portas DCE/RPC, a desativação do Telnet e do TLSv1.0/1.1.	72.7%
+teste33vts_4.txt	Corrige 10 de 11. Falha ao atualizar o jQuery devido a um caminho de arquivo de placeholder (/path/to/jquery.min.js).	90.9%
+teste33vts_5.txt	Corrige 7 de 11. Falha na atualização do jQuery (caminhos inválidos), na correção do TLS e usa métodos não persistentes para desativar os timestamps de TCP e ICMP.	63.6%
+teste33vts_6.txt	Corrige 11 de 11. Aborda todas as categorias de vulnerabilidade de forma eficaz.	100%
+teste33vts_7.txt	Corrige 10 de 11. Não aborda o filtro de portas DCE/RPC.	90.9%
+teste33vts_8.txt	Corrige 9 de 11. Falha ao filtrar todas as portas DCE/RPC necessárias e não aborda corretamente a vulnerabilidade de timestamp ICMP.	81.8%
+teste33vts_9.txt	Corrige 7 de 11. Não aborda o filtro de portas DCE/RPC, a desativação do Telnet e do TLSv1.0/1.1.	63.6%
+teste33vts_10.txt	Corrige 10 de 11. A correção para o timestamp ICMP não é persistente (/proc/sys/).	90.9%
+teste33vts_11.txt	Corrige 10 de 11. A tentativa de corrigir o jQuery apenas substitui o texto "1.8.3" por "1.9.0" no arquivo, o que corromperia a biblioteca.	90.9%
+teste33vts_12.txt	Corrige 8 de 11. Falha ao atualizar o jQuery devido a caminhos de arquivo inválidos e não aborda o filtro de portas DCE/RPC e a desativação do Telnet.	72.7%
+teste33vts_13.txt	Corrige 7 de 11. Não aborda jQuery, portas DCE/RPC, Telnet e TLS.	63.6%
+teste33vts_14.txt	Corrige 10 de 11. Não aborda o filtro de portas DCE/RPC.	90.9%
+teste33vts_15.txt	Corrige 11 de 11. Aborda todas as categorias de vulnerabilidade de forma eficaz.	100%
+teste33vts_16.txt	Corrige 10 de 11. Não aborda o filtro de portas DCE/RPC.	90.9%
+teste33vts_17.txt	Corrige 11 de 11. Aborda todas as categorias de vulnerabilidade de forma eficaz.	100%
+teste33vts_18.txt	Corrige 9 de 11. Não aborda o filtro de portas DCE/RPC e usa comandos incorretos para a mitigação do timestamp ICMP.	81.8%
+teste33vts_19.txt	Corrige 9 de 11. Não aborda o filtro de portas DCE/RPC e a desativação do TLSv1.0/1.1.	81.8%
+teste33vts_20.txt	Corrige 7 de 11. Não aborda portas DCE/RPC, Telnet e TLS.	63.6%
+teste33vts_21.txt	Corrige 10 de 11. Não aborda o filtro de portas DCE/RPC.	90.9%
+teste33vts_22.txt	Corrige 10 de 11. A correção para o timestamp ICMP é ineficaz (net.ipv4.timestamp_response não é um parâmetro válido) e há um erro de digitação em uma das portas RPC.	90.9%
+teste33vts_23.txt	Corrige 7 de 11. Falha ao corrigir jQuery, portas DCE/RPC, TLS e ICMP. A abordagem para remover o jQuery é falha.	63.6%
+teste33vts_24.txt	Corrige 10 de 11. A atualização do jQuery falha devido a caminhos de arquivo inválidos.	90.9%
+teste33vts_25.txt	Corrige 9 de 11. Não aborda o filtro de portas DCE/RPC e a correção para o timestamp ICMP não é persistente.	81.8%
+
+
+
+
+
+
+Exportar para as Planilhas
+Média Geral de Correção
+A média de porcentagem de correção, considerando todos os 25 scripts fornecidos, é de:
+
+M 
+e
+ˊ
+ dia Geral=84.4%

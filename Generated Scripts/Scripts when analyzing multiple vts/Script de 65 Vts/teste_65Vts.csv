@@ -1,0 +1,1449 @@
+IP,Hostname,Port,Port Protocol,CVSS,Severity,QoD,Solution Type,NVT Name,Summary,Specific Result,NVT OID,CVEs,Task ID,Task Name,Timestamp,Result ID,Impact,Solution,Affected Software/OS,Vulnerability Insight,Vulnerability Detection Method,Product Detection Result,BIDs,CERTs,Other References
+10.129.4.125,LARCES-SERVER,5000,tcp,9.8,High,80,VendorFix,Python Multiple Vulnerabilities (Aug 2024) - Windows,"Python is prone to an infinite loop vulnerability leading to a
+  denial of service (DoS).","Installed version: 3.10.12
+Fixed version:     3.10.15
+Installation
+path / port:       5000/tcp
+
+",1.3.6.1.4.1.25623.1.0.170806,"CVE-2024-6232,CVE-2024-7592,CVE-2024-8088,CVE-2024-45490,CVE-2024-45491,CVE-2024-45492",13b33abb-b176-462c-89de-d5152e979dea,self_scan_05-06-25_08-14,2025-06-05T11:14:56Z,bdccc575-f265-4290-ab42-47cd22816d54,,"Update to version 3.8.20, 3.9.20, 3.10.15, 3.11.10, 3.12.6 or
+  later.","Python prior to version 3.8.20, 3.9.x prior to 3.9.20, 3.10.x
+  prior to 3.10.15, 3.11.x prior to 3.11.10 and 3.12.x prior to 3.12.6.","The following flaws exist:
+
+  - CVE-2024-6232: Regular expressions that allowed excessive backtracking during tarfile.TarFile
+  header parsing are vulnerable to ReDoS via specifically-crafted tar archives.
+
+  - CVE-2024-7592: When parsing cookies that contained backslashes for quoted characters in the
+  cookie value, the parser would use an algorithm with quadratic complexity, resulting in excess
+  CPU resources being used while parsing the value.
+
+  - CVE-2024-8088: When iterating over names of entries in a zip archive (for example, methods of
+  'zipfile.Path' like 'namelist()', 'iterdir()', etc) the process can be put into an infinite loop
+  with a maliciously crafted zip archive. This defect applies when reading only metadata or
+  extracting the contents of the zip archive.This vulnerability only affects zipfile.Path, while the
+  more common API zipfile.ZipFile class is unaffected.
+
+  - CVE-2024-45490, CVE-2024-45491, CVE-2024-45492: vulnerabilities in libexpat prior to version
+  2.6.3","Checks if a vulnerable version is present on the target host.
+Details:
+Python Multiple Vulnerabilities (Aug 2024) - Windows
+(OID: 1.3.6.1.4.1.25623.1.0.170806)
+Version used: 2024-12-13T15:40:54Z
+","Product: cpe:/a:python:python:3.10.12
+Method: Python Detection Consolidation
+(OID: 1.3.6.1.4.1.25623.1.0.112857)
+",,"DFN-CERT-2025-0933,DFN-CERT-2025-0880,DFN-CERT-2025-0854,DFN-CERT-2025-0509,DFN-CERT-2025-0179,DFN-CERT-2025-0175,DFN-CERT-2025-0170,DFN-CERT-2025-0041,DFN-CERT-2024-3317,DFN-CERT-2024-3316,DFN-CERT-2024-3315,DFN-CERT-2024-3314,DFN-CERT-2024-3313,DFN-CERT-2024-3182,DFN-CERT-2024-3103,DFN-CERT-2024-3083,DFN-CERT-2024-2994,DFN-CERT-2024-2993,DFN-CERT-2024-2937,DFN-CERT-2024-2933,DFN-CERT-2024-2783,DFN-CERT-2024-2743,DFN-CERT-2024-2664,DFN-CERT-2024-2571,DFN-CERT-2024-2540,DFN-CERT-2024-2525,DFN-CERT-2024-2512,DFN-CERT-2024-2509,DFN-CERT-2024-2497,DFN-CERT-2024-2492,DFN-CERT-2024-2466,DFN-CERT-2024-2463,DFN-CERT-2024-2456,DFN-CERT-2024-2425,DFN-CERT-2024-2399,DFN-CERT-2024-2340,DFN-CERT-2024-2332,DFN-CERT-2024-2251,DFN-CERT-2024-2245,DFN-CERT-2024-2244,DFN-CERT-2024-2227,WID-SEC-2025-0794,WID-SEC-2025-0225,WID-SEC-2025-0166,WID-SEC-2025-0148,WID-SEC-2025-0144,WID-SEC-2025-0143,WID-SEC-2025-0135,WID-SEC-2025-0001,WID-SEC-2024-3692,WID-SEC-2024-3691,WID-SEC-2024-3684,WID-SEC-2024-3196,WID-SEC-2024-3195,WID-SEC-2024-3191,WID-SEC-2024-2047,WID-SEC-2024-1951,WID-SEC-2024-1914,WID-SEC-2024-1889",
+10.129.4.125,LARCES-SERVER,8000,tcp,9.8,High,80,VendorFix,Python Multiple Vulnerabilities (Aug 2024) - Windows,"Python is prone to an infinite loop vulnerability leading to a
+  denial of service (DoS).","Installed version: 3.12.0
+Fixed version:     3.12.6
+Installation
+path / port:       8000/tcp
+
+",1.3.6.1.4.1.25623.1.0.170806,"CVE-2024-6232,CVE-2024-7592,CVE-2024-8088,CVE-2024-45490,CVE-2024-45491,CVE-2024-45492",13b33abb-b176-462c-89de-d5152e979dea,self_scan_05-06-25_08-14,2025-06-05T11:14:56Z,ab4deeff-447a-46ed-9e64-03126134781b,,"Update to version 3.8.20, 3.9.20, 3.10.15, 3.11.10, 3.12.6 or
+  later.","Python prior to version 3.8.20, 3.9.x prior to 3.9.20, 3.10.x
+  prior to 3.10.15, 3.11.x prior to 3.11.10 and 3.12.x prior to 3.12.6.","The following flaws exist:
+
+  - CVE-2024-6232: Regular expressions that allowed excessive backtracking during tarfile.TarFile
+  header parsing are vulnerable to ReDoS via specifically-crafted tar archives.
+
+  - CVE-2024-7592: When parsing cookies that contained backslashes for quoted characters in the
+  cookie value, the parser would use an algorithm with quadratic complexity, resulting in excess
+  CPU resources being used while parsing the value.
+
+  - CVE-2024-8088: When iterating over names of entries in a zip archive (for example, methods of
+  'zipfile.Path' like 'namelist()', 'iterdir()', etc) the process can be put into an infinite loop
+  with a maliciously crafted zip archive. This defect applies when reading only metadata or
+  extracting the contents of the zip archive.This vulnerability only affects zipfile.Path, while the
+  more common API zipfile.ZipFile class is unaffected.
+
+  - CVE-2024-45490, CVE-2024-45491, CVE-2024-45492: vulnerabilities in libexpat prior to version
+  2.6.3","Checks if a vulnerable version is present on the target host.
+Details:
+Python Multiple Vulnerabilities (Aug 2024) - Windows
+(OID: 1.3.6.1.4.1.25623.1.0.170806)
+Version used: 2024-12-13T15:40:54Z
+","Product: cpe:/a:python:python:3.12.0
+Method: Python Detection Consolidation
+(OID: 1.3.6.1.4.1.25623.1.0.112857)
+",,"DFN-CERT-2025-0933,DFN-CERT-2025-0880,DFN-CERT-2025-0854,DFN-CERT-2025-0509,DFN-CERT-2025-0179,DFN-CERT-2025-0175,DFN-CERT-2025-0170,DFN-CERT-2025-0041,DFN-CERT-2024-3317,DFN-CERT-2024-3316,DFN-CERT-2024-3315,DFN-CERT-2024-3314,DFN-CERT-2024-3313,DFN-CERT-2024-3182,DFN-CERT-2024-3103,DFN-CERT-2024-3083,DFN-CERT-2024-2994,DFN-CERT-2024-2993,DFN-CERT-2024-2937,DFN-CERT-2024-2933,DFN-CERT-2024-2783,DFN-CERT-2024-2743,DFN-CERT-2024-2664,DFN-CERT-2024-2571,DFN-CERT-2024-2540,DFN-CERT-2024-2525,DFN-CERT-2024-2512,DFN-CERT-2024-2509,DFN-CERT-2024-2497,DFN-CERT-2024-2492,DFN-CERT-2024-2466,DFN-CERT-2024-2463,DFN-CERT-2024-2456,DFN-CERT-2024-2425,DFN-CERT-2024-2399,DFN-CERT-2024-2340,DFN-CERT-2024-2332,DFN-CERT-2024-2251,DFN-CERT-2024-2245,DFN-CERT-2024-2244,DFN-CERT-2024-2227,WID-SEC-2025-0794,WID-SEC-2025-0225,WID-SEC-2025-0166,WID-SEC-2025-0148,WID-SEC-2025-0144,WID-SEC-2025-0143,WID-SEC-2025-0135,WID-SEC-2025-0001,WID-SEC-2024-3692,WID-SEC-2024-3691,WID-SEC-2024-3684,WID-SEC-2024-3196,WID-SEC-2024-3195,WID-SEC-2024-3191,WID-SEC-2024-2047,WID-SEC-2024-1951,WID-SEC-2024-1914,WID-SEC-2024-1889",
+10.129.4.125,LARCES-SERVER,8001,tcp,9.8,High,80,VendorFix,Python Multiple Vulnerabilities (Aug 2024) - Windows,"Python is prone to an infinite loop vulnerability leading to a
+  denial of service (DoS).","Installed version: 3.12.0
+Fixed version:     3.12.6
+Installation
+path / port:       8001/tcp
+
+",1.3.6.1.4.1.25623.1.0.170806,"CVE-2024-6232,CVE-2024-7592,CVE-2024-8088,CVE-2024-45490,CVE-2024-45491,CVE-2024-45492",13b33abb-b176-462c-89de-d5152e979dea,self_scan_05-06-25_08-14,2025-06-05T11:14:56Z,3f19cf74-9263-4d89-ab84-97eeeab40b66,,"Update to version 3.8.20, 3.9.20, 3.10.15, 3.11.10, 3.12.6 or
+  later.","Python prior to version 3.8.20, 3.9.x prior to 3.9.20, 3.10.x
+  prior to 3.10.15, 3.11.x prior to 3.11.10 and 3.12.x prior to 3.12.6.","The following flaws exist:
+
+  - CVE-2024-6232: Regular expressions that allowed excessive backtracking during tarfile.TarFile
+  header parsing are vulnerable to ReDoS via specifically-crafted tar archives.
+
+  - CVE-2024-7592: When parsing cookies that contained backslashes for quoted characters in the
+  cookie value, the parser would use an algorithm with quadratic complexity, resulting in excess
+  CPU resources being used while parsing the value.
+
+  - CVE-2024-8088: When iterating over names of entries in a zip archive (for example, methods of
+  'zipfile.Path' like 'namelist()', 'iterdir()', etc) the process can be put into an infinite loop
+  with a maliciously crafted zip archive. This defect applies when reading only metadata or
+  extracting the contents of the zip archive.This vulnerability only affects zipfile.Path, while the
+  more common API zipfile.ZipFile class is unaffected.
+
+  - CVE-2024-45490, CVE-2024-45491, CVE-2024-45492: vulnerabilities in libexpat prior to version
+  2.6.3","Checks if a vulnerable version is present on the target host.
+Details:
+Python Multiple Vulnerabilities (Aug 2024) - Windows
+(OID: 1.3.6.1.4.1.25623.1.0.170806)
+Version used: 2024-12-13T15:40:54Z
+","Product: cpe:/a:python:python:3.12.0
+Method: Python Detection Consolidation
+(OID: 1.3.6.1.4.1.25623.1.0.112857)
+",,"DFN-CERT-2025-0933,DFN-CERT-2025-0880,DFN-CERT-2025-0854,DFN-CERT-2025-0509,DFN-CERT-2025-0179,DFN-CERT-2025-0175,DFN-CERT-2025-0170,DFN-CERT-2025-0041,DFN-CERT-2024-3317,DFN-CERT-2024-3316,DFN-CERT-2024-3315,DFN-CERT-2024-3314,DFN-CERT-2024-3313,DFN-CERT-2024-3182,DFN-CERT-2024-3103,DFN-CERT-2024-3083,DFN-CERT-2024-2994,DFN-CERT-2024-2993,DFN-CERT-2024-2937,DFN-CERT-2024-2933,DFN-CERT-2024-2783,DFN-CERT-2024-2743,DFN-CERT-2024-2664,DFN-CERT-2024-2571,DFN-CERT-2024-2540,DFN-CERT-2024-2525,DFN-CERT-2024-2512,DFN-CERT-2024-2509,DFN-CERT-2024-2497,DFN-CERT-2024-2492,DFN-CERT-2024-2466,DFN-CERT-2024-2463,DFN-CERT-2024-2456,DFN-CERT-2024-2425,DFN-CERT-2024-2399,DFN-CERT-2024-2340,DFN-CERT-2024-2332,DFN-CERT-2024-2251,DFN-CERT-2024-2245,DFN-CERT-2024-2244,DFN-CERT-2024-2227,WID-SEC-2025-0794,WID-SEC-2025-0225,WID-SEC-2025-0166,WID-SEC-2025-0148,WID-SEC-2025-0144,WID-SEC-2025-0143,WID-SEC-2025-0135,WID-SEC-2025-0001,WID-SEC-2024-3692,WID-SEC-2024-3691,WID-SEC-2024-3684,WID-SEC-2024-3196,WID-SEC-2024-3195,WID-SEC-2024-3191,WID-SEC-2024-2047,WID-SEC-2024-1951,WID-SEC-2024-1914,WID-SEC-2024-1889",
+10.129.4.125,LARCES-SERVER,8002,tcp,9.8,High,80,VendorFix,Python Multiple Vulnerabilities (Aug 2024) - Windows,"Python is prone to an infinite loop vulnerability leading to a
+  denial of service (DoS).","Installed version: 3.12.0
+Fixed version:     3.12.6
+Installation
+path / port:       8002/tcp
+
+",1.3.6.1.4.1.25623.1.0.170806,"CVE-2024-6232,CVE-2024-7592,CVE-2024-8088,CVE-2024-45490,CVE-2024-45491,CVE-2024-45492",13b33abb-b176-462c-89de-d5152e979dea,self_scan_05-06-25_08-14,2025-06-05T11:14:56Z,6f8136e5-e59c-43cb-b703-9983f58121d5,,"Update to version 3.8.20, 3.9.20, 3.10.15, 3.11.10, 3.12.6 or
+  later.","Python prior to version 3.8.20, 3.9.x prior to 3.9.20, 3.10.x
+  prior to 3.10.15, 3.11.x prior to 3.11.10 and 3.12.x prior to 3.12.6.","The following flaws exist:
+
+  - CVE-2024-6232: Regular expressions that allowed excessive backtracking during tarfile.TarFile
+  header parsing are vulnerable to ReDoS via specifically-crafted tar archives.
+
+  - CVE-2024-7592: When parsing cookies that contained backslashes for quoted characters in the
+  cookie value, the parser would use an algorithm with quadratic complexity, resulting in excess
+  CPU resources being used while parsing the value.
+
+  - CVE-2024-8088: When iterating over names of entries in a zip archive (for example, methods of
+  'zipfile.Path' like 'namelist()', 'iterdir()', etc) the process can be put into an infinite loop
+  with a maliciously crafted zip archive. This defect applies when reading only metadata or
+  extracting the contents of the zip archive.This vulnerability only affects zipfile.Path, while the
+  more common API zipfile.ZipFile class is unaffected.
+
+  - CVE-2024-45490, CVE-2024-45491, CVE-2024-45492: vulnerabilities in libexpat prior to version
+  2.6.3","Checks if a vulnerable version is present on the target host.
+Details:
+Python Multiple Vulnerabilities (Aug 2024) - Windows
+(OID: 1.3.6.1.4.1.25623.1.0.170806)
+Version used: 2024-12-13T15:40:54Z
+","Product: cpe:/a:python:python:3.12.0
+Method: Python Detection Consolidation
+(OID: 1.3.6.1.4.1.25623.1.0.112857)
+",,"DFN-CERT-2025-0933,DFN-CERT-2025-0880,DFN-CERT-2025-0854,DFN-CERT-2025-0509,DFN-CERT-2025-0179,DFN-CERT-2025-0175,DFN-CERT-2025-0170,DFN-CERT-2025-0041,DFN-CERT-2024-3317,DFN-CERT-2024-3316,DFN-CERT-2024-3315,DFN-CERT-2024-3314,DFN-CERT-2024-3313,DFN-CERT-2024-3182,DFN-CERT-2024-3103,DFN-CERT-2024-3083,DFN-CERT-2024-2994,DFN-CERT-2024-2993,DFN-CERT-2024-2937,DFN-CERT-2024-2933,DFN-CERT-2024-2783,DFN-CERT-2024-2743,DFN-CERT-2024-2664,DFN-CERT-2024-2571,DFN-CERT-2024-2540,DFN-CERT-2024-2525,DFN-CERT-2024-2512,DFN-CERT-2024-2509,DFN-CERT-2024-2497,DFN-CERT-2024-2492,DFN-CERT-2024-2466,DFN-CERT-2024-2463,DFN-CERT-2024-2456,DFN-CERT-2024-2425,DFN-CERT-2024-2399,DFN-CERT-2024-2340,DFN-CERT-2024-2332,DFN-CERT-2024-2251,DFN-CERT-2024-2245,DFN-CERT-2024-2244,DFN-CERT-2024-2227,WID-SEC-2025-0794,WID-SEC-2025-0225,WID-SEC-2025-0166,WID-SEC-2025-0148,WID-SEC-2025-0144,WID-SEC-2025-0143,WID-SEC-2025-0135,WID-SEC-2025-0001,WID-SEC-2024-3692,WID-SEC-2024-3691,WID-SEC-2024-3684,WID-SEC-2024-3196,WID-SEC-2024-3195,WID-SEC-2024-3191,WID-SEC-2024-2047,WID-SEC-2024-1951,WID-SEC-2024-1914,WID-SEC-2024-1889",
+10.129.4.125,LARCES-SERVER,8002,tcp,7.8,High,80,VendorFix,Python Command Injection Vulnerability (Oct 2024) - Windows,"Python is prone to a command injection vulnerability in the venv
+  module.","Installed version: 3.12.0
+Fixed version:     3.12.8
+Installation
+path / port:       8002/tcp
+
+",1.3.6.1.4.1.25623.1.0.114841,CVE-2024-9287,13b33abb-b176-462c-89de-d5152e979dea,self_scan_05-06-25_08-14,2025-06-05T11:14:56Z,4ab07624-87bd-49d1-8e5b-cf8ec143d427,,"Update to version 3.9.21, 3.10.16, 3.11.11, 3.12.8, 3.13.1
+  or later.","Python versions prior to 3.9.21, 3.10.x prior to 3.10.16,
+  3.11.x prior to 3.11.11, 3.12.x prior to 3.12.8 and 3.13.x prior to 3.13.1.","A vulnerability has been found in the venv module and CLI where
+  path names provided when creating a virtual environment were not quoted properly, allowing the
+  virtual environment creator to inject commands into virtual environment 'activation' scripts (ie
+  'source venv/bin/activate'). This means that attacker-controlled virtual environments are able to
+  run commands when the virtual environment is activated. Virtual environments which are not created
+  by an attacker or which aren't activated before being used (ie './venv/bin/python') are not
+  affected.","Checks if a vulnerable version is present on the target host.
+Details:
+Python Command Injection Vulnerability (Oct 2024) - Windows
+(OID: 1.3.6.1.4.1.25623.1.0.114841)
+Version used: 2025-02-11T05:38:07Z
+","Product: cpe:/a:python:python:3.12.0
+Method: Python Detection Consolidation
+(OID: 1.3.6.1.4.1.25623.1.0.112857)
+",,"DFN-CERT-2025-0655,DFN-CERT-2025-0179,DFN-CERT-2024-3255,DFN-CERT-2024-3220,DFN-CERT-2024-3182,DFN-CERT-2024-3141,DFN-CERT-2024-2837,WID-SEC-2024-3270",
+10.129.4.125,LARCES-SERVER,8000,tcp,7.8,High,80,VendorFix,Python Command Injection Vulnerability (Oct 2024) - Windows,"Python is prone to a command injection vulnerability in the venv
+  module.","Installed version: 3.12.0
+Fixed version:     3.12.8
+Installation
+path / port:       8000/tcp
+
+",1.3.6.1.4.1.25623.1.0.114841,CVE-2024-9287,13b33abb-b176-462c-89de-d5152e979dea,self_scan_05-06-25_08-14,2025-06-05T11:14:56Z,8f00563f-4e44-42df-a3eb-0e441425e495,,"Update to version 3.9.21, 3.10.16, 3.11.11, 3.12.8, 3.13.1
+  or later.","Python versions prior to 3.9.21, 3.10.x prior to 3.10.16,
+  3.11.x prior to 3.11.11, 3.12.x prior to 3.12.8 and 3.13.x prior to 3.13.1.","A vulnerability has been found in the venv module and CLI where
+  path names provided when creating a virtual environment were not quoted properly, allowing the
+  virtual environment creator to inject commands into virtual environment 'activation' scripts (ie
+  'source venv/bin/activate'). This means that attacker-controlled virtual environments are able to
+  run commands when the virtual environment is activated. Virtual environments which are not created
+  by an attacker or which aren't activated before being used (ie './venv/bin/python') are not
+  affected.","Checks if a vulnerable version is present on the target host.
+Details:
+Python Command Injection Vulnerability (Oct 2024) - Windows
+(OID: 1.3.6.1.4.1.25623.1.0.114841)
+Version used: 2025-02-11T05:38:07Z
+","Product: cpe:/a:python:python:3.12.0
+Method: Python Detection Consolidation
+(OID: 1.3.6.1.4.1.25623.1.0.112857)
+",,"DFN-CERT-2025-0655,DFN-CERT-2025-0179,DFN-CERT-2024-3255,DFN-CERT-2024-3220,DFN-CERT-2024-3182,DFN-CERT-2024-3141,DFN-CERT-2024-2837,WID-SEC-2024-3270",
+10.129.4.125,LARCES-SERVER,8001,tcp,7.8,High,80,VendorFix,Python Command Injection Vulnerability (Oct 2024) - Windows,"Python is prone to a command injection vulnerability in the venv
+  module.","Installed version: 3.12.0
+Fixed version:     3.12.8
+Installation
+path / port:       8001/tcp
+
+",1.3.6.1.4.1.25623.1.0.114841,CVE-2024-9287,13b33abb-b176-462c-89de-d5152e979dea,self_scan_05-06-25_08-14,2025-06-05T11:14:56Z,78811120-eced-4f79-8d52-f711e14961a4,,"Update to version 3.9.21, 3.10.16, 3.11.11, 3.12.8, 3.13.1
+  or later.","Python versions prior to 3.9.21, 3.10.x prior to 3.10.16,
+  3.11.x prior to 3.11.11, 3.12.x prior to 3.12.8 and 3.13.x prior to 3.13.1.","A vulnerability has been found in the venv module and CLI where
+  path names provided when creating a virtual environment were not quoted properly, allowing the
+  virtual environment creator to inject commands into virtual environment 'activation' scripts (ie
+  'source venv/bin/activate'). This means that attacker-controlled virtual environments are able to
+  run commands when the virtual environment is activated. Virtual environments which are not created
+  by an attacker or which aren't activated before being used (ie './venv/bin/python') are not
+  affected.","Checks if a vulnerable version is present on the target host.
+Details:
+Python Command Injection Vulnerability (Oct 2024) - Windows
+(OID: 1.3.6.1.4.1.25623.1.0.114841)
+Version used: 2025-02-11T05:38:07Z
+","Product: cpe:/a:python:python:3.12.0
+Method: Python Detection Consolidation
+(OID: 1.3.6.1.4.1.25623.1.0.112857)
+",,"DFN-CERT-2025-0655,DFN-CERT-2025-0179,DFN-CERT-2024-3255,DFN-CERT-2024-3220,DFN-CERT-2024-3182,DFN-CERT-2024-3141,DFN-CERT-2024-2837,WID-SEC-2024-3270",
+10.129.4.125,LARCES-SERVER,5000,tcp,7.8,High,80,VendorFix,Python Command Injection Vulnerability (Oct 2024) - Windows,"Python is prone to a command injection vulnerability in the venv
+  module.","Installed version: 3.10.12
+Fixed version:     3.10.16
+Installation
+path / port:       5000/tcp
+
+",1.3.6.1.4.1.25623.1.0.114841,CVE-2024-9287,13b33abb-b176-462c-89de-d5152e979dea,self_scan_05-06-25_08-14,2025-06-05T11:14:56Z,ffbd28c5-645d-406e-883c-89d025a2cb35,,"Update to version 3.9.21, 3.10.16, 3.11.11, 3.12.8, 3.13.1
+  or later.","Python versions prior to 3.9.21, 3.10.x prior to 3.10.16,
+  3.11.x prior to 3.11.11, 3.12.x prior to 3.12.8 and 3.13.x prior to 3.13.1.","A vulnerability has been found in the venv module and CLI where
+  path names provided when creating a virtual environment were not quoted properly, allowing the
+  virtual environment creator to inject commands into virtual environment 'activation' scripts (ie
+  'source venv/bin/activate'). This means that attacker-controlled virtual environments are able to
+  run commands when the virtual environment is activated. Virtual environments which are not created
+  by an attacker or which aren't activated before being used (ie './venv/bin/python') are not
+  affected.","Checks if a vulnerable version is present on the target host.
+Details:
+Python Command Injection Vulnerability (Oct 2024) - Windows
+(OID: 1.3.6.1.4.1.25623.1.0.114841)
+Version used: 2025-02-11T05:38:07Z
+","Product: cpe:/a:python:python:3.10.12
+Method: Python Detection Consolidation
+(OID: 1.3.6.1.4.1.25623.1.0.112857)
+",,"DFN-CERT-2025-0655,DFN-CERT-2025-0179,DFN-CERT-2024-3255,DFN-CERT-2024-3220,DFN-CERT-2024-3182,DFN-CERT-2024-3141,DFN-CERT-2024-2837,WID-SEC-2024-3270",
+10.129.4.125,LARCES-SERVER,8001,tcp,7.5,High,80,WillNotFix,Python <= 3.12.1 RecursionError Vulnerability - Windows,Python is prone to a 'RecursionError' vulnerability.,"Installed version: 3.12.0
+Fixed version:     None
+Installation
+path / port:       8001/tcp
+
+",1.3.6.1.4.1.25623.1.0.104816,CVE-2023-36632,13b33abb-b176-462c-89de-d5152e979dea,self_scan_05-06-25_08-14,2025-06-05T11:14:56Z,302412ac-d85d-4732-8c07-bae0e9d4359e,,"No known solution was made available for at least one year
+  since the disclosure of this vulnerability. Likely none will be provided anymore. General solution
+  options are to upgrade to a newer release, disable respective features, remove the product or
+  replace the product by another one.
+
+  NOTE: email.utils.parseaddr is categorized as a Legacy API in the documentation of the Python
+  email package. Applications should instead use the email.parser.BytesParser or
+  email.parser.Parser class.","The legacy email.utils.parseaddr function in Python through
+  3.12.1.","The legacy email.utils.parseaddr function allows attackers to
+  trigger 'RecursionError: maximum recursion depth exceeded while calling a Python object' via a
+  crafted argument. This argument is plausibly an untrusted value from an application's input data
+  that was supposed to contain a name and an e-mail address.
+
+  NOTE: The vendor's perspective is that this is neither a vulnerability nor a bug. The email
+  package is intended to have size limits and to throw an exception when limits are exceeded.","Checks if a vulnerable version is present on the target host.
+Details:
+Python <= 3.12.1 'RecursionError' Vulnerability - Windows
+(OID: 1.3.6.1.4.1.25623.1.0.104816)
+Version used: 2024-02-05T14:36:57Z
+","Product: cpe:/a:python:python:3.12.0
+Method: Python Detection Consolidation
+(OID: 1.3.6.1.4.1.25623.1.0.112857)
+",,"DFN-CERT-2024-1003,WID-SEC-2025-0225,WID-SEC-2024-0885,WID-SEC-2023-1561",
+10.129.4.125,LARCES-SERVER,5000,tcp,7.5,High,80,VendorFix,Python DoS Vulnerability (Mar 2024) - Windows,"Python is prone to a denial of service (DoS) vulnerability in
+  libexpat.","Installed version: 3.10.12
+Fixed version:     3.10.14
+Installation
+path / port:       5000/tcp
+
+",1.3.6.1.4.1.25623.1.0.170815,CVE-2023-52425,13b33abb-b176-462c-89de-d5152e979dea,self_scan_05-06-25_08-14,2025-06-05T11:14:56Z,eef27255-afeb-4afc-b597-4e5220e07896,,"Update to version 3.8.19, 3.9.19, 3.10.14, 3.11.9, 3.12.3
+  or later.","Python prior to version 3.8.19, 3.9.x prior to 3.9.19, 3.10.x
+  prior to 3.10.14, 3.11.x prior to 3.11.9 and 3.12.x prior to 3.12.3.","libexpat allows a denial of service (resource consumption)
+  because many full reparsings are required in the case of a large token for which multiple buffer
+  fills are needed.
+
+  Also, on Windows urllib.request no longer resolves the hostname before checking it against the
+  system's proxy bypass list.","Checks if a vulnerable version is present on the target host.
+Details:
+Python DoS Vulnerability (Mar 2024) - Windows
+(OID: 1.3.6.1.4.1.25623.1.0.170815)
+Version used: 2024-10-11T15:39:44Z
+","Product: cpe:/a:python:python:3.10.12
+Method: Python Detection Consolidation
+(OID: 1.3.6.1.4.1.25623.1.0.112857)
+",,"DFN-CERT-2025-0854,DFN-CERT-2024-2463,DFN-CERT-2024-2179,DFN-CERT-2024-1865,DFN-CERT-2024-1846,DFN-CERT-2024-1833,DFN-CERT-2024-1432,DFN-CERT-2024-1415,DFN-CERT-2024-1413,DFN-CERT-2024-1325,DFN-CERT-2024-1313,DFN-CERT-2024-1092,DFN-CERT-2024-0974,DFN-CERT-2024-0871,DFN-CERT-2024-0828,DFN-CERT-2024-0702,DFN-CERT-2024-0588,DFN-CERT-2024-0339,WID-SEC-2025-0225,WID-SEC-2024-3377,WID-SEC-2024-2100,WID-SEC-2024-1656,WID-SEC-2024-1642,WID-SEC-2024-1638,WID-SEC-2024-1637,WID-SEC-2024-1474,WID-SEC-2024-1226,WID-SEC-2024-1086,WID-SEC-2024-0687,WID-SEC-2024-0278",
+10.129.4.125,LARCES-SERVER,8000,tcp,7.5,High,80,VendorFix,Python DoS Vulnerability (Mar 2024) - Windows,"Python is prone to a denial of service (DoS) vulnerability in
+  libexpat.","Installed version: 3.12.0
+Fixed version:     3.12.3
+Installation
+path / port:       8000/tcp
+
+",1.3.6.1.4.1.25623.1.0.170815,CVE-2023-52425,13b33abb-b176-462c-89de-d5152e979dea,self_scan_05-06-25_08-14,2025-06-05T11:14:56Z,4a17957d-520d-401f-8d1b-b24c73afc324,,"Update to version 3.8.19, 3.9.19, 3.10.14, 3.11.9, 3.12.3
+  or later.","Python prior to version 3.8.19, 3.9.x prior to 3.9.19, 3.10.x
+  prior to 3.10.14, 3.11.x prior to 3.11.9 and 3.12.x prior to 3.12.3.","libexpat allows a denial of service (resource consumption)
+  because many full reparsings are required in the case of a large token for which multiple buffer
+  fills are needed.
+
+  Also, on Windows urllib.request no longer resolves the hostname before checking it against the
+  system's proxy bypass list.","Checks if a vulnerable version is present on the target host.
+Details:
+Python DoS Vulnerability (Mar 2024) - Windows
+(OID: 1.3.6.1.4.1.25623.1.0.170815)
+Version used: 2024-10-11T15:39:44Z
+","Product: cpe:/a:python:python:3.12.0
+Method: Python Detection Consolidation
+(OID: 1.3.6.1.4.1.25623.1.0.112857)
+",,"DFN-CERT-2025-0854,DFN-CERT-2024-2463,DFN-CERT-2024-2179,DFN-CERT-2024-1865,DFN-CERT-2024-1846,DFN-CERT-2024-1833,DFN-CERT-2024-1432,DFN-CERT-2024-1415,DFN-CERT-2024-1413,DFN-CERT-2024-1325,DFN-CERT-2024-1313,DFN-CERT-2024-1092,DFN-CERT-2024-0974,DFN-CERT-2024-0871,DFN-CERT-2024-0828,DFN-CERT-2024-0702,DFN-CERT-2024-0588,DFN-CERT-2024-0339,WID-SEC-2025-0225,WID-SEC-2024-3377,WID-SEC-2024-2100,WID-SEC-2024-1656,WID-SEC-2024-1642,WID-SEC-2024-1638,WID-SEC-2024-1637,WID-SEC-2024-1474,WID-SEC-2024-1226,WID-SEC-2024-1086,WID-SEC-2024-0687,WID-SEC-2024-0278",
+10.129.4.125,LARCES-SERVER,8001,tcp,7.5,High,80,VendorFix,Python DoS Vulnerability (Mar 2024) - Windows,"Python is prone to a denial of service (DoS) vulnerability in
+  libexpat.","Installed version: 3.12.0
+Fixed version:     3.12.3
+Installation
+path / port:       8001/tcp
+
+",1.3.6.1.4.1.25623.1.0.170815,CVE-2023-52425,13b33abb-b176-462c-89de-d5152e979dea,self_scan_05-06-25_08-14,2025-06-05T11:14:56Z,9f23b8e6-2a0d-4688-9fc5-1dbd2ec5fda2,,"Update to version 3.8.19, 3.9.19, 3.10.14, 3.11.9, 3.12.3
+  or later.","Python prior to version 3.8.19, 3.9.x prior to 3.9.19, 3.10.x
+  prior to 3.10.14, 3.11.x prior to 3.11.9 and 3.12.x prior to 3.12.3.","libexpat allows a denial of service (resource consumption)
+  because many full reparsings are required in the case of a large token for which multiple buffer
+  fills are needed.
+
+  Also, on Windows urllib.request no longer resolves the hostname before checking it against the
+  system's proxy bypass list.","Checks if a vulnerable version is present on the target host.
+Details:
+Python DoS Vulnerability (Mar 2024) - Windows
+(OID: 1.3.6.1.4.1.25623.1.0.170815)
+Version used: 2024-10-11T15:39:44Z
+","Product: cpe:/a:python:python:3.12.0
+Method: Python Detection Consolidation
+(OID: 1.3.6.1.4.1.25623.1.0.112857)
+",,"DFN-CERT-2025-0854,DFN-CERT-2024-2463,DFN-CERT-2024-2179,DFN-CERT-2024-1865,DFN-CERT-2024-1846,DFN-CERT-2024-1833,DFN-CERT-2024-1432,DFN-CERT-2024-1415,DFN-CERT-2024-1413,DFN-CERT-2024-1325,DFN-CERT-2024-1313,DFN-CERT-2024-1092,DFN-CERT-2024-0974,DFN-CERT-2024-0871,DFN-CERT-2024-0828,DFN-CERT-2024-0702,DFN-CERT-2024-0588,DFN-CERT-2024-0339,WID-SEC-2025-0225,WID-SEC-2024-3377,WID-SEC-2024-2100,WID-SEC-2024-1656,WID-SEC-2024-1642,WID-SEC-2024-1638,WID-SEC-2024-1637,WID-SEC-2024-1474,WID-SEC-2024-1226,WID-SEC-2024-1086,WID-SEC-2024-0687,WID-SEC-2024-0278",
+10.129.4.125,LARCES-SERVER,8002,tcp,7.5,High,80,VendorFix,Python DoS Vulnerability (Mar 2024) - Windows,"Python is prone to a denial of service (DoS) vulnerability in
+  libexpat.","Installed version: 3.12.0
+Fixed version:     3.12.3
+Installation
+path / port:       8002/tcp
+
+",1.3.6.1.4.1.25623.1.0.170815,CVE-2023-52425,13b33abb-b176-462c-89de-d5152e979dea,self_scan_05-06-25_08-14,2025-06-05T11:14:56Z,86540815-8c9d-45cb-b183-ab13c545a7cf,,"Update to version 3.8.19, 3.9.19, 3.10.14, 3.11.9, 3.12.3
+  or later.","Python prior to version 3.8.19, 3.9.x prior to 3.9.19, 3.10.x
+  prior to 3.10.14, 3.11.x prior to 3.11.9 and 3.12.x prior to 3.12.3.","libexpat allows a denial of service (resource consumption)
+  because many full reparsings are required in the case of a large token for which multiple buffer
+  fills are needed.
+
+  Also, on Windows urllib.request no longer resolves the hostname before checking it against the
+  system's proxy bypass list.","Checks if a vulnerable version is present on the target host.
+Details:
+Python DoS Vulnerability (Mar 2024) - Windows
+(OID: 1.3.6.1.4.1.25623.1.0.170815)
+Version used: 2024-10-11T15:39:44Z
+","Product: cpe:/a:python:python:3.12.0
+Method: Python Detection Consolidation
+(OID: 1.3.6.1.4.1.25623.1.0.112857)
+",,"DFN-CERT-2025-0854,DFN-CERT-2024-2463,DFN-CERT-2024-2179,DFN-CERT-2024-1865,DFN-CERT-2024-1846,DFN-CERT-2024-1833,DFN-CERT-2024-1432,DFN-CERT-2024-1415,DFN-CERT-2024-1413,DFN-CERT-2024-1325,DFN-CERT-2024-1313,DFN-CERT-2024-1092,DFN-CERT-2024-0974,DFN-CERT-2024-0871,DFN-CERT-2024-0828,DFN-CERT-2024-0702,DFN-CERT-2024-0588,DFN-CERT-2024-0339,WID-SEC-2025-0225,WID-SEC-2024-3377,WID-SEC-2024-2100,WID-SEC-2024-1656,WID-SEC-2024-1642,WID-SEC-2024-1638,WID-SEC-2024-1637,WID-SEC-2024-1474,WID-SEC-2024-1226,WID-SEC-2024-1086,WID-SEC-2024-0687,WID-SEC-2024-0278",
+10.129.4.125,LARCES-SERVER,5000,tcp,7.5,High,80,WillNotFix,Python <= 3.12.1 RecursionError Vulnerability - Windows,Python is prone to a 'RecursionError' vulnerability.,"Installed version: 3.10.12
+Fixed version:     None
+Installation
+path / port:       5000/tcp
+
+",1.3.6.1.4.1.25623.1.0.104816,CVE-2023-36632,13b33abb-b176-462c-89de-d5152e979dea,self_scan_05-06-25_08-14,2025-06-05T11:14:56Z,1003dc2f-0aab-45b2-bc3f-fa07d3605400,,"No known solution was made available for at least one year
+  since the disclosure of this vulnerability. Likely none will be provided anymore. General solution
+  options are to upgrade to a newer release, disable respective features, remove the product or
+  replace the product by another one.
+
+  NOTE: email.utils.parseaddr is categorized as a Legacy API in the documentation of the Python
+  email package. Applications should instead use the email.parser.BytesParser or
+  email.parser.Parser class.","The legacy email.utils.parseaddr function in Python through
+  3.12.1.","The legacy email.utils.parseaddr function allows attackers to
+  trigger 'RecursionError: maximum recursion depth exceeded while calling a Python object' via a
+  crafted argument. This argument is plausibly an untrusted value from an application's input data
+  that was supposed to contain a name and an e-mail address.
+
+  NOTE: The vendor's perspective is that this is neither a vulnerability nor a bug. The email
+  package is intended to have size limits and to throw an exception when limits are exceeded.","Checks if a vulnerable version is present on the target host.
+Details:
+Python <= 3.12.1 'RecursionError' Vulnerability - Windows
+(OID: 1.3.6.1.4.1.25623.1.0.104816)
+Version used: 2024-02-05T14:36:57Z
+","Product: cpe:/a:python:python:3.10.12
+Method: Python Detection Consolidation
+(OID: 1.3.6.1.4.1.25623.1.0.112857)
+",,"DFN-CERT-2024-1003,WID-SEC-2025-0225,WID-SEC-2024-0885,WID-SEC-2023-1561",
+10.129.4.125,LARCES-SERVER,8000,tcp,7.5,High,80,WillNotFix,Python <= 3.12.1 RecursionError Vulnerability - Windows,Python is prone to a 'RecursionError' vulnerability.,"Installed version: 3.12.0
+Fixed version:     None
+Installation
+path / port:       8000/tcp
+
+",1.3.6.1.4.1.25623.1.0.104816,CVE-2023-36632,13b33abb-b176-462c-89de-d5152e979dea,self_scan_05-06-25_08-14,2025-06-05T11:14:56Z,c80023f0-0e48-4c6d-85f6-6a67718023bd,,"No known solution was made available for at least one year
+  since the disclosure of this vulnerability. Likely none will be provided anymore. General solution
+  options are to upgrade to a newer release, disable respective features, remove the product or
+  replace the product by another one.
+
+  NOTE: email.utils.parseaddr is categorized as a Legacy API in the documentation of the Python
+  email package. Applications should instead use the email.parser.BytesParser or
+  email.parser.Parser class.","The legacy email.utils.parseaddr function in Python through
+  3.12.1.","The legacy email.utils.parseaddr function allows attackers to
+  trigger 'RecursionError: maximum recursion depth exceeded while calling a Python object' via a
+  crafted argument. This argument is plausibly an untrusted value from an application's input data
+  that was supposed to contain a name and an e-mail address.
+
+  NOTE: The vendor's perspective is that this is neither a vulnerability nor a bug. The email
+  package is intended to have size limits and to throw an exception when limits are exceeded.","Checks if a vulnerable version is present on the target host.
+Details:
+Python <= 3.12.1 'RecursionError' Vulnerability - Windows
+(OID: 1.3.6.1.4.1.25623.1.0.104816)
+Version used: 2024-02-05T14:36:57Z
+","Product: cpe:/a:python:python:3.12.0
+Method: Python Detection Consolidation
+(OID: 1.3.6.1.4.1.25623.1.0.112857)
+",,"DFN-CERT-2024-1003,WID-SEC-2025-0225,WID-SEC-2024-0885,WID-SEC-2023-1561",
+10.129.4.125,LARCES-SERVER,8002,tcp,5.6,Medium,80,VendorFix,Python Symlink Dereference Vulnerability (Mar 2024) - Windows,Python is prone to a symlink dereference vulnerability.,"Installed version: 3.12.0
+Fixed version:     3.12.1
+Installation
+path / port:       8002/tcp
+
+",1.3.6.1.4.1.25623.1.0.170812,CVE-2023-6597,13b33abb-b176-462c-89de-d5152e979dea,self_scan_05-06-25_08-14,2025-06-05T11:14:56Z,98f8e668-9fb7-4a74-8822-d73081fd1cdb,,"Update to version 3.8.19, 3.9.19, 3.10.14, 3.11.8, 3.12.1
+  or later.","Python prior to version 3.8.19, 3.9.x prior to 3.9.19, 3.10.x
+  prior to 3.10.14, 3.11.x prior to 3.11.8 and 3.12.x prior to 3.12.1.","The tempfile.TemporaryDirectory class would dereference symlinks
+  during cleanup of permissions-related errors. This means users which can run privileged programs
+  are potentially able to modify permissions of files referenced by symlinks in some
+  circumstances.","Checks if a vulnerable version is present on the target host.
+Details:
+Python Symlink Dereference Vulnerability (Mar 2024) - Windows
+(OID: 1.3.6.1.4.1.25623.1.0.170812)
+Version used: 2024-10-11T15:39:44Z
+","Product: cpe:/a:python:python:3.12.0
+Method: Python Detection Consolidation
+(OID: 1.3.6.1.4.1.25623.1.0.112857)
+",,"DFN-CERT-2025-0933,DFN-CERT-2025-0688,DFN-CERT-2025-0378,DFN-CERT-2025-0375,DFN-CERT-2025-0318,DFN-CERT-2025-0274,DFN-CERT-2025-0255,DFN-CERT-2025-0184,DFN-CERT-2024-3182,DFN-CERT-2024-2962,DFN-CERT-2024-1805,DFN-CERT-2024-1433,DFN-CERT-2024-1432,DFN-CERT-2024-0974,DFN-CERT-2024-0828,DFN-CERT-2024-0785,DFN-CERT-2024-0709,DFN-CERT-2024-0641,DFN-CERT-2024-0610,DFN-CERT-2024-0609,DFN-CERT-2024-0605,WID-SEC-2025-0794,WID-SEC-2025-0225,WID-SEC-2025-0001,WID-SEC-2024-3377,WID-SEC-2024-3195,WID-SEC-2024-1307,WID-SEC-2024-0687",
+10.129.4.125,LARCES-SERVER,8000,tcp,5.6,Medium,80,VendorFix,Python Symlink Dereference Vulnerability (Mar 2024) - Windows,Python is prone to a symlink dereference vulnerability.,"Installed version: 3.12.0
+Fixed version:     3.12.1
+Installation
+path / port:       8000/tcp
+
+",1.3.6.1.4.1.25623.1.0.170812,CVE-2023-6597,13b33abb-b176-462c-89de-d5152e979dea,self_scan_05-06-25_08-14,2025-06-05T11:14:56Z,f02835bd-ba38-4e44-8ef8-b40743922791,,"Update to version 3.8.19, 3.9.19, 3.10.14, 3.11.8, 3.12.1
+  or later.","Python prior to version 3.8.19, 3.9.x prior to 3.9.19, 3.10.x
+  prior to 3.10.14, 3.11.x prior to 3.11.8 and 3.12.x prior to 3.12.1.","The tempfile.TemporaryDirectory class would dereference symlinks
+  during cleanup of permissions-related errors. This means users which can run privileged programs
+  are potentially able to modify permissions of files referenced by symlinks in some
+  circumstances.","Checks if a vulnerable version is present on the target host.
+Details:
+Python Symlink Dereference Vulnerability (Mar 2024) - Windows
+(OID: 1.3.6.1.4.1.25623.1.0.170812)
+Version used: 2024-10-11T15:39:44Z
+","Product: cpe:/a:python:python:3.12.0
+Method: Python Detection Consolidation
+(OID: 1.3.6.1.4.1.25623.1.0.112857)
+",,"DFN-CERT-2025-0933,DFN-CERT-2025-0688,DFN-CERT-2025-0378,DFN-CERT-2025-0375,DFN-CERT-2025-0318,DFN-CERT-2025-0274,DFN-CERT-2025-0255,DFN-CERT-2025-0184,DFN-CERT-2024-3182,DFN-CERT-2024-2962,DFN-CERT-2024-1805,DFN-CERT-2024-1433,DFN-CERT-2024-1432,DFN-CERT-2024-0974,DFN-CERT-2024-0828,DFN-CERT-2024-0785,DFN-CERT-2024-0709,DFN-CERT-2024-0641,DFN-CERT-2024-0610,DFN-CERT-2024-0609,DFN-CERT-2024-0605,WID-SEC-2025-0794,WID-SEC-2025-0225,WID-SEC-2025-0001,WID-SEC-2024-3377,WID-SEC-2024-3195,WID-SEC-2024-1307,WID-SEC-2024-0687",
+10.129.4.125,LARCES-SERVER,5000,tcp,5.6,Medium,80,VendorFix,Python Symlink Dereference Vulnerability (Mar 2024) - Windows,Python is prone to a symlink dereference vulnerability.,"Installed version: 3.10.12
+Fixed version:     3.10.14
+Installation
+path / port:       5000/tcp
+
+",1.3.6.1.4.1.25623.1.0.170812,CVE-2023-6597,13b33abb-b176-462c-89de-d5152e979dea,self_scan_05-06-25_08-14,2025-06-05T11:14:56Z,fda7006c-5061-4677-9773-3c95c9d9796f,,"Update to version 3.8.19, 3.9.19, 3.10.14, 3.11.8, 3.12.1
+  or later.","Python prior to version 3.8.19, 3.9.x prior to 3.9.19, 3.10.x
+  prior to 3.10.14, 3.11.x prior to 3.11.8 and 3.12.x prior to 3.12.1.","The tempfile.TemporaryDirectory class would dereference symlinks
+  during cleanup of permissions-related errors. This means users which can run privileged programs
+  are potentially able to modify permissions of files referenced by symlinks in some
+  circumstances.","Checks if a vulnerable version is present on the target host.
+Details:
+Python Symlink Dereference Vulnerability (Mar 2024) - Windows
+(OID: 1.3.6.1.4.1.25623.1.0.170812)
+Version used: 2024-10-11T15:39:44Z
+","Product: cpe:/a:python:python:3.10.12
+Method: Python Detection Consolidation
+(OID: 1.3.6.1.4.1.25623.1.0.112857)
+",,"DFN-CERT-2025-0933,DFN-CERT-2025-0688,DFN-CERT-2025-0378,DFN-CERT-2025-0375,DFN-CERT-2025-0318,DFN-CERT-2025-0274,DFN-CERT-2025-0255,DFN-CERT-2025-0184,DFN-CERT-2024-3182,DFN-CERT-2024-2962,DFN-CERT-2024-1805,DFN-CERT-2024-1433,DFN-CERT-2024-1432,DFN-CERT-2024-0974,DFN-CERT-2024-0828,DFN-CERT-2024-0785,DFN-CERT-2024-0709,DFN-CERT-2024-0641,DFN-CERT-2024-0610,DFN-CERT-2024-0609,DFN-CERT-2024-0605,WID-SEC-2025-0794,WID-SEC-2025-0225,WID-SEC-2025-0001,WID-SEC-2024-3377,WID-SEC-2024-3195,WID-SEC-2024-1307,WID-SEC-2024-0687",
+10.129.4.125,LARCES-SERVER,8001,tcp,5.6,Medium,80,VendorFix,Python Symlink Dereference Vulnerability (Mar 2024) - Windows,Python is prone to a symlink dereference vulnerability.,"Installed version: 3.12.0
+Fixed version:     3.12.1
+Installation
+path / port:       8001/tcp
+
+",1.3.6.1.4.1.25623.1.0.170812,CVE-2023-6597,13b33abb-b176-462c-89de-d5152e979dea,self_scan_05-06-25_08-14,2025-06-05T11:14:56Z,d012501c-e666-49c5-93e0-adfb9ffefc95,,"Update to version 3.8.19, 3.9.19, 3.10.14, 3.11.8, 3.12.1
+  or later.","Python prior to version 3.8.19, 3.9.x prior to 3.9.19, 3.10.x
+  prior to 3.10.14, 3.11.x prior to 3.11.8 and 3.12.x prior to 3.12.1.","The tempfile.TemporaryDirectory class would dereference symlinks
+  during cleanup of permissions-related errors. This means users which can run privileged programs
+  are potentially able to modify permissions of files referenced by symlinks in some
+  circumstances.","Checks if a vulnerable version is present on the target host.
+Details:
+Python Symlink Dereference Vulnerability (Mar 2024) - Windows
+(OID: 1.3.6.1.4.1.25623.1.0.170812)
+Version used: 2024-10-11T15:39:44Z
+","Product: cpe:/a:python:python:3.12.0
+Method: Python Detection Consolidation
+(OID: 1.3.6.1.4.1.25623.1.0.112857)
+",,"DFN-CERT-2025-0933,DFN-CERT-2025-0688,DFN-CERT-2025-0378,DFN-CERT-2025-0375,DFN-CERT-2025-0318,DFN-CERT-2025-0274,DFN-CERT-2025-0255,DFN-CERT-2025-0184,DFN-CERT-2024-3182,DFN-CERT-2024-2962,DFN-CERT-2024-1805,DFN-CERT-2024-1433,DFN-CERT-2024-1432,DFN-CERT-2024-0974,DFN-CERT-2024-0828,DFN-CERT-2024-0785,DFN-CERT-2024-0709,DFN-CERT-2024-0641,DFN-CERT-2024-0610,DFN-CERT-2024-0609,DFN-CERT-2024-0605,WID-SEC-2025-0794,WID-SEC-2025-0225,WID-SEC-2025-0001,WID-SEC-2024-3377,WID-SEC-2024-3195,WID-SEC-2024-1307,WID-SEC-2024-0687",
+10.129.4.125,LARCES-SERVER,8001,tcp,5.5,Medium,80,NoneAvailable,Python Untrusted Search Path Vulnerability (Feb 2025) - Windows,"Python is prone to an untrusted search path vulnerability
+  in the mimetypes standard library.","Installed version: 3.12.0
+Fixed version:     None
+Installation
+path / port:       8001/tcp
+
+",1.3.6.1.4.1.25623.1.0.171228,CVE-2024-3220,13b33abb-b176-462c-89de-d5152e979dea,self_scan_05-06-25_08-14,2025-06-05T11:14:56Z,a4ff0d17-6a08-459f-bc4e-26dfd2fd3622,,"No known solution is available as of 18th February, 2025.
+  Information regarding this issue will be updated once solution details are available.",Python versions 3.13.2 and prior.,"There is a defect in the CPython standard library module
+  'mimetypes' where on Windows the default list of known file locations are writable meaning other
+  users can create invalid files to cause MemoryError to be raised on Python runtime startup or
+  have file extensions be interpreted as the incorrect file type.
+
+  This defect is caused by the default locations of Linux and macOS platforms (such as
+  '/etc/mime.types') also being used on Windows, where they are user-writable locations
+  ('C:\etc\mime.types').","Checks if a vulnerable version is present on the target host.
+Details:
+Python Untrusted Search Path Vulnerability (Feb 2025) - Windows
+(OID: 1.3.6.1.4.1.25623.1.0.171228)
+Version used: 2025-02-19T05:37:55Z
+","Product: cpe:/a:python:python:3.12.0
+Method: Python Detection Consolidation
+(OID: 1.3.6.1.4.1.25623.1.0.112857)
+",,WID-SEC-2025-0379,
+10.129.4.125,LARCES-SERVER,5000,tcp,5.5,Medium,80,VendorFix,Python Connection Race Vulnerability (Jul 2024) - Windows,Python is prone to a connection race vulnerability.,"Installed version: 3.10.12
+Fixed version:     3.10.15
+Installation
+path / port:       5000/tcp
+
+",1.3.6.1.4.1.25623.1.0.114743,CVE-2024-3219,13b33abb-b176-462c-89de-d5152e979dea,self_scan_05-06-25_08-14,2025-06-05T11:14:56Z,fcd6c58b-f545-4b3b-a36a-a037298bec51,,"Update to version 3.8.20, 3.9.20, 3.10.15, 3.11.10, 3.12.5 or
+  later.","Python version 3.5 prior to version 3.8.20, 3.9.x prior to
+  3.9.20, 3.10.x prior to 3.10.15, 3.11.x prior to 3.11.10 and 3.12.x prior to 3.12.5.
+
+  Platforms that support AF_UNIX such as Linux and macOS are not affected by this vulnerability.","The 'socket' module provides a pure-Python fallback to the
+  socket.socketpair() function for platforms that don't support AF_UNIX, such as Windows. This
+  pure-Python implementation uses AF_INET or AF_INET6 to create a local connected pair of sockets.
+  The connection between the two sockets was not verified before passing the two sockets back to the
+  user, which leaves the server socket vulnerable to a connection race from a malicious local
+  peer.","Checks if a vulnerable version is present on the target host.
+Details:
+Python Connection Race Vulnerability (Jul 2024) - Windows
+(OID: 1.3.6.1.4.1.25623.1.0.114743)
+Version used: 2024-10-11T15:39:44Z
+","Product: cpe:/a:python:python:3.10.12
+Method: Python Detection Consolidation
+(OID: 1.3.6.1.4.1.25623.1.0.112857)
+",,,
+10.129.4.125,LARCES-SERVER,5000,tcp,5.5,Medium,80,VendorFix,Python Access Control Vulnerability (May 2024) - Windows,Python is prone to an access control vulnerability.,"Installed version: 3.10.12
+Fixed version:     3.10.15
+Installation
+path / port:       5000/tcp
+
+",1.3.6.1.4.1.25623.1.0.152212,CVE-2024-4030,13b33abb-b176-462c-89de-d5152e979dea,self_scan_05-06-25_08-14,2025-06-05T11:14:56Z,430f53f3-4442-477d-a325-318f6702d745,,"Update to version 3.8.20, 3.9.20, 3.10.15, 3.11.10, 3.12.4 or
+  later.","Python prior to version 3.8.20, 3.9.x prior to 3.9.20, 3.10.x
+  prior to 3.10.15, 3.11.x prior to 3.11.10 and 3.12.x prior to 3.12.4.","On Windows a directory returned by tempfile.mkdtemp() would not
+  always have permissions set to restrict reading and writing to the temporary directory by other
+  users, instead usually inheriting the correct permissions from the default location. Alternate
+  configurations or users without a profile directory may not have the intended permissions.","Checks if a vulnerable version is present on the target host.
+Details:
+Python Access Control Vulnerability (May 2024) - Windows
+(OID: 1.3.6.1.4.1.25623.1.0.152212)
+Version used: 2024-10-11T15:39:44Z
+","Product: cpe:/a:python:python:3.10.12
+Method: Python Detection Consolidation
+(OID: 1.3.6.1.4.1.25623.1.0.112857)
+",,"DFN-CERT-2024-2340,DFN-CERT-2024-1908",
+10.129.4.125,LARCES-SERVER,8000,tcp,5.5,Medium,80,VendorFix,Python Access Control Vulnerability (May 2024) - Windows,Python is prone to an access control vulnerability.,"Installed version: 3.12.0
+Fixed version:     3.12.4
+Installation
+path / port:       8000/tcp
+
+",1.3.6.1.4.1.25623.1.0.152212,CVE-2024-4030,13b33abb-b176-462c-89de-d5152e979dea,self_scan_05-06-25_08-14,2025-06-05T11:14:56Z,041fd02b-2c9b-4459-9ad1-d9d12ec74b21,,"Update to version 3.8.20, 3.9.20, 3.10.15, 3.11.10, 3.12.4 or
+  later.","Python prior to version 3.8.20, 3.9.x prior to 3.9.20, 3.10.x
+  prior to 3.10.15, 3.11.x prior to 3.11.10 and 3.12.x prior to 3.12.4.","On Windows a directory returned by tempfile.mkdtemp() would not
+  always have permissions set to restrict reading and writing to the temporary directory by other
+  users, instead usually inheriting the correct permissions from the default location. Alternate
+  configurations or users without a profile directory may not have the intended permissions.","Checks if a vulnerable version is present on the target host.
+Details:
+Python Access Control Vulnerability (May 2024) - Windows
+(OID: 1.3.6.1.4.1.25623.1.0.152212)
+Version used: 2024-10-11T15:39:44Z
+","Product: cpe:/a:python:python:3.12.0
+Method: Python Detection Consolidation
+(OID: 1.3.6.1.4.1.25623.1.0.112857)
+",,"DFN-CERT-2024-2340,DFN-CERT-2024-1908",
+10.129.4.125,LARCES-SERVER,8001,tcp,5.5,Medium,80,VendorFix,Python Access Control Vulnerability (May 2024) - Windows,Python is prone to an access control vulnerability.,"Installed version: 3.12.0
+Fixed version:     3.12.4
+Installation
+path / port:       8001/tcp
+
+",1.3.6.1.4.1.25623.1.0.152212,CVE-2024-4030,13b33abb-b176-462c-89de-d5152e979dea,self_scan_05-06-25_08-14,2025-06-05T11:14:56Z,0c28e9ad-449e-40d0-9487-c3fdd4b47da3,,"Update to version 3.8.20, 3.9.20, 3.10.15, 3.11.10, 3.12.4 or
+  later.","Python prior to version 3.8.20, 3.9.x prior to 3.9.20, 3.10.x
+  prior to 3.10.15, 3.11.x prior to 3.11.10 and 3.12.x prior to 3.12.4.","On Windows a directory returned by tempfile.mkdtemp() would not
+  always have permissions set to restrict reading and writing to the temporary directory by other
+  users, instead usually inheriting the correct permissions from the default location. Alternate
+  configurations or users without a profile directory may not have the intended permissions.","Checks if a vulnerable version is present on the target host.
+Details:
+Python Access Control Vulnerability (May 2024) - Windows
+(OID: 1.3.6.1.4.1.25623.1.0.152212)
+Version used: 2024-10-11T15:39:44Z
+","Product: cpe:/a:python:python:3.12.0
+Method: Python Detection Consolidation
+(OID: 1.3.6.1.4.1.25623.1.0.112857)
+",,"DFN-CERT-2024-2340,DFN-CERT-2024-1908",
+10.129.4.125,LARCES-SERVER,8002,tcp,5.5,Medium,80,NoneAvailable,Python Untrusted Search Path Vulnerability (Feb 2025) - Windows,"Python is prone to an untrusted search path vulnerability
+  in the mimetypes standard library.","Installed version: 3.12.0
+Fixed version:     None
+Installation
+path / port:       8002/tcp
+
+",1.3.6.1.4.1.25623.1.0.171228,CVE-2024-3220,13b33abb-b176-462c-89de-d5152e979dea,self_scan_05-06-25_08-14,2025-06-05T11:14:56Z,5702a2e8-8148-45d1-b487-6900487fbff1,,"No known solution is available as of 18th February, 2025.
+  Information regarding this issue will be updated once solution details are available.",Python versions 3.13.2 and prior.,"There is a defect in the CPython standard library module
+  'mimetypes' where on Windows the default list of known file locations are writable meaning other
+  users can create invalid files to cause MemoryError to be raised on Python runtime startup or
+  have file extensions be interpreted as the incorrect file type.
+
+  This defect is caused by the default locations of Linux and macOS platforms (such as
+  '/etc/mime.types') also being used on Windows, where they are user-writable locations
+  ('C:\etc\mime.types').","Checks if a vulnerable version is present on the target host.
+Details:
+Python Untrusted Search Path Vulnerability (Feb 2025) - Windows
+(OID: 1.3.6.1.4.1.25623.1.0.171228)
+Version used: 2025-02-19T05:37:55Z
+","Product: cpe:/a:python:python:3.12.0
+Method: Python Detection Consolidation
+(OID: 1.3.6.1.4.1.25623.1.0.112857)
+",,WID-SEC-2025-0379,
+10.129.4.125,LARCES-SERVER,8002,tcp,5.5,Medium,80,VendorFix,Python Access Control Vulnerability (May 2024) - Windows,Python is prone to an access control vulnerability.,"Installed version: 3.12.0
+Fixed version:     3.12.4
+Installation
+path / port:       8002/tcp
+
+",1.3.6.1.4.1.25623.1.0.152212,CVE-2024-4030,13b33abb-b176-462c-89de-d5152e979dea,self_scan_05-06-25_08-14,2025-06-05T11:14:56Z,3c53edcc-1392-4c64-b1ae-2e21de2ab8b1,,"Update to version 3.8.20, 3.9.20, 3.10.15, 3.11.10, 3.12.4 or
+  later.","Python prior to version 3.8.20, 3.9.x prior to 3.9.20, 3.10.x
+  prior to 3.10.15, 3.11.x prior to 3.11.10 and 3.12.x prior to 3.12.4.","On Windows a directory returned by tempfile.mkdtemp() would not
+  always have permissions set to restrict reading and writing to the temporary directory by other
+  users, instead usually inheriting the correct permissions from the default location. Alternate
+  configurations or users without a profile directory may not have the intended permissions.","Checks if a vulnerable version is present on the target host.
+Details:
+Python Access Control Vulnerability (May 2024) - Windows
+(OID: 1.3.6.1.4.1.25623.1.0.152212)
+Version used: 2024-10-11T15:39:44Z
+","Product: cpe:/a:python:python:3.12.0
+Method: Python Detection Consolidation
+(OID: 1.3.6.1.4.1.25623.1.0.112857)
+",,"DFN-CERT-2024-2340,DFN-CERT-2024-1908",
+10.129.4.125,LARCES-SERVER,5000,tcp,5.5,Medium,80,NoneAvailable,Python Untrusted Search Path Vulnerability (Feb 2025) - Windows,"Python is prone to an untrusted search path vulnerability
+  in the mimetypes standard library.","Installed version: 3.10.12
+Fixed version:     None
+Installation
+path / port:       5000/tcp
+
+",1.3.6.1.4.1.25623.1.0.171228,CVE-2024-3220,13b33abb-b176-462c-89de-d5152e979dea,self_scan_05-06-25_08-14,2025-06-05T11:14:56Z,05d64233-502e-434e-904c-16a29151e0ae,,"No known solution is available as of 18th February, 2025.
+  Information regarding this issue will be updated once solution details are available.",Python versions 3.13.2 and prior.,"There is a defect in the CPython standard library module
+  'mimetypes' where on Windows the default list of known file locations are writable meaning other
+  users can create invalid files to cause MemoryError to be raised on Python runtime startup or
+  have file extensions be interpreted as the incorrect file type.
+
+  This defect is caused by the default locations of Linux and macOS platforms (such as
+  '/etc/mime.types') also being used on Windows, where they are user-writable locations
+  ('C:\etc\mime.types').","Checks if a vulnerable version is present on the target host.
+Details:
+Python Untrusted Search Path Vulnerability (Feb 2025) - Windows
+(OID: 1.3.6.1.4.1.25623.1.0.171228)
+Version used: 2025-02-19T05:37:55Z
+","Product: cpe:/a:python:python:3.10.12
+Method: Python Detection Consolidation
+(OID: 1.3.6.1.4.1.25623.1.0.112857)
+",,WID-SEC-2025-0379,
+10.129.4.125,LARCES-SERVER,8000,tcp,5.5,Medium,80,NoneAvailable,Python Untrusted Search Path Vulnerability (Feb 2025) - Windows,"Python is prone to an untrusted search path vulnerability
+  in the mimetypes standard library.","Installed version: 3.12.0
+Fixed version:     None
+Installation
+path / port:       8000/tcp
+
+",1.3.6.1.4.1.25623.1.0.171228,CVE-2024-3220,13b33abb-b176-462c-89de-d5152e979dea,self_scan_05-06-25_08-14,2025-06-05T11:14:56Z,207e07f4-c194-44f5-b0e6-6855680415e1,,"No known solution is available as of 18th February, 2025.
+  Information regarding this issue will be updated once solution details are available.",Python versions 3.13.2 and prior.,"There is a defect in the CPython standard library module
+  'mimetypes' where on Windows the default list of known file locations are writable meaning other
+  users can create invalid files to cause MemoryError to be raised on Python runtime startup or
+  have file extensions be interpreted as the incorrect file type.
+
+  This defect is caused by the default locations of Linux and macOS platforms (such as
+  '/etc/mime.types') also being used on Windows, where they are user-writable locations
+  ('C:\etc\mime.types').","Checks if a vulnerable version is present on the target host.
+Details:
+Python Untrusted Search Path Vulnerability (Feb 2025) - Windows
+(OID: 1.3.6.1.4.1.25623.1.0.171228)
+Version used: 2025-02-19T05:37:55Z
+","Product: cpe:/a:python:python:3.12.0
+Method: Python Detection Consolidation
+(OID: 1.3.6.1.4.1.25623.1.0.112857)
+",,WID-SEC-2025-0379,
+10.129.4.125,LARCES-SERVER,8000,tcp,5.5,Medium,80,VendorFix,Python Connection Race Vulnerability (Jul 2024) - Windows,Python is prone to a connection race vulnerability.,"Installed version: 3.12.0
+Fixed version:     3.12.5
+Installation
+path / port:       8000/tcp
+
+",1.3.6.1.4.1.25623.1.0.114743,CVE-2024-3219,13b33abb-b176-462c-89de-d5152e979dea,self_scan_05-06-25_08-14,2025-06-05T11:14:56Z,a91fa614-ae2e-4c8b-bca6-a3e8350d0e28,,"Update to version 3.8.20, 3.9.20, 3.10.15, 3.11.10, 3.12.5 or
+  later.","Python version 3.5 prior to version 3.8.20, 3.9.x prior to
+  3.9.20, 3.10.x prior to 3.10.15, 3.11.x prior to 3.11.10 and 3.12.x prior to 3.12.5.
+
+  Platforms that support AF_UNIX such as Linux and macOS are not affected by this vulnerability.","The 'socket' module provides a pure-Python fallback to the
+  socket.socketpair() function for platforms that don't support AF_UNIX, such as Windows. This
+  pure-Python implementation uses AF_INET or AF_INET6 to create a local connected pair of sockets.
+  The connection between the two sockets was not verified before passing the two sockets back to the
+  user, which leaves the server socket vulnerable to a connection race from a malicious local
+  peer.","Checks if a vulnerable version is present on the target host.
+Details:
+Python Connection Race Vulnerability (Jul 2024) - Windows
+(OID: 1.3.6.1.4.1.25623.1.0.114743)
+Version used: 2024-10-11T15:39:44Z
+","Product: cpe:/a:python:python:3.12.0
+Method: Python Detection Consolidation
+(OID: 1.3.6.1.4.1.25623.1.0.112857)
+",,,
+10.129.4.125,LARCES-SERVER,8001,tcp,5.5,Medium,80,VendorFix,Python Connection Race Vulnerability (Jul 2024) - Windows,Python is prone to a connection race vulnerability.,"Installed version: 3.12.0
+Fixed version:     3.12.5
+Installation
+path / port:       8001/tcp
+
+",1.3.6.1.4.1.25623.1.0.114743,CVE-2024-3219,13b33abb-b176-462c-89de-d5152e979dea,self_scan_05-06-25_08-14,2025-06-05T11:14:56Z,1c898c9b-7396-4839-8d01-b3ae110d8095,,"Update to version 3.8.20, 3.9.20, 3.10.15, 3.11.10, 3.12.5 or
+  later.","Python version 3.5 prior to version 3.8.20, 3.9.x prior to
+  3.9.20, 3.10.x prior to 3.10.15, 3.11.x prior to 3.11.10 and 3.12.x prior to 3.12.5.
+
+  Platforms that support AF_UNIX such as Linux and macOS are not affected by this vulnerability.","The 'socket' module provides a pure-Python fallback to the
+  socket.socketpair() function for platforms that don't support AF_UNIX, such as Windows. This
+  pure-Python implementation uses AF_INET or AF_INET6 to create a local connected pair of sockets.
+  The connection between the two sockets was not verified before passing the two sockets back to the
+  user, which leaves the server socket vulnerable to a connection race from a malicious local
+  peer.","Checks if a vulnerable version is present on the target host.
+Details:
+Python Connection Race Vulnerability (Jul 2024) - Windows
+(OID: 1.3.6.1.4.1.25623.1.0.114743)
+Version used: 2024-10-11T15:39:44Z
+","Product: cpe:/a:python:python:3.12.0
+Method: Python Detection Consolidation
+(OID: 1.3.6.1.4.1.25623.1.0.112857)
+",,,
+10.129.4.125,LARCES-SERVER,8002,tcp,5.5,Medium,80,VendorFix,Python Connection Race Vulnerability (Jul 2024) - Windows,Python is prone to a connection race vulnerability.,"Installed version: 3.12.0
+Fixed version:     3.12.5
+Installation
+path / port:       8002/tcp
+
+",1.3.6.1.4.1.25623.1.0.114743,CVE-2024-3219,13b33abb-b176-462c-89de-d5152e979dea,self_scan_05-06-25_08-14,2025-06-05T11:14:56Z,d744af46-7199-4fd3-a7bf-2bbc37369b7d,,"Update to version 3.8.20, 3.9.20, 3.10.15, 3.11.10, 3.12.5 or
+  later.","Python version 3.5 prior to version 3.8.20, 3.9.x prior to
+  3.9.20, 3.10.x prior to 3.10.15, 3.11.x prior to 3.11.10 and 3.12.x prior to 3.12.5.
+
+  Platforms that support AF_UNIX such as Linux and macOS are not affected by this vulnerability.","The 'socket' module provides a pure-Python fallback to the
+  socket.socketpair() function for platforms that don't support AF_UNIX, such as Windows. This
+  pure-Python implementation uses AF_INET or AF_INET6 to create a local connected pair of sockets.
+  The connection between the two sockets was not verified before passing the two sockets back to the
+  user, which leaves the server socket vulnerable to a connection race from a malicious local
+  peer.","Checks if a vulnerable version is present on the target host.
+Details:
+Python Connection Race Vulnerability (Jul 2024) - Windows
+(OID: 1.3.6.1.4.1.25623.1.0.114743)
+Version used: 2024-10-11T15:39:44Z
+","Product: cpe:/a:python:python:3.12.0
+Method: Python Detection Consolidation
+(OID: 1.3.6.1.4.1.25623.1.0.112857)
+",,,
+10.129.4.125,LARCES-SERVER,5000,tcp,5.3,Medium,80,VendorFix,"Python < 3.8.18, 3.9.x < 3.9.18, 3.10.x < 3.10.13, 3.11.x < 3.11.5 Security Bypass Vulnerability - Windows",Python is prone to a security bypass vulnerability.,"Installed version: 3.10.12
+Fixed version:     3.10.13
+Installation
+path / port:       5000/tcp
+
+",1.3.6.1.4.1.25623.1.0.124415,CVE-2023-40217,13b33abb-b176-462c-89de-d5152e979dea,self_scan_05-06-25_08-14,2025-06-05T11:14:56Z,e8674482-5dcb-4f3a-a9ad-150096f24da4,,"Update to version 3.8.18, 3.9.18, 3.10.13, 3.11.5 or later.","Python version prior to 3.8.18, 3.9.x prior to 3.9.18, 3.10.x
+  prior to 3.10.13 and 3.11.x prior to 3.11.5.","Instances of ssl.SSLSocket are vulnerable to a bypass of the
+  TLS handshake and included protections (like certificate verification) and treating sent
+  unencrypted data as if it were post-handshake TLS encrypted data if the socket is closed before
+  initiating its own handshake.","Checks if a vulnerable version is present on the target host.
+Details:
+Python < 3.8.18, 3.9.x < 3.9.18, 3.10.x < 3.10.13, 3.11.x < 3.11.5 Security ...
+(OID: 1.3.6.1.4.1.25623.1.0.124415)
+Version used: 2023-12-20T05:05:58Z
+","Product: cpe:/a:python:python:3.10.12
+Method: Python Detection Consolidation
+(OID: 1.3.6.1.4.1.25623.1.0.112857)
+",,"DFN-CERT-2025-0046,DFN-CERT-2024-3182,DFN-CERT-2024-2962,DFN-CERT-2024-1805,DFN-CERT-2024-0610,DFN-CERT-2024-0609,DFN-CERT-2023-3168,DFN-CERT-2023-2954,DFN-CERT-2023-2941,DFN-CERT-2023-2783,DFN-CERT-2023-2768,DFN-CERT-2023-2714,DFN-CERT-2023-2485,DFN-CERT-2023-2370,DFN-CERT-2023-2227,DFN-CERT-2023-2226,WID-SEC-2024-3377,WID-SEC-2024-0794,WID-SEC-2023-2850,WID-SEC-2023-2173",
+10.129.4.125,LARCES-SERVER,8002,tcp,5.3,Medium,80,WillNotFix,"Python <= 2.7.18, 3.x <= 3.12.3 Security Bypass Vulnerability - Windows","Python is prone to a security bypass vulnerability in the e-mail
+  module.","Installed version: 3.12.0
+Fixed version:     None
+Installation
+path / port:       8002/tcp
+
+",1.3.6.1.4.1.25623.1.0.104741,CVE-2023-27043,13b33abb-b176-462c-89de-d5152e979dea,self_scan_05-06-25_08-14,2025-06-05T11:14:56Z,c56f5249-2ab1-47e3-8d45-0b3f611e5107,,"No known solution was made available for at least one year since
+  the disclosure of this vulnerability. Likely none will be provided anymore. General solution options
+  are to upgrade to a newer release, disable respective features, remove the product or replace the
+  product by another one.
+
+  Note: The vendor mentions, that a patch was included in main branch 3.13. This version is expected
+  to release in October 2024. The patch might be included in the release of version 3.13 or later.",Python versions through 2.7.18 and 3.x through 3.12.3.,"The e-mail module incorrectly parses e-mail addresses which
+  contain a special character. This vulnerability allows attackers to send messages from e-mail
+  addresses that would otherwise be rejected.","Checks if a vulnerable version is present on the target host.
+Details:
+Python <= 2.7.18, 3.x <= 3.12.3 Security Bypass Vulnerability - Windows
+(OID: 1.3.6.1.4.1.25623.1.0.104741)
+Version used: 2024-05-14T05:05:26Z
+","Product: cpe:/a:python:python:3.12.0
+Method: Python Detection Consolidation
+(OID: 1.3.6.1.4.1.25623.1.0.112857)
+",,"DFN-CERT-2025-0809,DFN-CERT-2025-0179,DFN-CERT-2024-3182,DFN-CERT-2024-3141,DFN-CERT-2024-2425,DFN-CERT-2024-2340,DFN-CERT-2024-2186,DFN-CERT-2024-2179,DFN-CERT-2024-1391,DFN-CERT-2024-1325,DFN-CERT-2024-0744,DFN-CERT-2024-0609,DFN-CERT-2024-0605,DFN-CERT-2024-0408,DFN-CERT-2024-0278,DFN-CERT-2024-0227,DFN-CERT-2023-3186,DFN-CERT-2023-2651,WID-SEC-2025-0668,WID-SEC-2025-0225,WID-SEC-2024-3377,WID-SEC-2024-1086,WID-SEC-2024-0423,WID-SEC-2023-1097",
+10.129.4.125,LARCES-SERVER,8001,tcp,5.3,Medium,80,WillNotFix,"Python <= 2.7.18, 3.x <= 3.12.3 Security Bypass Vulnerability - Windows","Python is prone to a security bypass vulnerability in the e-mail
+  module.","Installed version: 3.12.0
+Fixed version:     None
+Installation
+path / port:       8001/tcp
+
+",1.3.6.1.4.1.25623.1.0.104741,CVE-2023-27043,13b33abb-b176-462c-89de-d5152e979dea,self_scan_05-06-25_08-14,2025-06-05T11:14:56Z,a24a1c19-6548-4bb2-a42a-b0849120e303,,"No known solution was made available for at least one year since
+  the disclosure of this vulnerability. Likely none will be provided anymore. General solution options
+  are to upgrade to a newer release, disable respective features, remove the product or replace the
+  product by another one.
+
+  Note: The vendor mentions, that a patch was included in main branch 3.13. This version is expected
+  to release in October 2024. The patch might be included in the release of version 3.13 or later.",Python versions through 2.7.18 and 3.x through 3.12.3.,"The e-mail module incorrectly parses e-mail addresses which
+  contain a special character. This vulnerability allows attackers to send messages from e-mail
+  addresses that would otherwise be rejected.","Checks if a vulnerable version is present on the target host.
+Details:
+Python <= 2.7.18, 3.x <= 3.12.3 Security Bypass Vulnerability - Windows
+(OID: 1.3.6.1.4.1.25623.1.0.104741)
+Version used: 2024-05-14T05:05:26Z
+","Product: cpe:/a:python:python:3.12.0
+Method: Python Detection Consolidation
+(OID: 1.3.6.1.4.1.25623.1.0.112857)
+",,"DFN-CERT-2025-0809,DFN-CERT-2025-0179,DFN-CERT-2024-3182,DFN-CERT-2024-3141,DFN-CERT-2024-2425,DFN-CERT-2024-2340,DFN-CERT-2024-2186,DFN-CERT-2024-2179,DFN-CERT-2024-1391,DFN-CERT-2024-1325,DFN-CERT-2024-0744,DFN-CERT-2024-0609,DFN-CERT-2024-0605,DFN-CERT-2024-0408,DFN-CERT-2024-0278,DFN-CERT-2024-0227,DFN-CERT-2023-3186,DFN-CERT-2023-2651,WID-SEC-2025-0668,WID-SEC-2025-0225,WID-SEC-2024-3377,WID-SEC-2024-1086,WID-SEC-2024-0423,WID-SEC-2023-1097",
+10.129.4.125,LARCES-SERVER,8000,tcp,5.3,Medium,80,WillNotFix,"Python <= 2.7.18, 3.x <= 3.12.3 Security Bypass Vulnerability - Windows","Python is prone to a security bypass vulnerability in the e-mail
+  module.","Installed version: 3.12.0
+Fixed version:     None
+Installation
+path / port:       8000/tcp
+
+",1.3.6.1.4.1.25623.1.0.104741,CVE-2023-27043,13b33abb-b176-462c-89de-d5152e979dea,self_scan_05-06-25_08-14,2025-06-05T11:14:56Z,3446aa32-6adf-4a8d-8101-2c563bdcbd70,,"No known solution was made available for at least one year since
+  the disclosure of this vulnerability. Likely none will be provided anymore. General solution options
+  are to upgrade to a newer release, disable respective features, remove the product or replace the
+  product by another one.
+
+  Note: The vendor mentions, that a patch was included in main branch 3.13. This version is expected
+  to release in October 2024. The patch might be included in the release of version 3.13 or later.",Python versions through 2.7.18 and 3.x through 3.12.3.,"The e-mail module incorrectly parses e-mail addresses which
+  contain a special character. This vulnerability allows attackers to send messages from e-mail
+  addresses that would otherwise be rejected.","Checks if a vulnerable version is present on the target host.
+Details:
+Python <= 2.7.18, 3.x <= 3.12.3 Security Bypass Vulnerability - Windows
+(OID: 1.3.6.1.4.1.25623.1.0.104741)
+Version used: 2024-05-14T05:05:26Z
+","Product: cpe:/a:python:python:3.12.0
+Method: Python Detection Consolidation
+(OID: 1.3.6.1.4.1.25623.1.0.112857)
+",,"DFN-CERT-2025-0809,DFN-CERT-2025-0179,DFN-CERT-2024-3182,DFN-CERT-2024-3141,DFN-CERT-2024-2425,DFN-CERT-2024-2340,DFN-CERT-2024-2186,DFN-CERT-2024-2179,DFN-CERT-2024-1391,DFN-CERT-2024-1325,DFN-CERT-2024-0744,DFN-CERT-2024-0609,DFN-CERT-2024-0605,DFN-CERT-2024-0408,DFN-CERT-2024-0278,DFN-CERT-2024-0227,DFN-CERT-2023-3186,DFN-CERT-2023-2651,WID-SEC-2025-0668,WID-SEC-2025-0225,WID-SEC-2024-3377,WID-SEC-2024-1086,WID-SEC-2024-0423,WID-SEC-2023-1097",
+10.129.4.125,LARCES-SERVER,5000,tcp,5.3,Medium,80,WillNotFix,"Python <= 2.7.18, 3.x <= 3.12.3 Security Bypass Vulnerability - Windows","Python is prone to a security bypass vulnerability in the e-mail
+  module.","Installed version: 3.10.12
+Fixed version:     None
+Installation
+path / port:       5000/tcp
+
+",1.3.6.1.4.1.25623.1.0.104741,CVE-2023-27043,13b33abb-b176-462c-89de-d5152e979dea,self_scan_05-06-25_08-14,2025-06-05T11:14:56Z,e87edbac-138d-4ab4-83b4-e9aa52d81a13,,"No known solution was made available for at least one year since
+  the disclosure of this vulnerability. Likely none will be provided anymore. General solution options
+  are to upgrade to a newer release, disable respective features, remove the product or replace the
+  product by another one.
+
+  Note: The vendor mentions, that a patch was included in main branch 3.13. This version is expected
+  to release in October 2024. The patch might be included in the release of version 3.13 or later.",Python versions through 2.7.18 and 3.x through 3.12.3.,"The e-mail module incorrectly parses e-mail addresses which
+  contain a special character. This vulnerability allows attackers to send messages from e-mail
+  addresses that would otherwise be rejected.","Checks if a vulnerable version is present on the target host.
+Details:
+Python <= 2.7.18, 3.x <= 3.12.3 Security Bypass Vulnerability - Windows
+(OID: 1.3.6.1.4.1.25623.1.0.104741)
+Version used: 2024-05-14T05:05:26Z
+","Product: cpe:/a:python:python:3.10.12
+Method: Python Detection Consolidation
+(OID: 1.3.6.1.4.1.25623.1.0.112857)
+",,"DFN-CERT-2025-0809,DFN-CERT-2025-0179,DFN-CERT-2024-3182,DFN-CERT-2024-3141,DFN-CERT-2024-2425,DFN-CERT-2024-2340,DFN-CERT-2024-2186,DFN-CERT-2024-2179,DFN-CERT-2024-1391,DFN-CERT-2024-1325,DFN-CERT-2024-0744,DFN-CERT-2024-0609,DFN-CERT-2024-0605,DFN-CERT-2024-0408,DFN-CERT-2024-0278,DFN-CERT-2024-0227,DFN-CERT-2023-3186,DFN-CERT-2023-2651,WID-SEC-2025-0668,WID-SEC-2025-0225,WID-SEC-2024-3377,WID-SEC-2024-1086,WID-SEC-2024-0423,WID-SEC-2023-1097",
+10.129.4.125,LARCES-SERVER,5000,tcp,5.0,Medium,80,VendorFix,Python Email Header Injection Vulnerability (Aug 2024) - Windows,"Python is prone to an email header injection vulnerability in
+  the email module.","Installed version: 3.10.12
+Fixed version:     3.10.15
+Installation
+path / port:       5000/tcp
+
+",1.3.6.1.4.1.25623.1.0.114733,CVE-2024-6923,13b33abb-b176-462c-89de-d5152e979dea,self_scan_05-06-25_08-14,2025-06-05T11:14:56Z,fa0bd68d-af17-4bea-8b51-69e39f017c9c,,"Update to version 3.8.20, 3.9.20, 3.10.15, 3.11.10, 3.12.5 or
+  later.","Python prior to version 3.8.20, 3.9.x prior to 3.9.20, 3.10.x
+  prior to 3.10.15, 3.11.x prior to 3.11.10 and 3.12.x prior to 3.12.5.","The email module didn't properly quote newlines for email
+  headers when serializing an email message allowing for header injection when an email is
+  serialized.","Checks if a vulnerable version is present on the target host.
+Details:
+Python Email Header Injection Vulnerability (Aug 2024) - Windows
+(OID: 1.3.6.1.4.1.25623.1.0.114733)
+Version used: 2024-10-11T15:39:44Z
+","Product: cpe:/a:python:python:3.10.12
+Method: Python Detection Consolidation
+(OID: 1.3.6.1.4.1.25623.1.0.112857)
+",,"DFN-CERT-2025-0179,DFN-CERT-2024-3182,DFN-CERT-2024-3083,DFN-CERT-2024-2937,DFN-CERT-2024-2571,DFN-CERT-2024-2525,DFN-CERT-2024-2512,DFN-CERT-2024-2497,DFN-CERT-2024-2496,DFN-CERT-2024-2466,DFN-CERT-2024-2456,DFN-CERT-2024-2425,DFN-CERT-2024-2340,DFN-CERT-2024-2271,DFN-CERT-2024-2251,DFN-CERT-2024-2245,DFN-CERT-2024-2186,DFN-CERT-2024-2152,DFN-CERT-2024-2049,WID-SEC-2025-0647,WID-SEC-2024-2033",
+10.129.4.125,LARCES-SERVER,8000,tcp,5.0,Medium,80,VendorFix,Python Email Header Injection Vulnerability (Aug 2024) - Windows,"Python is prone to an email header injection vulnerability in
+  the email module.","Installed version: 3.12.0
+Fixed version:     3.12.5
+Installation
+path / port:       8000/tcp
+
+",1.3.6.1.4.1.25623.1.0.114733,CVE-2024-6923,13b33abb-b176-462c-89de-d5152e979dea,self_scan_05-06-25_08-14,2025-06-05T11:14:56Z,6d0c47a5-e293-4bf4-bc36-4601d9015f56,,"Update to version 3.8.20, 3.9.20, 3.10.15, 3.11.10, 3.12.5 or
+  later.","Python prior to version 3.8.20, 3.9.x prior to 3.9.20, 3.10.x
+  prior to 3.10.15, 3.11.x prior to 3.11.10 and 3.12.x prior to 3.12.5.","The email module didn't properly quote newlines for email
+  headers when serializing an email message allowing for header injection when an email is
+  serialized.","Checks if a vulnerable version is present on the target host.
+Details:
+Python Email Header Injection Vulnerability (Aug 2024) - Windows
+(OID: 1.3.6.1.4.1.25623.1.0.114733)
+Version used: 2024-10-11T15:39:44Z
+","Product: cpe:/a:python:python:3.12.0
+Method: Python Detection Consolidation
+(OID: 1.3.6.1.4.1.25623.1.0.112857)
+",,"DFN-CERT-2025-0179,DFN-CERT-2024-3182,DFN-CERT-2024-3083,DFN-CERT-2024-2937,DFN-CERT-2024-2571,DFN-CERT-2024-2525,DFN-CERT-2024-2512,DFN-CERT-2024-2497,DFN-CERT-2024-2496,DFN-CERT-2024-2466,DFN-CERT-2024-2456,DFN-CERT-2024-2425,DFN-CERT-2024-2340,DFN-CERT-2024-2271,DFN-CERT-2024-2251,DFN-CERT-2024-2245,DFN-CERT-2024-2186,DFN-CERT-2024-2152,DFN-CERT-2024-2049,WID-SEC-2025-0647,WID-SEC-2024-2033",
+10.129.4.125,LARCES-SERVER,8001,tcp,5.0,Medium,80,VendorFix,Python Email Header Injection Vulnerability (Aug 2024) - Windows,"Python is prone to an email header injection vulnerability in
+  the email module.","Installed version: 3.12.0
+Fixed version:     3.12.5
+Installation
+path / port:       8001/tcp
+
+",1.3.6.1.4.1.25623.1.0.114733,CVE-2024-6923,13b33abb-b176-462c-89de-d5152e979dea,self_scan_05-06-25_08-14,2025-06-05T11:14:56Z,7b2415b8-ec76-48ab-af68-7ab92c1fa20a,,"Update to version 3.8.20, 3.9.20, 3.10.15, 3.11.10, 3.12.5 or
+  later.","Python prior to version 3.8.20, 3.9.x prior to 3.9.20, 3.10.x
+  prior to 3.10.15, 3.11.x prior to 3.11.10 and 3.12.x prior to 3.12.5.","The email module didn't properly quote newlines for email
+  headers when serializing an email message allowing for header injection when an email is
+  serialized.","Checks if a vulnerable version is present on the target host.
+Details:
+Python Email Header Injection Vulnerability (Aug 2024) - Windows
+(OID: 1.3.6.1.4.1.25623.1.0.114733)
+Version used: 2024-10-11T15:39:44Z
+","Product: cpe:/a:python:python:3.12.0
+Method: Python Detection Consolidation
+(OID: 1.3.6.1.4.1.25623.1.0.112857)
+",,"DFN-CERT-2025-0179,DFN-CERT-2024-3182,DFN-CERT-2024-3083,DFN-CERT-2024-2937,DFN-CERT-2024-2571,DFN-CERT-2024-2525,DFN-CERT-2024-2512,DFN-CERT-2024-2497,DFN-CERT-2024-2496,DFN-CERT-2024-2466,DFN-CERT-2024-2456,DFN-CERT-2024-2425,DFN-CERT-2024-2340,DFN-CERT-2024-2271,DFN-CERT-2024-2251,DFN-CERT-2024-2245,DFN-CERT-2024-2186,DFN-CERT-2024-2152,DFN-CERT-2024-2049,WID-SEC-2025-0647,WID-SEC-2024-2033",
+10.129.4.125,LARCES-SERVER,5000,tcp,5.0,Medium,80,VendorFix,Python SSL Vulnerability (Jun 2024) - Windows,Python is prone to a vulnerability in the ssl module.,"Installed version: 3.10.12
+Fixed version:     3.10.14
+Installation
+path / port:       5000/tcp
+
+",1.3.6.1.4.1.25623.1.0.152434,CVE-2024-0397,13b33abb-b176-462c-89de-d5152e979dea,self_scan_05-06-25_08-14,2025-06-05T11:14:56Z,bec18826-543a-4fb0-b3a4-74640cbbf56c,,"Update to version 3.8.20, 3.9.20, 3.10.14, 3.11.9, 3.12.3
+  or later.","Python prior to version 3.8.20, 3.9.x prior to 3.9.20, 3.10.x
+  prior to 3.10.14, 3.11.x prior to 3.11.9 and 3.12.x prior to 3.12.3.","A defect was discovered in the Python 'ssl' module where there
+  is a memory race condition with the ssl.SSLContext methods 'cert_store_stats()' and
+  'get_ca_certs()'. The race condition can be triggered if the methods are called at the same time
+  as certificates are loaded into the SSLContext, such as during the TLS handshake with a
+  certificate directory configured.","Checks if a vulnerable version is present on the target host.
+Details:
+Python SSL Vulnerability (Jun 2024) - Windows
+(OID: 1.3.6.1.4.1.25623.1.0.152434)
+Version used: 2024-10-11T15:39:44Z
+","Product: cpe:/a:python:python:3.10.12
+Method: Python Detection Consolidation
+(OID: 1.3.6.1.4.1.25623.1.0.112857)
+",,"DFN-CERT-2024-3182,DFN-CERT-2024-3083,DFN-CERT-2024-2448,DFN-CERT-2024-2245,DFN-CERT-2024-2227,DFN-CERT-2024-2186,DFN-CERT-2024-1908,DFN-CERT-2024-1851,DFN-CERT-2024-1833,DFN-CERT-2024-1702,WID-SEC-2025-0225,WID-SEC-2024-1645,WID-SEC-2024-1396",
+10.129.4.125,LARCES-SERVER,8002,tcp,5.0,Medium,80,VendorFix,Python Email Header Injection Vulnerability (Aug 2024) - Windows,"Python is prone to an email header injection vulnerability in
+  the email module.","Installed version: 3.12.0
+Fixed version:     3.12.5
+Installation
+path / port:       8002/tcp
+
+",1.3.6.1.4.1.25623.1.0.114733,CVE-2024-6923,13b33abb-b176-462c-89de-d5152e979dea,self_scan_05-06-25_08-14,2025-06-05T11:14:56Z,e9e0750d-bc53-4371-a661-bfd36b8f6b15,,"Update to version 3.8.20, 3.9.20, 3.10.15, 3.11.10, 3.12.5 or
+  later.","Python prior to version 3.8.20, 3.9.x prior to 3.9.20, 3.10.x
+  prior to 3.10.15, 3.11.x prior to 3.11.10 and 3.12.x prior to 3.12.5.","The email module didn't properly quote newlines for email
+  headers when serializing an email message allowing for header injection when an email is
+  serialized.","Checks if a vulnerable version is present on the target host.
+Details:
+Python Email Header Injection Vulnerability (Aug 2024) - Windows
+(OID: 1.3.6.1.4.1.25623.1.0.114733)
+Version used: 2024-10-11T15:39:44Z
+","Product: cpe:/a:python:python:3.12.0
+Method: Python Detection Consolidation
+(OID: 1.3.6.1.4.1.25623.1.0.112857)
+",,"DFN-CERT-2025-0179,DFN-CERT-2024-3182,DFN-CERT-2024-3083,DFN-CERT-2024-2937,DFN-CERT-2024-2571,DFN-CERT-2024-2525,DFN-CERT-2024-2512,DFN-CERT-2024-2497,DFN-CERT-2024-2496,DFN-CERT-2024-2466,DFN-CERT-2024-2456,DFN-CERT-2024-2425,DFN-CERT-2024-2340,DFN-CERT-2024-2271,DFN-CERT-2024-2251,DFN-CERT-2024-2245,DFN-CERT-2024-2186,DFN-CERT-2024-2152,DFN-CERT-2024-2049,WID-SEC-2025-0647,WID-SEC-2024-2033",
+10.129.4.125,LARCES-SERVER,8001,tcp,5.0,Medium,80,VendorFix,Python SSL Vulnerability (Jun 2024) - Windows,Python is prone to a vulnerability in the ssl module.,"Installed version: 3.12.0
+Fixed version:     3.12.3
+Installation
+path / port:       8001/tcp
+
+",1.3.6.1.4.1.25623.1.0.152434,CVE-2024-0397,13b33abb-b176-462c-89de-d5152e979dea,self_scan_05-06-25_08-14,2025-06-05T11:14:56Z,6558cf4a-67ee-440f-93ff-c3a8c0205a44,,"Update to version 3.8.20, 3.9.20, 3.10.14, 3.11.9, 3.12.3
+  or later.","Python prior to version 3.8.20, 3.9.x prior to 3.9.20, 3.10.x
+  prior to 3.10.14, 3.11.x prior to 3.11.9 and 3.12.x prior to 3.12.3.","A defect was discovered in the Python 'ssl' module where there
+  is a memory race condition with the ssl.SSLContext methods 'cert_store_stats()' and
+  'get_ca_certs()'. The race condition can be triggered if the methods are called at the same time
+  as certificates are loaded into the SSLContext, such as during the TLS handshake with a
+  certificate directory configured.","Checks if a vulnerable version is present on the target host.
+Details:
+Python SSL Vulnerability (Jun 2024) - Windows
+(OID: 1.3.6.1.4.1.25623.1.0.152434)
+Version used: 2024-10-11T15:39:44Z
+","Product: cpe:/a:python:python:3.12.0
+Method: Python Detection Consolidation
+(OID: 1.3.6.1.4.1.25623.1.0.112857)
+",,"DFN-CERT-2024-3182,DFN-CERT-2024-3083,DFN-CERT-2024-2448,DFN-CERT-2024-2245,DFN-CERT-2024-2227,DFN-CERT-2024-2186,DFN-CERT-2024-1908,DFN-CERT-2024-1851,DFN-CERT-2024-1833,DFN-CERT-2024-1702,WID-SEC-2025-0225,WID-SEC-2024-1645,WID-SEC-2024-1396",
+10.129.4.125,LARCES-SERVER,8002,tcp,5.0,Medium,80,VendorFix,Python IP Ranges Vulnerability (Jun 2024) - Windows,Python is prone to a vulnerability in the ipaddress module.,"Installed version: 3.12.0
+Fixed version:     3.12.4
+Installation
+path / port:       8002/tcp
+
+",1.3.6.1.4.1.25623.1.0.152431,CVE-2024-4032,13b33abb-b176-462c-89de-d5152e979dea,self_scan_05-06-25_08-14,2025-06-05T11:14:56Z,fe5e1d3a-eb71-4150-8462-b5e0644811c2,,"Update to version 3.8.20, 3.9.20, 3.10.15, 3.11.10, 3.12.4 or
+  later.","Python prior to version 3.8.20, 3.9.x prior to 3.9.20, 3.10.x
+  prior to 3.10.15, 3.11.x prior to 3.11.10 and 3.12.x prior to 3.12.4.","The 'ipaddress' module contained incorrect information about
+  whether certain IPv4 and IPv6 addresses were designated as 'globally reachable' or 'private'.
+  This affected the 'is_private' and 'is_global' properties of the ipaddress.IPv4Address,
+  ipaddress.IPv4Network, ipaddress.IPv6Address, and ipaddress.IPv6Network classes, where values
+  wouldn't be returned in accordance with the latest information from the IANA Special-Purpose
+  Address Registries.","Checks if a vulnerable version is present on the target host.
+Details:
+Python IP Ranges Vulnerability (Jun 2024) - Windows
+(OID: 1.3.6.1.4.1.25623.1.0.152431)
+Version used: 2024-10-11T15:39:44Z
+","Product: cpe:/a:python:python:3.12.0
+Method: Python Detection Consolidation
+(OID: 1.3.6.1.4.1.25623.1.0.112857)
+",,"DFN-CERT-2025-0655,DFN-CERT-2024-3182,DFN-CERT-2024-3083,DFN-CERT-2024-2993,DFN-CERT-2024-2525,DFN-CERT-2024-2512,DFN-CERT-2024-2448,DFN-CERT-2024-2340,DFN-CERT-2024-2251,DFN-CERT-2024-2227,DFN-CERT-2024-2186,DFN-CERT-2024-2152,DFN-CERT-2024-1908,DFN-CERT-2024-1833,DFN-CERT-2024-1702,DFN-CERT-2024-1615,WID-SEC-2025-0225,WID-SEC-2024-1396",
+10.129.4.125,LARCES-SERVER,8001,tcp,5.0,Medium,80,VendorFix,Python IP Ranges Vulnerability (Jun 2024) - Windows,Python is prone to a vulnerability in the ipaddress module.,"Installed version: 3.12.0
+Fixed version:     3.12.4
+Installation
+path / port:       8001/tcp
+
+",1.3.6.1.4.1.25623.1.0.152431,CVE-2024-4032,13b33abb-b176-462c-89de-d5152e979dea,self_scan_05-06-25_08-14,2025-06-05T11:14:56Z,61a26470-9c28-4aac-8600-b687e4e9ec8a,,"Update to version 3.8.20, 3.9.20, 3.10.15, 3.11.10, 3.12.4 or
+  later.","Python prior to version 3.8.20, 3.9.x prior to 3.9.20, 3.10.x
+  prior to 3.10.15, 3.11.x prior to 3.11.10 and 3.12.x prior to 3.12.4.","The 'ipaddress' module contained incorrect information about
+  whether certain IPv4 and IPv6 addresses were designated as 'globally reachable' or 'private'.
+  This affected the 'is_private' and 'is_global' properties of the ipaddress.IPv4Address,
+  ipaddress.IPv4Network, ipaddress.IPv6Address, and ipaddress.IPv6Network classes, where values
+  wouldn't be returned in accordance with the latest information from the IANA Special-Purpose
+  Address Registries.","Checks if a vulnerable version is present on the target host.
+Details:
+Python IP Ranges Vulnerability (Jun 2024) - Windows
+(OID: 1.3.6.1.4.1.25623.1.0.152431)
+Version used: 2024-10-11T15:39:44Z
+","Product: cpe:/a:python:python:3.12.0
+Method: Python Detection Consolidation
+(OID: 1.3.6.1.4.1.25623.1.0.112857)
+",,"DFN-CERT-2025-0655,DFN-CERT-2024-3182,DFN-CERT-2024-3083,DFN-CERT-2024-2993,DFN-CERT-2024-2525,DFN-CERT-2024-2512,DFN-CERT-2024-2448,DFN-CERT-2024-2340,DFN-CERT-2024-2251,DFN-CERT-2024-2227,DFN-CERT-2024-2186,DFN-CERT-2024-2152,DFN-CERT-2024-1908,DFN-CERT-2024-1833,DFN-CERT-2024-1702,DFN-CERT-2024-1615,WID-SEC-2025-0225,WID-SEC-2024-1396",
+10.129.4.125,LARCES-SERVER,8000,tcp,5.0,Medium,80,VendorFix,Python SSL Vulnerability (Jun 2024) - Windows,Python is prone to a vulnerability in the ssl module.,"Installed version: 3.12.0
+Fixed version:     3.12.3
+Installation
+path / port:       8000/tcp
+
+",1.3.6.1.4.1.25623.1.0.152434,CVE-2024-0397,13b33abb-b176-462c-89de-d5152e979dea,self_scan_05-06-25_08-14,2025-06-05T11:14:56Z,12d0bcfd-a8e1-45c0-a08b-6b1887eaaa42,,"Update to version 3.8.20, 3.9.20, 3.10.14, 3.11.9, 3.12.3
+  or later.","Python prior to version 3.8.20, 3.9.x prior to 3.9.20, 3.10.x
+  prior to 3.10.14, 3.11.x prior to 3.11.9 and 3.12.x prior to 3.12.3.","A defect was discovered in the Python 'ssl' module where there
+  is a memory race condition with the ssl.SSLContext methods 'cert_store_stats()' and
+  'get_ca_certs()'. The race condition can be triggered if the methods are called at the same time
+  as certificates are loaded into the SSLContext, such as during the TLS handshake with a
+  certificate directory configured.","Checks if a vulnerable version is present on the target host.
+Details:
+Python SSL Vulnerability (Jun 2024) - Windows
+(OID: 1.3.6.1.4.1.25623.1.0.152434)
+Version used: 2024-10-11T15:39:44Z
+","Product: cpe:/a:python:python:3.12.0
+Method: Python Detection Consolidation
+(OID: 1.3.6.1.4.1.25623.1.0.112857)
+",,"DFN-CERT-2024-3182,DFN-CERT-2024-3083,DFN-CERT-2024-2448,DFN-CERT-2024-2245,DFN-CERT-2024-2227,DFN-CERT-2024-2186,DFN-CERT-2024-1908,DFN-CERT-2024-1851,DFN-CERT-2024-1833,DFN-CERT-2024-1702,WID-SEC-2025-0225,WID-SEC-2024-1645,WID-SEC-2024-1396",
+10.129.4.125,LARCES-SERVER,5000,tcp,5.0,Medium,80,VendorFix,Python IP Ranges Vulnerability (Jun 2024) - Windows,Python is prone to a vulnerability in the ipaddress module.,"Installed version: 3.10.12
+Fixed version:     3.10.15
+Installation
+path / port:       5000/tcp
+
+",1.3.6.1.4.1.25623.1.0.152431,CVE-2024-4032,13b33abb-b176-462c-89de-d5152e979dea,self_scan_05-06-25_08-14,2025-06-05T11:14:56Z,885127ef-7e16-40cd-9db1-98d06484f922,,"Update to version 3.8.20, 3.9.20, 3.10.15, 3.11.10, 3.12.4 or
+  later.","Python prior to version 3.8.20, 3.9.x prior to 3.9.20, 3.10.x
+  prior to 3.10.15, 3.11.x prior to 3.11.10 and 3.12.x prior to 3.12.4.","The 'ipaddress' module contained incorrect information about
+  whether certain IPv4 and IPv6 addresses were designated as 'globally reachable' or 'private'.
+  This affected the 'is_private' and 'is_global' properties of the ipaddress.IPv4Address,
+  ipaddress.IPv4Network, ipaddress.IPv6Address, and ipaddress.IPv6Network classes, where values
+  wouldn't be returned in accordance with the latest information from the IANA Special-Purpose
+  Address Registries.","Checks if a vulnerable version is present on the target host.
+Details:
+Python IP Ranges Vulnerability (Jun 2024) - Windows
+(OID: 1.3.6.1.4.1.25623.1.0.152431)
+Version used: 2024-10-11T15:39:44Z
+","Product: cpe:/a:python:python:3.10.12
+Method: Python Detection Consolidation
+(OID: 1.3.6.1.4.1.25623.1.0.112857)
+",,"DFN-CERT-2025-0655,DFN-CERT-2024-3182,DFN-CERT-2024-3083,DFN-CERT-2024-2993,DFN-CERT-2024-2525,DFN-CERT-2024-2512,DFN-CERT-2024-2448,DFN-CERT-2024-2340,DFN-CERT-2024-2251,DFN-CERT-2024-2227,DFN-CERT-2024-2186,DFN-CERT-2024-2152,DFN-CERT-2024-1908,DFN-CERT-2024-1833,DFN-CERT-2024-1702,DFN-CERT-2024-1615,WID-SEC-2025-0225,WID-SEC-2024-1396",
+10.129.4.125,LARCES-SERVER,8000,tcp,5.0,Medium,80,VendorFix,Python IP Ranges Vulnerability (Jun 2024) - Windows,Python is prone to a vulnerability in the ipaddress module.,"Installed version: 3.12.0
+Fixed version:     3.12.4
+Installation
+path / port:       8000/tcp
+
+",1.3.6.1.4.1.25623.1.0.152431,CVE-2024-4032,13b33abb-b176-462c-89de-d5152e979dea,self_scan_05-06-25_08-14,2025-06-05T11:14:56Z,15a38dfa-0033-4077-9ef1-a74dc95b68e3,,"Update to version 3.8.20, 3.9.20, 3.10.15, 3.11.10, 3.12.4 or
+  later.","Python prior to version 3.8.20, 3.9.x prior to 3.9.20, 3.10.x
+  prior to 3.10.15, 3.11.x prior to 3.11.10 and 3.12.x prior to 3.12.4.","The 'ipaddress' module contained incorrect information about
+  whether certain IPv4 and IPv6 addresses were designated as 'globally reachable' or 'private'.
+  This affected the 'is_private' and 'is_global' properties of the ipaddress.IPv4Address,
+  ipaddress.IPv4Network, ipaddress.IPv6Address, and ipaddress.IPv6Network classes, where values
+  wouldn't be returned in accordance with the latest information from the IANA Special-Purpose
+  Address Registries.","Checks if a vulnerable version is present on the target host.
+Details:
+Python IP Ranges Vulnerability (Jun 2024) - Windows
+(OID: 1.3.6.1.4.1.25623.1.0.152431)
+Version used: 2024-10-11T15:39:44Z
+","Product: cpe:/a:python:python:3.12.0
+Method: Python Detection Consolidation
+(OID: 1.3.6.1.4.1.25623.1.0.112857)
+",,"DFN-CERT-2025-0655,DFN-CERT-2024-3182,DFN-CERT-2024-3083,DFN-CERT-2024-2993,DFN-CERT-2024-2525,DFN-CERT-2024-2512,DFN-CERT-2024-2448,DFN-CERT-2024-2340,DFN-CERT-2024-2251,DFN-CERT-2024-2227,DFN-CERT-2024-2186,DFN-CERT-2024-2152,DFN-CERT-2024-1908,DFN-CERT-2024-1833,DFN-CERT-2024-1702,DFN-CERT-2024-1615,WID-SEC-2025-0225,WID-SEC-2024-1396",
+10.129.4.125,LARCES-SERVER,8002,tcp,5.0,Medium,80,VendorFix,Python SSL Vulnerability (Jun 2024) - Windows,Python is prone to a vulnerability in the ssl module.,"Installed version: 3.12.0
+Fixed version:     3.12.3
+Installation
+path / port:       8002/tcp
+
+",1.3.6.1.4.1.25623.1.0.152434,CVE-2024-0397,13b33abb-b176-462c-89de-d5152e979dea,self_scan_05-06-25_08-14,2025-06-05T11:14:56Z,fc30bbc0-fe28-452d-9e78-90262b731fee,,"Update to version 3.8.20, 3.9.20, 3.10.14, 3.11.9, 3.12.3
+  or later.","Python prior to version 3.8.20, 3.9.x prior to 3.9.20, 3.10.x
+  prior to 3.10.14, 3.11.x prior to 3.11.9 and 3.12.x prior to 3.12.3.","A defect was discovered in the Python 'ssl' module where there
+  is a memory race condition with the ssl.SSLContext methods 'cert_store_stats()' and
+  'get_ca_certs()'. The race condition can be triggered if the methods are called at the same time
+  as certificates are loaded into the SSLContext, such as during the TLS handshake with a
+  certificate directory configured.","Checks if a vulnerable version is present on the target host.
+Details:
+Python SSL Vulnerability (Jun 2024) - Windows
+(OID: 1.3.6.1.4.1.25623.1.0.152434)
+Version used: 2024-10-11T15:39:44Z
+","Product: cpe:/a:python:python:3.12.0
+Method: Python Detection Consolidation
+(OID: 1.3.6.1.4.1.25623.1.0.112857)
+",,"DFN-CERT-2024-3182,DFN-CERT-2024-3083,DFN-CERT-2024-2448,DFN-CERT-2024-2245,DFN-CERT-2024-2227,DFN-CERT-2024-2186,DFN-CERT-2024-1908,DFN-CERT-2024-1851,DFN-CERT-2024-1833,DFN-CERT-2024-1702,WID-SEC-2025-0225,WID-SEC-2024-1645,WID-SEC-2024-1396",
+10.129.4.125,LARCES-SERVER,8002,tcp,5.0,Medium,99,Mitigation,SSL/TLS: Known Untrusted / Dangerous Certificate Authority (CA) Detection,"The service is using an SSL/TLS certificate from a known
+  untrusted and/or dangerous certificate authority (CA).","The certificate of the remote service is signed by the following untrusted and/or dangerous CA:
+
+Issuer: CN=localhost,O=Luminator,L=Caxias do Sul,ST=RS,C=BR
+
+Certificate details:
+fingerprint (SHA-1)             | 264544379FDBF127C25A667B5E2A7EA7620B996C
+fingerprint (SHA-256)           | 5668884BF9B84C38B81313EBF424434CB70F5D9930CDCF5C845A915352399F30
+issued by                       | CN=localhost,O=Luminator,L=Caxias do Sul,ST=RS,C=BR
+public key algorithm            | RSA
+public key size (bits)          | 2048
+serial                          | 745F8ECBC16B0434221410E84BC2561583C6ED19
+signature algorithm             | sha256WithRSAEncryption
+subject                         | CN=localhost,O=Luminator,L=Caxias do Sul,ST=RS,C=BR
+subject alternative names (SAN) | None
+valid from                      | 2024-08-26 20:26:21 UTC
+valid until                     | 2084-08-11 20:26:21 UTC
+",1.3.6.1.4.1.25623.1.0.113054,,13b33abb-b176-462c-89de-d5152e979dea,self_scan_05-06-25_08-14,2025-06-05T11:14:56Z,292c3e49-edba-4c5f-9540-4269fc720002,"An attacker could use this for man-in-the-middle (MITM) attacks,
+  accessing sensible data and other attacks.","Replace the SSL/TLS certificate with one signed by a trusted
+  CA.",,,"The script reads the certificate used by the target host and
+  checks if it was signed by a known untrusted and/or dangerous CA.
+Details:
+SSL/TLS: Known Untrusted / Dangerous Certificate Authority (CA) Detection
+(OID: 1.3.6.1.4.1.25623.1.0.113054)
+Version used: 2024-06-14T05:05:48Z
+","Product: cpe:/a:ietf:transport_layer_security
+Method: SSL/TLS: Collect and Report Certificate Details
+(OID: 1.3.6.1.4.1.25623.1.0.103692)
+",,,
+10.129.4.125,LARCES-SERVER,5000,tcp,4.9,Medium,80,VendorFix,Python Multiple Vulnerabilities (Mar 2024) - Windows,Python is prone to multiple vulnerabilities.,"Installed version: 3.10.12
+Fixed version:     3.10.14
+Installation
+path / port:       5000/tcp
+
+",1.3.6.1.4.1.25623.1.0.151952,CVE-2024-0450,13b33abb-b176-462c-89de-d5152e979dea,self_scan_05-06-25_08-14,2025-06-05T11:14:56Z,e7b4bdfa-34e8-4456-a27d-f431ea81c345,,"Update to version 3.8.19, 3.9.19, 3.10.14, 3.11.8, 3.12.2
+  or later.","Python prior to version 3.8.19, 3.9.x prior to 3.9.19, 3.10.x
+  prior to 3.10.14, 3.11.x prior to 3.11.8 and 3.12.x prior to 3.12.2.","The following vulnerabilities exist:
+
+  - CVE-2024-0450: Quoted zip-bomb protection for zipfile
+
+  - No CVE: crash in socket.if_indextoname() with a specific value (UINT_MAX).
+
+  - No CVE: .pth files with names starting with a dot or containing the hidden file attribute are
+  not skipped","Checks if a vulnerable version is present on the target host.
+Details:
+Python Multiple Vulnerabilities (Mar 2024) - Windows
+(OID: 1.3.6.1.4.1.25623.1.0.151952)
+Version used: 2024-10-11T15:39:44Z
+","Product: cpe:/a:python:python:3.10.12
+Method: Python Detection Consolidation
+(OID: 1.3.6.1.4.1.25623.1.0.112857)
+",,"DFN-CERT-2025-0933,DFN-CERT-2025-0132,DFN-CERT-2024-3182,DFN-CERT-2024-2994,DFN-CERT-2024-2993,DFN-CERT-2024-2962,DFN-CERT-2024-2745,DFN-CERT-2024-2179,DFN-CERT-2024-1846,DFN-CERT-2024-1833,DFN-CERT-2024-1805,DFN-CERT-2024-1645,DFN-CERT-2024-1433,DFN-CERT-2024-1432,DFN-CERT-2024-1415,DFN-CERT-2024-0828,DFN-CERT-2024-0785,DFN-CERT-2024-0782,WID-SEC-2025-0794,WID-SEC-2025-0225,WID-SEC-2025-0148,WID-SEC-2024-3377,WID-SEC-2024-3222,WID-SEC-2024-3195,WID-SEC-2024-1656,WID-SEC-2024-1642,WID-SEC-2024-1307,WID-SEC-2024-0687",
+10.129.4.125,LARCES-SERVER,8000,tcp,4.9,Medium,80,VendorFix,Python Multiple Vulnerabilities (Mar 2024) - Windows,Python is prone to multiple vulnerabilities.,"Installed version: 3.12.0
+Fixed version:     3.12.2
+Installation
+path / port:       8000/tcp
+
+",1.3.6.1.4.1.25623.1.0.151952,CVE-2024-0450,13b33abb-b176-462c-89de-d5152e979dea,self_scan_05-06-25_08-14,2025-06-05T11:14:56Z,61b9f833-ec6a-4d96-a453-e59bbf57b322,,"Update to version 3.8.19, 3.9.19, 3.10.14, 3.11.8, 3.12.2
+  or later.","Python prior to version 3.8.19, 3.9.x prior to 3.9.19, 3.10.x
+  prior to 3.10.14, 3.11.x prior to 3.11.8 and 3.12.x prior to 3.12.2.","The following vulnerabilities exist:
+
+  - CVE-2024-0450: Quoted zip-bomb protection for zipfile
+
+  - No CVE: crash in socket.if_indextoname() with a specific value (UINT_MAX).
+
+  - No CVE: .pth files with names starting with a dot or containing the hidden file attribute are
+  not skipped","Checks if a vulnerable version is present on the target host.
+Details:
+Python Multiple Vulnerabilities (Mar 2024) - Windows
+(OID: 1.3.6.1.4.1.25623.1.0.151952)
+Version used: 2024-10-11T15:39:44Z
+","Product: cpe:/a:python:python:3.12.0
+Method: Python Detection Consolidation
+(OID: 1.3.6.1.4.1.25623.1.0.112857)
+",,"DFN-CERT-2025-0933,DFN-CERT-2025-0132,DFN-CERT-2024-3182,DFN-CERT-2024-2994,DFN-CERT-2024-2993,DFN-CERT-2024-2962,DFN-CERT-2024-2745,DFN-CERT-2024-2179,DFN-CERT-2024-1846,DFN-CERT-2024-1833,DFN-CERT-2024-1805,DFN-CERT-2024-1645,DFN-CERT-2024-1433,DFN-CERT-2024-1432,DFN-CERT-2024-1415,DFN-CERT-2024-0828,DFN-CERT-2024-0785,DFN-CERT-2024-0782,WID-SEC-2025-0794,WID-SEC-2025-0225,WID-SEC-2025-0148,WID-SEC-2024-3377,WID-SEC-2024-3222,WID-SEC-2024-3195,WID-SEC-2024-1656,WID-SEC-2024-1642,WID-SEC-2024-1307,WID-SEC-2024-0687",
+10.129.4.125,LARCES-SERVER,8001,tcp,4.9,Medium,80,VendorFix,Python Multiple Vulnerabilities (Mar 2024) - Windows,Python is prone to multiple vulnerabilities.,"Installed version: 3.12.0
+Fixed version:     3.12.2
+Installation
+path / port:       8001/tcp
+
+",1.3.6.1.4.1.25623.1.0.151952,CVE-2024-0450,13b33abb-b176-462c-89de-d5152e979dea,self_scan_05-06-25_08-14,2025-06-05T11:14:56Z,ee781d7f-8289-4586-8679-549710a379cf,,"Update to version 3.8.19, 3.9.19, 3.10.14, 3.11.8, 3.12.2
+  or later.","Python prior to version 3.8.19, 3.9.x prior to 3.9.19, 3.10.x
+  prior to 3.10.14, 3.11.x prior to 3.11.8 and 3.12.x prior to 3.12.2.","The following vulnerabilities exist:
+
+  - CVE-2024-0450: Quoted zip-bomb protection for zipfile
+
+  - No CVE: crash in socket.if_indextoname() with a specific value (UINT_MAX).
+
+  - No CVE: .pth files with names starting with a dot or containing the hidden file attribute are
+  not skipped","Checks if a vulnerable version is present on the target host.
+Details:
+Python Multiple Vulnerabilities (Mar 2024) - Windows
+(OID: 1.3.6.1.4.1.25623.1.0.151952)
+Version used: 2024-10-11T15:39:44Z
+","Product: cpe:/a:python:python:3.12.0
+Method: Python Detection Consolidation
+(OID: 1.3.6.1.4.1.25623.1.0.112857)
+",,"DFN-CERT-2025-0933,DFN-CERT-2025-0132,DFN-CERT-2024-3182,DFN-CERT-2024-2994,DFN-CERT-2024-2993,DFN-CERT-2024-2962,DFN-CERT-2024-2745,DFN-CERT-2024-2179,DFN-CERT-2024-1846,DFN-CERT-2024-1833,DFN-CERT-2024-1805,DFN-CERT-2024-1645,DFN-CERT-2024-1433,DFN-CERT-2024-1432,DFN-CERT-2024-1415,DFN-CERT-2024-0828,DFN-CERT-2024-0785,DFN-CERT-2024-0782,WID-SEC-2025-0794,WID-SEC-2025-0225,WID-SEC-2025-0148,WID-SEC-2024-3377,WID-SEC-2024-3222,WID-SEC-2024-3195,WID-SEC-2024-1656,WID-SEC-2024-1642,WID-SEC-2024-1307,WID-SEC-2024-0687",
+10.129.4.125,LARCES-SERVER,8002,tcp,4.9,Medium,80,VendorFix,Python Multiple Vulnerabilities (Mar 2024) - Windows,Python is prone to multiple vulnerabilities.,"Installed version: 3.12.0
+Fixed version:     3.12.2
+Installation
+path / port:       8002/tcp
+
+",1.3.6.1.4.1.25623.1.0.151952,CVE-2024-0450,13b33abb-b176-462c-89de-d5152e979dea,self_scan_05-06-25_08-14,2025-06-05T11:14:56Z,383811d1-d2ca-4b51-aa46-f9e0b6c09121,,"Update to version 3.8.19, 3.9.19, 3.10.14, 3.11.8, 3.12.2
+  or later.","Python prior to version 3.8.19, 3.9.x prior to 3.9.19, 3.10.x
+  prior to 3.10.14, 3.11.x prior to 3.11.8 and 3.12.x prior to 3.12.2.","The following vulnerabilities exist:
+
+  - CVE-2024-0450: Quoted zip-bomb protection for zipfile
+
+  - No CVE: crash in socket.if_indextoname() with a specific value (UINT_MAX).
+
+  - No CVE: .pth files with names starting with a dot or containing the hidden file attribute are
+  not skipped","Checks if a vulnerable version is present on the target host.
+Details:
+Python Multiple Vulnerabilities (Mar 2024) - Windows
+(OID: 1.3.6.1.4.1.25623.1.0.151952)
+Version used: 2024-10-11T15:39:44Z
+","Product: cpe:/a:python:python:3.12.0
+Method: Python Detection Consolidation
+(OID: 1.3.6.1.4.1.25623.1.0.112857)
+",,"DFN-CERT-2025-0933,DFN-CERT-2025-0132,DFN-CERT-2024-3182,DFN-CERT-2024-2994,DFN-CERT-2024-2993,DFN-CERT-2024-2962,DFN-CERT-2024-2745,DFN-CERT-2024-2179,DFN-CERT-2024-1846,DFN-CERT-2024-1833,DFN-CERT-2024-1805,DFN-CERT-2024-1645,DFN-CERT-2024-1433,DFN-CERT-2024-1432,DFN-CERT-2024-1415,DFN-CERT-2024-0828,DFN-CERT-2024-0785,DFN-CERT-2024-0782,WID-SEC-2025-0794,WID-SEC-2025-0225,WID-SEC-2025-0148,WID-SEC-2024-3377,WID-SEC-2024-3222,WID-SEC-2024-3195,WID-SEC-2024-1656,WID-SEC-2024-1642,WID-SEC-2024-1307,WID-SEC-2024-0687",
+10.129.4.125,LARCES-SERVER,3389,tcp,4.3,Medium,98,Mitigation,SSL/TLS: Deprecated TLSv1.0 and TLSv1.1 Protocol Detection,"It was possible to detect the usage of the deprecated TLSv1.0
+  and/or TLSv1.1 protocol on this system.","In addition to TLSv1.2+ the service is also providing the deprecated TLSv1.0 and TLSv1.1 protocols and supports one or more ciphers. Those supported ciphers can be found in the 'SSL/TLS: Report Supported Cipher Suites' (OID: 1.3.6.1.4.1.25623.1.0.802067) VT.
+",1.3.6.1.4.1.25623.1.0.117274,"CVE-2011-3389,CVE-2015-0204,CVE-2025-3200",13b33abb-b176-462c-89de-d5152e979dea,self_scan_05-06-25_08-14,2025-06-05T11:14:56Z,8f844eba-7933-4c36-a4c5-de74bb7eb3cd,"An attacker might be able to use the known cryptographic flaws to
+  eavesdrop the connection between clients and the service to get access to sensitive data
+  transferred within the secured connection.
+
+  Furthermore newly uncovered vulnerabilities in this protocols won't receive security updates
+  anymore.","It is recommended to disable the deprecated TLSv1.0 and/or
+  TLSv1.1 protocols in favor of the TLSv1.2+ protocols.
+
+  Please see the references for more resources supporting you with this task.","'- All services providing an encrypted communication using the
+  TLSv1.0 and/or TLSv1.1 protocols
+
+  - CVE-2025-3200: Multiple products from Wiesemann & Theis","The TLSv1.0 and TLSv1.1 protocols contain known cryptographic
+  flaws like:
+
+  - CVE-2011-3389: Browser Exploit Against SSL/TLS (BEAST)
+
+  - CVE-2015-0204: Factoring Attack on RSA-EXPORT Keys Padding Oracle On Downgraded Legacy
+  Encryption (FREAK)","Checks the used TLS protocols of the services provided by this
+  system.
+Details:
+SSL/TLS: Deprecated TLSv1.0 and TLSv1.1 Protocol Detection
+(OID: 1.3.6.1.4.1.25623.1.0.117274)
+Version used: 2025-04-29T05:39:55Z
+","Product: cpe:/a:ietf:transport_layer_security:1.0
+Method: SSL/TLS: Version Detection
+(OID: 1.3.6.1.4.1.25623.1.0.105782)
+",,"DFN-CERT-2020-0177,DFN-CERT-2020-0111,DFN-CERT-2019-0068,DFN-CERT-2018-1441,DFN-CERT-2018-1408,DFN-CERT-2016-1372,DFN-CERT-2016-1164,DFN-CERT-2016-0388,DFN-CERT-2015-1853,DFN-CERT-2015-1332,DFN-CERT-2015-0884,DFN-CERT-2015-0800,DFN-CERT-2015-0758,DFN-CERT-2015-0567,DFN-CERT-2015-0544,DFN-CERT-2015-0530,DFN-CERT-2015-0396,DFN-CERT-2015-0375,DFN-CERT-2015-0374,DFN-CERT-2015-0305,DFN-CERT-2015-0199,DFN-CERT-2015-0079,DFN-CERT-2015-0021,DFN-CERT-2014-1414,DFN-CERT-2013-1847,DFN-CERT-2013-1792,DFN-CERT-2012-1979,DFN-CERT-2012-1829,DFN-CERT-2012-1530,DFN-CERT-2012-1380,DFN-CERT-2012-1377,DFN-CERT-2012-1292,DFN-CERT-2012-1214,DFN-CERT-2012-1213,DFN-CERT-2012-1180,DFN-CERT-2012-1156,DFN-CERT-2012-1155,DFN-CERT-2012-1039,DFN-CERT-2012-0956,DFN-CERT-2012-0908,DFN-CERT-2012-0868,DFN-CERT-2012-0867,DFN-CERT-2012-0848,DFN-CERT-2012-0838,DFN-CERT-2012-0776,DFN-CERT-2012-0722,DFN-CERT-2012-0638,DFN-CERT-2012-0627,DFN-CERT-2012-0451,DFN-CERT-2012-0418,DFN-CERT-2012-0354,DFN-CERT-2012-0234,DFN-CERT-2012-0221,DFN-CERT-2012-0177,DFN-CERT-2012-0170,DFN-CERT-2012-0146,DFN-CERT-2012-0142,DFN-CERT-2012-0126,DFN-CERT-2012-0123,DFN-CERT-2012-0095,DFN-CERT-2012-0051,DFN-CERT-2012-0047,DFN-CERT-2012-0021,DFN-CERT-2011-1953,DFN-CERT-2011-1946,DFN-CERT-2011-1844,DFN-CERT-2011-1826,DFN-CERT-2011-1774,DFN-CERT-2011-1743,DFN-CERT-2011-1738,DFN-CERT-2011-1706,DFN-CERT-2011-1628,DFN-CERT-2011-1627,DFN-CERT-2011-1619,DFN-CERT-2011-1482,WID-SEC-2023-1435,CB-K18/0799,CB-K16/1289,CB-K16/1096,CB-K15/1751,CB-K15/1266,CB-K15/0850,CB-K15/0764,CB-K15/0720,CB-K15/0548,CB-K15/0526,CB-K15/0509,CB-K15/0493,CB-K15/0384,CB-K15/0365,CB-K15/0364,CB-K15/0302,CB-K15/0192,CB-K15/0079,CB-K15/0016,CB-K14/1342,CB-K14/0231,CB-K13/0845,CB-K13/0796,CB-K13/0790",
+10.129.4.125,LARCES-SERVER,8000,tcp,2.6,Low,80,VendorFix,Python Improper Input Validation Vulnerability (Jan 2025) - Windows,"Python is prone to an improper input validation vulnerability
+  in the urllib.parse.urlsplit and urlparse standard functions.","Installed version: 3.12.0
+Fixed version:     3.12.9
+Installation
+path / port:       8000/tcp
+
+",1.3.6.1.4.1.25623.1.0.171144,CVE-2025-0938,13b33abb-b176-462c-89de-d5152e979dea,self_scan_05-06-25_08-14,2025-06-05T11:14:56Z,67e1f2dd-b7d8-4cf6-8861-c4292d3a3391,,"Update to version 3.12.9, 3.13.2 or later.",Python versions prior to 3.12.9 and 3.13.x prior to 3.13.2.,"The Python standard library functions urllib.parse.urlsplit and
+  urlparse accepted domain names that included square brackets which isn't valid according to RFC
+  3986. Square brackets are only meant to be used as delimiters for specifying IPv6 and IPvFuture
+  hosts in URLs. This could result in differential parsing across the Python URL parser and other
+  specification-compliant URL parsers.","Checks if a vulnerable version is present on the target host.
+Details:
+Python Improper Input Validation Vulnerability (Jan 2025) - Windows
+(OID: 1.3.6.1.4.1.25623.1.0.171144)
+Version used: 2025-02-06T05:38:57Z
+","Product: cpe:/a:python:python:3.12.0
+Method: Python Detection Consolidation
+(OID: 1.3.6.1.4.1.25623.1.0.112857)
+",,"DFN-CERT-2025-0993,DFN-CERT-2025-0717,DFN-CERT-2025-0655,DFN-CERT-2025-0409,DFN-CERT-2025-0399,DFN-CERT-2025-0309,WID-SEC-2025-0233",
+10.129.4.125,LARCES-SERVER,5000,tcp,2.6,Low,80,VendorFix,Python Improper Input Validation Vulnerability (Jan 2025) - Windows,"Python is prone to an improper input validation vulnerability
+  in the urllib.parse.urlsplit and urlparse standard functions.","Installed version: 3.10.12
+Fixed version:     3.12.9
+Installation
+path / port:       5000/tcp
+
+",1.3.6.1.4.1.25623.1.0.171144,CVE-2025-0938,13b33abb-b176-462c-89de-d5152e979dea,self_scan_05-06-25_08-14,2025-06-05T11:14:56Z,dc700ad3-b90d-4ecb-8414-1774ccd92a56,,"Update to version 3.12.9, 3.13.2 or later.",Python versions prior to 3.12.9 and 3.13.x prior to 3.13.2.,"The Python standard library functions urllib.parse.urlsplit and
+  urlparse accepted domain names that included square brackets which isn't valid according to RFC
+  3986. Square brackets are only meant to be used as delimiters for specifying IPv6 and IPvFuture
+  hosts in URLs. This could result in differential parsing across the Python URL parser and other
+  specification-compliant URL parsers.","Checks if a vulnerable version is present on the target host.
+Details:
+Python Improper Input Validation Vulnerability (Jan 2025) - Windows
+(OID: 1.3.6.1.4.1.25623.1.0.171144)
+Version used: 2025-02-06T05:38:57Z
+","Product: cpe:/a:python:python:3.10.12
+Method: Python Detection Consolidation
+(OID: 1.3.6.1.4.1.25623.1.0.112857)
+",,"DFN-CERT-2025-0993,DFN-CERT-2025-0717,DFN-CERT-2025-0655,DFN-CERT-2025-0409,DFN-CERT-2025-0399,DFN-CERT-2025-0309,WID-SEC-2025-0233",
+10.129.4.125,LARCES-SERVER,5000,tcp,2.6,Low,80,VendorFix,Python SSRF Vulnerability (Nov 2024) - Windows,"Python is prone to a server-side request forgery (SSRF)
+  vulnerability.","Installed version: 3.10.12
+Fixed version:     3.10.16
+Installation
+path / port:       5000/tcp
+
+",1.3.6.1.4.1.25623.1.0.170966,CVE-2024-11168,13b33abb-b176-462c-89de-d5152e979dea,self_scan_05-06-25_08-14,2025-06-05T11:14:56Z,782448aa-d212-4849-a769-a8d5765f5ddb,,"Update to version 3.9.21, 3.10.16, 3.11.4 or later.","Python versions prior to 3.9.21, 3.10.x prior to 3.10.16 and
+  3.11.x prior to 3.11.4.","The urllib.parse.urlsplit() and urlparse() functions improperly
+  validated bracketed hosts ([]), allowing hosts that weren't IPv6 or IPvFuture. This behavior was
+  not conformant to RFC 3986 and potentially enabled SSRF if a URL is processed by more than one
+  URL parser.","Checks if a vulnerable version is present on the target host.
+Details:
+Python SSRF Vulnerability (Nov 2024) - Windows
+(OID: 1.3.6.1.4.1.25623.1.0.170966)
+Version used: 2024-12-13T15:40:54Z
+","Product: cpe:/a:python:python:3.10.12
+Method: Python Detection Consolidation
+(OID: 1.3.6.1.4.1.25623.1.0.112857)
+",,"DFN-CERT-2025-0655,DFN-CERT-2025-0399,DFN-CERT-2025-0179,DFN-CERT-2024-3220,DFN-CERT-2024-3182,DFN-CERT-2024-3055,WID-SEC-2024-3463",
+10.129.4.125,LARCES-SERVER,8001,tcp,2.6,Low,80,VendorFix,Python Improper Input Validation Vulnerability (Jan 2025) - Windows,"Python is prone to an improper input validation vulnerability
+  in the urllib.parse.urlsplit and urlparse standard functions.","Installed version: 3.12.0
+Fixed version:     3.12.9
+Installation
+path / port:       8001/tcp
+
+",1.3.6.1.4.1.25623.1.0.171144,CVE-2025-0938,13b33abb-b176-462c-89de-d5152e979dea,self_scan_05-06-25_08-14,2025-06-05T11:14:56Z,7fc2ffb5-1020-475f-9935-bfaa48865cdc,,"Update to version 3.12.9, 3.13.2 or later.",Python versions prior to 3.12.9 and 3.13.x prior to 3.13.2.,"The Python standard library functions urllib.parse.urlsplit and
+  urlparse accepted domain names that included square brackets which isn't valid according to RFC
+  3986. Square brackets are only meant to be used as delimiters for specifying IPv6 and IPvFuture
+  hosts in URLs. This could result in differential parsing across the Python URL parser and other
+  specification-compliant URL parsers.","Checks if a vulnerable version is present on the target host.
+Details:
+Python Improper Input Validation Vulnerability (Jan 2025) - Windows
+(OID: 1.3.6.1.4.1.25623.1.0.171144)
+Version used: 2025-02-06T05:38:57Z
+","Product: cpe:/a:python:python:3.12.0
+Method: Python Detection Consolidation
+(OID: 1.3.6.1.4.1.25623.1.0.112857)
+",,"DFN-CERT-2025-0993,DFN-CERT-2025-0717,DFN-CERT-2025-0655,DFN-CERT-2025-0409,DFN-CERT-2025-0399,DFN-CERT-2025-0309,WID-SEC-2025-0233",
+10.129.4.125,LARCES-SERVER,22,tcp,2.6,Low,80,Mitigation,Weak MAC Algorithm(s) Supported (SSH),"The remote SSH server is configured to allow / support weak MAC
+  algorithm(s).","The remote SSH server supports the following weak client-to-server MAC algorithm(s):
+
+umac-64-etm@openssh.com
+umac-64@openssh.com
+
+
+The remote SSH server supports the following weak server-to-client MAC algorithm(s):
+
+umac-64-etm@openssh.com
+umac-64@openssh.com
+",1.3.6.1.4.1.25623.1.0.105610,,13b33abb-b176-462c-89de-d5152e979dea,self_scan_05-06-25_08-14,2025-06-05T11:14:56Z,da4663d8-7408-4e95-97d9-a757784a7000,,Disable the reported weak MAC algorithm(s).,,,"Checks the supported MAC algorithms (client-to-server and
+  server-to-client) of the remote SSH server.
+
+  Currently weak MAC algorithms are defined as the following:
+
+  - MD5 based algorithms
+
+  - 96-bit based algorithms
+
+  - 64-bit based algorithms
+
+  - 'none' algorithm
+Details:
+Weak MAC Algorithm(s) Supported (SSH)
+(OID: 1.3.6.1.4.1.25623.1.0.105610)
+Version used: 2024-06-14T05:05:48Z
+","Product: cpe:/a:ietf:secure_shell_protocol
+Method: SSH Protocol Algorithms Supported
+(OID: 1.3.6.1.4.1.25623.1.0.105565)
+",,,
+10.129.4.125,LARCES-SERVER,8002,tcp,2.6,Low,80,VendorFix,Python Improper Input Validation Vulnerability (Jan 2025) - Windows,"Python is prone to an improper input validation vulnerability
+  in the urllib.parse.urlsplit and urlparse standard functions.","Installed version: 3.12.0
+Fixed version:     3.12.9
+Installation
+path / port:       8002/tcp
+
+",1.3.6.1.4.1.25623.1.0.171144,CVE-2025-0938,13b33abb-b176-462c-89de-d5152e979dea,self_scan_05-06-25_08-14,2025-06-05T11:14:56Z,785529ce-8084-4dab-a2a8-33c45b851b4b,,"Update to version 3.12.9, 3.13.2 or later.",Python versions prior to 3.12.9 and 3.13.x prior to 3.13.2.,"The Python standard library functions urllib.parse.urlsplit and
+  urlparse accepted domain names that included square brackets which isn't valid according to RFC
+  3986. Square brackets are only meant to be used as delimiters for specifying IPv6 and IPvFuture
+  hosts in URLs. This could result in differential parsing across the Python URL parser and other
+  specification-compliant URL parsers.","Checks if a vulnerable version is present on the target host.
+Details:
+Python Improper Input Validation Vulnerability (Jan 2025) - Windows
+(OID: 1.3.6.1.4.1.25623.1.0.171144)
+Version used: 2025-02-06T05:38:57Z
+","Product: cpe:/a:python:python:3.12.0
+Method: Python Detection Consolidation
+(OID: 1.3.6.1.4.1.25623.1.0.112857)
+",,"DFN-CERT-2025-0993,DFN-CERT-2025-0717,DFN-CERT-2025-0655,DFN-CERT-2025-0409,DFN-CERT-2025-0399,DFN-CERT-2025-0309,WID-SEC-2025-0233",
+10.129.4.125,LARCES-SERVER,8001,tcp,2.1,Low,80,VendorFix,Python Improper Encoding of Output Vulnerability (Feb 2025) - Windows,"Python is prone to an improper encoding of output
+  vulnerability.","Installed version: 3.12.0
+Fixed version:     3.12.4
+Installation
+path / port:       8001/tcp
+
+",1.3.6.1.4.1.25623.1.0.171265,CVE-2025-1795,13b33abb-b176-462c-89de-d5152e979dea,self_scan_05-06-25_08-14,2025-06-05T11:14:56Z,b8865f63-2496-4005-aaec-1c6732b9be2e,,"Update to version 3.11.10, 3.12.4 or later.",Python versions prior to 3.11.10 and 3.12.x prior to 3.12.4.,"During an address list folding when a separating comma ends up
+  on a folded line and that line is to be unicode-encoded then the separator itself is also
+  unicode-encoded. Expected behavior is that the separating comma remains a plan comma. This can
+  result in the address header being misinterpreted by some mail servers.","Checks if a vulnerable version is present on the target host.
+Details:
+Python Improper Encoding of Output Vulnerability (Feb 2025) - Windows
+(OID: 1.3.6.1.4.1.25623.1.0.171265)
+Version used: 2025-03-05T05:38:53Z
+","Product: cpe:/a:python:python:3.12.0
+Method: Python Detection Consolidation
+(OID: 1.3.6.1.4.1.25623.1.0.112857)
+",,"DFN-CERT-2025-0717,DFN-CERT-2025-0687,WID-SEC-2025-0471",
+10.129.4.125,LARCES-SERVER,,,2.1,Low,80,Mitigation,ICMP Timestamp Reply Information Disclosure,The remote host responded to an ICMP timestamp request.,"The following response / ICMP packet has been received:
+- ICMP Type: 14
+- ICMP Code: 0
+",1.3.6.1.4.1.25623.1.0.103190,CVE-1999-0524,13b33abb-b176-462c-89de-d5152e979dea,self_scan_05-06-25_08-14,2025-06-05T11:14:56Z,0ae8ac2e-79f3-4e15-acc8-8224d5c38dcb,"This information could theoretically be used to exploit weak
+  time-based random number generators in other services.","Various mitigations are possible:
+
+  - Disable the support for ICMP timestamp on the remote host completely
+
+  - Protect the remote host by a firewall, and block ICMP packets passing through the firewall in
+  either direction (either completely or only for untrusted networks)",,"The Timestamp Reply is an ICMP message which replies to a
+  Timestamp message. It consists of the originating timestamp sent by the sender of the Timestamp as
+  well as a receive timestamp and a transmit timestamp.","Sends an ICMP Timestamp (Type 13) request and checks if a
+  Timestamp Reply (Type 14) is received.
+Details:
+ICMP Timestamp Reply Information Disclosure
+(OID: 1.3.6.1.4.1.25623.1.0.103190)
+Version used: 2025-01-21T05:37:33Z
+",,,"DFN-CERT-2014-0658,CB-K15/1514,CB-K14/0632",
+10.129.4.125,LARCES-SERVER,8000,tcp,2.1,Low,80,VendorFix,Python Improper Encoding of Output Vulnerability (Feb 2025) - Windows,"Python is prone to an improper encoding of output
+  vulnerability.","Installed version: 3.12.0
+Fixed version:     3.12.4
+Installation
+path / port:       8000/tcp
+
+",1.3.6.1.4.1.25623.1.0.171265,CVE-2025-1795,13b33abb-b176-462c-89de-d5152e979dea,self_scan_05-06-25_08-14,2025-06-05T11:14:56Z,4395460e-103e-4ac6-8828-7353b186604c,,"Update to version 3.11.10, 3.12.4 or later.",Python versions prior to 3.11.10 and 3.12.x prior to 3.12.4.,"During an address list folding when a separating comma ends up
+  on a folded line and that line is to be unicode-encoded then the separator itself is also
+  unicode-encoded. Expected behavior is that the separating comma remains a plan comma. This can
+  result in the address header being misinterpreted by some mail servers.","Checks if a vulnerable version is present on the target host.
+Details:
+Python Improper Encoding of Output Vulnerability (Feb 2025) - Windows
+(OID: 1.3.6.1.4.1.25623.1.0.171265)
+Version used: 2025-03-05T05:38:53Z
+","Product: cpe:/a:python:python:3.12.0
+Method: Python Detection Consolidation
+(OID: 1.3.6.1.4.1.25623.1.0.112857)
+",,"DFN-CERT-2025-0717,DFN-CERT-2025-0687,WID-SEC-2025-0471",
+10.129.4.125,LARCES-SERVER,5000,tcp,2.1,Low,80,VendorFix,Python Improper Encoding of Output Vulnerability (Feb 2025) - Windows,"Python is prone to an improper encoding of output
+  vulnerability.","Installed version: 3.10.12
+Fixed version:     3.11.10
+Installation
+path / port:       5000/tcp
+
+",1.3.6.1.4.1.25623.1.0.171265,CVE-2025-1795,13b33abb-b176-462c-89de-d5152e979dea,self_scan_05-06-25_08-14,2025-06-05T11:14:56Z,5a971112-9f09-4308-bab5-a412602f2444,,"Update to version 3.11.10, 3.12.4 or later.",Python versions prior to 3.11.10 and 3.12.x prior to 3.12.4.,"During an address list folding when a separating comma ends up
+  on a folded line and that line is to be unicode-encoded then the separator itself is also
+  unicode-encoded. Expected behavior is that the separating comma remains a plan comma. This can
+  result in the address header being misinterpreted by some mail servers.","Checks if a vulnerable version is present on the target host.
+Details:
+Python Improper Encoding of Output Vulnerability (Feb 2025) - Windows
+(OID: 1.3.6.1.4.1.25623.1.0.171265)
+Version used: 2025-03-05T05:38:53Z
+","Product: cpe:/a:python:python:3.10.12
+Method: Python Detection Consolidation
+(OID: 1.3.6.1.4.1.25623.1.0.112857)
+",,"DFN-CERT-2025-0717,DFN-CERT-2025-0687,WID-SEC-2025-0471",
+10.129.4.125,LARCES-SERVER,8002,tcp,2.1,Low,80,VendorFix,Python Improper Encoding of Output Vulnerability (Feb 2025) - Windows,"Python is prone to an improper encoding of output
+  vulnerability.","Installed version: 3.12.0
+Fixed version:     3.12.4
+Installation
+path / port:       8002/tcp
+
+",1.3.6.1.4.1.25623.1.0.171265,CVE-2025-1795,13b33abb-b176-462c-89de-d5152e979dea,self_scan_05-06-25_08-14,2025-06-05T11:14:56Z,8343748d-8a94-416a-9942-5846735c317c,,"Update to version 3.11.10, 3.12.4 or later.",Python versions prior to 3.11.10 and 3.12.x prior to 3.12.4.,"During an address list folding when a separating comma ends up
+  on a folded line and that line is to be unicode-encoded then the separator itself is also
+  unicode-encoded. Expected behavior is that the separating comma remains a plan comma. This can
+  result in the address header being misinterpreted by some mail servers.","Checks if a vulnerable version is present on the target host.
+Details:
+Python Improper Encoding of Output Vulnerability (Feb 2025) - Windows
+(OID: 1.3.6.1.4.1.25623.1.0.171265)
+Version used: 2025-03-05T05:38:53Z
+","Product: cpe:/a:python:python:3.12.0
+Method: Python Detection Consolidation
+(OID: 1.3.6.1.4.1.25623.1.0.112857)
+",,"DFN-CERT-2025-0717,DFN-CERT-2025-0687,WID-SEC-2025-0471",

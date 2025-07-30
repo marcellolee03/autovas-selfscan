@@ -1,0 +1,70 @@
+```bash
+#!/bin/bash
+
+# Este script atualiza o sistema operacional Ubuntu 8.04 para uma versão suportada.
+# AVISO: A atualização direta do Ubuntu 8.04 para uma versão moderna não é suportada.
+# Este script irá primeiro atualizar para uma versão intermediária (10.04), e então tentar atualizar para uma versão mais recente.
+# AVISO: Este processo é complexo, demorado e pode resultar em perda de dados ou instabilidade do sistema.
+#       É FORTEMENTE RECOMENDADO fazer um backup COMPLETO do sistema antes de executar este script.
+#       Use por sua conta e risco.
+
+# Interrompe a execução em caso de erro
+set -e
+
+# Informa o usuário sobre os riscos
+echo "
+
+ATENÇÃO: Este script irá tentar atualizar um sistema Ubuntu 8.04 que está fora de suporte.
+Este processo é arriscado e pode resultar em perda de dados ou instabilidade do sistema.
+
+É FORTEMENTE RECOMENDADO fazer um backup COMPLETO do sistema antes de continuar.
+
+Use por sua conta e risco.
+
+Pressione Enter para continuar ou Ctrl+C para cancelar.
+
+"
+read -n 1 -s
+
+# Atualiza os repositórios para o Ubuntu 10.04 (Lucid Lynx)
+echo "Atualizando repositórios para o Ubuntu 10.04..."
+sed -i 's/hardy/lucid/g' /etc/apt/sources.list
+apt-get update
+
+# Atualiza o sistema para o Ubuntu 10.04
+echo "Atualizando o sistema para o Ubuntu 10.04..."
+apt-get dist-upgrade -y
+
+# Remove pacotes obsoletos
+echo "Removendo pacotes obsoletos..."
+apt-get autoremove -y
+
+# Reinicia o sistema
+echo "Reiniciando o sistema..."
+reboot
+
+# Após a reinicialização (requer intervenção manual para executar os seguintes comandos):
+# Execute os seguintes comandos manualmente APÓS a reinicialização em um terminal:
+
+# do-release-upgrade
+#
+# Este comando iniciará a atualização para a próxima versão LTS disponível.
+# Siga as instruções na tela.
+# Repita o processo do-release-upgrade até atingir uma versão LTS suportada
+# (por exemplo, 12.04, 14.04, 16.04, 18.04, 20.04, 22.04).
+#
+# É FORTEMENTE RECOMENDADO fazer snapshots/backups entre cada atualização do sistema.
+
+echo "
+
+Script concluído.
+O sistema foi atualizado para o Ubuntu 10.04 e reiniciado.
+
+Agora, você deve executar o comando 'do-release-upgrade' manualmente em um terminal
+para atualizar para as próximas versões LTS (uma por vez).
+
+Lembre-se de fazer backups/snapshots entre cada atualização.
+
+"
+exit 0
+```

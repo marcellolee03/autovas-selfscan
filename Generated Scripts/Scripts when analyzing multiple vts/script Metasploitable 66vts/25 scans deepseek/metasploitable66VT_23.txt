@@ -1,0 +1,61 @@
+#!/bin/bash
+
+# Verifica se o usuário é root
+if [ "$EUID" -ne 0 ]; then
+  echo "Por favor, execute como root."
+  exit 1
+fi
+
+# Atualiza o sistema
+apt-get update && apt-get upgrade -y
+
+# Corrige a Vulnerabilidade 1 (TWiki XSS and Command Execution Vulnerabilities)
+apt-get install twiki -y
+
+# Corrige a Vulnerabilidade 3 (rlogin Passwordless Login)
+systemctl disable rlogin.socket
+systemctl stop rlogin.socket
+
+# Corrige a Vulnerabilidade 5 (rexec service is running)
+systemctl disable rexec
+systemctl stop rexec
+
+# Corrige a Vulnerabilidade 7 (Apache Tomcat AJP RCE Vulnerability)
+apt-get install apache-tomcat -y
+
+# Corrige a Vulnerabilidade 11 (vsftpd Compromised Source Packages Backdoor Vulnerability)
+apt-get install vsftpd -y
+
+# Corrige a Vulnerabilidade 13 (DistCC RCE Vulnerability)
+apt-get install distcc -y
+
+# Corrige a Vulnerabilidade 15 (VNC Brute Force Login)
+apt-get install vnc4server -y
+
+# Corrige a Vulnerabilidade 16 (Test HTTP dangerous methods)
+a2dismod include
+a2dismod autoindex
+a2dismod userdir
+systemctl restart apache2
+
+# Corrige a Vulnerabilidade 19 (rlogin service is running)
+systemctl disable rlogin.socket
+systemctl stop rlogin.socket
+
+# Corrige a Vulnerabilidade 20 (rsh Unencrypted Cleartext Login)
+systemctl disable rsh
+systemctl stop rsh
+
+# Corrige a Vulnerabilidade 45 (Telnet Unencrypted Cleartext Login)
+systemctl disable telnet
+systemctl stop telnet
+
+# Corrige a Vulnerabilidade 46 (FTP Unencrypted Cleartext Login)
+systemctl disable vsftpd
+systemctl stop vsftpd
+
+# Corrige a Vulnerabilidade 47 (VNC Server Unencrypted Data Transmission)
+systemctl disable vncserver
+systemctl stop vncserver
+
+echo "Correções aplicadas com sucesso!"

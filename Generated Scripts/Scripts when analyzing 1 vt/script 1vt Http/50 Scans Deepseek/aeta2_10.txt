@@ -1,0 +1,33 @@
+#!/bin/bash
+# Configura o Apache para redirecionar HTTP para HTTPS
+if [ -f /etc/apache2/sites-available/default.conf ]; then
+    sed -i 's/<VirtualHost \*:80>/<VirtualHost \*:80>\n    Redirect permanent \/ https:\/\/'"$(hostname)"'\/\n/' /etc/apache2/sites-available/default.conf
+elif [ -f /etc/apache2/sites-available/000-default.conf ]; then
+    sed -i 's/<VirtualHost \*:80>/<VirtualHost \*:80>\n    Redirect permanent \/ https:\/\/'"$(hostname)"'\/\n/' /etc/apache2/sites-available/000-default.conf
+fi
+
+# Habilita o módulo SSL do Apache
+a2enmod ssl
+
+# Reinicia o Apache para aplicar as mudanças
+systemctl restart apache2
+
+# Verifica se o Apache está escutando na porta 443
+if ! netstat -tuln | grep -q ':443 '; then
+    echo "Erro: Apache não está escutando na porta 443."
+    exit 1
+fi
+
+# Configura o firewall para permitir HTTPS e bloquear HTTP
+ufw allow 443/tcp
+ufw deny 80/tcp
+
+# Verifica se o UFW está ativo e aplica as regras
+if ufw status | grep -q 'Status: active'; then
+    ufw reload
+else
+    ufw enable
+    ufw reload
+fi
+
+echo "Configuração concluída. O tráfego HTTP foi redirecionado para HTTPS."

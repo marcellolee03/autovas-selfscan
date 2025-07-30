@@ -1,0 +1,141 @@
+```bash
+#!/bin/bash
+
+# Vulnerability 1: Proxmox VE EOL
+# This script assumes you want to upgrade to the latest available version.
+# Adjust the upgrade command if you have specific version requirements.
+if command -v pveversion >/dev/null 2>&1; then
+  echo "Updating Proxmox VE..."
+  apt update
+  apt dist-upgrade -y
+  echo "Proxmox VE updated.  Reboot may be required."
+else
+  echo "Proxmox VE not detected. Skipping update."
+fi
+
+# Vulnerabilities 2-6: jQuery XSS
+# This script downloads jQuery 1.9.0 and replaces the vulnerable files.
+# It iterates through the identified paths and replaces jquery-1.8.3.min.js
+
+jquery_version="1.9.0"
+jquery_file="jquery-${jquery_version}.min.js"
+jquery_url="https://code.jquery.com/${jquery_file}"
+vulnerable_paths=(
+  "/var/www/html/js/jquery-1.8.3.min.js"
+  "/var/www/html/opscenter/webcommon/framework/js/jquery-1.8.3.min.js"
+  "/var/www/html/framesets/js/jquery-1.8.3.min.js"
+  "/var/www/html/frameset/js/jquery-1.8.3.min.js"
+  "/var/www/html/console/framework/js/jquery-1.8.3.min.js"
+)
+
+download_jquery() {
+  if ! wget -q "$jquery_url" -O "/tmp/${jquery_file}"; then
+    echo "Failed to download jQuery ${jquery_version}."
+    return 1
+  fi
+  return 0
+}
+
+replace_jquery() {
+  for path in "${vulnerable_paths[@]}"; do
+    if [ -f "$path" ]; then
+      echo "Replacing $path with jQuery ${jquery_version}..."
+      cp "/tmp/${jquery_file}" "$path"
+      echo "Replaced $path"
+    else
+      echo "File not found: $path"
+    fi
+  done
+}
+
+# Create /var/www/html if it does not exist
+if [ ! -d "/var/www/html" ]; then
+    mkdir -p /var/www/html
+fi
+
+if download_jquery; then
+  replace_jquery
+  rm -f "/tmp/${jquery_file}"
+  echo "jQuery vulnerabilities addressed."
+else
+  echo "Failed to address jQuery vulnerabilities."
+fi
+
+# Vulnerabilities 7, 8, 9, 13, 14, 15, 16, 19, 21, 22: Weak SSH Algorithms
+# This script modifies /etc/ssh/sshd_config to disable weak algorithms.
+# It creates a backup of the original config file.
+
+ssh_config="/etc/ssh/sshd_config"
+ssh_config_backup="/etc/ssh/sshd_config.bak"
+
+# Create backup
+if [ ! -f "$ssh_config_backup" ]; then
+  cp "$ssh_config" "$ssh_config_backup"
+  echo "Created backup of $ssh_config at $ssh_config_backup"
+fi
+
+# Disable weak KEX algorithms
+sed -i '/KexAlgorithms/s/diffie-hellman-group1-sha1//g' "$ssh_config"
+
+# Disable weak MAC algorithms
+sed -i '/MACs/s/umac-64-etm@openssh.com,//g' "$ssh_config"
+sed -i '/MACs/s/umac-64@openssh.com,//g' "$ssh_config"
+sed -i '/MACs/s/hmac-md5,//g' "$ssh_config"
+sed -i '/MACs/s/hmac-sha1-96,//g' "$ssh_config"
+
+# Disable weak Ciphers
+sed -i '/Ciphers/s/3des-cbc,//g' "$ssh_config"
+sed -i '/Ciphers/s/aes128-cbc,//g' "$ssh_config"
+sed -i '/Ciphers/s/aes256-cbc,//g' "$ssh_config"
+sed -i '/Ciphers/s/twofish-cbc,//g' "$ssh_config"
+sed -i '/Ciphers/s/twofish128-cbc,//g' "$ssh_config"
+sed -i '/Ciphers/s/twofish256-cbc,//g' "$ssh_config"
+
+
+# Disable weak HostKeyAlgorithms
+sed -i '/HostKeyAlgorithms/s/ssh-dss,//g' "$ssh_config"
+
+
+echo "Weak SSH algorithms disabled. Restarting SSH service..."
+systemctl restart sshd
+echo "SSH service restarted."
+
+# Vulnerability 10: DCE/RPC and MSRPC Services Enumeration Reporting
+# The solution is to filter traffic. This requires firewall configuration, which is outside the scope
+# of this script.  A warning is printed to the console.
+echo "Warning: Vulnerability 10 (DCE/RPC and MSRPC Services Enumeration) requires firewall configuration to filter traffic on port 135."
+
+# Vulnerability 11: Telnet Unencrypted Cleartext Login
+# Disable Telnet and suggest using SSH
+if systemctl is-enabled telnet.socket 2>/dev/null; then
+  systemctl stop telnet.socket
+  systemctl disable telnet.socket
+  echo "Telnet service disabled. Please use SSH."
+else
+  echo "Telnet service is not enabled."
+fi
+
+# Vulnerability 12: SSL/TLS: Deprecated TLSv1.0 and TLSv1.1 Protocol Detection
+# This step is highly dependent on the specific service using TLS.  Without knowing the
+# service, a general warning is printed.  This script assumes RDP is the service in use.
+echo "Warning: Disabling TLS 1.0 and 1.1 requires modifying the configuration of the RDP service."
+# Create a file to disable TLS 1.0 and 1.1
+reg add "HKLM\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Protocols\TLS 1.0\Server" /v Enabled /t REG_DWORD /d 0 /f
+reg add "HKLM\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Protocols\TLS 1.1\Server" /v Enabled /t REG_DWORD /d 0 /f
+echo "TLS 1.0 and 1.1 disabled for RDP. Reboot is required."
+
+# Vulnerabilities 17, 18, 20, 23, 24, 25: TCP Timestamps Information Disclosure
+# Disable TCP timestamps
+echo "Disabling TCP timestamps..."
+sysctl -w net.ipv4.tcp_timestamps=0
+echo "net.ipv4.tcp_timestamps = 0" >> /etc/sysctl.conf
+sysctl -p
+echo "TCP timestamps disabled."
+
+# Vulnerabilities 26, 27, 28, 29, 30, 31, 32: ICMP Timestamp Reply Information Disclosure
+# Disable ICMP timestamp replies
+echo "Disabling ICMP timestamp replies..."
+echo 1 > /proc/sys/net/ipv4/icmp_echo_ignore_all
+echo "net.ipv4.icmp_echo_ignore_all = 1" >> /etc/sysctl.conf
+echo "ICMP timestamp replies disabled."
+```

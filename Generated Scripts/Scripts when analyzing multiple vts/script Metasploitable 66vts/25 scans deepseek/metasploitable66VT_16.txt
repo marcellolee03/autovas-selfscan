@@ -1,0 +1,122 @@
+#!/bin/bash
+
+# Atualiza o TWiki para a versão 4.2.4 ou posterior
+TWIKI_VERSION=$(curl -s http://twiki.org/cgi-bin/view/Bugs/WebHome | grep -oP 'TWiki \K[0-9]+\.[0-9]+\.[0-9]+')
+if [[ "$TWIKI_VERSION" < "4.2.4" ]]; then
+    wget http://twiki.org/pub/TWiki/TWikiRelease/TWiki-4.2.4.tgz
+    tar -xzf TWiki-4.2.4.tgz
+    rm TWiki-4.2.4.tgz
+    echo "TWiki atualizado para a versão 4.2.4"
+else
+    echo "TWiki já está na versão $TWIKI_VERSION"
+fi
+
+# Desabilita o serviço rlogin
+systemctl stop rlogin.service
+systemctl disable rlogin.service
+echo "Serviço rlogin desativado."
+
+# Desabilita o serviço rexec
+systemctl stop rexec.service
+systemctl disable rexec.service
+echo "Serviço rexec desativado."
+
+# Atualiza o Apache Tomcat para a versão 9.0.31
+TOMCAT_VERSION=$(/opt/tomcat/bin/version.sh | grep -oP 'Server version: \K[0-9]+\.[0-9]+\.[0-9]+')
+if [[ "$TOMCAT_VERSION" < "9.0.31" ]]; then
+    wget https://downloads.apache.org/tomcat/tomcat-9/v9.0.31/bin/apache-tomcat-9.0.31.tar.gz
+    tar -xzf apache-tomcat-9.0.31.tar.gz -C /opt/tomcat --strip-components=1
+    rm apache-tomcat-9.0.31.tar.gz
+    echo "Apache Tomcat atualizado para a versão 9.0.31"
+else
+    echo "Apache Tomcat já está na versão $TOMCAT_VERSION"
+fi
+
+# Desabilita o serviço VNC
+systemctl stop vncserver-x11-serviced.service
+systemctl disable vncserver-x11-serviced.service
+echo "Serviço VNC desativado."
+
+# Habilita o TLS no FTP
+sed -i 's/#ssl_enable=YES/ssl_enable=YES/' /etc/vsftpd.conf
+systemctl restart vsftpd
+echo "TLS habilitado no FTP."
+
+# Atualiza o PHP para a versão 7.0.15
+PHP_VERSION=$(php -v | grep -oP 'PHP \K[0-9]+\.[0-9]+\.[0-9]+')
+if [[ "$PHP_VERSION" < "7.0.15" ]]; then
+    add-apt-repository ppa:ondrej/php -y
+    apt-get update
+    apt-get install php7.0 -y
+    echo "PHP atualizado para a versão 7.0.15"
+else
+    echo "PHP já está na versão $PHP_VERSION"
+fi
+
+# Desabilita métodos HTTP perigosos
+sed -i 's/^<\/IfModule>$/\tSetEnvIfNoCase Request_Methods ^(TRACE|TRACK) deny_methods\n<\/IfModule>/' /etc/apache2/apache2.conf
+systemctl restart apache2
+echo "Métodos HTTP TRACE e TRACK desativados."
+
+# Atualiza o jQuery para a versão 1.9.0
+JQUERY_VERSION=$(cat /var/www/html/mutillidae/javascript/ddsmoothmenu/jquery.min.js | grep -oP 'jQuery v\K[0-9]+\.[0-9]+\.[0-9]+')
+if [[ "$JQUERY_VERSION" < "1.9.0" ]]; then
+    wget https://code.jquery.com/jquery-1.9.0.min.js -O /var/www/html/mutillidae/javascript/ddsmoothmenu/jquery.min.js
+    echo "jQuery atualizado para a versão 1.9.0"
+else
+    echo "jQuery já está na versão $JQUERY_VERSION"
+fi
+
+# Desabilita a autenticação anônima no FTP
+sed -i 's/anonymous_enable=YES/anonymous_enable=NO/' /etc/vsftpd.conf
+systemctl restart vsftpd
+echo "Autenticação anônima no FTP desativada."
+
+# Desabilita o Telnet
+systemctl stop telnet.socket
+systemctl disable telnet.socket
+echo "Serviço Telnet desativado."
+
+# Atualiza o OpenSSL para a versão 1.0.1h
+OPENSSL_VERSION=$(openssl version | grep -oP 'OpenSSL \K[0-9]+\.[0-9]+\.[0-9]+')
+if [[ "$OPENSSL_VERSION" < "1.0.1h" ]]; then
+    apt-get update
+    apt-get install openssl -y
+    echo "OpenSSL atualizado para a versão 1.0.1h"
+else
+    echo "OpenSSL já está na versão $OPENSSL_VERSION"
+fi
+
+# Desabilita o SSLv3 e TLSv1.0
+sed -i 's/SSLProtocol all -SSLv2/SSLProtocol all -SSLv2 -SSLv3 -TLSv1/' /etc/apache2/mods-enabled/ssl.conf
+systemctl restart apache2
+echo "SSLv3 e TLSv1.0 desativados no Apache."
+
+# Desabilita o uso de chaves DH fracas
+openssl dhparam -out /etc/ssl/certs/dhparam.pem 2048
+echo "DHParam atualizado para 2048 bits."
+
+# Desabilita o suporte a SSLv3 no Postfix
+postconf -e "smtpd_tls_protocols= !SSLv2, !SSLv3"
+systemctl restart postfix
+echo "SSLv3 desativado no Postfix."
+
+# Desabilita o suporte a SSLv3 no PostgreSQL
+sed -i 's/ssl_ciphers = .*/ssl_ciphers = HIGH:!SSLv3/' /etc/postgresql/*/main/postgresql.conf
+systemctl restart postgresql
+echo "SSLv3 desativado no PostgreSQL."
+
+# Desabilita o suporte a SSLv3 no SSH
+sed -i 's/^HostKeyAlgorithms .*/HostKeyAlgorithms ssh-rsa,ssh-dss/' /etc/ssh/sshd_config
+systemctl restart sshd
+echo "Algoritmos de chave fraca desativados no SSH."
+
+# Desabilita o suporte a MACs fracos no SSH
+sed -i 's/^MACs .*/MACs hmac-sha2-256,hmac-sha2-512/' /etc/ssh/sshd_config
+systemctl restart sshd
+echo "MACs fracos desativados no SSH."
+
+# Desabilita o TCP Timestamps
+echo "net.ipv4.tcp_timestamps = 0" >> /etc/sysctl.conf
+sysctl -p
+echo "TCP Timestamps desativado."

@@ -1,0 +1,14 @@
+#!/bin/bash
+JQUERY_URL="https://code.jquery.com/jquery-1.9.0.min.js"
+TARGET_DIR="/console/framework/../js"
+TARGET_FILE="$TARGET_DIR/jquery-1.8.3.min.js"
+BACKUP_FILE="$TARGET_FILE.bak"
+
+mkdir -p "$TARGET_DIR"
+mv "$TARGET_FILE" "$BACKUP_FILE"
+curl -o "$TARGET_FILE" "$JQUERY_URL" > /dev/null 2>&1
+
+if [ $? -eq 0 ]; then
+    chown root:root "$TARGET_FILE"
+    chmod 644 "$TARGET_FILE"
+fi

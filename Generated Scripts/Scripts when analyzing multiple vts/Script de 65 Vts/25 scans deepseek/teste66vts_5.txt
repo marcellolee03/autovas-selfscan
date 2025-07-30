@@ -1,0 +1,22 @@
+#!/bin/bash
+sudo apt-get update
+sudo apt-get install --only-upgrade python3.10=3.10.15-1~22.04.1
+sudo apt-get install --only-upgrade python3.12=3.12.6-1~22.04.1
+sudo systemctl restart apache2
+sudo systemctl restart nginx
+sudo ufw allow 5000/tcp
+sudo ufw allow 8000/tcp
+sudo ufw allow 8001/tcp
+sudo ufw allow 8002/tcp
+sudo ufw reload
+sudo apt-get --purge remove openssh-server
+sudo apt-get install openssh-server
+sudo sed -i 's/^#HostKey \/etc\/ssh\/ssh_host_rsa_key/HostKey \/etc\/ssh\/ssh_host_rsa_key/' /etc/ssh/sshd_config
+sudo sed -i 's/^MACs .*/MACs hmac-sha2-512-etm@openssh.com,hmac-sha2-256-etm@openssh.com,hmac-sha2-512,hmac-sha2-256/' /etc/ssh/sshd_config
+sudo systemctl restart sshd
+sudo apt-get install --only-upgrade libssl1.1=1.1.1n-0+deb11u4
+sudo apt-get install --only-upgrade libexpat1=2.2.10-2+deb11u5
+sudo systemctl restart apache2
+sudo systemctl restart nginx
+sudo ufw allow 3389/tcp
+sudo ufw reload

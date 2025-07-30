@@ -1,0 +1,50 @@
+Com base na análise da vulnerabilidade do Apache (CVE-2012-0053)  e nos 10 scripts de correção fornecidos, aqui está a avaliação de cada script e a porcentagem geral de correção.
+
+A vulnerabilidade afeta as versões 2.2.0 a 2.2.21 do Apache HTTP Server, e a solução é atualizar para a versão 2.2.22 ou posterior. A análise a seguir avalia se cada script é capaz de executar esta atualização com sucesso.
+
+Análise Individual dos Scripts
+
+    Script 1 (1vtapache_1.txt): Sim.
+        Este script verifica o gerenciador de pacotes (apt-get ou yum) e executa o comando de atualização para o Apache (apache2 ou httpd). Embora não verifique a versão antes de agir, a ação de atualizar o pacote corrige a vulnerabilidade.
+
+Script 2 (1vtapache_2.txt): Sim.
+
+    O script identifica o sistema operacional, localiza o binário do Apache e verifica se a versão instalada é inferior a 2.2.22. Caso seja vulnerável, ele executa o comando de atualização apropriado para o sistema (Debian, Ubuntu, CentOS, etc.) e reinicia o serviço. É um script completo e eficaz.
+
+Script 3 (1vtapache_3.txt): Sim.
+
+    Este script foca em sistemas baseados em Debian (apache2). Ele compara a versão instalada com a versão mínima "2.2.22" e, se for inferior, atualiza o pacote e reinicia o serviço. A lógica de verificação e correção é sólida.
+
+Script 4 (1vtapache_4.txt): Sim.
+
+    O script verifica se o pacote apache2 está instalado em um sistema Debian e, em caso afirmativo, executa a atualização. É um método direto que, assumindo que seja executado com privilégios de root, corrige o problema.
+
+Script 5 (1vtapache_5.txt): Sim.
+
+    Verifica se o apache2 está instalado e se a versão está na faixa vulnerável (2.2.0 a 2.2.21). Se estiver, ele atualiza o pacote. A lógica de detecção da versão é adequada para identificar a vulnerabilidade e aplicar a correção.
+
+Script 6 (1vtapache_6.txt): Sim.
+
+    Consiste nos comandos diretos para atualizar o apache2 em sistemas baseados em Debian usando sudo. É a forma mais simples e direta de aplicar a correção.
+
+Script 7 (1vtapache_7.txt): Sim.
+
+    Este script detecta múltiplos sistemas operacionais (Debian, RHEL, Alpine) e aplica o comando de atualização correspondente. Ele também reinicia o serviço Apache, garantindo que a correção seja aplicada.
+
+Script 8 (1vtapache_8.txt): Sim.
+
+    Focado em sistemas Debian, o script confirma se o apache2 está instalado antes de tentar atualizá-lo e reiniciar o serviço. É uma abordagem segura e eficaz.
+
+Script 9 (1vtapache_9.txt): Sim.
+
+    Utiliza dpkg --compare-versions para verificar de forma robusta se a versão instalada do apache2 é inferior a "2.2.22". Ele só executa a atualização se a versão for de fato vulnerável, o que o torna preciso e eficiente.
+
+Script 10 (1vtapache_10.txt): Sim.
+
+    Este é um script muito seguro. Ele verifica a versão antes de atualizar, sai se o sistema já estiver corrigido e, crucialmente, verifica a versão novamente após a atualização para garantir que a correção foi bem-sucedida, com tratamento de erros em cada etapa.
+
+Porcentagem Geral de Correção
+
+Todos os 10 scripts fornecidos são capazes de corrigir a vulnerabilidade descrita. Eles utilizam abordagens diferentes, desde a atualização direta até verificações detalhadas da versão, mas todos executam a ação fundamental necessária: atualizar o pacote do Apache para uma versão que não seja vulnerável.
+
+Média de porcentagem geral de correção: 100%

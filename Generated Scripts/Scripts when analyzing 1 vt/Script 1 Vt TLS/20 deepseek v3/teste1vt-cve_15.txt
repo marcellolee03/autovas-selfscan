@@ -1,0 +1,37 @@
+#!/bin/bash
+
+# Verifica se o OpenSSL está instalado
+if ! command -v openssl &> /dev/null; then
+    echo "OpenSSL não está instalado. Instalando OpenSSL..."
+    sudo apt-get update && sudo apt-get install -y openssl
+fi
+
+# Verifica se o arquivo de configuração do OpenSSL existe
+OPENSSL_CONF="/etc/ssl/openssl.cnf"
+if [ ! -f "$OPENSSL_CONF" ]; then
+    echo "Arquivo de configuração do OpenSSL não encontrado. Abortando."
+    exit 1
+fi
+
+# Desabilita TLSv1.0 e TLSv1.1 no arquivo de configuração do OpenSSL
+sudo sed -i '/^MinProtocol = TLSv1.0/d' "$OPENSSL_CONF"
+sudo sed -i '/^MaxProtocol = TLSv1.1/d' "$OPENSSL_CONF"
+sudo sed -i '/^MinProtocol = TLSv1.0/d' "$OPENSSL_CONF"
+sudo sed -i '/^MaxProtocol = TLSv1.1/d' "$OPENSSL_CONF"
+echo "MinProtocol = TLSv1.2" | sudo tee -a "$OPENSSL_CONF" > /dev/null
+echo "MaxProtocol = TLSv1.3" | sudo tee -a "$OPENSSL_CONF" > /dev/null
+
+# Reinicia os serviços que utilizam TLS/SSL
+sudo systemctl restart apache2
+sudo systemctl restart nginx
+sudo systemctl restart postgresql
+
+# Verifica a configuração atualizada
+openssl ciphers -v | grep -E "TLSv1\.0|TLSv1\.1"
+if [ $? -eq 0 ]; then
+    echo "Ainda há suporte para TLSv1.0 ou TLSv1.1. Verifique manualmente."
+else
+    echo "TLSv1.0 e TLSv1.1 foram desabilitados com sucesso."
+fi
+
+exit 0

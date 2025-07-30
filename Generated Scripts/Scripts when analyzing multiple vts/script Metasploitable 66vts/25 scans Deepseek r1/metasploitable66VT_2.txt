@@ -1,0 +1,54 @@
+#!/bin/bash
+
+# Redefinir senhas padrão e adicionar usuários necessários
+mysql -e "ALTER USER 'root'@'localhost' IDENTIFIED BY 'N0v4_S3nha_S3gur@'; FLUSH PRIVILEGES;" 2>/dev/null
+sudo -u postgres psql -c "ALTER USER postgres WITH PASSWORD 'S3nh4_F0rt3_P0stgr3s';" 2>/dev/null
+(echo "S3nh@_VNC_F0rt3!") | vncpasswd -f > /etc/vncpasswd
+
+# Atualizar pacotes críticos e remover vulnerabilidades conhecidas
+DEBIAN_FRONTEND=noninteractive apt-get update >/dev/null
+DEBIAN_FRONTEND=noninteractive apt-get install --only-upgrade -y openssl >/dev/null
+
+# Desativar serviços vulneráveis
+services=("rlogin" "rexec" "rsh" "vino" "distcc" "druby" "telnet" "ajp" "ingreslock")
+for svc in "${services[@]}"; do
+    [ -f "/etc/init.d/$svc" ] && /etc/init.d/$svc stop >/dev/null
+    update-rc.d -f "$svc" remove >/dev/null 2>&1
+    [ -f "/etc/xinetd.d/$svc" ] && rm -f "/etc/xinetd.d/$svc"  
+done
+
+# Configurar hardening em serviços essenciais
+sed -i '/^PermitRootLogin/c\PermitRootLogin no' /etc/ssh/sshd_config
+sed -i '/^#*PasswordAuthentication/c\PasswordAuthentication no' /etc/ssh/sshd_config
+[ -f /etc/ssh/sshd_config ] && service ssh restart >/dev/null
+
+# Configurar SSL/TLS em serviços críticos
+[ -f /etc/postfix/main.cf ] && postconf -e "smtpd_tls_protocols=!SSLv2,!SSLv3,!TLSv1,!TLSv1.1"
+[ -f /etc/postgresql/*/main/postgresql.conf ] && sed -i "s/ssl_ciphers.*/ssl_ciphers = 'HIGH:!aNULL:!MD5:!3DES'/g" /etc/postgresql/*/main/postgresql.conf
+
+# Configurar hardening do Apache
+[ -f /etc/apache2/apache2.conf ] && {
+    echo -e "<Directory />\nAllowOverride None\nOrder Deny,Allow\nDeny from all\n</Directory>" >> /etc/apache2/conf-enabled/security.conf
+    a2dismod cgi >/dev/null
+    apache2ctl graceful >/dev/null
+}
+
+# Remover arquivos sensíveis
+find /var/www/ -name "phpinfo.php" -exec rm -f {} \; >/dev/null 2>&1
+rm -rf /usr/share/twiki /var/www/html/{mutillidae,dvwa,doc} >/dev/null 2>&1
+
+# Configurar firewall básico
+iptables -A INPUT -p tcp --dport 80 -j ACCEPT
+iptables -A INPUT -p tcp --dport 443 -j ACCEPT
+iptables -A INPUT -p tcp --dport 22 -j ACCEPT
+iptables -A INPUT -j DROP
+
+# Aplicar hardening do kernel contra informações do sistema
+sysctl -w net.ipv4.tcp_timestamps=0 >/dev/null
+sysctl -w net.ipv4.icmp_echo_ignore_all=1 >/dev/null
+echo 'iptables-persistent iptables-persistent/autosave_v4 boolean true' | debconf-set-selections
+echo 'iptables-persistent iptables-persistent/autosave_v6 boolean true' | debconf-set-selections
+DEBIAN_FRONTEND=noninteractive apt-get install -y iptables-persistent >/dev/null
+netfilter-persistent save >/dev/null
+
+# Nota: Atualização do sistema operacional não realizada devido ao EOL - Recomendada migração para versão suportada

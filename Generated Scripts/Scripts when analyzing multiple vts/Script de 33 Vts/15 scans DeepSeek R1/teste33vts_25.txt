@@ -1,0 +1,66 @@
+#!/bin/bash
+
+# Atualizar repositórios e sistema para correção do Proxmox (Vulnerabilidade 1)
+apt-get update -y
+DEBIAN_FRONTEND=noninteractive apt-get full-upgrade -y -o Dpkg::Options::="--force-confold"
+
+# Baixar jQuery 3.7.1 e corrigir vulnerabilidades 2-6
+JQUERY_PATH="https://code.jquery.com/jquery-3.7.1.min.js"
+PATHS=(
+    "/js/jquery-1.8.3.min.js"
+    "/opscenter/webcommon/framework/../js/jquery-1.8.3.min.js"
+    "/framesets/../js/jquery-1.8.3.min.js"
+    "/frameset/../js/jquery-1.8.3.min.js"
+    "/console/framework/../js/jquery-1.8.3.min.js"
+)
+
+wget -qO /tmp/jquery.min.js "$JQUERY_PATH"
+for path in "${PATHS[@]}"; do
+    full_path="/var/www/html${path//..\/}"
+    if [ -f "$full_path" ]; then
+        cp /tmp/jquery.min.js "$full_path"
+        chown www-data:www-data "$full_path"
+    fi
+done
+rm /tmp/jquery.min.js
+
+# Configurar SSH (Vulnerabilidades 7-9,13-16,19,21-22)
+SSHD_CONFIG="/etc/ssh/sshd_config"
+cp "$SSHD_CONFIG" "${SSHD_CONFIG}.bak"
+
+# Algoritmos inseguros a serem removidos
+DISABLED_ALGORITHMS=(
+    "HostKeyAlgorithms" "ssh-dss"
+    "KexAlgorithms" "diffie-hellman-group1-sha1"
+    "Ciphers" "3des*\|*cbc*"
+    "MACs" "hmac-md5\|hmac-sha1-96\|umac-64*"
+)
+
+for ((i=0; i<${#DISABLED_ALGORITHMS[@]}; i+=2)); do
+    key="${DISABLED_ALGORITHMS[i]}"
+    values="${DISABLED_ALGORITHMS[i+1]}"
+    if grep -q "^$key" "$SSHD_CONFIG"; then
+        sed -i "/^$key/ s/$/,${values//|/,}/g" "$SSHD_CONFIG"
+    else
+        echo "$key ${values//|/,}" >> "$SSHD_CONFIG"
+    fi
+done
+
+# Parar e desativar Telnet (Vulnerabilidade 11)
+systemctl stop telnet.socket
+systemctl disable telnet.socket &> /dev/null
+
+# Configurações de kernel para TCP e ICMP (Vuln. 17-18,20,23-32)
+SYSCTL_CONF="/etc/sysctl.conf"
+cp "$SYSCTL_CONF" "${SYSCTL_CONF}.bak"
+
+echo "net.ipv4.tcp_timestamps = 0" >> "$SYSCTL_CONF"
+echo "net.ipv4.icmp_echo_ignore_all = 1" >> "$SYSCTL_CONF"
+
+# Aplicar configurações de rede
+sysctl -p &> /dev/null
+
+# Reiniciar SSH para aplicar mudanças
+systemctl restart sshd.service
+
+echo "Correções aplicadas com sucesso."

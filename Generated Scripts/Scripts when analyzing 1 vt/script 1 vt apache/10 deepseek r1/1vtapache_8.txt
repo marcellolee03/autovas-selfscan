@@ -1,0 +1,19 @@
+#!/bin/bash
+[ "$(id -u)" -ne 0 ] && { echo 'Erro: execute como root' >&2; exit 1; }
+if command -v apt-get >/dev/null 2>&1; then
+    apt-get update
+    if dpkg -l apache2 2>/dev/null | grep -q '^ii'; then
+        apt-get --only-upgrade install apache2 -y
+        if command -v systemctl >/dev/null 2>&1; then
+            systemctl restart apache2
+        elif command -v service >/dev/null 2>&1; then
+            service apache2 restart
+        else
+            /etc/init.d/apache2 restart
+        fi
+    fi
+else
+    echo "Erro: APT não encontrado (sistema não suportado)" >&2
+    exit 1
+fi
+exit 0

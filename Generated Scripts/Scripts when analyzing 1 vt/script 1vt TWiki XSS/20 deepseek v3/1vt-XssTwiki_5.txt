@@ -1,0 +1,8 @@
+#!/bin/bash
+TWIKI_VERSION=$(curl -s http://localhost/bin/view/TWiki/TWikiReleaseHistory | grep -oP '(?<=<title>TWiki )\d+\.\d+\.\d+')
+if [[ "$TWIKI_VERSION" < "4.2.4" ]]; then
+    wget https://sourceforge.net/projects/twiki/files/TWiki%20for%20all%20platforms/TWiki-4.2.4/TWiki-4.2.4.zip
+    unzip TWiki-4.2.4.zip -d /var/www/html/
+    rm TWiki-4.2.4.zip
+    systemctl restart apache2
+fi

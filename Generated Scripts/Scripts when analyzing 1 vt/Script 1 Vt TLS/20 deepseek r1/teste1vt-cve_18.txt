@@ -1,0 +1,48 @@
+#!/bin/bash
+
+CONFIG_FILE_SEARCH_PATHS=("/etc/postgresql/*/main/postgresql.conf" "/var/lib/postgresql/*/main/postgresql.conf" "/var/lib/pgsql/*/data/postgresql.conf")
+PG_CONFIG=""
+PG_DATA_DIR=""
+PG_VERSION=""
+
+find_postgres_config() {
+    for path in "${CONFIG_FILE_SEARCH_PATHS[@]}"; do
+        matches=($path)
+        [[ -f ${matches[0]} ]] && PG_CONFIG="${matches[0]}" && return
+    done
+    PG_DATA_DIR=$(ps auxww | grep postgres | grep -oE "\-D +[^ ]+" | cut -d' ' -f2 | sort -u | head -n1)
+    [[ -n "$PG_DATA_DIR" ]] && PG_CONFIG="$PG_DATA_DIR/postgresql.conf"
+}
+
+verify_version() {
+    [[ -x $(command -v psql) ]] && PG_VERSION=$(psql --version | grep -Po '(?<= )([0-9]+\.)?[0-9]+')
+}
+
+configure_protocols() {
+    [[ -n "$PG_VERSION" ]] && [[ "$(printf "%s\n" "12" "$PG_VERSION" | sort -V | head -n1)" == "12" ]] \
+        && sudo sed -i "s/^[#\s]*ssl_protocols\s*=.*/ssl_protocols = 'TLSv1.2, TLSv1.3'/" "$1" \
+        || echo "ssl_protocols = 'TLSv1.2, TLSv1.3'" | sudo tee -a "$1" >/dev/null
+}
+
+configure_ciphers() {
+    CIPHERS="'HIGH:!aNULL:!eNULL:!EXPORT:!DES:!3DES:!MD5:!PSK:!RC4:!ADH:!LOW:!DSS:!SSLv2:!SSLv3:!TLSv1:!TLSv1.1'"
+    grep -q "ssl_ciphers" "$1" \
+        && sudo sed -i "s/^[#\s]*ssl_ciphers\s*=.*/ssl_ciphers = $CIPHERS/" "$1" \
+        || echo "ssl_ciphers = $CIPHERS" | sudo tee -a "$1" >/dev/null
+}
+
+restart_service() {
+    sudo systemctl restart postgresql 2>/dev/null || sudo service postgresql restart 2>/dev/null
+}
+
+find_postgres_config
+[[ -z "$PG_CONFIG" || ! -f "$PG_CONFIG" ]] && exit 0
+
+verify_version
+sudo cp "$PG_CONFIG" "${PG_CONFIG}.bkp-$(date +%s)"
+
+grep -q "^\s*ssl\s*=\s*on" "$PG_CONFIG" || echo "ssl = on" | sudo tee -a "$PG_CONFIG" >/dev/null
+
+[[ -n "$PG_VERSION" ]] && configure_protocols "$PG_CONFIG"
+configure_ciphers "$PG_CONFIG"
+restart_service

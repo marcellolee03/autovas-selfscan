@@ -1,0 +1,32 @@
+```bash
+#!/bin/bash
+
+# Descrição: Desabilita o serviço rexec e remove o pacote, se instalado.
+
+# Verifica se o serviço rexec está instalado e o remove.
+if systemctl is-enabled rexec.socket 2>/dev/null; then
+  systemctl stop rexec.socket
+  systemctl disable rexec.socket
+  echo "Serviço rexec desabilitado."
+else
+  echo "Serviço rexec não está habilitado."
+fi
+
+if command -v rexecd &>/dev/null; then
+  apt-get purge --auto-remove -y rexec &>/dev/null
+  echo "Pacote rexec removido."
+elif rpm -q rexec &>/dev/null; then
+  yum remove -y rexec &>/dev/null
+  echo "Pacote rexec removido."
+else
+  echo "Pacote rexec não encontrado."
+fi
+
+# Garante que o serviço não será iniciado na inicialização.
+if [ -f /etc/xinetd.d/rexec ]; then
+  mv /etc/xinetd.d/rexec /etc/xinetd.d/rexec.disabled
+  echo "Serviço rexec desabilitado via xinetd."
+fi
+
+echo "Correção para CVE-1999-0618 (rexec) aplicada."
+```

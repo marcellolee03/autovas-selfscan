@@ -1,0 +1,39 @@
+#!/bin/bash
+
+# Backup original SSH configuration
+cp /etc/ssh/sshd_config /etc/ssh/sshd_config.bak
+
+# Update HostKeyAlgorithms to disable ssh-dss
+sed -i '/^HostKeyAlgorithms/d' /etc/ssh/sshd_config
+echo "HostKeyAlgorithms ecdsa-sha2-nistp256,ecdsa-sha2-nistp384,ecdsa-sha2-nistp521,ssh-ed25519,rsa-sha2-256,rsa-sha2-512" >> /etc/ssh/sshd_config
+
+# Update KexAlgorithms to disable diffie-hellman-group1-sha1
+sed -i '/^KexAlgorithms/d' /etc/ssh/sshd_config
+echo "KexAlgorithms curve25519-sha256,curve25519-sha256@libssh.org,diffie-hellman-group14-sha256,diffie-hellman-group16-sha512,diffie-hellman-group18-sha512,ecdh-sha2-nistp256,ecdh-sha2-nistp384,ecdh-sha2-nistp521" >> /etc/ssh/sshd_config
+
+# Update Ciphers to disable weak encryption algorithms
+sed -i '/^Ciphers/d' /etc/ssh/sshd_config
+echo "Ciphers chacha20-poly1305@openssh.com,aes256-gcm@openssh.com,aes128-gcm@openssh.com" >> /etc/ssh/sshd_config
+
+# Update MACs to disable weak MAC algorithms
+sed -i '/^MACs/d' /etc/ssh/sshd_config
+echo "MACs hmac-sha2-512-etm@openssh.com,hmac-sha2-256-etm@openssh.com,umac-128-etm@openssh.com" >> /etc/ssh/sshd_config
+
+# Restart SSH service
+systemctl restart sshd
+
+# Disable telnet service
+systemctl stop telnet.socket >/dev/null 2>&1
+systemctl disable telnet.socket >/dev/null 2>&1
+apt-get remove --purge telnetd -y >/dev/null 2>&1
+
+# Disable TCP timestamps
+echo "net.ipv4.tcp_timestamps = 0" >> /etc/sysctl.conf
+sysctl -p >/dev/null
+
+# Block ICMP timestamp requests
+if ! iptables -C INPUT -p icmp --icmp-type timestamp-request -j DROP 2>/dev/null; then
+    iptables -A INPUT -p icmp --icmp-type timestamp-request -j DROP
+    apt-get install iptables-persistent -y >/dev/null 2>&1
+    netfilter-persistent save >/dev/null
+fi

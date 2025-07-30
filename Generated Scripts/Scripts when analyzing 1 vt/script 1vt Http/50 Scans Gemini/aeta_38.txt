@@ -1,0 +1,87 @@
+#!/bin/bash
+
+# Descrição: Este script corrige a vulnerabilidade de transmissão de informações sensíveis em texto claro via HTTP,
+# redirecionando todas as solicitações HTTP para HTTPS.
+
+# Variáveis
+HTTP_PORT=80
+HTTPS_PORT=443
+APACHE_CONFIG_FILE="/etc/apache2/sites-available/000-default.conf" # Caminho padrão para a configuração do Apache
+NGINX_CONFIG_FILE="/etc/nginx/sites-available/default" # Caminho padrão para a configuração do Nginx
+WEB_SERVER=""
+
+# Funções
+
+detect_web_server() {
+  if command -v apache2 >/dev/null 2>&1; then
+    WEB_SERVER="apache"
+    echo "Servidor web Apache detectado."
+  elif command -v nginx >/dev/null 2>&1; then
+    WEB_SERVER="nginx"
+    echo "Servidor web Nginx detectado."
+  else
+    echo "Nenhum servidor web Apache ou Nginx detectado. O script não pode prosseguir."
+    exit 1
+  fi
+}
+
+
+configure_apache() {
+  # 1. Habilitar o módulo rewrite do Apache (se ainda não estiver habilitado)
+  if ! a2enmod rewrite >/dev/null 2>&1; then
+    echo "Habilitando o módulo rewrite do Apache..."
+    a2enmod rewrite
+  fi
+
+  # 2. Adicionar a regra de redirecionamento para o arquivo de configuração do Apache
+  if grep -q "RewriteEngine On" "$APACHE_CONFIG_FILE"; then
+    echo "RewriteEngine já está habilitado no arquivo de configuração."
+  else
+    echo "Adicionando RewriteEngine ao arquivo de configuração..."
+    sed -i 's|<VirtualHost \*:80>|<VirtualHost *:80>\n\tRewriteEngine On|g' "$APACHE_CONFIG_FILE"
+  fi
+
+  if grep -q "RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [R=301,L]" "$APACHE_CONFIG_FILE"; then
+    echo "Regra de redirecionamento já existe no arquivo de configuração."
+  else
+    echo "Adicionando regra de redirecionamento para HTTPS..."
+    sed -i 's|<VirtualHost \*:80>|<VirtualHost *:80>\n\tRewriteEngine On\n\tRewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [R=301,L]|g' "$APACHE_CONFIG_FILE"
+  fi
+
+  # 3. Reiniciar o Apache para aplicar as alterações
+  echo "Reiniciando o Apache..."
+  systemctl restart apache2
+}
+
+
+configure_nginx() {
+  # 1. Adicionar o bloco de redirecionamento no arquivo de configuração do Nginx
+  if grep -q "return 301 https://$host\$request_uri;" "$NGINX_CONFIG_FILE"; then
+    echo "Redirecionamento HTTPS já configurado no Nginx."
+  else
+    echo "Configurando redirecionamento HTTPS no Nginx..."
+    sed -i 's/listen 80 default_server;/listen 80 default_server;\n\treturn 301 https:\/\/${host}\$request_uri;/g' "$NGINX_CONFIG_FILE"
+    sed -i 's/listen 80;/listen 80;\n\treturn 301 https:\/\/${host}\$request_uri;/g' "$NGINX_CONFIG_FILE"
+
+  fi
+
+  # 2. Reiniciar o Nginx para aplicar as alterações
+  echo "Reiniciando o Nginx..."
+  systemctl restart nginx
+}
+
+# Programa principal
+
+detect_web_server
+
+if [ "$WEB_SERVER" == "apache" ]; then
+  configure_apache
+elif [ "$WEB_SERVER" == "nginx" ]; then
+  configure_nginx
+else
+  echo "Nenhum servidor web suportado detectado."
+  exit 1
+fi
+
+echo "Redirecionamento HTTP para HTTPS configurado com sucesso."
+exit 0

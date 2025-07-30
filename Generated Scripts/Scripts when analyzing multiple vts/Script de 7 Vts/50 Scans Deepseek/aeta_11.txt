@@ -1,0 +1,35 @@
+#!/bin/bash
+
+# Vulnerabilidade 1: Enforce HTTPS
+apt-get update -y
+apt-get install -y nginx
+sed -i 's/listen 80;/listen 80;\n    return 301 https:\/\/$host$request_uri;/' /etc/nginx/sites-available/default
+openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout /etc/ssl/private/nginx-selfsigned.key -out /etc/ssl/certs/nginx-selfsigned.crt -subj "/CN=localhost"
+sed -i 's/# listen 443 ssl default_server;/listen 443 ssl default_server;\n    ssl_certificate \/etc\/ssl\/certs\/nginx-selfsigned.crt;\n    ssl_certificate_key \/etc\/ssl\/private\/nginx-selfsigned.key;/' /etc/nginx/sites-available/default
+systemctl restart nginx
+
+# Vulnerabilidade 2: Disable DNS Recursion
+apt-get install -y bind9
+sed -i 's/recursion yes;/recursion no;/' /etc/bind/named.conf.options
+systemctl restart bind9
+
+# Vulnerabilidade 3: Disable ICMP Timestamp
+echo "net.ipv4.icmp_echo_ignore_all=1" >> /etc/sysctl.conf
+sysctl -p
+
+# Vulnerabilidade 4: Disable TLSv1.0 and TLSv1.1
+openssl ciphers -v 'ALL:!aNULL:!eNULL:!SSLv2:!SSLv3:!TLSv1:!TLSv1.1' > /etc/ssl/openssl.cnf
+systemctl restart apache2
+
+# Vulnerabilidade 5: Disable SSL/TLS Renegotiation
+sed -i 's/SSLProtocol all/SSLProtocol all -SSLv2 -SSLv3 -TLSv1 -TLSv1.1/' /etc/apache2/mods-enabled/ssl.conf
+sed -i 's/SSLHonorCipherOrder off/SSLHonorCipherOrder on/' /etc/apache2/mods-enabled/ssl.conf
+systemctl restart apache2
+
+# Vulnerabilidade 6: Disable Weak Cipher Suites
+sed -i 's/SSLCipherSuite HIGH:!aNULL/SSLCipherSuite HIGH:!aNULL:!MD5:!RC4:!DES:!3DES/' /etc/apache2/mods-enabled/ssl.conf
+systemctl restart apache2
+
+# Vulnerabilidade 7: Disable TCP Timestamps
+echo "net.ipv4.tcp_timestamps = 0" >> /etc/sysctl.conf
+sysctl -p

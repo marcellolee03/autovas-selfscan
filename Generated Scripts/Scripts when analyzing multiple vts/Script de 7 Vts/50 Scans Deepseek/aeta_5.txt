@@ -1,0 +1,49 @@
+#!/bin/bash
+# Configuração para forçar o uso de HTTPS e desativar HTTP
+apache_conf="/etc/apache2/sites-available/000-default.conf"
+if [ -f "$apache_conf" ]; then
+    sed -i 's/<VirtualHost \*:80>/<VirtualHost \*:80>\n    Redirect permanent \/ https:\/\/\$host\//' "$apache_conf"
+    systemctl restart apache2
+fi
+
+# Configuração do DNS para desativar recursão
+named_conf="/etc/bind/named.conf.options"
+if [ -f "$named_conf" ]; then
+    echo "options { recursion no; };" >> "$named_conf"
+    systemctl restart bind9
+fi
+
+# Configuração para desativar ICMP timestamp
+sysctl_conf="/etc/sysctl.conf"
+if [ -f "$sysctl_conf" ]; then
+    echo "net.ipv4.icmp_echo_ignore_all=1" >> "$sysctl_conf"
+    sysctl -p
+fi
+
+# Configuração para desativar TLS 1.0 e 1.1
+ssl_conf="/etc/ssl/openssl.cnf"
+if [ -f "$ssl_conf" ]; then
+    sed -i 's/MinProtocol = TLSv1.0/MinProtocol = TLSv1.2/' "$ssl_conf"
+    sed -i 's/CipherString = DEFAULT@SECLEVEL=2/CipherString = DEFAULT@SECLEVEL=2:!SSLv3:!TLSv1:!TLSv1.1/' "$ssl_conf"
+    systemctl restart apache2
+fi
+
+# Configuração para desabilitar renegociação SSL/TLS
+apache_ssl_conf="/etc/apache2/mods-available/ssl.conf"
+if [ -f "$apache_ssl_conf" ]; then
+    echo "SSLInsecureRenegotiation off" >> "$apache_ssl_conf"
+    systemctl restart apache2
+fi
+
+# Configuração para desativar cifras fracas
+if [ -f "$apache_ssl_conf" ]; then
+    echo "SSLProtocol all -SSLv3 -TLSv1 -TLSv1.1" >> "$apache_ssl_conf"
+    echo "SSLCipherSuite HIGH:!aNULL:!MD5:!RC4:!3DES" >> "$apache_ssl_conf"
+    systemctl restart apache2
+fi
+
+# Configuração para desativar timestamps TCP
+if [ -f "$sysctl_conf" ]; then
+    echo "net.ipv4.tcp_timestamps = 0" >> "$sysctl_conf"
+    sysctl -p
+fi

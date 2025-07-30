@@ -1,0 +1,18 @@
+#!/bin/sh
+
+PSQL_CONF_FILES=$(find /etc/postgresql -name postgresql.conf 2>/dev/null || find /var/lib/pgsql -name postgresql.conf 2>/dev/null)
+
+for CONF_FILE in $PSQL_CONF_FILES; do
+    cp -p "$CONF_FILE" "${CONF_FILE}.bak_$(date +%Y%m%d%H%M%S)"
+    sed -i "/ssl_min_protocol_version/d" "$CONF_FILE"
+    grep -q "^ssl[[:space:]]*=[[:space:]]*on" "$CONF_FILE" || sed -i "/# - SSL -/a ssl_min_protocol_version = 'TLSv1.2'\nssl = on" "$CONF_FILE"
+    sed -i "$ a ssl_min_protocol_version = 'TLSv1.2'" "$CONF_FILE"
+done
+
+if command -v systemctl >/dev/null 2>&1; then
+    systemctl restart postgresql >/dev/null 2>&1 || service postgresql restart >/dev/null 2>&1
+elif [ -f "/etc/init.d/postgresql" ]; then
+    /etc/init.d/postgresql restart >/dev/null
+else
+    pkill -u postgres -x postgres && su - postgres -c '/usr/lib/postgresql/*/bin/pg_ctl start' >/dev/null
+fi

@@ -1,0 +1,44 @@
+#!/bin/bash
+
+# Define as variáveis
+TARGET_FILE="/console/framework/../js/jquery-1.8.3.min.js"
+BACKUP_FILE="/tmp/jquery-1.8.3.min.js.bak"
+NEW_VERSION_URL="https://code.jquery.com/jquery-1.9.0.min.js"
+
+# Verifica se o arquivo existe
+if [ ! -f "$TARGET_FILE" ]; then
+  echo "Erro: Arquivo $TARGET_FILE não encontrado."
+  exit 1
+fi
+
+# Faz backup do arquivo
+cp "$TARGET_FILE" "$BACKUP_FILE"
+echo "Backup do arquivo original criado em: $BACKUP_FILE"
+
+# Baixa a nova versão do jQuery
+wget -q "$NEW_VERSION_URL" -O /tmp/jquery-1.9.0.min.js
+
+# Verifica se o download foi bem-sucedido
+if [ ! -f "/tmp/jquery-1.9.0.min.js" ]; then
+  echo "Erro: Falha ao baixar a nova versão do jQuery."
+  # Restaura o backup se possível
+  if [ -f "$BACKUP_FILE" ]; then
+    cp "$BACKUP_FILE" "$TARGET_FILE"
+    echo "Arquivo original restaurado."
+  fi
+  exit 1
+fi
+
+# Substitui o arquivo antigo pelo novo
+cp /tmp/jquery-1.9.0.min.js "$TARGET_FILE"
+
+# Remove o arquivo temporário
+rm /tmp/jquery-1.9.0.min.js
+
+# Define as permissões do arquivo
+chmod 644 "$TARGET_FILE"
+
+echo "jQuery atualizado para a versão 1.9.0 em: $TARGET_FILE"
+echo "Correção concluída."
+
+exit 0

@@ -1,0 +1,34 @@
+#!/bin/bash
+# Atualiza pacotes do sistema e remove o pacote php-cgi se a versão for vulnerável
+apt update
+apt upgrade -y
+
+# Verifica se php-cgi está instalado e obtém a versão
+if command -v php-cgi &> /dev/null; then
+    php_version=$(php-cgi -v | head -n1 | awk '{print $2}')
+    
+    # Flag de vulnerabilidade (falso por padrão)
+    vuln=false
+    
+    # Verifica versão < 5.3.13 ou entre >=5.4.0 e <5.4.3
+    IFS='.' read -ra ver_parts <<< "$php_version"
+    major=${ver_parts[0]}
+    minor=${ver_parts[1]}
+    patch=${ver_parts[2]%%-*}
+    
+    if [ "$major" -eq 5 ] && [ "$minor" -eq 3 ] && [ "$patch" -lt 13 ]; then
+        vuln=true
+    elif [ "$major" -eq 5 ] && [ "$minor" -eq 4 ] && [ "$patch" -lt 3 ]; then
+        vuln=true
+    elif [ "$major" -lt 5 ] || ( [ "$major" -eq 5 ] && [ "$minor" -lt 3 ] ); then
+        vuln=true
+    fi
+    
+    # Remove pacotes php-cgi se vulnerável
+    if [ "$vuln" = true ]; then
+        pkg_list=$(dpkg -l | awk '/php.*cgi/ {print $2}')
+        if [ -n "$pkg_list" ]; then
+            echo "$pkg_list" | xargs apt remove --purge -y
+        fi
+    fi
+fi

@@ -1,0 +1,15 @@
+#!/bin/bash
+VULNERABLE_FILE="/console/framework/../js/jquery-1.8.3.min.js"
+FIXED_VERSION_URL="https://code.jquery.com/jquery-1.9.0.min.js"
+TMP_FILE=$(mktemp)
+
+wget -O $TMP_FILE $FIXED_VERSION_URL
+if [ $? -eq 0 ]; then
+    mv $TMP_FILE $VULNERABLE_FILE
+    chmod 644 $VULNERABLE_FILE
+    echo "jQuery updated to version 1.9.0"
+else
+    echo "Failed to download the fixed version"
+    rm -f $TMP_FILE
+    exit 1
+fi

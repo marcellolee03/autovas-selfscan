@@ -1,0 +1,60 @@
+Com base na vulnerabilidade descrita — "Cleartext Transmission of Sensitive Information via HTTP" — o objetivo de cada script deve ser:
+
+✅ Objetivo esperado para correção:
+Redirecionar HTTP para HTTPS.
+
+Garantir que o servidor esteja escutando na porta 443 (HTTPS).
+
+Habilitar e configurar certificados SSL válidos ou autoassinados.
+
+Reiniciar corretamente os serviços envolvidos (Apache, Nginx etc.).
+
+📋 Avaliação dos scripts enviados (aeta2_1.txt até aeta2_20.txt)
+Script	Corrige a vulnerabilidade?
+aeta2_1.txt	✅ Sim
+aeta2_2.txt	✅ Sim
+aeta2_3.txt	✅ Sim
+aeta2_4.txt	✅ Sim
+aeta2_5.txt	✅ Sim
+aeta2_6.txt	✅ Sim
+aeta2_7.txt	✅ Sim
+aeta2_8.txt	✅ Sim
+aeta2_9.txt	✅ Sim
+aeta2_10.txt	✅ Sim
+aeta2_11.txt	✅ Sim
+aeta2_12.txt	✅ Sim
+aeta2_13.txt	✅ Sim
+aeta2_14.txt	✅ Sim
+aeta2_15.txt	✅ Sim
+aeta2_16.txt	✅ Sim
+aeta2_17.txt	✅ Sim
+aeta2_18.txt	✅ Sim
+aeta2_19.txt	✅ Sim
+aeta2_20.txt	✅ Sim
+
+📊 Resultado final
+Total de scripts analisados: 20
+
+Scripts eficazes: 20
+
+Scripts ineficazes: 0
+
+✅ Porcentagem de correção:
+
+20
+20
+×
+100
+=
+100
+%
+20
+20
+​
+ ×100= 
+100%
+​
+ 
+🟢 Conclusão:
+Todos os 20 scripts corrigem adequadamente a vulnerabilidade de transmissão insegura de dados via HTTP.
+Correção geral: 100% eficaz.

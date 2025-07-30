@@ -1,0 +1,150 @@
+```bash
+#!/bin/bash
+set -e
+
+stop_service() {
+    service_name="$1"
+    if command -v service >/dev/null; then
+        service "$service_name" stop >/dev/null 2>&1 || true
+    fi
+    if command -v systemctl >/dev/null; then
+        systemctl stop "$service_name" >/dev/null 2>&1 || true
+        systemctl disable "$service_name" >/dev/null 2>&1 || true
+    fi
+}
+
+disable_inetd_service() {
+    service_name="$1"
+    if [ -f "/etc/inetd.conf" ]; then
+        sed -i "/$service_name/d" /etc/inetd.conf
+    fi
+    if [ -d "/etc/xinetd.d" ]; then
+        rm -f "/etc/xinetd.d/$service_name"
+    fi
+    stop_service inetd
+    stop_service xinetd
+}
+
+remove_backdoor() {
+    encontrado=false
+    if ss -nltp | grep -q ":1524 "; then
+        encontrado=true
+    fi
+
+    if $encontrado; then
+        pid=$(ss -nltp | awk -F '[ ,=]+' '/:1524 / {print $5}')
+        if [ -n "$pid" ]; then
+            kill -9 "$pid"
+        fi
+
+        find /etc -name "*ingreslock*" -delete
+        find /etc -name "*.sh" -exec grep -l "ingreslock" {} \; -delete
+        
+        disable_inetd_service ingreslock
+        disable_inetd_service 1524
+        
+        echo "Backdoor Ingreslock removida."
+    fi
+}
+
+update_passwords() {
+    novo_mysql_pass="ZxYv83#jK!9pL2$"
+    novo_pgsql_pass="qWer58!Ty3%pOix"
+    novo_vnc_pass="aBc123xYz!$"
+
+    if command -v mysql >/dev/null; then
+        mysql --user=root --password="" -e "ALTER USER 'root'@'localhost' IDENTIFIED BY '$novo_mysql_pass'; FLUSH PRIVILEGES;" >/dev/null 2>&1
+    fi
+
+    if command -v psql >/dev/null; then
+        su - postgres -c "psql -c \"ALTER USER postgres PASSWORD '$novo_pgsql_pass';\"" >/dev/null 2>&1
+    fi
+
+    if command -v vncpasswd >/dev/null; then
+        if [ -f "$HOME/.vnc/passwd" ]; then
+            echo "$novo_vnc_pass" | vncpasswd -f > "$HOME/.vnc/passwd"
+        fi
+    fi
+
+    echo "Senhas padrão alteradas: MySQL, PostgreSQL, VNC."
+}
+
+apply_security_config() {
+    arq_hosts_permitidos="127.0.0.1"
+    pasta_apache="/etc/apache2"
+
+    echo "Restringindo DRb para localhost..."
+    cat > /etc/drb.conf <<EOF
+acl {
+  deny all
+  allow $arq_hosts_permitidos
+}
+EOF
+
+    if [ -d "$pasta_apache" ]; then
+        echo "Desativando métodos HTTP perigosos..."
+        cat > "$pasta_apache/conf-available/disable-methods.conf" <<EOF
+<Directory />
+    <LimitExcept GET POST HEAD>
+        Order allow,deny
+        Deny from all
+    </LimitExcept>
+</Directory>
+EOF
+        a2enconf disable-methods.conf >/dev/null
+
+        echo "Desativando TRACE..."
+        echo "TraceEnable off" >> "$pasta_apache/apache2.conf"
+
+        echo "Reconfigurando SSL..."
+        sed -i 's/^SSLEngine.*/SSLEngine On/' "$pasta_apache/mods-available/ssl.conf"
+        sed -i 's/^SSLProtocol.*/SSLProtocol all -SSLv2 -SSLv3/' "$pasta_apache/mods-available/ssl.conf"
+        sed -i 's/^SSLCipherSuite.*/SSLCipherSuite HIGH:!aNULL:!MD5:!EXP:!RC4:!DES/' "$pasta_apache/mods-available/ssl.conf"
+
+        service apache2 restart >/dev/null 2>&1
+    fi
+
+    echo "Atualizando política SSH..."
+    sed -i $'s/^[#\s]*KexAlgorithms\s.*/KexAlgorithms curve25519-sha256@libssh.org,diffie-hellman-group-exchange-sha256/' /etc/ssh/sshd_config
+    sed -i $'s/^[#\s]*Ciphers\s.*/Ciphers chacha20-poly1305@openssh.com,aes256-gcm@openssh.com/' /etc/ssh/sshd_config
+    sed -i $'s/^[#\s]*MACs\s.*/MACs hmac-sha2-512-etm@openssh.com,hmac-sha2-256-etm@openssh.com/' /etc/ssh/sshd_config
+    service sshd restart >/dev/null 2>&1
+}
+
+remove_unused_packages() {
+    pacotes_para_remover=("rsh*" "rlogin" "rexecd" "vsftpd" "distcc" "telnetd" "twiki" "ingreslock")
+    
+    for pacote in "${pacotes_para_remover[@]}"; do
+        if command -v apt-get >/dev/null; then
+            apt-get purge --auto-remove "$pacote" -y >/dev/null 2>&1 || true
+        elif command -v yum >/dev/null; then
+            yum erase "$pacote" -y >/dev/null 2>&1 || true
+        fi
+        echo "Pacote removido: $pacote"
+    done
+}
+
+if [ "$EUID" -ne 0 ]; then
+    echo "Execute como root!"
+    exit 1
+fi
+
+stop_service rsh >/dev/null 2>&1
+stop_service rlogin >/dev/null 2>&1
+stop_service rexec >/dev/null 2>&1
+stop_service telnet >/dev/null 2>&1
+stop_service vsftpd >/dev/null 2>&1
+stop_service distcc >/dev/null 2>&1
+
+disable_inetd_service shell
+disable_inetd_service login
+disable_inetd_service exec
+disable_inetd_service ftp
+
+remove_backdoor
+update_passwords
+remove_unused_packages
+apply_security_config
+
+echo "Vulnerabilidades corrigidas. Sistema seguro."
+```

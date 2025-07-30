@@ -1,0 +1,79 @@
+#!/bin/sh
+
+if [ "$(id -u)" -ne 0 ]; then
+    echo "Requer privilégios de root para executar este script." >&2
+    exit 1
+fi
+
+STOP_INETD=""
+STOP_XINETD=""
+
+if command -v systemctl >/dev/null 2>&1; then
+    SYSTEMD_SERVICES=$(systemctl list-units --all | awk '/rexec|rexecd/ && (/active|inactive/ && !/not-found/) {print $1}')
+    
+    for srv in $SYSTEMD_SERVICES; do
+        if systemctl is-active "$srv" >/dev/null 2>&1; then
+            systemctl stop "$srv"
+        fi
+        systemctl disable "$srv" >/dev/null 2>&1
+    done
+    
+    if systemctl is-active inetd.service >/dev/null 2>&1; then
+        STOP_INETD="yes"
+    fi
+    if systemctl is-active xinetd.service >/dev/null 2>&1; then
+        STOP_XINETD="yes"
+    fi
+else
+    RUNNING_SERVICES="rexecd rexec"
+    for srv in $RUNNING_SERVICES; do
+        if service "$srv" status >/dev/null 2>&1; then
+            service "$srv" stop
+        fi
+        update-rc.d -f "$srv" remove >/dev/null 2>&1 || chkconfig "$srv" off >/dev/null 2>&1
+    done
+    
+    if service xinetd status >/dev/null 2>&1 || service inetd status >/dev/null 2>&1; then
+        RUNNING_SUPER=$(pgrep -x 'inetd|xinetd')
+        for pid in $RUNNING_SUPER; do
+            cmd=$(ps -p "$pid" -o comm=)
+            [ "$cmd" = "xinetd" ] && STOP_XINETD="yes"
+            [ "$cmd" = "inetd" ] && STOP_INETD="yes"
+        done
+    fi
+fi
+
+if [ -f /etc/inetd.conf ]; then
+    sed -i '/^[[:space:]]*re[xx]ec[[:space:]]/s/^/#/' /etc/inetd.conf
+    [ -n "$STOP_INETD" ] && pkill -HUP inetd >/dev/null 2>&1
+fi
+
+if [ -d /etc/xinetd.d ]; then
+    for conf in /etc/xinetd.d/*; do
+        if grep -Eq 'service[[:space:]]+re[xx]ec' "$conf"; then
+            sed -i '/service[[:space:]]\+re[xx]ec/,/{/s/\([[:space:]]*disable[[:space:]]*=[[:space:]]*\)no/\1yes/g' "$conf"
+            [ -n "$STOP_XINETD" ] && pkill -HUP xinetd >/dev/null 2>&1
+        fi
+    done
+fi
+
+PKG_LIST="netkit-rexecd inetutils-rexecd"
+for pkg in $PKG_LIST; do
+    if command -v dpkg >/dev/null 2>&1 && dpkg -l | grep -q "^ii[[:space:]]\+$pkg[[:space:]]"; then
+        apt-get -y purge "$pkg"
+    elif command -v rpm >/dev/null 2>&1 && rpm -q "$pkg" >/dev/null 2>&1; then
+        yum -y remove "$pkg"
+    fi
+done
+
+RUNNING_REXEC_PIDS=$(pgrep -x 'rexecd|rexec')
+if [ -n "$RUNNING_REXEC_PIDS" ]; then
+    kill -9 $RUNNING_REXEC_PIDS
+fi
+
+iptables -D INPUT -p tcp --dport 512 -j DROP >/dev/null 2>&1
+iptables -A INPUT -p tcp --dport 512 -j DROP
+ip6tables -D INPUT -p tcp --dport 512 -j DROP >/dev/null 2>&1
+ip6tables -A INPUT -p tcp --dport 512 -j DROP
+
+exit 0

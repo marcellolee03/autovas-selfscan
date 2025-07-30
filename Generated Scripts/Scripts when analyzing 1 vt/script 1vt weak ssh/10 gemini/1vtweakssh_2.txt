@@ -1,0 +1,21 @@
+```sh
+#!/bin/bash
+
+# Determina o arquivo de configuração do SSH
+SSH_CONFIG_FILE="/etc/ssh/sshd_config"
+
+# Remove a entrada HostKeyAlgorithms se existir, para evitar duplicações
+sudo sed -i '/^HostKeyAlgorithms/d' "$SSH_CONFIG_FILE"
+
+# Adiciona a linha com os algoritmos de chave de host seguros
+sudo echo "HostKeyAlgorithms ssh-ed25519,ecdsa-sha2-nistp256,ecdsa-sha2-nistp384,ecdsa-sha2-nistp521,rsa-sha2-512,rsa-sha2-256" | sudo tee -a "$SSH_CONFIG_FILE"
+
+# Reinicia o serviço SSH para aplicar as alterações
+if systemctl is-active --quiet sshd.service; then
+  sudo systemctl restart sshd.service
+else
+  sudo service ssh restart
+fi
+
+echo "Vulnerabilidade corrigida. O serviço SSH foi reiniciado."
+```

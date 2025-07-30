@@ -1,0 +1,15 @@
+#!/bin/bash
+CONF_FILE="/etc/ssl/openssl.cnf"
+BACKUP_FILE="${CONF_FILE}.bak"
+
+if [ ! -f "$BACKUP_FILE" ]; then
+    cp "$CONF_FILE" "$BACKUP_FILE"
+fi
+
+sed -i 's/MinProtocol = TLSv1.0/MinProtocol = TLSv1.2/g' "$CONF_FILE"
+sed -i 's/MinProtocol = TLSv1.1/MinProtocol = TLSv1.2/g' "$CONF_FILE"
+
+sed -i 's/CipherString = DEFAULT@SECLEVEL=2/CipherString = HIGH:!aNULL:!MD5:!RC4:!3DES/g' "$CONF_FILE"
+
+systemctl restart apache2.service
+systemctl restart postgresql.service

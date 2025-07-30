@@ -1,0 +1,81 @@
+#!/bin/bash
+# Disable HTTP and enforce HTTPS
+if grep -q "^#*Listen 80$" /etc/apache2/ports.conf; then
+    sed -i 's/^#*Listen 80$/Listen 80\nRedirect permanent \/ https:\/\/$HOSTNAME\//' /etc/apache2/ports.conf
+fi
+a2enmod ssl
+if [ ! -f /etc/apache2/sites-available/default-ssl.conf ]; then
+    mv /etc/apache2/sites-available/default-ssl.conf /etc/apache2/sites-available/default-ssl.conf.bak
+    cat <<EOL > /etc/apache2/sites-available/default-ssl.conf
+<IfModule mod_ssl.c>
+    <VirtualHost _default_:443>
+        ServerAdmin webmaster@localhost
+        DocumentRoot /var/www/html
+        ErrorLog \${APACHE_LOG_DIR}/error.log
+        CustomLog \${APACHE_LOG_DIR}/access.log combined
+        SSLEngine on
+        SSLCertificateFile /etc/ssl/certs/ssl-cert-snakeoil.pem
+        SSLCertificateKeyFile /etc/ssl/private/ssl-cert-snakeoil.key
+        <FilesMatch "\.(cgi|shtml|phtml|php)$">
+            SSLOptions +StdEnvVars
+        </FilesMatch>
+        <Directory /usr/lib/cgi-bin>
+            SSLOptions +StdEnvVars
+        </Directory>
+        BrowserMatch "MSIE [2-6]" \
+            nokeepalive ssl-unclean-shutdown \
+            downgrade-1.0 force-response-1.0
+        BrowserMatch "MSIE [17-9]" ssl-unclean-shutdown
+    </VirtualHost>
+</IfModule>
+EOL
+fi
+a2ensite default-ssl.conf
+service apache2 restart
+
+# Configure DNS server to disable recursion
+if [ -f /etc/bind/named.conf.options ]; then
+    if grep -q "^#*recursion yes$" /etc/bind/named.conf.options; then
+        sed -i 's/^#*recursion yes$/recursion no/' /etc/bind/named.conf.options
+        service bind9 restart
+    fi
+fi
+
+# Disable ICMP timestamp requests
+echo "1" > /proc/sys/net/ipv4/icmp_echo_ignore_all
+echo "net.ipv4.icmp_echo_ignore_all = 1" >> /etc/sysctl.conf
+sysctl -p
+
+# Disable deprecated TLS versions
+if [ -f /etc/nginx/nginx.conf ]; then
+    sed -i 's/ssl_protocols .*/ssl_protocols TLSv1.2 TLSv1.3;/' /etc/nginx/nginx.conf
+    service nginx restart
+fi
+if [ -f /etc/apache2/mods-enabled/ssl.conf ]; then
+    sed -i 's/SSLProtocol .*/SSLProtocol -all +TLSv1.2 +TLSv1.3/' /etc/apache2/mods-enabled/ssl.conf
+    service apache2 restart
+fi
+
+# Disable SSL/TLS renegotiation
+if [ -f /etc/nginx/nginx.conf ]; then
+    sed -i '/ssl_session_cache/ a ssl_session_tickets off;' /etc/nginx/nginx.conf
+    service nginx restart
+fi
+if [ -f /etc/apache2/mods-enabled/ssl.conf ]; then
+    sed -i 's/SSLHonorCipherOrder .*/SSLHonorCipherOrder on/' /etc/apache2/mods-enabled/ssl.conf
+    service apache2 restart
+fi
+
+# Disable weak SSL/TLS cipher suites
+if [ -f /etc/nginx/nginx.conf ]; then
+    sed -i 's/ssl_ciphers .*/ssl_ciphers HIGH:!aNULL:!MD5:!kDHE:!kECDHE;/' /etc/nginx/nginx.conf
+    service nginx restart
+fi
+if [ -f /etc/apache2/mods-enabled/ssl.conf ]; then
+    sed -i 's/SSLCipherSuite .*/SSLCipherSuite HIGH:!aNULL:!MD5:!kDHE:!kECDHE/' /etc/apache2/mods-enabled/ssl.conf
+    service apache2 restart
+fi
+
+# Disable TCP timestamps
+echo "net.ipv4.tcp_timestamps = 0" >> /etc/sysctl.conf
+sysctl -p

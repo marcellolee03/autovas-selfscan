@@ -1,0 +1,66 @@
+#!/bin/bash
+
+# Determine current Ubuntu release
+CURRENT_RELEASE=$(lsb_release -cs)
+
+# Map for sequential upgrade path
+declare -A UPGRADE_PATH=( 
+    ["hardy"]="intrepid"
+    ["intrepid"]="jaunty"
+    ["jaunty"]="karmic"
+    ["karmic"]="lucid"
+    ["lucid"]="precise"
+    ["precise"]="trusty"
+    ["trusty"]="xenial"
+    ["xenial"]="bionic"
+    ["bionic"]="focal"
+    ["focal"]="jammy" 
+)
+
+# Ensure old-releases are accessible
+sed -i 's|http://[^ ]*[a-z]|http://old-releases.ubuntu.com|g' /etc/apt/sources.list
+
+# Update package information
+apt-get update -y
+
+# Install essential upgrade tools
+apt-get install -y update-manager-core ubuntu-release-upgrader-core
+
+# Configure non-interactive upgrades
+echo 'DPkg::options { 
+    "--force-confdef";
+    "--force-confold";
+}' > /etc/apt/apt.conf.d/99force-confold
+
+# Set release upgrades configuration
+echo "[Sources]
+AllowThirdParty=yes
+CheckDistUpgrades=yes" > /etc/update-manager/release-upgrades.d/local.cfg
+
+# Perform sequential upgrades until Jammy
+while [[ -n "${UPGRADE_PATH[$CURRENT_RELEASE]}" ]] && [[ "$CURRENT_RELEASE" != "jammy" ]]; do
+    NEXT_RELEASE="${UPGRADE_PATH[$CURRENT_RELEASE]}"
+    
+    # Execute release upgrade
+    DEBIAN_FRONTEND=noninteractive \
+        do-release-upgrade -q -f DistUpgradeViewNonInteractive -p
+        
+    # Verify and update current release
+    NEW_RELEASE=$(lsb_release -cs)
+    if [ "$NEW_RELEASE" != "$NEXT_RELEASE" ]; then
+        exit 1
+    fi
+    CURRENT_RELEASE="$NEW_RELEASE"
+done
+
+# Enable ESM if necessary
+PRODUCT=${PRODUCT:-}
+if [[ "$PRODUCT" == "esm-infra" ]] || lscpu | grep -qi 'Xen'; then
+    apt-get install -y ubuntu-advantage-tools
+    ua attach --no-auto-enable C1nt0xf1s4F0 # Generic token placeholder
+    ua enable esm-infra
+fi
+
+# Final cleanup
+apt-get autoremove -y
+apt-get clean

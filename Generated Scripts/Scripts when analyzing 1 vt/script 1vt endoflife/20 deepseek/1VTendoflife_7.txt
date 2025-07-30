@@ -1,0 +1,6 @@
+#!/bin/bash
+sudo apt-get update
+sudo apt-get install -y ubuntu-release-upgrader-core
+sudo do-release-upgrade -d
+sudo apt-get autoremove -y
+sudo apt-get clean

@@ -1,0 +1,107 @@
+For each script, I will analyze its ability to address the "SSL/TLS: Deprecated TLSv1.0 and TLSv1.1 Protocol Detection" vulnerability  based on the provided context. The recommended solution is to disable TLSv1.0 and TLSv1.1 protocols in favor of TLSv1.2+ protocols.
+
+
+Here's the analysis for each script:
+
+teste1vt-cve_1.txt
+
+This script attempts to set MinProtocol = TLSv1.2 and CipherString = DEFAULT@SECLEVEL=2 in /etc/ssl/openssl.cnf  and restarts apache2, nginx, and postgresql. This directly addresses the vulnerability by enforcing a minimum TLS version.
+Resolution: Yes
+teste1vt-cve_2.txt
+
+This script modifies /etc/ssl/openssl.cnf to set MinProtocol = TLSv1.2 and CipherString = DEFAULT@SECLEVEL=2. It also attempts to configure apache2 and nginx to use TLSv1.2 and TLSv1.3. It then restarts apache2 and nginx. This comprehensively addresses the vulnerability across OpenSSL and common web servers.
+
+
+Resolution: Yes
+teste1vt-cve_3.txt
+
+This script modifies /etc/ssl/openssl.cnf to set MinProtocol = TLSv1.2 and CipherString = DEFAULT@SECLEVEL=2  and restarts apache2, nginx, and postgresql. This directly addresses the vulnerability by enforcing a minimum TLS version.
+Resolution: Yes
+teste1vt-cve_4.txt
+
+This script modifies /etc/ssl/openssl.cnf to set MinProtocol = TLSv1.2 and CipherString = DEFAULT@SECLEVEL=2  and restarts apache2, postgresql, and nginx. This directly addresses the vulnerability by enforcing a minimum TLS version.
+Resolution: Yes
+teste1vt-cve_5.txt
+
+This script specifically targets PostgreSQL configurations by looking for listen_addresses on port 5432 and attempting to set ssl_protocols = TLSv1.2,TLSv1.3 in postgresql.conf. It then restarts PostgreSQL. This addresses the vulnerability specifically for PostgreSQL.
+Resolution: Yes
+teste1vt-cve_6.txt
+
+This script creates a temporary OpenSSL configuration file with MinProtocol = TLSv1.2 and CipherString = DEFAULT@SECLEVEL=2, then copies it to /etc/ssl/openssl.cnf. It also attempts to configure apache2 and nginx for TLSv1.2 and TLSv1.3. It then restarts apache2 and nginx. This provides a comprehensive fix.
+Resolution: Yes
+teste1vt-cve_7.txt
+
+This script attempts to remove lines for TLSv1.0 and TLSv1.1 and adds MinProtocol = TLSv1.2 to /etc/ssl/openssl.cnf. It also modifies nginx.conf and apache2.conf to use TLSv1.2 and TLSv1.3, and restarts these services. This offers a good attempt at a complete fix.
+
+Resolution: Yes
+teste1vt-cve_8.txt
+
+This script backs up openssl.cnf, then removes MinProtocol and CipherString lines before adding MinProtocol = TLSv1.2 and CipherString = DEFAULT@SECLEVEL=2. It then attempts to restart common services like nginx, apache2, httpd, and postgresql. This is a good general approach.
+
+Resolution: Yes
+teste1vt-cve_9.txt
+
+This script backs up openssl.cnf, then removes MinProtocol and CipherString lines before adding MinProtocol = TLSv1.2 and CipherString = DEFAULT@SECLEVEL=2. It then restarts apache2, postgresql, and nginx. This directly addresses the vulnerability by enforcing a minimum TLS version.
+Resolution: Yes
+teste1vt-cve_10.txt
+
+This script backs up openssl.cnf if no backup exists. It then replaces TLSv1.0 and TLSv1.1 with TLSv1.2 for MinProtocol and changes the CipherString. It then restarts apache2 and postgresql. This should address the vulnerability for OpenSSL and potentially services using its configuration.
+
+Resolution: Yes
+teste1vt-cve_11.txt
+
+This script modifies openssl.cnf to set MinProtocol to TLSv1.2 and CipherString to DEFAULT@SECLEVEL=2. It also modifies nginx.conf to remove TLSv1.0 and TLSv1.1 and add TLSv1.2 , and modifies apache2's ssl.conf for SSLProtocol and SSLCipherSuite. It then restarts nginx and apache2. This provides a strong, multi-service solution.
+
+
+Resolution: Yes
+teste1vt-cve_12.txt
+
+This script backs up openssl.cnf, then removes existing MinProtocol and CipherString lines, adding MinProtocol = TLSv1.2 and CipherString = DEFAULT@SECLEVEL=2. It then runs update-ca-certificates and restarts apache2 and postgresql. It also includes a verification step. This is a good, robust solution.
+
+
+Resolution: Yes
+teste1vt-cve_13.txt
+
+This script backs up openssl.cnf, then removes existing MinProtocol and CipherString lines, adding MinProtocol = TLSv1.2 and a specific CipherString. It then restarts apache2 and postgresql. This directly addresses the vulnerability for services relying on OpenSSL's configuration.
+Resolution: Yes
+teste1vt-cve_14.txt
+
+This script backs up openssl.cnf and sets MinProtocol to TLSv1.2 TLSv1.3 and CipherString to a strong list. It then restarts apache2, nginx, and postgresql. It also attempts to configure HSTS for Apache , and directly configure nginx.conf and postgresql.conf for TLS versions and ciphers. This is a very comprehensive approach.
+
+
+Resolution: Yes
+teste1vt-cve_15.txt
+
+This script first checks for OpenSSL installation and attempts to install it if missing. It then checks for openssl.cnf. It modifies openssl.cnf to remove TLSv1.0 and TLSv1.1 and set MinProtocol = TLSv1.2 and MaxProtocol = TLSv1.3. It then restarts apache2, nginx, and postgresql  and includes a verification step. This is a very thorough script.
+
+
+
+
+Resolution: Yes
+teste1vt-cve_16.txt
+
+This script backs up openssl.cnf, then removes lines for TLSv1.0 and TLSv1.1 and adds MinProtocol = TLSv1.2 and MaxProtocol = TLSv1.3. It then restarts apache2 and postgresql. This directly addresses the vulnerability for services relying on OpenSSL's configuration.
+Resolution: Yes
+teste1vt-cve_17.txt
+
+This script creates a backup directory and backs up openssl.cnf. It then removes MinProtocol for TLSv1.0 and TLSv1.1 and the generic CipherString, replacing them with MinProtocol = TLSv1.2 and CipherString = DEFAULT@SECLEVEL=2. It then restarts apache2 and postgresql. This is a solid approach.
+
+Resolution: Yes
+teste1vt-cve_18.txt
+
+This script checks for openssl.cnf. It then uses sed to modify MinProtocol to TLSv1.2 and MaxProtocol to TLSv1.3. It then restarts apache2, nginx, and postgresql. This is a direct approach to fixing the OpenSSL configuration.
+
+Resolution: Yes
+teste1vt-cve_19.txt
+
+This script checks for TLSv1.0 or TLSv1.1 in openssl.cnf, nginx.conf, and apache2's ssl.conf. If found, it removes them and sets MinProtocol = TLSv1.2, MaxProtocol = TLSv1.3 in openssl.cnf , and ssl_protocols TLSv1.2 TLSv1.3; in nginx.conf and SSLProtocol +TLSv1.2 +TLSv1.3 in apache2's ssl.conf. It then restarts nginx and apache2. This provides a targeted and effective solution for the affected services.
+
+Resolution: Yes
+teste1vt-cve_20.txt
+
+This script backs up openssl.cnf , then removes existing MinProtocol and CipherString lines, adding MinProtocol = TLSv1.2:TLSv1.3 and a specific CipherString. It then restarts apache2 and postgresql. This directly addresses the vulnerability for OpenSSL and related services.
+
+Resolution: Yes
+Overall Percentage of Correction:
+
+Based on the analysis, all 20 scripts directly or comprehensively address the vulnerability by disabling deprecated TLS protocols and enabling newer, secure ones. Therefore, the average general percentage of correction is 100%.

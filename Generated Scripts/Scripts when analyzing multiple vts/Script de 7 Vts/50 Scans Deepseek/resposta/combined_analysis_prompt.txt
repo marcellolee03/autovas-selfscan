@@ -1,0 +1,2340 @@
+>analise esse prompt contendo as vulnerabilidades encontradas em um csv do openvas e analise se os scripts que irei enviar em seguida sao capazes de corrigir esses problemas ou nao, me informando uma porcentagem de correcao das vulnerabilidades
+>Vulnerabilidades:
+    # INSTRUÇÕES PARA O MODELO DE IA
+
+    ## PERSONA
+    Você é um especialista em cibersegurança e automação de sistemas, focado em criar scripts de correção (patching). Sua única função é gerar um script que resolva a vulnerabilidade descrita abaixo.
+
+    ## TAREFA
+    Analise o contexto da vulnerabilidade a seguir e gere um script de shell (compatível com o sistema operacional do localhost) que, ao ser executado, corrija permanentemente a vulnerabilidade descrita.
+
+    ## CONTEXTO DA VULNERABILIDADE
+
+# Vulnerabilidade 1
+CVEs: nan
+NVT Name: Cleartext Transmission of Sensitive Information via HTTP
+Port: 80.0
+Port Protocol: tcp
+Summary: The host / application transmits sensitive information (username, passwords) in
+  cleartext via HTTP.
+Specific Result: Vulnerability was detected according to the Vulnerability Detection Method.
+Vulnerability Detection Method: Evaluate previous collected information and check if the host / application is not
+  enforcing the transmission of sensitive data via an encrypted SSL/TLS connection.
+
+  The script is currently checking the following:
+
+  - HTTP Basic Authentication (Basic Auth)
+
+  - HTTP Forms (e.g. Login) with input field of type 'password'
+Details:
+Cleartext Transmission of Sensitive Information via HTTP
+(OID: 1.3.6.1.4.1.25623.1.0.108440)
+Version used: 2023-09-07T05:05:21Z
+
+Affected Software/OS: Hosts / applications which doesn't enforce the transmission of sensitive data via an
+  encrypted SSL/TLS connection.
+Solution: Enforce the transmission of sensitive data via an encrypted SSL/TLS connection.
+  Additionally make sure the host / application is redirecting all users to the secured SSL/TLS connection before
+  allowing to input sensitive data into the mentioned functions.
+
+# Vulnerabilidade 2
+CVEs: nan
+NVT Name: DNS Cache Snooping Vulnerability (UDP) - Active Check
+Port: 53.0
+Port Protocol: udp
+Summary: The DNS server is prone to a cache snooping vulnerability.
+Specific Result: Vulnerability was detected according to the Vulnerability Detection Method.
+Vulnerability Detection Method: Sends a crafted DNS query and checks the response.
+
+  Notes:
+
+  - No scan result is expected if localhost (127.0.0.1) was scanned (self scanning)
+
+  - If the scanned network is e.g. a private LAN which contains systems not accessible to the public
+  (access restricted) and it is accepted that the target host is disclosing information to this
+  network please set the 'Network type' configuration of the following VT to 'Private LAN':
+
+  Global variable settings (OID: 1.3.6.1.4.1.25623.1.0.12288)
+Details:
+DNS Cache Snooping Vulnerability (UDP) - Active Check
+(OID: 1.3.6.1.4.1.25623.1.0.146591)
+Version used: 2025-01-21T05:37:33Z
+
+Affected Software/OS: nan
+Solution: There are multiple possible mitigation steps depending on
+  location and functionality needed by the DNS server:
+
+  - Disable recursion
+
+  - Don't allow public access to DNS Servers doing recursion
+
+  - Leave recursion enabled if the DNS Server stays on a corporate network that cannot be reached
+  by untrusted clients
+
+# Vulnerabilidade 3
+CVEs: CVE-1999-0524
+NVT Name: ICMP Timestamp Reply Information Disclosure
+Port: nan
+Port Protocol: nan
+Summary: The remote host responded to an ICMP timestamp request.
+Specific Result: Vulnerability was detected according to the Vulnerability Detection Method.
+Vulnerability Detection Method: Sends an ICMP Timestamp (Type 13) request and checks if a
+  Timestamp Reply (Type 14) is received.
+Details:
+ICMP Timestamp Reply Information Disclosure
+(OID: 1.3.6.1.4.1.25623.1.0.103190)
+Version used: 2025-01-21T05:37:33Z
+
+Affected Software/OS: nan
+Solution: Various mitigations are possible:
+
+  - Disable the support for ICMP timestamp on the remote host completely
+
+  - Protect the remote host by a firewall, and block ICMP packets passing through the firewall in
+  either direction (either completely or only for untrusted networks)
+
+# Vulnerabilidade 4
+CVEs: CVE-2011-3389,CVE-2015-0204,CVE-2025-3200
+NVT Name: SSL/TLS: Deprecated TLSv1.0 and TLSv1.1 Protocol Detection
+Port: 443.0
+Port Protocol: tcp
+Summary: It was possible to detect the usage of the deprecated TLSv1.0
+  and/or TLSv1.1 protocol on this system.
+Specific Result: Vulnerability was detected according to the Vulnerability Detection Method.
+Vulnerability Detection Method: Checks the used TLS protocols of the services provided by this
+  system.
+Details:
+SSL/TLS: Deprecated TLSv1.0 and TLSv1.1 Protocol Detection
+(OID: 1.3.6.1.4.1.25623.1.0.117274)
+Version used: 2024-09-27T05:05:23Z
+
+Affected Software/OS: '- All services providing an encrypted communication using the
+  TLSv1.0 and/or TLSv1.1 protocols
+
+  - CVE-2025-3200: Multiple products from Wiesemann & Theis
+Solution: It is recommended to disable the deprecated TLSv1.0 and/or
+  TLSv1.1 protocols in favor of the TLSv1.2+ protocols.
+
+  Please see the references for more resources supporting you with this task.
+
+# Vulnerabilidade 5
+CVEs: CVE-2011-1473,CVE-2011-5094
+NVT Name: SSL/TLS: Renegotiation DoS Vulnerability (CVE-2011-1473, CVE-2011-5094)
+Port: 443.0
+Port Protocol: tcp
+Summary: The remote SSL/TLS service is prone to a denial of service (DoS)
+  vulnerability.
+Specific Result: Vulnerability was detected according to the Vulnerability Detection Method.
+Vulnerability Detection Method: Checks if the remote service allows to re-do the same SSL/TLS
+  handshake (Renegotiation) over an existing / already established SSL/TLS connection.
+Details:
+SSL/TLS: Renegotiation DoS Vulnerability (CVE-2011-1473, CVE-2011-5094)
+(OID: 1.3.6.1.4.1.25623.1.0.117761)
+Version used: 2024-09-27T05:05:23Z
+
+Affected Software/OS: Every SSL/TLS service which does not properly restrict
+  client-initiated renegotiation.
+Solution: Users should contact their vendors for specific patch information.
+
+  A general solution is to remove/disable renegotiation capabilities altogether from/in the affected
+  SSL/TLS service.
+
+# Vulnerabilidade 6
+CVEs: CVE-2013-2566,CVE-2015-2808,CVE-2015-4000
+NVT Name: SSL/TLS: Report Weak Cipher Suites
+Port: 443.0
+Port Protocol: tcp
+Summary: This routine reports all weak SSL/TLS cipher suites accepted by
+  a service.
+Specific Result: Vulnerability was detected according to the Vulnerability Detection Method.
+Vulnerability Detection Method: Checks previous collected cipher suites.
+
+  NOTE: No severity for SMTP services with 'Opportunistic TLS' and weak cipher suites on port 25/tcp
+  is reported. If too strong cipher suites are configured for this service the alternative would be
+  to fall back to an even more insecure cleartext communication.
+Details:
+SSL/TLS: Report Weak Cipher Suites
+(OID: 1.3.6.1.4.1.25623.1.0.103440)
+Version used: 2024-09-27T05:05:23Z
+
+Affected Software/OS: All services providing an encrypted communication using weak
+  SSL/TLS cipher suites.
+Solution: The configuration of this services should be changed so that it
+  does not accept the listed weak cipher suites anymore.
+
+  Please see the references for more resources supporting you with this task.
+
+# Vulnerabilidade 7
+CVEs: nan
+NVT Name: TCP Timestamps Information Disclosure
+Port: nan
+Port Protocol: nan
+Summary: The remote host implements TCP timestamps and therefore allows
+  to compute the uptime.
+Specific Result: Vulnerability was detected according to the Vulnerability Detection Method.
+Vulnerability Detection Method: Special IP packets are forged and sent with a little delay in
+  between to the target IP. The responses are searched for a timestamps. If found, the timestamps
+  are reported.
+Details:
+TCP Timestamps Information Disclosure
+(OID: 1.3.6.1.4.1.25623.1.0.80091)
+Version used: 2023-12-15T16:10:08Z
+
+Affected Software/OS: TCP implementations that implement RFC1323/RFC7323.
+Solution: To disable TCP timestamps on linux add the line
+  'net.ipv4.tcp_timestamps = 0' to /etc/sysctl.conf. Execute 'sysctl -p' to apply the settings at
+  runtime.
+
+  To disable TCP timestamps on Windows execute 'netsh int tcp set global timestamps=disabled'
+
+  Starting with Windows Server 2008 and Vista, the timestamp can not be completely disabled.
+
+  The default behavior of the TCP/IP stack on this Systems is to not use the Timestamp options when
+  initiating TCP connections, but use them if the TCP peer that is initiating communication includes
+  them in their synchronize (SYN) segment.
+
+  See the references for more information.
+
+    ## REGRAS E RESTRIÇÕES DE SAÍDA
+    1.  **APENAS SCRIPT:** A sua resposta deve conter ÚNICA E EXCLUSIVAMENTE o código do script.
+    2.  **SEM EXPLICAÇÕES:** Não adicione nenhum comentário, explicação, introdução, ou despedida.
+    3.  **SEM BLOCOS DE CÓDIGO MARKDOWN:** Não envolva o script em blocos de código como ` ```bash ` ou ` ```sh `. A resposta deve ser o texto puro do script.
+    4.  **AUTOSSUFICIENTE:** O script deve ser completo, autônomo e não deve exigir interação do usuário para ser executado.
+    5.  **COMPATIBILIDADE:** O script deve ser compatível com o sistema operacional especificado em 'localhost OS'. Se o sistema operacional não for especificado, assuma um sistema baseado em Linux (como Ubuntu/Debian).
+
+    # INÍCIO DO SCRIPT DE CORREÇÃO
+
+>Scripts de correção:
+{type: uploaded file
+fileName: aeta_1.txt
+fullContent:
+#!/bin/bash
+
+# Correção para Vulnerabilidade 1: Enforce HTTPS for sensitive data
+if ! grep -q "Redirect permanent / https://" /etc/apache2/sites-available/default.conf; then
+    echo "Redirect permanent / https://$(hostname)/" >> /etc/apache2/sites-available/default.conf
+    systemctl restart apache2
+fi
+
+# Correção para Vulnerabilidade 2: Disable DNS recursion
+if ! grep -q "recursion no;" /etc/bind/named.conf.options; then
+    echo "recursion no;" >> /etc/bind/named.conf.options
+    systemctl restart bind9
+fi
+
+# Correção para Vulnerabilidade 3: Disable ICMP timestamp replies
+echo "net.ipv4.icmp_echo_ignore_broadcasts = 1" >> /etc/sysctl.conf
+echo "net.ipv4.icmp_ignore_bogus_error_responses = 1" >> /etc/sysctl.conf
+sysctl -p
+
+# Correção para Vulnerabilidade 4: Disable TLSv1.0 and TLSv1.1
+if ! grep -q "Protocols" /etc/apache2/mods-enabled/ssl.conf; then
+    echo "Protocols TLSv1.2 TLSv1.3" >> /etc/apache2/mods-enabled/ssl.conf
+    systemctl restart apache2
+fi
+
+# Correção para Vulnerabilidade 5: Disable SSL/TLS renegotiation
+if ! grep -q "SSLHonorCipherOrder on" /etc/apache2/mods-enabled/ssl.conf; then
+    echo "SSLHonorCipherOrder on" >> /etc/apache2/mods-enabled/ssl.conf
+    systemctl restart apache2
+fi
+
+# Correção para Vulnerabilidade 6: Remove weak cipher suites
+if ! grep -q "SSLCipherSuite HIGH:!aNULL:!MD5:!RC4:!3DES" /etc/apache2/mods-enabled/ssl.conf; then
+    echo "SSLCipherSuite HIGH:!aNULL:!MD5:!RC4:!3DES" >> /etc/apache2/mods-enabled/ssl.conf
+    systemctl restart apache2
+fi
+
+# Correção para Vulnerabilidade 7: Disable TCP timestamps
+if ! grep -q "net.ipv4.tcp_timestamps = 0" /etc/sysctl.conf; then
+    echo "net.ipv4.tcp_timestamps = 0" >> /etc/sysctl.conf
+    sysctl -p
+fi}
+{type: uploaded file
+fileName: aeta_2.txt
+fullContent:
+#!/bin/bash
+# Vulnerabilidade 1: Enforce HTTPS for sensitive data
+sed -i 's/^http:/https:/g' /etc/nginx/sites-available/default
+systemctl restart nginx
+
+# Vulnerabilidade 2: Disable DNS recursion
+sed -i 's/^recursion yes/recursion no/g' /etc/named.conf
+systemctl restart named
+
+# Vulnerabilidade 3: Disable ICMP timestamp
+echo "net.ipv4.icmp_echo_ignore_all=1" >> /etc/sysctl.conf
+sysctl -p
+
+# Vulnerabilidade 4: Disable TLSv1.0 and TLSv1.1
+sed -i 's/TLSv1.1//g' /etc/nginx/nginx.conf
+sed -i 's/TLSv1.0//g' /etc/nginx/nginx.conf
+systemctl restart nginx
+
+# Vulnerabilidade 5: Disable SSL/TLS renegotiation
+sed -i 's/ssl_renegotiation on/ssl_renegotiation off/g' /etc/nginx/nginx.conf
+systemctl restart nginx
+
+# Vulnerabilidade 6: Disable weak SSL/TLS cipher suites
+sed -i 's/ssl_ciphers .*/ssl_ciphers HIGH:!aNULL:!MD5:!EXP:!PSK:!SRP:!DSS;/g' /etc/nginx/nginx.conf
+systemctl restart nginx
+
+# Vulnerabilidade 7: Disable TCP timestamps
+echo "net.ipv4.tcp_timestamps = 0" >> /etc/sysctl.conf
+sysctl -p}
+{type: uploaded file
+fileName: aeta_3.txt
+fullContent:
+#!/bin/bash
+
+# Vulnerabilidade 1: Enforce HTTPS for sensitive data transmission
+if ! grep -q "RewriteEngine On" /etc/apache2/sites-available/default.conf; then
+    echo "Rewriting HTTP to HTTPS for sensitive data transmission..."
+    echo "RewriteEngine On" >> /etc/apache2/sites-available/default.conf
+    echo "RewriteCond %{HTTPS} off" >> /etc/apache2/sites-available/default.conf
+    echo "RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]" >> /etc/apache2/sites-available/default.conf
+    systemctl restart apache2
+fi
+
+# Vulnerabilidade 2: Disable DNS recursion
+if ! grep -q "recursion no;" /etc/bind/named.conf.options; then
+    echo "Disabling DNS recursion..."
+    echo "recursion no;" >> /etc/bind/named.conf.options
+    systemctl restart bind9
+fi
+
+# Vulnerabilidade 3: Block ICMP Timestamp Replies
+if ! grep -q "net.ipv4.icmp_echo_ignore_all=1" /etc/sysctl.conf; then
+    echo "Blocking ICMP Timestamp Replies..."
+    echo "net.ipv4.icmp_echo_ignore_all=1" >> /etc/sysctl.conf
+    sysctl -p
+fi
+
+# Vulnerabilidade 4: Disable deprecated TLS versions
+if ! grep -q "Protocols -ALL, TLSv1.2, TLSv1.3" /etc/apache2/mods-enabled/ssl.conf; then
+    echo "Disabling deprecated TLS versions..."
+    sed -i '/^SSLProtocol/ s/.*/Protocols -ALL, TLSv1.2, TLSv1.3/' /etc/apache2/mods-enabled/ssl.conf
+    systemctl restart apache2
+fi
+
+# Vulnerabilidade 5: Disable SSL/TLS renegotiation
+if ! grep -q "SSLInsecureRenegotiation off" /etc/apache2/mods-enabled/ssl.conf; then
+    echo "Disabling SSL/TLS renegotiation..."
+    echo "SSLInsecureRenegotiation off" >> /etc/apache2/mods-enabled/ssl.conf
+    systemctl restart apache2
+fi
+
+# Vulnerabilidade 6: Disable weak cipher suites
+if ! grep -q "SSLCipherSuite HIGH:!aNULL:!MD5:!RC4:!3DES" /etc/apache2/mods-enabled/ssl.conf; then
+    echo "Disabling weak cipher suites..."
+    sed -i '/^SSLCipherSuite/ s/.*/SSLCipherSuite HIGH:!aNULL:!MD5:!RC4:!3DES/' /etc/apache2/mods-enabled/ssl.conf
+    systemctl restart apache2
+fi
+
+# Vulnerabilidade 7: Disable TCP timestamps
+if ! grep -q "net.ipv4.tcp_timestamps = 0" /etc/sysctl.conf; then
+    echo "Disabling TCP timestamps..."
+    echo "net.ipv4.tcp_timestamps = 0" >> /etc/sysctl.conf
+    sysctl -p
+fi}
+{type: uploaded file
+fileName: aeta_4.txt
+fullContent:
+#!/bin/bash
+# Vulnerabilidade 1: Enforce HTTPS
+sed -i 's/Listen 80/Listen 443/' /etc/apache2/ports.conf
+sed -i 's/<VirtualHost \*:80>/<VirtualHost \*:443>/' /etc/apache2/sites-available/000-default.conf
+a2enmod ssl
+systemctl restart apache2
+
+# Vulnerabilidade 2: Disable DNS recursion
+sed -i 's/^recursion yes/recursion no/' /etc/bind/named.conf.options
+systemctl restart bind9
+
+# Vulnerabilidade 3: Disable ICMP timestamp
+echo "net.ipv4.icmp_echo_ignore_all = 1" >> /etc/sysctl.conf
+sysctl -p
+
+# Vulnerabilidade 4: Disable TLSv1.0 and TLSv1.1
+sed -i 's/SSLProtocol all -SSLv3/SSLProtocol all -SSLv3 -TLSv1 -TLSv1.1/' /etc/apache2/mods-enabled/ssl.conf
+systemctl restart apache2
+
+# Vulnerabilidade 5: Disable SSL/TLS renegotiation
+echo "SSLInsecureRenegotiation off" >> /etc/apache2/mods-enabled/ssl.conf
+systemctl restart apache2
+
+# Vulnerabilidade 6: Disable weak cipher suites
+sed -i 's/SSLCipherSuite HIGH:!aNULL/SSLCipherSuite HIGH:!aNULL:!MD5:!RC4:!DES:!3DES/' /etc/apache2/mods-enabled/ssl.conf
+systemctl restart apache2
+
+# Vulnerabilidade 7: Disable TCP timestamps
+echo "net.ipv4.tcp_timestamps = 0" >> /etc/sysctl.conf
+sysctl -p}
+{type: uploaded file
+fileName: aeta_5.txt
+fullContent:
+#!/bin/bash
+# Configuração para forçar o uso de HTTPS e desativar HTTP
+apache_conf="/etc/apache2/sites-available/000-default.conf"
+if [ -f "$apache_conf" ]; then
+    sed -i 's/<VirtualHost \*:80>/<VirtualHost \*:80>\n    Redirect permanent \/ https:\/\/\$host\//' "$apache_conf"
+    systemctl restart apache2
+fi
+
+# Configuração do DNS para desativar recursão
+named_conf="/etc/bind/named.conf.options"
+if [ -f "$named_conf" ]; then
+    echo "options { recursion no; };" >> "$named_conf"
+    systemctl restart bind9
+fi
+
+# Configuração para desativar ICMP timestamp
+sysctl_conf="/etc/sysctl.conf"
+if [ -f "$sysctl_conf" ]; then
+    echo "net.ipv4.icmp_echo_ignore_all=1" >> "$sysctl_conf"
+    sysctl -p
+fi
+
+# Configuração para desativar TLS 1.0 e 1.1
+ssl_conf="/etc/ssl/openssl.cnf"
+if [ -f "$ssl_conf" ]; then
+    sed -i 's/MinProtocol = TLSv1.0/MinProtocol = TLSv1.2/' "$ssl_conf"
+    sed -i 's/CipherString = DEFAULT@SECLEVEL=2/CipherString = DEFAULT@SECLEVEL=2:!SSLv3:!TLSv1:!TLSv1.1/' "$ssl_conf"
+    systemctl restart apache2
+fi
+
+# Configuração para desabilitar renegociação SSL/TLS
+apache_ssl_conf="/etc/apache2/mods-available/ssl.conf"
+if [ -f "$apache_ssl_conf" ]; then
+    echo "SSLInsecureRenegotiation off" >> "$apache_ssl_conf"
+    systemctl restart apache2
+fi
+
+# Configuração para desativar cifras fracas
+if [ -f "$apache_ssl_conf" ]; then
+    echo "SSLProtocol all -SSLv3 -TLSv1 -TLSv1.1" >> "$apache_ssl_conf"
+    echo "SSLCipherSuite HIGH:!aNULL:!MD5:!RC4:!3DES" >> "$apache_ssl_conf"
+    systemctl restart apache2
+fi
+
+# Configuração para desativar timestamps TCP
+if [ -f "$sysctl_conf" ]; then
+    echo "net.ipv4.tcp_timestamps = 0" >> "$sysctl_conf"
+    sysctl -p
+fi}
+{type: uploaded file
+fileName: aeta_6.txt
+fullContent:
+#!/bin/bash
+# Atualizar pacotes e instalar ferramentas necessárias
+sudo apt-get update
+sudo apt-get install -y openssl apache2 ufw
+
+# Vulnerabilidade 1: Enforce HTTPS
+sudo a2enmod ssl
+sudo a2ensite default-ssl
+sudo systemctl restart apache2
+sudo sed -i 's/^<VirtualHost \*:80>/<VirtualHost \*:80>\n    Redirect permanent \/ https:\/\/'"$(hostname)"'\//g' /etc/apache2/sites-available/000-default.conf
+sudo systemctl restart apache2
+
+# Vulnerabilidade 2: DNS Cache Snooping
+sudo ufw allow from 192.168.1.0/24 to any port 53
+sudo ufw deny 53/udp
+
+# Vulnerabilidade 3: ICMP Timestamp Reply
+sudo sysctl -w net.ipv4.icmp_echo_ignore_all=1
+echo "net.ipv4.icmp_echo_ignore_all=1" | sudo tee -a /etc/sysctl.conf
+
+# Vulnerabilidade 4: Disable TLSv1.0 and TLSv1.1
+sudo sed -i 's/SSLProtocol all -SSLv3/SSLProtocol all -SSLv3 -TLSv1 -TLSv1.1/g' /etc/apache2/mods-enabled/ssl.conf
+sudo systemctl restart apache2
+
+# Vulnerabilidade 5: SSL/TLS Renegotiation DoS
+sudo sed -i 's/SSLOptions +StdEnvVars/SSLOptions +StdEnvVars +OptRenegotiate/g' /etc/apache2/mods-enabled/ssl.conf
+sudo systemctl restart apache2
+
+# Vulnerabilidade 6: Weak Cipher Suites
+sudo sed -i 's/SSLCipherSuite HIGH:!aNULL/SSLCipherSuite HIGH:!aNULL:!MD5:!RC4:!DES:!3DES/g' /etc/apache2/mods-enabled/ssl.conf
+sudo systemctl restart apache2
+
+# Vulnerabilidade 7: TCP Timestamps
+sudo sysctl -w net.ipv4.tcp_timestamps=0
+echo "net.ipv4.tcp_timestamps=0" | sudo tee -a /etc/sysctl.conf
+sudo sysctl -p}
+{type: uploaded file
+fileName: aeta_7.txt
+fullContent:
+#!/bin/bash
+
+# Vulnerabilidade 1: Cleartext Transmission of Sensitive Information via HTTP
+sed -i 's/^#*\s*Listen 80$/Listen 443/' /etc/apache2/ports.conf
+sed -i 's/^#*\s*<VirtualHost \*:80>/<VirtualHost *:80>\n    Redirect permanent \/ https:\/\/${HOSTNAME}\//' /etc/apache2/sites-available/000-default.conf
+a2enmod ssl
+systemctl restart apache2
+
+# Vulnerabilidade 2: DNS Cache Snooping Vulnerability (UDP)
+sed -i 's/^\(options .*\)/\1\n\trecursion no;/' /etc/bind/named.conf.options
+systemctl restart bind9
+
+# Vulnerabilidade 3: ICMP Timestamp Reply Information Disclosure
+echo "net.ipv4.icmp_echo_ignore_all = 1" >> /etc/sysctl.conf
+sysctl -p
+
+# Vulnerabilidade 4: SSL/TLS: Deprecated TLSv1.0 and TLSv1.1 Protocol Detection
+sed -i 's/^SSLProtocol.*/SSLProtocol all -SSLv2 -SSLv3 -TLSv1 -TLSv1.1/' /etc/apache2/mods-enabled/ssl.conf
+systemctl restart apache2
+
+# Vulnerabilidade 5: SSL/TLS: Renegotiation DoS Vulnerability
+sed -i 's/^SSLProtocol.*/SSLProtocol all -SSLv2 -SSLv3/' /etc/apache2/mods-enabled/ssl.conf
+echo "SSLInsecureRenegotiation off" >> /etc/apache2/mods-enabled/ssl.conf
+systemctl restart apache2
+
+# Vulnerabilidade 6: SSL/TLS: Report Weak Cipher Suites
+sed -i 's/^SSLCipherSuite.*/SSLCipherSuite HIGH:!aNULL:!MD5:!RC4/' /etc/apache2/mods-enabled/ssl.conf
+systemctl restart apache2
+
+# Vulnerabilidade 7: TCP Timestamps Information Disclosure
+echo "net.ipv4.tcp_timestamps = 0" >> /etc/sysctl.conf
+sysctl -p}
+{type: uploaded file
+fileName: aeta_8.txt
+fullContent:
+#!/bin/bash
+
+# Vulnerabilidade 1: Cleartext Transmission of Sensitive Information via HTTP
+# Forçar HTTPS e redirecionar HTTP para HTTPS
+if ! grep -q "RewriteEngine On" /etc/apache2/sites-available/000-default.conf; then
+    echo "RewriteEngine On" | sudo tee -a /etc/apache2/sites-available/000-default.conf
+    echo "RewriteCond %{HTTPS} off" | sudo tee -a /etc/apache2/sites-available/000-default.conf
+    echo "RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]" | sudo tee -a /etc/apache2/sites-available/000-default.conf
+    sudo systemctl restart apache2
+fi
+
+# Vulnerabilidade 2: DNS Cache Snooping Vulnerability (UDP)
+# Desabilitar recursão no DNS
+if [ -f /etc/bind/named.conf.options ]; then
+    sudo sed -i 's/recursion yes;/recursion no;/' /etc/bind/named.conf.options
+    sudo systemctl restart bind9
+fi
+
+# Vulnerabilidade 3: ICMP Timestamp Reply Information Disclosure
+# Desabilitar resposta a ICMP timestamp
+echo "1" | sudo tee /proc/sys/net/ipv4/icmp_echo_ignore_all
+
+# Vulnerabilidade 4: SSL/TLS: Deprecated TLSv1.0 and TLSv1.1 Protocol Detection
+# Desabilitar TLSv1.0 e TLSv1.1
+if [ -f /etc/apache2/mods-enabled/ssl.conf ]; then
+    sudo sed -i 's/SSLProtocol all -SSLv3/SSLProtocol all -SSLv3 -TLSv1 -TLSv1.1/' /etc/apache2/mods-enabled/ssl.conf
+    sudo systemctl restart apache2
+fi
+
+# Vulnerabilidade 5: SSL/TLS: Renegotiation DoS Vulnerability
+# Desabilitar renegociação SSL/TLS
+if [ -f /etc/apache2/mods-enabled/ssl.conf ]; then
+    sudo sed -i 's/SSLHonorCipherOrder on/SSLHonorCipherOrder on\nSSLInsecureRenegotiation off/' /etc/apache2/mods-enabled/ssl.conf
+    sudo systemctl restart apache2
+fi
+
+# Vulnerabilidade 6: SSL/TLS: Report Weak Cipher Suites
+# Configurar cifras seguras
+if [ -f /etc/apache2/mods-enabled/ssl.conf ]; then
+    sudo sed -i 's/SSLCipherSuite HIGH:!aNULL/SSLCipherSuite ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:DHE-RSA-AES128-GCM-SHA256:DHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:DHE-RSA-CHACHA20-POLY1305/' /etc/apache2/mods-enabled/ssl.conf
+    sudo systemctl restart apache2
+fi
+
+# Vulnerabilidade 7: TCP Timestamps Information Disclosure
+# Desabilitar timestamps TCP
+echo "net.ipv4.tcp_timestamps = 0" | sudo tee -a /etc/sysctl.conf
+sudo sysctl -p}
+{type: uploaded file
+fileName: aeta_9.txt
+fullContent:
+#!/bin/bash
+# Corrigir Vulnerabilidade 1: Forçar uso de HTTPS
+sed -i 's/^#*Listen 80$/Listen 443/' /etc/apache2/ports.conf
+sed -i 's/^<VirtualHost \*:80>/<VirtualHost \*:443>/' /etc/apache2/sites-available/000-default.conf
+a2enmod ssl
+systemctl restart apache2
+
+# Corrigir Vulnerabilidade 2: Desabilitar recursão no DNS
+if [ -f /etc/bind/named.conf.options ]; then
+    sed -i 's/recursion yes;/recursion no;/' /etc/bind/named.conf.options
+    systemctl restart bind9
+fi
+
+# Corrigir Vulnerabilidade 3: Desabilitar ICMP Timestamp
+echo "net.ipv4.icmp_echo_ignore_broadcasts = 1" >> /etc/sysctl.conf
+echo "net.ipv4.icmp_ignore_bogus_error_responses = 1" >> /etc/sysctl.conf
+sysctl -p
+
+# Corrigir Vulnerabilidade 4: Desabilitar TLSv1.0 e TLSv1.1
+if [ -f /etc/ssl/openssl.cnf ]; then
+    sed -i 's/^MinProtocol = TLSv1.0$/MinProtocol = TLSv1.2/' /etc/ssl/openssl.cnf
+fi
+if [ -f /etc/apache2/mods-available/ssl.conf ]; then
+    sed -i 's/SSLProtocol all -SSLv3$/SSLProtocol all -SSLv3 -TLSv1 -TLSv1.1/' /etc/apache2/mods-available/ssl.conf
+    systemctl restart apache2
+fi
+
+# Corrigir Vulnerabilidade 5: Desabilitar renegociação SSL/TLS
+if [ -f /etc/apache2/mods-available/ssl.conf ]; then
+    echo "SSLInsecureRenegotiation off" >> /etc/apache2/mods-available/ssl.conf
+    systemctl restart apache2
+fi
+
+# Corrigir Vulnerabilidade 6: Remover cifras fracas
+if [ -f /etc/apache2/mods-available/ssl.conf ]; then
+    sed -i 's/^SSLCipherSuite.*$/SSLCipherSuite HIGH:!aNULL:!MD5:!RC4/' /etc/apache2/mods-available/ssl.conf
+    systemctl restart apache2
+fi
+
+# Corrigir Vulnerabilidade 7: Desabilitar timestamps TCP
+echo "net.ipv4.tcp_timestamps = 0" >> /etc/sysctl.conf
+sysctl -p}
+{type: uploaded file
+fileName: aeta_10.txt
+fullContent:
+#!/bin/bash
+sysctl -w net.ipv4.tcp_timestamps=0
+echo "net.ipv4.tcp_timestamps = 0" >> /etc/sysctl.conf
+sysctl -p
+iptables -A INPUT -p icmp --icmp-type timestamp-request -j DROP
+iptables -A OUTPUT -p icmp --icmp-type timestamp-reply -j DROP
+sed -i 's/SSLProtocol all -SSLv2 -SSLv3/SSLProtocol all -SSLv2 -SSLv3 -TLSv1 -TLSv1.1/' /etc/apache2/mods-enabled/ssl.conf
+systemctl restart apache2
+sed -i 's/SSLProtocol all -SSLv2 -SSLv3/SSLProtocol all -SSLv2 -SSLv3 -TLSv1 -TLSv1.1/' /etc/nginx/nginx.conf
+systemctl restart nginx
+sed -i 's/^CipherString = DEFAULT@SECLEVEL=2/CipherString = DEFAULT@SECLEVEL=2:!ECDHE-RSA-AES128-SHA:!ECDHE-RSA-AES256-SHA:!DHE-RSA-AES128-SHA:!DHE-RSA-AES256-SHA/' /etc/ssl/openssl.cnf
+systemctl restart apache2
+systemctl restart nginx
+iptables -A INPUT -p udp --dport 53 -j DROP
+iptables -A OUTPUT -p udp --dport 53 -j DROP
+iptables -A FORWARD -p udp --dport 53 -j DROP
+iptables-save > /etc/iptables/rules.v4}
+{type: uploaded file
+fileName: aeta_11.txt
+fullContent:
+#!/bin/bash
+
+# Vulnerabilidade 1: Enforce HTTPS
+apt-get update -y
+apt-get install -y nginx
+sed -i 's/listen 80;/listen 80;\n    return 301 https:\/\/$host$request_uri;/' /etc/nginx/sites-available/default
+openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout /etc/ssl/private/nginx-selfsigned.key -out /etc/ssl/certs/nginx-selfsigned.crt -subj "/CN=localhost"
+sed -i 's/# listen 443 ssl default_server;/listen 443 ssl default_server;\n    ssl_certificate \/etc\/ssl\/certs\/nginx-selfsigned.crt;\n    ssl_certificate_key \/etc\/ssl\/private\/nginx-selfsigned.key;/' /etc/nginx/sites-available/default
+systemctl restart nginx
+
+# Vulnerabilidade 2: Disable DNS Recursion
+apt-get install -y bind9
+sed -i 's/recursion yes;/recursion no;/' /etc/bind/named.conf.options
+systemctl restart bind9
+
+# Vulnerabilidade 3: Disable ICMP Timestamp
+echo "net.ipv4.icmp_echo_ignore_all=1" >> /etc/sysctl.conf
+sysctl -p
+
+# Vulnerabilidade 4: Disable TLSv1.0 and TLSv1.1
+openssl ciphers -v 'ALL:!aNULL:!eNULL:!SSLv2:!SSLv3:!TLSv1:!TLSv1.1' > /etc/ssl/openssl.cnf
+systemctl restart apache2
+
+# Vulnerabilidade 5: Disable SSL/TLS Renegotiation
+sed -i 's/SSLProtocol all/SSLProtocol all -SSLv2 -SSLv3 -TLSv1 -TLSv1.1/' /etc/apache2/mods-enabled/ssl.conf
+sed -i 's/SSLHonorCipherOrder off/SSLHonorCipherOrder on/' /etc/apache2/mods-enabled/ssl.conf
+systemctl restart apache2
+
+# Vulnerabilidade 6: Disable Weak Cipher Suites
+sed -i 's/SSLCipherSuite HIGH:!aNULL/SSLCipherSuite HIGH:!aNULL:!MD5:!RC4:!DES:!3DES/' /etc/apache2/mods-enabled/ssl.conf
+systemctl restart apache2
+
+# Vulnerabilidade 7: Disable TCP Timestamps
+echo "net.ipv4.tcp_timestamps = 0" >> /etc/sysctl.conf
+sysctl -p}
+{type: uploaded file
+fileName: aeta_12.txt
+fullContent:
+#!/bin/bash
+
+# Vulnerabilidade 1: Enforce SSL/TLS for sensitive data transmission
+if ! grep -q "RewriteEngine On" /etc/apache2/sites-available/default-ssl.conf; then
+    echo "RewriteEngine On" | sudo tee -a /etc/apache2/sites-available/default-ssl.conf
+    echo "RewriteCond %{HTTPS} off" | sudo tee -a /etc/apache2/sites-available/default-ssl.conf
+    echo "RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]" | sudo tee -a /etc/apache2/sites-available/default-ssl.conf
+    sudo systemctl restart apache2
+fi
+
+# Vulnerabilidade 2: Disable DNS recursion
+if ! grep -q "recursion no;" /etc/bind/named.conf.options; then
+    echo "recursion no;" | sudo tee -a /etc/bind/named.conf.options
+    sudo systemctl restart bind9
+fi
+
+# Vulnerabilidade 3: Disable ICMP timestamp replies
+if ! grep -q "net.ipv4.icmp_echo_ignore_all=1" /etc/sysctl.conf; then
+    echo "net.ipv4.icmp_echo_ignore_all=1" | sudo tee -a /etc/sysctl.conf
+    sudo sysctl -p
+fi
+
+# Vulnerabilidade 4: Disable TLSv1.0 and TLSv1.1
+if ! grep -q "SSLProtocol all -SSLv2 -SSLv3 -TLSv1 -TLSv1.1" /etc/apache2/mods-enabled/ssl.conf; then
+    sudo sed -i 's/SSLProtocol.*/SSLProtocol all -SSLv2 -SSLv3 -TLSv1 -TLSv1.1/' /etc/apache2/mods-enabled/ssl.conf
+    sudo systemctl restart apache2
+fi
+
+# Vulnerabilidade 5: Disable SSL/TLS renegotiation
+if ! grep -q "SSLInsecureRenegotiation off" /etc/apache2/mods-enabled/ssl.conf; then
+    echo "SSLInsecureRenegotiation off" | sudo tee -a /etc/apache2/mods-enabled/ssl.conf
+    sudo systemctl restart apache2
+fi
+
+# Vulnerabilidade 6: Disable weak SSL/TLS cipher suites
+if ! grep -q "SSLCipherSuite HIGH:!aNULL:!MD5:!RC4:!3DES" /etc/apache2/mods-enabled/ssl.conf; then
+    sudo sed -i 's/SSLCipherSuite .*/SSLCipherSuite HIGH:!aNULL:!MD5:!RC4:!3DES/' /etc/apache2/mods-enabled/ssl.conf
+    sudo systemctl restart apache2
+fi
+
+# Vulnerabilidade 7: Disable TCP timestamps
+if ! grep -q "net.ipv4.tcp_timestamps=0" /etc/sysctl.conf; then
+    echo "net.ipv4.tcp_timestamps=0" | sudo tee -a /etc/sysctl.conf
+    sudo sysctl -p
+fi}
+{type: uploaded file
+fileName: aeta_13.txt
+fullContent:
+#!/bin/bash
+# Corrige Vulnerabilidade 1: Enforce HTTPS
+if ! grep -q "RewriteEngine On" /etc/apache2/sites-available/000-default.conf; then
+    echo "RewriteEngine On" >> /etc/apache2/sites-available/000-default.conf
+    echo "RewriteCond %{HTTPS} off" >> /etc/apache2/sites-available/000-default.conf
+    echo "RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]" >> /etc/apache2/sites-available/000-default.conf
+    systemctl restart apache2
+fi
+
+# Corrige Vulnerabilidade 2: Configurar DNS para mitigar cache snooping
+if ! grep -q "recursion no;" /etc/bind/named.conf.options; then
+    echo "recursion no;" >> /etc/bind/named.conf.options
+    systemctl restart bind9
+fi
+
+# Corrige Vulnerabilidade 3: Desabilitar ICMP timestamp
+echo "net.ipv4.tcp_timestamps = 0" >> /etc/sysctl.conf
+sysctl -p
+
+# Corrige Vulnerabilidade 4: Desabilitar TLSv1.0 e TLSv1.1
+if ! grep -q "SSLProtocol all -TLSv1 -TLSv1.1" /etc/apache2/mods-enabled/ssl.conf; then
+    echo "SSLProtocol all -TLSv1 -TLSv1.1" >> /etc/apache2/mods-enabled/ssl.conf
+    systemctl restart apache2
+fi
+
+# Corrige Vulnerabilidade 5: Desabilitar renegociação SSL/TLS
+if ! grep -q "SSLHonorCipherOrder on" /etc/apache2/mods-enabled/ssl.conf; then
+    echo "SSLHonorCipherOrder on" >> /etc/apache2/mods-enabled/ssl.conf
+    echo "SSLInsecureRenegotiation off" >> /etc/apache2/mods-enabled/ssl.conf
+    systemctl restart apache2
+fi
+
+# Corrige Vulnerabilidade 6: Remover cifras fracas
+if ! grep -q "SSLCipherSuite HIGH:!aNULL:!MD5:!RC4" /etc/apache2/mods-enabled/ssl.conf; then
+    echo "SSLCipherSuite HIGH:!aNULL:!MD5:!RC4" >> /etc/apache2/mods-enabled/ssl.conf
+    systemctl restart apache2
+fi
+
+# Corrige Vulnerabilidade 7: Desabilitar timestamps TCP
+echo "net.ipv4.tcp_timestamps = 0" >> /etc/sysctl.conf
+sysctl -p}
+{type: uploaded file
+fileName: aeta_14.txt
+fullContent:
+#!/bin/bash
+# Corrige a vulnerabilidade de transmissão de dados sensíveis via HTTP
+sed -i 's/^#\?\(Listen 80\)/\1\nRewriteEngine On\nRewriteCond %{HTTPS} off\nRewriteRule (.*) https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]/' /etc/apache2/sites-available/000-default.conf
+a2enmod ssl rewrite
+service apache2 restart
+
+# Corrige a vulnerabilidade de DNS Cache Snooping
+sed -i 's/recursion yes/recursion no/' /etc/bind/named.conf.options
+service bind9 restart
+
+# Corrige a vulnerabilidade de ICMP Timestamp Reply
+echo "net.ipv4.icmp_echo_ignore_all = 1" >> /etc/sysctl.conf
+sysctl -p
+
+# Corrige a vulnerabilidade de TLSv1.0 e TLSv1.1
+sed -i 's/^SSLProtocol.*/SSLProtocol -all +TLSv1.2 +TLSv1.3/' /etc/apache2/mods-enabled/ssl.conf
+service apache2 restart
+
+# Corrige a vulnerabilidade de Renegotiation DoS
+sed -i 's/^SSLInsecureRenegotiation.*/SSLInsecureRenegotiation off/' /etc/apache2/mods-enabled/ssl.conf
+service apache2 restart
+
+# Corrige a vulnerabilidade de Weak Cipher Suites
+sed -i 's/^SSLCipherSuite.*/SSLCipherSuite HIGH:!aNULL:!MD5:!RC4/' /etc/apache2/mods-enabled/ssl.conf
+service apache2 restart
+
+# Corrige a vulnerabilidade de TCP Timestamps
+echo "net.ipv4.tcp_timestamps = 0" >> /etc/sysctl.conf
+sysctl -p}
+{type: uploaded file
+fileName: aeta_15.txt
+fullContent:
+#!/bin/bash
+
+# Vulnerabilidade 1: Enforce HTTPS
+if command -v apache2 &> /dev/null; then
+    a2enmod ssl
+    a2ensite default-ssl
+    sed -i 's/#Redirect/RewriteEngine On\nRewriteCond %{HTTPS} off\nRewriteRule ^ https:\/\/%{HTTP_HOST}%{REQUEST_URI} [L,R=301]/' /etc/apache2/sites-available/000-default.conf
+    systemctl restart apache2
+fi
+
+# Vulnerabilidade 2: Disable DNS Recursion
+if command -v named &> /dev/null; then
+    sed -i 's/recursion yes/recursion no/' /etc/named.conf
+    systemctl restart named
+fi
+
+# Vulnerabilidade 3: Disable ICMP Timestamp
+echo 'net.ipv4.icmp_echo_ignore_all = 1' >> /etc/sysctl.conf
+sysctl -p
+
+# Vulnerabilidade 4: Disable TLSv1.0 and TLSv1.1
+if command -v openssl &> /dev/null; then
+    sed -i 's/SSLProtocol all -SSLv2 -SSLv3/SSLProtocol all -SSLv2 -SSLv3 -TLSv1 -TLSv1.1/' /etc/apache2/mods-enabled/ssl.conf
+    systemctl restart apache2
+fi
+
+# Vulnerabilidade 5: Disable SSL/TLS Renegotiation
+if command -v apache2 &> /dev/null; then
+    sed -i 's/SSLInsecureRenegotiation on/SSLInsecureRenegotiation off/' /etc/apache2/mods-enabled/ssl.conf
+    systemctl restart apache2
+fi
+
+# Vulnerabilidade 6: Disable Weak Cipher Suites
+if command -v apache2 &> /dev/null; then
+    sed -i 's/SSLCipherSuite HIGH:!aNULL:!MD5/SSLCipherSuite HIGH:!aNULL:!MD5:!DES:!RC4:!3DES:!CAMELLIA@STRENGTH/' /etc/apache2/mods-enabled/ssl.conf
+    systemctl restart apache2
+fi
+
+# Vulnerabilidade 7: Disable TCP Timestamps
+echo 'net.ipv4.tcp_timestamps = 0' >> /etc/sysctl.conf
+sysctl -p}
+{type: uploaded file
+fileName: aeta_16.txt
+fullContent:
+#!/bin/bash
+
+# Corrigir Vulnerabilidade 1: Enforce SSL/TLS for sensitive data transmission
+sed -i 's/^#*Redirect permanent \/ https:\/\/\$HOST\//Redirect permanent / https://\$HOST/' /etc/apache2/sites-available/default.conf
+a2enmod ssl
+systemctl restart apache2
+
+# Corrigir Vulnerabilidade 2: Disable DNS recursion
+sed -i 's/^#*recursion yes/recursion no/' /etc/bind/named.conf.options
+systemctl restart bind9
+
+# Corrigir Vulnerabilidade 3: Disable ICMP timestamp replies
+echo "net.ipv4.icmp_echo_ignore_broadcasts = 1" >> /etc/sysctl.conf
+echo "net.ipv4.icmp_ignore_bogus_error_responses = 1" >> /etc/sysctl.conf
+sysctl -p
+
+# Corrigir Vulnerabilidade 4: Disable TLSv1.0 and TLSv1.1
+echo "SSLProtocol all -SSLv3 -TLSv1 -TLSv1.1" >> /etc/apache2/mods-enabled/ssl.conf
+systemctl restart apache2
+
+# Corrigir Vulnerabilidade 5: Disable SSL/TLS renegotiation
+echo "SSLInsecureRenegotiation off" >> /etc/apache2/mods-enabled/ssl.conf
+systemctl restart apache2
+
+# Corrigir Vulnerabilidade 6: Disable weak cipher suites
+echo "SSLCipherSuite HIGH:!aNULL:!MD5:!RC4:!3DES" >> /etc/apache2/mods-enabled/ssl.conf
+systemctl restart apache2
+
+# Corrigir Vulnerabilidade 7: Disable TCP timestamps
+echo "net.ipv4.tcp_timestamps = 0" >> /etc/sysctl.conf
+sysctl -p}
+{type: uploaded file
+fileName: aeta_17.txt
+fullContent:
+#!/bin/bash
+
+# Vulnerabilidade 1 - Enforce SSL/TLS for sensitive data transmission
+sed -i 's/^#\?Redirect permanent \/ https:\/\/[^\/]*\//Redirect permanent \/ https:\/\/\$host\//g' /etc/apache2/sites-available/default-ssl.conf
+a2enmod ssl
+a2ensite default-ssl
+systemctl restart apache2
+
+# Vulnerabilidade 2 - Disable DNS recursion
+sed -i 's/^#\?recursion yes;/recursion no;/g' /etc/bind/named.conf.options
+systemctl restart bind9
+
+# Vulnerabilidade 3 - Disable ICMP timestamp replies
+echo "net.ipv4.icmp_echo_ignore_all = 1" >> /etc/sysctl.conf
+sysctl -p
+
+# Vulnerabilidade 4 - Disable deprecated TLS protocols
+sed -i 's/^SSLProtocol all -SSLv3$/SSLProtocol all -SSLv3 -TLSv1 -TLSv1.1/g' /etc/apache2/mods-enabled/ssl.conf
+systemctl restart apache2
+
+# Vulnerabilidade 5 - Disable SSL/TLS renegotiation
+echo "SSLInsecureRenegotiation off" >> /etc/apache2/mods-enabled/ssl.conf
+systemctl restart apache2
+
+# Vulnerabilidade 6 - Disable weak cipher suites
+sed -i 's/^SSLCipherSuite HIGH:!aNULL$/SSLCipherSuite HIGH:!aNULL:!MD5:!RC4:!DES:!3DES/g' /etc/apache2/mods-enabled/ssl.conf
+systemctl restart apache2
+
+# Vulnerabilidade 7 - Disable TCP timestamps
+echo "net.ipv4.tcp_timestamps = 0" >> /etc/sysctl.conf
+sysctl -p}
+{type: uploaded file
+fileName: aeta_18.txt
+fullContent:
+#!/bin/bash
+
+# Configurar Apache para redirecionar HTTP para HTTPS
+if [ -f /etc/apache2/sites-available/000-default.conf ]; then
+    sed -i 's/<VirtualHost \*:80>/<VirtualHost \*:80>\n    Redirect permanent \/ https:\/\/'$(hostname)'\//' /etc/apache2/sites-available/000-default.conf
+    systemctl restart apache2
+fi
+
+# Configurar Nginx para redirecionar HTTP para HTTPS
+if [ -f /etc/nginx/sites-available/default ]; then
+    sed -i 's/listen 80 default_server;/listen 80 default_server;\n    return 301 https:\/\/'$(hostname)'$request_uri;/' /etc/nginx/sites-available/default
+    systemctl restart nginx
+fi
+
+# Desabilitar recursão no DNS (BIND)
+if [ -f /etc/bind/named.conf.options ]; then
+    sed -i 's/recursion yes;/recursion no;/' /etc/bind/named.conf.options
+    systemctl restart bind9
+fi
+
+# Desabilitar ICMP timestamp replies
+echo "net.ipv4.icmp_echo_ignore_all=1" >> /etc/sysctl.conf
+sysctl -p
+
+# Atualizar configurações de TLS para desabilitar TLSv1.0 e TLSv1.1 (Apache)
+if [ -f /etc/apache2/mods-available/ssl.conf ]; then
+    sed -i 's/SSLProtocol all -SSLv3/SSLProtocol all -SSLv3 -TLSv1 -TLSv1.1/' /etc/apache2/mods-available/ssl.conf
+    systemctl restart apache2
+fi
+
+# Atualizar configurações de TLS para desabilitar TLSv1.0 e TLSv1.1 (Nginx)
+if [ -f /etc/nginx/nginx.conf ]; then
+    sed -i 's/ssl_protocols TLSv1 TLSv1.1 TLSv1.2;/ssl_protocols TLSv1.2 TLSv1.3;/' /etc/nginx/nginx.conf
+    systemctl restart nginx
+fi
+
+# Desabilitar renegociação de SSL/TLS (Apache)
+if [ -f /etc/apache2/mods-available/ssl.conf ]; then
+    echo "SSLHonorCipherOrder on" >> /etc/apache2/mods-available/ssl.conf
+    echo "SSLInsecureRenegotiation off" >> /etc/apache2/mods-available/ssl.conf
+    systemctl restart apache2
+fi
+
+# Desabilitar renegociação de SSL/TLS (Nginx)
+if [ -f /etc/nginx/nginx.conf ]; then
+    echo "ssl_renegotiation_limit 0;" >> /etc/nginx/nginx.conf
+    systemctl restart nginx
+fi
+
+# Remover cifras fracas (Apache)
+if [ -f /etc/apache2/mods-available/ssl.conf ]; then
+    sed -i 's/SSLCipherSuite HIGH:!aNULL:!MD5/SSLCipherSuite HIGH:!aNULL:!MD5:!3DES:!DES:!RC4:!EXPORT:!LOW/' /etc/apache2/mods-available/ssl.conf
+    systemctl restart apache2
+fi
+
+# Remover cifras fracas (Nginx)
+if [ -f /etc/nginx/nginx.conf ]; then
+    sed -i 's/ssl_ciphers HIGH:!aNULL:!MD5;/ssl_ciphers HIGH:!aNULL:!MD5:!3DES:!DES:!RC4:!EXPORT:!LOW;/' /etc/nginx/nginx.conf
+    systemctl restart nginx
+fi
+
+# Desabilitar timestamps TCP
+echo "net.ipv4.tcp_timestamps = 0" >> /etc/sysctl.conf
+sysctl -p}
+{type: uploaded file
+fileName: aeta_19.txt
+fullContent:
+#!/bin/bash
+
+# Vulnerabilidade 1: Enforce SSL/TLS
+if ! grep -q "Redirect permanent / https://" /etc/apache2/sites-available/default.conf; then
+    echo "Redirect permanent / https://" >> /etc/apache2/sites-available/default.conf
+    systemctl restart apache2
+fi
+
+# Vulnerabilidade 2: Disable DNS Recursion
+if ! grep -q "recursion no;" /etc/bind/named.conf.options; then
+    sed -i '/options {/a \\trecursion no;' /etc/bind/named.conf.options
+    systemctl restart bind9
+fi
+
+# Vulnerabilidade 3: Disable ICMP Timestamp
+if ! grep -q "net.ipv4.icmp_echo_ignore_all=1" /etc/sysctl.conf; then
+    echo "net.ipv4.icmp_echo_ignore_all=1" >> /etc/sysctl.conf
+    sysctl -p
+fi
+
+# Vulnerabilidade 4: Disable TLSv1.0 and TLSv1.1
+if ! grep -q "Protocols" /etc/apache2/mods-enabled/ssl.conf; then
+    sed -i '/SSLEngine on/a \\tProtocols TLSv1.2 TLSv1.3' /etc/apache2/mods-enabled/ssl.conf
+    systemctl restart apache2
+fi
+
+# Vulnerabilidade 5: Disable SSL/TLS Renegotiation
+if ! grep -q "SSLInsecureRenegotiation off" /etc/apache2/mods-enabled/ssl.conf; then
+    sed -i '/SSLEngine on/a \\tSSLInsecureRenegotiation off' /etc/apache2/mods-enabled/ssl.conf
+    systemctl restart apache2
+fi
+
+# Vulnerabilidade 6: Disable Weak Cipher Suites
+if ! grep -q "SSLCipherSuite HIGH:!aNULL:!MD5:!RC4" /etc/apache2/mods-enabled/ssl.conf; then
+    sed -i '/SSLEngine on/a \\tSSLCipherSuite HIGH:!aNULL:!MD5:!RC4' /etc/apache2/mods-enabled/ssl.conf
+    systemctl restart apache2
+fi
+
+# Vulnerabilidade 7: Disable TCP Timestamps
+if ! grep -q "net.ipv4.tcp_timestamps = 0" /etc/sysctl.conf; then
+    echo "net.ipv4.tcp_timestamps = 0" >> /etc/sysctl.conf
+    sysctl -p
+fi}
+{type: uploaded file
+fileName: aeta_20.txt
+fullContent:
+#!/bin/bash
+
+# Corrigir Vulnerabilidade 1: Enforce SSL/TLS for sensitive data transmission
+if grep -q "Listen 80" /etc/apache2/ports.conf; then
+    sed -i 's/Listen 80/# Listen 80/' /etc/apache2/ports.conf
+    echo "Redirecting HTTP to HTTPS in Apache configuration"
+    echo "<VirtualHost *:80>
+    Redirect permanent / https://$(hostname)/
+</VirtualHost>" > /etc/apache2/sites-available/000-default.conf
+    systemctl restart apache2
+fi
+
+# Corrigir Vulnerabilidade 2: Disable DNS recursion
+if [ -f /etc/bind/named.conf.options ]; then
+    sed -i 's/recursion yes/recursion no/' /etc/bind/named.conf.options
+    systemctl restart bind9
+fi
+
+# Corrigir Vulnerabilidade 3: Disable ICMP timestamp replies
+echo "net.ipv4.tcp_timestamps = 0" >> /etc/sysctl.conf
+sysctl -p
+
+# Corrigir Vulnerabilidade 4: Disable TLSv1.0 and TLSv1.1
+if [ -f /etc/ssl/openssl.cnf ]; then
+    sed -i 's/TLSv1 TLSv1.1 #/# TLSv1 TLSv1.1 #/' /etc/ssl/openssl.cnf
+    systemctl restart apache2
+fi
+
+# Corrigir Vulnerabilidade 5: Disable SSL/TLS renegotiation
+if [ -f /etc/ssl/openssl.cnf ]; then
+    echo "SSLProtocol all -SSLv3 -TLSv1 -TLSv1.1" >> /etc/apache2/mods-enabled/ssl.conf
+    systemctl restart apache2
+fi
+
+# Corrigir Vulnerabilidade 6: Disable weak SSL/TLS cipher suites
+if [ -f /etc/ssl/openssl.cnf ]; then
+    echo "SSLCipherSuite HIGH:!aNULL:!MD5:!RC4:!3DES" >> /etc/apache2/mods-enabled/ssl.conf
+    systemctl restart apache2
+fi
+
+# Corrigir Vulnerabilidade 7: Disable TCP timestamps
+echo "net.ipv4.tcp_timestamps = 0" >> /etc/sysctl.conf
+sysctl -p}
+{type: uploaded file
+fileName: aeta_21.txt
+fullContent:
+#!/bin/bash
+# Corrigindo vulnerabilidades de segurança
+
+# Vulnerabilidade 1: Cleartext Transmission of Sensitive Information via HTTP
+sudo sed -i 's/^#Listen 80/Listen 443/' /etc/apache2/ports.conf
+sudo sed -i 's/^<VirtualHost \*:80>/<VirtualHost \*:443>/' /etc/apache2/sites-available/000-default.conf
+sudo a2enmod ssl
+sudo systemctl restart apache2
+
+# Vulnerabilidade 2: DNS Cache Snooping Vulnerability (UDP)
+sudo sed -i 's/^recursion yes/recursion no/' /etc/named.conf
+sudo systemctl restart named
+
+# Vulnerabilidade 3: ICMP Timestamp Reply Information Disclosure
+sudo sysctl -w net.ipv4.icmp_echo_ignore_all=1
+echo "net.ipv4.icmp_echo_ignore_all=1" | sudo tee -a /etc/sysctl.conf
+sudo sysctl -p
+
+# Vulnerabilidade 4: SSL/TLS: Deprecated TLSv1.0 and TLSv1.1 Protocol Detection
+sudo sed -i 's/^SSLProtocol all -SSLv3/SSLProtocol all -SSLv3 -TLSv1 TLSv1.1/' /etc/apache2/mods-available/ssl.conf
+sudo systemctl restart apache2
+
+# Vulnerabilidade 5: SSL/TLS: Renegotiation DoS Vulnerability (CVE-2011-1473, CVE-2011-5094)
+sudo sed -i 's/^SSLInsecureRenegotiation off/SSLInsecureRenegotiation on/' /etc/apache2/mods-available/ssl.conf
+sudo systemctl restart apache2
+
+# Vulnerabilidade 6: SSL/TLS: Report Weak Cipher Suites
+sudo sed -i 's/^SSLCipherSuite HIGH:!aNULL/SSLCipherSuite HIGH:!aNULL:!MD5:!RC4/' /etc/apache2/mods-available/ssl.conf
+sudo systemctl restart apache2
+
+# Vulnerabilidade 7: TCP Timestamps Information Disclosure
+echo "net.ipv4.tcp_timestamps = 0" | sudo tee -a /etc/sysctl.conf
+sudo sysctl -p}
+{type: uploaded file
+fileName: aeta_22.txt
+fullContent:
+#!/bin/bash
+
+# Vulnerabilidade 1: Enforce SSL/TLS for sensitive data transmission
+sed -i 's/^\(.*\)http:\/\//\1https:\/\//g' /etc/nginx/nginx.conf
+systemctl restart nginx
+
+# Vulnerabilidade 2: Configure DNS server to disable recursion
+sed -i 's/^\(.*recursion.*\)yes/\1no/g' /etc/named.conf
+systemctl restart named
+
+# Vulnerabilidade 3: Disable ICMP Timestamp Reply
+sysctl -w net.ipv4.icmp_echo_ignore_all=1
+sysctl -w net.ipv4.icmp_echo_ignore_broadcasts=1
+sysctl -p
+
+# Vulnerabilidade 4: Disable deprecated TLSv1.0 and TLSv1.1
+sed -i 's/^\(.*TLSv1\).*/\1.2 TLSv1.3;/g' /etc/nginx/nginx.conf
+systemctl restart nginx
+
+# Vulnerabilidade 5: Disable SSL/TLS Renegotiation
+sed -i 's/^\(.*ssl_renegotiation_limit.*\)512/\10/g' /etc/nginx/nginx.conf
+systemctl restart nginx
+
+# Vulnerabilidade 6: Disable weak cipher suites
+sed -i 's/^\(.*ssl_ciphers.*\)/\1!aNULL:!eNULL:!LOW:!3DES:!MD5:!EXP:!PSK:!SRP:!DSS;/g' /etc/nginx/nginx.conf
+systemctl restart nginx
+
+# Vulnerabilidade 7: Disable TCP Timestamps
+sysctl -w net.ipv4.tcp_timestamps=0
+sysctl -p}
+{type: uploaded file
+fileName: aeta_23.txt
+fullContent:
+#!/bin/bash
+# Corrige a Vulnerabilidade 1: Força o uso de SSL/TLS
+sed -i 's/^#\?\(Listen 80\)/\1\nRedirect permanent \/ https:\/\/$HOSTNAME\//' /etc/apache2/sites-available/000-default.conf
+a2enmod ssl
+systemctl restart apache2
+
+# Corrige a Vulnerabilidade 2: Desabilita recursão no DNS
+sed -i 's/^\(recursion\).*/\1 no;/' /etc/bind/named.conf.options
+systemctl restart bind9
+
+# Corrige a Vulnerabilidade 3: Desabilita respostas ICMP Timestamp
+echo "net.ipv4.icmp_echo_ignore_all=1" >> /etc/sysctl.conf
+sysctl -p
+
+# Corrige a Vulnerabilidade 4: Desabilita TLSv1.0 e TLSv1.1
+sed -i 's/^\(SSLProtocol\).*/\1 all -TLSv1 -TLSv1.1/' /etc/apache2/mods-enabled/ssl.conf
+systemctl restart apache2
+
+# Corrige a Vulnerabilidade 5: Desabilita renegociação SSL/TLS
+sed -i 's/^\(SSLOptions\).*/\1 +StrictRequire/' /etc/apache2/mods-enabled/ssl.conf
+systemctl restart apache2
+
+# Corrige a Vulnerabilidade 6: Remove cifras fracas
+sed -i 's/^\(SSLCipherSuite\).*/\1 HIGH:!aNULL:!MD5:!RC4:!3DES/' /etc/apache2/mods-enabled/ssl.conf
+systemctl restart apache2
+
+# Corrige a Vulnerabilidade 7: Desabilita timestamps TCP
+echo "net.ipv4.tcp_timestamps = 0" >> /etc/sysctl.conf
+sysctl -p}
+{type: uploaded file
+fileName: aeta_24.txt
+fullContent:
+#!/bin/bash
+if [[ $EUID -ne 0 ]]; then
+   echo "This script must be run as root" 
+   exit 1
+fi
+
+# Disable HTTP and enforce HTTPS
+sed -i 's/^Listen 80$/Listen 80\nRewriteEngine On\nRewriteCond %{HTTPS} off\nRewriteRule ^ https:\/\/%{HTTP_HOST}%{REQUEST_URI} [L,R=301]/' /etc/apache2/ports.conf
+systemctl restart apache2
+
+# Disable DNS recursion
+sed -i 's/^recursion yes$/recursion no/' /etc/named.conf
+systemctl restart named
+
+# Disable ICMP timestamp
+echo "net.ipv4.icmp_echo_ignore_all = 1" >> /etc/sysctl.conf
+sysctl -p
+
+# Disable TLS 1.0 and 1.1
+sed -i 's/^SSLProtocol all -SSLv3$/SSLProtocol all -SSLv3 -TLSv1 -TLSv1.1/' /etc/apache2/mods-enabled/ssl.conf
+systemctl restart apache2
+
+# Disable SSL/TLS renegotiation
+sed -i 's/^SSLHonorCipherOrder On$/SSLHonorCipherOrder On\nSSLInsecureRenegotiation off/' /etc/apache2/mods-enabled/ssl.conf
+systemctl restart apache2
+
+# Disable weak cipher suites
+sed -i 's/^SSLCipherSuite HIGH:!aNULL$/SSLCipherSuite HIGH:!aNULL:!MD5:!RC4:!DES/' /etc/apache2/mods-enabled/ssl.conf
+systemctl restart apache2
+
+# Disable TCP timestamps
+echo "net.ipv4.tcp_timestamps = 0" >> /etc/sysctl.conf
+sysctl -p}
+{type: uploaded file
+fileName: aeta_25.txt
+fullContent:
+#!/bin/bash
+# Correção para Vulnerabilidade 1
+sed -i 's/^#*Listen 80$/Listen 443/' /etc/apache2/ports.conf
+sed -i 's/^#*<VirtualHost \*:80>$/<VirtualHost \*:443>/' /etc/apache2/sites-available/000-default.conf
+a2enmod ssl
+systemctl restart apache2
+
+# Correção para Vulnerabilidade 2
+echo "options bind disable-recursion yes;" > /etc/bind/named.conf.options
+systemctl restart bind9
+
+# Correção para Vulnerabilidade 3
+echo "net.ipv4.icmp_echo_ignore_all = 1" >> /etc/sysctl.conf
+sysctl -p
+
+# Correção para Vulnerabilidade 4
+openssl ciphers -v 'DEFAULT:!TLSv1:!TLSv1.1' > /etc/ssl/ciphers.conf
+sed -i 's/^SSLProtocol all -SSLv3$/SSLProtocol all -SSLv3 -TLSv1 -TLSv1.1/' /etc/apache2/mods-enabled/ssl.conf
+systemctl restart apache2
+
+# Correção para Vulnerabilidade 5
+sed -i 's/^SSLInsecureRenegotiation on$/SSLInsecureRenegotiation off/' /etc/apache2/mods-enabled/ssl.conf
+systemctl restart apache2
+
+# Correção para Vulnerabilidade 6
+openssl ciphers -v 'HIGH:!aNULL:!MD5:!RC4:!3DES' > /etc/ssl/ciphers.conf
+sed -i 's/^SSLCipherSuite HIGH:!aNULL:!MD5$/SSLCipherSuite HIGH:!aNULL:!MD5:!RC4:!3DES/' /etc/apache2/mods-enabled/ssl.conf
+systemctl restart apache2
+
+# Correção para Vulnerabilidade 7
+echo "net.ipv4.tcp_timestamps = 0" >> /etc/sysctl.conf
+sysctl -p}
+{type: uploaded file
+fileName: aeta_26.txt
+fullContent:
+#!/bin/bash
+
+# Vulnerabilidade 1: Cleartext Transmission of Sensitive Information via HTTP
+nginx_conf="/etc/nginx/nginx.conf"
+if [ -f "$nginx_conf" ]; then
+    sed -i 's/listen 80;/listen 80;\n    return 301 https:\/\/\$host\$request_uri;/' "$nginx_conf"
+    systemctl restart nginx
+fi
+
+# Vulnerabilidade 2: DNS Cache Snooping Vulnerability (UDP)
+bind_conf="/etc/bind/named.conf.options"
+if [ -f "$bind_conf" ]; then
+    sed -i 's/recursion yes;/recursion no;/' "$bind_conf"
+    systemctl restart bind9
+fi
+
+# Vulnerabilidade 3: ICMP Timestamp Reply Information Disclosure
+echo "net.ipv4.icmp_echo_ignore_all = 1" >> /etc/sysctl.conf
+sysctl -p
+
+# Vulnerabilidade 4: SSL/TLS: Deprecated TLSv1.0 and TLSv1.1 Protocol Detection
+openssl_conf="/etc/ssl/openssl.cnf"
+if [ -f "$openssl_conf" ]; then
+    sed -i 's/MinProtocol = TLSv1.0/MinProtocol = TLSv1.2/' "$openssl_conf"
+    systemctl restart apache2
+fi
+
+# Vulnerabilidade 5: SSL/TLS: Renegotiation DoS Vulnerability (CVE-2011-1473, CVE-2011-5094)
+apache_conf="/etc/apache2/apache2.conf"
+if [ -f "$apache_conf" ]; then
+    echo "SSLInsecureRenegotiation off" >> "$apache_conf"
+    systemctl restart apache2
+fi
+
+# Vulnerabilidade 6: SSL/TLS: Report Weak Cipher Suites
+apache_ssl_conf="/etc/apache2/mods-available/ssl.conf"
+if [ -f "$apache_ssl_conf" ]; then
+    sed -i 's/SSLCipherSuite HIGH:!aNULL:!MD5/SSLCipherSuite HIGH:!aNULL:!MD5:!3DES:!DES:!RC4/' "$apache_ssl_conf"
+    systemctl restart apache2
+fi
+
+# Vulnerabilidade 7: TCP Timestamps Information Disclosure
+echo "net.ipv4.tcp_timestamps = 0" >> /etc/sysctl.conf
+sysctl -p}
+{type: uploaded file
+fileName: aeta_27.txt
+fullContent:
+#!/bin/bash
+
+# Vulnerabilidade 1: Cleartext Transmission of Sensitive Information via HTTP
+if ! grep -q "Listen 443" /etc/apache2/ports.conf; then
+    echo "Listen 443" >> /etc/apache2/ports.conf
+fi
+if ! grep -q "Redirect permanent / https://" /etc/apache2/sites-available/000-default.conf; then
+    sed -i '/<VirtualHost \*:80>/a Redirect permanent / https://' /etc/apache2/sites-available/000-default.conf
+fi
+a2enmod ssl
+systemctl restart apache2
+
+# Vulnerabilidade 2: DNS Cache Snooping Vulnerability (UDP)
+if grep -q "allow-recursion" /etc/bind/named.conf.options; then
+    sed -i '/allow-recursion/d' /etc/bind/named.conf.options
+fi
+echo "allow-recursion { none; };" >> /etc/bind/named.conf.options
+systemctl restart bind9
+
+# Vulnerabilidade 3: ICMP Timestamp Reply Information Disclosure
+echo "net.ipv4.icmp_echo_ignore_all=1" >> /etc/sysctl.conf
+sysctl -p
+
+# Vulnerabilidade 4: SSL/TLS: Deprecated TLSv1.0 and TLSv1.1 Protocol Detection
+if grep -q "SSLProtocol" /etc/apache2/mods-enabled/ssl.conf; then
+    sed -i 's/SSLProtocol.*/SSLProtocol -all +TLSv1.2 +TLSv1.3/' /etc/apache2/mods-enabled/ssl.conf
+else
+    echo "SSLProtocol -all +TLSv1.2 +TLSv1.3" >> /etc/apache2/mods-enabled/ssl.conf
+fi
+systemctl restart apache2
+
+# Vulnerabilidade 5: SSL/TLS: Renegotiation DoS Vulnerability (CVE-2011-1473, CVE-2011-5094)
+if grep -q "SSLInsecureRenegotiation" /etc/apache2/mods-enabled/ssl.conf; then
+    sed -i 's/SSLInsecureRenegotiation.*/SSLInsecureRenegotiation off/' /etc/apache2/mods-enabled/ssl.conf
+else
+    echo "SSLInsecureRenegotiation off" >> /etc/apache2/mods-enabled/ssl.conf
+fi
+systemctl restart apache2
+
+# Vulnerabilidade 6: SSL/TLS: Report Weak Cipher Suites
+if grep -q "SSLCipherSuite" /etc/apache2/mods-enabled/ssl.conf; then
+    sed -i 's/SSLCipherSuite.*/SSLCipherSuite HIGH:!aNULL:!MD5:!RC4/' /etc/apache2/mods-enabled/ssl.conf
+else
+    echo "SSLCipherSuite HIGH:!aNULL:!MD5:!RC4" >> /etc/apache2/mods-enabled/ssl.conf
+fi
+systemctl restart apache2
+
+# Vulnerabilidade 7: TCP Timestamps Information Disclosure
+echo "net.ipv4.tcp_timestamps = 0" >> /etc/sysctl.conf
+sysctl -p}
+{type: uploaded file
+fileName: aeta_28.txt
+fullContent:
+#!/bin/bash
+
+# Corrigir Vulnerabilidade 1: Enforce TLS
+echo "Configuring web server to enforce TLS..."
+if [ -f /etc/apache2/apache2.conf ]; then
+    sed -i 's/^#*\(SSLProtocol\s\+.*\)/\1 -ALL +TLSv1.2 +TLSv1.3/' /etc/apache2/mods-enabled/ssl.conf
+    sed -i 's/^#*\(SSLCipherSuite\s\+.*\)/\1 HIGH:!aNULL:!MD5/' /etc/apache2/mods-enabled/ssl.conf
+    systemctl restart apache2
+fi
+
+# Corrigir Vulnerabilidade 2: Disable DNS Recursion
+echo "Disabling DNS recursion..."
+if [ -f /etc/bind/named.conf.options ]; then
+    sed -i 's/\(recursion\s\+\)yes/\1no/' /etc/bind/named.conf.options
+    systemctl restart bind9
+fi
+
+# Corrigir Vulnerabilidade 3: Disable ICMP Timestamps
+echo "Disabling ICMP timestamp responses..."
+sysctl -w net.ipv4.icmp_echo_ignore_all=1
+sysctl -w net.ipv4.icmp_echo_ignore_broadcasts=1
+sysctl -p
+
+# Corrigir Vulnerabilidade 4: Disable TLS 1.0 and 1.1
+echo "Disabling deprecated TLS 1.0 and 1.1..."
+if [ -f /etc/apache2/mods-enabled/ssl.conf ]; then
+    sed -i 's/^#*\(SSLProtocol\s\+.*\)/\1 -ALL +TLSv1.2 +TLSv1.3/' /etc/apache2/mods-enabled/ssl.conf
+    systemctl restart apache2
+fi
+if [ -f /etc/nginx/nginx.conf ]; then
+    sed -i 's/^#*\(ssl_protocols\s\+.*\)/\1 TLSv1.2 TLSv1.3;/' /etc/nginx/nginx.conf
+    systemctl restart nginx
+fi
+
+# Corrigir Vulnerabilidade 5: Disable SSL Renegotiation
+echo "Disabling SSL renegotiation..."
+if [ -f /etc/apache2/mods-enabled/ssl.conf ]; then
+    sed -i 's/^#*\(SSLInsecureRenegotiation\s\+.*\)/\1 off/' /etc/apache2/mods-enabled/ssl.conf
+    systemctl restart apache2
+fi
+
+# Corrigir Vulnerabilidade 6: Disable Weak Cipher Suites
+echo "Disabling weak cipher suites..."
+if [ -f /etc/apache2/mods-enabled/ssl.conf ]; then
+    sed -i 's/^#*\(SSLCipherSuite\s\+.*\)/\1 HIGH:!aNULL:!MD5:!3DES/' /etc/apache2/mods-enabled/ssl.conf
+    systemctl restart apache2
+fi
+if [ -f /etc/nginx/nginx.conf ]; then
+    sed -i 's/^#*\(ssl_ciphers\s\+.*\)/\1 HIGH:!aNULL:!MD5:!3DES;/' /etc/nginx/nginx.conf
+    systemctl restart nginx
+fi
+
+# Corrigir Vulnerabilidade 7: Disable TCP Timestamps
+echo "Disabling TCP timestamps..."
+sysctl -w net.ipv4.tcp_timestamps=0
+sysctl -p}
+{type: uploaded file
+fileName: aeta_29.txt
+fullContent:
+#!/bin/bash
+
+# Vulnerabilidade 1: Enforce SSL/TLS
+sed -i 's/^#*\(listen 80;\)/\1\n    return 301 https:\/\/$host$request_uri;/' /etc/nginx/sites-available/default
+systemctl restart nginx
+
+# Vulnerabilidade 2: Disable DNS Recursion
+sed -i 's/^recursion yes;/recursion no;/' /etc/named.conf
+systemctl restart named
+
+# Vulnerabilidade 3: Disable ICMP Timestamp
+echo "net.ipv4.tcp_timestamps = 0" >> /etc/sysctl.conf
+sysctl -p
+
+# Vulnerabilidade 4: Disable TLSv1.0 and TLSv1.1
+sed -i 's/^\(SSLProtocol all -SSLv2 -SSLv3\)/\1 -TLSv1 -TLSv1.1/' /etc/apache2/mods-enabled/ssl.conf
+systemctl restart apache2
+
+# Vulnerabilidade 5: Disable SSL Renegotiation
+sed -i 's/^\(SSLInsecureRenegotiation on\)/SSLSessionCacheTimeout 0\nSSLStrictSNIVHostCheck on\nSSLInsecureRenegotiation off/' /etc/apache2/mods-enabled/ssl.conf
+systemctl restart apache2
+
+# Vulnerabilidade 6: Disable Weak Cipher Suites
+sed -i 's/^\(SSLCipherSuite HIGH:MEDIUM:!aNULL:!MD5\)/SSLCipherSuite HIGH:!aNULL:!MD5:!DSS:!RC4:!3DES/' /etc/apache2/mods-enabled/ssl.conf
+systemctl restart apache2
+
+# Vulnerabilidade 7: Disable TCP Timestamps
+echo "net.ipv4.tcp_timestamps = 0" >> /etc/sysctl.conf
+sysctl -p}
+{type: uploaded file
+fileName: aeta_30.txt
+fullContent:
+#!/bin/bash
+# Corrige vulnerabilidades de cibersegurança
+
+# Vulnerabilidade 1: Cleartext Transmission of Sensitive Information via HTTP
+# Configura o servidor para redirecionar HTTP para HTTPS
+if [ -f /etc/apache2/sites-available/000-default.conf ]; then
+    sed -i 's/<VirtualHost \*:80>/<VirtualHost \*:80>\n    Redirect permanent \/ https:\/\/$server_name\//' /etc/apache2/sites-available/000-default.conf
+    systemctl restart apache2
+fi
+
+# Vulnerabilidade 2: DNS Cache Snooping Vulnerability (UDP)
+# Desativa a recursão no DNS
+if [ -f /etc/named.conf ]; then
+    sed -i 's/recursion yes/recursion no/' /etc/named.conf
+    systemctl restart named
+fi
+
+# Vulnerabilidade 3: ICMP Timestamp Reply Information Disclosure
+# Bloqueia pacotes ICMP timestamp
+iptables -A INPUT -p icmp --icmp-type timestamp-request -j DROP
+iptables -A OUTPUT -p icmp --icmp-type timestamp-reply -j DROP
+
+# Vulnerabilidade 4: SSL/TLS: Deprecated TLSv1.0 and TLSv1.1 Protocol Detection
+# Desativa TLSv1.0 e TLSv1.1
+if [ -f /etc/nginx/nginx.conf ]; then
+    sed -i 's/ssl_protocols TLSv1 TLSv1.1 TLSv1.2;/ssl_protocols TLSv1.2 TLSv1.3;/' /etc/nginx/nginx.conf
+    systemctl restart nginx
+fi
+
+if [ -f /etc/apache2/mods-enabled/ssl.conf ]; then
+    sed -i 's/SSLProtocol all -SSLv3/SSLProtocol all -SSLv3 -TLSv1 -TLSv1.1/' /etc/apache2/mods-enabled/ssl.conf
+    systemctl restart apache2
+fi
+
+# Vulnerabilidade 5: SSL/TLS: Renegotiation DoS Vulnerability
+# Desativa a renegociação SSL/TLS
+if [ -f /etc/nginx/nginx.conf ]; then
+    sed -i 's/ssl_session_cache shared:SSL:10m;/ssl_session_cache shared:SSL:10m;\n    ssl_renegotiation off;/' /etc/nginx/nginx.conf
+    systemctl restart nginx
+fi
+
+if [ -f /etc/apache2/mods-enabled/ssl.conf ]; then
+    sed -i 's/SSLInsecureRenegotiation off/SSLInsecureRenegotiation off\n    SSLHonorCipherOrder on/' /etc/apache2/mods-enabled/ssl.conf
+    systemctl restart apache2
+fi
+
+# Vulnerabilidade 6: SSL/TLS: Report Weak Cipher Suites
+# Configura apenas cifras fortes
+if [ -f /etc/nginx/nginx.conf ]; then
+    sed -i 's/ssl_ciphers HIGH:!aNULL:!MD5;/ssl_ciphers ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:DHE-RSA-AES128-GCM-SHA256:DHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:DHE-RSA-CHACHA20-POLY1305:ECDHE-ECDSA-AES128-SHA256:ECDHE-RSA-AES128-SHA256:ECDHE-ECDSA-AES128-SHA:ECDHE-RSA-AES128-SHA:ECDHE-ECDSA-AES256-SHA384:ECDHE-RSA-AES256-SHA384:ECDHE-ECDSA-AES256-SHA:ECDHE-RSA-AES256-SHA:DHE-RSA-AES128-SHA256:DHE-RSA-AES256-SHA256:AES128-GCM-SHA256:AES256-GCM-SHA384:AES128-SHA256:AES256-SHA256:AES128-SHA:AES256-SHA:!DSS;/' /etc/nginx/nginx.conf
+    systemctl restart nginx
+fi
+
+if [ -f /etc/apache2/mods-enabled/ssl.conf ]; then
+    sed -i 's/SSLCipherSuite HIGH:!aNULL:!MD5/SSLCipherSuite ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:DHE-RSA-AES128-GCM-SHA256:DHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:DHE-RSA-CHACHA20-POLY1305:ECDHE-ECDSA-AES128-SHA256:ECDHE-RSA-AES128-SHA256:ECDHE-ECDSA-AES128-SHA:ECDHE-RSA-AES128-SHA:ECDHE-ECDSA-AES256-SHA384:ECDHE-RSA-AES256-SHA384:ECDHE-ECDSA-AES256-SHA:ECDHE-RSA-AES256-SHA:DHE-RSA-AES128-SHA256:DHE-RSA-AES256-SHA256:AES128-GCM-SHA256:AES256-GCM-SHA384:AES128-SHA256:AES256-SHA256:AES128-SHA:AES256-SHA:!DSS/' /etc/apache2/mods-enabled/ssl.conf
+    systemctl restart apache2
+fi
+
+# Vulnerabilidade 7: TCP Timestamps Information Disclosure
+# Desativa timestamps TCP
+echo "net.ipv4.tcp_timestamps = 0" >> /etc/sysctl.conf
+sysctl -p}
+{type: uploaded file
+fileName: aeta_31.txt
+fullContent:
+#!/bin/bash
+# Disable HTTP and enforce HTTPS
+sed -i 's/^Listen 80$/Listen 443/' /etc/apache2/ports.conf
+a2enmod ssl
+systemctl restart apache2
+
+# Disable DNS recursion
+sed -i 's/^recursion yes$/recursion no/' /etc/named.conf
+systemctl restart named
+
+# Disable ICMP timestamp replies
+echo 1 > /proc/sys/net/ipv4/icmp_echo_ignore_all
+echo "net.ipv4.icmp_echo_ignore_all = 1" >> /etc/sysctl.conf
+sysctl -p
+
+# Disable deprecated TLSv1.0 and TLSv1.1
+sed -i 's/^SSLProtocol.*$/SSLProtocol all -SSLv2 -SSLv3 -TLSv1 -TLSv1.1/' /etc/apache2/mods-enabled/ssl.conf
+systemctl restart apache2
+
+# Disable SSL/TLS renegotiation
+sed -i 's/^SSLHonorCipherOrder.*$/SSLHonorCipherOrder on\nSSLInsecureRenegotiation off/' /etc/apache2/mods-enabled/ssl.conf
+systemctl restart apache2
+
+# Remove weak cipher suites
+sed -i 's/^SSLCipherSuite.*$/SSLCipherSuite HIGH:!aNULL:!MD5:!RC4:!3DES/' /etc/apache2/mods-enabled/ssl.conf
+systemctl restart apache2
+
+# Disable TCP timestamps
+echo "net.ipv4.tcp_timestamps = 0" >> /etc/sysctl.conf
+sysctl -p}
+{type: uploaded file
+fileName: aeta_32.txt
+fullContent:
+#!/bin/bash
+
+# Vulnerabilidade 1: Enforce SSL/TLS
+sed -i 's/^#*\(Listen 80\)/\1\nRewriteEngine On\nRewriteCond %{HTTPS} off\nRewriteRule (.*) https://%{HTTP_HOST}%{REQUEST_URI} [R=301,L]/' /etc/apache2/apache2.conf
+a2enmod ssl rewrite
+systemctl restart apache2
+
+# Vulnerabilidade 2: Disable DNS Recursion
+sed -i 's/^\(recursion\) yes;/\1 no;/' /etc/bind/named.conf.options
+systemctl restart bind9
+
+# Vulnerabilidade 3: Disable ICMP Timestamp
+echo "net.ipv4.tcp_timestamps = 0" >> /etc/sysctl.conf
+sysctl -p
+
+# Vulnerabilidade 4: Disable TLSv1.0 and TLSv1.1
+sed -i 's/^SSLProtocol.*/SSLProtocol -all +TLSv1.2 +TLSv1.3/' /etc/apache2/mods-enabled/ssl.conf
+systemctl restart apache2
+
+# Vulnerabilidade 5: Disable SSL/TLS Renegotiation
+sed -i 's/^SSLProtocol.*/SSLProtocol -all +TLSv1.2 +TLSv1.3\nSSLHonorCipherOrder On\nSSLCompression Off/' /etc/apache2/mods-enabled/ssl.conf
+systemctl restart apache2
+
+# Vulnerabilidade 6: Disable Weak Cipher Suites
+sed -i 's/^SSLCipherSuite.*/SSLCipherSuite HIGH:!aNULL:!MD5:!RC4:!3DES/' /etc/apache2/mods-enabled/ssl.conf
+systemctl restart apache2
+
+# Vulnerabilidade 7: Disable TCP Timestamps
+echo "net.ipv4.tcp_timestamps = 0" >> /etc/sysctl.conf
+sysctl -p}
+{type: uploaded file
+fileName: aeta_33.txt
+fullContent:
+#!/bin/bash
+
+# Vulnerabilidade 1: Cleartext Transmission of Sensitive Information via HTTP
+# Forçando o uso de HTTPS e redirecionando HTTP para HTTPS
+sed -i 's/^<VirtualHost \*:80>/<VirtualHost *:80>\n    RewriteEngine On\n    RewriteCond %{HTTPS} off\n    RewriteRule (.*) https:\/\/%{HTTP_HOST}%{REQUEST_URI} [L,R=301]/' /etc/apache2/sites-available/000-default.conf
+sed -i 's/^<VirtualHost \*:80>/<VirtualHost *:80>\n    SSLEngine on\n    SSLCertificateFile \/etc\/ssl\/certs\/ssl-cert-snakeoil.pem\n    SSLCertificateKeyFile \/etc\/ssl\/private\/ssl-cert-snakeoil.key/' /etc/apache2/sites-available/default-ssl.conf
+a2enmod ssl
+a2ensite default-ssl
+systemctl restart apache2
+
+# Vulnerabilidade 2: DNS Cache Snooping Vulnerability (UDP)
+# Desabilitando recursão no DNS para mitigar o vazamento de cache
+sed -i 's/^recursion yes/recursion no/' /etc/bind/named.conf.options
+systemctl restart bind9
+
+# Vulnerabilidade 3: ICMP Timestamp Reply Information Disclosure
+# Desabilitando respostas ICMP timestamp
+echo "net.ipv4.icmp_echo_ignore_all=1" >> /etc/sysctl.conf
+sysctl -p
+
+# Vulnerabilidade 4: SSL/TLS: Deprecated TLSv1.0 and TLSv1.1 Protocol Detection
+# Desabilitando TLSv1.0 e TLSv1.1
+sed -i 's/^SSLProtocol all -SSLv3/SSLProtocol all -SSLv3 -TLSv1 -TLSv1.1/' /etc/apache2/mods-enabled/ssl.conf
+systemctl restart apache2
+
+# Vulnerabilidade 5: SSL/TLS: Renegotiation DoS Vulnerability (CVE-2011-1473, CVE-2011-5094)
+# Desabilitando renegociação de SSL/TLS
+echo "SSLInsecureRenegotiation off" >> /etc/apache2/mods-enabled/ssl.conf
+systemctl restart apache2
+
+# Vulnerabilidade 6: SSL/TLS: Report Weak Cipher Suites
+# Configurando apenas cifras seguras
+sed -i 's/^SSLCipherSuite HIGH:!aNULL/SSLCipherSuite HIGH:!aNULL:!MD5:!RC4:!3DES/' /etc/apache2/mods-enabled/ssl.conf
+systemctl restart apache2
+
+# Vulnerabilidade 7: TCP Timestamps Information Disclosure
+# Desabilitando timestamps TCP
+echo "net.ipv4.tcp_timestamps = 0" >> /etc/sysctl.conf
+sysctl -p}
+{type: uploaded file
+fileName: aeta_34.txt
+fullContent:
+#!/bin/bash
+
+# Vulnerabilidade 1: Cleartext Transmission of Sensitive Information via HTTP
+# Redirecionar HTTP para HTTPS
+if ! grep -q "RewriteEngine On" /etc/apache2/sites-available/000-default.conf; then
+    echo "<VirtualHost *:80>
+    RewriteEngine On
+    RewriteCond %{HTTPS} off
+    RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+</VirtualHost>" >> /etc/apache2/sites-available/000-default.conf
+    systemctl restart apache2
+fi
+
+# Vulnerabilidade 2: DNS Cache Snooping Vulnerability (UDP)
+# Desabilitar recursão no DNS
+if grep -q "recursion yes;" /etc/bind/named.conf.options; then
+    sed -i 's/recursion yes;/recursion no;/g' /etc/bind/named.conf.options
+    systemctl restart bind9
+fi
+
+# Vulnerabilidade 3: ICMP Timestamp Reply Information Disclosure
+# Desabilitar respostas ICMP Timestamp
+echo "net.ipv4.tcp_timestamps = 0" >> /etc/sysctl.conf
+sysctl -p
+
+# Vulnerabilidade 4: SSL/TLS: Deprecated TLSv1.0 and TLSv1.1 Protocol Detection
+# Desabilitar TLS 1.0 e 1.1
+if ! grep -q "SSLProtocol" /etc/apache2/mods-enabled/ssl.conf; then
+    sed -i '/SSLEngine on/a SSLProtocol all -SSLv2 -SSLv3 -TLSv1 -TLSv1.1' /etc/apache2/mods-enabled/ssl.conf
+    systemctl restart apache2
+fi
+
+# Vulnerabilidade 5: SSL/TLS: Renegotiation DoS Vulnerability (CVE-2011-1473, CVE-2011-5094)
+# Desabilitar renegociação SSL/TLS
+if ! grep -q "SSLInsecureRenegotiation off" /etc/apache2/mods-enabled/ssl.conf; then
+    echo "SSLInsecureRenegotiation off" >> /etc/apache2/mods-enabled/ssl.conf
+    systemctl restart apache2
+fi
+
+# Vulnerabilidade 6: SSL/TLS: Report Weak Cipher Suites
+# Remover cifras fracas
+if ! grep -q "SSLCipherSuite" /etc/apache2/mods-enabled/ssl.conf; then
+    sed -i '/SSLEngine on/a SSLCipherSuite HIGH:!aNULL:!MD5:!RC4:!3DES' /etc/apache2/mods-enabled/ssl.conf
+    systemctl restart apache2
+fi
+
+# Vulnerabilidade 7: TCP Timestamps Information Disclosure
+# Desabilitar timestamps TCP
+echo "net.ipv4.tcp_timestamps = 0" >> /etc/sysctl.conf
+sysctl -p}
+{type: uploaded file
+fileName: aeta_35.txt
+fullContent:
+#!/bin/bash
+# Fix vulnerability 1: Enforce SSL/TLS for sensitive data transmission
+sed -i 's/^#ServerName www.example.com:80/ServerName www.example.com:443/' /etc/apache2/sites-available/000-default.conf
+sed -i 's/^<VirtualHost \*:80>/<VirtualHost *:443>/' /etc/apache2/sites-available/000-default.conf
+a2enmod ssl
+systemctl restart apache2
+
+# Fix vulnerability 2: Disable DNS recursion
+sed -i 's/recursion yes;/recursion no;/' /etc/bind/named.conf.options
+systemctl restart bind9
+
+# Fix vulnerability 3: Disable ICMP timestamp replies
+echo "net.ipv4.icmp_echo_ignore_all=1" | tee -a /etc/sysctl.conf
+sysctl -p
+
+# Fix vulnerability 4: Disable deprecated TLS protocols
+sed -i 's/^SSLProtocol all -SSLv3/SSLProtocol -all +TLSv1.2 +TLSv1.3/' /etc/apache2/mods-enabled/ssl.conf
+systemctl restart apache2
+
+# Fix vulnerability 5: Disable SSL/TLS renegotiation
+echo "SSLInsecureRenegotiation off" | tee -a /etc/apache2/mods-enabled/ssl.conf
+systemctl restart apache2
+
+# Fix vulnerability 6: Disable weak SSL/TLS cipher suites
+sed -i 's/^SSLCipherSuite HIGH:!aNULL/SSLCipherSuite HIGH:!aNULL:!MD5:!RC4:!DES/' /etc/apache2/mods-enabled/ssl.conf
+systemctl restart apache2
+
+# Fix vulnerability 7: Disable TCP timestamps
+echo "net.ipv4.tcp_timestamps=0" | tee -a /etc/sysctl.conf
+sysctl -p}
+{type: uploaded file
+fileName: aeta_36.txt
+fullContent:
+#!/bin/bash
+# Corrige a vulnerabilidade de transmissão de dados sensíveis via HTTP
+sed -i 's/^#*Listen 80$/Listen 443/' /etc/apache2/ports.conf
+sed -i 's/^#*<VirtualHost \*:80>/<VirtualHost \*:443>/' /etc/apache2/sites-available/000-default.conf
+a2enmod ssl
+systemctl restart apache2
+
+# Corrige a vulnerabilidade de DNS Cache Snooping
+sed -i 's/^recursion yes;/recursion no;/' /etc/bind/named.conf.options
+systemctl restart bind9
+
+# Corrige a vulnerabilidade de ICMP Timestamp Reply
+echo "net.ipv4.icmp_echo_ignore_all=1" >> /etc/sysctl.conf
+sysctl -p
+
+# Corrige a vulnerabilidade de TLSv1.0 e TLSv1.1
+sed -i 's/^SSLProtocol all -SSLv3$/SSLProtocol all -SSLv3 -TLSv1 -TLSv1.1/' /etc/apache2/mods-enabled/ssl.conf
+systemctl restart apache2
+
+# Corrige a vulnerabilidade de Renegotiation DoS
+sed -i 's/^SSLHonorCipherOrder off$/SSLHonorCipherOrder on/' /etc/apache2/mods-enabled/ssl.conf
+systemctl restart apache2
+
+# Corrige a vulnerabilidade de Weak Cipher Suites
+sed -i 's/^SSLCipherSuite HIGH:!aNULL$/SSLCipherSuite HIGH:!aNULL:!MD5:!RC4:!DES:!3DES/' /etc/apache2/mods-enabled/ssl.conf
+systemctl restart apache2
+
+# Corrige a vulnerabilidade de TCP Timestamps
+echo "net.ipv4.tcp_timestamps=0" >> /etc/sysctl.conf
+sysctl -p}
+{type: uploaded file
+fileName: aeta_37.txt
+fullContent:
+#!/bin/bash
+
+# Configurar TLS no Apache
+if [ -f /etc/apache2/apache2.conf ]; then
+    sed -i 's/^SSLEngine on$/SSLEngine on/' /etc/apache2/apache2.conf
+    sed -i 's/^SSLProtocol all -SSLv3$/SSLProtocol all -SSLv3 -TLSv1 -TLSv1.1/' /etc/apache2/apache2.conf
+    sed -i 's/^SSLCipherSuite HIGH:!aNULL:!MD5$/SSLCipherSuite HIGH:!aNULL:!MD5:!kRSA:!PSK:!SRP:!3DES:!eNULL:!EXP:!RC4/' /etc/apache2/apache2.conf
+    systemctl restart apache2
+fi
+
+# Configurar TLS no Nginx
+if [ -f /etc/nginx/nginx.conf ]; then
+    sed -i 's/^ssl_protocols TLSv1 TLSv1.1 TLSv1.2;$/ssl_protocols TLSv1.2 TLSv1.3;/' /etc/nginx/nginx.conf
+    sed -i 's/^ssl_ciphers HIGH:!aNULL:!MD5;$/ssl_ciphers HIGH:!aNULL:!MD5:!kRSA:!PSK:!SRP:!3DES:!eNULL:!EXP:!RC4;/' /etc/nginx/nginx.conf
+    systemctl restart nginx
+fi
+
+# Desabilitar ICMP timestamp
+echo "net.ipv4.icmp_echo_ignore_all = 1" >> /etc/sysctl.conf
+sysctl -p
+
+# Desabilitar TCP timestamps
+echo "net.ipv4.tcp_timestamps = 0" >> /etc/sysctl.conf
+sysctl -p
+
+# Configurar DNS para desabilitar recursão
+if [ -f /etc/bind/named.conf.options ]; then
+    sed -i 's/^recursion yes;$/recursion no;/' /etc/bind/named.conf.options
+    systemctl restart bind9
+fi
+
+# Configurar renegociação SSL/TLS
+if [ -f /etc/apache2/apache2.conf ]; then
+    sed -i 's/^SSLHonorCipherOrder on$/SSLHonorCipherOrder on/' /etc/apache2/apache2.conf
+    sed -i 's/^SSLProtocol all -SSLv3$/SSLProtocol all -SSLv3 -TLSv1 -TLSv1.1/' /etc/apache2/apache2.conf
+    systemctl restart apache2
+fi
+
+if [ -f /etc/nginx/nginx.conf ]; then
+    sed -i 's/^ssl_protocols TLSv1 TLSv1.1 TLSv1.2;$/ssl_protocols TLSv1.2 TLSv1.3;/' /etc/nginx/nginx.conf
+    systemctl restart nginx
+fi}
+{type: uploaded file
+fileName: aeta_38.txt
+fullContent:
+#!/bin/bash
+
+# Vulnerabilidade 1: Enforce HTTPS
+if ! grep -q "RewriteEngine On" /etc/apache2/sites-available/default.conf; then
+    echo "<VirtualHost *:80>
+    RewriteEngine On
+    RewriteCond %{HTTPS} off
+    RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+</VirtualHost>" >> /etc/apache2/sites-available/default.conf
+    service apache2 restart
+fi
+
+# Vulnerabilidade 2: Disable DNS recursion
+if ! grep -q "recursion no;" /etc/bind/named.conf.options; then
+    sed -i '/options {/a \    recursion no;' /etc/bind/named.conf.options
+    service bind9 restart
+fi
+
+# Vulnerabilidade 3: Disable ICMP timestamp
+sysctl -w net.ipv4.icmp_echo_ignore_all=1
+echo "net.ipv4.icmp_echo_ignore_all=1" >> /etc/sysctl.conf
+
+# Vulnerabilidade 4: Disable TLSv1.0 and TLSv1.1
+if ! grep -q "Protocols" /etc/apache2/mods-enabled/ssl.conf; then
+    sed -i '/SSLProtocol/ s/$/ -TLSv1 -TLSv1.1/' /etc/apache2/mods-enabled/ssl.conf
+    service apache2 restart
+fi
+
+# Vulnerabilidade 5: Disable SSL/TLS renegotiation
+if ! grep -q "SSLInsecureRenegotiation off" /etc/apache2/mods-enabled/ssl.conf; then
+    echo "SSLInsecureRenegotiation off" >> /etc/apache2/mods-enabled/ssl.conf
+    service apache2 restart
+fi
+
+# Vulnerabilidade 6: Disable weak SSL/TLS cipher suites
+if ! grep -q "SSLCipherSuite HIGH:!aNULL:!MD5" /etc/apache2/mods-enabled/ssl.conf; then
+    sed -i '/SSLCipherSuite/ s/.*/SSLCipherSuite HIGH:!aNULL:!MD5/' /etc/apache2/mods-enabled/ssl.conf
+    service apache2 restart
+fi
+
+# Vulnerabilidade 7: Disable TCP timestamps
+sysctl -w net.ipv4.tcp_timestamps=0
+echo "net.ipv4.tcp_timestamps=0" >> /etc/sysctl.conf}
+{type: uploaded file
+fileName: aeta_39.txt
+fullContent:
+#!/bin/bash
+# Corrigir vulnerabilidades de cibersegurança
+
+# Vulnerabilidade 1: Cleartext Transmission of Sensitive Information via HTTP
+# Forçar uso de HTTPS e redirecionar HTTP para HTTPS
+if ! grep -q "RewriteEngine On" /etc/apache2/sites-available/000-default.conf; then
+    echo 'RewriteEngine On' >> /etc/apache2/sites-available/000-default.conf
+    echo 'RewriteCond %{HTTPS} off' >> /etc/apache2/sites-available/000-default.conf
+    echo 'RewriteRule (.*) https://%{HTTP_HOST}%{REQUEST_URI}' >> /etc/apache2/sites-available/000-default.conf
+fi
+systemctl restart apache2
+
+# Vulnerabilidade 2: DNS Cache Snooping Vulnerability (UDP)
+# Desabilitar recursão no DNS
+if ! grep -q "recursion no;" /etc/bind/named.conf.options; then
+    sed -i '/recursion yes;/c\recursion no;' /etc/bind/named.conf.options
+fi
+systemctl restart bind9
+
+# Vulnerabilidade 3: ICMP Timestamp Reply Information Disclosure
+# Bloquear ICMP timestamp
+iptables -A INPUT -p icmp --icmp-type timestamp-request -j DROP
+iptables -A INPUT -p icmp --icmp-type timestamp-reply -j DROP
+
+# Vulnerabilidade 4: SSL/TLS: Deprecated TLSv1.0 and TLSv1.1 Protocol Detection
+# Desabilitar TLS 1.0 e 1.1
+if ! grep -q "SSLProtocol" /etc/apache2/mods-enabled/ssl.conf; then
+    echo 'SSLProtocol all -SSLv3 -TLSv1 -TLSv1.1' >> /etc/apache2/mods-enabled/ssl.conf
+fi
+systemctl restart apache2
+
+# Vulnerabilidade 5: SSL/TLS: Renegotiation DoS Vulnerability
+# Desabilitar renegociação SSL/TLS
+if ! grep -q "SSLInsecureRenegotiation off" /etc/apache2/mods-enabled/ssl.conf; then
+    echo 'SSLInsecureRenegotiation off' >> /etc/apache2/mods-enabled/ssl.conf
+fi
+systemctl restart apache2
+
+# Vulnerabilidade 6: SSL/TLS: Report Weak Cipher Suites
+# Configurar cifras seguras
+if ! grep -q "SSLCipherSuite" /etc/apache2/mods-enabled/ssl.conf; then
+    echo 'SSLCipherSuite HIGH:!aNULL:!MD5:!RC4' >> /etc/apache2/mods-enabled/ssl.conf
+fi
+systemctl restart apache2
+
+# Vulnerabilidade 7: TCP Timestamps Information Disclosure
+# Desabilitar timestamps TCP
+if ! grep -q "net.ipv4.tcp_timestamps" /etc/sysctl.conf; then
+    echo 'net.ipv4.tcp_timestamps = 0' >> /etc/sysctl.conf
+fi
+sysctl -p}
+{type: uploaded file
+fileName: aeta_40.txt
+fullContent:
+#!/bin/bash
+# Vulnerabilidade 1: Enforce SSL/TLS for sensitive data transmission
+sed -i 's/Listen 80/Listen 443/g' /etc/apache2/ports.conf
+a2enmod ssl
+systemctl restart apache2
+
+# Vulnerabilidade 2: Disable DNS recursion
+sed -i 's/recursion yes;/recursion no;/g' /etc/named.conf
+systemctl restart named
+
+# Vulnerabilidade 3: Disable ICMP timestamp
+echo "net.ipv4.icmp_echo_ignore_all = 1" >> /etc/sysctl.conf
+sysctl -p
+
+# Vulnerabilidade 4: Disable deprecated TLSv1.0 and TLSv1.1
+sed -i 's/SSLProtocol all -SSLv3/SSLProtocol all -SSLv3 -TLSv1 -TLSv1.1/g' /etc/apache2/mods-enabled/ssl.conf
+systemctl restart apache2
+
+# Vulnerabilidade 5: Disable SSL/TLS renegotiation
+sed -i 's/SSLInsecureRenegotiation on/SSLInsecureRenegotiation off/g' /etc/apache2/mods-enabled/ssl.conf
+systemctl restart apache2
+
+# Vulnerabilidade 6: Remove weak SSL/TLS cipher suites
+sed -i 's/SSLCipherSuite HIGH:!aNULL:!MD5/SSLCipherSuite HIGH:!aNULL:!MD5:!ADH:!RC4:!DES:!3DES:!DSS/g' /etc/apache2/mods-enabled/ssl.conf
+systemctl restart apache2
+
+# Vulnerabilidade 7: Disable TCP timestamps
+echo "net.ipv4.tcp_timestamps = 0" >> /etc/sysctl.conf
+sysctl -p}
+{type: uploaded file
+fileName: aeta_41.txt
+fullContent:
+#!/bin/bash
+
+# Vulnerabilidade 1: Enforce HTTPS for sensitive data
+echo "Redirecting HTTP to HTTPS for sensitive data..."
+if ! grep -q "RewriteEngine On" /etc/apache2/sites-available/000-default.conf; then
+    echo "RewriteEngine On" >> /etc/apache2/sites-available/000-default.conf
+    echo "RewriteCond %{SERVER_PORT} 80" >> /etc/apache2/sites-available/000-default.conf
+    echo "RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]" >> /etc/apache2/sites-available/000-default.conf
+fi
+systemctl restart apache2
+
+# Vulnerabilidade 2: Disable DNS recursion
+echo "Disabling DNS recursion..."
+if [ -f /etc/bind/named.conf.options ]; then
+    sed -i 's/recursion yes;/recursion no;/g' /etc/bind/named.conf.options
+    systemctl restart bind9
+fi
+
+# Vulnerabilidade 3: Block ICMP timestamp requests
+echo "Blocking ICMP timestamp requests..."
+iptables -A INPUT -p icmp --icmp-type timestamp-request -j DROP
+iptables -A OUTPUT -p icmp --icmp-type timestamp-reply -j DROP
+
+# Vulnerabilidade 4: Disable TLSv1.0 and TLSv1.1
+echo "Disabling TLSv1.0 and TLSv1.1..."
+if [ -f /etc/ssl/openssl.cnf ]; then
+    sed -i 's/^MinProtocol = TLSv1.0$/MinProtocol = TLSv1.2/' /etc/ssl/openssl.cnf
+    sed -i 's/^MinProtocol = TLSv1.1$/MinProtocol = TLSv1.2/' /etc/ssl/openssl.cnf
+fi
+systemctl restart apache2
+
+# Vulnerabilidade 5: Disable SSL/TLS renegotiation
+echo "Disabling SSL/TLS renegotiation..."
+if [ -f /etc/apache2/mods-enabled/ssl.conf ]; then
+    echo "SSLInsecureRenegotiation off" >> /etc/apache2/mods-enabled/ssl.conf
+    systemctl restart apache2
+fi
+
+# Vulnerabilidade 6: Disable weak cipher suites
+echo "Disabling weak cipher suites..."
+if [ -f /etc/apache2/mods-enabled/ssl.conf ]; then
+    sed -i 's/^SSLProtocol all -SSLv3$/SSLProtocol all -SSLv3 -TLSv1 -TLSv1.1/' /etc/apache2/mods-enabled/ssl.conf
+    sed -i 's/^SSLCipherSuite HIGH:!aNULL:!MD5$/SSLCipherSuite HIGH:!aNULL:!MD5:!RC4:!3DES/' /etc/apache2/mods-enabled/ssl.conf
+    systemctl restart apache2
+fi
+
+# Vulnerabilidade 7: Disable TCP timestamps
+echo "Disabling TCP timestamps..."
+echo "net.ipv4.tcp_timestamps = 0" >> /etc/sysctl.conf
+sysctl -p}
+{type: uploaded file
+fileName: aeta_42.txt
+fullContent:
+#!/bin/bash
+
+# Corrigindo a vulnerabilidade de transmissão de dados sensíveis via HTTP
+if [ -f /etc/apache2/sites-available/default-ssl.conf ]; then
+    sed -i 's/<\/VirtualHost>/\tRedirect permanent \/ https:\/\/$SERVER_NAME\/\n<\/VirtualHost>/' /etc/apache2/sites-available/000-default.conf
+    a2enmod ssl
+    a2ensite default-ssl
+    systemctl restart apache2
+fi
+
+# Corrigindo a vulnerabilidade de DNS Cache Snooping
+if [ -f /etc/bind/named.conf.options ]; then
+    sed -i 's/recursion yes;/recursion no;/' /etc/bind/named.conf.options
+    systemctl restart bind9
+fi
+
+# Corrigindo a vulnerabilidade de ICMP Timestamp Reply
+echo "net.ipv4.icmp_echo_ignore_all = 1" >> /etc/sysctl.conf
+sysctl -p
+
+# Corrigindo a vulnerabilidade de uso de TLS depreciados
+if [ -f /etc/nginx/nginx.conf ]; then
+    sed -i 's/TLSv1 TLSv1.1/TLSv1.2 TLSv1.3/' /etc/nginx/nginx.conf
+    systemctl restart nginx
+fi
+
+if [ -f /etc/apache2/mods-available/ssl.conf ]; then
+    sed -i 's/SSLProtocol all -SSLv3/SSLProtocol +TLSv1.2 +TLSv1.3/' /etc/apache2/mods-available/ssl.conf
+    systemctl restart apache2
+fi
+
+# Corrigindo a vulnerabilidade de Renegotiation DoS
+if [ -f /etc/apache2/mods-available/ssl.conf ]; then
+    echo "SSLInsecureRenegotiation off" >> /etc/apache2/mods-available/ssl.conf
+    systemctl restart apache2
+fi
+
+# Corrigindo a vulnerabilidade de cifras SSL/TLS fracas
+if [ -f /etc/apache2/mods-available/ssl.conf ]; then
+    sed -i 's/SSLCipherSuite HIGH:!aNULL:!MD5/SSLCipherSuite ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:DHE-RSA-AES128-GCM-SHA256:DHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:DHE-RSA-CHACHA20-POLY1305/' /etc/apache2/mods-available/ssl.conf
+    systemctl restart apache2
+fi
+
+if [ -f /etc/nginx/nginx.conf ]; then
+    sed -i 's/ssl_ciphers HIGH:!aNULL:!MD5/ssl_ciphers ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:DHE-RSA-AES128-GCM-SHA256:DHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:DHE-RSA-CHACHA20-POLY1305/' /etc/nginx/nginx.conf
+    systemctl restart nginx
+fi
+
+# Corrigindo a vulnerabilidade de TCP Timestamps
+echo "net.ipv4.tcp_timestamps = 0" >> /etc/sysctl.conf
+sysctl -p}
+{type: uploaded file
+fileName: aeta_43.txt
+fullContent:
+#!/bin/bash
+
+# Vulnerabilidade 1: Enforce SSL/TLS
+sed -i 's/^\(#\)\?\(listen 80;\)/#\2\n\tlisten 443 ssl;\n\tssl_certificate \/etc\/ssl\/certs\/ssl-cert-snakeoil.pem;\n\tssl_certificate_key \/etc\/ssl\/private\/ssl-cert-snakeoil.key;\n\tssl_protocols TLSv1.2 TLSv1.3;\n\tssl_ciphers HIGH:!aNULL:!MD5;/' /etc/nginx/sites-available/default
+nginx -t && systemctl restart nginx
+
+# Vulnerabilidade 2: Disable DNS Recursion
+sed -i 's/^\(#\)\?\(recursion yes;\)/#\2\n\trecursion no;/' /etc/bind/named.conf.options
+systemctl restart bind9
+
+# Vulnerabilidade 3: Disable ICMP Timestamp
+echo "net.ipv4.tcp_timestamps = 0" >> /etc/sysctl.conf
+sysctl -p
+
+# Vulnerabilidade 4: Disable TLSv1.0 and TLSv1.1
+sed -i 's/^\(#\)\?\(SSLProtocol.*\)/\1\2 -TLSv1 -TLSv1.1/' /etc/apache2/mods-available/ssl.conf
+systemctl restart apache2
+
+# Vulnerabilidade 5: Disable SSL Renegotiation
+sed -i 's/^\(#\)\?\(SSLHonorCipherOrder.*\)/\1\2\n\tSSLInsecureRenegotiation off/' /etc/apache2/mods-available/ssl.conf
+systemctl restart apache2
+
+# Vulnerabilidade 6: Disable Weak Cipher Suites
+sed -i 's/^\(#\)\?\(SSLCipherSuite.*\)/\1\2:!aNULL:!eNULL:!EXPORT:!DES:!RC4:!3DES:!MD5:!PSK/' /etc/apache2/mods-available/ssl.conf
+systemctl restart apache2
+
+# Vulnerabilidade 7: Disable TCP Timestamps
+echo "net.ipv4.tcp_timestamps = 0" >> /etc/sysctl.conf
+sysctl -p}
+{type: uploaded file
+fileName: aeta_44.txt
+fullContent:
+#!/bin/bash
+# Vulnerabilidade 1: Redirecionar HTTP para HTTPS
+if [ -f /etc/apache2/sites-available/000-default.conf ]; then
+    sed -i 's/<VirtualHost \*:80>/<VirtualHost *:80>\n    Redirect permanent \/ https:\/\/$HOSTNAME\//' /etc/apache2/sites-available/000-default.conf
+    systemctl restart apache2
+fi
+
+# Vulnerabilidade 2: Desabilitar recursão DNS
+if [ -f /etc/bind/named.conf.options ]; then
+    sed -i 's/recursion yes;/recursion no;/' /etc/bind/named.conf.options
+    systemctl restart bind9
+fi
+
+# Vulnerabilidade 3: Bloquear ICMP timestamp
+iptables -A INPUT -p icmp --icmp-type timestamp-request -j DROP
+iptables -A OUTPUT -p icmp --icmp-type timestamp-reply -j DROP
+
+# Vulnerabilidade 4: Desabilitar TLSv1.0 e TLSv1.1
+if [ -f /etc/ssl/openssl.cnf ]; then
+    sed -i 's/MinProtocol = TLSv1.0/MinProtocol = TLSv1.2/' /etc/ssl/openssl.cnf
+    sed -i 's/MaxProtocol = TLSv1.1/MaxProtocol = TLSv1.3/' /etc/ssl/openssl.cnf
+fi
+
+# Vulnerabilidade 5: Desabilitar renegociação SSL/TLS
+if [ -f /etc/apache2/mods-available/ssl.conf ]; then
+    sed -i 's/SSLInsecureRenegotiation on/SSLInsecureRenegotiation off/' /etc/apache2/mods-available/ssl.conf
+    systemctl restart apache2
+fi
+
+# Vulnerabilidade 6: Remover cifras fracas
+if [ -f /etc/ssl/openssl.cnf ]; then
+    sed -i 's/CipherString = DEFAULT@SECLEVEL=1/CipherString = DEFAULT@SECLEVEL=2/' /etc/ssl/openssl.cnf
+fi
+
+# Vulnerabilidade 7: Desabilitar TCP timestamps
+echo "net.ipv4.tcp_timestamps = 0" >> /etc/sysctl.conf
+sysctl -p}
+{type: uploaded file
+fileName: aeta_45.txt
+fullContent:
+#!/bin/bash
+# Fixing Vulnerabilities
+# 1. Enforce SSL/TLS for sensitive data transmission
+apt-get update
+apt-get install -y apache2
+a2enmod ssl
+a2ensite default-ssl
+systemctl restart apache2
+
+# 2. DNS Cache Snooping Mitigation
+echo "options {
+    allow-query { localhost; };
+    recursion no;
+};" > /etc/bind/named.conf.options
+systemctl restart bind9
+
+# 3. Disable ICMP Timestamp
+echo "1" > /proc/sys/net/ipv4/icmp_echo_ignore_all
+sysctl -w net.ipv4.icmp_echo_ignore_all=1
+
+# 4. Disable TLSv1.0 and TLSv1.1
+sed -i 's/^SSLProtocol all -SSLv3$/SSLProtocol all -SSLv3 -TLSv1 -TLSv1.1/' /etc/apache2/mods-enabled/ssl.conf
+systemctl restart apache2
+
+# 5. Disable SSL/TLS Renegotiation
+echo "SSLInsecureRenegotiation off" >> /etc/apache2/mods-enabled/ssl.conf
+systemctl restart apache2
+
+# 6. Remove Weak Cipher Suites
+sed -i 's/^SSLCipherSuite HIGH:!aNULL:!MD5$/SSLCipherSuite HIGH:!aNULL:!MD5:!3DES:!DES:!RC4/' /etc/apache2/mods-enabled/ssl.conf
+systemctl restart apache2
+
+# 7. Disable TCP Timestamps
+echo "net.ipv4.tcp_timestamps = 0" >> /etc/sysctl.conf
+sysctl -p}
+{type: uploaded file
+fileName: aeta_46.txt
+fullContent:
+#!/bin/bash
+# Disable HTTP and enforce HTTPS
+if grep -q "^#*Listen 80$" /etc/apache2/ports.conf; then
+    sed -i 's/^#*Listen 80$/Listen 80\nRedirect permanent \/ https:\/\/$HOSTNAME\//' /etc/apache2/ports.conf
+fi
+a2enmod ssl
+if [ ! -f /etc/apache2/sites-available/default-ssl.conf ]; then
+    mv /etc/apache2/sites-available/default-ssl.conf /etc/apache2/sites-available/default-ssl.conf.bak
+    cat <<EOL > /etc/apache2/sites-available/default-ssl.conf
+<IfModule mod_ssl.c>
+    <VirtualHost _default_:443>
+        ServerAdmin webmaster@localhost
+        DocumentRoot /var/www/html
+        ErrorLog \${APACHE_LOG_DIR}/error.log
+        CustomLog \${APACHE_LOG_DIR}/access.log combined
+        SSLEngine on
+        SSLCertificateFile /etc/ssl/certs/ssl-cert-snakeoil.pem
+        SSLCertificateKeyFile /etc/ssl/private/ssl-cert-snakeoil.key
+        <FilesMatch "\.(cgi|shtml|phtml|php)$">
+            SSLOptions +StdEnvVars
+        </FilesMatch>
+        <Directory /usr/lib/cgi-bin>
+            SSLOptions +StdEnvVars
+        </Directory>
+        BrowserMatch "MSIE [2-6]" \
+            nokeepalive ssl-unclean-shutdown \
+            downgrade-1.0 force-response-1.0
+        BrowserMatch "MSIE [17-9]" ssl-unclean-shutdown
+    </VirtualHost>
+</IfModule>
+EOL
+fi
+a2ensite default-ssl.conf
+service apache2 restart
+
+# Configure DNS server to disable recursion
+if [ -f /etc/bind/named.conf.options ]; then
+    if grep -q "^#*recursion yes$" /etc/bind/named.conf.options; then
+        sed -i 's/^#*recursion yes$/recursion no/' /etc/bind/named.conf.options
+        service bind9 restart
+    fi
+fi
+
+# Disable ICMP timestamp requests
+echo "1" > /proc/sys/net/ipv4/icmp_echo_ignore_all
+echo "net.ipv4.icmp_echo_ignore_all = 1" >> /etc/sysctl.conf
+sysctl -p
+
+# Disable deprecated TLS versions
+if [ -f /etc/nginx/nginx.conf ]; then
+    sed -i 's/ssl_protocols .*/ssl_protocols TLSv1.2 TLSv1.3;/' /etc/nginx/nginx.conf
+    service nginx restart
+fi
+if [ -f /etc/apache2/mods-enabled/ssl.conf ]; then
+    sed -i 's/SSLProtocol .*/SSLProtocol -all +TLSv1.2 +TLSv1.3/' /etc/apache2/mods-enabled/ssl.conf
+    service apache2 restart
+fi
+
+# Disable SSL/TLS renegotiation
+if [ -f /etc/nginx/nginx.conf ]; then
+    sed -i '/ssl_session_cache/ a ssl_session_tickets off;' /etc/nginx/nginx.conf
+    service nginx restart
+fi
+if [ -f /etc/apache2/mods-enabled/ssl.conf ]; then
+    sed -i 's/SSLHonorCipherOrder .*/SSLHonorCipherOrder on/' /etc/apache2/mods-enabled/ssl.conf
+    service apache2 restart
+fi
+
+# Disable weak SSL/TLS cipher suites
+if [ -f /etc/nginx/nginx.conf ]; then
+    sed -i 's/ssl_ciphers .*/ssl_ciphers HIGH:!aNULL:!MD5:!kDHE:!kECDHE;/' /etc/nginx/nginx.conf
+    service nginx restart
+fi
+if [ -f /etc/apache2/mods-enabled/ssl.conf ]; then
+    sed -i 's/SSLCipherSuite .*/SSLCipherSuite HIGH:!aNULL:!MD5:!kDHE:!kECDHE/' /etc/apache2/mods-enabled/ssl.conf
+    service apache2 restart
+fi
+
+# Disable TCP timestamps
+echo "net.ipv4.tcp_timestamps = 0" >> /etc/sysctl.conf
+sysctl -p}
+{type: uploaded file
+fileName: aeta_47.txt
+fullContent:
+#!/bin/bash
+# Corrigir Vulnerabilidade 1
+sed -i 's/listen 80;/listen 80;\n    return 301 https:\/\/$host$request_uri;/' /etc/nginx/sites-available/default
+nginx -t && systemctl reload nginx
+
+# Corrigir Vulnerabilidade 2
+sed -i 's/recursion yes;/recursion no;/' /etc/bind/named.conf.options
+systemctl restart bind9
+
+# Corrigir Vulnerabilidade 3
+echo "net.ipv4.icmp_echo_ignore_all = 1" >> /etc/sysctl.conf
+sysctl -p
+
+# Corrigir Vulnerabilidade 4
+sed -i 's/TLSv1.1/TLSv1.2/' /etc/nginx/nginx.conf
+sed -i 's/TLSv1.0/TLSv1.2/' /etc/nginx/nginx.conf
+nginx -t && systemctl reload nginx
+
+# Corrigir Vulnerabilidade 5
+sed -i 's/ssl_renegotiation on;/ssl_renegotiation off;/' /etc/nginx/nginx.conf
+nginx -t && systemctl reload nginx
+
+# Corrigir Vulnerabilidade 6
+sed -i 's/ssl_ciphers HIGH:!aNULL:!MD5;/ssl_ciphers HIGH:!aNULL:!MD5:!DSS:!3DES:!RC4:!AES128:!CAMELLIA128:!SEED:!IDEA:!DES:!SSLv2:!SSLv3:!TLSv1:!TLSv1.1;/' /etc/nginx/nginx.conf
+nginx -t && systemctl reload nginx
+
+# Corrigir Vulnerabilidade 7
+echo "net.ipv4.tcp_timestamps = 0" >> /etc/sysctl.conf
+sysctl -p}
+{type: uploaded file
+fileName: aeta_48.txt
+fullContent:
+#!/bin/bash
+
+# Vulnerabilidade 1: Cleartext Transmission of Sensitive Information via HTTP
+echo "Configuring SSL/TLS for sensitive data transmission..."
+sed -i 's/^#*\(Listen 80\)/\1\nListen 443/g' /etc/apache2/ports.conf
+a2enmod ssl
+systemctl restart apache2
+
+# Vulnerabilidade 2: DNS Cache Snooping Vulnerability (UDP)
+echo "Disabling DNS recursion..."
+sed -i 's/^recursion yes;/recursion no;/g' /etc/named.conf
+systemctl restart named
+
+# Vulnerabilidade 3: ICMP Timestamp Reply Information Disclosure
+echo "Disabling ICMP timestamp reply..."
+echo "1" > /proc/sys/net/ipv4/icmp_echo_ignore_all
+
+# Vulnerabilidade 4: SSL/TLS: Deprecated TLSv1.0 and TLSv1.1 Protocol Detection
+echo "Disabling TLSv1.0 and TLSv1.1..."
+openssl_conf=$(openssl ciphers -v | grep -E 'TLSv1\.0|TLSv1\.1')
+if [ -n "$openssl_conf" ]; then
+    sed -i 's/SSLProtocol all -SSLv2 -SSLv3/SSLProtocol all -SSLv2 -SSLv3 -TLSv1 -TLSv1.1/g' /etc/apache2/mods-enabled/ssl.conf
+    systemctl restart apache2
+fi
+
+# Vulnerabilidade 5: SSL/TLS: Renegotiation DoS Vulnerability (CVE-2011-1473, CVE-2011-5094)
+echo "Disabling SSL/TLS renegotiation..."
+sed -i 's/SSLHonorCipherOrder on/SSLHonorCipherOrder on\nSSLInsecureRenegotiation off/g' /etc/apache2/mods-enabled/ssl.conf
+systemctl restart apache2
+
+# Vulnerabilidade 6: SSL/TLS: Report Weak Cipher Suites
+echo "Disabling weak SSL/TLS cipher suites..."
+sed -i 's/SSLCipherSuite HIGH:!aNULL/SSLCipherSuite HIGH:!aNULL:!MD5:!RC4:!DES:!3DES/g' /etc/apache2/mods-enabled/ssl.conf
+systemctl restart apache2
+
+# Vulnerabilidade 7: TCP Timestamps Information Disclosure
+echo "Disabling TCP timestamps..."
+echo "net.ipv4.tcp_timestamps = 0" >> /etc/sysctl.conf
+sysctl -p}
+{type: uploaded file
+fileName: aeta_49.txt
+fullContent:
+#!/bin/bash
+# Enforce HTTPS for sensitive data transmission
+if ! grep -q "rewrite ^ https://\$host\$request_uri? permanent;" /etc/nginx/nginx.conf; then
+    sed -i '/server {/a \ \ \ \ \ \ \ \ rewrite ^ https://$host$request_uri? permanent;' /etc/nginx/nginx.conf
+    systemctl restart nginx
+fi
+
+# Disable DNS recursion
+if ! grep -q "recursion no;" /etc/named.conf; then
+    sed -i '/options {/a \ \ \ \ \ \ \ \ recursion no;' /etc/named.conf
+    systemctl restart named
+fi
+
+# Disable ICMP timestamp replies
+echo "net.ipv4.tcp_timestamps = 0" >> /etc/sysctl.conf
+sysctl -p
+
+# Disable deprecated TLSv1.0 and TLSv1.1
+if ! grep -q "TLSv1.0" /etc/nginx/nginx.conf; then
+    sed -i '/ssl_protocols/d' /etc/nginx/nginx.conf
+    echo "ssl_protocols TLSv1.2 TLSv1.3;" >> /etc/nginx/nginx.conf
+    systemctl restart nginx
+fi
+
+# Disable SSL/TLS renegotiation
+if ! grep -q "ssl_renegotiation off;" /etc/nginx/nginx.conf; then
+    sed -i '/server {/a \ \ \ \ \ \ \ \ ssl_renegotiation off;' /etc/nginx/nginx.conf
+    systemctl restart nginx
+fi
+
+# Disable weak SSL/TLS cipher suites
+if ! grep -q "ssl_ciphers HIGH:!aNULL:!MD5;" /etc/nginx/nginx.conf; then
+    sed -i '/ssl_protocols/a \ \ \ \ \ \ \ \ ssl_ciphers HIGH:!aNULL:!MD5;' /etc/nginx/nginx.conf
+    systemctl restart nginx
+fi
+
+# Disable TCP timestamps
+echo "net.ipv4.tcp_timestamps = 0" >> /etc/sysctl.conf
+sysctl -p}
+{type: uploaded file
+fileName: aeta_50.txt
+fullContent:
+#!/bin/bash
+# Correção para Vulnerabilidade 1: Enforce HTTPS
+if [ -f /etc/apache2/sites-available/default ]; then
+    sed -i 's/^.*<VirtualHost \*:80>.*$/<VirtualHost *:80>\n    RewriteEngine On\n    RewriteCond %{HTTPS} off\n    RewriteRule ^ https:\/\/%{HTTP_HOST}%{REQUEST_URI} [L,R=301]/' /etc/apache2/sites-available/default
+    a2enmod ssl rewrite
+    service apache2 restart
+fi  
+
+# Correção para Vulnerabilidade 2: Disable DNS Recursion
+if [ -f /etc/bind/named.conf.options ]; then
+    sed -i 's/recursion yes;/recursion no;/' /etc/bind/named.conf.options
+    service bind9 restart
+fi
+
+# Correção para Vulnerabilidade 3: Block ICMP Timestamp
+iptables -A INPUT -p icmp --icmp-type timestamp-request -j DROP
+iptables -A OUTPUT -p icmp --icmp-type timestamp-reply -j DROP
+sysctl -w net.ipv4.icmp_echo_ignore_all=1
+
+# Correção para Vulnerabilidade 4: Disable TLSv1.0 and TLSv1.1
+if [ -f /etc/ssl/openssl.cnf ]; then
+    sed -i 's/^MinProtocol = TLSv1.0/MinProtocol = TLSv1.2/' /etc/ssl/openssl.cnf
+    sed -i 's/^CipherString = DEFAULT@SECLEVEL=1/CipherString = DEFAULT@SECLEVEL=2/' /etc/ssl/openssl.cnf
+    update-ca-certificates
+fi
+
+# Correção para Vulnerabilidade 5: Disable SSL/TLS Renegotiation
+if [ -f /etc/apache2/mods-available/ssl.conf ]; then
+    sed -i 's/SSLInsecureRenegotiation on/SSLInsecureRenegotiation off/' /etc/apache2/mods-available/ssl.conf
+    service apache2 restart
+fi
+
+# Correção para Vulnerabilidade 6: Remove Weak Cipher Suites
+if [ -f /etc/ssl/openssl.cnf ]; then
+    sed -i 's/^CipherString = DEFAULT@SECLEVEL=1/CipherString = HIGH:!aNULL:!MD5:!3DES:!DES:!RC4:!SHA1/' /etc/ssl/openssl.cnf
+    update-ca-certificates
+fi
+
+# Correção para Vulnerabilidade 7: Disable TCP Timestamps
+sysctl -w net.ipv4.tcp_timestamps=0
+echo "net.ipv4.tcp_timestamps=0" >> /etc/sysctl.conf
+sysctl -p}

@@ -1,0 +1,471 @@
+```bash
+#!/bin/bash
+
+# Variáveis para cores
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[0;33m'
+NC='\033[0m' # No Color
+
+# Função para exibir mensagens de status
+status() {
+  echo -e "${YELLOW}==> ${NC}$1"
+}
+
+# Função para exibir mensagens de sucesso
+success() {
+  echo -e "${GREEN}==> ${NC}$1"
+}
+
+# Função para exibir mensagens de erro
+error() {
+  echo -e "${RED}==> ${NC}$1"
+}
+
+# 1. TWiki XSS and Command Execution Vulnerabilities (CVE-2008-5304, CVE-2008-5305)
+status "Removendo TWiki (vulnerável)"
+if [ -d /var/www/twiki ]; then
+  rm -rf /var/www/twiki
+  success "TWiki removido de /var/www/twiki"
+elif [ -d /home/twiki ]; then
+  rm -rf /home/twiki
+  success "TWiki removido de /home/twiki"
+else
+  error "Diretório TWiki não encontrado. Verifique a instalação."
+fi
+
+# 2. Distributed Ruby (dRuby/DRb) Multiple RCE Vulnerabilities
+status "Desabilitando dRuby (DRb) - Porta 8787"
+if ss -lnt | grep -q ":8787"; then
+  # Tenta identificar e matar o processo dRuby
+  PID=$(sudo lsof -ti:8787)
+  if [ -n "$PID" ]; then
+    sudo kill -9 "$PID"
+    success "Processo dRuby (PID $PID) terminado."
+  else
+    error "Processo dRuby não encontrado."
+  fi
+else
+  success "dRuby não está em execução na porta 8787."
+fi
+
+# 3. rlogin Passwordless Login
+status "Desabilitando serviço rlogin"
+sudo apt-get -y remove rsh-server rsh-client
+if ! systemctl is-enabled rlogin.socket 2>/dev/null; then
+    success "rlogin já está desabilitado."
+else
+    sudo systemctl stop rlogin.socket
+    sudo systemctl disable rlogin.socket
+    success "rlogin desabilitado."
+fi
+
+# 4. Operating System (OS) End of Life (EOL) Detection
+error "Ubuntu 8.04 é EOL. Atualize o sistema operacional urgentemente."
+
+# 5. The rexec service is running
+status "Desabilitando serviço rexec"
+sudo apt-get -y remove rexec
+if ! systemctl is-enabled rexec.socket 2>/dev/null; then
+    success "rexec já está desabilitado."
+else
+    sudo systemctl stop rexec.socket
+    sudo systemctl disable rexec.socket
+    success "rexec desabilitado."
+fi
+
+# 6. Possible Backdoor: Ingreslock
+status "Removendo possível backdoor Ingreslock (porta 1524)"
+if ss -lnt | grep -q ":1524"; then
+  # Tenta identificar e matar o processo Ingreslock
+  PID=$(sudo lsof -ti:1524)
+  if [ -n "$PID" ]; then
+    sudo kill -9 "$PID"
+    success "Processo Ingreslock (PID $PID) terminado.  RECOMENDADO: Realizar uma varredura completa do sistema em busca de malware."
+    error "RECOMENDADO: Realizar uma varredura completa do sistema em busca de malware e reinstalar o SO se necessário."
+  else
+    error "Processo Ingreslock não encontrado. RECOMENDADO: Realizar uma varredura completa do sistema."
+    error "RECOMENDADO: Realizar uma varredura completa do sistema em busca de malware e reinstalar o SO se necessário."
+  fi
+else
+  success "Ingreslock não está em execução na porta 1524."
+fi
+
+# 7. Apache Tomcat AJP RCE Vulnerability (Ghostcat)
+status "Desabilitando ou protegendo a porta AJP do Tomcat (8009)"
+# Assume que Tomcat está instalado via apt
+if dpkg -s tomcat6 2>/dev/null || dpkg -s tomcat7 2>/dev/null || dpkg -s tomcat8 2>/dev/null || dpkg -s tomcat9 2>/dev/null; then
+  TOMCAT_VERSION=$(dpkg-query -W -f='${Version}' tomcat*)
+  TOMCAT_CONF="/etc/tomcat$TOMCAT_VERSION/server.xml"
+  if [ -f "$TOMCAT_CONF" ]; then
+    sudo sed -i 's/Connector port="8009"/Connector port="-1"/' "$TOMCAT_CONF" # Desabilita AJP
+    success "Porta AJP (8009) desabilitada no arquivo de configuração do Tomcat ($TOMCAT_CONF)."
+    sudo systemctl restart tomcat*
+    success "Tomcat reiniciado."
+  else
+    error "Arquivo de configuração do Tomcat não encontrado.  Verifique a instalação."
+  fi
+else
+    error "Tomcat não detectado via apt. Verifique a instalação e a necessidade de aplicar as mitigações manuais."
+fi
+
+# 8. MySQL / MariaDB Default Credentials
+status "Alterando a senha do usuário 'root' do MySQL/MariaDB"
+sudo mysql -u root -e "ALTER USER 'root'@'localhost' IDENTIFIED BY 'nova_senha';"
+sudo mysql -u root -e "ALTER USER 'root'@'127.0.0.1' IDENTIFIED BY 'nova_senha';"
+sudo mysql -u root -e "ALTER USER 'root'@'::1' IDENTIFIED BY 'nova_senha';"
+sudo mysql -u root -e "FLUSH PRIVILEGES;"
+success "Senha do usuário 'root' do MySQL/MariaDB alterada (substitua 'nova_senha' por uma senha forte)."
+
+# 9. PHP < 5.6.30, 7.x < 7.0.15, 7.1.x < 7.1.1 Multiple Vulnerabilities
+status "Atualizando PHP (versão 5.2.4 encontrada)"
+error "PHP 5.2.4 é extremamente obsoleto e vulnerável.  Atualize o sistema operacional ou realize uma instalação paralela de uma versão suportada do PHP."
+
+# 10. PHP < 5.3.13, 5.4.x < 5.4.3 Multiple Vulnerabilities - Active Check
+status "Mitigando vulnerabilidades PHP (detectada execução remota de código)"
+# Assume que os cgi.force_redirect e cgi.redirect_status_env são configuráveis no php.ini
+PHP_INI="/etc/php5/cgi/php.ini" # Ajuste o caminho se necessário
+if [ -f "$PHP_INI" ]; then
+  sudo sed -i 's/cgi.force_redirect = 1/cgi.force_redirect = 0/g' "$PHP_INI"
+  sudo sed -i 's/;cgi.redirect_status_env =/cgi.redirect_status_env =/g' "$PHP_INI"
+  sudo sed -i 's/cgi.redirect_status_env =/cgi.redirect_status_env = ""/g' "$PHP_INI" # Define como vazio
+  success "Mitigações aplicadas no $PHP_INI."
+  sudo systemctl restart apache2 # Ou o serviço web que você usa
+  success "Serviço web reiniciado."
+else
+  error "Arquivo php.ini não encontrado. Verifique a configuração do PHP."
+fi
+
+# 11 & 12. vsftpd Compromised Source Packages Backdoor Vulnerability
+status "Removendo e reinstalando vsftpd"
+sudo apt-get -y remove --purge vsftpd
+sudo apt-get -y update
+sudo apt-get -y install vsftpd
+success "vsftpd removido e reinstalado.  Verifique a integridade do pacote."
+
+# 13. DistCC RCE Vulnerability (CVE-2004-2687)
+status "Removendo DistCC"
+sudo apt-get -y remove distcc
+success "DistCC removido."
+
+# 14. PostgreSQL Default Credentials
+status "Alterando a senha do usuário 'postgres' do PostgreSQL"
+sudo -u postgres psql -c "ALTER USER postgres PASSWORD 'nova_senha';"
+success "Senha do usuário 'postgres' do PostgreSQL alterada (substitua 'nova_senha' por uma senha forte)."
+
+# 15. VNC Brute Force Login
+status "Alterando a senha do VNC"
+echo "nova_senha" | sudo vncpasswd  # Substitua 'nova_senha' por uma senha forte
+sudo systemctl restart vncserver*
+success "Senha do VNC alterada e serviço reiniciado (substitua 'nova_senha' por uma senha forte)."
+
+# 16. Test HTTP dangerous methods
+status "Desabilitando os métodos HTTP PUT e DELETE no Apache"
+APACHE_CONF="/etc/apache2/apache2.conf" # Caminho comum
+if [ -f "$APACHE_CONF" ]; then
+  # Adiciona restrição para PUT e DELETE
+  sudo sed -i '/<Directory \/>/a \
+    <LimitExcept GET POST OPTIONS>\
+      Require all denied\
+    </LimitExcept>' "$APACHE_CONF"
+
+  success "Métodos PUT e DELETE restritos no arquivo de configuração do Apache ($APACHE_CONF)."
+  sudo systemctl restart apache2
+  success "Apache reiniciado."
+else
+  error "Arquivo de configuração do Apache não encontrado.  Verifique a instalação."
+fi
+
+# 17 & 18. FTP Brute Force Logins With Default Credentials Reporting
+status "Bloqueando logins FTP com credenciais fracas"
+# Remove os usuários vulneráveis do sistema
+sudo deluser --remove-home msfadmin
+sudo deluser --remove-home postgres
+sudo deluser --remove-home service
+sudo deluser --remove-home user
+
+# 19 & 20. The rlogin and rsh service is running
+status "Desabilitando serviço rlogin e rsh"
+sudo apt-get -y remove rsh-server rsh-client
+if ! systemctl is-enabled rlogin.socket 2>/dev/null; then
+    success "rlogin já está desabilitado."
+else
+    sudo systemctl stop rlogin.socket
+    sudo systemctl disable rlogin.socket
+    success "rlogin desabilitado."
+fi
+if ! systemctl is-enabled rsh.socket 2>/dev/null; then
+    success "rsh já está desabilitado."
+else
+    sudo systemctl stop rsh.socket
+    sudo systemctl disable rsh.socket
+    success "rsh desabilitado."
+fi
+
+# 21. SSL/TLS: OpenSSL CCS Man in the Middle Security Bypass Vulnerability
+error "Requer atualização do OpenSSL.  Não há correção automatizada aqui, atualize o SO ou o OpenSSL manualmente."
+
+# 22. Multiple Vendors STARTTLS Implementation Plaintext Arbitrary Command Injection Vulnerability
+error "Requer atualização do servidor de e-mail (Postfix, Qmail, etc.). Não há correção automatizada aqui, atualize o software de e-mail manualmente."
+
+# 23, 26, 27. TWiki Cross-Site Request Forgery Vulnerability (CVE-2009-4898), TWiki < 6.1.0 XSS Vulnerability (CVE-2018-20212), TWiki CSRF Vulnerability
+status "Removendo TWiki (vulnerável)"
+if [ -d /var/www/twiki ]; then
+  rm -rf /var/www/twiki
+  success "TWiki removido de /var/www/twiki"
+elif [ -d /home/twiki ]; then
+  rm -rf /home/twiki
+  success "TWiki removido de /home/twiki"
+else
+  error "Diretório TWiki não encontrado. Verifique a instalação."
+fi
+
+# 24. Anonymous FTP Login Reporting
+status "Desabilitando logins anônimos no FTP"
+VSFTPD_CONF="/etc/vsftpd.conf" # Localização comum
+if [ -f "$VSFTPD_CONF" ]; then
+  sudo sed -i 's/anonymous_enable=YES/anonymous_enable=NO/g' "$VSFTPD_CONF"
+  success "Logins anônimos desabilitados no arquivo de configuração do vsftpd ($VSFTPD_CONF)."
+  sudo systemctl restart vsftpd
+  success "vsftpd reiniciado."
+else
+  error "Arquivo de configuração do vsftpd não encontrado. Verifique a instalação."
+fi
+
+# 25 & 55. jQuery < 1.9.0 XSS Vulnerability (CVE-2012-6708), jQuery < 1.6.3 XSS Vulnerability (CVE-2011-4969)
+status "Substituindo jQuery antigo no Mutillidae"
+MUTILLIDAE_JQUERY="/var/www/mutillidae/javascript/ddsmoothmenu/jquery.min.js" # Localização presumida
+if [ -f "$MUTILLIDAE_JQUERY" ]; then
+  sudo wget -qO "$MUTILLIDAE_JQUERY" "https://code.jquery.com/jquery-1.12.4.min.js"
+  success "jQuery substituído no Mutillidae ($MUTILLIDAE_JQUERY)."
+else
+  error "Arquivo jQuery no Mutillidae não encontrado. Verifique a instalação."
+fi
+
+# 28 & 29. SSL/TLS: Deprecated SSLv2 and SSLv3 Protocol Detection
+status "Desabilitando SSLv3 e SSLv2 no PostgreSQL (porta 5432) e no Servidor de Email (porta 25)"
+#PGSQL
+PGSQL_CONF="/etc/postgresql/*/main/postgresql.conf"  # Ajuste se necessario
+EMAIL_CONF="/etc/postfix/main.cf"  # Ajuste se necessario
+
+if [ -f "$PGSQL_CONF" ]; then
+        sudo sed -i "s/ssl_min_protocol = tls1.0/ssl_min_protocol = tls1.2/g" "$PGSQL_CONF"
+        sudo systemctl restart postgresql
+        success "SSLv3 desabilitado no PostgreSQL"
+fi
+
+if [ -f "$EMAIL_CONF" ]; then
+       sudo sed -i '$i tls_ssl_options = NO_SSLv2, NO_SSLv3' "$EMAIL_CONF"
+       sudo systemctl restart postfix
+        success "SSLv3 e SSLv2 desabilitados no EMAIL"
+fi
+
+# 30. SSL/TLS: Report Weak Cipher Suites
+error "Remoção de Cipher Suites Fracas requer configuração manual do Servidor de Email(porta 25) e PostgreSQL(porta 5432)."
+# 31. HTTP Debugging Methods (TRACE/TRACK) Enabled
+status "Desabilitando TRACE no Apache"
+APACHE_CONF="/etc/apache2/apache2.conf" # Caminho comum
+if [ -f "$APACHE_CONF" ]; then
+  # Desabilita TRACE
+  sudo sed -i 's/TraceEnable On/TraceEnable Off/g' "$APACHE_CONF"
+  success "Método TRACE desabilitado no arquivo de configuração do Apache ($APACHE_CONF)."
+  sudo systemctl restart apache2
+  success "Apache reiniciado."
+else
+  error "Arquivo de configuração do Apache não encontrado. Verifique a instalação."
+fi
+
+# 32 & 33. SSL/TLS: Server Certificate / Certificate in Chain with RSA keys less than 2048 bits
+error "Certificados SSL/TLS com chaves RSA menores que 2048 bits encontrados. Requer substituição manual por certificados mais seguros."
+
+# 34 & 36. Weak Key Exchange (KEX) Algorithm(s) Supported (SSH), Weak Host Key Algorithm(s) (SSH)
+status "Removendo algoritmos de chave fracos no SSH"
+SSH_CONF="/etc/ssh/sshd_config"
+if [ -f "$SSH_CONF" ]; then
+  sudo sed -i '/KexAlgorithms/s/diffie-hellman-group-exchange-sha1,diffie-hellman-group1-sha1//g' "$SSH_CONF" #Remover SHA1
+  sudo sed -i '/HostKeyAlgorithms/s/ssh-dss//g' "$SSH_CONF" #Remover DSS
+  success "Algoritmos KEX fracos removidos (SHA-1, DSS) no arquivo de configuração do SSH ($SSH_CONF)."
+  sudo systemctl restart sshd
+  success "SSH reiniciado."
+else
+  error "Arquivo de configuração do SSH não encontrado. Verifique a instalação."
+fi
+
+# 35. phpinfo() Output Reporting (HTTP)
+status "Removendo arquivos phpinfo()"
+find /var/www/html -name "phpinfo.php" -print0 | while IFS= read -r -d $'\0' file; do
+  sudo rm -f "$file"
+  success "Arquivo phpinfo() removido: $file"
+done
+
+# 37. Check if Mailserver answer to VRFY and EXPN requests
+status "Desabilitando VRFY e EXPN no Postfix"
+POSTFIX_CONF="/etc/postfix/main.cf"
+if [ -f "$POSTFIX_CONF" ]; then
+  sudo sed -i '$i disable_vrfy_command = yes' "$POSTFIX_CONF"
+  sudo systemctl restart postfix
+  success "VRFY desabilitado no Postfix. Opcionalmente, considere desabilitar EXPN."
+else
+  error "Arquivo de configuração do Postfix não encontrado. Verifique a instalação."
+fi
+
+# 38 & 39. SSL/TLS: Renegotiation DoS Vulnerability (CVE-2011-1473, CVE-2011-5094)
+status "Desabilitando Renegociação SSL/TLS (PostgreSQL e Email)"
+error "PostgreSQL e Email: A Renegociação SSL/TLS requer configuração manual.  Não há correção automatizada."
+
+# 40 & 41. SSL/TLS: Certificate Expired
+error "O certificado SSL/TLS expirou. Requer substituição manual por um certificado válido."
+
+# 42 & 43. QWikiwiki directory traversal vulnerability, awiki <= 20100125 Multiple LFI Vulnerabilities - Active Check
+status "Removendo QWikiwiki e awiki"
+# Assume que ambos estão dentro do diretório Mutillidae (se não, ajuste os caminhos)
+sudo rm -rf /var/www/mutillidae/qwikiwiki
+sudo rm -rf /var/www/mutillidae/awiki
+success "QWikiwiki e awiki removidos do Mutillidae."
+
+# 44. /doc directory browsable
+status "Restringindo acesso ao diretório /doc no Apache"
+APACHE_CONF="/etc/apache2/conf.d/security" # Pode variar dependendo da distribuição
+if [ -f "$APACHE_CONF" ]; then
+  sudo echo -e "<Directory /usr/share/doc/>\n\tOptions None\n\t<Limit GET POST OPTIONS>\n\t\tRequire all denied\n\t</Limit>\n</Directory>" | sudo tee /etc/apache2/conf-available/no-doc.conf
+  sudo a2enconf no-doc
+  sudo systemctl restart apache2
+  success "Acesso ao diretório /doc restrito no arquivo de configuração do Apache ($APACHE_CONF)."
+  success "Apache reiniciado."
+else
+  error "Arquivo de configuração do Apache não encontrado. Verifique a instalação."
+fi
+
+# 45. Telnet Unencrypted Cleartext Login
+status "Removendo serviço Telnet"
+sudo apt-get -y remove telnetd
+if ! systemctl is-enabled telnet.socket 2>/dev/null; then
+    success "Telnet já está desabilitado."
+else
+    sudo systemctl stop telnet.socket
+    sudo systemctl disable telnet.socket
+    success "Telnet desabilitado."
+fi
+
+# 46 & 48. FTP Unencrypted Cleartext Login
+status "Forçando conexões FTPS ou exigindo AUTH TLS"
+# Configuração específica dependerá do servidor FTP.  O exemplo a seguir é para vsftpd
+VSFTPD_CONF="/etc/vsftpd.conf" # Localização comum
+if [ -f "$VSFTPD_CONF" ]; then
+  sudo sed -i 's/#force_local_data_ssl=YES/force_local_data_ssl=YES/g' "$VSFTPD_CONF"
+  sudo sed -i 's/#force_local_logins_ssl=YES/force_local_logins_ssl=YES/g' "$VSFTPD_CONF"
+  success "FTPS forçado no arquivo de configuração do vsftpd ($VSFTPD_CONF)."
+  sudo systemctl restart vsftpd
+  success "vsftpd reiniciado."
+else
+  error "Arquivo de configuração do vsftpd não encontrado. Verifique a instalação."
+fi
+
+# 47. VNC Server Unencrypted Data Transmission
+error "VNC: Configuração para transmissão de dados criptografada requer configuração manual do servidor VNC."
+
+# 49. Cleartext Transmission of Sensitive Information via HTTP
+error "URLs reportadas transmitem informações confidenciais via HTTP. Habilite HTTPS e redirecione HTTP para HTTPS no Apache."
+
+# 50 & 54. SSL/TLS: Deprecated TLSv1.0 and TLSv1.1 Protocol Detection
+status "Desabilitando TLSv1.0 e TLSv1.1 (PostgreSQL e Email)"
+#PGSQL
+PGSQL_CONF="/etc/postgresql/*/main/postgresql.conf"  # Ajuste se necessario
+EMAIL_CONF="/etc/postfix/main.cf"  # Ajuste se necessario
+
+if [ -f "$PGSQL_CONF" ]; then
+        sudo sed -i "s/ssl_min_protocol = tls1.0/ssl_min_protocol = tls1.2/g" "$PGSQL_CONF"
+        sudo systemctl restart postgresql
+        success "TLSv1.0 e TLSv1.1 desabilitados no PostgreSQL"
+fi
+
+if [ -f "$EMAIL_CONF" ]; then
+       sudo sed -i '$i tls_ssl_options = NO_TLSv1, NO_TLSv1_1' "$EMAIL_CONF"
+       sudo systemctl restart postfix
+        success "TLSv1.0 e TLSv1.1 desabilitados no EMAIL"
+fi
+
+# 51. Weak Encryption Algorithm(s) Supported (SSH)
+status "Removendo algoritmos de criptografia fracos no SSH"
+SSH_CONF="/etc/ssh/sshd_config" # Caminho comum
+if [ -f "$SSH_CONF" ]; then
+  sudo sed -i '/Ciphers/s/3des-cbc,aes128-cbc,aes192-cbc,aes256-cbc,arcfour,arcfour128,arcfour256,blowfish-cbc,cast128-cbc,rijndael-cbc@lysator.liu.se//g' "$SSH_CONF"
+  success "Algoritmos de criptografia fracos removidos no arquivo de configuração do SSH ($SSH_CONF)."
+  sudo systemctl restart sshd
+  success "SSH reiniciado."
+else
+  error "Arquivo de configuração do SSH não encontrado. Verifique a instalação."
+fi
+
+# 52. Apache HTTP Server httpOnly Cookie Information Disclosure Vulnerability
+status "Atualizando Apache"
+sudo apt-get -y update
+sudo apt-get -y upgrade apache2
+success "Apache atualizado. Verifique se a versão é >= 2.2.22."
+
+# 53. phpMyAdmin error.php Cross Site Scripting Vulnerability
+error "Não há correção automatizada para o phpMyAdmin XSS. Recomenda-se atualizar ou remover o phpMyAdmin."
+
+# 56 & 61. SSL/TLS: RSA Temporary Key Handling RSA_EXPORT Downgrade Issue (FREAK) & SSL/TLS: DHE_EXPORT MITM Security Bypass Vulnerability (LogJam)
+error "Remoção de cifras EXPORT Requer configuração manual do Servidor de Email(porta 25). Não há correção automatizada."
+
+# 57 & 60. SSL/TLS: Certificate Signed Using A Weak Signature Algorithm
+error "Certificados com assinatura SHA1 requerem substituição manual por certificados com SHA256 ou superior."
+
+# 58 & 59. SSL/TLS: Diffie-Hellman Key Exchange Insufficient DH Group Strength Vulnerability
+status "Aumentando a força do grupo Diffie-Hellman no SSH"
+SSH_CONF="/etc/ssh/sshd_config" # Caminho comum
+if [ -f "$SSH_CONF" ]; then
+# Adicionando e configurando o tamanho do grupo DH
+  sudo sed -i '/#DH_KeySize/s/#DH_KeySize/DH_KeySize 2048/g' "$SSH_CONF"
+  success "Diffie-Hellman Key Size configurado para 2048 no arquivo de configuração do SSH ($SSH_CONF)."
+  sudo systemctl restart sshd
+  success "SSH reiniciado."
+else
+  error "Arquivo de configuração do SSH não encontrado. Verifique a instalação."
+fi
+
+# 62 & 63. SSL/TLS: SSLv3 Protocol CBC Cipher Suites Information Disclosure Vulnerability (POODLE)
+status "Desabilitando SSLv3 e ciphers CBC nos Servidores Postgress (porta 5432) e Email (porta 25)"
+PGSQL_CONF="/etc/postgresql/*/main/postgresql.conf"  # Ajuste se necessario
+EMAIL_CONF="/etc/postfix/main.cf" # Ajuste se necessario
+if [ -f "$PGSQL_CONF" ]; then
+        sudo sed -i "s/ssl_ciphers = 'HIGH:MEDIUM:+3DES:!aNULL'/ssl_ciphers = 'HIGH:!aNULL:!MD5:!RC4:!3DES:!CAMELLIA'/g" "$PGSQL_CONF"
+        sudo systemctl restart postgresql
+        success "Desabilitado SSLv3 e ciphers CBC em Postgress"
+fi
+
+if [ -f "$EMAIL_CONF" ]; then
+       sudo sed -i '$i tls_ssl_options = NO_SSLv3' "$EMAIL_CONF"
+       sudo sed -i '$i  smtpd_tls_mandatory_ciphers = high' "$EMAIL_CONF"
+       sudo sed -i '$i smtpd_tls_exclude_ciphers = RC4, aNULL' "$EMAIL_CONF"
+       sudo systemctl restart postfix
+        success "Desabilitado SSLv3 e ciphers CBC no Email"
+fi
+
+# 64. Weak MAC Algorithm(s) Supported (SSH)
+status "Removendo algoritmos MAC fracos no SSH"
+SSH_CONF="/etc/ssh/sshd_config" # Caminho comum
+if [ -f "$SSH_CONF" ]; then
+  sudo sed -i '/MACs/s/hmac-md5,hmac-md5-96,hmac-sha1-96,umac-64@openssh.com//g' "$SSH_CONF"
+  success "Algoritmos MAC fracos removidos no arquivo de configuração do SSH ($SSH_CONF)."
+  sudo systemctl restart sshd
+  success "SSH reiniciado."
+else
+  error "Arquivo de configuração do SSH não encontrado. Verifique a instalação."
+fi
+
+# 65. TCP Timestamps Information Disclosure
+status "Desabilitando TCP Timestamps"
+sudo sysctl -w net.ipv4.tcp_timestamps=0
+sudo echo "net.ipv4.tcp_timestamps = 0" >> /etc/sysctl.conf
+success "TCP Timestamps desabilitados."
+
+# 66. ICMP Timestamp Reply Information Disclosure
+status "Bloqueando ICMP Timestamp Reply"
+sudo iptables -A INPUT -p icmp --icmp-type timestamp-request -j DROP
+sudo iptables -A OUTPUT -p icmp --icmp-type timestamp-reply -j DROP
+success "ICMP Timestamp Reply bloqueado."
+
+echo -e "${GREEN}Todas as ações foram concluídas.  Revise os erros para ações manuais.${NC}"
+```

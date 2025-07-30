@@ -1,0 +1,46 @@
+```bash
+#!/bin/bash
+
+# Script para mitigar a vulnerabilidade CVE-2012-0053 no Apache HTTP Server.
+# Este script é projetado para sistemas baseados em Debian/Ubuntu.
+
+# 1. Verificar se o script está sendo executado como root.
+if [[ $EUID -ne 0 ]]; then
+  echo "Este script deve ser executado como root."
+  exit 1
+fi
+
+# 2. Verificar se o Apache está instalado.
+if ! command -v apache2 &> /dev/null; then
+  echo "Apache HTTP Server não encontrado. Instalando..."
+  apt-get update
+  apt-get install -y apache2
+fi
+
+# 3. Verificar a versão do Apache.
+apache_version=$($(apache2 -v 2>&1) | grep "Server version:" | awk '{print $3}' | cut -d '/' -f2 | cut -d '.' -f1,2)
+
+# 4. Atualizar o Apache se a versão for vulnerável (2.2.0 a 2.2.21).
+if [[ $(echo "$apache_version < 2.2" | bc) -eq 1 ]] || [[ $(echo "$apache_version == 2.2" | bc) -eq 1 ]]; then
+  echo "Versão vulnerável do Apache detectada: $apache_version. Atualizando..."
+  apt-get update
+  apt-get upgrade -y apache2
+  apache_version=$($(apache2 -v 2>&1) | grep "Server version:" | awk '{print $3}' | cut -d '/' -f2 | cut -d '.' -f1,2)
+
+  # Verificar se a atualização foi bem-sucedida.
+  if [[ $(echo "$apache_version >= 2.2" | bc) -eq 1 ]]; then
+        echo "Apache atualizado para a versão: $apache_version"
+        systemctl restart apache2
+        echo "Apache reiniciado."
+  else
+        echo "Falha ao atualizar o Apache."
+        exit 1
+  fi
+
+else
+  echo "Versão do Apache ($apache_version) não é vulnerável ou já está atualizada."
+fi
+
+echo "Verificação concluída."
+exit 0
+```

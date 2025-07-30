@@ -1,0 +1,69 @@
+```bash
+#!/bin/bash
+
+# Variáveis para controlar o processo de atualização
+python3_10_updated=false
+python3_12_updated=false
+
+# Função para atualizar o Python em Windows
+update_python() {
+    version="$1"
+    fixed_version="$2"
+    port="$3"
+
+    echo "Iniciando atualização do Python ${version} (Porta: ${port}) para a versão ${fixed_version}..."
+
+    # Construir o comando para atualizar o Python usando o pip
+    update_command="python${version} -m pip install --upgrade python==${fixed_version}"
+
+    # Executar o comando de atualização
+    echo "Executando: ${update_command}"
+    eval "${update_command}"
+
+    # Verificar se a atualização foi bem-sucedida
+    if [ $? -eq 0 ]; then
+        echo "Python ${version} (Porta: ${port}) foi atualizado para a versão ${fixed_version} com sucesso."
+        return 0
+    else
+        echo "Falha ao atualizar o Python ${version} (Porta: ${port}). Verifique os logs de erro."
+        return 1
+    fi
+}
+
+# Identificar e corrigir as vulnerabilidades
+echo "Iniciando verificação e correção de vulnerabilidades do Python..."
+
+# Vulnerabilidade 1, 8, 10, 14, 18, 21, 22, 27, 32, 36, 37, 40, 46, 50, 56, 57, 64
+# CVEs: CVE-2024-6232,CVE-2024-7592,CVE-2024-8088,CVE-2024-45490,CVE-2024-45491,CVE-2024-45492, CVE-2024-9287, CVE-2023-52425, CVE-2023-36632, CVE-2023-6597, CVE-2024-3219, CVE-2024-4030, CVE-2024-0397, CVE-2024-0450, CVE-2025-0938, CVE-2024-11168, CVE-2025-1795
+if ! $python3_10_updated; then
+    if update_python "3.10" "3.10.16" "5000"; then
+      python3_10_updated=true
+    fi
+fi
+
+# Vulnerabilidade 2, 3, 4, 5, 6, 7, 9, 11, 12, 13, 15, 16, 17, 19, 20, 23, 24, 25, 26, 28, 29, 30, 31, 33, 34, 35, 38, 39, 41, 42, 43, 44, 45, 47, 48, 51, 52, 53, 55, 58, 60, 61, 63, 65
+# CVEs: CVE-2024-6232,CVE-2024-7592,CVE-2024-8088,CVE-2024-45490,CVE-2024-45491,CVE-2024-45492, CVE-2024-9287, CVE-2023-36632, CVE-2023-52425, CVE-2023-6597, CVE-2024-3220, CVE-2024-4030, CVE-2024-3219, CVE-2023-27043, CVE-2024-6923, CVE-2024-0397, CVE-2024-4032, CVE-2024-0450, CVE-2025-0938, CVE-2025-1795
+if ! $python3_12_updated; then
+    if update_python "3.12" "3.12.9" "8000"; then
+      python3_12_updated=true
+    fi
+fi
+
+# Vulnerabilidade 49
+# CVEs: nan
+echo "A vulnerabilidade 'SSL/TLS: Known Untrusted / Dangerous Certificate Authority (CA) Detection' (Porta 8002) requer a substituição do certificado SSL/TLS por um assinado por uma CA confiável."
+
+# Vulnerabilidade 54
+# CVEs: CVE-2011-3389,CVE-2015-0204,CVE-2025-3200
+echo "A vulnerabilidade 'SSL/TLS: Deprecated TLSv1.0 and TLSv1.1 Protocol Detection' (Porta 3389) requer a desativação dos protocolos TLSv1.0 e TLSv1.1 em favor do TLSv1.2+."
+
+# Vulnerabilidade 59
+# CVEs: nan
+echo "A vulnerabilidade 'Weak MAC Algorithm(s) Supported (SSH)' (Porta 22) requer a desativação dos algoritmos MAC fracos no servidor SSH."
+
+# Vulnerabilidade 62
+# CVEs: CVE-1999-0524
+echo "A vulnerabilidade 'ICMP Timestamp Reply Information Disclosure' requer a desativação do suporte para ICMP timestamp ou a proteção por um firewall."
+
+echo "Verificação e correção de vulnerabilidades do Python concluídas."
+```

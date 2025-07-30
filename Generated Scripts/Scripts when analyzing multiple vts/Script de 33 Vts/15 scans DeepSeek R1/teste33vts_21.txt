@@ -1,0 +1,104 @@
+```bash
+#!/bin/bash
+set -e
+if [ "$(id -u)" -ne 0 ]; then
+    echo "This script must be run as root." >&2
+    exit 1
+fi
+timestamp=$(date +%Y%m%d%H%M%S)
+backup_dir="/root/backup_${timestamp}"
+mkdir -p "$backup_dir"
+grep -qi 'Ubuntu\|Debian' /etc/os-release || (echo "Unsupported OS"; exit 1)
+systemctl stop ssh
+if [ -f /etc/ssh/sshd_config ]; then
+    cp /etc/ssh/sshd_config "$backup_dir/sshd_config.bak.$timestamp"
+    sed -i '/HostKeyAlgorithms/d' /etc/ssh/sshd_config
+    echo "HostKeyAlgorithms ecdsa-sha2-nistp256,ecdsa-sha2-nistp384,ecdsa-sha2-nistp521,ssh-ed25519,rsa-sha2-512,rsa-sha2-256" >> /etc/ssh/sshd_config
+    sed -i '/KexAlgorithms/d' /etc/ssh/sshd_config
+    echo "KexAlgorithms curve25519-sha256,curve25519-sha256@libssh.org,ecdh-sha2-nistp256,ecdh-sha2-nistp384,ecdh-sha2-nistp521,diffie-hellman-group-exchange-sha256,diffie-hellman-group16-sha512,diffie-hellman-group18-sha512" >> /etc/ssh/sshd_config
+    sed -i '/Ciphers/d' /etc/ssh/sshd_config
+    echo "Ciphers chacha20-poly1305@openssh.com,aes256-gcm@openssh.com,aes128-gcm@openssh.com,aes256-ctr,aes192-ctr,aes128-ctr" >> /etc/ssh/sshd_config
+    sed -i '/MACs/d' /etc/ssh/sshd_config
+    echo "MACs hmac-sha2-512-etm@openssh.com,hmac-sha2-256-etm@openssh.com,umac-128-etm@openssh.com" >> /etc/ssh/sshd_config
+    grep -q '^UseDNS' /etc/ssh/sshd_config && sed -i 's/^UseDNS.*/UseDNS no/' /etc/ssh/sshd_config || echo "UseDNS no" >> /etc/ssh/sshd_config
+fi
+systemctl restart ssh
+systemctl enable --now ssh >/dev/null 2>&1
+if which telnetd >/dev/null || dpkg -l | grep -q 'telnetd'; then
+    systemctl disable --now telnetd >/dev/null 2>&1 || :
+    systemctl disable --now inetd >/dev/null 2>&1 || :
+    systemctl disable --now xinetd >/dev/null 2>&1 || :
+    apt-get purge -y telnetd inetutils-telnetd telnetd-ssl inetd xinetd >/dev/null 2>&1
+fi
+iptables-save > "$backup_dir/iptables.bak.$timestamp"
+udp_ports=(23 135 39710 49664 49665 49666 49667 49668 49670 7832)
+tcp_ports=(23 135 39710 49664 49665 49666 49667 49668 49670 7832)
+if ! iptables -C INPUT -p icmp --icmp-type timestamp-request -j DROP 2>/dev/null; then
+    iptables -A INPUT -p icmp --icmp-type timestamp-request -j DROP
+fi
+if ! iptables -C INPUT -p icmp --icmp-type timestamp-reply -j DROP 2>/dev/null; then
+    iptables -A INPUT -p icmp --icmp-type timestamp-reply -j DROP
+fi
+for port in "${udp_ports[@]}"; do
+    if ! iptables -C INPUT -p udp --dport "$port" -j DROP 2>/dev/null; then
+        iptables -A INPUT -p udp --dport "$port" -j DROP
+    fi
+done
+for port in "${tcp_ports[@]}"; do
+    if ! iptables -C INPUT -p tcp --dport "$port" -j DROP 2>/dev/null; then
+        iptables -A INPUT -p tcp --dport "$port" -j DROP
+    fi
+done
+iptables-save > /etc/iptables/rules.v4
+ip6tables-save > /etc/iptables/rules.v6
+sysctl_backup="$backup_dir/sysctl.bak.$timestamp"
+sysctl -a > "$sysctl_backup"
+echo "net.ipv4.tcp_timestamps = 0" >> /etc/sysctl.conf
+echo "net.ipv4.icmp_echo_ignore_all = 1" >> /etc/sysctl.conf
+sysctl -p
+if grep -q 'proxmox' /etc/os-release; then
+    apt-get update
+    DEBIAN_FRONTEND=noninteractive apt-get upgrade -y
+    DEBIAN_FRONTEND=noninteractive apt-get dist-upgrade -y
+    if grep -q '7\.' /etc/os-release; then
+        sed -i 's/stretch/bullseye/g' /etc/apt/sources.list.d/pve-no-subscription.list /etc/apt/sources.list
+        apt-get update
+        DEBIAN_FRONTEND=noninteractive apt-get dist-upgrade -y
+    fi
+fi
+jquery_paths=("/../js/jquery-1.8.3.min.js" "/opscenter/webcommon/framework/../js/jquery-1.8.3.min.js" "/framesets/../js/jquery-1.8.3.min.js" "/frameset/../js/jquery-1.8.3.min.js" "/console/framework/../js/jquery-1.8.3.min.js")
+web_roots=("/var/www/html" "/usr/share/nginx/html" "/opt" "/srv")
+clean_jquery_paths=()
+for path in "${jquery_paths[@]}"; do
+    clean_path=$(echo "$path" | sed 's/\/\.\.//g')
+    clean_jquery_paths+=("$clean_path")
+done
+sorted_clean_paths=($(echo "${clean_jquery_paths[@]}" | tr ' ' '\n' | sort -u | tr '\n' ' '))
+temp_dir=$(mktemp -d)
+wget -qP "$temp_dir" "https://code.jquery.com/jquery-1.12.4.min.js" || wget -qP "$temp_dir" "https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"
+if [ -f "$temp_dir/jquery-1.12.4.min.js" ]; then
+    jquery_file="$temp_dir/jquery-1.12.4.min.js"
+elif [ -f "$temp_dir/jquery.min.js" ]; then
+    jquery_file="$temp_dir/jquery.min.js"
+else
+    jquery_file=""
+fi
+if [ -n "$jquery_file" ]; then
+    for root_dir in "${web_roots[@]}"; do
+        if [ ! -d "$root_dir" ]; then
+            continue
+        fi
+        for rel_path in "${sorted_clean_paths[@]}"; do
+            file_path="${root_dir}${rel_path}"
+            if [ -f "$file_path" ]; then
+                cp -f "$file_path" "${file_path}.${timestamp}.bak"
+                cp -f "$jquery_file" "$file_path"
+                chown --reference="${file_path}.${timestamp}.bak" "$file_path"
+                chmod --reference="${file_path}.${timestamp}.bak" "$file_path"
+            fi
+        done
+    done
+fi
+rm -rf "$temp_dir"
+exit 0
+```

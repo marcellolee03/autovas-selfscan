@@ -1,0 +1,129 @@
+```bash
+#!/bin/bash
+
+# Vulnerability 1: Proxmox VE EOL
+# This script attempts to upgrade Proxmox VE to a supported version.
+# Note: Upgrading Proxmox VE is a complex process and should be done with caution.
+# This script provides a basic framework; specific upgrade instructions may vary.
+
+# Check if the script is running as root
+if [[ $EUID -ne 0 ]]; then
+  echo "This script must be run as root."
+  exit 1
+fi
+
+# Update package lists
+apt update
+
+# Attempt to upgrade Proxmox VE
+apt dist-upgrade -y
+
+# Clean up old packages
+apt autoremove -y
+
+# Reboot the system to apply changes
+reboot
+
+# Vulnerabilities 2-6: jQuery < 1.9.0 XSS
+# Update jQuery to version 1.9.0 or later
+
+JQUERY_VERSION="1.9.0"
+JQUERY_URL="https://code.jquery.com/jquery-$JQUERY_VERSION.min.js"
+
+FILES=(
+  "/var/www/html/../js/jquery-1.8.3.min.js"
+  "/var/www/html/opscenter/webcommon/framework/../js/jquery-1.8.3.min.js"
+  "/var/www/html/framesets/../js/jquery-1.8.3.min.js"
+  "/var/www/html/frameset/../js/jquery-1.8.3.min.js"
+  "/var/www/html/console/framework/../js/jquery-1.8.3.min.js"
+)
+
+for FILE in "${FILES[@]}"; do
+  if [ -f "$FILE" ]; then
+    # Backup the old file
+    mv "$FILE" "${FILE}.bak"
+    # Download the new version
+    wget -q "$JQUERY_URL" -O "$FILE"
+    echo "Updated $FILE to jQuery $JQUERY_VERSION"
+  fi
+done
+
+# Vulnerabilities 7, 8, 9, 13, 14, 15, 16, 19, 21, 22: Weak SSH Algorithms
+# Disable weak SSH algorithms
+
+SSH_CONFIG="/etc/ssh/sshd_config"
+
+# Backup the original SSH configuration file
+cp "$SSH_CONFIG" "$SSH_CONFIG.bak"
+
+# Remove weak KEX algorithms
+sed -i '/^KexAlgorithms/s/diffie-hellman-group1-sha1//g' "$SSH_CONFIG"
+
+# Disable weak MAC algorithms (umac-64*, hmac-md5, hmac-sha1-96)
+sed -i '/^MACs/s/,umac-64-etm@openssh.com//g' "$SSH_CONFIG"
+sed -i '/^MACs/s/,umac-64@openssh.com//g' "$SSH_CONFIG"
+sed -i '/^MACs/s/,hmac-md5//g' "$SSH_CONFIG"
+sed -i '/^MACs/s/,hmac-sha1-96//g' "$SSH_CONFIG"
+
+# Disable weak ciphers (CBC ciphers, 3des)
+sed -i '/^Ciphers/s/,3des-cbc//g' "$SSH_CONFIG"
+sed -i '/^Ciphers/s/,aes128-cbc//g' "$SSH_CONFIG"
+sed -i '/^Ciphers/s/,aes256-cbc//g' "$SSH_CONFIG"
+sed -i '/^Ciphers/s/,twofish-cbc//g' "$SSH_CONFIG"
+sed -i '/^Ciphers/s/,twofish128-cbc//g' "$SSH_CONFIG"
+sed -i '/^Ciphers/s/,twofish256-cbc//g' "$SSH_CONFIG"
+
+#Restart SSH service
+systemctl restart sshd
+
+# Vulnerability 10: DCE/RPC and MSRPC Services Enumeration Reporting
+# Mitigation: Filter incoming traffic to port 135.  This script provides a basic firewall rule using iptables.
+# Note:  Adjust the interface and IP range as needed.  Ensure your firewall configuration is persistent.
+
+# Flush existing rules related to port 135 (Optional, use with caution)
+# iptables -F INPUT -p tcp --dport 135
+
+# Drop incoming traffic to port 135 from external sources
+iptables -A INPUT -p tcp --dport 135 -j DROP
+
+# Save the iptables rules (Debian/Ubuntu)
+iptables-save > /etc/iptables/rules.v4
+
+#Vulnerability 11: Telnet Unencrypted Cleartext Login
+#Remove telnet and install SSH
+
+apt remove --purge telnetd -y
+apt install openssh-server -y
+
+#Vulnerability 12: SSL/TLS: Deprecated TLSv1.0 and TLSv1.1 Protocol Detection
+#Disable TLS 1.0 and TLS 1.1
+
+#This requires knowing what application is using the deprecated protocols
+#This example will assume it's OpenSSL and edit the openssl.conf file.
+#This is a VERY general example and may not work on your system.
+#ALWAYS back up config files before editing.
+
+OPENSSL_CONFIG="/etc/ssl/openssl.cnf"
+
+#Backup
+cp "$OPENSSL_CONFIG" "$OPENSSL_CONFIG.bak"
+
+#Add -TLSv1 -TLSv1.1 to CipherString
+sed -i 's/CipherString = DEFAULT@SECLEVEL=2/CipherString = DEFAULT@SECLEVEL=2:-TLSv1:-TLSv1.1/g' "$OPENSSL_CONFIG"
+#This may need to be modified according to the application providing the SSL/TLS service.
+
+#Vulnerabilities 17, 18, 20, 23, 24, 25: TCP Timestamps Information Disclosure
+#Disable TCP timestamps
+
+echo "net.ipv4.tcp_timestamps = 0" >> /etc/sysctl.conf
+sysctl -p
+
+#Vulnerabilities 26, 27, 28, 29, 30, 31, 32: ICMP Timestamp Reply Information Disclosure
+#Disable ICMP timestamp replies
+#Note this may break some network diagnostics tools
+
+echo "net.ipv4.icmp_echo_ignore_all = 1" >> /etc/sysctl.conf
+sysctl -p
+
+echo "Vulnerability remediation complete. Please review the changes and reboot the system if necessary."
+```

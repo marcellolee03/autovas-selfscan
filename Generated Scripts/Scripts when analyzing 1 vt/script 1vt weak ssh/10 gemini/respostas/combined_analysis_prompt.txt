@@ -1,0 +1,387 @@
+>analise esse prompt contendo as vulnerabilidades encontradas em um csv do openvas e analise se os scripts que irei enviar em seguida sao capazes de corrigir esses problemas ou nao, me informando uma porcentagem de correcao das vulnerabilidades
+>Vulnerabilidades:
+    # INSTRUÇÕES PARA O MODELO DE IA
+
+    ## PERSONA
+    Você é um especialista em cibersegurança e automação de sistemas, focado em criar scripts de correção (patching). Sua única função é gerar um script que resolva a vulnerabilidade descrita abaixo.
+
+    ## TAREFA
+    Analise o contexto da vulnerabilidade a seguir e gere um script de shell (compatível com o sistema operacional do localhost) que, ao ser executado, corrija permanentemente a vulnerabilidade descrita.
+
+    ## CONTEXTO DA VULNERABILIDADE
+
+# Vulnerabilidade 1
+CVEs: nan
+NVT Name: Weak Host Key Algorithm(s) (SSH)
+Port: 22
+Port Protocol: tcp
+Summary: The remote SSH server is configured to allow / support weak host
+  key algorithm(s).
+Specific Result: The remote SSH server supports the following weak host key algorithm(s):
+
+host key algorithm | Description
+-----------------------------------------------------------------------------------------
+ssh-dss            | Digital Signature Algorithm (DSA) / Digital Signature Standard (DSS)
+
+Vulnerability Detection Method: Checks the supported host key algorithms of the remote SSH
+  server.
+
+  Currently weak host key algorithms are defined as the following:
+
+  - ssh-dss: Digital Signature Algorithm (DSA) / Digital Signature Standard (DSS)
+Details:
+Weak Host Key Algorithm(s) (SSH)
+(OID: 1.3.6.1.4.1.25623.1.0.117687)
+Version used: 2024-06-14T05:05:48Z
+
+Affected Software/OS: nan
+Product Detection Result: Product: cpe:/a:ietf:secure_shell_protocol
+Method: SSH Protocol Algorithms Supported
+(OID: 1.3.6.1.4.1.25623.1.0.105565)
+
+Solution: Disable the reported weak host key algorithm(s).
+
+    ## REGRAS E RESTRIÇÕES DE SAÍDA
+    1.  **APENAS SCRIPT:** A sua resposta deve conter ÚNICA E EXCLUSIVAMENTE o código do script.
+    2.  **SEM EXPLICAÇÕES:** Não adicione nenhum comentário, explicação, introdução, ou despedida.
+    3.  **SEM BLOCOS DE CÓDIGO MARKDOWN:** Não envolva o script em blocos de código como ` ```bash ` ou ` ```sh `. A resposta deve ser o texto puro do script.
+    4.  **AUTOSSUFICIENTE:** O script deve ser completo, autônomo e não deve exigir interação do usuário para ser executado.
+    5.  **COMPATIBILIDADE:** O script deve ser compatível com o sistema operacional especificado em 'localhost OS'. Se o sistema operacional não for especificado, assuma um sistema baseado em Linux (como Ubuntu/Debian).
+
+    # INÍCIO DO SCRIPT DE CORREÇÃO
+
+
+>Scripts de correção:
+{type: uploaded file
+fileName: 1vtweakssh_1.txt
+fullContent:
+```bash
+#!/bin/bash
+
+# Define o arquivo de configuração SSH
+SSH_CONFIG="/etc/ssh/sshd_config"
+
+# Remove a opção KexAlgorithms com ssh-dss (se existir)
+if grep -q "^KexAlgorithms" "$SSH_CONFIG"; then
+    sudo sed -i '/^KexAlgorithms/s/ssh-dss//g' "$SSH_CONFIG"
+else
+    echo "KexAlgorithms não encontrado. Adicionando a configuração padrão."
+fi
+
+# Remove a opção HostKeyAlgorithms com ssh-dss (se existir)
+if grep -q "^HostKeyAlgorithms" "$SSH_CONFIG"; then
+    sudo sed -i '/^HostKeyAlgorithms/s/ssh-dss//g' "$SSH_CONFIG"
+else
+    echo "HostKeyAlgorithms não encontrado. Adicionando a configuração padrão."
+fi
+
+# Adiciona a diretiva HostKeyAlgorithms se não existir, removendo ssh-dss
+if ! grep -q "^HostKeyAlgorithms" "$SSH_CONFIG"; then
+    echo "HostKeyAlgorithms não encontrada. Adicionando..."
+    sudo echo "HostKeyAlgorithms ecdsa-sha2-nistp256,ecdsa-sha2-nistp384,ecdsa-sha2-nistp521,ssh-ed25519,rsa-sha2-512,rsa-sha2-256" | sudo tee -a "$SSH_CONFIG" > /dev/null
+fi
+
+# Garante que ssh-dss não está presente em HostKeyAlgorithms
+sudo sed -i 's/HostKeyAlgorithms.*ssh-dss//g' "$SSH_CONFIG"
+
+# Remove linhas em branco extras (opcional, mas boa prática)
+sudo sed -i '/^$/N;/^\n$/D' "$SSH_CONFIG"
+
+# Reinicia o serviço SSH para aplicar as mudanças
+sudo systemctl restart sshd
+
+echo "Vulnerabilidade corrigida. Serviço SSH reiniciado."
+```}
+{type: uploaded file
+fileName: 1vtweakssh_2.txt
+fullContent:
+```sh
+#!/bin/bash
+
+# Determina o arquivo de configuração do SSH
+SSH_CONFIG_FILE="/etc/ssh/sshd_config"
+
+# Remove a entrada HostKeyAlgorithms se existir, para evitar duplicações
+sudo sed -i '/^HostKeyAlgorithms/d' "$SSH_CONFIG_FILE"
+
+# Adiciona a linha com os algoritmos de chave de host seguros
+sudo echo "HostKeyAlgorithms ssh-ed25519,ecdsa-sha2-nistp256,ecdsa-sha2-nistp384,ecdsa-sha2-nistp521,rsa-sha2-512,rsa-sha2-256" | sudo tee -a "$SSH_CONFIG_FILE"
+
+# Reinicia o serviço SSH para aplicar as alterações
+if systemctl is-active --quiet sshd.service; then
+  sudo systemctl restart sshd.service
+else
+  sudo service ssh restart
+fi
+
+echo "Vulnerabilidade corrigida. O serviço SSH foi reiniciado."
+```}
+{type: uploaded file
+fileName: 1vtweakssh_3.txt
+fullContent:
+```sh
+#!/bin/bash
+
+# Identifica o arquivo de configuração do SSH
+SSH_CONFIG_FILE="/etc/ssh/sshd_config"
+
+# Remove a linha que habilita o algoritmo ssh-dss, se existir
+sudo sed -i '/HostKeyAlgorithms.*ssh-dss/s/,ssh-dss//g' "$SSH_CONFIG_FILE"
+sudo sed -i 's/HostKeyAlgorithms.*ssh-dss//g' "$SSH_CONFIG_FILE"
+
+# Remove a linha que habilita o KexAlgorithms com dife-hellman-group1-sha1, se existir
+sudo sed -i '/KexAlgorithms.*diffie-hellman-group1-sha1/s/,diffie-hellman-group1-sha1//g' "$SSH_CONFIG_FILE"
+sudo sed -i 's/KexAlgorithms.*diffie-hellman-group1-sha1//g' "$SSH_CONFIG_FILE"
+
+# Reinicia o serviço SSH para aplicar as alterações
+sudo systemctl restart sshd
+
+echo "Vulnerabilidade SSH corrigida: Algoritmo ssh-dss desabilitado."
+```}
+{type: uploaded file
+fileName: 1vtweakssh_4.txt
+fullContent:
+```sh
+#!/bin/bash
+
+# Define o arquivo de configuração do SSH
+SSH_CONFIG="/etc/ssh/sshd_config"
+
+# Remove a entrada HostKeyAlgorithms existente (se houver)
+sudo sed -i '/^HostKeyAlgorithms/d' "$SSH_CONFIG"
+
+# Adiciona a linha com algoritmos de chave de host seguros
+sudo echo "HostKeyAlgorithms ssh-ed25519,ecdsa-sha2-nistp256,ecdsa-sha2-nistp384,ecdsa-sha2-nistp521,rsa-sha2-256,rsa-sha2-512" | sudo tee -a "$SSH_CONFIG"
+
+# Reinicia o serviço SSH para aplicar as alterações
+sudo systemctl restart sshd
+
+echo "Vulnerabilidade CVE-nan (Weak Host Key Algorithm(s) (SSH)) corrigida. Algoritmo ssh-dss desabilitado."
+```}
+{type: uploaded file
+fileName: 1vtweakssh_5.txt
+fullContent:
+```sh
+#!/bin/bash
+
+# Remova o algoritmo ssh-dss do arquivo de configuração do SSH.
+# Este script assume que o arquivo de configuração principal do SSH é /etc/ssh/sshd_config.
+# Adapte o caminho se a sua configuração estiver em um local diferente.
+
+SSH_CONFIG="/etc/ssh/sshd_config"
+
+# Cria um backup do arquivo de configuração.
+sudo cp "$SSH_CONFIG" "$SSH_CONFIG.bak"
+
+# Remove a linha "HostKeyAlgorithms" se ela existir e contiver "ssh-dss".
+sudo sed -i '/HostKeyAlgorithms.*ssh-dss/d' "$SSH_CONFIG"
+
+# Adiciona a linha "HostKeyAlgorithms" com algoritmos seguros, caso não exista ou precise ser atualizada.
+# Se a linha já existir e não contiver "ssh-dss", ela será mantida.
+if ! grep -q "^HostKeyAlgorithms" "$SSH_CONFIG"; then
+  echo "Adicionando HostKeyAlgorithms..."
+  sudo echo "HostKeyAlgorithms ecdsa-sha2-nistp256-cert-v01@openssh.com,ecdsa-sha2-nistp384-cert-v01@openssh.com,ecdsa-sha2-nistp521-cert-v01@openssh.com,ssh-rsa-cert-v01@openssh.com,ssh-ed25519-cert-v01@openssh.com,rsa-sha2-512,rsa-sha2-256,ecdsa-sha2-nistp256,ecdsa-sha2-nistp384,ecdsa-sha2-nistp521,ssh-rsa,ssh-ed25519" | sudo tee -a "$SSH_CONFIG"
+else
+  echo "Linha HostKeyAlgorithms já existe. Verifique se 'ssh-dss' foi removido manualmente se necessário."
+fi
+
+# Reinicia o serviço SSH para aplicar as alterações.
+sudo systemctl restart sshd
+
+echo "Vulnerabilidade corrigida. O serviço SSH foi reiniciado."
+```}
+{type: uploaded file
+fileName: 1vtweakssh_6.txt
+fullContent:
+```sh
+#!/bin/bash
+
+# Define o arquivo de configuração SSH
+SSH_CONFIG="/etc/ssh/sshd_config"
+
+# Remove a linha que permite o algoritmo ssh-dss, se existir
+sudo sed -i '/^HostKeyAlgorithms.*ssh-dss/s/ssh-dss//g' "$SSH_CONFIG"
+
+# Remove qualquer linha 'HostKeyAlgorithms' que fique vazia após a remoção do algoritmo
+sudo sed -i '/^HostKeyAlgorithms[[:space:]]*$/d' "$SSH_CONFIG"
+
+# Adiciona uma nova linha com algoritmos seguros, se não existir nenhuma linha 'HostKeyAlgorithms'
+if ! grep -q "^HostKeyAlgorithms" "$SSH_CONFIG"; then
+  echo "HostKeyAlgorithms ssh-rsa,ssh-ed25519,ecdsa-sha2-nistp256,ecdsa-sha2-nistp384,ecdsa-sha2-nistp521" | sudo tee -a "$SSH_CONFIG"
+fi
+
+# Garante que o HostKeyAlgorithms esteja presente e com algoritmos seguros
+if ! grep -q "HostKeyAlgorithms" "$SSH_CONFIG"; then
+  echo "HostKeyAlgorithms ssh-rsa,ssh-ed25519,ecdsa-sha2-nistp256,ecdsa-sha2-nistp384,ecdsa-sha2-nistp521" | sudo tee -a "$SSH_CONFIG"
+fi
+
+# Remove o algoritmo ssh-dss da linha HostKeyAlgorithms (caso ainda esteja lá)
+sudo sed -i 's/HostKeyAlgorithms[[:space:]]*=\(.*\)/\1/I' "$SSH_CONFIG"
+sudo sed -i 's/ssh-dss//g' "$SSH_CONFIG"
+
+# Reinicia o serviço SSH para aplicar as mudanças
+sudo systemctl restart sshd
+
+echo "Vulnerabilidade corrigida e serviço SSH reiniciado."
+```}
+{type: uploaded file
+fileName: 1vtweakssh_7.txt
+fullContent:
+```bash
+#!/bin/bash
+
+# Arquivo de configuração do SSH
+SSH_CONFIG="/etc/ssh/sshd_config"
+
+# Algoritmo fraco a ser removido
+WEAK_ALGORITHM="ssh-dss"
+
+# Função para verificar se o algoritmo está habilitado
+is_algorithm_enabled() {
+  grep -q "^HostKeyAlgorithms.*$WEAK_ALGORITHM" "$SSH_CONFIG"
+}
+
+# Função para remover o algoritmo fraco
+remove_algorithm() {
+  if is_algorithm_enabled; then
+    # Remove o algoritmo fraco da linha HostKeyAlgorithms
+    sed -i "s/HostKeyAlgorithms\(.*\)$WEAK_ALGORITHM\(.*\)/HostKeyAlgorithms\1\2/g" "$SSH_CONFIG"
+
+    # Remove espaços extras e vírgulas duplicadas
+    sed -i "s/HostKeyAlgorithms  /HostKeyAlgorithms /g" "$SSH_CONFIG"
+    sed -i "s/,,/,/g" "$SSH_CONFIG"
+    sed -i "s/, /,/g" "$SSH_CONFIG"
+
+    # Remove a linha inteira se ficar vazia
+    sed -i "/^HostKeyAlgorithms[[:space:]]*$/d" "$SSH_CONFIG"
+  fi
+}
+
+# Função para adicionar HostKeyAlgorithms se não existir
+add_hostkeyalgorithms() {
+  if ! grep -q "^HostKeyAlgorithms" "$SSH_CONFIG"; then
+    echo "HostKeyAlgorithms ssh-rsa,ecdsa-sha2-nistp256,ecdsa-sha2-nistp384,ecdsa-sha2-nistp521,ssh-ed25519" >> "$SSH_CONFIG"
+  fi
+}
+
+
+# Remover o algoritmo fraco
+remove_algorithm
+
+# Adicionar a linha HostKeyAlgorithms caso não exista (com algoritmos seguros)
+add_hostkeyalgorithms
+
+# Remover o algoritmo fraco da linha KexAlgorithms também.
+if grep -q "^KexAlgorithms.*$WEAK_ALGORITHM" "$SSH_CONFIG"; then
+    sed -i "s/KexAlgorithms\(.*\)$WEAK_ALGORITHM\(.*\)/KexAlgorithms\1\2/g" "$SSH_CONFIG"
+    sed -i "s/KexAlgorithms  /KexAlgorithms /g" "$SSH_CONFIG"
+    sed -i "s/,,/,/g" "$SSH_CONFIG"
+    sed -i "s/, /,/g" "$SSH_CONFIG"
+    sed -i "/^KexAlgorithms[[:space:]]*$/d" "$SSH_CONFIG"
+fi
+
+
+# Reiniciar o serviço SSH
+systemctl restart sshd
+
+echo "Vulnerabilidade corrigida. O serviço SSH foi reiniciado."
+```}
+{type: uploaded file
+fileName: 1vtweakssh_8.txt
+fullContent:
+```bash
+#!/bin/bash
+
+# Define o arquivo de configuração do SSH
+SSH_CONFIG="/etc/ssh/sshd_config"
+
+# Define o algoritmo de chave de host fraco a ser removido
+WEAK_ALGORITHM="ssh-dss"
+
+# Remove a linha 'HostKeyAlgorithms' se ela existir e contiver apenas o algoritmo fraco
+if grep -q "^HostKeyAlgorithms.*${WEAK_ALGORITHM}" "$SSH_CONFIG"; then
+  if grep -q "^HostKeyAlgorithms.*${WEAK_ALGORITHM}$" "$SSH_CONFIG"; then
+    sed -i "/^HostKeyAlgorithms.*${WEAK_ALGORITHM}$/d" "$SSH_CONFIG"
+  else
+    # Remove apenas o algoritmo fraco da linha 'HostKeyAlgorithms'
+    sed -i "s/,${WEAK_ALGORITHM}//g" "$SSH_CONFIG"
+    sed -i "s/${WEAK_ALGORITHM},//g" "$SSH_CONFIG"
+    sed -i "s/${WEAK_ALGORITHM}//g" "$SSH_CONFIG"
+  fi
+fi
+
+# Remove qualquer menção ao algoritmo fraco dentro do arquivo
+# Isso é para garantir que não haja outras configurações conflitantes
+sed -i "/${WEAK_ALGORITHM}/d" "$SSH_CONFIG"
+
+# Reinicia o serviço SSH para aplicar as alterações
+if command -v systemctl &> /dev/null; then
+  systemctl restart sshd
+elif command -v service &> /dev/null; then
+  service sshd restart
+else
+  /etc/init.d/sshd restart
+fi
+
+echo "Vulnerabilidade SSH (ssh-dss) corrigida. Serviço SSH reiniciado."
+```}
+{type: uploaded file
+fileName: 1vtweakssh_9.txt
+fullContent:
+```bash
+#!/bin/bash
+
+# Define o arquivo de configuração do SSH
+SSH_CONFIG="/etc/ssh/sshd_config"
+
+# Remove a opção KexAlgorithms existente, se houver
+sed -i '/^HostKeyAlgorithms/d' "$SSH_CONFIG"
+
+# Adiciona a opção KexAlgorithms com algoritmos seguros
+echo "HostKeyAlgorithms ssh-ed25519,ecdsa-sha2-nistp256,ecdsa-sha2-nistp384,ecdsa-sha2-nistp521,rsa-sha2-256,rsa-sha2-512" >> "$SSH_CONFIG"
+
+# Remove a opção PubkeyAcceptedKeyTypes existente, se houver
+sed -i '/^PubkeyAcceptedKeyTypes/d' "$SSH_CONFIG"
+
+# Adiciona a opção PubkeyAcceptedKeyTypes com algoritmos seguros
+echo "PubkeyAcceptedKeyTypes ssh-ed25519,ecdsa-sha2-nistp256,ecdsa-sha2-nistp384,ecdsa-sha2-nistp521,rsa-sha2-256,rsa-sha2-512" >> "$SSH_CONFIG"
+
+# Remove a opção HostKey para ssh-dss, se houver
+sed -i '/^HostKey \/etc\/ssh\/ssh_host_dsa_key/d' "$SSH_CONFIG"
+sed -i '/^HostKey \/etc\/ssh\/ssh_host_dsa_key.pub/d' "$SSH_CONFIG"
+
+# Verifica se o arquivo ssh_host_dsa_key existe e, se existir, o remove
+if [ -f "/etc/ssh/ssh_host_dsa_key" ]; then
+    rm -f /etc/ssh/ssh_host_dsa_key
+fi
+
+# Verifica se o arquivo ssh_host_dsa_key.pub existe e, se existir, o remove
+if [ -f "/etc/ssh/ssh_host_dsa_key.pub" ]; then
+    rm -f /etc/ssh/ssh_host_dsa_key.pub
+fi
+
+# Reinicia o serviço SSH
+systemctl restart sshd
+
+echo "Vulnerabilidade SSH corrigida: Algoritmo ssh-dss desabilitado."
+```}
+{type: uploaded file
+fileName: 1vtweakssh_10.txt
+fullContent:
+```sh
+#!/bin/bash
+
+# Define o arquivo de configuração do SSH
+SSH_CONFIG_FILE="/etc/ssh/sshd_config"
+
+# Remove a linha que define HostKeyAlgorithms, se existir
+sudo sed -i '/^HostKeyAlgorithms/d' "$SSH_CONFIG_FILE"
+
+# Adiciona a linha com os algoritmos de chave de host seguros
+sudo echo "HostKeyAlgorithms ssh-rsa,ecdsa-sha2-nistp256,ecdsa-sha2-nistp384,ecdsa-sha2-nistp521,ssh-ed25519" | sudo tee -a "$SSH_CONFIG_FILE" > /dev/null
+
+# Reinicia o serviço SSH
+sudo systemctl restart sshd
+
+echo "Vulnerabilidade SSH corrigida. Algoritmos de chave de host fracos desabilitados."
+```}

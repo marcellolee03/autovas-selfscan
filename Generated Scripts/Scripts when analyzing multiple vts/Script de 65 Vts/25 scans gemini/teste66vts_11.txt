@@ -1,0 +1,55 @@
+```bash
+#!/bin/bash
+
+# Variáveis para controle de versão e caminhos
+python3_10_version="3.10"
+python3_12_version="3.12"
+
+# Função para atualizar uma versão específica do Python
+update_python() {
+  local current_version="$1"
+  local target_version="$2"
+  local port="$3"
+
+  echo "Atualizando Python ${current_version} (porta ${port}) para a versão ${target_version}..."
+
+  # Baixar a versão desejada do Python (adaptar para sua fonte de download preferida)
+  # Exemplo usando wget (certifique-se de que wget esteja instalado)
+  # wget "https://www.python.org/ftp/python/${target_version}/python-${target_version}-embed-amd64.zip" -O /tmp/python-${target_version}-embed-amd64.zip
+
+  # Extrair o arquivo (adaptar o caminho conforme necessário)
+  # unzip /tmp/python-${target_version}-embed-amd64.zip -d /opt
+
+  # Remover a instalação antiga (tenha cuidado com dependências!)
+  # rm -rf /usr/bin/python${current_version}  # Exemplo de remoção de link simbólico
+
+  # Criar um novo link simbólico (adaptar os caminhos!)
+  # ln -s /opt/python-${target_version}/python.exe /usr/bin/python${current_version}
+
+  echo "Atualização de Python ${current_version} (porta ${port}) concluída (simulado).  Adaptar o script com os comandos corretos de instalação para windows!"
+}
+
+# Vulnerabilidades e soluções
+# Agrupar as vulnerabilidades por versão e porta para evitar redundância
+# Atualizar Python 3.10 na porta 5000
+update_python "$python3_10_version" "3.10.16" "5000"
+
+# Atualizar Python 3.12 nas portas 8000, 8001 e 8002
+update_python "$python3_12_version" "3.12.9" "8000"
+update_python "$python3_12_version" "3.12.9" "8001"
+update_python "$python3_12_version" "3.12.9" "8002"
+
+
+# Solução para certificado SSL não confiável (porta 8002)
+echo "AVISO: Certificado SSL não confiável detectado na porta 8002. Substituir o certificado por um certificado assinado por uma CA confiável."
+echo "Ação manual necessária: Gerar um novo certificado SSL/TLS assinado por uma CA confiável e instalá-lo no serviço da porta 8002."
+
+# Solução para algoritmos MAC fracos (SSH - porta 22)
+echo "AVISO: Algoritmos MAC fracos detectados no SSH (porta 22). Desativar os algoritmos umac-64-etm@openssh.com e umac-64@openssh.com."
+echo "Ação manual necessária: Editar o arquivo de configuração do SSH (/etc/ssh/sshd_config) e remover os algoritmos fracos da lista MACs. Reiniciar o serviço SSH."
+
+# Solução para ICMP Timestamp Reply
+echo "AVISO: Resposta a requisição de ICMP Timestamp detectada.  Desabilitar as respostas a este tipo de pacote no firewall."
+
+exit 0
+```

@@ -1,0 +1,70 @@
+#!/bin/bash
+
+# Corrige vulnerabilidades relacionadas a serviços
+service rlogin stop
+update-rc.d -f rlogin remove
+service rsh stop
+update-rc.d -f rsh remove
+service rexec stop
+update-rc.d -f rexec remove
+service telnet stop
+update-rc.d -f telnet remove
+service vsftpd stop
+update-rc.d -f vsftpd remove
+service distcc stop
+update-rc.d -f distcc remove
+service vncserver stop
+update-rc.d -f vncserver remove
+
+# Remove backdoor Ingreslock
+pkill -f ingreslock
+find / -name '*ingreslock*' -delete
+
+# Configura o AJP do Tomcat
+sed -i '/<Connector.*protocol="AJP.*"/d' /etc/tomcat*/server.xml
+
+# Define senhas fortes para MySQL e PostgreSQL
+mysql -e "ALTER USER 'root'@'localhost' IDENTIFIED BY 'S3nh@F0rt3!!'; FLUSH PRIVILEGES;"
+sudo -u postgres psql -c "ALTER USER postgres WITH PASSWORD 'P0stgr3s_S3cur3P@ss';"
+
+# Atualiza e configura PHP
+sed -i 's/.*cgi.fix_pathinfo=.*/cgi.fix_pathinfo=0/' /etc/php5*/apache2/php.ini
+sed -i 's/.*allow_url_include =.*/allow_url_include = Off/' /etc/php5*/apache2/php.ini
+find /var/www -name 'phpinfo.php' -delete
+a2dismod cgi
+
+# Configura Apache
+sed -i -e "s/^TraceEnable/#TraceEnable/" /etc/apache2/apache2.conf
+echo -e "\nTraceEnable off\n<DirectoryMatch \"/\">\n    Options -ExecCGI\n    <LimitExcept GET POST HEAD>\n        deny from all\n    </LimitExcept>\n    <Files *.php>\n        Options -ExecCGI\n    </Files>\n</DirectoryMatch>" >> /etc/apache2/apache2.conf
+a2dismod -f userdir
+
+# Configura TLS e SSL
+find /etc -type f -name '*.conf' -exec sed -i -e 's/SSLProtocol.*/SSLProtocol all -SSLv2 -SSLv3 -TLSv1 -TLSv1.1/g' -e 's/SSLCipherSuite.*/SSLCipherSuite HIGH:!aNULL:!MD5:!kRSA:!eNULL/g' {} \;
+
+# Configura SSH
+echo -e "Ciphers aes256-ctr,aes192-ctr,aes128-ctr\nMACs hmac-sha2-512,hmac-sha2-256\nKexAlgorithms ecdh-sha2-nistp521,ecdh-sha2-nistp384,ecdh-sha2-nistp256,diffie-hellman-group-exchange-sha256\nHostKeyAlgorithms ecdsa-sha2-nistp256,rsa-sha2-512,ssh-ed25519" >> /etc/ssh/sshd_config
+service ssh restart
+
+# Configura Postfix
+postconf -e disable_vrfy_command=yes
+
+# Remove diretórios públicos e verbosidade
+rm -rf /doc
+rm -rf /usr/doc/*
+rm -rf /var/www/dav
+
+# Atualiza biblioteca jQuery
+find /var/www -name 'jquery.min.js' -exec sed -i '1s/1\.3\.2/1.9.0/' {} \;
+
+# Aplica hardening geral
+echo "net.ipv4.tcp_timestamps = 0" >> /etc/sysctl.conf
+echo "net.ipv4.icmp_echo_ignore_all = 1" >> /etc/sysctl.conf
+sysctl -p
+chmod 700 /root
+dpkg-reconfigure -f noninteractive --force-unsafe-io tzdata
+
+# Reinicia serviços necessários
+service apache2 restart
+service tomcat6 restart
+service mysql restart
+service postgresql restart

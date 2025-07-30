@@ -1,0 +1,95 @@
+```bash
+#!/bin/bash
+
+# Detecta o sistema operacional
+os=$(uname -s)
+
+# Define o nome do serviço PostgreSQL
+service_name="postgresql"
+
+# Define a porta do PostgreSQL
+port="5432"
+
+# Função para verificar se o PostgreSQL está instalado
+check_postgresql() {
+  if command -v pg_ctl >/dev/null 2>&1; then
+    return 0
+  else
+    return 1
+  fi
+}
+
+# Função para obter a versão do PostgreSQL
+get_postgresql_version() {
+  if check_postgresql; then
+    pg_ctl --version | awk '{print $3}'
+  else
+    echo "PostgreSQL não está instalado."
+    exit 1
+  fi
+}
+
+# Função para desabilitar TLSv1.0 e TLSv1.1 no PostgreSQL
+disable_tls10_tls11_postgresql() {
+  version=$(get_postgresql_version)
+  config_file=""
+
+  # Determina o arquivo de configuração com base na versão do PostgreSQL
+  if [[ "$version" == 9.* ]]; then
+    config_file="/etc/postgresql/9.x/main/postgresql.conf"
+  elif [[ "$version" == 10.* ]]; then
+    config_file="/etc/postgresql/10/main/postgresql.conf"
+  elif [[ "$version" == 11.* ]]; then
+    config_file="/etc/postgresql/11/main/postgresql.conf"
+  elif [[ "$version" == 12.* ]]; then
+    config_file="/etc/postgresql/12/main/postgresql.conf"
+  elif [[ "$version" == 13.* ]]; then
+    config_file="/etc/postgresql/13/main/postgresql.conf"
+  elif [[ "$version" == 14.* ]]; then
+    config_file="/etc/postgresql/14/main/postgresql.conf"
+  elif [[ "$version" == 15.* ]]; then
+    config_file="/etc/postgresql/15/main/postgresql.conf"
+  elif [[ "$version" == 16.* ]]; then
+    config_file="/etc/postgresql/16/main/postgresql.conf"
+  else
+    echo "Versão do PostgreSQL não suportada: $version"
+    exit 1
+  fi
+
+  # Verifica se o arquivo de configuração existe
+  if [ ! -f "$config_file" ]; then
+    echo "Arquivo de configuração não encontrado: $config_file"
+    exit 1
+  fi
+
+  # Define as configurações de SSL/TLS
+  tls_settings="ssl = on
+ssl_min_protocol = TLSv1.2"
+
+  # Remove configurações antigas (se existirem)
+  sudo sed -i '/^ssl =/d' "$config_file"
+  sudo sed -i '/^ssl_min_protocol =/d' "$config_file"
+
+  # Adiciona as novas configurações
+  echo "$tls_settings" | sudo tee -a "$config_file" > /dev/null
+
+  # Reinicia o serviço PostgreSQL
+  if systemctl is-active --quiet "$service_name"; then
+      sudo systemctl restart "$service_name"
+  else
+      echo "O serviço PostgreSQL não está em execução."
+  fi
+
+  echo "TLSv1.0 e TLSv1.1 desabilitados no PostgreSQL. Arquivo de configuração modificado: $config_file"
+}
+
+# Script principal
+if check_postgresql; then
+  disable_tls10_tls11_postgresql
+else
+  echo "PostgreSQL não está instalado."
+  exit 1
+fi
+
+exit 0
+```

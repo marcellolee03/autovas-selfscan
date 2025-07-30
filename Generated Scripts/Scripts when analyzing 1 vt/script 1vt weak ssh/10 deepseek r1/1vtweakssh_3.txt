@@ -1,0 +1,26 @@
+#!/bin/bash
+
+set -e
+
+if [ "$(id -u)" -ne 0 ]; then
+    exit 1
+fi
+
+CONFIG_FILE="/etc/ssh/sshd_config"
+BACKUP_FILE="$CONFIG_FILE.bak_$(date +%Y%m%d%H%M%S)"
+NEW_ALGOS="ssh-ed25519,ecdsa-sha2-nistp256,ecdsa-sha2-nistp384,ecdsa-sha2-nistp521,rsa-sha2-256,rsa-sha2-512"
+
+if [ ! -f "$CONFIG_FILE" ]; then
+    exit 1
+fi
+
+cp "$CONFIG_FILE" "$BACKUP_FILE"
+sed -i -e '/^[[:space:]]*HostKeyAlgorithms[[:space:]]/d' "$CONFIG_FILE"
+echo "HostKeyAlgorithms $NEW_ALGOS" >> "$CONFIG_FILE"
+
+if sshd -t -f "$CONFIG_FILE"; then
+    systemctl reload sshd
+else
+    mv -f "$BACKUP_FILE" "$CONFIG_FILE"
+    exit 1
+fi

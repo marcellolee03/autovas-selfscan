@@ -1,0 +1,84 @@
+```bash
+#!/bin/bash
+
+# Script para mitigar a vulnerabilidade de transmissão de informações sensíveis em texto claro via HTTP.
+# Este script configura um redirecionamento automático de HTTP para HTTPS usando Apache ou Nginx.
+
+# Variáveis
+HTTP_PORT=80
+HTTPS_PORT=443
+DOMAIN=$(hostname)
+
+# Detecta o servidor web
+if command -v apache2 &> /dev/null; then
+  WEB_SERVER="apache2"
+elif command -v nginx &> /dev/null; then
+  WEB_SERVER="nginx"
+else
+  echo "Nenhum servidor web (Apache ou Nginx) detectado. Impossível continuar."
+  exit 1
+fi
+
+# Função para configurar o redirecionamento no Apache
+configure_apache() {
+  # Verifica se o módulo rewrite está habilitado
+  if ! a2query -m rewrite &> /dev/null; then
+    echo "Habilitando o módulo rewrite do Apache..."
+    sudo a2enmod rewrite
+  fi
+
+  # Cria um arquivo de configuração virtual host para redirecionar HTTP para HTTPS
+  VHOST_FILE="/etc/apache2/sites-available/http-to-https.conf"
+  echo "<VirtualHost *:80>
+    ServerName $DOMAIN
+    Redirect permanent / https://$DOMAIN/
+  </VirtualHost>" | sudo tee $VHOST_FILE
+
+  # Habilita o novo virtual host
+  sudo a2ensite http-to-https.conf
+
+  # Reinicia o Apache
+  echo "Reiniciando o Apache..."
+  sudo systemctl restart apache2
+}
+
+# Função para configurar o redirecionamento no Nginx
+configure_nginx() {
+  # Cria um arquivo de configuração do servidor para redirecionar HTTP para HTTPS
+  SERVER_FILE="/etc/nginx/sites-available/http-to-https"
+  echo "server {
+    listen $HTTP_PORT;
+    server_name $DOMAIN;
+    return 301 https://\$host\$request_uri;
+  }" | sudo tee $SERVER_FILE
+
+  # Cria um link simbólico para habilitar o arquivo de configuração
+  sudo ln -s /etc/nginx/sites-available/http-to-https /etc/nginx/sites-enabled/
+
+  # Remove o arquivo de configuração default, caso exista
+  if [ -f /etc/nginx/sites-enabled/default ]; then
+    sudo rm /etc/nginx/sites-enabled/default
+  fi
+
+  # Reinicia o Nginx
+  echo "Reiniciando o Nginx..."
+  sudo systemctl restart nginx
+}
+
+# Executa a configuração com base no servidor web detectado
+case $WEB_SERVER in
+  "apache2")
+    configure_apache
+    ;;
+  "nginx")
+    configure_nginx
+    ;;
+  *)
+    echo "Servidor web não suportado."
+    exit 1
+    ;;
+esac
+
+echo "Redirecionamento de HTTP para HTTPS configurado com sucesso."
+exit 0
+```

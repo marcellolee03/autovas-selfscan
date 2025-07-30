@@ -1,0 +1,16 @@
+#!/bin/bash
+if grep -q "Ubuntu 8.04" /etc/issue; then
+    echo "Detected Ubuntu 8.04 (End of Life). Upgrading to Ubuntu 16.04 LTS..."
+    export DEBIAN_FRONTEND=noninteractive
+    apt-get update -y
+    apt-get install update-manager-core -y
+    do-release-upgrade -d -f DistUpgradeViewNonInteractive
+    if grep -q "Ubuntu 16.04" /etc/issue; then
+        echo "Upgrade to Ubuntu 16.04 LTS completed successfully."
+    else
+        echo "Upgrade failed. Manual intervention required."
+        exit 1
+    fi
+else
+    echo "No EOL Ubuntu 8.04 detected. No action needed."
+fi

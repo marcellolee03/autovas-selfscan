@@ -1,0 +1,116 @@
+#!/bin/bash
+# Vulnerabilidade 1: TWiki XSS and Command Execution Vulnerabilities
+wget https://sourceforge.net/projects/twiki/files/TWiki/TWiki-4.2.4/TWiki-4.2.4.zip/download -O twiki.zip
+unzip twiki.zip -d /var/www/html/twiki
+rm twiki.zip
+
+# Vulnerabilidade 2: Distributed Ruby (dRuby/DRb) Multiple RCE Vulnerabilities
+gem update drb
+echo "SAFE=2" >> /etc/environment
+
+# Vulnerabilidade 3: rlogin Passwordless Login
+systemctl disable rlogin
+systemctl stop rlogin
+
+# Vulnerabilidade 4: Operating System (OS) End of Life (EOL) Detection
+do-release-upgrade
+
+# Vulnerabilidade 5: The rexec service is running
+systemctl disable rexec
+systemctl stop rexec
+
+# Vulnerabilidade 6: Possible Backdoor: Ingreslock
+iptables -A INPUT -p tcp --dport 1524 -j DROP
+
+# Vulnerabilidade 7: Apache Tomcat AJP RCE Vulnerability (Ghostcat)
+wget https://downloads.apache.org/tomcat/tomcat-9/v9.0.31/bin/apache-tomcat-9.0.31.tar.gz
+tar -xzf apache-tomcat-9.0.31.tar.gz -C /opt/
+rm apache-tomcat-9.0.31.tar.gz
+
+# Vulnerabilidade 8: MySQL / MariaDB Default Credentials (MySQL Protocol)
+mysql -u root -e "ALTER USER 'root'@'localhost' IDENTIFIED BY 'NewStrongPassword';"
+
+# Vulnerabilidade 9: PHP < 5.6.30, 7.x < 7.0.15, 7.1.x < 7.1.1 Multiple Vulnerabilities
+apt-get update
+apt-get install php7.3 -y
+
+# Vulnerabilidade 10: PHP < 5.3.13, 5.4.x < 5.4.3 Multiple Vulnerabilities
+apt-get update
+apt-get install php7.3 -y
+
+# Vulnerabilidade 11: vsftpd Compromised Source Packages Backdoor Vulnerability
+apt-get update
+apt-get install vsftpd -y
+
+# Vulnerabilidade 12: vsftpd Compromised Source Packages Backdoor Vulnerability
+apt-get update
+apt-get install vsftpd -y
+
+# Vulnerabilidade 13: DistCC RCE Vulnerability (CVE-2004-2687)
+iptables -A INPUT -p tcp --dport 3632 -j DROP
+
+# Vulnerabilidade 14: PostgreSQL Default Credentials (PostgreSQL Protocol)
+psql -U postgres -c "ALTER USER postgres WITH PASSWORD 'NewStrongPassword';"
+
+# Vulnerabilidade 15: VNC Brute Force Login
+iptables -A INPUT -p tcp --dport 5900 -j DROP
+
+# Vulnerabilidade 16: Test HTTP dangerous methods
+iptables -A INPUT -p tcp --dport 80 -m multiport --dports 80,443 -j DROP
+
+# Vulnerabilidade 17: FTP Brute Force Logins With Default Credentials Reporting
+iptables -A INPUT -p tcp --dport 21 -j DROP
+
+# Vulnerabilidade 18: FTP Brute Force Logins With Default Credentials Reporting
+iptables -A INPUT -p tcp --dport 2121 -j DROP
+
+# Vulnerabilidade 19: The rlogin service is running
+systemctl disable rlogin
+systemctl stop rlogin
+
+# Vulnerabilidade 20: rsh Unencrypted Cleartext Login
+systemctl disable rsh
+systemctl stop rsh
+
+# Vulnerabilidade 21: SSL/TLS: OpenSSL CCS Man in the Middle Security Bypass Vulnerability
+apt-get update
+apt-get install openssl -y
+
+# Vulnerabilidade 22: Multiple Vendors STARTTLS Implementation Plaintext Arbitrary Command Injection Vulnerability
+iptables -A INPUT -p tcp --dport 25 -j DROP
+
+# Vulnerabilidade 23: TWiki Cross-Site Request Forgery Vulnerability (Sep 2010)
+wget https://sourceforge.net/projects/twiki/files/TWiki/TWiki-4.3.2/TWiki-4.3.2.zip/download -O twiki.zip
+unzip twiki.zip -d /var/www/html/twiki
+rm twiki.zip
+
+# Vulnerabilidade 24: Anonymous FTP Login Reporting
+iptables -A INPUT -p tcp --dport 21 -j DROP
+
+# Vulnerabilidade 25: jQuery < 1.9.0 XSS Vulnerability
+wget https://code.jquery.com/jquery-1.12.4.min.js -O /var/www/html/mutillidae/javascript/ddsmoothmenu/jquery.min.js
+
+# Vulnerabilidade 26: TWiki < 6.1.0 XSS Vulnerability
+wget https://sourceforge.net/projects/twiki/files/TWiki/TWiki-6.1.0/TWiki-6.1.0.zip/download -O twiki.zip
+unzip twiki.zip -d /var/www/html/twiki
+rm twiki.zip
+
+# Vulnerabilidade 27: TWiki CSRF Vulnerability
+wget https://sourceforge.net/projects/twiki/files/TWiki/TWiki-4.3.1/TWiki-4.3.1.zip/download -O twiki.zip
+unzip twiki.zip -d /var/www/html/twiki
+rm twiki.zip
+
+# Vulnerabilidade 28: SSL/TLS: Deprecated SSLv2 and SSLv3 Protocol Detection
+iptables -A INPUT -p tcp --dport 5432 -j DROP
+
+# Vulnerabilidade 29: SSL/TLS: Deprecated SSLv2 and SSLv3 Protocol Detection
+iptables -A INPUT -p tcp --dport 25 -j DROP
+
+# Vulnerabilidade 30: SSL/TLS: Report Weak Cipher Suites
+iptables -A INPUT -p tcp --dport 5432 -j DROP
+
+# Vulnerabilidade 31: HTTP Debugging Methods (TRACE/TRACK) Enabled
+iptables -A INPUT -p tcp --dport 80 -j DROP
+
+# Vulnerabilidade 32: SSL/TLS: Server Certificate / Certificate in Chain with RSA keys less than 2048 bits
+iptables -

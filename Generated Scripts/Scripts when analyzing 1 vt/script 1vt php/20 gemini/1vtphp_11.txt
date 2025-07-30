@@ -1,0 +1,58 @@
+```bash
+#!/bin/bash
+
+# Verifica o sistema operacional para determinar o gerenciador de pacotes
+if command -v apt-get &> /dev/null; then
+  package_manager="apt-get"
+elif command -v yum &> /dev/null; then
+  package_manager="yum"
+elif command -v zypper &> /dev/null; then
+  package_manager="zypper"
+else
+  echo "Gerenciador de pacotes não suportado. Este script suporta apenas sistemas Debian/Ubuntu, RedHat/CentOS, e SUSE/openSUSE."
+  exit 1
+fi
+
+# Atualiza o cache do gerenciador de pacotes
+if [[ "$package_manager" == "apt-get" ]]; then
+  apt-get update
+elif [[ "$package_manager" == "yum" ]]; then
+  yum makecache fast
+elif [[ "$package_manager" == "zypper" ]]; then
+  zypper refresh
+fi
+
+# Atualiza o PHP para a versão mais recente disponível
+if [[ "$package_manager" == "apt-get" ]]; then
+  apt-get upgrade -y php5 php5-cgi
+elif [[ "$package_manager" == "yum" ]]; then
+  yum update -y php php-cgi
+elif [[ "$package_manager" == "zypper" ]]; then
+  zypper update -y php php-cgi
+fi
+
+# Verifica a versão do PHP após a atualização
+php_version=$(php -v | head -n 1 | awk '{print $2}')
+
+# Compara a versão atual com as versões vulneráveis
+if [[ "$php_version" =~ ^5\.3\.([0-9]|1[0-2])$ ]] || [[ "$php_version" =~ ^5\.4\.([0-2])$ ]]; then
+  echo "A atualização pode não ter sido bem-sucedida. A versão do PHP ($php_version) ainda está vulnerável."
+  echo "Considere atualizar para uma versão mais recente manualmente ou verificar se existem atualizações adicionais disponíveis."
+  exit 1
+else
+  echo "PHP foi atualizado para a versão: $php_version"
+  echo "A vulnerabilidade CVE-2012-1823, CVE-2012-2311, CVE-2012-2336, e CVE-2012-2335 devem ter sido corrigidas."
+fi
+
+# Reinicia o servidor web (Apache ou Nginx)
+if command -v systemctl &> /dev/null; then
+  systemctl restart apache2 2>/dev/null || systemctl restart httpd 2>/dev/null || systemctl restart nginx 2>/dev/null
+elif command -v service &> /dev/null; then
+  service apache2 restart 2>/dev/null || service httpd restart 2>/dev/null || service nginx restart 2>/dev/null
+else
+  echo "Não foi possível detectar systemctl ou service. Reinicie o servidor web manualmente."
+fi
+
+echo "Script de correção finalizado."
+exit 0
+```

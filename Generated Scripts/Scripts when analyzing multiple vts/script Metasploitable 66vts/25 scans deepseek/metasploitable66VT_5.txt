@@ -1,0 +1,84 @@
+#!/bin/bash
+# Correção das vulnerabilidades
+
+# Desabilitar serviços inseguros
+systemctl stop rlogin.service
+systemctl disable rlogin.service
+systemctl stop rsh.service
+systemctl disable rsh.service
+systemctl stop rexec.service
+systemctl disable rexec.service
+systemctl stop telnet.service
+systemctl disable telnet.service
+
+# Instalar/reinstalar vsftpd seguro
+apt-get update
+apt-get install --only-upgrade vsftpd -y
+
+# Atualizar o sistema operacional
+apt-get dist-upgrade -y
+
+# Atualizar pacotes de software
+apt-get update
+apt-get upgrade -y
+
+# Configurar MySQL para não aceitar login root sem senha
+mysql -e "ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY 'NovaSenhaSegura123!';"
+
+# Atualizar Apache Tomcat para versão segura
+tomcat_version=$(/usr/share/tomcat/bin/version.sh | grep 'Server version' | awk '{print $3}' | cut -d'/' -f2)
+if [[ "$tomcat_version" < "9.0.31" ]]; then
+    apt-get remove --purge -y tomcat9
+    apt-get install tomcat9 -y
+fi
+
+# Configurar PHP para versão segura
+php_version=$(php -v | grep 'PHP' | awk '{print $2}' | cut -d'.' -f1-2)
+if [[ "$php_version" < "7.0" ]]; then
+    apt-get remove --purge -y php php*
+    apt-get install php7.4 -y
+fi
+
+# Atualizar jQuery para versão segura
+jquery_version=$(find /var/www/html -name 'jquery.min.js' -exec grep -oP 'jQuery v\K\d+\.\d+\.\d+' {} + | head -n 1)
+if [[ "$jquery_version" < "1.9.0" ]]; then
+    wget -O /var/www/html/jquery.min.js https://code.jquery.com/jquery-1.9.0.min.js
+fi
+
+# Configurar SSL/TLS seguro
+sed -i 's/SSLProtocol all -SSLv2 -SSLv3/SSLProtocol all -SSLv2 -SSLv3 -TLSv1 -TLSv1.1/g' /etc/apache2/mods-enabled/ssl.conf
+sed -i 's/SSLCipherSuite HIGH:!aNULL:!MD5/SSLCipherSuite HIGH:!aNULL:!MD5:!RC4:!3DES/g' /etc/apache2/mods-enabled/ssl.conf
+systemctl restart apache2
+
+# Configurar PostgreSQL para não aceitar senha fraca
+psql -U postgres -c "ALTER USER postgres WITH PASSWORD 'NovaSenhaSegura123!';"
+
+# Configurar VNC para usar criptografia
+apt-get install tightvncserver -y
+
+# Configurar SSH para usar cifras seguras
+sed -i 's/Ciphers .*/Ciphers aes256-ctr/g' /etc/ssh/sshd_config
+systemctl restart sshd
+
+# Configurar Firewall para bloquear portas inseguras
+ufw deny 21
+ufw deny 23
+ufw deny 513
+ufw deny 514
+ufw deny 512
+ufw deny 3632
+ufw deny 6200
+ufw deny 8787
+
+# Verificar e aplicar configurações de segurança
+apt-get install unattended-upgrades -y
+dpkg-reconfigure --priority=low unattended-upgrades
+
+# Reiniciar serviços necessários
+systemctl restart apache2
+systemctl restart mysql
+systemctl restart postgresql
+systemctl restart tomcat9
+systemctl restart sshd
+
+exit 0

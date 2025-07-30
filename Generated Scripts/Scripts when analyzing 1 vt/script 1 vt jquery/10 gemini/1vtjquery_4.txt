@@ -1,0 +1,59 @@
+```bash
+#!/bin/bash
+
+# Define as variáveis
+vulnerable_file="/var/www/html/console/framework/../js/jquery-1.8.3.min.js"
+backup_file="${vulnerable_file}.bak"
+new_version_url="https://code.jquery.com/jquery-1.9.0.min.js"
+temp_file="/tmp/jquery-1.9.0.min.js"
+
+# Garante que o diretório /tmp exista e seja gravável
+if [ ! -d "/tmp" ]; then
+    mkdir -p /tmp
+    if [ ! -d "/tmp" ]; then
+        echo "Erro: Não foi possível criar o diretório /tmp. Verifique as permissões."
+        exit 1
+    fi
+fi
+
+# Navega para o diretório raiz do sistema de arquivos
+cd /
+
+# Verifica se o arquivo vulnerável existe
+if [ ! -f "${vulnerable_file}" ]; then
+  echo "Arquivo vulnerável não encontrado: ${vulnerable_file}"
+  exit 1
+fi
+
+# Faz backup do arquivo vulnerável
+echo "Fazendo backup do arquivo vulnerável para: ${backup_file}"
+cp "${vulnerable_file}" "${backup_file}"
+
+# Baixa a nova versão do jQuery
+echo "Baixando a versão corrigida do jQuery: ${new_version_url}"
+wget -q "${new_version_url}" -O "${temp_file}"
+
+# Verifica se o download foi bem-sucedido
+if [ ! -f "${temp_file}" ]; then
+  echo "Erro ao baixar a nova versão do jQuery."
+  # Restaura o backup se o download falhar
+  echo "Restaurando o arquivo de backup."
+  cp "${backup_file}" "${vulnerable_file}"
+  rm -f "${backup_file}"
+  exit 1
+fi
+
+# Substitui o arquivo vulnerável pela nova versão
+echo "Substituindo o arquivo vulnerável."
+mv "${temp_file}" "${vulnerable_file}"
+
+# Define as permissões adequadas para o arquivo (se necessário)
+chmod 644 "${vulnerable_file}"
+chown www-data:www-data "${vulnerable_file}" # ajuste o usuário e grupo conforme necessário
+
+# Limpa o arquivo temporário
+rm -f "${temp_file}"
+
+echo "Vulnerabilidade corrigida com sucesso!"
+exit 0
+```

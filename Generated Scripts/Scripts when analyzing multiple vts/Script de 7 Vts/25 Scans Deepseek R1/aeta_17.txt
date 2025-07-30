@@ -1,0 +1,99 @@
+```bash
+#!/bin/bash
+
+if [ "$EUID" -ne 0 ]; then
+    echo "Este script deve ser executado como root"
+    exit 1
+fi
+
+# Vulnerabilidade 2 (DNS Cache Snooping)
+if command -v named &>/dev/null && [ -f /etc/named.conf ]; then
+    cp /etc/named.conf /etc/named.conf.bak
+    sed -i '/options {/,/\};/ {/recursion/d}' /etc/named.conf
+    sed -i '/options {/ a\\trecursion no;' /etc/named.conf
+    systemctl restart named
+fi
+
+# Vulnerabilidades 3 (ICMP Timestamp) e 7 (TCP Timestamps)
+cat >>/etc/sysctl.conf <<EOL
+net.ipv4.icmp_echo_ignore_all = 1
+net.ipv4.tcp_timestamps = 0
+EOL
+sysctl -p
+
+# Configuração SSL unificada para Apache e Nginx
+SSL_COMMON=(
+    "TLS 1.2"
+    "TLS 1.3"
+    "!ECDSA-SECP256k1"
+    "!ECDH-SECP256k1"
+    "!3DES"
+    "!RC4"
+    "!CAMELLIA"
+    "!AESCCM"
+    "!DSS"
+    "!aNULL"
+    "!eNULL"
+    "!MD5"
+    "!PSK"
+    "!SRP"
+    "!KRB5"
+)
+
+# Vulnerabilidade 1 (HTTP Redirect) e 4/5/6 (SSL) para Apache
+for apache_dir in /etc/apache2 /etc/httpd; do
+    if [ -d "$apache_dir" ]; then
+        # HTTP para HTTPS
+        if ! grep -q "RewriteRule ^https" "$apache_dir/sites-enabled"/* 2>/dev/null; then
+            cat >"$apache_dir/sites-enabled/000-ssl-redirect.conf" <<EOF
+<VirtualHost *:80>
+    Redirect permanent / https://%{HTTP_HOST}/
+</VirtualHost>
+EOF
+        fi
+
+        # Configuração SSL
+        CONF_LOCATION=$(find "$apache_dir" -name ssl.conf -print -quit)
+        [ -z "$CONF_LOCATION" ] && CONF_LOCATION="$apache_dir/conf.d/ssl.conf"
+
+        # CipherSuite baseado no SO
+        if grep -qi "Amazon Linux" /etc/os-release || grep -qi "CentOS" /etc/os-release; then
+            CIPHER_SUITE="ECDHE:ECDSA:!ADH:!EXP:!LOW:!SSLv2:${SSL_COMMON[*]}"
+        else
+            CIPHER_SUITE="ECDH-ECDSA:ECDH-RSA:!RSA:!DES:${SSL_COMMON[*]}"
+        fi
+
+        cat >"$CONF_LOCATION" <<EOF
+SSLProtocol all -SSLv2 -SSLv3 -TLSv1 -TLSv1.1
+SSLCipherSuite HIGH:!aNULL:$CIPHER_SUITE
+SSLHonorCipherOrder on
+SSLCompression off
+SSLInsecureRenegotiation off
+EOF
+        systemctl restart apache2 httpd
+    fi
+done
+
+# Vulnerabilidade 1 (HTTP Redirect) e 4/5/6 (SSL) para Nginx
+if [ -d /etc/nginx ]; then
+    # HTTP para HTTPS
+    if ! grep -q "return 301 https" /etc/nginx/sites-enabled/*; then
+        cat >/etc/nginx/conf.d/ssl_redirect.conf <<EOF
+server {
+    listen 80 default_server;
+    return 301 https://\$host\$request_uri;
+}
+EOF
+    fi
+
+    # Configuração SSL
+    grep -q "ssl_protocol" /etc/nginx/nginx.conf || sed -i '/http {/a \\tssl_protocols TLSv1.2 TLSv1.3;' /etc/nginx/nginx.conf
+    
+    CIPHER_SUITE="ECDHE:ECDSA:!ADH:!EXP:!LOW:!SSLv2:!3DES:${SSL_COMMON[*]}"
+    grep -q "ssl_ciphers" /etc/nginx/nginx.conf || sed -i '/http {/a \\tssl_ciphers '"'$CIPHER_SUITE';" /etc/nginx/nginx.conf
+    
+    sed -i '/http {/a \\tssl_prefer_server_ciphers on;' /etc/nginx/nginx.conf
+    sed -i '/http {/a \\tssl_session_tickets off;' /etc/nginx/nginx.conf
+    nginx -t && systemctl restart nginx
+fi
+```

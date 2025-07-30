@@ -1,0 +1,53 @@
+```bash
+#!/bin/bash
+
+# Vulnerabilidade 1: Cleartext Transmission of Sensitive Information via HTTP
+# Solução: Implica configurar o servidor web para redirecionar todo o tráfego HTTP para HTTPS e habilitar HSTS.
+# Como este script não tem como objetivo configurar um servidor web (Apache, Nginx, etc), essa parte fica a cargo do administrador.
+# Este script apenas fornece as diretrizes.
+echo "Vulnerabilidade 1: A correção requer configuração do servidor web (Apache, Nginx, etc.) para redirecionar HTTP para HTTPS e habilitar HSTS."
+echo "Consulte a documentação do seu servidor web para obter instruções detalhadas."
+
+# Vulnerabilidade 2: DNS Cache Snooping Vulnerability (UDP) - Active Check
+# Solução: Desabilitar recursão no servidor DNS.
+# Assume-se que o servidor DNS é BIND9. Adaptar se for outro servidor DNS.
+if command -v named >/dev/null 2>&1; then
+  echo "options { recursion no; };" >> /etc/bind/named.conf.options
+  systemctl restart bind9
+  echo "Vulnerabilidade 2: Recursão desabilitada no servidor DNS (BIND9). Reiniciei o serviço bind9."
+else
+  echo "Vulnerabilidade 2: Servidor DNS (BIND9) não encontrado.  A correção requer adaptação para o servidor DNS em uso."
+fi
+
+# Vulnerabilidade 3: ICMP Timestamp Reply Information Disclosure
+# Solução: Desabilitar ICMP timestamp replies.
+echo 1 > /proc/sys/net/ipv4/icmp_echo_ignore_all
+sysctl -w net.ipv4.icmp_echo_ignore_all=1
+echo "net.ipv4.icmp_echo_ignore_all = 1" >> /etc/sysctl.conf
+echo "Vulnerabilidade 3: ICMP Timestamp replies desabilitados."
+
+# Vulnerabilidade 4: SSL/TLS: Deprecated TLSv1.0 and TLSv1.1 Protocol Detection
+# Solução: Desabilitar TLSv1.0 e TLSv1.1 no servidor web.
+# Assume-se que o servidor web é Apache ou Nginx. Adaptar se for outro servidor web.
+echo "Vulnerabilidade 4: A correção requer a desabilitação de TLSv1.0 e TLSv1.1 na configuração do servidor web (Apache, Nginx, etc.)."
+echo "Consulte a documentação do seu servidor web para obter instruções detalhadas."
+
+# Vulnerabilidade 5: SSL/TLS: Renegotiation DoS Vulnerability (CVE-2011-1473, CVE-2011-5094)
+# Solução: Desabilitar ou restringir a renegociação SSL/TLS.
+# Assume-se que o servidor web é Apache ou Nginx. Adaptar se for outro servidor web.
+echo "Vulnerabilidade 5: A correção requer a desabilitação ou restrição da renegociação SSL/TLS na configuração do servidor web (Apache, Nginx, etc.)."
+echo "Consulte a documentação do seu servidor web para obter instruções detalhadas."
+
+# Vulnerabilidade 6: SSL/TLS: Report Weak Cipher Suites
+# Solução: Configurar o servidor web para usar apenas cipher suites fortes.
+# Assume-se que o servidor web é Apache ou Nginx. Adaptar se for outro servidor web.
+echo "Vulnerabilidade 6: A correção requer a configuração do servidor web (Apache, Nginx, etc.) para usar cipher suites fortes."
+echo "Consulte a documentação do seu servidor web para obter instruções detalhadas."
+
+# Vulnerabilidade 7: TCP Timestamps Information Disclosure
+# Solução: Desabilitar TCP timestamps.
+sysctl -w net.ipv4.tcp_timestamps=0
+echo "net.ipv4.tcp_timestamps = 0" >> /etc/sysctl.conf
+sysctl -p
+echo "Vulnerabilidade 7: TCP timestamps desabilitados."
+```

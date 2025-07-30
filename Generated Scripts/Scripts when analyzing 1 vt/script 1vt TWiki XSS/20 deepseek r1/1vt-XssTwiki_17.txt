@@ -1,0 +1,30 @@
+#!/bin/bash
+
+BACKUP_DIR="/var/backups/twiki"
+INSTALL_DIR="/var/www/twiki"
+NOW=$(date +%Y%m%d_%H%M%S)
+TEMP_DIR=$(mktemp -d)
+TWIKI_ARCHIVE="$TEMP_DIR/twiki-4.2.4.tgz"
+TWIKI_URL="https://sourceforge.net/projects/twiki/files/TWiki%20for%20all%20Platforms/TWiki-4.2.4/TWiki-4.2.4.tgz/download"
+
+[ ! -d "$INSTALL_DIR" ] && echo "TWiki installation not found. Exiting." >&2 && exit 1
+[ ! -f "$INSTALL_DIR/lib/LocalSite.cfg" ] && echo "Missing configuration file. Cannot proceed." >&2 && exit 1
+
+mkdir -p "$BACKUP_DIR"
+tar -czf "$BACKUP_DIR/twiki_backup_$NOW.tgz" -C / $(realpath --relative-to=/ "$INSTALL_DIR")
+
+wget -q -O "$TWIKI_ARCHIVE" "$TWIKI_URL"
+tar -xzf "$TWIKI_ARCHIVE" -C "$TEMP_DIR"
+
+rsync -a "$INSTALL_DIR/data" "$TEMP_DIR/TWiki-4.2.4/"
+rsync -a "$INSTALL_DIR/pub" "$TEMP_DIR/TWiki-4.2.4/"
+cp -p "$INSTALL_DIR/lib/LocalSite.cfg" "$TEMP_DIR/TWiki-4.2.4/lib/"
+
+rm -rf "$INSTALL_DIR"
+mv "$TEMP_DIR/TWiki-4.2.4" "$INSTALL_DIR"
+
+find "$INSTALL_DIR" -type f -name .htaccess -exec chmod 644 {} \;
+find "$INSTALL_DIR"/{bin,tools} -type f -exec chmod 755 {} \;
+find "$INSTALL_DIR" -type d -exec chmod 755 {} \;
+
+rm -rf "$TEMP_DIR"

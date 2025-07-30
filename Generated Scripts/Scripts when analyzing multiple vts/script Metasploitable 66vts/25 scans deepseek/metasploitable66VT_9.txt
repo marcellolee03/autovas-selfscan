@@ -1,0 +1,236 @@
+#!/bin/bash
+
+# Vulnerabilidade 1
+sudo apt-get update
+sudo apt-get install -y twiki=4.2.4
+
+# Vulnerabilidade 3
+sudo systemctl stop rlogin
+sudo systemctl disable rlogin
+
+# Vulnerabilidade 4
+sudo do-release-upgrade
+
+# Vulnerabilidade 5
+sudo systemctl stop rexec
+sudo systemctl disable rexec
+
+# Vulnerabilidade 6
+sudo mv /usr/sbin/ingreslock /usr/sbin/ingreslock.bak
+
+# Vulnerabilidade 7
+sudo systemctl stop tomcat
+sudo apt-get update
+sudo apt-get install -y tomcat9
+
+# Vulnerabilidade 8
+mysql -u root -e "ALTER USER 'root'@'localhost' IDENTIFIED BY 'StrongPassword123!';"
+
+# Vulnerabilidade 9
+sudo apt-get update
+sudo apt-get install -y php7.2
+
+# Vulnerabilidade 11
+sudo apt-get update
+sudo apt-get install -y vsftpd
+
+# Vulnerabilidade 12
+sudo apt-get update
+sudo apt-get install -y vsftpd
+
+# Vulnerabilidade 13
+sudo systemctl stop distcc
+sudo systemctl disable distcc
+
+# Vulnerabilidade 14
+sudo -u postgres psql -c "ALTER USER postgres WITH PASSWORD 'StrongPassword123!';"
+
+# Vulnerabilidade 15
+vncpasswd
+
+# Vulnerabilidade 16
+sudo a2dismod dav
+sudo systemctl restart apache2
+
+# Vulnerabilidade 17
+sudo passwd msfadmin
+sudo passwd postgres
+sudo passwd service
+sudo passwd user
+
+# Vulnerabilidade 19
+sudo systemctl stop rlogin
+sudo systemctl disable rlogin
+
+# Vulnerabilidade 20
+sudo systemctl stop rsh
+sudo systemctl disable rsh
+
+# Vulnerabilidade 21
+sudo apt-get update
+sudo apt-get install -y openssl
+
+# Vulnerabilidade 23
+sudo apt-get update
+sudo apt-get install -y twiki=4.3.2
+
+# Vulnerabilidade 24
+sudo apt-get update
+sudo apt-get install -y vsftpd
+sudo sed -i 's/anonymous_enable=YES/anonymous_enable=NO/' /etc/vsftpd.conf
+sudo systemctl restart vsftpd
+
+# Vulnerabilidade 25
+wget https://code.jquery.com/jquery-1.9.0.min.js -O /var/www/html/mutillidae/javascript/ddsmoothmenu/jquery.min.js
+
+# Vulnerabilidade 26
+sudo apt-get update
+sudo apt-get install -y twiki=6.1.0
+
+# Vulnerabilidade 27
+sudo apt-get update
+sudo apt-get install -y twiki=4.3.1
+
+# Vulnerabilidade 28
+sudo sed -i 's/SSLProtocol all -SSLv3/SSLProtocol all -SSLv2 -SSLv3/' /etc/apache2/mods-enabled/ssl.conf
+sudo systemctl restart apache2
+
+# Vulnerabilidade 29
+sudo sed -i 's/SSLProtocol all -SSLv3/SSLProtocol all -SSLv2 -SSLv3/' /etc/apache2/mods-enabled/ssl.conf
+sudo systemctl restart apache2
+
+# Vulnerabilidade 30
+sudo sed -i 's/SSLCipherSuite HIGH:!aNULL:!MD5/SSLCipherSuite HIGH:!aNULL:!MD5:!RC4/' /etc/apache2/mods-enabled/ssl.conf
+sudo systemctl restart apache2
+
+# Vulnerabilidade 31
+sudo sed -i 's/TraceEnable On/TraceEnable Off/' /etc/apache2/apache2.conf
+sudo systemctl restart apache2
+
+# Vulnerabilidade 32
+openssl req -newkey rsa:4096 -nodes -keyout /etc/ssl/private/ssl-cert-snakeoil.key -x509 -days 365 -out /etc/ssl/certs/ssl-cert-snakeoil.pem -subj "/CN=example.com"
+
+# Vulnerabilidade 33
+openssl req -newkey rsa:4096 -nodes -keyout /etc/ssl/private/ssl-cert-snakeoil.key -x509 -days 365 -out /etc/ssl/certs/ssl-cert-snakeoil.pem -subj "/CN=example.com"
+
+# Vulnerabilidade 34
+sudo sed -i 's/KexAlgorithms curve25519-sha256@libssh.org,ecdh-sha2-nistp256,ecdh-sha2-nistp384,ecdh-sha2-nistp521,diffie-hellman-group-exchange-sha256/KexAlgorithms curve25519-sha256@libssh.org,ecdh-sha2-nistp256,ecdh-sha2-nistp384,ecdh-sha2-nistp521/' /etc/ssh/sshd_config
+sudo systemctl restart sshd
+
+# Vulnerabilidade 35
+sudo rm /var/www/html/mutillidae/phpinfo.php
+sudo rm /var/www/html/phpinfo.php
+
+# Vulnerabilidade 36
+sudo sed -i 's/HostKeyAlgorithms ssh-rsa,ssh-dss/HostKeyAlgorithms ssh-rsa/' /etc/ssh/sshd_config
+sudo systemctl restart sshd
+
+# Vulnerabilidade 37
+sudo sed -i 's/smtpd_vrfy_command=yes/smtpd_vrfy_command=no/' /etc/postfix/main.cf
+sudo systemctl restart postfix
+
+# Vulnerabilidade 38
+sudo sed -i 's/SSLHonorCipherOrder on/SSLHonorCipherOrder on,SSLInsecureRenegotiation off/' /etc/apache2/mods-enabled/ssl.conf
+sudo systemctl restart apache2
+
+# Vulnerabilidade 39
+sudo sed -i 's/SSLHonorCipherOrder on/SSLHonorCipherOrder on,SSLInsecureRenegotiation off/' /etc/apache2/mods-enabled/ssl.conf
+sudo systemctl restart apache2
+
+# Vulnerabilidade 40
+openssl req -newkey rsa:4096 -nodes -keyout /etc/ssl/private/ssl-cert-snakeoil.key -x509 -days 365 -out /etc/ssl/certs/ssl-cert-snakeoil.pem -subj "/CN=example.com"
+
+# Vulnerabilidade 41
+openssl req -newkey rsa:4096 -nodes -keyout /etc/ssl/private/ssl-cert-snakeoil.key -x509 -days 365 -out /etc/ssl/certs/ssl-cert-snakeoil.pem -subj "/CN=example.com"
+
+# Vulnerabilidade 42
+sudo rm /var/www/html/mutillidae/index.php
+
+# Vulnerabilidade 43
+sudo rm /var/www/html/mutillidae/index.php
+
+# Vulnerabilidade 44
+sudo chmod 750 /usr/doc
+
+# Vulnerabilidade 45
+sudo systemctl stop telnet
+sudo systemctl disable telnet
+
+# Vulnerabilidade 46
+sudo sed -i 's/#force_local_logins_ssl=no/force_local_logins_ssl=yes/' /etc/vsftpd.conf
+sudo systemctl restart vsftpd
+
+# Vulnerabilidade 47
+sudo apt-get update
+sudo apt-get install -y tightvncserver
+
+# Vulnerabilidade 48
+sudo sed -i 's/#force_local_logins_ssl=no/force_local_logins_ssl=yes/' /etc/vsftpd.conf
+sudo systemctl restart vsftpd
+
+# Vulnerabilidade 49
+sudo a2enmod ssl
+sudo a2ensite default-ssl
+sudo systemctl restart apache2
+
+# Vulnerabilidade 50
+sudo sed -i 's/SSLProtocol all -SSLv3/SSLProtocol all -SSLv2 -SSLv3 -TLSv1 -TLSv1.1/' /etc/apache2/mods-enabled/ssl.conf
+sudo systemctl restart apache2
+
+# Vulnerabilidade 51
+sudo sed -i 's/Ciphers aes128-ctr,aes192-ctr,aes256-ctr/Ciphers aes128-ctr,aes192-ctr,aes256-ctr,chacha20-poly1305@openssh.com/' /etc/ssh/sshd_config
+sudo systemctl restart sshd
+
+# Vulnerabilidade 52
+sudo apt-get update
+sudo apt-get install -y apache2
+
+# Vulnerabilidade 53
+sudo rm /var/www/html/phpMyAdmin/error.php
+
+# Vulnerabilidade 54
+sudo sed -i 's/SSLProtocol all -SSLv3/SSLProtocol all -SSLv2 -SSLv3 -TLSv1 -TLSv1.1/' /etc/apache2/mods-enabled/ssl.conf
+sudo systemctl restart apache2
+
+# Vulnerabilidade 55
+wget https://code.jquery.com/jquery-1.9.0.min.js -O /var/www/html/mutillidae/javascript/ddsmoothmenu/jquery.min.js
+
+# Vulnerabilidade 56
+sudo sed -i 's/SSLCipherSuite HIGH:!aNULL:!MD5/SSLCipherSuite HIGH:!aNULL:!MD5:!RC4:!DES:!3DES/' /etc/apache2/mods-enabled/ssl.conf
+sudo systemctl restart apache2
+
+# Vulnerabilidade 57
+openssl req -newkey rsa:4096 -nodes -keyout /etc/ssl/private/ssl-cert-snakeoil.key -x509 -days 365 -out /etc/ssl/certs/ssl-cert-snakeoil.pem -subj "/CN=example.com"
+
+# Vulnerabilidade 58
+sudo sed -i 's/SSLHonorCipherOrder on/SSLHonorCipherOrder on,SSLOptions +StrictRequire/' /etc/apache2/mods-enabled/ssl.conf
+sudo systemctl restart apache2
+
+# Vulnerabilidade 59
+sudo sed -i 's/SSLHonorCipherOrder on/SSLHonorCipherOrder on,SSLOptions +StrictRequire/' /etc/apache2/mods-enabled/ssl.conf
+sudo systemctl restart apache2
+
+# Vulnerabilidade 60
+openssl req -newkey rsa:4096 -nodes -keyout /etc/ssl/private/ssl-cert-snakeoil.key -x509 -days 365 -out /etc/ssl/certs/ssl-cert-snakeoil.pem -subj "/CN=example.com"
+
+# Vulnerabilidade 61
+sudo sed -i 's/SSLCipherSuite HIGH:!aNULL:!MD5/SSLCipherSuite HIGH:!aNULL:!MD5:!RC4:!DES:!3DES/' /etc/apache2/mods-enabled/ssl.conf
+sudo systemctl restart apache2
+
+# Vulnerabilidade 62
+sudo sed -i 's/SSLProtocol all -SSLv3/SSLProtocol all -SSLv2 -SSLv3/' /etc/apache2/mods-enabled/ssl.conf
+sudo systemctl restart apache2
+
+# Vulnerabilidade 63
+sudo sed -i 's/SSLProtocol all -SSLv3/SSLProtocol all -SSLv2 -SSLv3/' /etc/apache2/mods-enabled/ssl.conf
+sudo systemctl restart apache2
+
+# Vulnerabilidade 64
+sudo sed -i 's/MACs hmac-sha1,umac-64@openssh.com/MACs hmac-sha2-256,hmac-sha2-512/' /etc/ssh/sshd_config
+sudo systemctl restart sshd
+
+# Vulnerabilidade 65
+sudo sysctl -w net.ipv4.tcp_timestamps=0
+
+# Vulnerabilidade 66
+sudo sysctl -w net.ipv4.icmp_echo_ignore_broadcasts=1

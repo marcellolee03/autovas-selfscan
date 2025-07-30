@@ -1,0 +1,89 @@
+
+A vulnerabilidade identificada é a "Cleartext Transmission of Sensitive Information via HTTP" (Transmissão de Informações Sensíveis em Texto Simples via HTTP) na porta 80 (TCP).  Isso significa que o host/aplicativo transmite informações sensíveis (como nome de usuário e senhas) sem criptografia, e a solução é forçar a transmissão de dados via uma conexão SSL/TLS criptografada, além de redirecionar todos os usuários para a conexão segura antes de permitir a inserção de dados sensíveis. 
+
+
+A seguir, a análise de cada script em relação à capacidade de corrigir essa vulnerabilidade:
+
+Script aeta2_1.txt: Sim. Este script tenta resolver a vulnerabilidade configurando o iptables para bloquear o tráfego HTTP não criptografado na porta 80 e configurando tanto o Apache quanto o Nginx para redirecionar todas as requisições HTTP para HTTPS.  Ele também verifica e configura um certificado SSL. 
+
+Script aeta2_2.txt: Sim. Este script configura o Apache para redirecionar HTTP para HTTPS e habilita o módulo SSL, além de configurar o Apache para usar SSL com um certificado snakeoil.pem.  Ele também verifica se o redirecionamento está funcionando. 
+
+Script aeta2_3.txt: Sim. O script configura tanto o Apache quanto o Nginx para redirecionar HTTP para HTTPS.  Ele também verifica a existência de um certificado SSL e o gera se necessário, e configura ambos os servidores web para usá-lo.  Por fim, tenta forçar o uso de HTTPS em formulários de login de um arquivo index.html. 
+
+
+Script aeta2_4.txt: Sim. O script configura tanto o Apache quanto o Nginx para forçar o HTTPS e redirecionar o tráfego HTTP.  Ele também verifica se o openssl está instalado e gera um certificado autoassinado caso o certificado SSL não exista ou não seja válido. 
+
+Script aeta2_5.txt: Sim. O script foca na configuração do Apache para forçar HTTPS, redirecionar HTTP para HTTPS e desabilitar a Autenticação Básica HTTP se não estiver usando HTTPS. 
+Script aeta2_6.txt: Sim. Este script para o serviço Apache HTTP e tenta habilitar um serviço Apache SSL (o que é uma abordagem menos comum do que configurar o Apache existente para SSL, mas visa o mesmo objetivo).  Ele também configura o redirecionamento HTTP para HTTPS no Apache. 
+Script aeta2_7.txt: Sim. O script desabilita o acesso HTTP via iptables e garante que o HTTPS esteja habilitado, incluindo um redirecionamento de HTTP para HTTPS via iptables.  Ele também endurece a configuração SSL/TLS para Apache e Nginx e configura o SSH (o que não está diretamente relacionado à vulnerabilidade principal, mas é uma medida de segurança). 
+
+Script aeta2_8.txt: Sim. O script configura o Apache e o Nginx para redirecionar HTTP para HTTPS.  Ele também verifica a presença de certificados SSL e gera um autoassinado se necessário. 
+
+Script aeta2_9.txt: Sim. Este script instala Apache e OpenSSL, habilita o módulo SSL, gera um certificado autoassinado, configura o site SSL e redireciona todo o tráfego HTTP para HTTPS. 
+Script aeta2_10.txt: Sim. O script configura o Apache para redirecionar HTTP para HTTPS, habilita o módulo SSL, verifica a escuta na porta 443 e configura o UFW para permitir HTTPS e bloquear HTTP. 
+Script aeta2_11.txt: Sim. O script detecta a presença de Apache ou Nginx e, para ambos, faz backup da configuração original, modifica os arquivos de configuração para redirecionar HTTP para HTTPS e habilita o SSL. 
+Script aeta2_12.txt: Sim. Este script configura Apache e Nginx para forçar HTTPS e redirecionar HTTP para HTTPS.  Ele também verifica e gera certificados SSL autoassinados se estiverem faltando e configura o UFW para permitir HTTPS. 
+
+Script aeta2_13.txt: Sim. O script configura o Apache para redirecionar HTTP para HTTPS, habilita o módulo SSL e reinicia o Apache.  Ele também inclui uma verificação para confirmar se o redirecionamento está funcionando. 
+
+Script aeta2_14.txt: Sim. Este script garante que o Apache esteja instalado, habilita o módulo SSL e o site SSL padrão, redireciona HTTP para HTTPS, e configura o UFW para permitir HTTPS. 
+Script aeta2_15.txt: Sim. O script instala Apache, habilita SSL e o site SSL padrão, redireciona HTTP para HTTPS e configura o default-ssl.conf com um certificado snakeoil.pem. 
+Script aeta2_16.txt: Sim. O script verifica a existência do arquivo de configuração SSL padrão do Apache e, se presente, adiciona regras de reescrita para forçar HTTPS e redirecionamento.  Habilita os módulos SSL e Rewrite e reinicia o Apache.
+Script aeta2_17.txt: Sim. O script verifica a existência dos arquivos de configuração SSL e HTTP do Apache e, se presentes, habilita os módulos SSL e o site SSL padrão, adiciona uma regra de redirecionamento HTTP para HTTPS e reinicia o Apache.  Ele também tenta alterar os caminhos dos certificados, o que pode ser um problema se os certificados não existirem nesses novos caminhos.
+Script aeta2_18.txt: Sim. O script desativa o serviço HTTP do Apache, instala pacotes relacionados a SSL se necessário, habilita o módulo SSL e o site SSL padrão.  Em seguida, configura o redirecionamento HTTP para HTTPS no 000-default.conf. 
+
+Script aeta2_19.txt: Sim. Este script instala o OpenSSL, gera um certificado autoassinado para Nginx, e cria um arquivo de configuração Nginx que redireciona o tráfego HTTP para HTTPS e configura o SSL na porta 443. 
+Script aeta2_20.txt: Sim. O script adiciona uma regra de redirecionamento HTTP para HTTPS no 000-default.conf do Apache, habilita o módulo SSL e configura o default-ssl.conf para usar SSL com certificados snakeoil.pem. 
+Script aeta2_21.txt: Sim. Este script instala Certbot e Nginx (se não estiverem presentes) e usa o Certbot para obter e instalar um certificado SSL para o Nginx, configurando automaticamente o redirecionamento de HTTP para HTTPS. 
+Script aeta2_22.txt: Sim. O script instala o Certbot, configura o SSL usando o Certbot para um domínio específico e, em seguida, configura o Nginx para redirecionar HTTP para HTTPS. 
+Script aeta2_23.txt: Sim. O script configura o Apache e o Nginx para redirecionar HTTP para HTTPS.  Ele também verifica e gera um certificado SSL autoassinado se necessário e habilita o SSL em ambos os servidores. 
+
+Script aeta2_24.txt: Sim. Este script configura Apache e Nginx para forçar HTTPS e desabilitar HTTP.  Também garante que SSL/TLS esteja habilitado e configurado com protocolos e cifras seguras para ambos os servidores, e adiciona o cabeçalho HSTS. 
+
+Script aeta2_25.txt: Sim. O script configura o Apache e o Nginx para redirecionar HTTP para HTTPS.  Verifica e gera um certificado SSL autoassinado se necessário, e habilita o SSL para Apache e Nginx.  Inclui uma verificação final do redirecionamento. 
+
+
+Script aeta2_26.txt: Sim. O script garante que o módulo SSL do Apache esteja habilitado, redireciona HTTP para HTTPS modificando o 000-default.conf, e configura o default-ssl.conf com SSL. 
+Script aeta2_27.txt: Sim. O script configura Apache e Nginx para redirecionar HTTP para HTTPS.  Ele instala o Certbot (se não estiver presente) e o utiliza para obter e instalar certificados SSL para Apache e Nginx, além de atualizar as regras do firewall (UFW) para permitir HTTPS. 
+
+Script aeta2_28.txt: Sim. Este script habilita o módulo SSL e o site SSL padrão no Apache.  Ele tenta mudar a porta de escuta do Apache para 443 e cria um novo VirtualHost na porta 80 para redirecionar para HTTPS.
+Script aeta2_29.txt: Sim. O script configura Apache e Nginx para redirecionar HTTP para HTTPS.  Garante que SSL/TLS esteja habilitado e configurado para ambos os servidores e adiciona o cabeçalho HSTS. 
+
+Script aeta2_30.txt: Sim. Semelhante a aeta2_29.txt e aeta2_24.txt, este script configura Apache e Nginx para redirecionar HTTP para HTTPS, garante que SSL/TLS esteja habilitado com configurações seguras de protocolo e cifra, e adiciona o cabeçalho HSTS. 
+Script aeta2_31.txt: Sim. O script instala o Apache (se não estiver presente), cria um certificado SSL autoassinado, configura o Apache para usar SSL e edita o arquivo de configuração para redirecionar HTTP para HTTPS.  Inclui uma verificação para o redirecionamento. 
+
+Script aeta2_32.txt: Sim. O script configura o Apache para redirecionar HTTP para HTTPS e habilita o módulo SSL.  Ele também configura o iptables e o UFW para bloquear o tráfego HTTP na porta 80. 
+
+Script aeta2_33.txt: Sim. Este script verifica e, se necessário, configura o SSL no Apache, gerando um certificado autoassinado.  Em seguida, habilita o site SSL padrão e adiciona regras de redirecionamento HTTP para HTTPS no arquivo de configuração padrão do Apache. 
+
+Script aeta2_34.txt: Sim. O script garante que OpenSSL e Apache estejam instalados, habilita o módulo SSL e o site SSL padrão, configura o redirecionamento HTTP para HTTPS e gera um certificado SSL autoassinado se não existir. 
+Script aeta2_35.txt: Sim. O script habilita os módulos SSL e o site SSL padrão do Apache.  Ele adiciona regras de reescrita ao arquivo de configuração padrão do servidor para redirecionar todo o tráfego HTTP para HTTPS.
+Script aeta2_36.txt: Sim. O script configura o Apache para redirecionar HTTP para HTTPS e para usar HTTPS.  Ele ativa o módulo SSL e reinicia o Apache.  Também configura o UFW para permitir HTTPS e negar HTTP.
+
+Script aeta2_37.txt: Sim. Este script instala o OpenSSL, gera um certificado autoassinado para Nginx se não existir, e modifica o arquivo de configuração padrão do Nginx para escutar na porta 443 com SSL e redirecionar a porta 80 para HTTPS. 
+Script aeta2_38.txt: Sim. O script configura o Apache para redirecionar HTTP para HTTPS, habilita o módulo SSL e configura o Apache para usar SSL com um certificado snakeoil.pem. 
+Script aeta2_39.txt: Sim. O script verifica se o Apache está instalado, instala o módulo SSL se necessário, habilita o SSL e o site SSL padrão.  Em seguida, configura o redirecionamento de HTTP para HTTPS no 000-default.conf e habilita o módulo de reescrita. 
+
+Script aeta2_40.txt: Sim. O script instala o Apache (se necessário), habilita o módulo SSL e o site SSL padrão, gera um certificado autoassinado e configura o default-ssl.conf para usar SSL.  Finalmente, adiciona uma regra de redirecionamento HTTP para HTTPS ao 000-default.conf. 
+
+Script aeta2_41.txt: Sim. O script configura o Apache para redirecionar HTTP para HTTPS e habilita o módulo SSL.  Ele configura o SSL no Apache para usar um certificado snakeoil.pem. 
+
+Script aeta2_42.txt: Sim. O script instala o Apache (se não estiver presente), habilita o módulo SSL, cria um certificado autoassinado, configura o Apache para usar SSL e redireciona HTTP para HTTPS. 
+Script aeta2_43.txt: Sim. Semelhante a aeta2_24.txt, este script configura Apache e Nginx para forçar HTTPS e desabilitar HTTP, garante que SSL/TLS esteja habilitado com configurações seguras de protocolo e cifra, e adiciona o cabeçalho HSTS. 
+Script aeta2_44.txt: Sim. O script verifica se o Apache está instalado e se o default-ssl.conf existe.  Ele habilita o módulo SSL e o site SSL padrão, adiciona um redirecionamento HTTP para HTTPS e adiciona o cabeçalho HSTS. 
+
+Script aeta2_45.txt: Sim. Idêntico aos scripts aeta2_24.txt, aeta2_30.txt e aeta2_43.txt, este script configura Apache e Nginx para redirecionar HTTP para HTTPS, garante que SSL/TLS esteja habilitado com configurações seguras de protocolo e cifra, e adiciona o cabeçalho HSTS. 
+Script aeta2_46.txt: Sim. Este script instala Certbot e Nginx (se necessário), usa o Certbot para obter um certificado SSL e configura o Nginx para redirecionar HTTP para HTTPS. 
+Script aeta2_47.txt: Sim. O script para o serviço HTTP do Apache, instala mod_ssl, gera um certificado autoassinado, configura o Apache para redirecionar HTTP para HTTPS e para usar SSL. 
+Script aeta2_48.txt: Sim. Este script instala o Certbot (se não estiver presente) e o utiliza para obter e instalar um certificado SSL para o Nginx, configurando automaticamente o redirecionamento de HTTP para HTTPS. 
+Script aeta2_49.txt: Sim. O script verifica e habilita o módulo SSL do Apache.  Se o arquivo de configuração SSL não existir, ele o cria.  Habilita o site SSL e configura o redirecionamento HTTP para HTTPS. 
+
+
+Script aeta2_50.txt: Sim. Idêntico aos scripts aeta2_24.txt, aeta2_30.txt, aeta2_43.txt e aeta2_45.txt, este script configura Apache e Nginx para redirecionar HTTP para HTTPS, garante que SSL/TLS esteja habilitado com configurações seguras de protocolo e cifra, e adiciona o cabeçalho HSTS. 
+Porcentagem geral de correção das vulnerabilidades:
+
+Todos os 50 scripts fornecidos abordam a vulnerabilidade de "Cleartext Transmission of Sensitive Information via HTTP" e implementam medidas para corrigi-la, principalmente forçando o uso de HTTPS e redirecionando o tráfego HTTP. Embora a eficácia exata possa variar dependendo do ambiente específico e de outras configurações de segurança, todos os scripts demonstram a intenção e os mecanismos para mitigar a vulnerabilidade.
+
+Considerando que todos os scripts visam a correção da mesma vulnerabilidade através de métodos diretos e apropriados (redirecionamento para HTTPS, habilitação de SSL/TLS), a porcentagem de correção para a vulnerabilidade específica apresentada é de 100% para cada script individualmente, assumindo que eles são executados em um ambiente compatível onde o Apache ou Nginx estão instalados e os caminhos de configuração são os esperados.
+
+Portanto, a média de porcentagem geral de correção das vulnerabilidades é de 100%.

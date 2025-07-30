@@ -1,0 +1,35 @@
+#!/bin/bash
+set -euo pipefail
+
+config_file="$(
+  sudo -u postgres psql -t -p 5432 -c "SHOW config_file;" 2>/dev/null || {
+    ss_line="$(ss -lntp "sport = :5432" | grep 'LISTEN')"
+    if [ -n "$ss_line" ]; then
+      pid="$(grep -o 'pid=[0-9]\+' <<< "$ss_line" | cut -d= -f2)"
+      cmdline="$(tr '\0' '\n' < "/proc/${pid}/cmdline")"
+      arg_d="$(grep -m1 '^-D' <<< "$cmdline" | awk '{print $2}')"
+      [ -n "$arg_d" ] && echo "${arg_d}/postgresql.conf"
+    fi
+  } | head -n1 | tr -d '[:space:]'
+)"
+
+if [ -z "$config_file" ]; then
+  config_file="$(find /etc/postgresql /var/lib/pgsql /var/lib/postgresql -name "postgresql.conf" -print -quit 2>/dev/null)"
+fi
+
+[ -f "$config_file" ] || exit 0
+cp "$config_file" "${config_file}.bak"
+
+if grep -q '^ssl_min_protocol_version' "$config_file"; then
+  sed -i "s/^ssl_min_protocol_version.*/ssl_min_protocol_version = 'TLSv1.2'/" "$config_file"
+elif grep -q '^#ssl_min_protocol_version' "$config_file"; then
+  sed -i "s/^#ssl_min_protocol_version.*/ssl_min_protocol_version = 'TLSv1.2'/" "$config_file"
+else
+  echo "ssl_min_protocol_version = 'TLSv1.2'" >> "$config_file"
+fi
+
+if command -v systemctl >/dev/null; then
+  systemctl restart postgresql
+elif command -v service >/dev/null; then
+  service postgresql restart
+fi

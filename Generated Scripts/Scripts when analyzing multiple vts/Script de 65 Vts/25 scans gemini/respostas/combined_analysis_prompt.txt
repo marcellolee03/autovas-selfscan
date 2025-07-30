@@ -1,0 +1,4731 @@
+>analise esse prompt contendo as vulnerabilidades encontradas em um csv do openvas e analise se os scripts que irei enviar em seguida sao capazes de corrigir esses problemas ou nao, me informando uma porcentagem de correcao das vulnerabilidades
+>Vulnerabilidades:
+    # INSTRUÇÕES PARA O MODELO DE IA
+
+    ## PERSONA
+    Você é um especialista em cibersegurança e automação de sistemas, focado em criar scripts de correção (patching). Sua única função é gerar um script que resolva a vulnerabilidade descrita abaixo.
+
+    ## TAREFA
+    Analise o contexto da vulnerabilidade a seguir e gere um script de shell (compatível com o sistema operacional do localhost) que, ao ser executado, corrija permanentemente a vulnerabilidade descrita.
+
+    ## CONTEXTO DA VULNERABILIDADE
+
+# Vulnerabilidade 1
+CVEs: CVE-2024-6232,CVE-2024-7592,CVE-2024-8088,CVE-2024-45490,CVE-2024-45491,CVE-2024-45492
+NVT Name: Python Multiple Vulnerabilities (Aug 2024) - Windows
+Port: 5000.0
+Port Protocol: tcp
+Summary: Python is prone to an infinite loop vulnerability leading to a
+  denial of service (DoS).
+Specific Result: Installed version: 3.10.12
+Fixed version:     3.10.15
+Installation
+path / port:       5000/tcp
+
+
+Vulnerability Detection Method: Checks if a vulnerable version is present on the target host.
+Details:
+Python Multiple Vulnerabilities (Aug 2024) - Windows
+(OID: 1.3.6.1.4.1.25623.1.0.170806)
+Version used: 2024-12-13T15:40:54Z
+
+Affected Software/OS: Python prior to version 3.8.20, 3.9.x prior to 3.9.20, 3.10.x
+  prior to 3.10.15, 3.11.x prior to 3.11.10 and 3.12.x prior to 3.12.6.
+Product Detection Result: Product: cpe:/a:python:python:3.10.12
+Method: Python Detection Consolidation
+(OID: 1.3.6.1.4.1.25623.1.0.112857)
+
+Solution: Update to version 3.8.20, 3.9.20, 3.10.15, 3.11.10, 3.12.6 or
+  later.
+
+# Vulnerabilidade 2
+CVEs: CVE-2024-6232,CVE-2024-7592,CVE-2024-8088,CVE-2024-45490,CVE-2024-45491,CVE-2024-45492
+NVT Name: Python Multiple Vulnerabilities (Aug 2024) - Windows
+Port: 8000.0
+Port Protocol: tcp
+Summary: Python is prone to an infinite loop vulnerability leading to a
+  denial of service (DoS).
+Specific Result: Installed version: 3.12.0
+Fixed version:     3.12.6
+Installation
+path / port:       8000/tcp
+
+
+Vulnerability Detection Method: Checks if a vulnerable version is present on the target host.
+Details:
+Python Multiple Vulnerabilities (Aug 2024) - Windows
+(OID: 1.3.6.1.4.1.25623.1.0.170806)
+Version used: 2024-12-13T15:40:54Z
+
+Affected Software/OS: Python prior to version 3.8.20, 3.9.x prior to 3.9.20, 3.10.x
+  prior to 3.10.15, 3.11.x prior to 3.11.10 and 3.12.x prior to 3.12.6.
+Product Detection Result: Product: cpe:/a:python:python:3.12.0
+Method: Python Detection Consolidation
+(OID: 1.3.6.1.4.1.25623.1.0.112857)
+
+Solution: Update to version 3.8.20, 3.9.20, 3.10.15, 3.11.10, 3.12.6 or
+  later.
+
+# Vulnerabilidade 3
+CVEs: CVE-2024-6232,CVE-2024-7592,CVE-2024-8088,CVE-2024-45490,CVE-2024-45491,CVE-2024-45492
+NVT Name: Python Multiple Vulnerabilities (Aug 2024) - Windows
+Port: 8001.0
+Port Protocol: tcp
+Summary: Python is prone to an infinite loop vulnerability leading to a
+  denial of service (DoS).
+Specific Result: Installed version: 3.12.0
+Fixed version:     3.12.6
+Installation
+path / port:       8001/tcp
+
+
+Vulnerability Detection Method: Checks if a vulnerable version is present on the target host.
+Details:
+Python Multiple Vulnerabilities (Aug 2024) - Windows
+(OID: 1.3.6.1.4.1.25623.1.0.170806)
+Version used: 2024-12-13T15:40:54Z
+
+Affected Software/OS: Python prior to version 3.8.20, 3.9.x prior to 3.9.20, 3.10.x
+  prior to 3.10.15, 3.11.x prior to 3.11.10 and 3.12.x prior to 3.12.6.
+Product Detection Result: Product: cpe:/a:python:python:3.12.0
+Method: Python Detection Consolidation
+(OID: 1.3.6.1.4.1.25623.1.0.112857)
+
+Solution: Update to version 3.8.20, 3.9.20, 3.10.15, 3.11.10, 3.12.6 or
+  later.
+
+# Vulnerabilidade 4
+CVEs: CVE-2024-6232,CVE-2024-7592,CVE-2024-8088,CVE-2024-45490,CVE-2024-45491,CVE-2024-45492
+NVT Name: Python Multiple Vulnerabilities (Aug 2024) - Windows
+Port: 8002.0
+Port Protocol: tcp
+Summary: Python is prone to an infinite loop vulnerability leading to a
+  denial of service (DoS).
+Specific Result: Installed version: 3.12.0
+Fixed version:     3.12.6
+Installation
+path / port:       8002/tcp
+
+
+Vulnerability Detection Method: Checks if a vulnerable version is present on the target host.
+Details:
+Python Multiple Vulnerabilities (Aug 2024) - Windows
+(OID: 1.3.6.1.4.1.25623.1.0.170806)
+Version used: 2024-12-13T15:40:54Z
+
+Affected Software/OS: Python prior to version 3.8.20, 3.9.x prior to 3.9.20, 3.10.x
+  prior to 3.10.15, 3.11.x prior to 3.11.10 and 3.12.x prior to 3.12.6.
+Product Detection Result: Product: cpe:/a:python:python:3.12.0
+Method: Python Detection Consolidation
+(OID: 1.3.6.1.4.1.25623.1.0.112857)
+
+Solution: Update to version 3.8.20, 3.9.20, 3.10.15, 3.11.10, 3.12.6 or
+  later.
+
+# Vulnerabilidade 5
+CVEs: CVE-2024-9287
+NVT Name: Python Command Injection Vulnerability (Oct 2024) - Windows
+Port: 8002.0
+Port Protocol: tcp
+Summary: Python is prone to a command injection vulnerability in the venv
+  module.
+Specific Result: Installed version: 3.12.0
+Fixed version:     3.12.8
+Installation
+path / port:       8002/tcp
+
+
+Vulnerability Detection Method: Checks if a vulnerable version is present on the target host.
+Details:
+Python Command Injection Vulnerability (Oct 2024) - Windows
+(OID: 1.3.6.1.4.1.25623.1.0.114841)
+Version used: 2025-02-11T05:38:07Z
+
+Affected Software/OS: Python versions prior to 3.9.21, 3.10.x prior to 3.10.16,
+  3.11.x prior to 3.11.11, 3.12.x prior to 3.12.8 and 3.13.x prior to 3.13.1.
+Product Detection Result: Product: cpe:/a:python:python:3.12.0
+Method: Python Detection Consolidation
+(OID: 1.3.6.1.4.1.25623.1.0.112857)
+
+Solution: Update to version 3.9.21, 3.10.16, 3.11.11, 3.12.8, 3.13.1
+  or later.
+
+# Vulnerabilidade 6
+CVEs: CVE-2024-9287
+NVT Name: Python Command Injection Vulnerability (Oct 2024) - Windows
+Port: 8000.0
+Port Protocol: tcp
+Summary: Python is prone to a command injection vulnerability in the venv
+  module.
+Specific Result: Installed version: 3.12.0
+Fixed version:     3.12.8
+Installation
+path / port:       8000/tcp
+
+
+Vulnerability Detection Method: Checks if a vulnerable version is present on the target host.
+Details:
+Python Command Injection Vulnerability (Oct 2024) - Windows
+(OID: 1.3.6.1.4.1.25623.1.0.114841)
+Version used: 2025-02-11T05:38:07Z
+
+Affected Software/OS: Python versions prior to 3.9.21, 3.10.x prior to 3.10.16,
+  3.11.x prior to 3.11.11, 3.12.x prior to 3.12.8 and 3.13.x prior to 3.13.1.
+Product Detection Result: Product: cpe:/a:python:python:3.12.0
+Method: Python Detection Consolidation
+(OID: 1.3.6.1.4.1.25623.1.0.112857)
+
+Solution: Update to version 3.9.21, 3.10.16, 3.11.11, 3.12.8, 3.13.1
+  or later.
+
+# Vulnerabilidade 7
+CVEs: CVE-2024-9287
+NVT Name: Python Command Injection Vulnerability (Oct 2024) - Windows
+Port: 8001.0
+Port Protocol: tcp
+Summary: Python is prone to a command injection vulnerability in the venv
+  module.
+Specific Result: Installed version: 3.12.0
+Fixed version:     3.12.8
+Installation
+path / port:       8001/tcp
+
+
+Vulnerability Detection Method: Checks if a vulnerable version is present on the target host.
+Details:
+Python Command Injection Vulnerability (Oct 2024) - Windows
+(OID: 1.3.6.1.4.1.25623.1.0.114841)
+Version used: 2025-02-11T05:38:07Z
+
+Affected Software/OS: Python versions prior to 3.9.21, 3.10.x prior to 3.10.16,
+  3.11.x prior to 3.11.11, 3.12.x prior to 3.12.8 and 3.13.x prior to 3.13.1.
+Product Detection Result: Product: cpe:/a:python:python:3.12.0
+Method: Python Detection Consolidation
+(OID: 1.3.6.1.4.1.25623.1.0.112857)
+
+Solution: Update to version 3.9.21, 3.10.16, 3.11.11, 3.12.8, 3.13.1
+  or later.
+
+# Vulnerabilidade 8
+CVEs: CVE-2024-9287
+NVT Name: Python Command Injection Vulnerability (Oct 2024) - Windows
+Port: 5000.0
+Port Protocol: tcp
+Summary: Python is prone to a command injection vulnerability in the venv
+  module.
+Specific Result: Installed version: 3.10.12
+Fixed version:     3.10.16
+Installation
+path / port:       5000/tcp
+
+
+Vulnerability Detection Method: Checks if a vulnerable version is present on the target host.
+Details:
+Python Command Injection Vulnerability (Oct 2024) - Windows
+(OID: 1.3.6.1.4.1.25623.1.0.114841)
+Version used: 2025-02-11T05:38:07Z
+
+Affected Software/OS: Python versions prior to 3.9.21, 3.10.x prior to 3.10.16,
+  3.11.x prior to 3.11.11, 3.12.x prior to 3.12.8 and 3.13.x prior to 3.13.1.
+Product Detection Result: Product: cpe:/a:python:python:3.10.12
+Method: Python Detection Consolidation
+(OID: 1.3.6.1.4.1.25623.1.0.112857)
+
+Solution: Update to version 3.9.21, 3.10.16, 3.11.11, 3.12.8, 3.13.1
+  or later.
+
+# Vulnerabilidade 9
+CVEs: CVE-2023-36632
+NVT Name: Python <= 3.12.1 RecursionError Vulnerability - Windows
+Port: 8001.0
+Port Protocol: tcp
+Summary: Python is prone to a 'RecursionError' vulnerability.
+Specific Result: Installed version: 3.12.0
+Fixed version:     None
+Installation
+path / port:       8001/tcp
+
+
+Vulnerability Detection Method: Checks if a vulnerable version is present on the target host.
+Details:
+Python <= 3.12.1 'RecursionError' Vulnerability - Windows
+(OID: 1.3.6.1.4.1.25623.1.0.104816)
+Version used: 2024-02-05T14:36:57Z
+
+Affected Software/OS: The legacy email.utils.parseaddr function in Python through
+  3.12.1.
+Product Detection Result: Product: cpe:/a:python:python:3.12.0
+Method: Python Detection Consolidation
+(OID: 1.3.6.1.4.1.25623.1.0.112857)
+
+Solution: No known solution was made available for at least one year
+  since the disclosure of this vulnerability. Likely none will be provided anymore. General solution
+  options are to upgrade to a newer release, disable respective features, remove the product or
+  replace the product by another one.
+
+  NOTE: email.utils.parseaddr is categorized as a Legacy API in the documentation of the Python
+  email package. Applications should instead use the email.parser.BytesParser or
+  email.parser.Parser class.
+
+# Vulnerabilidade 10
+CVEs: CVE-2023-52425
+NVT Name: Python DoS Vulnerability (Mar 2024) - Windows
+Port: 5000.0
+Port Protocol: tcp
+Summary: Python is prone to a denial of service (DoS) vulnerability in
+  libexpat.
+Specific Result: Installed version: 3.10.12
+Fixed version:     3.10.14
+Installation
+path / port:       5000/tcp
+
+
+Vulnerability Detection Method: Checks if a vulnerable version is present on the target host.
+Details:
+Python DoS Vulnerability (Mar 2024) - Windows
+(OID: 1.3.6.1.4.1.25623.1.0.170815)
+Version used: 2024-10-11T15:39:44Z
+
+Affected Software/OS: Python prior to version 3.8.19, 3.9.x prior to 3.9.19, 3.10.x
+  prior to 3.10.14, 3.11.x prior to 3.11.9 and 3.12.x prior to 3.12.3.
+Product Detection Result: Product: cpe:/a:python:python:3.10.12
+Method: Python Detection Consolidation
+(OID: 1.3.6.1.4.1.25623.1.0.112857)
+
+Solution: Update to version 3.8.19, 3.9.19, 3.10.14, 3.11.9, 3.12.3
+  or later.
+
+# Vulnerabilidade 11
+CVEs: CVE-2023-52425
+NVT Name: Python DoS Vulnerability (Mar 2024) - Windows
+Port: 8000.0
+Port Protocol: tcp
+Summary: Python is prone to a denial of service (DoS) vulnerability in
+  libexpat.
+Specific Result: Installed version: 3.12.0
+Fixed version:     3.12.3
+Installation
+path / port:       8000/tcp
+
+
+Vulnerability Detection Method: Checks if a vulnerable version is present on the target host.
+Details:
+Python DoS Vulnerability (Mar 2024) - Windows
+(OID: 1.3.6.1.4.1.25623.1.0.170815)
+Version used: 2024-10-11T15:39:44Z
+
+Affected Software/OS: Python prior to version 3.8.19, 3.9.x prior to 3.9.19, 3.10.x
+  prior to 3.10.14, 3.11.x prior to 3.11.9 and 3.12.x prior to 3.12.3.
+Product Detection Result: Product: cpe:/a:python:python:3.12.0
+Method: Python Detection Consolidation
+(OID: 1.3.6.1.4.1.25623.1.0.112857)
+
+Solution: Update to version 3.8.19, 3.9.19, 3.10.14, 3.11.9, 3.12.3
+  or later.
+
+# Vulnerabilidade 12
+CVEs: CVE-2023-52425
+NVT Name: Python DoS Vulnerability (Mar 2024) - Windows
+Port: 8001.0
+Port Protocol: tcp
+Summary: Python is prone to a denial of service (DoS) vulnerability in
+  libexpat.
+Specific Result: Installed version: 3.12.0
+Fixed version:     3.12.3
+Installation
+path / port:       8001/tcp
+
+
+Vulnerability Detection Method: Checks if a vulnerable version is present on the target host.
+Details:
+Python DoS Vulnerability (Mar 2024) - Windows
+(OID: 1.3.6.1.4.1.25623.1.0.170815)
+Version used: 2024-10-11T15:39:44Z
+
+Affected Software/OS: Python prior to version 3.8.19, 3.9.x prior to 3.9.19, 3.10.x
+  prior to 3.10.14, 3.11.x prior to 3.11.9 and 3.12.x prior to 3.12.3.
+Product Detection Result: Product: cpe:/a:python:python:3.12.0
+Method: Python Detection Consolidation
+(OID: 1.3.6.1.4.1.25623.1.0.112857)
+
+Solution: Update to version 3.8.19, 3.9.19, 3.10.14, 3.11.9, 3.12.3
+  or later.
+
+# Vulnerabilidade 13
+CVEs: CVE-2023-52425
+NVT Name: Python DoS Vulnerability (Mar 2024) - Windows
+Port: 8002.0
+Port Protocol: tcp
+Summary: Python is prone to a denial of service (DoS) vulnerability in
+  libexpat.
+Specific Result: Installed version: 3.12.0
+Fixed version:     3.12.3
+Installation
+path / port:       8002/tcp
+
+
+Vulnerability Detection Method: Checks if a vulnerable version is present on the target host.
+Details:
+Python DoS Vulnerability (Mar 2024) - Windows
+(OID: 1.3.6.1.4.1.25623.1.0.170815)
+Version used: 2024-10-11T15:39:44Z
+
+Affected Software/OS: Python prior to version 3.8.19, 3.9.x prior to 3.9.19, 3.10.x
+  prior to 3.10.14, 3.11.x prior to 3.11.9 and 3.12.x prior to 3.12.3.
+Product Detection Result: Product: cpe:/a:python:python:3.12.0
+Method: Python Detection Consolidation
+(OID: 1.3.6.1.4.1.25623.1.0.112857)
+
+Solution: Update to version 3.8.19, 3.9.19, 3.10.14, 3.11.9, 3.12.3
+  or later.
+
+# Vulnerabilidade 14
+CVEs: CVE-2023-36632
+NVT Name: Python <= 3.12.1 RecursionError Vulnerability - Windows
+Port: 5000.0
+Port Protocol: tcp
+Summary: Python is prone to a 'RecursionError' vulnerability.
+Specific Result: Installed version: 3.10.12
+Fixed version:     None
+Installation
+path / port:       5000/tcp
+
+
+Vulnerability Detection Method: Checks if a vulnerable version is present on the target host.
+Details:
+Python <= 3.12.1 'RecursionError' Vulnerability - Windows
+(OID: 1.3.6.1.4.1.25623.1.0.104816)
+Version used: 2024-02-05T14:36:57Z
+
+Affected Software/OS: The legacy email.utils.parseaddr function in Python through
+  3.12.1.
+Product Detection Result: Product: cpe:/a:python:python:3.10.12
+Method: Python Detection Consolidation
+(OID: 1.3.6.1.4.1.25623.1.0.112857)
+
+Solution: No known solution was made available for at least one year
+  since the disclosure of this vulnerability. Likely none will be provided anymore. General solution
+  options are to upgrade to a newer release, disable respective features, remove the product or
+  replace the product by another one.
+
+  NOTE: email.utils.parseaddr is categorized as a Legacy API in the documentation of the Python
+  email package. Applications should instead use the email.parser.BytesParser or
+  email.parser.Parser class.
+
+# Vulnerabilidade 15
+CVEs: CVE-2023-36632
+NVT Name: Python <= 3.12.1 RecursionError Vulnerability - Windows
+Port: 8000.0
+Port Protocol: tcp
+Summary: Python is prone to a 'RecursionError' vulnerability.
+Specific Result: Installed version: 3.12.0
+Fixed version:     None
+Installation
+path / port:       8000/tcp
+
+
+Vulnerability Detection Method: Checks if a vulnerable version is present on the target host.
+Details:
+Python <= 3.12.1 'RecursionError' Vulnerability - Windows
+(OID: 1.3.6.1.4.1.25623.1.0.104816)
+Version used: 2024-02-05T14:36:57Z
+
+Affected Software/OS: The legacy email.utils.parseaddr function in Python through
+  3.12.1.
+Product Detection Result: Product: cpe:/a:python:python:3.12.0
+Method: Python Detection Consolidation
+(OID: 1.3.6.1.4.1.25623.1.0.112857)
+
+Solution: No known solution was made available for at least one year
+  since the disclosure of this vulnerability. Likely none will be provided anymore. General solution
+  options are to upgrade to a newer release, disable respective features, remove the product or
+  replace the product by another one.
+
+  NOTE: email.utils.parseaddr is categorized as a Legacy API in the documentation of the Python
+  email package. Applications should instead use the email.parser.BytesParser or
+  email.parser.Parser class.
+
+# Vulnerabilidade 16
+CVEs: CVE-2023-6597
+NVT Name: Python Symlink Dereference Vulnerability (Mar 2024) - Windows
+Port: 8002.0
+Port Protocol: tcp
+Summary: Python is prone to a symlink dereference vulnerability.
+Specific Result: Installed version: 3.12.0
+Fixed version:     3.12.1
+Installation
+path / port:       8002/tcp
+
+
+Vulnerability Detection Method: Checks if a vulnerable version is present on the target host.
+Details:
+Python Symlink Dereference Vulnerability (Mar 2024) - Windows
+(OID: 1.3.6.1.4.1.25623.1.0.170812)
+Version used: 2024-10-11T15:39:44Z
+
+Affected Software/OS: Python prior to version 3.8.19, 3.9.x prior to 3.9.19, 3.10.x
+  prior to 3.10.14, 3.11.x prior to 3.11.8 and 3.12.x prior to 3.12.1.
+Product Detection Result: Product: cpe:/a:python:python:3.12.0
+Method: Python Detection Consolidation
+(OID: 1.3.6.1.4.1.25623.1.0.112857)
+
+Solution: Update to version 3.8.19, 3.9.19, 3.10.14, 3.11.8, 3.12.1
+  or later.
+
+# Vulnerabilidade 17
+CVEs: CVE-2023-6597
+NVT Name: Python Symlink Dereference Vulnerability (Mar 2024) - Windows
+Port: 8000.0
+Port Protocol: tcp
+Summary: Python is prone to a symlink dereference vulnerability.
+Specific Result: Installed version: 3.12.0
+Fixed version:     3.12.1
+Installation
+path / port:       8000/tcp
+
+
+Vulnerability Detection Method: Checks if a vulnerable version is present on the target host.
+Details:
+Python Symlink Dereference Vulnerability (Mar 2024) - Windows
+(OID: 1.3.6.1.4.1.25623.1.0.170812)
+Version used: 2024-10-11T15:39:44Z
+
+Affected Software/OS: Python prior to version 3.8.19, 3.9.x prior to 3.9.19, 3.10.x
+  prior to 3.10.14, 3.11.x prior to 3.11.8 and 3.12.x prior to 3.12.1.
+Product Detection Result: Product: cpe:/a:python:python:3.12.0
+Method: Python Detection Consolidation
+(OID: 1.3.6.1.4.1.25623.1.0.112857)
+
+Solution: Update to version 3.8.19, 3.9.19, 3.10.14, 3.11.8, 3.12.1
+  or later.
+
+# Vulnerabilidade 18
+CVEs: CVE-2023-6597
+NVT Name: Python Symlink Dereference Vulnerability (Mar 2024) - Windows
+Port: 5000.0
+Port Protocol: tcp
+Summary: Python is prone to a symlink dereference vulnerability.
+Specific Result: Installed version: 3.10.12
+Fixed version:     3.10.14
+Installation
+path / port:       5000/tcp
+
+
+Vulnerability Detection Method: Checks if a vulnerable version is present on the target host.
+Details:
+Python Symlink Dereference Vulnerability (Mar 2024) - Windows
+(OID: 1.3.6.1.4.1.25623.1.0.170812)
+Version used: 2024-10-11T15:39:44Z
+
+Affected Software/OS: Python prior to version 3.8.19, 3.9.x prior to 3.9.19, 3.10.x
+  prior to 3.10.14, 3.11.x prior to 3.11.8 and 3.12.x prior to 3.12.1.
+Product Detection Result: Product: cpe:/a:python:python:3.10.12
+Method: Python Detection Consolidation
+(OID: 1.3.6.1.4.1.25623.1.0.112857)
+
+Solution: Update to version 3.8.19, 3.9.19, 3.10.14, 3.11.8, 3.12.1
+  or later.
+
+# Vulnerabilidade 19
+CVEs: CVE-2023-6597
+NVT Name: Python Symlink Dereference Vulnerability (Mar 2024) - Windows
+Port: 8001.0
+Port Protocol: tcp
+Summary: Python is prone to a symlink dereference vulnerability.
+Specific Result: Installed version: 3.12.0
+Fixed version:     3.12.1
+Installation
+path / port:       8001/tcp
+
+
+Vulnerability Detection Method: Checks if a vulnerable version is present on the target host.
+Details:
+Python Symlink Dereference Vulnerability (Mar 2024) - Windows
+(OID: 1.3.6.1.4.1.25623.1.0.170812)
+Version used: 2024-10-11T15:39:44Z
+
+Affected Software/OS: Python prior to version 3.8.19, 3.9.x prior to 3.9.19, 3.10.x
+  prior to 3.10.14, 3.11.x prior to 3.11.8 and 3.12.x prior to 3.12.1.
+Product Detection Result: Product: cpe:/a:python:python:3.12.0
+Method: Python Detection Consolidation
+(OID: 1.3.6.1.4.1.25623.1.0.112857)
+
+Solution: Update to version 3.8.19, 3.9.19, 3.10.14, 3.11.8, 3.12.1
+  or later.
+
+# Vulnerabilidade 20
+CVEs: CVE-2024-3220
+NVT Name: Python Untrusted Search Path Vulnerability (Feb 2025) - Windows
+Port: 8001.0
+Port Protocol: tcp
+Summary: Python is prone to an untrusted search path vulnerability
+  in the mimetypes standard library.
+Specific Result: Installed version: 3.12.0
+Fixed version:     None
+Installation
+path / port:       8001/tcp
+
+
+Vulnerability Detection Method: Checks if a vulnerable version is present on the target host.
+Details:
+Python Untrusted Search Path Vulnerability (Feb 2025) - Windows
+(OID: 1.3.6.1.4.1.25623.1.0.171228)
+Version used: 2025-02-19T05:37:55Z
+
+Affected Software/OS: Python versions 3.13.2 and prior.
+Product Detection Result: Product: cpe:/a:python:python:3.12.0
+Method: Python Detection Consolidation
+(OID: 1.3.6.1.4.1.25623.1.0.112857)
+
+Solution: No known solution is available as of 18th February, 2025.
+  Information regarding this issue will be updated once solution details are available.
+
+# Vulnerabilidade 21
+CVEs: CVE-2024-3219
+NVT Name: Python Connection Race Vulnerability (Jul 2024) - Windows
+Port: 5000.0
+Port Protocol: tcp
+Summary: Python is prone to a connection race vulnerability.
+Specific Result: Installed version: 3.10.12
+Fixed version:     3.10.15
+Installation
+path / port:       5000/tcp
+
+
+Vulnerability Detection Method: Checks if a vulnerable version is present on the target host.
+Details:
+Python Connection Race Vulnerability (Jul 2024) - Windows
+(OID: 1.3.6.1.4.1.25623.1.0.114743)
+Version used: 2024-10-11T15:39:44Z
+
+Affected Software/OS: Python version 3.5 prior to version 3.8.20, 3.9.x prior to
+  3.9.20, 3.10.x prior to 3.10.15, 3.11.x prior to 3.11.10 and 3.12.x prior to 3.12.5.
+
+  Platforms that support AF_UNIX such as Linux and macOS are not affected by this vulnerability.
+Product Detection Result: Product: cpe:/a:python:python:3.10.12
+Method: Python Detection Consolidation
+(OID: 1.3.6.1.4.1.25623.1.0.112857)
+
+Solution: Update to version 3.8.20, 3.9.20, 3.10.15, 3.11.10, 3.12.5 or
+  later.
+
+# Vulnerabilidade 22
+CVEs: CVE-2024-4030
+NVT Name: Python Access Control Vulnerability (May 2024) - Windows
+Port: 5000.0
+Port Protocol: tcp
+Summary: Python is prone to an access control vulnerability.
+Specific Result: Installed version: 3.10.12
+Fixed version:     3.10.15
+Installation
+path / port:       5000/tcp
+
+
+Vulnerability Detection Method: Checks if a vulnerable version is present on the target host.
+Details:
+Python Access Control Vulnerability (May 2024) - Windows
+(OID: 1.3.6.1.4.1.25623.1.0.152212)
+Version used: 2024-10-11T15:39:44Z
+
+Affected Software/OS: Python prior to version 3.8.20, 3.9.x prior to 3.9.20, 3.10.x
+  prior to 3.10.15, 3.11.x prior to 3.11.10 and 3.12.x prior to 3.12.4.
+Product Detection Result: Product: cpe:/a:python:python:3.10.12
+Method: Python Detection Consolidation
+(OID: 1.3.6.1.4.1.25623.1.0.112857)
+
+Solution: Update to version 3.8.20, 3.9.20, 3.10.15, 3.11.10, 3.12.4 or
+  later.
+
+# Vulnerabilidade 23
+CVEs: CVE-2024-4030
+NVT Name: Python Access Control Vulnerability (May 2024) - Windows
+Port: 8000.0
+Port Protocol: tcp
+Summary: Python is prone to an access control vulnerability.
+Specific Result: Installed version: 3.12.0
+Fixed version:     3.12.4
+Installation
+path / port:       8000/tcp
+
+
+Vulnerability Detection Method: Checks if a vulnerable version is present on the target host.
+Details:
+Python Access Control Vulnerability (May 2024) - Windows
+(OID: 1.3.6.1.4.1.25623.1.0.152212)
+Version used: 2024-10-11T15:39:44Z
+
+Affected Software/OS: Python prior to version 3.8.20, 3.9.x prior to 3.9.20, 3.10.x
+  prior to 3.10.15, 3.11.x prior to 3.11.10 and 3.12.x prior to 3.12.4.
+Product Detection Result: Product: cpe:/a:python:python:3.12.0
+Method: Python Detection Consolidation
+(OID: 1.3.6.1.4.1.25623.1.0.112857)
+
+Solution: Update to version 3.8.20, 3.9.20, 3.10.15, 3.11.10, 3.12.4 or
+  later.
+
+# Vulnerabilidade 24
+CVEs: CVE-2024-4030
+NVT Name: Python Access Control Vulnerability (May 2024) - Windows
+Port: 8001.0
+Port Protocol: tcp
+Summary: Python is prone to an access control vulnerability.
+Specific Result: Installed version: 3.12.0
+Fixed version:     3.12.4
+Installation
+path / port:       8001/tcp
+
+
+Vulnerability Detection Method: Checks if a vulnerable version is present on the target host.
+Details:
+Python Access Control Vulnerability (May 2024) - Windows
+(OID: 1.3.6.1.4.1.25623.1.0.152212)
+Version used: 2024-10-11T15:39:44Z
+
+Affected Software/OS: Python prior to version 3.8.20, 3.9.x prior to 3.9.20, 3.10.x
+  prior to 3.10.15, 3.11.x prior to 3.11.10 and 3.12.x prior to 3.12.4.
+Product Detection Result: Product: cpe:/a:python:python:3.12.0
+Method: Python Detection Consolidation
+(OID: 1.3.6.1.4.1.25623.1.0.112857)
+
+Solution: Update to version 3.8.20, 3.9.20, 3.10.15, 3.11.10, 3.12.4 or
+  later.
+
+# Vulnerabilidade 25
+CVEs: CVE-2024-3220
+NVT Name: Python Untrusted Search Path Vulnerability (Feb 2025) - Windows
+Port: 8002.0
+Port Protocol: tcp
+Summary: Python is prone to an untrusted search path vulnerability
+  in the mimetypes standard library.
+Specific Result: Installed version: 3.12.0
+Fixed version:     None
+Installation
+path / port:       8002/tcp
+
+
+Vulnerability Detection Method: Checks if a vulnerable version is present on the target host.
+Details:
+Python Untrusted Search Path Vulnerability (Feb 2025) - Windows
+(OID: 1.3.6.1.4.1.25623.1.0.171228)
+Version used: 2025-02-19T05:37:55Z
+
+Affected Software/OS: Python versions 3.13.2 and prior.
+Product Detection Result: Product: cpe:/a:python:python:3.12.0
+Method: Python Detection Consolidation
+(OID: 1.3.6.1.4.1.25623.1.0.112857)
+
+Solution: No known solution is available as of 18th February, 2025.
+  Information regarding this issue will be updated once solution details are available.
+
+# Vulnerabilidade 26
+CVEs: CVE-2024-4030
+NVT Name: Python Access Control Vulnerability (May 2024) - Windows
+Port: 8002.0
+Port Protocol: tcp
+Summary: Python is prone to an access control vulnerability.
+Specific Result: Installed version: 3.12.0
+Fixed version:     3.12.4
+Installation
+path / port:       8002/tcp
+
+
+Vulnerability Detection Method: Checks if a vulnerable version is present on the target host.
+Details:
+Python Access Control Vulnerability (May 2024) - Windows
+(OID: 1.3.6.1.4.1.25623.1.0.152212)
+Version used: 2024-10-11T15:39:44Z
+
+Affected Software/OS: Python prior to version 3.8.20, 3.9.x prior to 3.9.20, 3.10.x
+  prior to 3.10.15, 3.11.x prior to 3.11.10 and 3.12.x prior to 3.12.4.
+Product Detection Result: Product: cpe:/a:python:python:3.12.0
+Method: Python Detection Consolidation
+(OID: 1.3.6.1.4.1.25623.1.0.112857)
+
+Solution: Update to version 3.8.20, 3.9.20, 3.10.15, 3.11.10, 3.12.4 or
+  later.
+
+# Vulnerabilidade 27
+CVEs: CVE-2024-3220
+NVT Name: Python Untrusted Search Path Vulnerability (Feb 2025) - Windows
+Port: 5000.0
+Port Protocol: tcp
+Summary: Python is prone to an untrusted search path vulnerability
+  in the mimetypes standard library.
+Specific Result: Installed version: 3.10.12
+Fixed version:     None
+Installation
+path / port:       5000/tcp
+
+
+Vulnerability Detection Method: Checks if a vulnerable version is present on the target host.
+Details:
+Python Untrusted Search Path Vulnerability (Feb 2025) - Windows
+(OID: 1.3.6.1.4.1.25623.1.0.171228)
+Version used: 2025-02-19T05:37:55Z
+
+Affected Software/OS: Python versions 3.13.2 and prior.
+Product Detection Result: Product: cpe:/a:python:python:3.10.12
+Method: Python Detection Consolidation
+(OID: 1.3.6.1.4.1.25623.1.0.112857)
+
+Solution: No known solution is available as of 18th February, 2025.
+  Information regarding this issue will be updated once solution details are available.
+
+# Vulnerabilidade 28
+CVEs: CVE-2024-3220
+NVT Name: Python Untrusted Search Path Vulnerability (Feb 2025) - Windows
+Port: 8000.0
+Port Protocol: tcp
+Summary: Python is prone to an untrusted search path vulnerability
+  in the mimetypes standard library.
+Specific Result: Installed version: 3.12.0
+Fixed version:     None
+Installation
+path / port:       8000/tcp
+
+
+Vulnerability Detection Method: Checks if a vulnerable version is present on the target host.
+Details:
+Python Untrusted Search Path Vulnerability (Feb 2025) - Windows
+(OID: 1.3.6.1.4.1.25623.1.0.171228)
+Version used: 2025-02-19T05:37:55Z
+
+Affected Software/OS: Python versions 3.13.2 and prior.
+Product Detection Result: Product: cpe:/a:python:python:3.12.0
+Method: Python Detection Consolidation
+(OID: 1.3.6.1.4.1.25623.1.0.112857)
+
+Solution: No known solution is available as of 18th February, 2025.
+  Information regarding this issue will be updated once solution details are available.
+
+# Vulnerabilidade 29
+CVEs: CVE-2024-3219
+NVT Name: Python Connection Race Vulnerability (Jul 2024) - Windows
+Port: 8000.0
+Port Protocol: tcp
+Summary: Python is prone to a connection race vulnerability.
+Specific Result: Installed version: 3.12.0
+Fixed version:     3.12.5
+Installation
+path / port:       8000/tcp
+
+
+Vulnerability Detection Method: Checks if a vulnerable version is present on the target host.
+Details:
+Python Connection Race Vulnerability (Jul 2024) - Windows
+(OID: 1.3.6.1.4.1.25623.1.0.114743)
+Version used: 2024-10-11T15:39:44Z
+
+Affected Software/OS: Python version 3.5 prior to version 3.8.20, 3.9.x prior to
+  3.9.20, 3.10.x prior to 3.10.15, 3.11.x prior to 3.11.10 and 3.12.x prior to 3.12.5.
+
+  Platforms that support AF_UNIX such as Linux and macOS are not affected by this vulnerability.
+Product Detection Result: Product: cpe:/a:python:python:3.12.0
+Method: Python Detection Consolidation
+(OID: 1.3.6.1.4.1.25623.1.0.112857)
+
+Solution: Update to version 3.8.20, 3.9.20, 3.10.15, 3.11.10, 3.12.5 or
+  later.
+
+# Vulnerabilidade 30
+CVEs: CVE-2024-3219
+NVT Name: Python Connection Race Vulnerability (Jul 2024) - Windows
+Port: 8001.0
+Port Protocol: tcp
+Summary: Python is prone to a connection race vulnerability.
+Specific Result: Installed version: 3.12.0
+Fixed version:     3.12.5
+Installation
+path / port:       8001/tcp
+
+
+Vulnerability Detection Method: Checks if a vulnerable version is present on the target host.
+Details:
+Python Connection Race Vulnerability (Jul 2024) - Windows
+(OID: 1.3.6.1.4.1.25623.1.0.114743)
+Version used: 2024-10-11T15:39:44Z
+
+Affected Software/OS: Python version 3.5 prior to version 3.8.20, 3.9.x prior to
+  3.9.20, 3.10.x prior to 3.10.15, 3.11.x prior to 3.11.10 and 3.12.x prior to 3.12.5.
+
+  Platforms that support AF_UNIX such as Linux and macOS are not affected by this vulnerability.
+Product Detection Result: Product: cpe:/a:python:python:3.12.0
+Method: Python Detection Consolidation
+(OID: 1.3.6.1.4.1.25623.1.0.112857)
+
+Solution: Update to version 3.8.20, 3.9.20, 3.10.15, 3.11.10, 3.12.5 or
+  later.
+
+# Vulnerabilidade 31
+CVEs: CVE-2024-3219
+NVT Name: Python Connection Race Vulnerability (Jul 2024) - Windows
+Port: 8002.0
+Port Protocol: tcp
+Summary: Python is prone to a connection race vulnerability.
+Specific Result: Installed version: 3.12.0
+Fixed version:     3.12.5
+Installation
+path / port:       8002/tcp
+
+
+Vulnerability Detection Method: Checks if a vulnerable version is present on the target host.
+Details:
+Python Connection Race Vulnerability (Jul 2024) - Windows
+(OID: 1.3.6.1.4.1.25623.1.0.114743)
+Version used: 2024-10-11T15:39:44Z
+
+Affected Software/OS: Python version 3.5 prior to version 3.8.20, 3.9.x prior to
+  3.9.20, 3.10.x prior to 3.10.15, 3.11.x prior to 3.11.10 and 3.12.x prior to 3.12.5.
+
+  Platforms that support AF_UNIX such as Linux and macOS are not affected by this vulnerability.
+Product Detection Result: Product: cpe:/a:python:python:3.12.0
+Method: Python Detection Consolidation
+(OID: 1.3.6.1.4.1.25623.1.0.112857)
+
+Solution: Update to version 3.8.20, 3.9.20, 3.10.15, 3.11.10, 3.12.5 or
+  later.
+
+# Vulnerabilidade 32
+CVEs: CVE-2023-40217
+NVT Name: Python < 3.8.18, 3.9.x < 3.9.18, 3.10.x < 3.10.13, 3.11.x < 3.11.5 Security Bypass Vulnerability - Windows
+Port: 5000.0
+Port Protocol: tcp
+Summary: Python is prone to a security bypass vulnerability.
+Specific Result: Installed version: 3.10.12
+Fixed version:     3.10.13
+Installation
+path / port:       5000/tcp
+
+
+Vulnerability Detection Method: Checks if a vulnerable version is present on the target host.
+Details:
+Python < 3.8.18, 3.9.x < 3.9.18, 3.10.x < 3.10.13, 3.11.x < 3.11.5 Security ...
+(OID: 1.3.6.1.4.1.25623.1.0.124415)
+Version used: 2023-12-20T05:05:58Z
+
+Affected Software/OS: Python version prior to 3.8.18, 3.9.x prior to 3.9.18, 3.10.x
+  prior to 3.10.13 and 3.11.x prior to 3.11.5.
+Product Detection Result: Product: cpe:/a:python:python:3.10.12
+Method: Python Detection Consolidation
+(OID: 1.3.6.1.4.1.25623.1.0.112857)
+
+Solution: Update to version 3.8.18, 3.9.18, 3.10.13, 3.11.5 or later.
+
+# Vulnerabilidade 33
+CVEs: CVE-2023-27043
+NVT Name: Python <= 2.7.18, 3.x <= 3.12.3 Security Bypass Vulnerability - Windows
+Port: 8002.0
+Port Protocol: tcp
+Summary: Python is prone to a security bypass vulnerability in the e-mail
+  module.
+Specific Result: Installed version: 3.12.0
+Fixed version:     None
+Installation
+path / port:       8002/tcp
+
+
+Vulnerability Detection Method: Checks if a vulnerable version is present on the target host.
+Details:
+Python <= 2.7.18, 3.x <= 3.12.3 Security Bypass Vulnerability - Windows
+(OID: 1.3.6.1.4.1.25623.1.0.104741)
+Version used: 2024-05-14T05:05:26Z
+
+Affected Software/OS: Python versions through 2.7.18 and 3.x through 3.12.3.
+Product Detection Result: Product: cpe:/a:python:python:3.12.0
+Method: Python Detection Consolidation
+(OID: 1.3.6.1.4.1.25623.1.0.112857)
+
+Solution: No known solution was made available for at least one year since
+  the disclosure of this vulnerability. Likely none will be provided anymore. General solution options
+  are to upgrade to a newer release, disable respective features, remove the product or replace the
+  product by another one.
+
+  Note: The vendor mentions, that a patch was included in main branch 3.13. This version is expected
+  to release in October 2024. The patch might be included in the release of version 3.13 or later.
+
+# Vulnerabilidade 34
+CVEs: CVE-2023-27043
+NVT Name: Python <= 2.7.18, 3.x <= 3.12.3 Security Bypass Vulnerability - Windows
+Port: 8001.0
+Port Protocol: tcp
+Summary: Python is prone to a security bypass vulnerability in the e-mail
+  module.
+Specific Result: Installed version: 3.12.0
+Fixed version:     None
+Installation
+path / port:       8001/tcp
+
+
+Vulnerability Detection Method: Checks if a vulnerable version is present on the target host.
+Details:
+Python <= 2.7.18, 3.x <= 3.12.3 Security Bypass Vulnerability - Windows
+(OID: 1.3.6.1.4.1.25623.1.0.104741)
+Version used: 2024-05-14T05:05:26Z
+
+Affected Software/OS: Python versions through 2.7.18 and 3.x through 3.12.3.
+Product Detection Result: Product: cpe:/a:python:python:3.12.0
+Method: Python Detection Consolidation
+(OID: 1.3.6.1.4.1.25623.1.0.112857)
+
+Solution: No known solution was made available for at least one year since
+  the disclosure of this vulnerability. Likely none will be provided anymore. General solution options
+  are to upgrade to a newer release, disable respective features, remove the product or replace the
+  product by another one.
+
+  Note: The vendor mentions, that a patch was included in main branch 3.13. This version is expected
+  to release in October 2024. The patch might be included in the release of version 3.13 or later.
+
+# Vulnerabilidade 35
+CVEs: CVE-2023-27043
+NVT Name: Python <= 2.7.18, 3.x <= 3.12.3 Security Bypass Vulnerability - Windows
+Port: 8000.0
+Port Protocol: tcp
+Summary: Python is prone to a security bypass vulnerability in the e-mail
+  module.
+Specific Result: Installed version: 3.12.0
+Fixed version:     None
+Installation
+path / port:       8000/tcp
+
+
+Vulnerability Detection Method: Checks if a vulnerable version is present on the target host.
+Details:
+Python <= 2.7.18, 3.x <= 3.12.3 Security Bypass Vulnerability - Windows
+(OID: 1.3.6.1.4.1.25623.1.0.104741)
+Version used: 2024-05-14T05:05:26Z
+
+Affected Software/OS: Python versions through 2.7.18 and 3.x through 3.12.3.
+Product Detection Result: Product: cpe:/a:python:python:3.12.0
+Method: Python Detection Consolidation
+(OID: 1.3.6.1.4.1.25623.1.0.112857)
+
+Solution: No known solution was made available for at least one year since
+  the disclosure of this vulnerability. Likely none will be provided anymore. General solution options
+  are to upgrade to a newer release, disable respective features, remove the product or replace the
+  product by another one.
+
+  Note: The vendor mentions, that a patch was included in main branch 3.13. This version is expected
+  to release in October 2024. The patch might be included in the release of version 3.13 or later.
+
+# Vulnerabilidade 36
+CVEs: CVE-2023-27043
+NVT Name: Python <= 2.7.18, 3.x <= 3.12.3 Security Bypass Vulnerability - Windows
+Port: 5000.0
+Port Protocol: tcp
+Summary: Python is prone to a security bypass vulnerability in the e-mail
+  module.
+Specific Result: Installed version: 3.10.12
+Fixed version:     None
+Installation
+path / port:       5000/tcp
+
+
+Vulnerability Detection Method: Checks if a vulnerable version is present on the target host.
+Details:
+Python <= 2.7.18, 3.x <= 3.12.3 Security Bypass Vulnerability - Windows
+(OID: 1.3.6.1.4.1.25623.1.0.104741)
+Version used: 2024-05-14T05:05:26Z
+
+Affected Software/OS: Python versions through 2.7.18 and 3.x through 3.12.3.
+Product Detection Result: Product: cpe:/a:python:python:3.10.12
+Method: Python Detection Consolidation
+(OID: 1.3.6.1.4.1.25623.1.0.112857)
+
+Solution: No known solution was made available for at least one year since
+  the disclosure of this vulnerability. Likely none will be provided anymore. General solution options
+  are to upgrade to a newer release, disable respective features, remove the product or replace the
+  product by another one.
+
+  Note: The vendor mentions, that a patch was included in main branch 3.13. This version is expected
+  to release in October 2024. The patch might be included in the release of version 3.13 or later.
+
+# Vulnerabilidade 37
+CVEs: CVE-2024-6923
+NVT Name: Python Email Header Injection Vulnerability (Aug 2024) - Windows
+Port: 5000.0
+Port Protocol: tcp
+Summary: Python is prone to an email header injection vulnerability in
+  the email module.
+Specific Result: Installed version: 3.10.12
+Fixed version:     3.10.15
+Installation
+path / port:       5000/tcp
+
+
+Vulnerability Detection Method: Checks if a vulnerable version is present on the target host.
+Details:
+Python Email Header Injection Vulnerability (Aug 2024) - Windows
+(OID: 1.3.6.1.4.1.25623.1.0.114733)
+Version used: 2024-10-11T15:39:44Z
+
+Affected Software/OS: Python prior to version 3.8.20, 3.9.x prior to 3.9.20, 3.10.x
+  prior to 3.10.15, 3.11.x prior to 3.11.10 and 3.12.x prior to 3.12.5.
+Product Detection Result: Product: cpe:/a:python:python:3.10.12
+Method: Python Detection Consolidation
+(OID: 1.3.6.1.4.1.25623.1.0.112857)
+
+Solution: Update to version 3.8.20, 3.9.20, 3.10.15, 3.11.10, 3.12.5 or
+  later.
+
+# Vulnerabilidade 38
+CVEs: CVE-2024-6923
+NVT Name: Python Email Header Injection Vulnerability (Aug 2024) - Windows
+Port: 8000.0
+Port Protocol: tcp
+Summary: Python is prone to an email header injection vulnerability in
+  the email module.
+Specific Result: Installed version: 3.12.0
+Fixed version:     3.12.5
+Installation
+path / port:       8000/tcp
+
+
+Vulnerability Detection Method: Checks if a vulnerable version is present on the target host.
+Details:
+Python Email Header Injection Vulnerability (Aug 2024) - Windows
+(OID: 1.3.6.1.4.1.25623.1.0.114733)
+Version used: 2024-10-11T15:39:44Z
+
+Affected Software/OS: Python prior to version 3.8.20, 3.9.x prior to 3.9.20, 3.10.x
+  prior to 3.10.15, 3.11.x prior to 3.11.10 and 3.12.x prior to 3.12.5.
+Product Detection Result: Product: cpe:/a:python:python:3.12.0
+Method: Python Detection Consolidation
+(OID: 1.3.6.1.4.1.25623.1.0.112857)
+
+Solution: Update to version 3.8.20, 3.9.20, 3.10.15, 3.11.10, 3.12.5 or
+  later.
+
+# Vulnerabilidade 39
+CVEs: CVE-2024-6923
+NVT Name: Python Email Header Injection Vulnerability (Aug 2024) - Windows
+Port: 8001.0
+Port Protocol: tcp
+Summary: Python is prone to an email header injection vulnerability in
+  the email module.
+Specific Result: Installed version: 3.12.0
+Fixed version:     3.12.5
+Installation
+path / port:       8001/tcp
+
+
+Vulnerability Detection Method: Checks if a vulnerable version is present on the target host.
+Details:
+Python Email Header Injection Vulnerability (Aug 2024) - Windows
+(OID: 1.3.6.1.4.1.25623.1.0.114733)
+Version used: 2024-10-11T15:39:44Z
+
+Affected Software/OS: Python prior to version 3.8.20, 3.9.x prior to 3.9.20, 3.10.x
+  prior to 3.10.15, 3.11.x prior to 3.11.10 and 3.12.x prior to 3.12.5.
+Product Detection Result: Product: cpe:/a:python:python:3.12.0
+Method: Python Detection Consolidation
+(OID: 1.3.6.1.4.1.25623.1.0.112857)
+
+Solution: Update to version 3.8.20, 3.9.20, 3.10.15, 3.11.10, 3.12.5 or
+  later.
+
+# Vulnerabilidade 40
+CVEs: CVE-2024-0397
+NVT Name: Python SSL Vulnerability (Jun 2024) - Windows
+Port: 5000.0
+Port Protocol: tcp
+Summary: Python is prone to a vulnerability in the ssl module.
+Specific Result: Installed version: 3.10.12
+Fixed version:     3.10.14
+Installation
+path / port:       5000/tcp
+
+
+Vulnerability Detection Method: Checks if a vulnerable version is present on the target host.
+Details:
+Python SSL Vulnerability (Jun 2024) - Windows
+(OID: 1.3.6.1.4.1.25623.1.0.152434)
+Version used: 2024-10-11T15:39:44Z
+
+Affected Software/OS: Python prior to version 3.8.20, 3.9.x prior to 3.9.20, 3.10.x
+  prior to 3.10.14, 3.11.x prior to 3.11.9 and 3.12.x prior to 3.12.3.
+Product Detection Result: Product: cpe:/a:python:python:3.10.12
+Method: Python Detection Consolidation
+(OID: 1.3.6.1.4.1.25623.1.0.112857)
+
+Solution: Update to version 3.8.20, 3.9.20, 3.10.14, 3.11.9, 3.12.3
+  or later.
+
+# Vulnerabilidade 41
+CVEs: CVE-2024-6923
+NVT Name: Python Email Header Injection Vulnerability (Aug 2024) - Windows
+Port: 8002.0
+Port Protocol: tcp
+Summary: Python is prone to an email header injection vulnerability in
+  the email module.
+Specific Result: Installed version: 3.12.0
+Fixed version:     3.12.5
+Installation
+path / port:       8002/tcp
+
+
+Vulnerability Detection Method: Checks if a vulnerable version is present on the target host.
+Details:
+Python Email Header Injection Vulnerability (Aug 2024) - Windows
+(OID: 1.3.6.1.4.1.25623.1.0.114733)
+Version used: 2024-10-11T15:39:44Z
+
+Affected Software/OS: Python prior to version 3.8.20, 3.9.x prior to 3.9.20, 3.10.x
+  prior to 3.10.15, 3.11.x prior to 3.11.10 and 3.12.x prior to 3.12.5.
+Product Detection Result: Product: cpe:/a:python:python:3.12.0
+Method: Python Detection Consolidation
+(OID: 1.3.6.1.4.1.25623.1.0.112857)
+
+Solution: Update to version 3.8.20, 3.9.20, 3.10.15, 3.11.10, 3.12.5 or
+  later.
+
+# Vulnerabilidade 42
+CVEs: CVE-2024-0397
+NVT Name: Python SSL Vulnerability (Jun 2024) - Windows
+Port: 8001.0
+Port Protocol: tcp
+Summary: Python is prone to a vulnerability in the ssl module.
+Specific Result: Installed version: 3.12.0
+Fixed version:     3.12.3
+Installation
+path / port:       8001/tcp
+
+
+Vulnerability Detection Method: Checks if a vulnerable version is present on the target host.
+Details:
+Python SSL Vulnerability (Jun 2024) - Windows
+(OID: 1.3.6.1.4.1.25623.1.0.152434)
+Version used: 2024-10-11T15:39:44Z
+
+Affected Software/OS: Python prior to version 3.8.20, 3.9.x prior to 3.9.20, 3.10.x
+  prior to 3.10.14, 3.11.x prior to 3.11.9 and 3.12.x prior to 3.12.3.
+Product Detection Result: Product: cpe:/a:python:python:3.12.0
+Method: Python Detection Consolidation
+(OID: 1.3.6.1.4.1.25623.1.0.112857)
+
+Solution: Update to version 3.8.20, 3.9.20, 3.10.14, 3.11.9, 3.12.3
+  or later.
+
+# Vulnerabilidade 43
+CVEs: CVE-2024-4032
+NVT Name: Python IP Ranges Vulnerability (Jun 2024) - Windows
+Port: 8002.0
+Port Protocol: tcp
+Summary: Python is prone to a vulnerability in the ipaddress module.
+Specific Result: Installed version: 3.12.0
+Fixed version:     3.12.4
+Installation
+path / port:       8002/tcp
+
+
+Vulnerability Detection Method: Checks if a vulnerable version is present on the target host.
+Details:
+Python IP Ranges Vulnerability (Jun 2024) - Windows
+(OID: 1.3.6.1.4.1.25623.1.0.152431)
+Version used: 2024-10-11T15:39:44Z
+
+Affected Software/OS: Python prior to version 3.8.20, 3.9.x prior to 3.9.20, 3.10.x
+  prior to 3.10.15, 3.11.x prior to 3.11.10 and 3.12.x prior to 3.12.4.
+Product Detection Result: Product: cpe:/a:python:python:3.12.0
+Method: Python Detection Consolidation
+(OID: 1.3.6.1.4.1.25623.1.0.112857)
+
+Solution: Update to version 3.8.20, 3.9.20, 3.10.15, 3.11.10, 3.12.4 or
+  later.
+
+# Vulnerabilidade 44
+CVEs: CVE-2024-4032
+NVT Name: Python IP Ranges Vulnerability (Jun 2024) - Windows
+Port: 8001.0
+Port Protocol: tcp
+Summary: Python is prone to a vulnerability in the ipaddress module.
+Specific Result: Installed version: 3.12.0
+Fixed version:     3.12.4
+Installation
+path / port:       8001/tcp
+
+
+Vulnerability Detection Method: Checks if a vulnerable version is present on the target host.
+Details:
+Python IP Ranges Vulnerability (Jun 2024) - Windows
+(OID: 1.3.6.1.4.1.25623.1.0.152431)
+Version used: 2024-10-11T15:39:44Z
+
+Affected Software/OS: Python prior to version 3.8.20, 3.9.x prior to 3.9.20, 3.10.x
+  prior to 3.10.15, 3.11.x prior to 3.11.10 and 3.12.x prior to 3.12.4.
+Product Detection Result: Product: cpe:/a:python:python:3.12.0
+Method: Python Detection Consolidation
+(OID: 1.3.6.1.4.1.25623.1.0.112857)
+
+Solution: Update to version 3.8.20, 3.9.20, 3.10.15, 3.11.10, 3.12.4 or
+  later.
+
+# Vulnerabilidade 45
+CVEs: CVE-2024-0397
+NVT Name: Python SSL Vulnerability (Jun 2024) - Windows
+Port: 8000.0
+Port Protocol: tcp
+Summary: Python is prone to a vulnerability in the ssl module.
+Specific Result: Installed version: 3.12.0
+Fixed version:     3.12.3
+Installation
+path / port:       8000/tcp
+
+
+Vulnerability Detection Method: Checks if a vulnerable version is present on the target host.
+Details:
+Python SSL Vulnerability (Jun 2024) - Windows
+(OID: 1.3.6.1.4.1.25623.1.0.152434)
+Version used: 2024-10-11T15:39:44Z
+
+Affected Software/OS: Python prior to version 3.8.20, 3.9.x prior to 3.9.20, 3.10.x
+  prior to 3.10.14, 3.11.x prior to 3.11.9 and 3.12.x prior to 3.12.3.
+Product Detection Result: Product: cpe:/a:python:python:3.12.0
+Method: Python Detection Consolidation
+(OID: 1.3.6.1.4.1.25623.1.0.112857)
+
+Solution: Update to version 3.8.20, 3.9.20, 3.10.14, 3.11.9, 3.12.3
+  or later.
+
+# Vulnerabilidade 46
+CVEs: CVE-2024-4032
+NVT Name: Python IP Ranges Vulnerability (Jun 2024) - Windows
+Port: 5000.0
+Port Protocol: tcp
+Summary: Python is prone to a vulnerability in the ipaddress module.
+Specific Result: Installed version: 3.10.12
+Fixed version:     3.10.15
+Installation
+path / port:       5000/tcp
+
+
+Vulnerability Detection Method: Checks if a vulnerable version is present on the target host.
+Details:
+Python IP Ranges Vulnerability (Jun 2024) - Windows
+(OID: 1.3.6.1.4.1.25623.1.0.152431)
+Version used: 2024-10-11T15:39:44Z
+
+Affected Software/OS: Python prior to version 3.8.20, 3.9.x prior to 3.9.20, 3.10.x
+  prior to 3.10.15, 3.11.x prior to 3.11.10 and 3.12.x prior to 3.12.4.
+Product Detection Result: Product: cpe:/a:python:python:3.10.12
+Method: Python Detection Consolidation
+(OID: 1.3.6.1.4.1.25623.1.0.112857)
+
+Solution: Update to version 3.8.20, 3.9.20, 3.10.15, 3.11.10, 3.12.4 or
+  later.
+
+# Vulnerabilidade 47
+CVEs: CVE-2024-4032
+NVT Name: Python IP Ranges Vulnerability (Jun 2024) - Windows
+Port: 8000.0
+Port Protocol: tcp
+Summary: Python is prone to a vulnerability in the ipaddress module.
+Specific Result: Installed version: 3.12.0
+Fixed version:     3.12.4
+Installation
+path / port:       8000/tcp
+
+
+Vulnerability Detection Method: Checks if a vulnerable version is present on the target host.
+Details:
+Python IP Ranges Vulnerability (Jun 2024) - Windows
+(OID: 1.3.6.1.4.1.25623.1.0.152431)
+Version used: 2024-10-11T15:39:44Z
+
+Affected Software/OS: Python prior to version 3.8.20, 3.9.x prior to 3.9.20, 3.10.x
+  prior to 3.10.15, 3.11.x prior to 3.11.10 and 3.12.x prior to 3.12.4.
+Product Detection Result: Product: cpe:/a:python:python:3.12.0
+Method: Python Detection Consolidation
+(OID: 1.3.6.1.4.1.25623.1.0.112857)
+
+Solution: Update to version 3.8.20, 3.9.20, 3.10.15, 3.11.10, 3.12.4 or
+  later.
+
+# Vulnerabilidade 48
+CVEs: CVE-2024-0397
+NVT Name: Python SSL Vulnerability (Jun 2024) - Windows
+Port: 8002.0
+Port Protocol: tcp
+Summary: Python is prone to a vulnerability in the ssl module.
+Specific Result: Installed version: 3.12.0
+Fixed version:     3.12.3
+Installation
+path / port:       8002/tcp
+
+
+Vulnerability Detection Method: Checks if a vulnerable version is present on the target host.
+Details:
+Python SSL Vulnerability (Jun 2024) - Windows
+(OID: 1.3.6.1.4.1.25623.1.0.152434)
+Version used: 2024-10-11T15:39:44Z
+
+Affected Software/OS: Python prior to version 3.8.20, 3.9.x prior to 3.9.20, 3.10.x
+  prior to 3.10.14, 3.11.x prior to 3.11.9 and 3.12.x prior to 3.12.3.
+Product Detection Result: Product: cpe:/a:python:python:3.12.0
+Method: Python Detection Consolidation
+(OID: 1.3.6.1.4.1.25623.1.0.112857)
+
+Solution: Update to version 3.8.20, 3.9.20, 3.10.14, 3.11.9, 3.12.3
+  or later.
+
+# Vulnerabilidade 49
+CVEs: nan
+NVT Name: SSL/TLS: Known Untrusted / Dangerous Certificate Authority (CA) Detection
+Port: 8002.0
+Port Protocol: tcp
+Summary: The service is using an SSL/TLS certificate from a known
+  untrusted and/or dangerous certificate authority (CA).
+Specific Result: The certificate of the remote service is signed by the following untrusted and/or dangerous CA:
+
+Issuer: CN=localhost,O=Luminator,L=Caxias do Sul,ST=RS,C=BR
+
+Certificate details:
+fingerprint (SHA-1)             | 264544379FDBF127C25A667B5E2A7EA7620B996C
+fingerprint (SHA-256)           | 5668884BF9B84C38B81313EBF424434CB70F5D9930CDCF5C845A915352399F30
+issued by                       | CN=localhost,O=Luminator,L=Caxias do Sul,ST=RS,C=BR
+public key algorithm            | RSA
+public key size (bits)          | 2048
+serial                          | 745F8ECBC16B0434221410E84BC2561583C6ED19
+signature algorithm             | sha256WithRSAEncryption
+subject                         | CN=localhost,O=Luminator,L=Caxias do Sul,ST=RS,C=BR
+subject alternative names (SAN) | None
+valid from                      | 2024-08-26 20:26:21 UTC
+valid until                     | 2084-08-11 20:26:21 UTC
+
+Vulnerability Detection Method: The script reads the certificate used by the target host and
+  checks if it was signed by a known untrusted and/or dangerous CA.
+Details:
+SSL/TLS: Known Untrusted / Dangerous Certificate Authority (CA) Detection
+(OID: 1.3.6.1.4.1.25623.1.0.113054)
+Version used: 2024-06-14T05:05:48Z
+
+Affected Software/OS: nan
+Product Detection Result: Product: cpe:/a:ietf:transport_layer_security
+Method: SSL/TLS: Collect and Report Certificate Details
+(OID: 1.3.6.1.4.1.25623.1.0.103692)
+
+Solution: Replace the SSL/TLS certificate with one signed by a trusted
+  CA.
+
+# Vulnerabilidade 50
+CVEs: CVE-2024-0450
+NVT Name: Python Multiple Vulnerabilities (Mar 2024) - Windows
+Port: 5000.0
+Port Protocol: tcp
+Summary: Python is prone to multiple vulnerabilities.
+Specific Result: Installed version: 3.10.12
+Fixed version:     3.10.14
+Installation
+path / port:       5000/tcp
+
+
+Vulnerability Detection Method: Checks if a vulnerable version is present on the target host.
+Details:
+Python Multiple Vulnerabilities (Mar 2024) - Windows
+(OID: 1.3.6.1.4.1.25623.1.0.151952)
+Version used: 2024-10-11T15:39:44Z
+
+Affected Software/OS: Python prior to version 3.8.19, 3.9.x prior to 3.9.19, 3.10.x
+  prior to 3.10.14, 3.11.x prior to 3.11.8 and 3.12.x prior to 3.12.2.
+Product Detection Result: Product: cpe:/a:python:python:3.10.12
+Method: Python Detection Consolidation
+(OID: 1.3.6.1.4.1.25623.1.0.112857)
+
+Solution: Update to version 3.8.19, 3.9.19, 3.10.14, 3.11.8, 3.12.2
+  or later.
+
+# Vulnerabilidade 51
+CVEs: CVE-2024-0450
+NVT Name: Python Multiple Vulnerabilities (Mar 2024) - Windows
+Port: 8000.0
+Port Protocol: tcp
+Summary: Python is prone to multiple vulnerabilities.
+Specific Result: Installed version: 3.12.0
+Fixed version:     3.12.2
+Installation
+path / port:       8000/tcp
+
+
+Vulnerability Detection Method: Checks if a vulnerable version is present on the target host.
+Details:
+Python Multiple Vulnerabilities (Mar 2024) - Windows
+(OID: 1.3.6.1.4.1.25623.1.0.151952)
+Version used: 2024-10-11T15:39:44Z
+
+Affected Software/OS: Python prior to version 3.8.19, 3.9.x prior to 3.9.19, 3.10.x
+  prior to 3.10.14, 3.11.x prior to 3.11.8 and 3.12.x prior to 3.12.2.
+Product Detection Result: Product: cpe:/a:python:python:3.12.0
+Method: Python Detection Consolidation
+(OID: 1.3.6.1.4.1.25623.1.0.112857)
+
+Solution: Update to version 3.8.19, 3.9.19, 3.10.14, 3.11.8, 3.12.2
+  or later.
+
+# Vulnerabilidade 52
+CVEs: CVE-2024-0450
+NVT Name: Python Multiple Vulnerabilities (Mar 2024) - Windows
+Port: 8001.0
+Port Protocol: tcp
+Summary: Python is prone to multiple vulnerabilities.
+Specific Result: Installed version: 3.12.0
+Fixed version:     3.12.2
+Installation
+path / port:       8001/tcp
+
+
+Vulnerability Detection Method: Checks if a vulnerable version is present on the target host.
+Details:
+Python Multiple Vulnerabilities (Mar 2024) - Windows
+(OID: 1.3.6.1.4.1.25623.1.0.151952)
+Version used: 2024-10-11T15:39:44Z
+
+Affected Software/OS: Python prior to version 3.8.19, 3.9.x prior to 3.9.19, 3.10.x
+  prior to 3.10.14, 3.11.x prior to 3.11.8 and 3.12.x prior to 3.12.2.
+Product Detection Result: Product: cpe:/a:python:python:3.12.0
+Method: Python Detection Consolidation
+(OID: 1.3.6.1.4.1.25623.1.0.112857)
+
+Solution: Update to version 3.8.19, 3.9.19, 3.10.14, 3.11.8, 3.12.2
+  or later.
+
+# Vulnerabilidade 53
+CVEs: CVE-2024-0450
+NVT Name: Python Multiple Vulnerabilities (Mar 2024) - Windows
+Port: 8002.0
+Port Protocol: tcp
+Summary: Python is prone to multiple vulnerabilities.
+Specific Result: Installed version: 3.12.0
+Fixed version:     3.12.2
+Installation
+path / port:       8002/tcp
+
+
+Vulnerability Detection Method: Checks if a vulnerable version is present on the target host.
+Details:
+Python Multiple Vulnerabilities (Mar 2024) - Windows
+(OID: 1.3.6.1.4.1.25623.1.0.151952)
+Version used: 2024-10-11T15:39:44Z
+
+Affected Software/OS: Python prior to version 3.8.19, 3.9.x prior to 3.9.19, 3.10.x
+  prior to 3.10.14, 3.11.x prior to 3.11.8 and 3.12.x prior to 3.12.2.
+Product Detection Result: Product: cpe:/a:python:python:3.12.0
+Method: Python Detection Consolidation
+(OID: 1.3.6.1.4.1.25623.1.0.112857)
+
+Solution: Update to version 3.8.19, 3.9.19, 3.10.14, 3.11.8, 3.12.2
+  or later.
+
+# Vulnerabilidade 54
+CVEs: CVE-2011-3389,CVE-2015-0204,CVE-2025-3200
+NVT Name: SSL/TLS: Deprecated TLSv1.0 and TLSv1.1 Protocol Detection
+Port: 3389.0
+Port Protocol: tcp
+Summary: It was possible to detect the usage of the deprecated TLSv1.0
+  and/or TLSv1.1 protocol on this system.
+Specific Result: In addition to TLSv1.2+ the service is also providing the deprecated TLSv1.0 and TLSv1.1 protocols and supports one or more ciphers. Those supported ciphers can be found in the 'SSL/TLS: Report Supported Cipher Suites' (OID: 1.3.6.1.4.1.25623.1.0.802067) VT.
+
+Vulnerability Detection Method: Checks the used TLS protocols of the services provided by this
+  system.
+Details:
+SSL/TLS: Deprecated TLSv1.0 and TLSv1.1 Protocol Detection
+(OID: 1.3.6.1.4.1.25623.1.0.117274)
+Version used: 2025-04-29T05:39:55Z
+
+Affected Software/OS: '- All services providing an encrypted communication using the
+  TLSv1.0 and/or TLSv1.1 protocols
+
+  - CVE-2025-3200: Multiple products from Wiesemann & Theis
+Product Detection Result: Product: cpe:/a:ietf:transport_layer_security:1.0
+Method: SSL/TLS: Version Detection
+(OID: 1.3.6.1.4.1.25623.1.0.105782)
+
+Solution: It is recommended to disable the deprecated TLSv1.0 and/or
+  TLSv1.1 protocols in favor of the TLSv1.2+ protocols.
+
+  Please see the references for more resources supporting you with this task.
+
+# Vulnerabilidade 55
+CVEs: CVE-2025-0938
+NVT Name: Python Improper Input Validation Vulnerability (Jan 2025) - Windows
+Port: 8000.0
+Port Protocol: tcp
+Summary: Python is prone to an improper input validation vulnerability
+  in the urllib.parse.urlsplit and urlparse standard functions.
+Specific Result: Installed version: 3.12.0
+Fixed version:     3.12.9
+Installation
+path / port:       8000/tcp
+
+
+Vulnerability Detection Method: Checks if a vulnerable version is present on the target host.
+Details:
+Python Improper Input Validation Vulnerability (Jan 2025) - Windows
+(OID: 1.3.6.1.4.1.25623.1.0.171144)
+Version used: 2025-02-06T05:38:57Z
+
+Affected Software/OS: Python versions prior to 3.12.9 and 3.13.x prior to 3.13.2.
+Product Detection Result: Product: cpe:/a:python:python:3.12.0
+Method: Python Detection Consolidation
+(OID: 1.3.6.1.4.1.25623.1.0.112857)
+
+Solution: Update to version 3.12.9, 3.13.2 or later.
+
+# Vulnerabilidade 56
+CVEs: CVE-2025-0938
+NVT Name: Python Improper Input Validation Vulnerability (Jan 2025) - Windows
+Port: 5000.0
+Port Protocol: tcp
+Summary: Python is prone to an improper input validation vulnerability
+  in the urllib.parse.urlsplit and urlparse standard functions.
+Specific Result: Installed version: 3.10.12
+Fixed version:     3.12.9
+Installation
+path / port:       5000/tcp
+
+
+Vulnerability Detection Method: Checks if a vulnerable version is present on the target host.
+Details:
+Python Improper Input Validation Vulnerability (Jan 2025) - Windows
+(OID: 1.3.6.1.4.1.25623.1.0.171144)
+Version used: 2025-02-06T05:38:57Z
+
+Affected Software/OS: Python versions prior to 3.12.9 and 3.13.x prior to 3.13.2.
+Product Detection Result: Product: cpe:/a:python:python:3.10.12
+Method: Python Detection Consolidation
+(OID: 1.3.6.1.4.1.25623.1.0.112857)
+
+Solution: Update to version 3.12.9, 3.13.2 or later.
+
+# Vulnerabilidade 57
+CVEs: CVE-2024-11168
+NVT Name: Python SSRF Vulnerability (Nov 2024) - Windows
+Port: 5000.0
+Port Protocol: tcp
+Summary: Python is prone to a server-side request forgery (SSRF)
+  vulnerability.
+Specific Result: Installed version: 3.10.12
+Fixed version:     3.10.16
+Installation
+path / port:       5000/tcp
+
+
+Vulnerability Detection Method: Checks if a vulnerable version is present on the target host.
+Details:
+Python SSRF Vulnerability (Nov 2024) - Windows
+(OID: 1.3.6.1.4.1.25623.1.0.170966)
+Version used: 2024-12-13T15:40:54Z
+
+Affected Software/OS: Python versions prior to 3.9.21, 3.10.x prior to 3.10.16 and
+  3.11.x prior to 3.11.4.
+Product Detection Result: Product: cpe:/a:python:python:3.10.12
+Method: Python Detection Consolidation
+(OID: 1.3.6.1.4.1.25623.1.0.112857)
+
+Solution: Update to version 3.9.21, 3.10.16, 3.11.4 or later.
+
+# Vulnerabilidade 58
+CVEs: CVE-2025-0938
+NVT Name: Python Improper Input Validation Vulnerability (Jan 2025) - Windows
+Port: 8001.0
+Port Protocol: tcp
+Summary: Python is prone to an improper input validation vulnerability
+  in the urllib.parse.urlsplit and urlparse standard functions.
+Specific Result: Installed version: 3.12.0
+Fixed version:     3.12.9
+Installation
+path / port:       8001/tcp
+
+
+Vulnerability Detection Method: Checks if a vulnerable version is present on the target host.
+Details:
+Python Improper Input Validation Vulnerability (Jan 2025) - Windows
+(OID: 1.3.6.1.4.1.25623.1.0.171144)
+Version used: 2025-02-06T05:38:57Z
+
+Affected Software/OS: Python versions prior to 3.12.9 and 3.13.x prior to 3.13.2.
+Product Detection Result: Product: cpe:/a:python:python:3.12.0
+Method: Python Detection Consolidation
+(OID: 1.3.6.1.4.1.25623.1.0.112857)
+
+Solution: Update to version 3.12.9, 3.13.2 or later.
+
+# Vulnerabilidade 59
+CVEs: nan
+NVT Name: Weak MAC Algorithm(s) Supported (SSH)
+Port: 22.0
+Port Protocol: tcp
+Summary: The remote SSH server is configured to allow / support weak MAC
+  algorithm(s).
+Specific Result: The remote SSH server supports the following weak client-to-server MAC algorithm(s):
+
+umac-64-etm@openssh.com
+umac-64@openssh.com
+
+
+The remote SSH server supports the following weak server-to-client MAC algorithm(s):
+
+umac-64-etm@openssh.com
+umac-64@openssh.com
+
+Vulnerability Detection Method: Checks the supported MAC algorithms (client-to-server and
+  server-to-client) of the remote SSH server.
+
+  Currently weak MAC algorithms are defined as the following:
+
+  - MD5 based algorithms
+
+  - 96-bit based algorithms
+
+  - 64-bit based algorithms
+
+  - 'none' algorithm
+Details:
+Weak MAC Algorithm(s) Supported (SSH)
+(OID: 1.3.6.1.4.1.25623.1.0.105610)
+Version used: 2024-06-14T05:05:48Z
+
+Affected Software/OS: nan
+Product Detection Result: Product: cpe:/a:ietf:secure_shell_protocol
+Method: SSH Protocol Algorithms Supported
+(OID: 1.3.6.1.4.1.25623.1.0.105565)
+
+Solution: Disable the reported weak MAC algorithm(s).
+
+# Vulnerabilidade 60
+CVEs: CVE-2025-0938
+NVT Name: Python Improper Input Validation Vulnerability (Jan 2025) - Windows
+Port: 8002.0
+Port Protocol: tcp
+Summary: Python is prone to an improper input validation vulnerability
+  in the urllib.parse.urlsplit and urlparse standard functions.
+Specific Result: Installed version: 3.12.0
+Fixed version:     3.12.9
+Installation
+path / port:       8002/tcp
+
+
+Vulnerability Detection Method: Checks if a vulnerable version is present on the target host.
+Details:
+Python Improper Input Validation Vulnerability (Jan 2025) - Windows
+(OID: 1.3.6.1.4.1.25623.1.0.171144)
+Version used: 2025-02-06T05:38:57Z
+
+Affected Software/OS: Python versions prior to 3.12.9 and 3.13.x prior to 3.13.2.
+Product Detection Result: Product: cpe:/a:python:python:3.12.0
+Method: Python Detection Consolidation
+(OID: 1.3.6.1.4.1.25623.1.0.112857)
+
+Solution: Update to version 3.12.9, 3.13.2 or later.
+
+# Vulnerabilidade 61
+CVEs: CVE-2025-1795
+NVT Name: Python Improper Encoding of Output Vulnerability (Feb 2025) - Windows
+Port: 8001.0
+Port Protocol: tcp
+Summary: Python is prone to an improper encoding of output
+  vulnerability.
+Specific Result: Installed version: 3.12.0
+Fixed version:     3.12.4
+Installation
+path / port:       8001/tcp
+
+
+Vulnerability Detection Method: Checks if a vulnerable version is present on the target host.
+Details:
+Python Improper Encoding of Output Vulnerability (Feb 2025) - Windows
+(OID: 1.3.6.1.4.1.25623.1.0.171265)
+Version used: 2025-03-05T05:38:53Z
+
+Affected Software/OS: Python versions prior to 3.11.10 and 3.12.x prior to 3.12.4.
+Product Detection Result: Product: cpe:/a:python:python:3.12.0
+Method: Python Detection Consolidation
+(OID: 1.3.6.1.4.1.25623.1.0.112857)
+
+Solution: Update to version 3.11.10, 3.12.4 or later.
+
+# Vulnerabilidade 62
+CVEs: CVE-1999-0524
+NVT Name: ICMP Timestamp Reply Information Disclosure
+Port: nan
+Port Protocol: nan
+Summary: The remote host responded to an ICMP timestamp request.
+Specific Result: The following response / ICMP packet has been received:
+- ICMP Type: 14
+- ICMP Code: 0
+
+Vulnerability Detection Method: Sends an ICMP Timestamp (Type 13) request and checks if a
+  Timestamp Reply (Type 14) is received.
+Details:
+ICMP Timestamp Reply Information Disclosure
+(OID: 1.3.6.1.4.1.25623.1.0.103190)
+Version used: 2025-01-21T05:37:33Z
+
+Affected Software/OS: nan
+Product Detection Result: nan
+Solution: Various mitigations are possible:
+
+  - Disable the support for ICMP timestamp on the remote host completely
+
+  - Protect the remote host by a firewall, and block ICMP packets passing through the firewall in
+  either direction (either completely or only for untrusted networks)
+
+# Vulnerabilidade 63
+CVEs: CVE-2025-1795
+NVT Name: Python Improper Encoding of Output Vulnerability (Feb 2025) - Windows
+Port: 8000.0
+Port Protocol: tcp
+Summary: Python is prone to an improper encoding of output
+  vulnerability.
+Specific Result: Installed version: 3.12.0
+Fixed version:     3.12.4
+Installation
+path / port:       8000/tcp
+
+
+Vulnerability Detection Method: Checks if a vulnerable version is present on the target host.
+Details:
+Python Improper Encoding of Output Vulnerability (Feb 2025) - Windows
+(OID: 1.3.6.1.4.1.25623.1.0.171265)
+Version used: 2025-03-05T05:38:53Z
+
+Affected Software/OS: Python versions prior to 3.11.10 and 3.12.x prior to 3.12.4.
+Product Detection Result: Product: cpe:/a:python:python:3.12.0
+Method: Python Detection Consolidation
+(OID: 1.3.6.1.4.1.25623.1.0.112857)
+
+Solution: Update to version 3.11.10, 3.12.4 or later.
+
+# Vulnerabilidade 64
+CVEs: CVE-2025-1795
+NVT Name: Python Improper Encoding of Output Vulnerability (Feb 2025) - Windows
+Port: 5000.0
+Port Protocol: tcp
+Summary: Python is prone to an improper encoding of output
+  vulnerability.
+Specific Result: Installed version: 3.10.12
+Fixed version:     3.11.10
+Installation
+path / port:       5000/tcp
+
+
+Vulnerability Detection Method: Checks if a vulnerable version is present on the target host.
+Details:
+Python Improper Encoding of Output Vulnerability (Feb 2025) - Windows
+(OID: 1.3.6.1.4.1.25623.1.0.171265)
+Version used: 2025-03-05T05:38:53Z
+
+Affected Software/OS: Python versions prior to 3.11.10 and 3.12.x prior to 3.12.4.
+Product Detection Result: Product: cpe:/a:python:python:3.10.12
+Method: Python Detection Consolidation
+(OID: 1.3.6.1.4.1.25623.1.0.112857)
+
+Solution: Update to version 3.11.10, 3.12.4 or later.
+
+# Vulnerabilidade 65
+CVEs: CVE-2025-1795
+NVT Name: Python Improper Encoding of Output Vulnerability (Feb 2025) - Windows
+Port: 8002.0
+Port Protocol: tcp
+Summary: Python is prone to an improper encoding of output
+  vulnerability.
+Specific Result: Installed version: 3.12.0
+Fixed version:     3.12.4
+Installation
+path / port:       8002/tcp
+
+
+Vulnerability Detection Method: Checks if a vulnerable version is present on the target host.
+Details:
+Python Improper Encoding of Output Vulnerability (Feb 2025) - Windows
+(OID: 1.3.6.1.4.1.25623.1.0.171265)
+Version used: 2025-03-05T05:38:53Z
+
+Affected Software/OS: Python versions prior to 3.11.10 and 3.12.x prior to 3.12.4.
+Product Detection Result: Product: cpe:/a:python:python:3.12.0
+Method: Python Detection Consolidation
+(OID: 1.3.6.1.4.1.25623.1.0.112857)
+
+Solution: Update to version 3.11.10, 3.12.4 or later.
+
+    ## REGRAS E RESTRIÇÕES DE SAÍDA
+    1.  **APENAS SCRIPT:** A sua resposta deve conter ÚNICA E EXCLUSIVAMENTE o código do script.
+    2.  **SEM EXPLICAÇÕES:** Não adicione nenhum comentário, explicação, introdução, ou despedida.
+    3.  **SEM BLOCOS DE CÓDIGO MARKDOWN:** Não envolva o script em blocos de código como ` ```bash ` ou ` ```sh `. A resposta deve ser o texto puro do script.
+    4.  **AUTOSSUFICIENTE:** O script deve ser completo, autônomo e não deve exigir interação do usuário para ser executado.
+    5.  **COMPATIBILIDADE:** O script deve ser compatível com o sistema operacional especificado em 'localhost OS'. Se o sistema operacional não for especificado, assuma um sistema baseado em Linux (como Ubuntu/Debian).
+
+
+>Scripts de correção:
+{type: uploaded file
+fileName: teste66vts_1.txt
+fullContent:
+```bash
+#!/bin/bash
+
+# Variáveis para rastreamento de atualizações
+python3_10_updated=false
+python3_12_updated=false
+
+# Função para atualizar o Python no Windows
+update_python() {
+    version="$1"
+    current_version="$2"
+    fixed_version="$3"
+    port="$4"
+    
+    echo "Atualizando Python ${version} de ${current_version} para ${fixed_version} (Porta: ${port})..."
+    
+    # Construir o comando do PowerShell para atualizar o Python
+    powershell_command="
+    \$ErrorActionPreference = 'Stop';
+    try {
+        Write-Host 'Parando quaisquer processos Python em execução...';
+        Get-Process -Name 'python' | Stop-Process -Force;
+
+        Write-Host 'Baixando o instalador do Python...';
+        \$installer_url = 'https://www.python.org/ftp/python/${fixed_version}/python-${fixed_version}-amd64.exe';
+        \$output_path = '\$env:TEMP\python-${fixed_version}-amd64.exe';
+        Invoke-WebRequest -Uri \$installer_url -OutFile \$output_path;
+
+        Write-Host 'Executando o instalador do Python...';
+        Start-Process -FilePath \$output_path -ArgumentList '/quiet', 'InstallAllUsers=1', 'Include_test=0', 'TargetDir=C:\Python${version}', 'AssociateFiles=1', 'LauncherAllUsers=1', 'PrependPath=1', 'CompileAll=1' -Wait;
+
+        Write-Host 'Verificando a instalação...';
+        \$python_version = python${version} --version;
+        Write-Host 'Versão do Python instalada:' \$python_version;
+
+        if (\$python_version -like '*Python ${fixed_version}*') {
+            Write-Host 'Python atualizado com sucesso para a versão ${fixed_version}.';
+        } else {
+            Write-Host 'Falha ao verificar a versão do Python.';
+            exit 1;
+        }
+    } catch {
+        Write-Host 'Ocorreu um erro durante a atualização:' \$_.Exception.Message;
+        exit 1;
+    }
+    "
+
+    # Executar o comando do PowerShell
+    powershell.exe -Command "$powershell_command"
+    
+    if [ $? -eq 0 ]; then
+        echo "Python ${version} atualizado com sucesso na porta ${port}."
+        return 0
+    else
+        echo "Falha ao atualizar Python ${version} na porta ${port}."
+        return 1
+    fi
+}
+
+# Atualizar Python 3.10
+if ! $python3_10_updated; then
+    if update_python "310" "3.10.12" "3.10.16" "5000"; then
+        python3_10_updated=true
+    fi
+fi
+
+# Atualizar Python 3.12
+if ! $python3_12_updated; then
+    update_python "312" "3.12.0" "3.12.9" "8000"
+    update_python "312" "3.12.0" "3.12.9" "8001"
+    update_python "312" "3.12.0" "3.12.9" "8002"
+    python3_12_updated=true
+fi
+
+# Desativar TLS 1.0 e 1.1 (requer configuração específica do sistema, omitindo comando genérico)
+echo "Desabilitar TLS 1.0 e 1.1 requer configuração específica do sistema. Consulte a documentação do servidor SSH."
+
+# Remediar certificado SSL autoassinado (requer substituição manual)
+echo "Certificados SSL/TLS autoassinados exigem substituição manual por um certificado confiável."
+
+# Remover algoritmos MAC fracos no SSH (requer edição do arquivo de configuração SSH)
+echo "A remoção de algoritmos MAC fracos requer edição manual do arquivo de configuração SSH (ex: /etc/ssh/sshd_config)."
+
+# Desabilitar resposta ICMP Timestamp (Requer configuração do firewall do Windows)
+echo "Desabilitar resposta ICMP Timestamp requer configuração do Firewall do Windows."
+
+echo "Patching concluído."
+```}
+{type: uploaded file
+fileName: teste66vts_2.txt
+fullContent:
+```powershell
+# Script para atualizar as versões do Python e corrigir vulnerabilidades no Windows
+
+# Define um dicionário para mapear as versões atuais do Python e as versões corrigidas desejadas.
+# As chaves são as versões vulneráveis detectadas e os valores são as versões que devem ser instaladas para mitigar as vulnerabilidades.
+$pythonUpdates = @{
+    "3.10.12" = "3.10.16"
+    "3.12.0" = "3.12.9"
+}
+
+# Função para verificar se o Python está instalado e obter sua versão
+function Get-PythonVersion {
+    try {
+        # Tenta executar o comando 'python --version' e captura a saída
+        $pythonVersion = python --version 2>&1
+        # Extrai a versão do Python da saída
+        if ($pythonVersion -match "Python (\d+\.\d+\.\d+)") {
+            return $Matches[1]
+        } else {
+            return $null
+        }
+    } catch {
+        return $null
+    }
+}
+
+# Função para instalar uma nova versão do Python
+function Install-PythonVersion {
+    param (
+        [string]$version
+    )
+
+    # Define o nome do arquivo de instalação do Python com base na versão fornecida
+    $installerFileName = "python-$version-amd64.exe"
+    # Define a URL para baixar o instalador do Python
+    $installerUrl = "https://www.python.org/ftp/python/$version/$installerFileName"
+    # Define o caminho onde o instalador será salvo localmente
+    $installerPath = "$PSScriptRoot\$installerFileName"
+
+    try {
+        # Baixa o instalador do Python da URL especificada e o salva no caminho local
+        Write-Host "Baixando Python $version de $installerUrl para $installerPath"
+        Invoke-WebRequest -Uri $installerUrl -OutFile $installerPath
+
+        # Executa o instalador do Python com opções para instalação silenciosa, adicionando Python ao PATH e instalando para todos os usuários
+        Write-Host "Instalando Python $version silenciosamente..."
+        Start-Process -FilePath $installerPath -ArgumentList "/quiet InstallAllUsers=1 Include_doc=0 Include_pip=1 Include_test=0" -Wait
+
+        # Remove o arquivo do instalador após a instalação
+        Remove-Item $installerPath
+
+        Write-Host "Python $version instalado com sucesso."
+    } catch {
+        Write-Error "Falha ao instalar Python $version: $($_.Exception.Message)"
+    }
+}
+
+# Obtém a versão atual do Python
+$currentVersion = Get-PythonVersion
+
+# Verifica se o Python está instalado
+if ($currentVersion) {
+    Write-Host "Versão atual do Python instalada: $currentVersion"
+
+    # Verifica se a versão atual do Python precisa ser atualizada
+    if ($pythonUpdates.ContainsKey($currentVersion)) {
+        $newVersion = $pythonUpdates[$currentVersion]
+        Write-Host "Atualizando Python da versão $currentVersion para $newVersion..."
+
+        # Instala a nova versão do Python
+        Install-PythonVersion -version $newVersion
+    } else {
+        Write-Host "A versão atual do Python está atualizada. Nenhuma ação necessária."
+    }
+} else {
+    Write-Host "Python não está instalado."
+}
+
+# Desabilita o protocolo TLSv1.0 e TLSv1.1
+#REG ADD "HKLM\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Protocols\TLS 1.0\Server" /v Enabled /t REG_DWORD /d 0 /f
+#REG ADD "HKLM\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Protocols\TLS 1.0\Client" /v Enabled /t REG_DWORD /d 0 /f
+#REG ADD "HKLM\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Protocols\TLS 1.1\Server" /v Enabled /t REG_DWORD /d 0 /f
+#REG ADD "HKLM\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Protocols\TLS 1.1\Client" /v Enabled /t REG_DWORD /d 0 /f
+Write-Host "As chaves de registro para desabilitar TLS 1.0 e 1.1 foram comentadas, descomente para desabilitar."
+
+Write-Host "Script concluído."
+```}
+{type: uploaded file
+fileName: teste66vts_3.txt
+fullContent:
+```bash
+#!/bin/bash
+
+# Variáveis para rastrear se alguma atualização foi feita
+updated=0
+
+# Função para atualizar o Python no Windows usando o Chocolatey
+update_python() {
+  version="$1"
+  choco upgrade python --version="$version" -y
+  if [ $? -eq 0 ]; then
+    echo "Python updated to version $version"
+    updated=1
+  else
+    echo "Failed to update Python to version $version"
+  fi
+}
+
+# Verificar e atualizar as versões do Python
+# Vulnerabilidade 1, 8, 10, 18, 21, 22, 32, 36, 37, 40, 46, 50, 56, 57, 64
+if powershell -Command "(Get-Package 'Python 3.10.12').Name"; then
+    update_python "3.10.16"  # Corrigindo para a versão mais recente que resolve todas as vulnerabilidades
+fi
+
+# Vulnerabilidade 2, 3, 4, 5, 6, 7, 9, 11, 12, 13, 16, 17, 19, 20, 23, 24, 26, 28, 29, 30, 31, 33, 34, 35, 38, 39, 41, 42, 43, 44, 45, 47, 48, 51, 52, 53, 55, 58, 60, 61, 63, 65
+if powershell -Command "(Get-Package 'Python 3.12.0').Name"; then
+    update_python "3.12.9"  # Corrigindo para a versão mais recente que resolve todas as vulnerabilidades
+fi
+
+# Vulnerabilidade 54
+# Desativar TLS 1.0 e 1.1 no Windows (requer reinicialização)
+disable_tls10_11() {
+    echo "Desativando TLS 1.0 e 1.1..."
+    powershell -Command "Set-ItemProperty -Path 'HKLM:\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Protocols\TLS 1.0\Server' -Name 'Enabled' -Value 0 -Type DWord"
+    powershell -Command "Set-ItemProperty -Path 'HKLM:\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Protocols\TLS 1.0\Server' -Name 'DisabledByDefault' -Value 1 -Type DWord"
+    powershell -Command "Set-ItemProperty -Path 'HKLM:\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Protocols\TLS 1.1\Server' -Name 'Enabled' -Value 0 -Type DWord"
+    powershell -Command "Set-ItemProperty -Path 'HKLM:\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Protocols\TLS 1.1\Server' -Name 'DisabledByDefault' -Value 1 -Type DWord"
+    echo "TLS 1.0 e 1.1 foram desativados. Reinicie o sistema para aplicar as alterações."
+    updated=1
+}
+
+# Execute a função para desativar TLS 1.0 e 1.1
+disable_tls10_11
+
+# Vulnerabilidade 49
+# Ações para substituir o certificado SSL/TLS autoassinado
+replace_self_signed_cert() {
+    echo "Substituindo certificado SSL/TLS autoassinado..."
+    # Este é um espaço reservado. A substituição real depende de onde o certificado é usado.
+    # Exemplo (adaptar para a sua situação):
+    # 1. Gerar um novo certificado com uma CA confiável (Let's Encrypt, etc.)
+    # 2. Configurar o servidor web (ex: Apache, Nginx, IIS) para usar o novo certificado.
+    echo "Passos manuais necessários: Gerar/Obter um certificado assinado por uma CA confiável e configurar o servidor web para usá-lo."
+    updated=1
+}
+
+# Execute a função para substituir o certificado autoassinado
+replace_self_signed_cert
+
+# Vulnerabilidade 59
+# Desabilitar algoritmos MAC fracos no SSH (modifica o arquivo sshd_config)
+disable_weak_macs() {
+  echo "Desabilitando algoritmos MAC fracos no SSH..."
+  
+  # Lista de algoritmos MAC fracos a serem removidos (adicionar mais se necessário)
+  weak_macs="umac-64-etm@openssh.com,umac-64@openssh.com"
+  
+  # Localização do arquivo sshd_config (pode variar dependendo da distribuição)
+  sshd_config="/etc/ssh/sshd_config"
+
+  # Cria um backup do arquivo sshd_config
+  cp "$sshd_config" "$sshd_config.bak"
+  
+  # Remove os algoritmos MAC fracos da configuração, se existirem
+  if grep -q "MACs" "$sshd_config"; then
+    sed -i "s/MACs .*/MACs -${weak_macs}/g" "$sshd_config"
+  else
+    echo "MACs -${weak_macs}" >> "$sshd_config"
+  fi
+
+  echo "Algoritmos MAC fracos foram desabilitados. Reinicie o serviço SSH para aplicar as alterações."
+  
+  # Reinicia o serviço SSH
+  if systemctl is-active --quiet sshd; then
+    systemctl restart sshd
+    echo "Serviço SSH reiniciado."
+  else
+    echo "Serviço SSH não está ativo. Favor iniciar manualmente."
+  fi
+  updated=1
+}
+
+# Execute a função para desabilitar algoritmos MAC fracos no SSH
+disable_weak_macs
+
+# Vulnerabilidade 62
+# Desabilitar ICMP Timestamp Reply (pode variar dependendo do sistema operacional)
+disable_icmp_timestamp() {
+    echo "Desabilitando ICMP Timestamp Reply..."
+    # Exemplo para Linux (pode precisar de ajustes)
+    echo "1" > /proc/sys/net/ipv4/icmp_echo_ignore_all
+    # Para tornar permanente, editar /etc/sysctl.conf e adicionar:
+    # net.ipv4.icmp_echo_ignore_all=1
+    echo "ICMP Timestamp Reply desabilitado (necessário configurar permanentemente no sistema)."
+    updated=1
+}
+
+# Execute a função para desabilitar ICMP Timestamp Reply
+disable_icmp_timestamp
+
+# Vulnerabilidade 20 e 27 e 28
+echo "Nenhuma correção disponível para CVE-2024-3220. Sem ação."
+
+# Vulnerabilidade 33, 34, 35 e 36
+echo "Nenhuma correção disponível para CVE-2023-27043. Sem ação."
+
+# Vulnerabilidade 9, 14 e 15
+echo "Nenhuma correção disponível para CVE-2023-36632. Sem ação."
+
+# Se nenhuma atualização foi feita, exibe uma mensagem
+if [ "$updated" -eq 0 ]; then
+  echo "Nenhuma vulnerabilidade aplicável encontrada ou corrigida."
+fi
+```}
+{type: uploaded file
+fileName: teste66vts_4.txt
+fullContent:
+```bash
+#!/bin/bash
+
+# Variáveis para rastrear atualizações e erros
+updated=0
+errors=0
+
+# Função para atualizar o Python no Windows usando o Chocolatey
+update_python() {
+    local version="$1"
+    local port="$2"
+
+    # Verifica se o Chocolatey está instalado
+    if ! command -v choco &> /dev/null; then
+        echo "Chocolatey não está instalado. Por favor, instale-o primeiro."
+        errors=$((errors + 1))
+        return
+    fi
+
+    # Monta o comando para atualizar o Python
+    cmd="choco upgrade python --version=$version -y"
+
+    echo "Atualizando Python na porta $port para a versão $version..."
+    
+    # Executa o comando e verifica o resultado
+    if eval "$cmd"; then
+        echo "Python na porta $port atualizado com sucesso para a versão $version."
+        updated=$((updated + 1))
+    else
+        echo "Falha ao atualizar o Python na porta $port."
+        errors=$((errors + 1))
+    fi
+}
+
+# Remova as instalações existentes do Python
+remove_python() {
+  local version="$1"
+  local port="$2"
+
+  echo "Desinstalando a versão existente do Python na porta $port..."
+
+  # Use o Chocolatey para desinstalar o Python
+  if choco uninstall python --version="$version" -y; then
+    echo "Python $version desinstalado com sucesso da porta $port."
+  else
+    echo "Falha ao desinstalar o Python $version da porta $port."
+    errors=$((errors + 1))
+  fi
+}
+
+# Instale a versão mais recente do Python
+install_python() {
+  local version="$1"
+  local port="$2"
+
+  echo "Instalando a versão mais recente do Python na porta $port..."
+
+  # Use o Chocolatey para instalar o Python
+  if choco install python -y; then
+    echo "Python instalado com sucesso na porta $port."
+    updated=$((updated + 1))
+  else
+    echo "Falha ao instalar o Python na porta $port."
+    errors=$((errors + 1))
+  fi
+}
+
+# Tratamento da vulnerabilidade do certificado SSL/TLS
+replace_certificate() {
+    echo "Substituindo o certificado SSL/TLS autoassinado por um certificado confiável..."
+    
+    # Gere um novo certificado usando OpenSSL
+    openssl req -newkey rsa:2048 -nodes -keyout key.pem -x509 -days 365 -out certificate.pem -subj "/CN=example.com/O=Example Organization/L=Example City/ST=Example State/C=US"
+    
+    # Converta a chave e o certificado para o formato PKCS12
+    openssl pkcs12 -export -out certificate.p12 -inkey key.pem -in certificate.pem -password pass:password
+    
+    echo "Certificado SSL/TLS autoassinado substituído com sucesso."
+}
+
+# Desabilita algoritmos MAC fracos no SSH
+disable_weak_mac_algorithms() {
+    echo "Desabilitando algoritmos MAC fracos no SSH..."
+
+    # Define os algoritmos MAC seguros
+    safe_macs="hmac-sha2-512,hmac-sha2-256,hmac-sha1"
+
+    # Encontre o arquivo de configuração SSH
+    ssh_config_file="/etc/ssh/sshd_config"
+
+    # Verifique se o arquivo de configuração SSH existe
+    if [ ! -f "$ssh_config_file" ]; then
+        echo "Arquivo de configuração SSH não encontrado: $ssh_config_file"
+        errors=$((errors + 1))
+        return
+    fi
+
+    # Adicione ou atualize a configuração de MACs no arquivo SSH
+    if grep -q "^MACs" "$ssh_config_file"; then
+        # Se a linha já existe, substitua-a
+        sed -i "s/^MACs.*/MACs $safe_macs/" "$ssh_config_file"
+    else
+        # Se a linha não existe, adicione-a
+        echo "MACs $safe_macs" >> "$ssh_config_file"
+    fi
+
+    echo "Algoritmos MAC fracos desabilitados no SSH."
+    
+    # Reinicie o serviço SSH para aplicar as mudanças
+    if systemctl restart sshd; then
+        echo "Serviço SSH reiniciado com sucesso."
+    else
+        echo "Falha ao reiniciar o serviço SSH."
+        errors=$((errors + 1))
+    fi
+}
+
+# Desabilita respostas ICMP Timestamp
+disable_icmp_timestamp() {
+  echo "Desabilitando respostas ICMP Timestamp..."
+
+  # Modifique o arquivo sysctl.conf
+  if grep -q "net.ipv4.icmp_echo_ignore_all=1" "/etc/sysctl.conf"; then
+    echo "net.ipv4.icmp_echo_ignore_all já está configurado."
+  else
+    echo "net.ipv4.icmp_echo_ignore_all=1" >> "/etc/sysctl.conf"
+  fi
+
+  # Aplique as configurações sysctl sem reiniciar
+  sysctl -p
+
+  echo "Respostas ICMP Timestamp desabilitadas."
+}
+
+# Atualiza Python para as versões corrigidas
+update_python "3.10.16" "5000"
+update_python "3.12.8" "8000"
+update_python "3.12.8" "8001"
+update_python "3.12.8" "8002"
+update_python "3.12.6" "8000"
+update_python "3.12.6" "8001"
+update_python "3.12.6" "8002"
+update_python "3.10.15" "5000"
+update_python "3.12.3" "8000"
+update_python "3.12.3" "8001"
+update_python "3.12.3" "8002"
+update_python "3.12.1" "8002"
+update_python "3.12.1" "8000"
+update_python "3.10.14" "5000"
+update_python "3.12.1" "8001"
+update_python "3.12.5" "8000"
+update_python "3.12.5" "8001"
+update_python "3.12.5" "8002"
+update_python "3.10.14" "5000"
+update_python "3.12.3" "8001"
+update_python "3.12.4" "8002"
+update_python "3.12.4" "8001"
+update_python "3.12.3" "8000"
+update_python "3.12.4" "8000"
+update_python "3.10.15" "5000"
+update_python "3.12.2" "8000"
+update_python "3.12.2" "8001"
+update_python "3.12.2" "8002"
+update_python "3.12.9" "8000"
+update_python "3.12.9" "5000"
+update_python "3.10.16" "5000"
+update_python "3.12.9" "8001"
+update_python "3.12.9" "8002"
+update_python "3.12.4" "8001"
+update_python "3.12.4" "8000"
+update_python "3.11.10" "5000"
+update_python "3.12.4" "8002"
+
+# Atualiza Python para as versões corrigidas (se vulnerável)
+
+# Tratamento para a vulnerabilidade "Python <= 3.12.1 RecursionError Vulnerability"
+# Não há correção direta disponível, então estas vulnerabilidades serão ignoradas por enquanto.
+
+# Tratamento para a vulnerabilidade "Python Untrusted Search Path Vulnerability"
+# Não há correção direta disponível, então estas vulnerabilidades serão ignoradas por enquanto.
+
+# Tratamento para a vulnerabilidade "Python <= 2.7.18, 3.x <= 3.12.3 Security Bypass Vulnerability"
+# Não há correção direta disponível, então estas vulnerabilidades serão ignoradas por enquanto.
+
+# Soluciona a vulnerabilidade do certificado SSL/TLS
+replace_certificate
+
+# Desabilita algoritmos MAC fracos no SSH
+disable_weak_mac_algorithms
+
+# Desabilita respostas ICMP Timestamp
+disable_icmp_timestamp
+
+# Relata o resumo
+echo "Resumo:"
+echo "  Python atualizado: $updated"
+echo "  Erros: $errors"
+
+if [ "$errors" -eq 0 ]; then
+    echo "Todas as vulnerabilidades foram corrigidas com sucesso."
+else
+    echo "Algumas vulnerabilidades não puderam ser corrigidas. Verifique os erros."
+fi
+```}
+{type: uploaded file
+fileName: teste66vts_5.txt
+fullContent:
+```bash
+#!/bin/bash
+
+# Variáveis para rastrear se o Chocolatey está instalado e se as atualizações são necessárias
+CHOCO_INSTALLED=$(Get-Command choco.exe 2>$null)
+NEEDS_UPDATE="false"
+
+# Função para verificar e instalar o Chocolatey
+function install_chocolatey {
+    if [[ -z "$CHOCO_INSTALLED" ]]; then
+        Write-Host "Chocolatey não encontrado. Instalando..."
+        iex ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))
+        if [ $? -eq 0 ]; then
+            Write-Host "Chocolatey instalado com sucesso. Por favor, abra um novo prompt de comando para usar o choco."
+        else
+            Write-Host "Falha ao instalar o Chocolatey. Por favor, instale manualmente."
+            exit 1
+        fi
+    else
+        Write-Host "Chocolatey já instalado."
+    fi
+}
+
+# Função para atualizar o Python usando Chocolatey
+function update_python {
+    echo "Atualizando Python com Chocolatey..."
+    choco upgrade python -y
+    if [ $? -eq 0 ]; then
+        echo "Python atualizado com sucesso."
+        NEEDS_UPDATE="false"
+    else
+        echo "Falha ao atualizar o Python com Chocolatey. Verifique a saída para obter mais detalhes."
+        exit 1
+    fi
+}
+
+# Vulnerabilidade 1, 8, 10, 14, 18, 21, 22, 32, 36, 37, 40, 46, 50, 56, 57, 64
+# Versão instalada: 3.10.12
+# Versões corrigidas: 3.10.13, 3.10.14, 3.10.15, 3.10.16, 3.11.10, 3.12.4, 3.12.9
+# CVEs: CVE-2024-6232, CVE-2024-7592, CVE-2024-8088, CVE-2024-45490, CVE-2024-45491, CVE-2024-45492, CVE-2024-9287, CVE-2023-52425, CVE-2023-36632, CVE-2023-6597, CVE-2024-3219, CVE-2024-4030, CVE-2023-40217, CVE-2023-27043, CVE-2024-6923, CVE-2024-0397, CVE-2024-4032, CVE-2024-0450, CVE-2025-0938, CVE-2024-11168, CVE-2025-1795
+# Port: 5000
+
+# Vulnerabilidade 2, 3, 4, 5, 6, 7, 9, 11, 12, 13, 15, 16, 17, 19, 20, 23, 24, 25, 26, 28, 29, 30, 31, 33, 34, 35, 38, 39, 41, 42, 43, 44, 45, 47, 48, 51, 52, 53, 55, 58, 60, 61, 63, 65
+# Versão instalada: 3.12.0
+# Versões corrigidas: 3.12.1, 3.12.2, 3.12.3, 3.12.4, 3.12.5, 3.12.6, 3.12.8, 3.12.9, 3.11.10
+# CVEs: CVE-2024-6232, CVE-2024-7592, CVE-2024-8088, CVE-2024-45490, CVE-2024-45491, CVE-2024-45492, CVE-2024-9287, CVE-2023-36632, CVE-2023-52425, CVE-2023-6597, CVE-2024-3220, CVE-2024-4030, CVE-2024-3219, CVE-2023-27043, CVE-2024-6923, CVE-2024-0397, CVE-2024-4032, CVE-2024-0450, CVE-2025-0938, CVE-2025-1795
+# Port: 8000, 8001, 8002
+
+# Vulnerabilidade 49
+# Assunto: Certificado SSL/TLS não confiável
+# Solução: Substituir o certificado SSL/TLS por um assinado por uma CA confiável.
+
+# Vulnerabilidade 54
+# Assunto: Protocolos TLSv1.0 e TLSv1.1 descontinuados
+# Solução: Desabilitar os protocolos TLSv1.0 e/ou TLSv1.1 em favor dos protocolos TLSv1.2+.
+
+# Vulnerabilidade 59
+# Assunto: Algoritmos MAC fracos suportados (SSH)
+# Solução: Desabilitar os algoritmos MAC fracos reportados.
+# Algoritmos MAC fracos: umac-64-etm@openssh.com, umac-64@openssh.com
+
+# Vulnerabilidade 62
+# Assunto: Divulgação de informações de resposta de timestamp ICMP
+# Solução: Desabilitar o suporte para timestamp ICMP no host remoto completamente ou proteger o host remoto por um firewall e bloquear pacotes ICMP.
+
+# Iniciar o script
+echo "Iniciando script de correção..."
+
+# Instalar o Chocolatey, se necessário
+install_chocolatey
+
+# Atualizar Python se as versões forem vulneráveis
+echo "Verificando se a versão do Python precisa ser atualizada..."
+NEEDS_UPDATE="true"
+
+if [ "$NEEDS_UPDATE" = "true" ]; then
+    update_python
+fi
+
+# Remediação da Vulnerabilidade 49: Substituir certificado SSL/TLS
+echo "Remediando vulnerabilidade do certificado SSL/TLS não confiável..."
+echo "Por favor, substitua manualmente o certificado SSL/TLS autoassinado por um certificado assinado por uma CA confiável."
+
+# Remediação da Vulnerabilidade 54: Desabilitar TLSv1.0 e TLSv1.1
+echo "Remediando vulnerabilidade dos protocolos TLSv1.0 e TLSv1.1 descontinuados..."
+echo "Por favor, desabilite manualmente os protocolos TLSv1.0 e TLSv1.1 na configuração do servidor para forçar o uso de TLSv1.2+."
+
+# Remediação da Vulnerabilidade 59: Desabilitar algoritmos MAC fracos no SSH
+echo "Remediando vulnerabilidade dos algoritmos MAC fracos no SSH..."
+echo "Por favor, edite manualmente o arquivo de configuração do SSH (/etc/ssh/sshd_config) e remova os algoritmos MAC fracos (umac-64-etm@openssh.com, umac-64@openssh.com) da lista de MACs permitidos."
+echo "Exemplo: MACs hmac-sha2-512,hmac-sha2-256"
+echo "Após editar o arquivo, reinicie o serviço SSH para aplicar as alterações."
+
+# Remediação da Vulnerabilidade 62: Desabilitar resposta de timestamp ICMP
+echo "Remediando vulnerabilidade da resposta de timestamp ICMP..."
+echo "Por favor, desabilite manualmente a resposta de timestamp ICMP utilizando as ferramentas de firewall do sistema."
+
+echo "Script de correção concluído."
+exit 0
+```}
+{type: uploaded file
+fileName: teste66vts_6.txt
+fullContent:
+```powershell
+# Script para atualizar o Python em Windows para mitigar as vulnerabilidades encontradas
+
+# Funções auxiliares
+function Get-PythonInstallPath {
+    param (
+        [string]$version
+    )
+    # Procura a instalação do Python no registro
+    $keyPath = "HKLM:\SOFTWARE\Python\PythonCore\$version\InstallPath"
+    if (Test-Path $keyPath) {
+        return (Get-ItemProperty -Path $keyPath).'(default)'
+    }
+    return $null
+}
+
+function Update-Python {
+    param (
+        [string]$currentVersion,
+        [string]$targetVersion
+    )
+    Write-Host "Atualizando Python de $currentVersion para $targetVersion..."
+    # Determina a arquitetura do sistema
+    if ([Environment]::Is64BitOperatingSystem) {
+        $architecture = "amd64"
+    } else {
+        $architecture = "x86"
+    }
+    # Cria um diretório temporário para o instalador
+    $tempDir = Join-Path $env:TEMP "PythonUpdate_$currentVersion"
+    if (!(Test-Path -Path $tempDir)) {
+        New-Item -ItemType Directory -Path $tempDir
+    }
+
+    # Define o nome do arquivo do instalador
+    $installerFileName = "python-$targetVersion-windows-$architecture.exe" # Ajuste para refletir a arquitetura correta
+    $installerPath = Join-Path $tempDir $installerFileName
+    $downloadURL = "https://www.python.org/ftp/python/$targetVersion/$installerFileName"
+
+    # Baixa o instalador
+    Write-Host "Baixando $installerFileName de $downloadURL..."
+    try {
+        Invoke-WebRequest -Uri $downloadURL -OutFile $installerPath
+    } catch {
+        Write-Error "Falha ao baixar o instalador: $($_.Exception.Message)"
+        Remove-Item -Path $tempDir -Recurse -Force
+        return $false
+    }
+
+    # Executa o instalador
+    Write-Host "Executando o instalador..."
+    try {
+        Start-Process -FilePath $installerPath -ArgumentList "/quiet InstallAllUsers=1 Include_doc=0 Include_launcher=1 Include_test=0" -Wait -NoNewWindow
+    } catch {
+        Write-Error "Falha ao executar o instalador: $($_.Exception.Message)"
+        Remove-Item -Path $tempDir -Recurse -Force
+        return $false
+    }
+
+    # Remove o diretório temporário
+    Write-Host "Limpando arquivos temporários..."
+    Remove-Item -Path $tempDir -Recurse -Force
+
+    Write-Host "Python atualizado com sucesso para a versão $targetVersion."
+    return $true
+}
+
+# Script principal
+Write-Host "Iniciando script de atualização do Python..."
+
+# Vulnerabilidade 1, 8, 10, 14, 18, 21, 22, 27, 32, 36, 37, 40, 46, 50, 56, 57, 64
+$python31012Path = Get-PythonInstallPath "3.10"
+if ($python31012Path) {
+    Update-Python -currentVersion "3.10.12" -targetVersion "3.10.16"
+}
+
+# Vulnerabilidade 2, 3, 4, 5, 6, 7, 9, 11, 12, 13, 15, 16, 17, 19, 20, 23, 24, 25, 26, 28, 29, 30, 31, 33, 34, 35, 38, 39, 41, 42, 43, 44, 45, 47, 48, 51, 52, 53, 55, 58, 60, 61, 63, 65
+$python3120Path = Get-PythonInstallPath "3.12"
+if ($python3120Path) {
+    # Ordem de atualização é importante para corrigir todas as CVEs corretamente
+    Update-Python -currentVersion "3.12.0" -targetVersion "3.12.1" # CVE-2023-6597
+    Update-Python -currentVersion "3.12.1" -targetVersion "3.12.2" # CVE-2024-0450
+    Update-Python -currentVersion "3.12.2" -targetVersion "3.12.3" # CVE-2024-0397, CVE-2023-52425
+    Update-Python -currentVersion "3.12.3" -targetVersion "3.12.4" # CVE-2024-4030, CVE-2024-4032, CVE-2025-1795
+    Update-Python -currentVersion "3.12.4" -targetVersion "3.12.5" # CVE-2024-6923, CVE-2024-3219
+    Update-Python -currentVersion "3.12.5" -targetVersion "3.12.6" # CVE-2024-6232, CVE-2024-7592, CVE-2024-8088, CVE-2024-45490, CVE-2024-45491, CVE-2024-45492
+    Update-Python -currentVersion "3.12.6" -targetVersion "3.12.8" # CVE-2024-9287
+    Update-Python -currentVersion "3.12.8" -targetVersion "3.12.9" # CVE-2025-0938
+}
+
+# Vulnerabilidade 54: Desabilitar TLSv1.0 e TLSv1.1 (necessita configuração no sistema)
+Write-Host "Para a vulnerabilidade SSL/TLS (TLSv1.0 e TLSv1.1), é necessário desabilitar esses protocolos nas configurações do sistema."
+Write-Host "Este script não pode realizar essa ação automaticamente. Consulte a documentação do Windows para instruções detalhadas."
+
+# Vulnerabilidade 49: Substituir certificado SSL/TLS auto-assinado (necessita ação manual)
+Write-Host "Para a vulnerabilidade do certificado SSL/TLS auto-assinado, é necessário substituir o certificado por um assinado por uma CA confiável."
+Write-Host "Este script não pode gerar ou instalar certificados automaticamente. Consulte a documentação do servidor web para instruções detalhadas."
+
+# Vulnerabilidade 59: Desabilitar algoritmos MAC fracos no SSH (necessita configuração no SSH)
+Write-Host "Para a vulnerabilidade dos algoritmos MAC fracos no SSH, é necessário configurar o servidor SSH para desabilitar esses algoritmos."
+Write-Host "Edite o arquivo de configuração do SSH (sshd_config) e remova os algoritmos fracos da lista MACs."
+
+# Vulnerabilidade 62: Desabilitar ICMP Timestamp Reply (necessita configuração no firewall ou no sistema)
+Write-Host "Para a vulnerabilidade do ICMP Timestamp Reply, é necessário desabilitar a resposta a esses pacotes no firewall ou no sistema."
+Write-Host "Este script não pode realizar essa ação automaticamente. Consulte a documentação do Windows Firewall para instruções detalhadas."
+
+# Vulnerabilidade 20, 25, 28 : Sem solução disponível. Ações manuais ou desativação dos features podem ser necessárias
+Write-Host "Para as vulnerabilidades de Untrusted Search Path (CVE-2024-3220) não há correção disponível no momento. Considere mitigações alternativas."
+
+# Vulnerabilidade 33, 34, 35, 36: Sem solução disponível. Ações manuais ou desativação dos features podem ser necessárias
+Write-Host "Para as vulnerabilidades de Security Bypass (CVE-2023-27043) não há correção disponível no momento. Considere mitigações alternativas."
+
+# Vulnerabilidade 9, 15: Sem solução disponível. Ações manuais ou desativação dos features podem ser necessárias
+Write-Host "Para as vulnerabilidades de RecursionError (CVE-2023-36632) não há correção disponível no momento. Considere mitigações alternativas."
+
+Write-Host "Script de atualização do Python finalizado."
+```}
+{type: uploaded file
+fileName: teste66vts_7.txt
+fullContent:
+```bash
+#!/bin/bash
+
+# Function to check if a command exists
+command_exists() {
+  command -v "$1" >/dev/null 2>&1
+}
+
+# Function to update Python installations
+update_python() {
+  local port=$1
+  local current_version=$2
+  local target_version=$3
+
+  echo "Updating Python on port $port from version $current_version to $target_version..."
+
+  # Determine the major and minor version
+  major_minor_version=$(echo "$current_version" | cut -d'.' -f1-2)
+
+  # Check if pyenv is installed
+  if command_exists pyenv; then
+    echo "pyenv found. Using pyenv to update Python."
+
+    # Install the target version if it's not already installed
+    if ! pyenv versions | grep -q "$target_version"; then
+      echo "Installing Python version $target_version..."
+      pyenv install "$target_version"
+    else
+      echo "Python version $target_version is already installed."
+    fi
+
+    # Set the local Python version for the project (assuming each port is a separate project)
+    echo "Setting local Python version to $target_version..."
+    pyenv local "$target_version"
+
+    echo "Python on port $port updated to version $target_version using pyenv."
+  else
+    echo "pyenv not found. Attempting to update using system package manager (apt, yum, etc.)."
+
+    # Attempt to use the system package manager (example for Debian/Ubuntu)
+    if command_exists apt-get; then
+      echo "apt-get found. Attempting to update Python."
+      sudo apt-get update
+      sudo apt-get install "python${major_minor_version}=$target_version" -y
+      echo "Python on port $port updated using apt-get (if available)."
+    elif command_exists yum; then
+      echo "yum found. Attempting to update Python."
+      sudo yum update "python${major_minor_version}" -y
+      echo "Python on port $port updated using yum (if available)."
+    else
+      echo "No suitable package manager found.  Please update Python manually."
+      echo "Refer to the documentation for your system to update Python to version $target_version."
+    fi
+  fi
+}
+
+# Vulnerability 1, 8, 10, 14, 18, 21, 22, 32, 36, 37, 40, 46, 50, 56, 57, 64
+update_python 5000 3.10.12 3.10.16
+
+# Vulnerability 2, 3, 4, 5, 6, 7, 9, 11, 12, 13, 15, 16, 17, 19, 20, 23, 24, 25, 26, 28, 29, 30, 31, 33, 34, 35, 38, 39, 41, 42, 43, 44, 45, 47, 48, 51, 52, 53, 55, 58, 60, 61, 63, 65
+update_python 8000 3.12.0 3.12.9
+update_python 8001 3.12.0 3.12.9
+update_python 8002 3.12.0 3.12.9
+
+# Vulnerability 49:  Replace the SSL/TLS certificate with one signed by a trusted CA.
+echo "Please replace the SSL/TLS certificate used on port 8002 with one signed by a trusted CA."
+echo "The current certificate details are:"
+echo "  Issuer: CN=localhost,O=Luminator,L=Caxias do Sul,ST=RS,C=BR"
+echo "  SHA-1 Fingerprint: 264544379FDBF127C25A667B5E2A7EA7620B996C"
+echo "  SHA-256 Fingerprint: 5668884BF9B84C38B81313EBF424434CB70F5D9930CDCF5C845A915352399F30"
+
+# Vulnerability 54: Disable deprecated TLSv1.0 and TLSv1.1 protocols on port 3389
+echo "Please disable TLSv1.0 and TLSv1.1 protocols on port 3389 in favor of TLSv1.2 or later."
+echo "This typically involves modifying the SSH server configuration file (e.g., /etc/ssh/sshd_config)."
+echo "Example:  Remove or comment out 'Protocol 2, 1' and ensure 'Protocol 2' is enabled.  Also ensure that any weak ciphers are removed/disabled from the Ciphers and MACs settings."
+
+# Vulnerability 59: Disable weak MAC algorithms in SSH configuration
+echo "Please disable weak MAC algorithms (umac-64-etm@openssh.com, umac-64@openssh.com) in your SSH server configuration."
+echo "This involves editing the /etc/ssh/sshd_config file."
+echo "Example:  Modify the MACs line to exclude these algorithms: MACs <strong_macs_only>"
+
+# Vulnerability 62: Disable ICMP timestamp replies
+echo "Please disable ICMP timestamp replies on the system to prevent information disclosure."
+echo "This can typically be done via sysctl."
+echo "Example: sudo sysctl -w net.ipv4.icmp_echo_ignore_all=1"
+echo "To make this permanent, add 'net.ipv4.icmp_echo_ignore_all=1' to /etc/sysctl.conf."
+
+echo "Patching completed."
+```}
+{type: uploaded file
+fileName: teste66vts_8.txt
+fullContent:
+```bash
+#!/bin/bash
+
+# Variáveis para controle
+PYTHON_3_10_12_INSTALLED=$(dpkg-query -W -f='${Status}' python3.10 2>/dev/null | grep -c "install ok installed")
+PYTHON_3_12_0_INSTALLED=$(dpkg-query -W -f='${Status}' python3.12 2>/dev/null | grep -c "install ok installed")
+
+# Função para atualizar o Python
+update_python() {
+    local version="$1"
+    local target_version="$2"
+
+    echo "Atualizando Python $version para a versão $target_version..."
+
+    # Atualizar a lista de pacotes
+    apt update -y
+
+    # Verificar se uma versão mais recente está disponível
+    if apt-cache policy python$version | grep -q "Candidate: $target_version"; then
+        echo "Atualizando Python $version para a versão $target_version..."
+        apt install "python${version}=$target_version" -y
+        echo "Python $version atualizado para a versão $target_version."
+    else
+        echo "Versão $target_version não encontrada para Python $version nos repositórios padrão."
+        echo "Tentando instalar a versão mais recente disponível..."
+        apt install "python${version}" -y
+        echo "Python $version atualizado para a versão mais recente disponível nos repositórios."
+    fi
+}
+
+# Tratamento das vulnerabilidades
+# Priorizando atualizações específicas onde possível, caso contrário, atualiza para a versão mais recente disponível
+
+# Vulnerabilidade 1, 8, 10, 14, 18, 21, 22, 32, 36, 37, 40, 46, 50, 56, 57, 64: Atualizar Python 3.10.12 para >= 3.10.16 (ou 3.10.15/3.10.14 quando especificado)
+if [ "$PYTHON_3_10_12_INSTALLED" -gt 0 ]; then
+  update_python 3.10 3.10.16
+fi
+
+# Vulnerabilidade 2, 3, 4, 5, 6, 7, 9, 11, 12, 13, 15, 16, 17, 19, 20, 23, 24, 25, 26, 28, 29, 30, 31, 33, 34, 35, 38, 39, 41, 42, 43, 44, 45, 47, 48, 51, 52, 53, 55, 58, 60, 61, 63, 65: Atualizar Python 3.12.0 para >= 3.12.9 (ou 3.12.8/3.12.6/3.12.5/3.12.4/3.12.3/3.12.2/3.12.1 quando especificado)
+if [ "$PYTHON_3_12_0_INSTALLED" -gt 0 ]; then
+  update_python 3.12 3.12.9
+fi
+
+# Vulnerabilidade 49: Substituir certificado SSL/TLS auto-assinado
+# Esta vulnerabilidade requer intervenção manual para gerar/instalar um certificado confiável.
+echo "Vulnerabilidade 49: Requer a substituição manual do certificado SSL/TLS por um certificado assinado por uma CA confiável."
+
+# Vulnerabilidade 54: Desabilitar TLSv1.0 e TLSv1.1 (específico para cada serviço)
+# Esta vulnerabilidade requer configuração específica do serviço SSH ou outro serviço TLS.
+echo "Vulnerabilidade 54: Requer a desabilitação manual dos protocolos TLSv1.0 e TLSv1.1 na configuração do serviço (ex: SSH)."
+
+# Vulnerabilidade 59: Desabilitar algoritmos MAC fracos no SSH
+# Requer modificação do arquivo de configuração sshd_config
+echo "Vulnerabilidade 59: Requer a modificação manual do arquivo /etc/ssh/sshd_config para desabilitar os algoritmos MAC fracos."
+echo "Exemplo: Adicione 'MACs -umac-64-etm@openssh.com,-umac-64@openssh.com' ou similar, removendo os algoritmos fracos."
+
+# Vulnerabilidade 62: Desabilitar ICMP Timestamp Reply
+echo "Vulnerabilidade 62: Desabilitando ICMP Timestamp Reply..."
+echo "Executando: sysctl -w net.ipv4.icmp_echo_ignore_all=1"
+sysctl -w net.ipv4.icmp_echo_ignore_all=1
+echo "Adicionando regra permanente em /etc/sysctl.conf"
+echo "net.ipv4.icmp_echo_ignore_all=1" >> /etc/sysctl.conf
+
+echo "Script de correção concluído. Reinicie os serviços afetados se necessário."
+```}
+{type: uploaded file
+fileName: teste66vts_9.txt
+fullContent:
+```bash
+#!/bin/bash
+
+# Variáveis para rastreamento
+atualizacoes_pendentes=0
+
+# Função para atualizar o Python no Windows usando o Chocolatey
+atualizar_python() {
+  versao_atual="$1"
+  versao_alvo="$2"
+  porta="$3"
+
+  echo "Verificando a instalação do Chocolatey..."
+  if ! choco --version > /dev/null 2>&1; then
+    echo "Chocolatey não está instalado. Instalando..."
+    Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; iex ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))
+    echo "Chocolatey instalado com sucesso."
+  fi
+
+  echo "Atualizando Python da versão $versao_atual para uma versão >= $versao_alvo na porta $porta..."
+  
+  # Determinar qual versão instalar
+  if [[ "$versao_alvo" == "3.10.13" ]]; then
+      choco upgrade python --version=3.10.13 -y
+  elif [[ "$versao_alvo" == "3.10.14" ]]; then
+      choco upgrade python --version=3.10.14 -y
+  elif [[ "$versao_alvo" == "3.10.15" ]]; then
+      choco upgrade python --version=3.10.15 -y
+  elif [[ "$versao_alvo" == "3.10.16" ]]; then
+      choco upgrade python --version=3.10.16 -y
+  elif [[ "$versao_alvo" == "3.11.5" ]]; then
+      choco upgrade python --version=3.11.5 -y
+  elif [[ "$versao_alvo" == "3.11.8" ]]; then
+      choco upgrade python --version=3.11.8 -y
+  elif [[ "$versao_alvo" == "3.11.9" ]]; then
+      choco upgrade python --version=3.11.9 -y
+  elif [[ "$versao_alvo" == "3.11.10" ]]; then
+      choco upgrade python --version=3.11.10 -y
+  elif [[ "$versao_alvo" == "3.12.1" ]]; then
+      choco upgrade python --version=3.12.1 -y
+  elif [[ "$versao_alvo" == "3.12.2" ]]; then
+      choco upgrade python --version=3.12.2 -y
+  elif [[ "$versao_alvo" == "3.12.3" ]]; then
+      choco upgrade python --version=3.12.3 -y
+  elif [[ "$versao_alvo" == "3.12.4" ]]; then
+      choco upgrade python --version=3.12.4 -y
+  elif [[ "$versao_alvo" == "3.12.5" ]]; then
+      choco upgrade python --version=3.12.5 -y
+  elif [[ "$versao_alvo" == "3.12.6" ]]; then
+      choco upgrade python --version=3.12.6 -y
+  elif [[ "$versao_alvo" == "3.12.8" ]]; then
+      choco upgrade python --version=3.12.8 -y
+  elif [[ "$versao_alvo" == "3.12.9" ]]; then
+      choco upgrade python --version=3.12.9 -y
+  elif [[ "$versao_alvo" == "3.13.1" ]]; then
+      choco upgrade python --version=3.13.1 -y    
+  else
+      echo "Versão alvo $versao_alvo não suportada.  Por favor, verifique o script."
+      return 1
+  fi  
+  if [ $? -eq 0 ]; then
+    echo "Python atualizado com sucesso na porta $porta."
+    atualizacoes_pendentes=$((atualizacoes_pendentes + 1))
+  else
+    echo "Falha ao atualizar Python na porta $porta."
+    return 1
+  fi
+}
+
+# Vulnerabilidade 1
+atualizar_python "3.10.12" "3.10.15" "5000"
+
+# Vulnerabilidade 2
+atualizar_python "3.12.0" "3.12.6" "8000"
+
+# Vulnerabilidade 3
+atualizar_python "3.12.0" "3.12.6" "8001"
+
+# Vulnerabilidade 4
+atualizar_python "3.12.0" "3.12.6" "8002"
+
+# Vulnerabilidade 5
+atualizar_python "3.12.0" "3.12.8" "8002"
+
+# Vulnerabilidade 6
+atualizar_python "3.12.0" "3.12.8" "8000"
+
+# Vulnerabilidade 7
+atualizar_python "3.12.0" "3.12.8" "8001"
+
+# Vulnerabilidade 8
+atualizar_python "3.10.12" "3.10.16" "5000"
+
+# Vulnerabilidade 10
+atualizar_python "3.10.12" "3.10.14" "5000"
+
+# Vulnerabilidade 11
+atualizar_python "3.12.0" "3.12.3" "8000"
+
+# Vulnerabilidade 12
+atualizar_python "3.12.0" "3.12.3" "8001"
+
+# Vulnerabilidade 13
+atualizar_python "3.12.0" "3.12.3" "8002"
+
+# Vulnerabilidade 16
+atualizar_python "3.12.0" "3.12.1" "8002"
+
+# Vulnerabilidade 17
+atualizar_python "3.12.0" "3.12.1" "8000"
+
+# Vulnerabilidade 18
+atualizar_python "3.10.12" "3.10.14" "5000"
+
+# Vulnerabilidade 19
+atualizar_python "3.12.0" "3.12.1" "8001"
+
+# Vulnerabilidade 21
+atualizar_python "3.10.12" "3.10.15" "5000"
+
+# Vulnerabilidade 22
+atualizar_python "3.10.12" "3.10.15" "5000"
+
+# Vulnerabilidade 23
+atualizar_python "3.12.0" "3.12.4" "8000"
+
+# Vulnerabilidade 24
+atualizar_python "3.12.0" "3.12.4" "8001"
+
+# Vulnerabilidade 26
+atualizar_python "3.12.0" "3.12.4" "8002"
+
+# Vulnerabilidade 29
+atualizar_python "3.12.0" "3.12.5" "8000"
+
+# Vulnerabilidade 30
+atualizar_python "3.12.0" "3.12.5" "8001"
+
+# Vulnerabilidade 31
+atualizar_python "3.12.0" "3.12.5" "8002"
+
+# Vulnerabilidade 32
+atualizar_python "3.10.12" "3.10.13" "5000"
+
+# Vulnerabilidade 37
+atualizar_python "3.10.12" "3.10.15" "5000"
+
+# Vulnerabilidade 38
+atualizar_python "3.12.0" "3.12.5" "8000"
+
+# Vulnerabilidade 39
+atualizar_python "3.12.0" "3.12.5" "8001"
+
+# Vulnerabilidade 40
+atualizar_python "3.10.12" "3.10.14" "5000"
+
+# Vulnerabilidade 41
+atualizar_python "3.12.0" "3.12.5" "8002"
+
+# Vulnerabilidade 42
+atualizar_python "3.12.0" "3.12.3" "8001"
+
+# Vulnerabilidade 43
+atualizar_python "3.12.0" "3.12.4" "8002"
+
+# Vulnerabilidade 44
+atualizar_python "3.12.0" "3.12.4" "8001"
+
+# Vulnerabilidade 45
+atualizar_python "3.12.0" "3.12.3" "8000"
+
+# Vulnerabilidade 46
+atualizar_python "3.10.12" "3.10.15" "5000"
+
+# Vulnerabilidade 47
+atualizar_python "3.12.0" "3.12.4" "8000"
+
+# Vulnerabilidade 48
+atualizar_python "3.12.0" "3.12.3" "8002"
+
+# Vulnerabilidade 50
+atualizar_python "3.10.12" "3.10.14" "5000"
+
+# Vulnerabilidade 51
+atualizar_python "3.12.0" "3.12.2" "8000"
+
+# Vulnerabilidade 52
+atualizar_python "3.12.0" "3.12.2" "8001"
+
+# Vulnerabilidade 53
+atualizar_python "3.12.0" "3.12.2" "8002"
+
+# Vulnerabilidade 55
+atualizar_python "3.12.0" "3.12.9" "8000"
+
+# Vulnerabilidade 56
+atualizar_python "3.10.12" "3.12.9" "5000"
+
+# Vulnerabilidade 57
+atualizar_python "3.10.12" "3.10.16" "5000"
+
+# Vulnerabilidade 58
+atualizar_python "3.12.0" "3.12.9" "8001"
+
+# Vulnerabilidade 60
+atualizar_python "3.12.0" "3.12.9" "8002"
+
+# Vulnerabilidade 61
+atualizar_python "3.12.0" "3.12.4" "8001"
+
+# Vulnerabilidade 63
+atualizar_python "3.12.0" "3.12.4" "8000"
+
+# Vulnerabilidade 64
+atualizar_python "3.10.12" "3.11.10" "5000"
+
+# Vulnerabilidade 65
+atualizar_python "3.12.0" "3.12.4" "8002"
+
+# Vulnerabilidade 49 -  Substituir certificado SSL/TLS autoassinado
+gerar_novo_certificado() {
+  echo "Gerando um novo certificado autoassinado..."
+  
+  # Gere uma nova chave privada RSA
+  openssl genrsa -out localhost.key 2048
+
+  # Gere um certificado autoassinado usando a chave privada
+  openssl req -new -x509 -key localhost.key -out localhost.crt \
+    -subj "/CN=localhost/O=Luminator/L=Caxias do Sul/ST=RS/C=BR" \
+    -days 3650
+
+    echo "Novo certificado gerado (localhost.key e localhost.crt)."
+}
+
+#Chamar a função para gerar um novo certificado
+gerar_novo_certificado
+
+# Vulnerabilidade 54
+desabilitar_tls1_0_e_1_1() {
+    echo "Desabilitando TLS 1.0 e 1.1 no registro do Windows..."
+    #Desabilitar TLS 1.0
+    reg add "HKLM\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Protocols\TLS 1.0\Server" /v Enabled /t REG_DWORD /d 0 /f
+    reg add "HKLM\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Protocols\TLS 1.0\Client" /v Enabled /t REG_DWORD /d 0 /f
+
+    #Desabilitar TLS 1.1
+    reg add "HKLM\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Protocols\TLS 1.1\Server" /v Enabled /t REG_DWORD /d 0 /f
+    reg add "HKLM\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Protocols\TLS 1.1\Client" /v Enabled /t REG_DWORD /d 0 /f
+
+    echo "TLS 1.0 e 1.1 desabilitados. Reinicie o sistema para aplicar as alterações."
+}
+
+#Chamar a função para desabilitar TLS 1.0 e 1.1
+desabilitar_tls1_0_e_1_1
+
+# Vulnerabilidade 59
+remover_algoritmos_mac_fracos() {
+    echo "Removendo algoritmos MAC fracos da configuração do SSH..."
+    
+    # Localize o arquivo de configuração do SSH (geralmente sshd_config)
+    SSH_CONFIG_FILE="/etc/ssh/sshd_config"
+
+    # Verifique se o arquivo existe
+    if [ -f "$SSH_CONFIG_FILE" ]; then
+      # Crie um backup do arquivo de configuração
+      cp "$SSH_CONFIG_FILE" "$SSH_CONFIG_FILE.bak"
+      echo "Backup da configuração SSH criado: $SSH_CONFIG_FILE.bak"
+
+      # Remova as MACs fracas usando sed
+      sed -i '/^MACs/s/umac-64-etm@openssh.com,//g' "$SSH_CONFIG_FILE"
+      sed -i '/^MACs/s/umac-64@openssh.com,//g' "$SSH_CONFIG_FILE"
+
+      # Garanta que a linha MACs exista e não esteja vazia
+      if grep -q "^MACs" "$SSH_CONFIG_FILE"; then
+        # Remova a linha inteira se não houver MACs restantes
+        MAC_LINE=$(grep "^MACs" "$SSH_CONFIG_FILE")
+        MAC_VALUES=$(echo "$MAC_LINE" | awk '{print $2}')
+
+        if [ -z "$MAC_VALUES" ]; then
+          sed -i '/^MACs/d' "$SSH_CONFIG_FILE"
+          echo "Removida a linha MACs pois não contém valores."
+        fi
+      else
+        echo "Linha MACs não encontrada no arquivo de configuração SSH."
+      fi
+
+      echo "Algoritmos MAC fracos removidos da configuração SSH."
+      
+      # Reinicie o serviço SSH para aplicar as alterações
+      if systemctl is-active --quiet sshd.service; then
+        systemctl restart sshd.service
+        echo "Serviço SSH reiniciado."
+      else
+        echo "Serviço SSH não está ativo ou systemctl não está disponível. Reinicie o serviço manualmente."
+      fi
+    else
+      echo "Arquivo de configuração SSH não encontrado: $SSH_CONFIG_FILE"
+    fi
+}
+
+#Chamar a função para remover algoritmos MAC fracos
+remover_algoritmos_mac_fracos
+
+# Vulnerabilidade 62
+desabilitar_icmp() {
+    echo "Desabilitando respostas ICMP Timestamp..."
+    # Desabilitar ICMP Timestamp Reply no Windows
+    netsh advfirewall firewall add rule name="Bloquear ICMP Timestamp Request" protocol=icmpv4:13,0 dir=in action=block
+    echo "Respostas ICMP Timestamp desabilitadas (regra de firewall adicionada)."
+}
+
+desabilitar_icmp
+
+# Informa ao usuário sobre a necessidade de reiniciar, se houver atualizações pendentes
+if [ "$atualizacoes_pendentes" -gt 0 ]; then
+  echo "Atualizações do Python foram instaladas. Recomenda-se reiniciar o sistema para que as alterações tenham efeito."
+fi
+```}
+{type: uploaded file
+fileName: teste66vts_10.txt
+fullContent:
+```bash
+#!/bin/bash
+
+# Variáveis para rastrear se alguma atualização foi necessária
+updated_3_10_12=false
+updated_3_12_0=false
+
+# Função para verificar se o Python está instalado e obter o caminho
+get_python_path() {
+  local version="$1"
+  local path
+  path=$(where python | grep "python$version" | head -n 1)
+  if [ -n "$path" ]; then
+    echo "$path"
+  else
+    echo ""
+  fi
+}
+
+# Função para verificar se o pip está instalado
+check_pip() {
+    if ! command -v pip &> /dev/null
+    then
+        echo "pip is not installed. Installing now..."
+        curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py
+        python get-pip.py
+    fi
+}
+
+# Atualizar Python 3.10.12 para 3.10.16 (ou superior, se disponível)
+python_3_10_path=$(get_python_path "3.10")
+if [ -n "$python_3_10_path" ]; then
+  current_version=$("$python_3_10_path" -c "import sys; print('.'.join(map(str, sys.version_info[:3])))")
+  if dpkg --compare-versions "$current_version" lt "3.10.16"; then
+    echo "Atualizando Python 3.10.12 para 3.10.16 (ou superior)..."
+    check_pip
+    pip install "python==3.10.16"
+    if [ $? -eq 0 ]; then
+      updated_3_10_12=true
+      echo "Python 3.10.12 atualizado com sucesso para 3.10.16 (ou superior)."
+    else
+      echo "Falha ao atualizar o Python 3.10.12."
+    fi
+  else
+    echo "Python 3.10 já está na versão 3.10.16 ou superior."
+  fi
+fi
+
+# Atualizar Python 3.12.0 para 3.12.9 (ou superior, se disponível)
+python_3_12_path=$(get_python_path "3.12")
+if [ -n "$python_3_12_path" ]; then
+  current_version=$("$python_3_12_path" -c "import sys; print('.'.join(map(str, sys.version_info[:3])))")
+  if dpkg --compare-versions "$current_version" lt "3.12.9"; then
+    echo "Atualizando Python 3.12.0 para 3.12.9 (ou superior)..."
+    check_pip
+    pip install "python==3.12.9"
+    if [ $? -eq 0 ]; then
+      updated_3_12_0=true
+      echo "Python 3.12.0 atualizado com sucesso para 3.12.9 (ou superior)."
+    else
+      echo "Falha ao atualizar o Python 3.12.0."
+    fi
+  else
+    echo "Python 3.12 já está na versão 3.12.9 ou superior."
+  fi
+fi
+
+# Desabilitar TLSv1.0 e TLSv1.1 (exemplo, ajuste conforme necessário para o serviço específico)
+# Isso é apenas um exemplo genérico e pode não se aplicar diretamente.
+echo "Desabilitando TLSv1.0 e TLSv1.1 (se aplicável - requer configuração específica do serviço)."
+
+# Tratar vulnerabilidade do certificado SSL/TLS autoassinado
+echo "O certificado SSL/TLS autoassinado precisa ser substituído por um certificado assinado por uma CA confiável.  A troca manual é necessária."
+
+# Tratar ICMP Timestamp Reply Information Disclosure
+echo "Para mitigar a vulnerabilidade ICMP Timestamp Reply, considere desabilitar as respostas ICMP Timestamp ou proteger o host com um firewall."
+
+# Tratar Weak MAC Algorithm(s) Supported (SSH)
+echo "Para mitigar a vulnerabilidade de algoritmos MAC fracos no SSH, edite o arquivo de configuração SSH para desabilitar algoritmos fracos. A troca manual é necessária."
+
+# Verificar se alguma atualização foi realizada
+if [ "$updated_3_10_12" = true ] || [ "$updated_3_12_0" = true ]; then
+  echo "Atualizações concluídas. Pode ser necessário reiniciar os serviços Python."
+else
+  echo "Nenhuma atualização necessária."
+fi
+
+exit 0
+```}
+{type: uploaded file
+fileName: teste66vts_11.txt
+fullContent:
+```bash
+#!/bin/bash
+
+# Variáveis para controle de versão e caminhos
+python3_10_version="3.10"
+python3_12_version="3.12"
+
+# Função para atualizar uma versão específica do Python
+update_python() {
+  local current_version="$1"
+  local target_version="$2"
+  local port="$3"
+
+  echo "Atualizando Python ${current_version} (porta ${port}) para a versão ${target_version}..."
+
+  # Baixar a versão desejada do Python (adaptar para sua fonte de download preferida)
+  # Exemplo usando wget (certifique-se de que wget esteja instalado)
+  # wget "https://www.python.org/ftp/python/${target_version}/python-${target_version}-embed-amd64.zip" -O /tmp/python-${target_version}-embed-amd64.zip
+
+  # Extrair o arquivo (adaptar o caminho conforme necessário)
+  # unzip /tmp/python-${target_version}-embed-amd64.zip -d /opt
+
+  # Remover a instalação antiga (tenha cuidado com dependências!)
+  # rm -rf /usr/bin/python${current_version}  # Exemplo de remoção de link simbólico
+
+  # Criar um novo link simbólico (adaptar os caminhos!)
+  # ln -s /opt/python-${target_version}/python.exe /usr/bin/python${current_version}
+
+  echo "Atualização de Python ${current_version} (porta ${port}) concluída (simulado).  Adaptar o script com os comandos corretos de instalação para windows!"
+}
+
+# Vulnerabilidades e soluções
+# Agrupar as vulnerabilidades por versão e porta para evitar redundância
+# Atualizar Python 3.10 na porta 5000
+update_python "$python3_10_version" "3.10.16" "5000"
+
+# Atualizar Python 3.12 nas portas 8000, 8001 e 8002
+update_python "$python3_12_version" "3.12.9" "8000"
+update_python "$python3_12_version" "3.12.9" "8001"
+update_python "$python3_12_version" "3.12.9" "8002"
+
+
+# Solução para certificado SSL não confiável (porta 8002)
+echo "AVISO: Certificado SSL não confiável detectado na porta 8002. Substituir o certificado por um certificado assinado por uma CA confiável."
+echo "Ação manual necessária: Gerar um novo certificado SSL/TLS assinado por uma CA confiável e instalá-lo no serviço da porta 8002."
+
+# Solução para algoritmos MAC fracos (SSH - porta 22)
+echo "AVISO: Algoritmos MAC fracos detectados no SSH (porta 22). Desativar os algoritmos umac-64-etm@openssh.com e umac-64@openssh.com."
+echo "Ação manual necessária: Editar o arquivo de configuração do SSH (/etc/ssh/sshd_config) e remover os algoritmos fracos da lista MACs. Reiniciar o serviço SSH."
+
+# Solução para ICMP Timestamp Reply
+echo "AVISO: Resposta a requisição de ICMP Timestamp detectada.  Desabilitar as respostas a este tipo de pacote no firewall."
+
+exit 0
+```}
+{type: uploaded file
+fileName: teste66vts_12.txt
+fullContent:
+```bash
+#!/bin/bash
+
+# Variáveis para controle de versão e caminhos
+python3_10_version="3.10.12"
+python3_12_version="3.12.0"
+
+# Função para verificar se o Python está instalado
+check_python_installed() {
+  if ! command -v python3 &> /dev/null; then
+    echo "Python 3 não está instalado. Por favor, instale-o e tente novamente."
+    exit 1
+  fi
+}
+
+# Atualizar Python 3.10 se instalado nas portas especificadas
+update_python3_10() {
+  echo "Verificando e atualizando Python 3.10..."
+  if [[ "$python3_10_version" == "3.10.12" ]]; then
+    echo "Atualizando Python 3.10 de 3.10.12 para 3.10.16 (ou mais recente)..."
+    # Usar apt para atualizar, se disponível
+    if command -v apt &> /dev/null; then
+      apt update
+      apt install -y python3.10
+    # Usar yum para atualizar, se disponível
+    elif command -v yum &> /dev/null; then
+      yum update -y python3.10
+    # Caso contrário, tentar instalar a partir do código fonte (mais complexo e demorado)
+    else
+      echo "Nenhum gerenciador de pacotes padrão (apt ou yum) encontrado."
+      echo "Por favor, atualize o Python 3.10 manualmente ou use um gerenciador de pacotes."
+      exit 1
+    fi
+    echo "Python 3.10 atualizado."
+  else
+    echo "Python 3.10 não necessita ser atualizado."
+  fi
+}
+
+# Atualizar Python 3.12 se instalado nas portas especificadas
+update_python3_12() {
+  echo "Verificando e atualizando Python 3.12..."
+  if [[ "$python3_12_version" == "3.12.0" ]]; then
+    echo "Atualizando Python 3.12 de 3.12.0 para 3.12.9 (ou mais recente)..."
+    # Usar apt para atualizar, se disponível
+    if command -v apt &> /dev/null; then
+      apt update
+      apt install -y python3.12
+    # Usar yum para atualizar, se disponível
+    elif command -v yum &> /dev/null; then
+      yum update -y python3.12
+    # Caso contrário, tentar instalar a partir do código fonte (mais complexo e demorado)
+    else
+      echo "Nenhum gerenciador de pacotes padrão (apt ou yum) encontrado."
+      echo "Por favor, atualize o Python 3.12 manualmente ou use um gerenciador de pacotes."
+      exit 1
+    fi
+    echo "Python 3.12 atualizado."
+  else
+    echo "Python 3.12 não necessita ser atualizado."
+  fi
+}
+
+# Desativar TLS 1.0 e 1.1 (Exemplo para OpenSSL)
+disable_tls1_0_1_1() {
+  echo "Desativando TLS 1.0 e 1.1 no OpenSSL..."
+  openssl_config="/etc/ssl/openssl.cnf"
+  if [[ -f "$openssl_config" ]]; then
+    sed -i 's/^\(SSLProtocol = \).*/\1-TLSv1 -TLSv1.1/' "$openssl_config"
+    echo "TLS 1.0 e 1.1 desativados em $openssl_config. Reinicie os serviços afetados."
+  else
+    echo "Arquivo de configuração do OpenSSL não encontrado em $openssl_config.  Por favor, desative TLS 1.0 e 1.1 manualmente na configuração do servidor."
+  fi
+}
+
+# Desativar ICMP Timestamp Replies (requer privilégios de root)
+disable_icmp_timestamp() {
+  echo "Desativando respostas ICMP Timestamp..."
+  # Para sistemas Linux que usam sysctl
+  if command -v sysctl &> /dev/null; then
+    sysctl -w net.ipv4.icmp_timestamp_ignore=1
+    echo "net.ipv4.icmp_timestamp_ignore=1 adicionado.  Para tornar permanente, adicione esta linha a /etc/sysctl.conf"
+  else
+    echo "sysctl não encontrado. Por favor, desative as respostas ICMP Timestamp manualmente usando a ferramenta apropriada para seu sistema."
+  fi
+}
+
+# Função principal para executar as correções
+main() {
+  echo "Iniciando script de correção..."
+
+  # Verificar se o script está sendo executado como root para certas operações
+  if [[ $EUID -ne 0 ]]; then
+    echo "Este script pode precisar ser executado como root para algumas operações (desativar ICMP).  Continue com cuidado."
+  fi
+
+  check_python_installed
+  update_python3_10
+  update_python3_12
+  disable_tls1_0_1_1
+  disable_icmp_timestamp
+
+  echo "Script de correção concluído."
+}
+
+# Executar a função principal
+main
+```}
+{type: uploaded file
+fileName: teste66vts_13.txt
+fullContent:
+```bash
+#!/bin/bash
+
+# Variáveis para rastrear se as atualizações são necessárias
+update_3_10_needed=0
+update_3_12_needed=0
+
+# Função para verificar e atualizar o Python 3.10
+update_python_3_10() {
+  if [ "$update_3_10_needed" -eq 1 ]; then
+    echo "Atualizando Python 3.10 para a versão mais recente..."
+    # Comando para atualizar o Python 3.10 no Windows
+    # Adaptar o comando abaixo com o gerenciador de pacotes adequado (e.g., choco, winget)
+    # Exemplo com choco:
+    choco upgrade python3 --version=3.10.16 -y
+    echo "Python 3.10 atualizado com sucesso!"
+  fi
+}
+
+# Função para verificar e atualizar o Python 3.12
+update_python_3_12() {
+  if [ "$update_3_12_needed" -eq 1 ]; then
+    echo "Atualizando Python 3.12 para a versão mais recente..."
+    # Comando para atualizar o Python 3.12 no Windows
+    # Adaptar o comando abaixo com o gerenciador de pacotes adequado (e.g., choco, winget)
+    # Exemplo com choco:
+    choco upgrade python3 --version=3.12.9 -y
+    echo "Python 3.12 atualizado com sucesso!"
+  fi
+}
+
+# Vulnerabilidades que exigem atualização para 3.10.13 ou 3.10.14 ou 3.10.15 ou 3.10.16 ou 3.11.10
+if (choco list --localonly | findstr -i "python3") then
+{
+  python_3_10_installed=$(choco list --localonly | findstr -i "python3" | findstr -i "3.10")
+  python_3_12_installed=$(choco list --localonly | findstr -i "python3" | findstr -i "3.12")
+
+  if [[ ! -z "$python_3_10_installed" ]]; then
+      installed_version=$(echo "$python_3_10_installed" | awk '{print $2}')
+      if [[ "$installed_version" < "3.10.13" ]] || [[ "$installed_version" == "3.10.12" ]]; then
+          update_3_10_needed=1
+      fi
+  fi
+
+  if [[ ! -z "$python_3_12_installed" ]]; then
+      installed_version=$(echo "$python_3_12_installed" | awk '{print $2}')
+      if [[ "$installed_version" < "3.12.9" ]] || [[ "$installed_version" == "3.12.0" ]]; then
+          update_3_12_needed=1
+      fi
+  fi
+}
+else
+{
+    echo "Python não encontrado. Por favor, instale-o usando o Chocolatey."
+}
+fi
+
+# Tratar vulnerabilidade SSL/TLS: Deprecated TLSv1.0 and TLSv1.1 Protocol Detection
+# Desabilitar TLS 1.0 e 1.1 (isso é específico para cada serviço, exemplo para o IIS)
+# (Precisa ser adaptado para o serviço específico que usa TLS 1.0/1.1)
+echo "Desabilitando TLS 1.0 e 1.1 (se aplicável)..."
+# Exemplo para IIS (adaptar conforme necessário)
+#  New-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Protocols\TLS 1.0\Server" -Name "Enabled" -Value "0" -PropertyType DWORD -Force
+#  New-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Protocols\TLS 1.1\Server" -Name "Enabled" -Value "0" -PropertyType DWORD -Force
+echo "TLS 1.0 e 1.1 desabilitados (se aplicável)."
+
+#Tratar  SSL/TLS: Known Untrusted / Dangerous Certificate Authority (CA) Detection
+echo "Removendo certificado auto assinado"
+Remove-Item -Path "Cert:\LocalMachine\My\5668884BF9B84C38B81313EBF424434CB70F5D99"
+
+# Atualizar as versões do Python
+update_python_3_10
+update_python_3_12
+
+echo "Script de correção concluído."
+```}
+{type: uploaded file
+fileName: teste66vts_14.txt
+fullContent:
+```bash
+#!/bin/bash
+
+# Variáveis para rastrear se alguma atualização foi necessária
+updated=0
+
+# Função para verificar e atualizar uma instalação do Python
+update_python() {
+    local port="$1"
+    local installed_version="$2"
+    local security_update_version="$3"
+    local command_injection_version="$4"
+    local dos_version="$5"
+    local symlink_version="$6"
+    local connection_race_version="$7"
+    local access_control_version="$8"
+    local input_validation_version="$9"
+    local encoding_output_version="${10}"
+    local ssl_version="${11}"
+    local multiple_version="${12}"
+    local ip_range_version="${13}"
+
+    echo "Verificando Python na porta $port..."
+
+    # CVE-2024-6232, CVE-2024-7592, CVE-2024-8088, CVE-2024-45490, CVE-2024-45491, CVE-2024-45492 (DoS)
+    if [[ "$installed_version" == "3.10.12" ]] && [[ "$security_update_version" == "3.10.15" ]]; then
+        echo "Atualizando Python 3.10.12 para 3.10.15 (DoS)"
+        # Simulação de atualização (substitua pelo comando real)
+        echo "Simulando atualização: apt-get install python3.10=$security_update_version"
+        # apt-get install python3.10="$security_update_version" -y
+        updated=1
+    fi
+
+    if [[ "$installed_version" == "3.12.0" ]] && [[ "$security_update_version" == "3.12.6" ]]; then
+        echo "Atualizando Python 3.12.0 para 3.12.6 (DoS)"
+        # Simulação de atualização (substitua pelo comando real)
+        echo "Simulando atualização: apt-get install python3.12=$security_update_version"
+        # apt-get install python3.12="$security_update_version" -y
+        updated=1
+    fi
+
+    # CVE-2024-9287 (Command Injection)
+    if [[ "$installed_version" == "3.10.12" ]] && [[ "$command_injection_version" == "3.10.16" ]]; then
+        echo "Atualizando Python 3.10.12 para 3.10.16 (Command Injection)"
+        # Simulação de atualização (substitua pelo comando real)
+        echo "Simulando atualização: apt-get install python3.10=$command_injection_version"
+        # apt-get install python3.10="$command_injection_version" -y
+        updated=1
+    fi
+
+    if [[ "$installed_version" == "3.12.0" ]] && [[ "$command_injection_version" == "3.12.8" ]]; then
+        echo "Atualizando Python 3.12.0 para 3.12.8 (Command Injection)"
+        # Simulação de atualização (substitua pelo comando real)
+        echo "Simulando atualização: apt-get install python3.12=$command_injection_version"
+        # apt-get install python3.12="$command_injection_version" -y
+        updated=1
+    fi
+
+    # CVE-2023-52425 (DoS in libexpat)
+    if [[ "$installed_version" == "3.10.12" ]] && [[ "$dos_version" == "3.10.14" ]]; then
+        echo "Atualizando Python 3.10.12 para 3.10.14 (DoS libexpat)"
+        # Simulação de atualização (substitua pelo comando real)
+        echo "Simulando atualização: apt-get install python3.10=$dos_version"
+        # apt-get install python3.10="$dos_version" -y
+        updated=1
+    fi
+
+    if [[ "$installed_version" == "3.12.0" ]] && [[ "$dos_version" == "3.12.3" ]]; then
+        echo "Atualizando Python 3.12.0 para 3.12.3 (DoS libexpat)"
+        # Simulação de atualização (substitua pelo comando real)
+        echo "Simulando atualização: apt-get install python3.12=$dos_version"
+        # apt-get install python3.12="$dos_version" -y
+        updated=1
+    fi
+
+    # CVE-2023-6597 (Symlink Dereference)
+    if [[ "$installed_version" == "3.10.12" ]] && [[ "$symlink_version" == "3.10.14" ]]; then
+        echo "Atualizando Python 3.10.12 para 3.10.14 (Symlink Dereference)"
+        # Simulação de atualização (substitua pelo comando real)
+        echo "Simulando atualização: apt-get install python3.10=$symlink_version"
+        # apt-get install python3.10="$symlink_version" -y
+        updated=1
+    fi
+
+    if [[ "$installed_version" == "3.12.0" ]] && [[ "$symlink_version" == "3.12.1" ]]; then
+        echo "Atualizando Python 3.12.0 para 3.12.1 (Symlink Dereference)"
+        # Simulação de atualização (substitua pelo comando real)
+        echo "Simulando atualização: apt-get install python3.12=$symlink_version"
+        # apt-get install python3.12="$symlink_version" -y
+        updated=1
+    fi
+
+    # CVE-2024-3219 (Connection Race)
+    if [[ "$installed_version" == "3.12.0" ]] && [[ "$connection_race_version" == "3.12.5" ]]; then
+        echo "Atualizando Python 3.12.0 para 3.12.5 (Connection Race)"
+        # Simulação de atualização (substitua pelo comando real)
+        echo "Simulando atualização: apt-get install python3.12=$connection_race_version"
+        # apt-get install python3.12="$connection_race_version" -y
+        updated=1
+    fi
+
+    if [[ "$installed_version" == "3.10.12" ]] && [[ "$connection_race_version" == "3.10.15" ]]; then
+        echo "Atualizando Python 3.10.12 para 3.10.15 (Connection Race)"
+        # Simulação de atualização (substitua pelo comando real)
+        echo "Simulando atualização: apt-get install python3.10=$connection_race_version"
+        # apt-get install python3.10="$connection_race_version" -y
+        updated=1
+    fi
+
+    # CVE-2024-4030 (Access Control)
+    if [[ "$installed_version" == "3.12.0" ]] && [[ "$access_control_version" == "3.12.4" ]]; then
+        echo "Atualizando Python 3.12.0 para 3.12.4 (Access Control)"
+        # Simulação de atualização (substitua pelo comando real)
+        echo "Simulando atualização: apt-get install python3.12=$access_control_version"
+        # apt-get install python3.12="$access_control_version" -y
+        updated=1
+    fi
+
+    if [[ "$installed_version" == "3.10.12" ]] && [[ "$access_control_version" == "3.10.15" ]]; then
+        echo "Atualizando Python 3.10.12 para 3.10.15 (Access Control)"
+        # Simulação de atualização (substitua pelo comando real)
+        echo "Simulando atualização: apt-get install python3.10=$access_control_version"
+        # apt-get install python3.10="$access_control_version" -y
+        updated=1
+    fi
+    
+    # CVE-2025-0938 (Improper Input Validation)
+    if [[ "$installed_version" == "3.10.12" ]] && [[ "$input_validation_version" == "3.12.9" ]]; then
+        echo "Atualizando Python 3.10.12 para 3.12.9 (Improper Input Validation)"
+        # Simulação de atualização (substitua pelo comando real)
+        echo "Simulando atualização: apt-get install python3.10=$input_validation_version"
+        updated=1
+    fi
+
+    if [[ "$installed_version" == "3.12.0" ]] && [[ "$input_validation_version" == "3.12.9" ]]; then
+        echo "Atualizando Python 3.12.0 para 3.12.9 (Improper Input Validation)"
+        # Simulação de atualização (substitua pelo comando real)
+        echo "Simulando atualização: apt-get install python3.12=$input_validation_version"
+        updated=1
+    fi
+
+    # CVE-2025-1795 (Improper Encoding of Output)
+    if [[ "$installed_version" == "3.10.12" ]] && [[ "$encoding_output_version" == "3.11.10" ]]; then
+        echo "Atualizando Python 3.10.12 para 3.11.10 (Improper Encoding of Output)"
+        # Simulação de atualização (substitua pelo comando real)
+        echo "Simulando atualização: apt-get install python3.10=$encoding_output_version"
+        updated=1
+    fi
+
+    if [[ "$installed_version" == "3.12.0" ]] && [[ "$encoding_output_version" == "3.12.4" ]]; then
+        echo "Atualizando Python 3.12.0 para 3.12.4 (Improper Encoding of Output)"
+        # Simulação de atualização (substitua pelo comando real)
+        echo "Simulando atualização: apt-get install python3.12=$encoding_output_version"
+        updated=1
+    fi
+
+    # CVE-2024-0397 (SSL Vulnerability)
+    if [[ "$installed_version" == "3.10.12" ]] && [[ "$ssl_version" == "3.10.14" ]]; then
+        echo "Atualizando Python 3.10.12 para 3.10.14 (SSL Vulnerability)"
+        # Simulação de atualização (substitua pelo comando real)
+        echo "Simulando atualização: apt-get install python3.10=$ssl_version"
+        updated=1
+    fi
+
+    if [[ "$installed_version" == "3.12.0" ]] && [[ "$ssl_version" == "3.12.3" ]]; then
+        echo "Atualizando Python 3.12.0 para 3.12.3 (SSL Vulnerability)"
+        # Simulação de atualização (substitua pelo comando real)
+        echo "Simulando atualização: apt-get install python3.12=$ssl_version"
+        updated=1
+    fi
+        
+    # CVE-2024-0450 (Multiple Vulnerabilities)
+    if [[ "$installed_version" == "3.10.12" ]] && [[ "$multiple_version" == "3.10.14" ]]; then
+        echo "Atualizando Python 3.10.12 para 3.10.14 (Multiple Vulnerabilities)"
+        # Simulação de atualização (substitua pelo comando real)
+        echo "Simulando atualização: apt-get install python3.10=$multiple_version"
+        updated=1
+    fi
+
+    if [[ "$installed_version" == "3.12.0" ]] && [[ "$multiple_version" == "3.12.2" ]]; then
+        echo "Atualizando Python 3.12.0 para 3.12.2 (Multiple Vulnerabilities)"
+        # Simulação de atualização (substitua pelo comando real)
+        echo "Simulando atualização: apt-get install python3.12=$multiple_version"
+        updated=1
+    fi
+
+    # CVE-2024-4032 (IP Ranges Vulnerability)
+    if [[ "$installed_version" == "3.10.12" ]] && [[ "$ip_range_version" == "3.10.15" ]]; then
+        echo "Atualizando Python 3.10.12 para 3.10.15 (IP Ranges Vulnerability)"
+        # Simulação de atualização (substitua pelo comando real)
+        echo "Simulando atualização: apt-get install python3.10=$ip_range_version"
+        updated=1
+    fi
+
+    if [[ "$installed_version" == "3.12.0" ]] && [[ "$ip_range_version" == "3.12.4" ]]; then
+        echo "Atualizando Python 3.12.0 para 3.12.4 (IP Ranges Vulnerability)"
+        # Simulação de atualização (substitua pelo comando real)
+        echo "Simulando atualização: apt-get install python3.12=$ip_range_version"
+        updated=1
+    fi
+
+    # CVE-2024-11168 (SSRF Vulnerability)
+    if [[ "$installed_version" == "3.10.12" ]] && [[ "$command_injection_version" == "3.10.16" ]]; then
+        echo "Atualizando Python 3.10.12 para 3.10.16 (SSRF Vulnerability)"
+        # Simulação de atualização (substitua pelo comando real)
+        echo "Simulando atualização: apt-get install python3.10=$command_injection_version"
+        # apt-get install python3.10="$command_injection_version" -y
+        updated=1
+    fi
+
+     # CVE-2024-6923 (Email Header Injection Vulnerability)
+    if [[ "$installed_version" == "3.10.12" ]] && [[ "$connection_race_version" == "3.10.15" ]]; then
+        echo "Atualizando Python 3.10.12 para 3.10.15 (Email Header Injection Vulnerability)"
+        # Simulação de atualização (substitua pelo comando real)
+        echo "Simulando atualização: apt-get install python3.10=$connection_race_version"
+        # apt-get install python3.10="$connection_race_version" -y
+        updated=1
+    fi
+
+    if [[ "$installed_version" == "3.12.0" ]] && [[ "$connection_race_version" == "3.12.5" ]]; then
+        echo "Atualizando Python 3.12.0 para 3.12.5 (Email Header Injection Vulnerability)"
+        # Simulação de atualização (substitua pelo comando real)
+        echo "Simulando atualização: apt-get install python3.12=$connection_race_version"
+        # apt-get install python3.12="$connection_race_version" -y
+        updated=1
+    fi
+}
+
+# Atualizar os índices do repositório
+echo "Atualizando índices do repositório..."
+# apt-get update -y
+
+# Corrigir vulnerabilidades específicas para cada porta
+update_python "5000" "3.10.12" "3.10.15" "3.10.16" "3.10.14" "3.10.14" "3.10.15" "3.10.15" "3.12.9" "3.11.10" "3.10.14" "3.10.14" "3.10.15"
+update_python "8000" "3.12.0" "3.12.6" "3.12.8" "3.12.3" "3.12.1" "3.12.5" "3.12.4" "3.12.9" "3.12.4" "3.12.3" "3.12.2" "3.12.4"
+update_python "8001" "3.12.0" "3.12.6" "3.12.8" "3.12.3" "3.12.1" "3.12.5" "3.12.4" "3.12.9" "3.12.4" "3.12.3" "3.12.2" "3.12.4"
+update_python "8002" "3.12.0" "3.12.6" "3.12.8" "3.12.3" "3.12.1" "3.12.5" "3.12.4" "3.12.9" "3.12.4" "3.12.3" "3.12.2" "3.12.4"
+
+# Vulnerabilidade 49: SSL/TLS: Known Untrusted / Dangerous Certificate Authority (CA) Detection
+echo "Substituindo certificado auto-assinado por um certificado confiável para a porta 8002..."
+echo "Simulando a substituição do certificado para a porta 8002."
+
+# Vulnerabilidade 54: SSL/TLS: Deprecated TLSv1.0 and TLSv1.1 Protocol Detection
+echo "Desabilitando TLSv1.0 e TLSv1.1 para o serviço SSH na porta 22..."
+echo "Simulando desabilitação de TLSv1.0 e TLSv1.1 para SSH."
+
+# Vulnerabilidade 59: Weak MAC Algorithm(s) Supported (SSH)
+echo "Desabilitando algoritmos MAC fracos para o serviço SSH na porta 22..."
+echo "Simulando a desabilitação de algoritmos MAC fracos para SSH."
+
+# Vulnerabilidade 62: ICMP Timestamp Reply Information Disclosure
+echo "Desabilitando resposta a solicitações ICMP Timestamp..."
+echo "Simulando a desabilitação de respostas ICMP Timestamp."
+
+# Reiniciar serviços afetados (simulação)
+if [[ "$updated" == 1 ]]; then
+    echo "Reiniciando serviços afetados..."
+    echo "Simulando reinicialização dos serviços Python."
+    # systemctl restart <nome_do_servico>
+fi
+
+echo "Script de correção concluído."
+```}
+{type: uploaded file
+fileName: teste66vts_15.txt
+fullContent:
+```sh
+#!/bin/bash
+
+# Variáveis para rastrear atualizações e erros
+updated=0
+errors=0
+
+# Função para atualizar o Python no Windows usando o Chocolatey
+update_python() {
+    local version="$1"
+    choco upgrade python --version "$version" -y
+    if [ $? -eq 0 ]; then
+        echo "Python atualizado para a versão $version com sucesso."
+        updated=$((updated+1))
+    else
+        echo "Falha ao atualizar o Python para a versão $version."
+        errors=$((errors+1))
+    fi
+}
+
+# Função para lidar com vulnerabilidades sem solução conhecida
+handle_no_solution() {
+    echo "Vulnerabilidade sem solução disponível. Considere desativar/remover o componente."
+}
+
+# Vulnerabilidade 1, 8, 10, 18, 21, 22, 32, 37, 40, 46, 50, 56, 57, 64 : Atualizar Python 3.10.12 para 3.10.16 (ou 3.10.14 quando especificado)
+echo "Atualizando Python 3.10.12..."
+update_python "3.10.16"
+
+# Vulnerabilidade 2, 3, 4, 5, 6, 7, 9, 11, 12, 13, 16, 17, 19, 20, 23, 24, 25, 26, 28, 29, 30, 31, 33, 34, 35, 38, 39, 41, 42, 43, 44, 45, 47, 48, 51, 52, 53, 55, 58, 60, 61, 63, 65: Atualizar Python 3.12.0 para 3.12.9 (ou 3.12.8/3.12.5/3.12.4/3.12.3/3.12.2/3.12.1 quando especificado)
+echo "Atualizando Python 3.12.0..."
+update_python "3.12.9"
+
+# Vulnerabilidade 14, 15, 27, 36: Sem solução para RecursionError e Security Bypass (<= 3.12.3)
+echo "Lidando com vulnerabilidades sem solução para RecursionError e Security Bypass (<= 3.12.3)..."
+handle_no_solution
+
+# Vulnerabilidade 49:  Substituir certificado SSL/TLS auto-assinado por um assinado por uma CA confiável
+echo "Substituindo certificado SSL/TLS auto-assinado..."
+echo "Ação manual necessária: Substitua o certificado 'localhost' por um certificado assinado por uma CA confiável."
+errors=$((errors+1))
+
+# Vulnerabilidade 54: Desativar TLSv1.0 e TLSv1.1
+echo "Desativando TLSv1.0 e TLSv1.1..."
+echo "Ação manual necessária: Desative TLSv1.0 e TLSv1.1 na configuração do servidor para o qual a porta 3389 está configurada."
+errors=$((errors+1))
+
+# Vulnerabilidade 59: Desabilitar algoritmos MAC fracos no SSH
+echo "Desabilitando algoritmos MAC fracos no SSH..."
+echo "Ação manual necessária: Edite o arquivo de configuração SSH (/etc/ssh/sshd_config) e remova os algoritmos MAC fracos (umac-64-etm@openssh.com, umac-64@openssh.com) da lista 'MACs'. Reinicie o serviço SSH após a modificação."
+errors=$((errors+1))
+
+# Vulnerabilidade 62: Desabilitar ICMP Timestamp Reply
+echo "Desabilitando ICMP Timestamp Reply..."
+echo "Ação manual necessária: A configuração para desabilitar ICMP Timestamp Reply depende do sistema operacional e firewall utilizado. Consulte a documentação específica do sistema."
+errors=$((errors+1))
+
+# Resultados
+echo "------------------------"
+echo "Relatório de Patching:"
+echo "Atualizações bem-sucedidas: $updated"
+echo "Erros/Ações manuais necessárias: $errors"
+
+exit 0
+```}
+{type: uploaded file
+fileName: teste66vts_16.txt
+fullContent:
+```bash
+#!/bin/bash
+
+# Variáveis para controlar o processo de atualização
+python3_10_updated=false
+python3_12_updated=false
+
+# Função para atualizar o Python em Windows
+update_python() {
+    version="$1"
+    fixed_version="$2"
+    port="$3"
+
+    echo "Iniciando atualização do Python ${version} (Porta: ${port}) para a versão ${fixed_version}..."
+
+    # Construir o comando para atualizar o Python usando o pip
+    update_command="python${version} -m pip install --upgrade python==${fixed_version}"
+
+    # Executar o comando de atualização
+    echo "Executando: ${update_command}"
+    eval "${update_command}"
+
+    # Verificar se a atualização foi bem-sucedida
+    if [ $? -eq 0 ]; then
+        echo "Python ${version} (Porta: ${port}) foi atualizado para a versão ${fixed_version} com sucesso."
+        return 0
+    else
+        echo "Falha ao atualizar o Python ${version} (Porta: ${port}). Verifique os logs de erro."
+        return 1
+    fi
+}
+
+# Identificar e corrigir as vulnerabilidades
+echo "Iniciando verificação e correção de vulnerabilidades do Python..."
+
+# Vulnerabilidade 1, 8, 10, 14, 18, 21, 22, 27, 32, 36, 37, 40, 46, 50, 56, 57, 64
+# CVEs: CVE-2024-6232,CVE-2024-7592,CVE-2024-8088,CVE-2024-45490,CVE-2024-45491,CVE-2024-45492, CVE-2024-9287, CVE-2023-52425, CVE-2023-36632, CVE-2023-6597, CVE-2024-3219, CVE-2024-4030, CVE-2024-0397, CVE-2024-0450, CVE-2025-0938, CVE-2024-11168, CVE-2025-1795
+if ! $python3_10_updated; then
+    if update_python "3.10" "3.10.16" "5000"; then
+      python3_10_updated=true
+    fi
+fi
+
+# Vulnerabilidade 2, 3, 4, 5, 6, 7, 9, 11, 12, 13, 15, 16, 17, 19, 20, 23, 24, 25, 26, 28, 29, 30, 31, 33, 34, 35, 38, 39, 41, 42, 43, 44, 45, 47, 48, 51, 52, 53, 55, 58, 60, 61, 63, 65
+# CVEs: CVE-2024-6232,CVE-2024-7592,CVE-2024-8088,CVE-2024-45490,CVE-2024-45491,CVE-2024-45492, CVE-2024-9287, CVE-2023-36632, CVE-2023-52425, CVE-2023-6597, CVE-2024-3220, CVE-2024-4030, CVE-2024-3219, CVE-2023-27043, CVE-2024-6923, CVE-2024-0397, CVE-2024-4032, CVE-2024-0450, CVE-2025-0938, CVE-2025-1795
+if ! $python3_12_updated; then
+    if update_python "3.12" "3.12.9" "8000"; then
+      python3_12_updated=true
+    fi
+fi
+
+# Vulnerabilidade 49
+# CVEs: nan
+echo "A vulnerabilidade 'SSL/TLS: Known Untrusted / Dangerous Certificate Authority (CA) Detection' (Porta 8002) requer a substituição do certificado SSL/TLS por um assinado por uma CA confiável."
+
+# Vulnerabilidade 54
+# CVEs: CVE-2011-3389,CVE-2015-0204,CVE-2025-3200
+echo "A vulnerabilidade 'SSL/TLS: Deprecated TLSv1.0 and TLSv1.1 Protocol Detection' (Porta 3389) requer a desativação dos protocolos TLSv1.0 e TLSv1.1 em favor do TLSv1.2+."
+
+# Vulnerabilidade 59
+# CVEs: nan
+echo "A vulnerabilidade 'Weak MAC Algorithm(s) Supported (SSH)' (Porta 22) requer a desativação dos algoritmos MAC fracos no servidor SSH."
+
+# Vulnerabilidade 62
+# CVEs: CVE-1999-0524
+echo "A vulnerabilidade 'ICMP Timestamp Reply Information Disclosure' requer a desativação do suporte para ICMP timestamp ou a proteção por um firewall."
+
+echo "Verificação e correção de vulnerabilidades do Python concluídas."
+```}
+{type: uploaded file
+fileName: teste66vts_17.txt
+fullContent:
+```bash
+#!/bin/bash
+
+# Função para verificar se o Chocolatey está instalado
+check_chocolatey() {
+  if command -v choco &> /dev/null; then
+    return 0
+  else
+    return 1
+  fi
+}
+
+# Instalar Chocolatey se não estiver instalado
+install_chocolatey() {
+  if check_chocolatey; then
+    echo "Chocolatey já está instalado."
+  else
+    echo "Instalando Chocolatey..."
+    iex "& { $(irm https://chocolatey.org/install.ps1) } -Force" | powershell.exe
+    echo "Chocolatey instalado. Favor abrir um novo terminal para que as alterações de ambiente sejam aplicadas."
+    exit 1
+  fi
+}
+
+# Atualizar Python para as versões corrigidas
+update_python() {
+  # Define um array com as versões do Python a serem atualizadas e suas respectivas versões corrigidas
+  declare -A python_updates=(
+    [3.10.12]=3.10.16
+    [3.12.0]=3.12.9
+  )
+
+  # Loop através das versões instaladas e atualiza cada uma
+  for installed_version in "${!python_updates[@]}"; do
+    fixed_version="${python_updates[$installed_version]}"
+
+    # Verifica se o Python está instalado e precisa ser atualizado
+    if [[ $(python${installed_version:0:4} --version 2>&1) =~ "Python ${installed_version}" ]]; then
+      echo "Atualizando Python ${installed_version} para ${fixed_version}..."
+	  
+	  # Determina a versão mais recente disponível para atualização
+	  latest_minor=$(echo "$fixed_version" | cut -d '.' -f 1,2)
+	  latest_version=$(choco search python --exact --version "$latest_minor" | awk '/python[0-9.]+/ {print $1}')
+	  
+	  # Verifica se a versão mais recente foi encontrada
+	  if [[ -z "$latest_version" ]]; then
+	    echo "Versão mais recente para Python $latest_minor não encontrada no Chocolatey."
+		continue # Pula para a próxima versão se não encontrar
+	  fi
+
+      # Atualiza o Python usando Chocolatey
+      choco upgrade "$latest_version" -y
+      echo "Python ${installed_version} atualizado para ${fixed_version}."
+    else
+      echo "Python ${installed_version} não encontrado ou já está atualizado."
+    fi
+  done
+}
+
+# Desabilitar TLS 1.0 e 1.1 (requer ajustes manuais no sistema Windows)
+disable_tls10_tls11() {
+  echo "Desabilitando TLS 1.0 e TLS 1.1..."
+  echo "Esta ação requer ajustes manuais nas configurações do sistema Windows."
+  echo "Consulte as instruções da Microsoft para desabilitar TLS 1.0 e TLS 1.1 no registro do Windows."
+  echo "https://learn.microsoft.com/en-us/windows-server/security/tls/tls-registry-settings"
+}
+
+# Remover certificado SSL/TLS autoassinado (requer intervenção manual)
+remove_self_signed_cert() {
+    echo "Removendo certificado SSL/TLS autoassinado..."
+    echo "Esta ação exige intervenção manual para remover o certificado do armazenamento de certificados do Windows."
+    echo "1. Abra o 'Gerenciar certificados de computador' (certlm.msc)."
+    echo "2. Navegue até 'Pessoal' -> 'Certificados'."
+    echo "3. Localize o certificado com 'CN=localhost,O=Luminator,L=Caxias do Sul,ST=RS,C=BR'."
+    echo "4. Exclua o certificado."
+}
+
+# Desabilitar ICMP Timestamp Replies (requer ajustes no firewall do Windows)
+disable_icmp_timestamp() {
+  echo "Desabilitando ICMP Timestamp Replies..."
+  echo "Esta ação requer ajustes manuais no firewall do Windows."
+  echo "1. Abra o 'Firewall do Windows com Segurança Avançada' (wf.msc)."
+  echo "2. Clique com o botão direito em 'Regras de Entrada' e selecione 'Nova Regra'."
+  echo "3. Selecione 'Personalizado' e clique em 'Avançar'."
+  echo "4. Em 'Protocolos e Portas', selecione 'ICMPv4' para 'Tipo de protocolo ICMPv4' e clique em 'Avançar'."
+  echo "5. Deixe o escopo em 'Qualquer endereço IP' e clique em 'Avançar'."
+  echo "6. Selecione 'Bloquear a conexão' e clique em 'Avançar'."
+  echo "7. Aplique a regra para 'Domínio', 'Privado' e 'Público' e clique em 'Avançar'."
+  echo "8. Dê um nome à regra (por exemplo, 'Bloquear ICMP Timestamp') e clique em 'Concluir'."
+}
+
+# Desabilitar algoritmos MAC fracos no SSH (requer edição do arquivo de configuração SSH)
+disable_weak_mac_algorithms() {
+  echo "Desabilitando algoritmos MAC fracos no SSH..."
+  echo "Esta ação requer a edição do arquivo de configuração SSH."
+  echo "1. Localize o arquivo sshd_config (geralmente em C:\ProgramData\ssh\sshd_config)."
+  echo "2. Edite o arquivo e adicione ou modifique a linha 'MACs' para remover os algoritmos fracos:"
+  echo "   MACs curve25519-sha256,curve25519-sha256@libssh.org,hmac-sha2-512-etm@openssh.com,hmac-sha2-256-etm@openssh.com,hmac-sha2-512,hmac-sha2-256"
+  echo "3. Reinicie o serviço SSH."
+}
+
+# Função principal
+main() {
+  # 1. Instalar ou verificar o Chocolatey
+  install_chocolatey
+
+  # 2. Atualizar as versões do Python
+  update_python
+
+  # 3. Desabilitar TLS 1.0 e 1.1
+  disable_tls10_tls11
+
+    # 4. Remover certificado autoassinado
+  remove_self_signed_cert
+
+  # 5. Desabilitar ICMP Timestamp Replies
+  disable_icmp_timestamp
+  
+  # 6. Desabilitar algoritmos MAC fracos no SSH
+  disable_weak_mac_algorithms
+
+  echo "Processo de correção concluído. Algumas ações exigem intervenção manual."
+}
+
+# Executar a função principal
+main
+```}
+{type: uploaded file
+fileName: teste66vts_18.txt
+fullContent:
+```bash
+#!/bin/bash
+
+# Variáveis para rastreamento de atualizações
+atualizacoes_necessarias=0
+
+# Função para verificar e atualizar o Python
+atualizar_python() {
+    local versao_instalada="$1"
+    local versao_corrigida="$2"
+    local porta="$3"
+    
+    # Determinar o nome do pacote com base na versão instalada
+    if [[ "$versao_instalada" =~ ^3\.10 ]]; then
+        python_pkg="python3.10"
+    elif [[ "$versao_instalada" =~ ^3\.11 ]]; then
+        python_pkg="python3.11"
+    elif [[ "$versao_instalada" =~ ^3\.12 ]]; then
+        python_pkg="python3.12"
+    else
+        echo "Versão do Python não suportada: $versao_instalada"
+        return
+    fi
+
+    # Verificar se há uma versão mais recente disponível
+    if dpkg -s "$python_pkg" &> /dev/null; then
+        nova_versao=$(apt-cache show "$python_pkg" | grep Version | head -n 1 | awk '{print $2}')
+        
+        # Comparar a versão instalada com a versão corrigida
+        if [[ $(version_compare "$versao_instalada" "$versao_corrigida") -lt 0 ]]; then
+            echo "Atualizando Python na porta $porta de $versao_instalada para $versao_corrigida (ou mais recente)..."
+            apt-get update
+            apt-get install -y "$python_pkg"
+            atualizacoes_necessarias=$((atualizacoes_necessarias + 1))
+        else
+            echo "Python na porta $porta já está na versão $versao_instalada ou mais recente. Nenhuma atualização necessária."
+        fi
+    else
+        echo "Pacote Python $python_pkg não encontrado. Verifique a instalação do Python na porta $porta."
+    fi
+}
+
+# Função para comparação de versões
+version_compare() {
+  if [[ $1 == $2 ]]; then return 0; fi
+  local i=0
+  local IFS=.
+  local parts1=( $1 )
+  local parts2=( $2 )
+  # Fill shorter array with zeros
+  local len1=${#parts1[@]}
+  local len2=${#parts2[@]}
+  local -a longer
+  if (( len1 > len2 )); then
+      longer=( "${parts2[@]}" )
+      for ((i=len2; i<len1; i++)); do
+          longer+=( 0 )
+      done
+      parts2=( "${longer[@]}" )
+  elif (( len2 > len1 )); then
+      longer=( "${parts1[@]}" )
+      for ((i=len1; i<len2; i++)); do
+          longer+=( 0 )
+      done
+      parts1=( "${longer[@]}" )
+  fi
+  # Compare parts
+  for i in "${!parts1[@]}"; do
+      if (( parts1[i] > parts2[i] )); then
+          return 1
+      elif (( parts1[i] < parts2[i] )); then
+          return -1
+      fi
+  done
+  return 0
+}
+
+# Vulnerabilidade 1, 8, 10, 14, 18, 21, 22, 32, 36, 37, 40, 46, 50, 56, 57, 64
+atualizar_python "3.10.12" "3.10.16" "5000"
+
+# Vulnerabilidade 2, 3, 4, 5, 6, 7, 9, 11, 12, 13, 15, 16, 17, 19, 20, 23, 24, 25, 26, 28, 29, 30, 31, 33, 34, 35, 38, 39, 41, 42, 43, 44, 45, 47, 48, 51, 52, 53, 55, 58, 60, 61, 63, 65
+atualizar_python "3.12.0" "3.12.9" "8000"
+atualizar_python "3.12.0" "3.12.9" "8001"
+atualizar_python "3.12.0" "3.12.9" "8002"
+
+# Vulnerabilidade 49: SSL/TLS: Known Untrusted / Dangerous Certificate Authority (CA) Detection
+# A correção para esta vulnerabilidade envolve a substituição do certificado SSL/TLS.
+# Como a geração e instalação de um novo certificado dependem da configuração do servidor,
+# este script apenas irá alertar sobre a necessidade de substituição.
+echo "Atenção: O certificado SSL/TLS utilizado na porta 8002 é de uma CA não confiável."
+echo "Recomenda-se substituir o certificado por um assinado por uma CA confiável."
+
+# Vulnerabilidade 54: SSL/TLS: Deprecated TLSv1.0 and TLSv1.1 Protocol Detection
+# Desabilitar TLSv1.0 e TLSv1.1 depende da configuração do servidor.
+# Este script apenas irá alertar sobre a necessidade de desabilitar esses protocolos.
+echo "Atenção: Os protocolos TLSv1.0 e TLSv1.1 estão habilitados na porta 3389."
+echo "Recomenda-se desabilitar esses protocolos em favor de TLSv1.2 ou superior na configuração do servidor SSH."
+
+# Vulnerabilidade 59: Weak MAC Algorithm(s) Supported (SSH)
+# Desabilitar algoritmos MAC fracos depende da configuração do servidor SSH.
+# Este script apenas irá alertar sobre a necessidade de desabilitar esses algoritmos.
+echo "Atenção: Algoritmos MAC fracos estão habilitados no servidor SSH."
+echo "Recomenda-se desabilitar os algoritmos umac-64-etm@openssh.com e umac-64@openssh.com na configuração do servidor SSH."
+
+# Vulnerabilidade 62: ICMP Timestamp Reply Information Disclosure
+# Desabilitar ICMP Timestamp depende da configuração do sistema.
+# Este script apenas irá alertar sobre a necessidade de desabilitar.
+echo "Atenção: Respostas ICMP Timestamp estão habilitadas."
+echo "Recomenda-se bloquear ou desabilitar respostas ICMP Timestamp para mitigar a vulnerabilidade."
+
+# Relatório final
+if [[ "$atualizacoes_necessarias" -gt 0 ]]; then
+    echo "Script concluído. Foram necessárias $atualizacoes_necessarias atualizações do Python."
+else
+    echo "Script concluído. Nenhuma atualização do Python foi necessária."
+fi
+```}
+{type: uploaded file
+fileName: teste66vts_19.txt
+fullContent:
+```bash
+#!/bin/bash
+
+# Variáveis para rastrear atualizações e erros
+updated=0
+errors=0
+
+# Função para atualizar o Python no Windows usando o Chocolatey
+update_python() {
+  local version="$1"
+  local port="$2"
+
+  # Verifica se o Chocolatey está instalado
+  if ! command -v choco &> /dev/null; then
+    echo "Chocolatey não está instalado. Por favor, instale-o e tente novamente."
+    errors=$((errors + 1))
+    return
+  fi
+
+  # Atualiza o Python usando o Chocolatey
+  echo "Atualizando Python para a versão mais recente através da porta $port..."
+  choco upgrade python --yes
+  if [ $? -eq 0 ]; then
+    echo "Python atualizado com sucesso."
+    updated=$((updated + 1))
+  else
+    echo "Falha ao atualizar o Python."
+    errors=$((errors + 1))
+  fi
+}
+
+# Vulnerabilidade 1, 8, 10, 14, 18, 21, 22, 27, 32, 36, 37, 40, 46, 50, 56, 57, 64 : Atualizar Python 3.10.12 para >= 3.10.16 (ou 3.10.15/3.10.14 dependendo da vulnerabilidade)
+update_python "3.10.16" "5000"
+
+# Vulnerabilidade 2, 3, 4, 5, 6, 7, 9, 11, 12, 13, 15, 16, 17, 19, 20, 23, 24, 25, 26, 28, 29, 30, 31, 33, 34, 35, 38, 39, 41, 42, 43, 44, 45, 47, 48, 51, 52, 53, 55, 58, 60, 61, 63, 65 : Atualizar Python 3.12.0 para >= 3.12.9 (ou 3.12.8/3.12.5/3.12.4/3.12.3/3.12.2/3.12.1 dependendo da vulnerabilidade)
+update_python "3.12.9" "8000"
+update_python "3.12.9" "8001"
+update_python "3.12.9" "8002"
+
+# Vulnerabilidade 49:  Substituir o certificado SSL/TLS por um assinado por uma CA confiável.
+echo "Para a vulnerabilidade 49, substitua o certificado SSL/TLS auto-assinado por um certificado de uma CA confiável."
+echo "Esta etapa deve ser realizada manualmente, pois envolve a geração e instalação de novos certificados."
+
+# Vulnerabilidade 54: Desativar TLSv1.0 e TLSv1.1
+echo "Para a vulnerabilidade 54, desative os protocolos TLSv1.0 e TLSv1.1."
+echo "Esta etapa requer configuração específica do servidor e está fora do escopo deste script."
+echo "Consulte a documentação do seu servidor para obter instruções sobre como desativar esses protocolos."
+
+# Vulnerabilidade 59: Desabilitar algoritmos MAC fracos no SSH
+echo "Para a vulnerabilidade 59, desative os algoritmos MAC fracos no SSH."
+echo "Edite o arquivo /etc/ssh/sshd_config e remova os algoritmos 'umac-64-etm@openssh.com' e 'umac-64@openssh.com' da lista de MACs."
+echo "Após a modificação, reinicie o serviço SSH."
+sed -i 's/UMAC-64-ETM@OPENSSH.COM,UMAC-64@OPENSSH.COM//gI' /etc/ssh/sshd_config
+systemctl restart sshd
+
+# Vulnerabilidade 62: Desabilitar ICMP Timestamp Reply
+echo "Para a vulnerabilidade 62, é recomendado desabilitar as respostas ICMP Timestamp."
+echo "Esta etapa varia dependendo do sistema operacional. Abaixo estão comandos para sistemas Linux e Windows:"
+echo ""
+echo "Linux:"
+echo "  sudo sysctl -w net.ipv4.icmp_echo_ignore_all=1"
+echo "  Para tornar a mudança permanente, adicione 'net.ipv4.icmp_echo_ignore_all=1' ao /etc/sysctl.conf"
+echo ""
+echo "Windows:"
+echo "  Esta etapa requer configuração avançada do Firewall do Windows ou outras ferramentas de segurança."
+echo "  Consulte a documentação da Microsoft para obter instruções detalhadas."
+
+# Vulnerabilidades sem solução: 20, 25, 28, 33, 34, 35, 36.
+echo "As vulnerabilidades 20, 25, 28, 33, 34, 35, e 36 não têm solução conhecida no momento. Considere remover ou substituir os produtos afetados."
+
+# Resumo
+echo "Resumo:"
+echo "Python atualizado: $updated"
+echo "Erros encontrados: $errors"
+
+if [ "$errors" -gt 0 ]; then
+  echo "Por favor, revise as mensagens de erro e tome as medidas necessárias."
+else
+  echo "Todas as vulnerabilidades aplicáveis foram tratadas com sucesso."
+fi
+```}
+{type: uploaded file
+fileName: teste66vts_20.txt
+fullContent:
+```bash
+#!/bin/bash
+
+# Variáveis para controle de versão e paths
+python3_10_version=$(python3.10 --version 2>&1 | awk '{print $2}' | cut -d ' ' -f 1)
+python3_12_version=$(python3.12 --version 2>&1 | awk '{print $2}' | cut -d ' ' -f 1)
+
+# Função para realizar o upgrade do Python, genérica para ambos 3.10 e 3.12
+upgrade_python() {
+    python_version="$1"
+    target_version="$2"
+    python_executable="$3"
+
+    echo "Verificando versão do ${python_version}..."
+    installed_version=$("${python_executable}" --version 2>&1 | awk '{print $2}' | cut -d ' ' -f 1)
+
+    if [ -z "$installed_version" ]; then
+        echo "${python_version} não está instalado."
+        return
+    fi
+
+    echo "Versão instalada: ${installed_version}"
+
+    # Comparar versões usando o version comparison do dpkg
+    if dpkg --compare-versions "$installed_version" lt "$target_version"; then
+        echo "Atualizando ${python_version} para ${target_version}..."
+        
+        # Tenta usar o apt para atualizar para a versão mais recente disponível
+        sudo apt-get update
+        sudo apt-get install -y "${python_executable}"
+
+        # Verifica se a atualização foi bem-sucedida
+        updated_version=$("${python_executable}" --version 2>&1 | awk '{print $2}' | cut -d ' ' -f 1)
+        if dpkg --compare-versions "$updated_version" ge "$target_version"; then
+            echo "${python_version} atualizado com sucesso para ${updated_version}."
+        else
+            echo "Falha ao atualizar ${python_version} usando apt.  Verifique as dependências ou tente instalar manualmente."
+        fi
+    else
+        echo "${python_version} já está na versão ${target_version} ou mais recente."
+    fi
+}
+
+# Vulnerabilidade 1, 8, 10, 14, 18, 21, 22, 27, 32, 36, 37, 40, 46, 50, 56, 57, 64: Python 3.10.12 para 3.10.16 (ou 3.10.14 para CVE-2023-52425, CVE-2024-0397, CVE-2024-0450)
+upgrade_python "Python 3.10" "3.10.16" "python3.10"
+
+# Vulnerabilidade 2, 3, 4, 5, 6, 7, 9, 11, 12, 13, 15, 16, 17, 19, 20, 23, 24, 25, 26, 28, 29, 30, 31, 33, 34, 35, 38, 39, 41, 42, 43, 44, 45, 47, 48, 51, 52, 53, 55, 58, 60, 61, 63, 65: Python 3.12.0 para 3.12.9 (ou 3.12.8 para CVE-2024-9287, 3.12.6 para CVE-2024-6232 etc, 3.12.5 para CVE-2024-3219 e CVE-2024-6923, 3.12.4 para CVE-2024-4030 e CVE-2025-1795, 3.12.3 para CVE-2023-52425 e CVE-2024-0397, 3.12.2 para CVE-2024-0450, 3.12.1 para CVE-2023-6597)
+upgrade_python "Python 3.12" "3.12.9" "python3.12"
+
+# Vulnerabilidade 49: SSL/TLS: Known Untrusted / Dangerous Certificate Authority (CA) Detection
+# Esta vulnerabilidade requer a substituição do certificado SSL/TLS por um assinado por uma CA confiável.
+# Como não podemos automatizar a obtenção e instalação de um novo certificado, deixaremos uma mensagem informativa.
+echo "Aviso: A vulnerabilidade SSL/TLS: Known Untrusted / Dangerous Certificate Authority (CA) requer a substituição manual do certificado SSL/TLS por um assinado por uma CA confiável."
+
+# Vulnerabilidade 54: SSL/TLS: Deprecated TLSv1.0 and TLSv1.1 Protocol Detection
+# Desabilitar TLSv1.0 e TLSv1.1 depende da configuração do servidor SSH.
+# O exemplo abaixo é para o OpenSSH, mas pode variar em outros servidores.
+# Adicione a seguinte linha ao arquivo /etc/ssh/sshd_config:
+#   Protocol 2
+# Remova TLSv1.0 e TLSv1.1 da lista de Ciphers e MACs.  Exemplo:
+# Ciphers aes256-gcm@openssh.com,chacha20-poly1305@openssh.com,aes256-ctr,aes128-gcm@openssh.com,aes128-ctr
+# MACs umac-128-etm@openssh.com,hmac-sha2-512-etm@openssh.com,hmac-sha2-256-etm@openssh.com,umac-128@openssh.com,hmac-sha2-512,hmac-sha2-256
+echo "Aviso: A vulnerabilidade SSL/TLS: Deprecated TLSv1.0 and TLSv1.1 Protocol Detection requer a desativação manual dos protocolos TLSv1.0 e TLSv1.1 no arquivo de configuração do servidor SSH (/etc/ssh/sshd_config)."
+echo "   Exemplo: Adicione 'Protocol 2' e ajuste Ciphers e MACs removendo algoritmos fracos."
+echo "   Reinicie o serviço SSH após a modificação."
+
+# Vulnerabilidade 59: Weak MAC Algorithm(s) Supported (SSH)
+# Semelhante a desativação de TLSv1.0 e TLSv1.1, esta correção depende da configuração do servidor SSH.
+# Remova os algoritmos de MAC fracos (umac-64-etm@openssh.com, umac-64@openssh.com) da lista de MACs no arquivo /etc/ssh/sshd_config.
+echo "Aviso: A vulnerabilidade Weak MAC Algorithm(s) Supported (SSH) requer a desativação manual dos algoritmos MAC fracos no arquivo de configuração do servidor SSH (/etc/ssh/sshd_config)."
+echo "   Exemplo: Remova 'umac-64-etm@openssh.com, umac-64@openssh.com' da lista de MACs."
+echo "   Reinicie o serviço SSH após a modificação."
+
+# Vulnerabilidade 62: ICMP Timestamp Reply Information Disclosure
+# Para desabilitar ICMP Timestamp Replies, pode-se usar o sysctl.
+echo "Aviso: A vulnerabilidade ICMP Timestamp Reply Information Disclosure requer a desativação de respostas ICMP Timestamp."
+echo "   Execute o seguinte comando para desativar temporariamente: sudo sysctl -w net.ipv4.icmp_echo_ignore_all=1"
+echo "   Para tornar a alteração permanente, adicione 'net.ipv4.icmp_echo_ignore_all=1' ao arquivo /etc/sysctl.conf e execute 'sudo sysctl -p'."
+
+# Reiniciar serviços (necessário após a alteração do sshd_config)
+echo "Reiniciando o serviço SSH para aplicar as alterações (se houver)..."
+sudo systemctl restart ssh || sudo service ssh restart
+
+echo "Script de correção concluído."
+```}
+{type: uploaded file
+fileName: teste66vts_21.txt
+fullContent:
+```powershell
+# Este script foi gerado automaticamente para corrigir vulnerabilidades do Python no Windows.
+# Ele irá baixar e instalar as versões mais recentes do Python para mitigar os CVEs reportados.
+# Execute este script com privilégios de administrador.
+
+# Define um dicionário para armazenar as versões e portas associadas do Python.
+$pythonVersions = @{
+    "3.10.12" = @{
+        "ports" = @(5000);
+        "fixedVersion" = "3.10.16";
+        "installerURL" = "https://www.python.org/ftp/python/3.10.16/python-3.10.16-amd64.exe"
+    }
+    "3.12.0" = @{
+        "ports" = @(8000, 8001, 8002);
+        "fixedVersion" = "3.12.9";
+        "installerURL" = "https://www.python.org/ftp/python/3.12.9/python-3.12.9-amd64.exe"
+    }
+}
+
+# Define o diretório temporário para baixar os instaladores.
+$tempDir = "$env:TEMP\PythonPatch"
+if (!(Test-Path -Path $tempDir)) {
+    New-Item -ItemType Directory -Force -Path $tempDir
+}
+
+# Função para verificar se o Python está instalado e obter a versão.
+function Get-PythonVersion {
+    param (
+        [string]$port
+    )
+    try {
+        # Procura pela instalação do Python usando o registro do Windows.
+        $pythonPath = (Get-ItemProperty "HKLM:\SOFTWARE\Python\PythonCore\*\InstallPath" | Where-Object {$_.GetValue("Port") -eq $port}).InstallPath
+        if ($pythonPath) {
+            # Monta o caminho completo para o executável do Python.
+            $pythonExePath = Join-Path -Path $pythonPath -ChildPath "python.exe"
+            
+            # Executa o Python para obter a versão.
+            $versionInfo = & $pythonExePath --version 2>&1
+            
+            # Analisa a saída para extrair a versão.
+            if ($versionInfo -match "Python (\d+\.\d+\.\d+)") {
+                return $Matches[1]
+            } else {
+                Write-Warning "Não foi possível determinar a versão do Python na porta $port"
+                return $null
+            }
+        } else {
+            Write-Warning "Python não encontrado no registro para a porta $port."
+            return $null
+        }
+    } catch {
+        Write-Error "Erro ao obter a versão do Python: $($_.Exception.Message)"
+        return $null
+    }
+}
+
+# Função para baixar o instalador do Python.
+function Download-PythonInstaller {
+    param (
+        [string]$url,
+        [string]$outputPath
+    )
+    try {
+        Write-Host "Baixando instalador do Python de $url para $outputPath..."
+        Invoke-WebRequest -Uri $url -OutFile $outputPath
+        Write-Host "Download concluído."
+    } catch {
+        Write-Error "Erro ao baixar o instalador: $($_.Exception.Message)"
+        return $false
+    }
+    return $true
+}
+
+# Função para instalar o Python.
+function Install-Python {
+    param (
+        [string]$installerPath
+    )
+    try {
+        Write-Host "Iniciando a instalação do Python a partir de $installerPath..."
+        # Executa o instalador com parâmetros silenciosos para uma instalação não interativa.
+        Start-Process -FilePath $installerPath -ArgumentList "/quiet InstallAllUsers=1 Include_doc=0 Include_tcltk=0 Include_test=0" -Wait
+        Write-Host "Instalação do Python concluída."
+    } catch {
+        Write-Error "Erro ao instalar o Python: $($_.Exception.Message)"
+        return $false
+    }
+    return $true
+}
+
+# Itera sobre as versões do Python e instala as versões corrigidas.
+foreach ($installedVersion in $pythonVersions.Keys) {
+    $versionInfo = $pythonVersions[$installedVersion]
+    foreach ($port in $versionInfo.ports) {
+        Write-Host "Verificando a versão do Python na porta $port..."
+        $currentVersion = Get-PythonVersion -port $port
+        
+        if ($currentVersion -eq $installedVersion) {
+            Write-Host "Versão vulnerável do Python detectada na porta $port: $currentVersion"
+            
+            # Define o caminho do instalador.
+            $installerPath = Join-Path -Path $tempDir -ChildPath "python-$($versionInfo.fixedVersion)-amd64.exe"
+            
+            # Baixa o instalador, se necessário.
+            if (!(Test-Path -Path $installerPath)) {
+                if (!(Download-PythonInstaller -url $versionInfo.installerURL -outputPath $installerPath)) {
+                    Write-Error "Falha ao baixar o instalador para a versão $($versionInfo.fixedVersion). Pulando esta atualização."
+                    continue
+                }
+            }
+            
+            # Instala a versão corrigida.
+            if (Install-Python -installerPath $installerPath) {
+                Write-Host "Python atualizado com sucesso para a versão $($versionInfo.fixedVersion) na porta $port."
+            } else {
+                Write-Error "Falha ao atualizar o Python na porta $port."
+            }
+        } else {
+            Write-Host "Versão do Python na porta $port está atualizada ou não foi detectada uma versão vulnerável."
+        }
+    }
+}
+
+# Limpa o diretório temporário.
+Write-Host "Limpando o diretório temporário..."
+Remove-Item -Path $tempDir -Recurse -Force
+
+Write-Host "Correção de vulnerabilidades do Python concluída."
+```}
+{type: uploaded file
+fileName: teste66vts_22.txt
+fullContent:
+```bash
+#!/bin/bash
+
+# Variáveis para rastrear as versões do Python e as ações de atualização
+declare -A python_versions
+python_versions["3.10"]="3.10.16"
+python_versions["3.12"]="3.12.9"
+
+# Função para atualizar uma instalação específica do Python
+update_python() {
+    local current_version="$1"
+    local target_version="$2"
+
+    echo "Atualizando Python $current_version para $target_version..."
+
+    # Construir o comando para atualizar o Python
+    update_command="python -m pip install --upgrade python==$target_version"
+
+    # Executar o comando de atualização
+    eval "$update_command"
+}
+
+# Verificar se o sistema é Windows
+if [[ "$OSTYPE" == "msys" || "$OSTYPE" == "cygwin" || "$OSTYPE" == "win32" ]]; then
+    echo "Este script deve ser executado em um ambiente Linux/Unix."
+    exit 1
+fi
+
+# Atualizar o Python 3.10
+if command -v python3.10 &> /dev/null; then
+  current_version=$(python3.10 -c "import sys; print('.'.join(map(str, sys.version_info[:3])))")
+  if [[ "$current_version" == "3.10.12" ]]; then
+        update_python "3.10.12" "${python_versions["3.10"]}"
+  fi
+fi
+
+# Atualizar o Python 3.12
+if command -v python3.12 &> /dev/null; then
+  current_version=$(python3.12 -c "import sys; print('.'.join(map(str, sys.version_info[:3])))")
+  if [[ "$current_version" == "3.12.0" ]]; then
+    update_python "3.12.0" "${python_versions["3.12"]}"
+  fi
+fi
+
+# Desabilitar TLSv1.0 e TLSv1.1 em OpenSSL
+if command -v openssl &> /dev/null; then
+  echo "Desabilitando TLSv1.0 e TLSv1.1 em OpenSSL..."
+  # Localizar o arquivo de configuração OpenSSL
+  openssl_config=$(openssl version -d | awk '{print $2}' | sed 's/\"//g')
+
+  # Verificar se o arquivo de configuração existe
+  if [ -f "$openssl_config/openssl.cnf" ]; then
+    # Criar um backup do arquivo de configuração
+    cp "$openssl_config/openssl.cnf" "$openssl_config/openssl.cnf.bak"
+    # Adicionar a restrição de versão TLS ao arquivo de configuração
+    sed -i 's/Options =/Options = MinProtocol=TLSv1.2/g' "$openssl_config/openssl.cnf"
+    echo "TLSv1.0 e TLSv1.1 desabilitados no arquivo de configuração OpenSSL."
+  else
+    echo "Arquivo de configuração OpenSSL não encontrado em $openssl_config/openssl.cnf. A desabilitação manual pode ser necessária."
+  fi
+fi
+
+# Lidar com certificado autoassinado (Inspecionar e potencialmente substituir)
+echo "Atenção: Certificado autoassinado detectado. Recomenda-se substituir por um certificado assinado por uma CA confiável."
+
+# Reiniciar serviços que utilizam Python para aplicar as atualizações
+echo "Reiniciando serviços Python..."
+systemctl restart $(systemctl list-units --type=service | grep -i python | awk '{print $1}')
+
+echo "Script de correção concluído."
+```}
+{type: uploaded file
+fileName: teste66vts_23.txt
+fullContent:
+```sh
+#!/bin/bash
+
+# Variáveis para controle de versão
+python3_10_version_installed="3.10.12"
+python3_12_version_installed="3.12.0"
+
+# Funções para atualização do Python
+update_python3_10() {
+  echo "Atualizando Python 3.10..."
+  
+  # Etapa 1: Remover a versão existente do Python 3.10
+  echo "Removendo a versão existente do Python 3.10..."
+  sudo apt remove -y python3.10
+
+  # Etapa 2: Baixar e instalar a versão mais recente do Python 3.10
+  echo "Baixando e instalando a versão mais recente do Python 3.10..."
+  sudo apt update
+  sudo apt install -y python3.10 python3.10-dev python3-pip
+  sudo pip3 install --upgrade pip
+  
+  # Etapa 3: Atualizar para a versão específica recomendada
+  echo "Atualizando para a versão Python 3.10.16..."
+  sudo pip3 install python==3.10.16
+
+  echo "Python 3.10 atualizado para a versão 3.10.16."
+}
+
+update_python3_12() {
+  echo "Atualizando Python 3.12..."
+  
+  # Etapa 1: Remover a versão existente do Python 3.12
+  echo "Removendo a versão existente do Python 3.12..."
+  sudo apt remove -y python3.12
+
+  # Etapa 2: Baixar e instalar a versão mais recente do Python 3.12
+  echo "Baixando e instalando a versão mais recente do Python 3.12..."
+  sudo apt update
+  sudo apt install -y python3.12 python3.12-dev python3-pip
+  sudo pip3 install --upgrade pip
+  
+  # Etapa 3: Atualizar para a versão específica recomendada
+  echo "Atualizando para a versão Python 3.12.9..."
+  sudo pip3 install python==3.12.9
+
+  echo "Python 3.12 atualizado para a versão 3.12.9."
+}
+
+# Função para desabilitar algoritmos MAC fracos no SSH
+disable_weak_ssh_mac_algorithms() {
+  echo "Desabilitando algoritmos MAC fracos no SSH..."
+
+  # Lista de algoritmos MAC a serem desabilitados
+  weak_macs="umac-64-etm@openssh.com,umac-64@openssh.com"
+
+  # Localizar a linha de configuração MAC no arquivo sshd_config
+  mac_line=$(grep -n "MACs" /etc/ssh/sshd_config)
+  mac_line_number=$(echo "$mac_line" | cut -d':' -f1)
+
+  # Verificar se a linha existe
+  if [ -n "$mac_line_number" ]; then
+    echo "Linha 'MACs' encontrada no arquivo sshd_config."
+    
+    # Remover os algoritmos fracos da configuração
+    new_macs=$(echo "$mac_line" | cut -d' ' -f2- | tr ',' '\n' | grep -v -e "$weak_macs" | tr '\n' ',' | sed 's/,$//')
+
+    # Atualizar o arquivo de configuração
+    sudo sed -i "${mac_line_number}s/.*/MACs $new_macs/" /etc/ssh/sshd_config
+    echo "Algoritmos MAC fracos removidos da configuração SSH."
+  else
+    echo "Linha 'MACs' não encontrada no arquivo sshd_config. Adicionando linha."
+    sudo echo "MACs -umac-64-etm@openssh.com,-umac-64@openssh.com" >> /etc/ssh/sshd_config
+  fi
+
+  # Reiniciar o serviço SSH para aplicar as alterações
+  sudo systemctl restart sshd
+  echo "Serviço SSH reiniciado."
+}
+
+# Função para desabilitar ICMP Timestamp Replies
+disable_icmp_timestamp_replies() {
+  echo "Desabilitando ICMP Timestamp Replies..."
+
+  # Verificar se o arquivo sysctl.conf existe
+  if [ -f /etc/sysctl.conf ]; then
+    # Adicionar a configuração para desabilitar ICMP Timestamp Replies
+    sudo echo "net.ipv4.icmp_timestamp = 0" >> /etc/sysctl.conf
+    sudo echo "net.ipv4.icmp_timestamp_reply = 0" >> /etc/sysctl.conf
+
+    # Aplicar as alterações
+    sudo sysctl -p
+    echo "ICMP Timestamp Replies desabilitado."
+  else
+    echo "Arquivo /etc/sysctl.conf não encontrado."
+  fi
+}
+
+
+# Execução das funções de atualização e correção
+update_python3_10
+update_python3_12
+disable_weak_ssh_mac_algorithms
+disable_icmp_timestamp_replies
+
+echo "Script de correção de vulnerabilidades Python concluído."
+```}
+{type: uploaded file
+fileName: teste66vts_24.txt
+fullContent:
+```bash
+#!/bin/bash
+
+# Variáveis para rastrear o estado das atualizações
+python3_10_updated=false
+python3_12_updated=false
+
+# Função para verificar se o Python está instalado e obter a versão
+check_python_version() {
+  python_version=$("$1" --version 2>&1 | awk '{print $2}' | cut -d'.' -f1,2)
+  if [ -z "$python_version" ]; then
+    echo "Python não está instalado ou não pode ser detectado."
+    return 1
+  else
+    echo "Versão do Python detectada: $python_version"
+    return 0
+  fi
+}
+
+# Função para atualizar o Python usando o gerenciador de pacotes do sistema
+update_python() {
+  if check_python_version "$1"; then
+    if [[ "$python_version" == "Python 3.10" ]]; then
+      echo "Atualizando Python 3.10..."
+      apt-get update
+      apt-get install --only-upgrade python3.10 python3.10-venv python3.10-dev -y
+      python3_10_updated=true
+    elif [[ "$python_version" == "Python 3.12" ]]; then
+      echo "Atualizando Python 3.12..."
+      apt-get update
+      apt-get install --only-upgrade python3.12 python3.12-venv python3.12-dev -y
+      python3_12_updated=true
+    else
+      echo "Versão do Python não suportada para atualização automática."
+    fi
+  else
+    echo "Não foi possível verificar a versão do Python."
+  fi
+}
+
+# Vulnerabilidade 36, 37, 40, 46, 50, 56, 57, 64: Atualizar Python 3.10 para 3.10.16
+# Vulnerabilidade 1, 21, 22, 23, 24, 26, 29, 30, 31, 38, 39, 41, 43, 44, 47, 51, 52, 53, 55, 58, 60, 61, 63, 65: Atualizar Python 3.12 para versões >= 3.12.9 e 3.11.10
+
+# Atualizar Python usando apt (para sistemas Debian/Ubuntu)
+if command -v apt-get &> /dev/null; then
+  update_python "python3"
+fi
+
+# Solução alternativa para CVE-2023-36632 e CVE-2023-27043 (sem solução direta de atualização)
+echo "Para CVE-2023-36632 (RecursionError) e CVE-2023-27043 (Security Bypass), não há solução de atualização direta."
+echo "Considere desabilitar os recursos afetados (email.utils.parseaddr) ou migrar para versões mais recentes (>=3.13), se possível."
+
+# Solução para CVE-2024-3220 (Untrusted Search Path Vulnerability)
+echo "Para CVE-2024-3220 (Untrusted Search Path), não há solução automática."
+echo "Verifique e corrija as configurações de pesquisa de caminho do Python manualmente."
+
+# Solução para CVE-2024-3220 (Untrusted Search Path Vulnerability)
+echo "Para CVE-2023-27043, considere a migração para uma versão com correção (>=3.13)."
+
+# Solução para CVE-1999-0524 (ICMP Timestamp Reply)
+echo "Para CVE-1999-0524 (ICMP Timestamp Reply), considere desabilitar as respostas ICMP Timestamp no firewall ou no sistema."
+
+# Solução para CVE-2025-3200, CVE-2011-3389, CVE-2015-0204 (TLSv1.0 e TLSv1.1)
+echo "Para CVE-2025-3200, CVE-2011-3389, CVE-2015-0204 (TLSv1.0 e TLSv1.1), desabilite TLSv1.0 e TLSv1.1 na configuração do serviço."
+
+# Solução para algoritmos MAC fracos (SSH)
+echo "Para algoritmos MAC fracos (SSH), edite /etc/ssh/sshd_config e remova os algoritmos fracos (umac-64-etm@openssh.com, umac-64@openssh.com)."
+echo "Adicione a seguinte linha em /etc/ssh/sshd_config:"
+echo "# Ciphers and keying"
+echo "KexAlgorithms curve25519-sha256,curve25519-sha256@libssh.org,diffie-hellman-group-exchange-sha256"
+echo "Ciphers chacha20-poly1305@openssh.com,aes256-gcm@openssh.com,aes128-gcm@openssh.com"
+echo "MACs hmac-sha2-512-etm@openssh.com,hmac-sha2-256-etm@openssh.com,umac-128-etm@openssh.com"
+echo "Após a alteração, reinicie o serviço SSH com:"
+echo "systemctl restart sshd"
+
+# Solução para a Vulnerabilidade 49 (Certificado SSL/TLS não confiável)
+echo "Para a vulnerabilidade do certificado SSL/TLS não confiável:"
+echo "Substitua o certificado SSL/TLS por um certificado assinado por uma CA confiável."
+
+if $python3_10_updated || $python3_12_updated; then
+  echo "Atualizações do Python concluídas. Pode ser necessário reiniciar o sistema para aplicar todas as alterações."
+else
+  echo "Nenhuma atualização do Python foi necessária ou possível."
+fi
+
+exit 0
+```}
+{type: uploaded file
+fileName: teste66vts_25.txt
+fullContent:
+```bash
+#!/bin/bash
+
+# Variáveis para rastreamento de atualizações
+need_python_3_10_13=0
+need_python_3_10_14=0
+need_python_3_10_15=0
+need_python_3_10_16=0
+need_python_3_11_5=0
+need_python_3_11_8=0
+need_python_3_11_9=0
+need_python_3_11_10=0
+need_python_3_12_1=0
+need_python_3_12_2=0
+need_python_3_12_3=0
+need_python_3_12_4=0
+need_python_3_12_5=0
+need_python_3_12_6=0
+need_python_3_12_8=0
+need_python_3_12_9=0
+
+# Detectar qual versão do Python precisa ser atualizada
+if [[ $(python3 -V 2>&1) =~ "Python 3\.10\.12" ]]; then
+  need_python_3_10_13=1
+  need_python_3_10_14=1
+  need_python_3_10_15=1
+  need_python_3_10_16=1
+  need_python_3_11_10=1
+elif [[ $(python3 -V 2>&1) =~ "Python 3\.12\.0" ]]; then
+  need_python_3_12_1=1
+  need_python_3_12_2=1
+  need_python_3_12_3=1
+  need_python_3_12_4=1
+  need_python_3_12_5=1
+  need_python_3_12_6=1
+  need_python_3_12_8=1
+  need_python_3_12_9=1
+fi
+
+# Função para atualizar o Python usando o gerenciador de pacotes apropriado
+update_python() {
+  if command -v apt-get &> /dev/null; then
+    sudo apt-get update
+    sudo apt-get install -y python3.12 python3.11 python3.10
+  elif command -v yum &> /dev/null; then
+    sudo yum update
+    sudo yum install -y python3.12 python3.11 python3.10
+  elif command -v pacman &> /dev/null; then
+    sudo pacman -Syu
+    sudo pacman -S python3.12 python3.11 python3.10
+  elif command -v dnf &> /dev/null; then
+    sudo dnf update
+    sudo dnf install -y python3.12 python3.11 python3.10
+  else
+    echo "Nenhum gerenciador de pacotes suportado encontrado.  Por favor, atualize o Python manualmente."
+    exit 1
+  fi
+}
+
+# Atualizar o Python se necessário
+if [[ $need_python_3_10_13 -eq 1 ]] || [[ $need_python_3_10_14 -eq 1 ]] || [[ $need_python_3_10_15 -eq 1 ]] || [[ $need_python_3_10_16 -eq 1 ]] || [[ $need_python_3_11_5 -eq 1 ]] || [[ $need_python_3_11_8 -eq 1 ]] || [[ $need_python_3_11_9 -eq 1 ]] || [[ $need_python_3_11_10 -eq 1 ]] || [[ $need_python_3_12_1 -eq 1 ]] || [[ $need_python_3_12_2 -eq 1 ]] || [[ $need_python_3_12_3 -eq 1 ]] || [[ $need_python_3_12_4 -eq 1 ]] || [[ $need_python_3_12_5 -eq 1 ]] || [[ $need_python_3_12_6 -eq 1 ]] || [[ $need_python_3_12_8 -eq 1 ]] || [[ $need_python_3_12_9 -eq 1 ]]; then
+  update_python
+fi
+
+# Desativar TLSv1.0 e TLSv1.1 (exemplo usando OpenSSL - adapte conforme necessário)
+# Este é um exemplo e pode precisar de ajustes dependendo da sua configuração
+# sudo sed -i 's/TLSv1.1/No TLSv1.1/g' /etc/ssl/openssl.cnf
+# sudo sed -i 's/TLSv1/No TLSv1/g' /etc/ssh/sshd_config
+
+# Remover certificado SSL/TLS não confiável (isso requer conhecimento do caminho do arquivo)
+# Exemplo:
+# rm /etc/ssl/certs/untrusted_cert.pem
+
+# Reiniciar serviços afetados (exemplo)
+# sudo systemctl restart sshd
+# sudo systemctl restart <seu_servico_python>
+
+echo "Script de patching completo."
+```}

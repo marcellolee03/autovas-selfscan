@@ -1,0 +1,88 @@
+```bash
+#!/bin/bash
+
+# Identifica o sistema operacional.
+OS=$(uname -s)
+
+# Função para desabilitar TLSv1.0 e TLSv1.1 no PostgreSQL.
+disable_tls_postgres() {
+  # Arquivo de configuração do PostgreSQL.  Pode variar dependendo da distribuição.
+  POSTGRES_CONF="/etc/postgresql/*/main/postgresql.conf"
+
+  # Verifica se o arquivo de configuração existe.
+  if [ ! -f "$POSTGRES_CONF" ]; then
+    echo "Arquivo de configuração do PostgreSQL não encontrado em $POSTGRES_CONF. Verifique a localização."
+    return 1
+  fi
+
+  # Cria um backup do arquivo de configuração.
+  cp "$POSTGRES_CONF" "${POSTGRES_CONF}.bak.$(date +%Y%m%d%H%M%S)"
+
+  # Desabilita TLSv1.0 e TLSv1.1 editando o arquivo postgresql.conf.
+  # Define ssl_min_protocol para tls1.2
+  sed -i "s/^#ssl_min_protocol = .*/ssl_min_protocol = 'tls1.2'/g" "$POSTGRES_CONF"
+  if ! grep -q "^ssl_min_protocol = " "$POSTGRES_CONF"; then
+    echo "ssl_min_protocol = 'tls1.2'" >> "$POSTGRES_CONF"
+  fi
+
+  # Reinicia o serviço PostgreSQL para aplicar as mudanças.
+  systemctl restart postgresql
+
+  # Verifica se o serviço foi reiniciado com sucesso.
+  if [ $? -eq 0 ]; then
+    echo "PostgreSQL reiniciado com sucesso com TLSv1.2+ apenas."
+  else
+    echo "Erro ao reiniciar o PostgreSQL. Verifique os logs."
+    return 1
+  fi
+
+  return 0
+}
+
+# Desabilita TLSv1.0 e TLSv1.1 no OpenSSL (configuração global do sistema).
+disable_tls_openssl() {
+  # Localização do arquivo openssl.cnf (pode variar).
+  OPENSSL_CONF="/etc/ssl/openssl.cnf"
+
+  # Verifica se o arquivo de configuração existe.
+  if [ ! -f "$OPENSSL_CONF" ]; then
+    OPENSSL_CONF="/etc/pki/tls/openssl.cnf"
+    if [ ! -f "$OPENSSL_CONF" ]; then
+      echo "Arquivo de configuração do OpenSSL não encontrado. Verifique a localização."
+      return 1
+    fi
+  fi
+
+  # Cria um backup do arquivo de configuração.
+  cp "$OPENSSL_CONF" "${OPENSSL_CONF}.bak.$(date +%Y%m%d%H%M%S)"
+
+  # Adiciona a configuração MinProtocol = TLSv1.2 na seção [system_default_sect] ou similar.
+  sed -i 's/^[ ]*CipherString = DEFAULT@SECLEVEL=2/&\\nMinProtocol = TLSv1.2/g' "$OPENSSL_CONF"
+
+  if ! grep -q "^MinProtocol = TLSv1.2" "$OPENSSL_CONF"; then
+      echo "Não foi possível adicionar MinProtocol ao arquivo openssl.cnf. A configuração manual pode ser necessária."
+  fi
+
+  echo "Configuração do OpenSSL atualizada. Reinicie os serviços afetados para aplicar as mudanças."
+
+  return 0
+}
+
+# Função principal que coordena as ações.
+main() {
+  echo "Iniciando a correção para desabilitar TLSv1.0 e TLSv1.1..."
+
+  # Desabilita no PostgreSQL
+  echo "Desabilitando TLSv1.0 e TLSv1.1 no PostgreSQL..."
+  disable_tls_postgres
+
+  # Desabilita no OpenSSL (configuração global)
+  echo "Desabilitando TLSv1.0 e TLSv1.1 no OpenSSL (configuração global)..."
+  disable_tls_openssl
+
+  echo "Correção concluída.  Reinicie os serviços afetados (além do PostgreSQL) para garantir que as mudanças sejam aplicadas."
+}
+
+# Executa a função principal.
+main
+```

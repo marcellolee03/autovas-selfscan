@@ -1,0 +1,17 @@
+#!/bin/bash
+sysctl -w net.ipv4.tcp_timestamps=0
+echo "net.ipv4.tcp_timestamps = 0" >> /etc/sysctl.conf
+sysctl -p
+iptables -A INPUT -p icmp --icmp-type timestamp-request -j DROP
+iptables -A OUTPUT -p icmp --icmp-type timestamp-reply -j DROP
+sed -i 's/SSLProtocol all -SSLv2 -SSLv3/SSLProtocol all -SSLv2 -SSLv3 -TLSv1 -TLSv1.1/' /etc/apache2/mods-enabled/ssl.conf
+systemctl restart apache2
+sed -i 's/SSLProtocol all -SSLv2 -SSLv3/SSLProtocol all -SSLv2 -SSLv3 -TLSv1 -TLSv1.1/' /etc/nginx/nginx.conf
+systemctl restart nginx
+sed -i 's/^CipherString = DEFAULT@SECLEVEL=2/CipherString = DEFAULT@SECLEVEL=2:!ECDHE-RSA-AES128-SHA:!ECDHE-RSA-AES256-SHA:!DHE-RSA-AES128-SHA:!DHE-RSA-AES256-SHA/' /etc/ssl/openssl.cnf
+systemctl restart apache2
+systemctl restart nginx
+iptables -A INPUT -p udp --dport 53 -j DROP
+iptables -A OUTPUT -p udp --dport 53 -j DROP
+iptables -A FORWARD -p udp --dport 53 -j DROP
+iptables-save > /etc/iptables/rules.v4

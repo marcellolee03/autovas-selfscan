@@ -1,0 +1,118 @@
+```bash
+#!/bin/bash
+set -e
+
+stop_and_disable_service() {
+    service_name=$1
+    if command -v "$service_name" >/dev/null 2>&1; then
+        update-rc.d -f "$service_name" remove || true
+        service "$service_name" stop || service systcl stop "$service_name" || true
+    fi
+}
+
+purge_packages() {
+    for package in "$@"; do
+        if dpkg-query -W -f='${Status}' "$package" 2>/dev/null | grep -q "ok installed"; then
+            apt-get purge -y "$package" || true
+        fi
+    done
+}
+
+update_sshd_config() {
+    sed -i '/^Ciphers/d' /etc/ssh/sshd_config
+    sed -i '/^MACs/d' /etc/ssh/sshd_config
+    sed -i '/^KexAlgorithms/d' /etc/ssh/sshd_config
+    sed -i '/^HostKeyAlgorithms/d' /etc/ssh/sshd_config
+    sed -i 's/^#*PermitRootLogin.*/PermitRootLogin without-password/' /etc/ssh/sshd_config
+    sed -i 's/^#*Protocol .*/Protocol 2/' /etc/ssh/sshd_config
+    sed -i 's/^#*UsePAM .*/UsePAM yes/' /etc/ssh/sshd_config
+
+    echo "Ciphers aes256-ctr,aes192-ctr,aes128-ctr" >> /etc/ssh/sshd_config
+    echo "MACs hmac-sha2-512,hmac-sha2-256" >> /etc/ssh/sshd_config
+    echo "KexAlgorithms ecdh-sha2-nistp521,ecdh-sha2-nistp384,ecdh-sha2-nistp256,diffie-hellman-group-exchange-sha256" >> /etc/ssh/sshd_config
+    echo "HostKeyAlgorithms ecdsa-sha2-nistp256,rsa-sha2-512,rsa-sha2-256" >> /etc/ssh/sshd_config
+    service ssh restart || systemctl restart ssh || true
+}
+
+secure_mysql() {
+    if command -v mysql &>/dev/null; then
+        new_pass=$(tr -dc A-Za-z0-9 </dev/urandom | head -c 32)
+        mysql -uroot -e "SET PASSWORD FOR 'root'@'localhost' = PASSWORD('$new_pass');" || true
+        echo "root MySQL password changed to: $new_pass" >> /root/secured.log
+    fi
+}
+
+secure_postgresql() {
+    if su - postgres -c 'psql --version' &>/dev/null; then
+        new_pass=$(tr -dc A-Za-z0-9 </dev/urandom | head -c 32)
+        psql -U postgres -d template1 -c "ALTER ROLE postgres WITH PASSWORD '$new_pass';" || true
+        echo "postgres PostgreSQL password changed to: $new_pass" >> /root/secured.log
+    fi
+}
+
+configure_iptables() {
+    iptables -F
+    iptables -A INPUT -i lo -j ACCEPT
+    iptables -A INPUT -p tcp --dport 22 -j ACCEPT
+    iptables -A INPUT -p tcp --dport 80 -j ACCEPT
+    iptables -A INPUT -p tcp --dport 443 -j ACCEPT
+    iptables -A INPUT -m state --state ESTABLISHED,RELATED -j ACCEPT
+    vulnerable_ports=(21 25 23 513 514 1524 5900 3632 2121)
+    for port in ${vulnerable_ports[@]}; do
+        iptables -A INPUT -p tcp --dport $port -j DROP
+    done
+    iptables -P INPUT DROP
+    iptables-save > /etc/iptables.rules
+    cat > /etc/network/if-pre-up.d/iptables <<'EOF'
+#!/bin/sh
+iptables-restore < /etc/iptables.rules
+EOF
+    chmod +x /etc/network/if-pre-up.d/iptables
+}
+
+main() {
+    stop_and_disable_service rlogin
+    stop_and_disable_service rsh
+    stop_and_disable_service rexec
+    stop_and_disable_service telnet
+    stop_and_disable_service vncserver
+    stop_and_disable_service distcc
+    stop_and_disable_service mysql
+    stop_and_disable_service postgresql
+    stop_and_disable_service tomcat5.5
+    stop_and_disable_service vsftpd
+
+    purge_packages rsh-server inetutils-telnetd tightvncserver distccd altenen
+
+    pkill -f '/usr/bin/druby_timeserver.rb' || true
+    rm -f /usr/sbin/druby_timeserver.rb || true
+    rm -f /etc/xinetd.d/* || true
+
+    racoon_vuln_procs=("ingreslock" "rexecd" "rlogind" "druby")
+    for proc in ${racoon_vuln_procs[@]}; do
+        pkill -f "$proc" || true
+    done
+
+    update_sshd_config
+    secure_mysql
+    secure_postgresql
+    configure_iptables
+
+    a2dismod proxy_ajp || true
+    sed -i 's/<Connector port="8009"/<!-- <Connector port="8009"/' /etc/tomcat?/server.xml
+    sed -i 's/<\/Connector>/<\/Connector> -->/' /etc/tomcat?/server.xml
+
+    find /var/www -name 'phpinfo.php' -exec rm -f {} \;
+    find /var/www -name 'bash_history' -exec rm -f {} \;
+
+    rm -f /etc/jwiki.versions.tmp
+    rm -f /usr/bin/tikiwiki.sh
+
+    sed -i 's/^\(.*AcceptEnv.*\)/#\1/' /etc/ssh/sshd_config
+    service ssh restart || systemctl restart ssh || true
+
+    echo "HostExploitPatch applied: $(date)" > /var/log/security_patch.log
+}
+
+main
+```

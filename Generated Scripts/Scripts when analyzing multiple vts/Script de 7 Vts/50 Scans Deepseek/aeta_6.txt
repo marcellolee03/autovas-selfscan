@@ -1,0 +1,36 @@
+#!/bin/bash
+# Atualizar pacotes e instalar ferramentas necessárias
+sudo apt-get update
+sudo apt-get install -y openssl apache2 ufw
+
+# Vulnerabilidade 1: Enforce HTTPS
+sudo a2enmod ssl
+sudo a2ensite default-ssl
+sudo systemctl restart apache2
+sudo sed -i 's/^<VirtualHost \*:80>/<VirtualHost \*:80>\n    Redirect permanent \/ https:\/\/'"$(hostname)"'\//g' /etc/apache2/sites-available/000-default.conf
+sudo systemctl restart apache2
+
+# Vulnerabilidade 2: DNS Cache Snooping
+sudo ufw allow from 192.168.1.0/24 to any port 53
+sudo ufw deny 53/udp
+
+# Vulnerabilidade 3: ICMP Timestamp Reply
+sudo sysctl -w net.ipv4.icmp_echo_ignore_all=1
+echo "net.ipv4.icmp_echo_ignore_all=1" | sudo tee -a /etc/sysctl.conf
+
+# Vulnerabilidade 4: Disable TLSv1.0 and TLSv1.1
+sudo sed -i 's/SSLProtocol all -SSLv3/SSLProtocol all -SSLv3 -TLSv1 -TLSv1.1/g' /etc/apache2/mods-enabled/ssl.conf
+sudo systemctl restart apache2
+
+# Vulnerabilidade 5: SSL/TLS Renegotiation DoS
+sudo sed -i 's/SSLOptions +StdEnvVars/SSLOptions +StdEnvVars +OptRenegotiate/g' /etc/apache2/mods-enabled/ssl.conf
+sudo systemctl restart apache2
+
+# Vulnerabilidade 6: Weak Cipher Suites
+sudo sed -i 's/SSLCipherSuite HIGH:!aNULL/SSLCipherSuite HIGH:!aNULL:!MD5:!RC4:!DES:!3DES/g' /etc/apache2/mods-enabled/ssl.conf
+sudo systemctl restart apache2
+
+# Vulnerabilidade 7: TCP Timestamps
+sudo sysctl -w net.ipv4.tcp_timestamps=0
+echo "net.ipv4.tcp_timestamps=0" | sudo tee -a /etc/sysctl.conf
+sudo sysctl -p

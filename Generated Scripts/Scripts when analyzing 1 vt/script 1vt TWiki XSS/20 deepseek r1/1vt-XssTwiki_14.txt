@@ -1,0 +1,27 @@
+#!/bin/bash
+set -e
+BACKUP_DIR="/var/www/twiki_backup_$(date +%Y%m%d%H%M%S)"
+OLD_TWIKI_DIR="/var/www/twiki"
+service apache2 stop
+if [ -d "$OLD_TWIKI_DIR" ]; then
+    cp -a "$OLD_TWIKI_DIR" "$BACKUP_DIR"
+    cd /tmp
+    wget -q http://twiki.org/pub/TWiki/TWikiDownload/twiki-4.2.4.tar.gz
+    tar xzf twiki-4.2.4.tar.gz
+    rm -rf /var/www/twiki_new
+    mv twiki-4.2.4 /var/www/twiki_new
+    cp -a "$BACKUP_DIR/data" "$BACKUP_DIR/pub" /var/www/twiki_new/
+    [ -f "$BACKUP_DIR/lib/LocalSite.cfg" ] && cp "$BACKUP_DIR/lib/LocalSite.cfg" /var/www/twiki_new/lib/
+    if [ -d "$BACKUP_DIR/lib/TWiki/Plugins" ]; then
+        mkdir -p /var/www/twiki_new/lib/TWiki
+        cp -a "$BACKUP_DIR/lib/TWiki/Plugins" /var/www/twiki_new/lib/TWiki/
+    fi
+    if [ -d "$BACKUP_DIR/lib/TWiki/Contrib" ]; then
+        mkdir -p /var/www/twiki_new/lib/TWiki
+        cp -a "$BACKUP_DIR/lib/TWiki/Contrib" /var/www/twiki_new/lib/TWiki/
+    fi
+    rm -rf "$OLD_TWIKI_DIR"
+    mv /var/www/twiki_new "$OLD_TWIKI_DIR"
+    chown -R www-data:www-data "$OLD_TWIKI_DIR"
+fi
+service apache2 start

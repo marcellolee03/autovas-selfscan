@@ -1,0 +1,131 @@
+```bash
+#!/bin/bash
+
+# Vulnerability 1: Proxmox VE EOL
+# The provided information indicates that Proxmox VE 7.3-3 is installed, which is EOL.
+# Upgrading Proxmox VE requires a more complex process and is beyond the scope of a simple script.
+# It typically involves updating the apt repositories and using apt update/upgrade.
+# A manual upgrade process is recommended, following the official Proxmox documentation.
+# Since I cannot perform the actual upgrade, I will skip this part.
+
+# Vulnerabilities 2-6: jQuery < 1.9.0 XSS Vulnerability (CVE-2012-6708)
+# Define the paths to the vulnerable jQuery files.
+jquery_files=(
+    "/var/www/html/../js/jquery-1.8.3.min.js"
+    "/var/www/html/opscenter/webcommon/framework/../js/jquery-1.8.3.min.js"
+    "/var/www/html/framesets/../js/jquery-1.8.3.min.js"
+    "/var/www/html/frameset/../js/jquery-1.8.3.min.js"
+    "/var/www/html/console/framework/../js/jquery-1.8.3.min.js"
+)
+
+# URL to download jQuery 1.9.0
+jquery_1_9_0_url="https://code.jquery.com/jquery-1.9.0.min.js"
+
+# Function to download and replace a file
+download_and_replace() {
+    local file_path="$1"
+    
+    # Check if the directory exists
+    if [ ! -d "$(dirname "$file_path")" ]; then
+        echo "Directory $(dirname "$file_path") does not exist. Skipping $file_path"
+        return
+    fi
+
+    # Download the new jQuery version and replace the old one
+    if wget -q "$jquery_1_9_0_url" -O "$file_path.new"; then
+        mv "$file_path.new" "$file_path"
+        echo "Successfully updated $file_path"
+    else
+        echo "Failed to download or replace $file_path"
+    fi
+}
+
+# Loop through the jQuery files and update them
+for file in "${jquery_files[@]}"; do
+    if [ -f "$file" ]; then
+        download_and_replace "$file"
+    else
+        echo "File not found: $file"
+    fi
+done
+
+# Vulnerabilities 7-9, 13-16, 19, 21-22: Weak SSH Algorithms
+# Disable weak SSH algorithms.
+# This involves modifying the /etc/ssh/sshd_config file.
+
+# Create a backup of the sshd_config file
+sudo cp /etc/ssh/sshd_config /etc/ssh/sshd_config.bak
+
+# Define strong algorithms
+strong_kex_algorithms="curve25519-sha256,curve25519-sha256@libssh.org,ecdh-sha2-nistp256,ecdh-sha2-nistp384,ecdh-sha2-nistp521,diffie-hellman-group-exchange-sha256"
+strong_ciphers="chacha20-poly1305@openssh.com,aes256-gcm@openssh.com,aes128-gcm@openssh.com,aes256-ctr,aes128-ctr"
+strong_macs="hmac-sha2-256,hmac-sha2-512,hmac-sha1"
+host_key_algorithms="ecdsa-sha2-nistp256-cert-v01@openssh.com,ecdsa-sha2-nistp384-cert-v01@openssh.com,ecdsa-sha2-nistp521-cert-v01@openssh.com,ecdsa-sha2-nistp256,ecdsa-sha2-nistp384,ecdsa-sha2-nistp521,rsa-sha2-512-cert-v01@openssh.com,rsa-sha2-256-cert-v01@openssh.com,ssh-rsa-cert-v01@openssh.com,rsa-sha2-512,rsa-sha2-256,ssh-rsa"
+
+# Update sshd_config with stronger algorithms
+sudo sed -i "s/^KexAlgorithms .*/KexAlgorithms $strong_kex_algorithms/g" /etc/ssh/sshd_config
+sudo sed -i "s/^Ciphers .*/Ciphers $strong_ciphers/g" /etc/ssh/sshd_config
+sudo sed -i "s/^MACs .*/MACs $strong_macs/g" /etc/ssh/sshd_config
+sudo sed -i "s/^HostKeyAlgorithms .*/HostKeyAlgorithms $host_key_algorithms/g" /etc/ssh/sshd_config
+
+# Remove potentially conflicting or weak settings
+sudo sed -i '/^KexAlgorithms .*diffie-hellman-group1-sha1/d' /etc/ssh/sshd_config
+sudo sed -i '/^Ciphers .*3des-cbc/d' /etc/ssh/sshd_config
+sudo sed -i '/^Ciphers .*aes128-cbc/d' /etc/ssh/sshd_config
+sudo sed -i '/^Ciphers .*aes256-cbc/d' /etc/ssh/sshd_config
+sudo sed -i '/^Ciphers .*twofish-cbc/d' /etc/ssh/sshd_config
+sudo sed -i '/^Ciphers .*twofish128-cbc/d' /etc/ssh/sshd_config
+sudo sed -i '/^Ciphers .*twofish256-cbc/d' /etc/ssh/sshd_config
+sudo sed -i '/^MACs .*umac-64-etm@openssh.com/d' /etc/ssh/sshd_config
+sudo sed -i '/^MACs .*umac-64@openssh.com/d' /etc/ssh/sshd_config
+sudo sed -i '/^MACs .*hmac-md5/d' /etc/ssh/sshd_config
+sudo sed -i '/^MACs .*hmac-sha1-96/d' /etc/ssh/sshd_config
+
+# Restart SSH service
+sudo systemctl restart sshd
+
+# Vulnerabilities 10: DCE/RPC and MSRPC Services Enumeration Reporting
+# Filtering traffic to these ports requires firewall configuration.
+# This example uses iptables to block traffic to port 135.
+# Adjust the rule to match your specific needs.
+
+# Block incoming traffic to port 135
+# sudo iptables -A INPUT -p tcp --dport 135 -j DROP
+# sudo iptables -A INPUT -p udp --dport 135 -j DROP
+# sudo netfilter-persistent save
+
+# Vulnerability 11: Telnet Unencrypted Cleartext Login
+# Disable Telnet.
+# The following assumes systemd.
+
+# Stop and disable the telnet service
+sudo systemctl stop telnet.socket
+sudo systemctl disable telnet.socket
+sudo systemctl stop telnetd.socket
+sudo systemctl disable telnetd.socket
+
+# Vulnerability 12: SSL/TLS: Deprecated TLSv1.0 and TLSv1.1 Protocol Detection
+# Disable TLS 1.0 and 1.1
+# Note: The method to disable TLS 1.0 and 1.1 depends on the service using SSL/TLS.
+# The following is a general example for Apache.
+# Similar configurations may be required for other services like nginx or Postfix.
+
+# Apache: Edit the SSL configuration file (e.g., /etc/apache2/mods-available/ssl.conf)
+# Add or modify the SSLProtocol directive:
+# SSLProtocol All -SSLv3 -TLSv1 -TLSv1.1
+# Restart Apache: sudo systemctl restart apache2
+
+# Vulnerabilities 17-18, 20, 23-25: TCP Timestamps Information Disclosure
+# Disable TCP timestamps.
+sudo sysctl -w net.ipv4.tcp_timestamps=0
+echo "net.ipv4.tcp_timestamps = 0" | sudo tee -a /etc/sysctl.conf
+
+# Vulnerabilities 26-32: ICMP Timestamp Reply Information Disclosure
+# Disable ICMP timestamp replies.
+# This is often handled by a firewall. The following example uses iptables.
+
+# Block ICMP timestamp requests and replies
+# sudo iptables -A INPUT -p icmp --icmp-type timestamp-request -j DROP
+# sudo iptables -A OUTPUT -p icmp --icmp-type timestamp-reply -j DROP
+# sudo netfilter-persistent save
+```

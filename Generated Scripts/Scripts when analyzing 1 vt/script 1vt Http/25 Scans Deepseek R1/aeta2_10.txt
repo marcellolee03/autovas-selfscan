@@ -1,0 +1,69 @@
+```bash
+#!/bin/bash
+set -euo pipefail
+
+apache_redirect() {
+    if [ -d /etc/apache2/sites-enabled ]; then
+        CONF_FILE="/etc/apache2/conf-available/http_to_https.conf"
+        cat > "$CONF_FILE" << 'EOL'
+<IfModule mod_ssl.c>
+    <VirtualHost *:80>
+        ServerName _ 
+        Redirect permanent / https://%{HTTP_HOST}%{REQUEST_URI}
+    </VirtualHost>
+</IfModule>
+EOL
+        a2enconf http_to_https >/dev/null 
+        apache2ctl configtest && systemctl reload apache2
+    elif [ -d /etc/httpd/conf.d ]; then
+        CONF_FILE="/etc/httpd/conf.d/http_to_https.conf"
+        cat > "$CONF_FILE" << 'EOL'
+<IfModule mod_ssl.c>
+    <VirtualHost *:80>
+        ServerName _ 
+        Redirect permanent / https://%{HTTP_HOST}%{REQUEST_URI}
+    </VirtualHost>
+</IfModule>
+EOL
+        httpd -t && systemctl reload httpd
+    fi
+}
+
+nginx_redirect() {
+    local config_dirs=()
+    [ -d /etc/nginx/conf.d ] && config_dirs=("${config_dirs[@]}" "/etc/nginx/conf.d")
+    [ -d /etc/nginx/sites-enabled ] && config_dirs=("${config_dirs[@]}" "/etc/nginx/sites-enabled")
+    
+    if [ ${#config_dirs[@]} -eq 0 ]; then
+        config_dirs=("/etc/nginx")
+    fi
+
+    REDIRECT_SET=0
+    for dir in "${config_dirs[@]}"; do
+        FILE="$dir/global_redirect.conf"
+        cat > "$FILE" << 'EOL'
+server {
+    listen 80 default_server;
+    listen [::]:80 default_server;
+    server_name _;
+    return 301 https://$host$request_uri;
+}
+EOL
+        REDIRECT_SET=1
+        break
+    done
+
+    if [ "$REDIRECT_SET" -eq 1 ]; then
+        nginx -t && systemctl reload nginx
+    fi
+}
+
+if pgrep -x apache2 >/dev/null || pgrep -x httpd >/dev/null; then
+    apache_redirect
+elif pgrep -x nginx >/dev/null; then
+    nginx_redirect
+else
+    echo "No supported web server detected." >&2
+    exit 1
+fi
+```

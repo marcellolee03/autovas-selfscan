@@ -1,0 +1,70 @@
+#!/bin/bash
+
+# Verifica se o Apache está instalado
+if ! command -v apache2 &> /dev/null; then
+    echo "Apache não está instalado. Este script é destinado a sistemas com Apache instalado."
+    exit 1
+fi
+
+# Instala o módulo SSL do Apache, se não estiver instalado
+if ! apache2ctl -M | grep -q ssl; then
+    apt-get install -y apache2-ssl
+fi
+
+# Habilita o módulo SSL e reinicia o Apache
+a2enmod ssl
+systemctl restart apache2
+
+# Verifica se o site está configurado para usar SSL
+if [ ! -f /etc/apache2/sites-available/default-ssl.conf ]; then
+    echo "Configuração SSL padrão não encontrada. Criando configuração SSL padrão..."
+    mkdir -p /etc/apache2/ssl
+    openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout /etc/apache2/ssl/apache.key -out /etc/apache2/ssl/apache.crt -subj "/CN=localhost"
+    cp /etc/apache2/sites-available/default-ssl.conf /etc/apache2/sites-available/default-ssl.conf.bak
+    cat <<EOL > /etc/apache2/sites-available/default-ssl.conf
+<IfModule mod_ssl.c>
+    <VirtualHost _default_:443>
+        ServerAdmin webmaster@localhost
+        DocumentRoot /var/www/html
+        ErrorLog \${APACHE_LOG_DIR}/error.log
+        CustomLog \${APACHE_LOG_DIR}/access.log combined
+        SSLEngine on
+        SSLCertificateFile /etc/apache2/ssl/apache.crt
+        SSLCertificateKeyFile /etc/apache2/ssl/apache.key
+        <FilesMatch "\.(cgi|shtml|phtml|php)$">
+            SSLOptions +StdEnvVars
+        </FilesMatch>
+        <Directory /usr/lib/cgi-bin>
+            SSLOptions +StdEnvVars
+        </Directory>
+    </VirtualHost>
+</IfModule>
+EOL
+fi
+
+# Habilita o site SSL e reinicia o Apache
+a2ensite default-ssl
+systemctl restart apache2
+
+# Configura o redirecionamento de HTTP para HTTPS
+if [ ! -f /etc/apache2/sites-available/000-default.conf ]; then
+    echo "Configuração padrão HTTP não encontrada. Criando configuração HTTP padrão..."
+    cp /etc/apache2/sites-available/000-default.conf /etc/apache2/sites-available/000-default.conf.bak
+    cat <<EOL > /etc/apache2/sites-available/000-default.conf
+<VirtualHost *:80>
+    ServerAdmin webmaster@localhost
+    DocumentRoot /var/www/html
+    ErrorLog \${APACHE_LOG_DIR}/error.log
+    CustomLog \${APACHE_LOG_DIR}/access.log combined
+    RewriteEngine On
+    RewriteCond %{HTTPS} off
+    RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+</VirtualHost>
+EOL
+fi
+
+# Habilita o módulo de redirecionamento e reinicia o Apache
+a2enmod rewrite
+systemctl restart apache2
+
+echo "Configuração de SSL e redirecionamento para HTTPS concluída com sucesso."

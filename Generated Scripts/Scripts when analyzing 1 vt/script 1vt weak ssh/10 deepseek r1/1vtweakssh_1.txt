@@ -1,0 +1,26 @@
+#!/bin/bash
+
+BACKUP_TIME=$(date +"%Y%m%d_%H%M%S")
+cp /etc/ssh/sshd_config /etc/ssh/sshd_config.backup.$BACKUP_TIME || exit 1
+sed -i -E 's/^(\s*HostKey\s+\S*dsa\S*)/# \1/' /etc/ssh/sshd_config
+rm -f /etc/ssh/ssh_host_dsa_key /etc/ssh/ssh_host_dsa_key.pub
+
+if command -v systemctl >/dev/null 2>&1; then
+    systemctl reload sshd >/dev/null 2>&1 && exit 0
+    systemctl reload ssh >/dev/null 2>&1 && exit 0
+fi
+
+if command -v service >/dev/null 2>&1; then
+    service sshd reload >/dev/null 2>&1 && exit 0
+    service ssh reload >/dev/null 2>&1 && exit 0
+fi
+
+if [ -x /etc/init.d/ssh ]; then
+    /etc/init.d/ssh reload >/dev/null 2>&1 && exit 0
+fi
+
+if [ -x /etc/init.d/sshd ]; then
+    /etc/init.d/sshd reload >/dev/null 2>&1 && exit 0
+fi
+
+exit 1

@@ -1,0 +1,59 @@
+#!/bin/bash
+
+# Atualizar Proxmox VE para versão suportada
+if [ -f /etc/debian_version ] && grep -qi 'proxmox' /etc/issue; then
+  # Adicionar repositório do Proxmox VE 8.x
+  echo "deb http://download.proxmox.com/debian/pve bookworm pve-no-subscription" > /etc/apt/sources.list.d/pve-enterprise.list
+
+  # Atualizar e instalar pacotes mais recentes
+  apt-get update
+  DEBIAN_FRONTEND=noninteractive apt-get -o Dpkg::Options::="--force-confnew" dist-upgrade -y
+fi
+
+# Atualizar arquivos jQuery vulneráveis
+replace_jquery() {
+  local path="$1"
+  local jquery_new_url="https://code.jquery.com/jquery-3.6.0.min.js"
+  local temp_file="/tmp/jquery-3.6.0.min.js"
+
+  # Baixar nova versão do jQuery
+  wget --quiet -O "$temp_file" "$jquery_new_url"
+
+  # Procurar e substituir arquivos jQuery
+  find "$path" -type f -name 'jquery-1.8.3.min.js' -print0 | while IFS= read -r -d $'\0' file; do
+    if [ -f "$file" ]; then
+      cp "$temp_file" "$file"
+      echo "Atualizado: $file"
+    fi
+  done
+}
+
+# Locais comuns do servidor web/www
+replace_jquery "/var/www"
+replace_jquery "/usr/share/nginx"
+
+# Configurar SSH (remover algoritmos inseguros)
+sshd_config="/etc/ssh/sshd_config"
+cp "$sshd_config" "${sshd_config}.bak"
+
+sed -i '/^HostKeyAlgorithms/d' "$sshd_config"
+sed -i '/^KexAlgorithms/d' "$sshd_config"
+sed -i '/^Ciphers/d' "$sshd_config"
+sed -i '/^MACs/d' "$sshd_config"
+
+echo "HostKeyAlgorithms ecdsa-sha2-nistp256,ecdsa-sha2-nistp384,ecdsa-sha2-nistp521,ssh-ed25519,rsa-sha2-512,rsa-sha2-256" >> "$sshd_config"
+echo "KexAlgorithms curve25519-sha256,curve25519-sha256@libssh.org,diffie-hellman-group-exchange-sha256,diffie-hellman-group14-sha256,diffie-hellman-group16-sha512,diffie-hellman-group18-sha512" >> "$sshd_config"
+echo "Ciphers chacha20-poly1305@openssh.com,aes256-gcm@openssh.com,aes128-gcm@openssh.com,aes256-ctr,aes192-ctr,aes128-ctr" >> "$sshd_config"
+echo "MACs hmac-sha2-256-etm@openssh.com,hmac-sha2-512-etm@openssh.com,umac-128-etm@openssh.com" >> "$sshd_config"
+
+# Desativar Telnet
+systemctl disable --now telnet.socket 2>/dev/null
+systemctl disable --now telnet.service 2>/dev/null
+apt-get purge telnetd -y 2>/dev/null
+
+# Configurar TCP timestamps
+echo "net.ipv4.tcp_timestamps = 0" >> /etc/sysctl.conf
+sysctl -p
+
+# Reiniciar SSH para aplicar mudanças
+sshd -t && systemctl restart sshd

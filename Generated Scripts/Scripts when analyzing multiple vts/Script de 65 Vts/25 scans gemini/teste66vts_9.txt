@@ -1,0 +1,317 @@
+```bash
+#!/bin/bash
+
+# Variáveis para rastreamento
+atualizacoes_pendentes=0
+
+# Função para atualizar o Python no Windows usando o Chocolatey
+atualizar_python() {
+  versao_atual="$1"
+  versao_alvo="$2"
+  porta="$3"
+
+  echo "Verificando a instalação do Chocolatey..."
+  if ! choco --version > /dev/null 2>&1; then
+    echo "Chocolatey não está instalado. Instalando..."
+    Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; iex ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))
+    echo "Chocolatey instalado com sucesso."
+  fi
+
+  echo "Atualizando Python da versão $versao_atual para uma versão >= $versao_alvo na porta $porta..."
+  
+  # Determinar qual versão instalar
+  if [[ "$versao_alvo" == "3.10.13" ]]; then
+      choco upgrade python --version=3.10.13 -y
+  elif [[ "$versao_alvo" == "3.10.14" ]]; then
+      choco upgrade python --version=3.10.14 -y
+  elif [[ "$versao_alvo" == "3.10.15" ]]; then
+      choco upgrade python --version=3.10.15 -y
+  elif [[ "$versao_alvo" == "3.10.16" ]]; then
+      choco upgrade python --version=3.10.16 -y
+  elif [[ "$versao_alvo" == "3.11.5" ]]; then
+      choco upgrade python --version=3.11.5 -y
+  elif [[ "$versao_alvo" == "3.11.8" ]]; then
+      choco upgrade python --version=3.11.8 -y
+  elif [[ "$versao_alvo" == "3.11.9" ]]; then
+      choco upgrade python --version=3.11.9 -y
+  elif [[ "$versao_alvo" == "3.11.10" ]]; then
+      choco upgrade python --version=3.11.10 -y
+  elif [[ "$versao_alvo" == "3.12.1" ]]; then
+      choco upgrade python --version=3.12.1 -y
+  elif [[ "$versao_alvo" == "3.12.2" ]]; then
+      choco upgrade python --version=3.12.2 -y
+  elif [[ "$versao_alvo" == "3.12.3" ]]; then
+      choco upgrade python --version=3.12.3 -y
+  elif [[ "$versao_alvo" == "3.12.4" ]]; then
+      choco upgrade python --version=3.12.4 -y
+  elif [[ "$versao_alvo" == "3.12.5" ]]; then
+      choco upgrade python --version=3.12.5 -y
+  elif [[ "$versao_alvo" == "3.12.6" ]]; then
+      choco upgrade python --version=3.12.6 -y
+  elif [[ "$versao_alvo" == "3.12.8" ]]; then
+      choco upgrade python --version=3.12.8 -y
+  elif [[ "$versao_alvo" == "3.12.9" ]]; then
+      choco upgrade python --version=3.12.9 -y
+  elif [[ "$versao_alvo" == "3.13.1" ]]; then
+      choco upgrade python --version=3.13.1 -y    
+  else
+      echo "Versão alvo $versao_alvo não suportada.  Por favor, verifique o script."
+      return 1
+  fi  
+  if [ $? -eq 0 ]; then
+    echo "Python atualizado com sucesso na porta $porta."
+    atualizacoes_pendentes=$((atualizacoes_pendentes + 1))
+  else
+    echo "Falha ao atualizar Python na porta $porta."
+    return 1
+  fi
+}
+
+# Vulnerabilidade 1
+atualizar_python "3.10.12" "3.10.15" "5000"
+
+# Vulnerabilidade 2
+atualizar_python "3.12.0" "3.12.6" "8000"
+
+# Vulnerabilidade 3
+atualizar_python "3.12.0" "3.12.6" "8001"
+
+# Vulnerabilidade 4
+atualizar_python "3.12.0" "3.12.6" "8002"
+
+# Vulnerabilidade 5
+atualizar_python "3.12.0" "3.12.8" "8002"
+
+# Vulnerabilidade 6
+atualizar_python "3.12.0" "3.12.8" "8000"
+
+# Vulnerabilidade 7
+atualizar_python "3.12.0" "3.12.8" "8001"
+
+# Vulnerabilidade 8
+atualizar_python "3.10.12" "3.10.16" "5000"
+
+# Vulnerabilidade 10
+atualizar_python "3.10.12" "3.10.14" "5000"
+
+# Vulnerabilidade 11
+atualizar_python "3.12.0" "3.12.3" "8000"
+
+# Vulnerabilidade 12
+atualizar_python "3.12.0" "3.12.3" "8001"
+
+# Vulnerabilidade 13
+atualizar_python "3.12.0" "3.12.3" "8002"
+
+# Vulnerabilidade 16
+atualizar_python "3.12.0" "3.12.1" "8002"
+
+# Vulnerabilidade 17
+atualizar_python "3.12.0" "3.12.1" "8000"
+
+# Vulnerabilidade 18
+atualizar_python "3.10.12" "3.10.14" "5000"
+
+# Vulnerabilidade 19
+atualizar_python "3.12.0" "3.12.1" "8001"
+
+# Vulnerabilidade 21
+atualizar_python "3.10.12" "3.10.15" "5000"
+
+# Vulnerabilidade 22
+atualizar_python "3.10.12" "3.10.15" "5000"
+
+# Vulnerabilidade 23
+atualizar_python "3.12.0" "3.12.4" "8000"
+
+# Vulnerabilidade 24
+atualizar_python "3.12.0" "3.12.4" "8001"
+
+# Vulnerabilidade 26
+atualizar_python "3.12.0" "3.12.4" "8002"
+
+# Vulnerabilidade 29
+atualizar_python "3.12.0" "3.12.5" "8000"
+
+# Vulnerabilidade 30
+atualizar_python "3.12.0" "3.12.5" "8001"
+
+# Vulnerabilidade 31
+atualizar_python "3.12.0" "3.12.5" "8002"
+
+# Vulnerabilidade 32
+atualizar_python "3.10.12" "3.10.13" "5000"
+
+# Vulnerabilidade 37
+atualizar_python "3.10.12" "3.10.15" "5000"
+
+# Vulnerabilidade 38
+atualizar_python "3.12.0" "3.12.5" "8000"
+
+# Vulnerabilidade 39
+atualizar_python "3.12.0" "3.12.5" "8001"
+
+# Vulnerabilidade 40
+atualizar_python "3.10.12" "3.10.14" "5000"
+
+# Vulnerabilidade 41
+atualizar_python "3.12.0" "3.12.5" "8002"
+
+# Vulnerabilidade 42
+atualizar_python "3.12.0" "3.12.3" "8001"
+
+# Vulnerabilidade 43
+atualizar_python "3.12.0" "3.12.4" "8002"
+
+# Vulnerabilidade 44
+atualizar_python "3.12.0" "3.12.4" "8001"
+
+# Vulnerabilidade 45
+atualizar_python "3.12.0" "3.12.3" "8000"
+
+# Vulnerabilidade 46
+atualizar_python "3.10.12" "3.10.15" "5000"
+
+# Vulnerabilidade 47
+atualizar_python "3.12.0" "3.12.4" "8000"
+
+# Vulnerabilidade 48
+atualizar_python "3.12.0" "3.12.3" "8002"
+
+# Vulnerabilidade 50
+atualizar_python "3.10.12" "3.10.14" "5000"
+
+# Vulnerabilidade 51
+atualizar_python "3.12.0" "3.12.2" "8000"
+
+# Vulnerabilidade 52
+atualizar_python "3.12.0" "3.12.2" "8001"
+
+# Vulnerabilidade 53
+atualizar_python "3.12.0" "3.12.2" "8002"
+
+# Vulnerabilidade 55
+atualizar_python "3.12.0" "3.12.9" "8000"
+
+# Vulnerabilidade 56
+atualizar_python "3.10.12" "3.12.9" "5000"
+
+# Vulnerabilidade 57
+atualizar_python "3.10.12" "3.10.16" "5000"
+
+# Vulnerabilidade 58
+atualizar_python "3.12.0" "3.12.9" "8001"
+
+# Vulnerabilidade 60
+atualizar_python "3.12.0" "3.12.9" "8002"
+
+# Vulnerabilidade 61
+atualizar_python "3.12.0" "3.12.4" "8001"
+
+# Vulnerabilidade 63
+atualizar_python "3.12.0" "3.12.4" "8000"
+
+# Vulnerabilidade 64
+atualizar_python "3.10.12" "3.11.10" "5000"
+
+# Vulnerabilidade 65
+atualizar_python "3.12.0" "3.12.4" "8002"
+
+# Vulnerabilidade 49 -  Substituir certificado SSL/TLS autoassinado
+gerar_novo_certificado() {
+  echo "Gerando um novo certificado autoassinado..."
+  
+  # Gere uma nova chave privada RSA
+  openssl genrsa -out localhost.key 2048
+
+  # Gere um certificado autoassinado usando a chave privada
+  openssl req -new -x509 -key localhost.key -out localhost.crt \
+    -subj "/CN=localhost/O=Luminator/L=Caxias do Sul/ST=RS/C=BR" \
+    -days 3650
+
+    echo "Novo certificado gerado (localhost.key e localhost.crt)."
+}
+
+#Chamar a função para gerar um novo certificado
+gerar_novo_certificado
+
+# Vulnerabilidade 54
+desabilitar_tls1_0_e_1_1() {
+    echo "Desabilitando TLS 1.0 e 1.1 no registro do Windows..."
+    #Desabilitar TLS 1.0
+    reg add "HKLM\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Protocols\TLS 1.0\Server" /v Enabled /t REG_DWORD /d 0 /f
+    reg add "HKLM\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Protocols\TLS 1.0\Client" /v Enabled /t REG_DWORD /d 0 /f
+
+    #Desabilitar TLS 1.1
+    reg add "HKLM\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Protocols\TLS 1.1\Server" /v Enabled /t REG_DWORD /d 0 /f
+    reg add "HKLM\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Protocols\TLS 1.1\Client" /v Enabled /t REG_DWORD /d 0 /f
+
+    echo "TLS 1.0 e 1.1 desabilitados. Reinicie o sistema para aplicar as alterações."
+}
+
+#Chamar a função para desabilitar TLS 1.0 e 1.1
+desabilitar_tls1_0_e_1_1
+
+# Vulnerabilidade 59
+remover_algoritmos_mac_fracos() {
+    echo "Removendo algoritmos MAC fracos da configuração do SSH..."
+    
+    # Localize o arquivo de configuração do SSH (geralmente sshd_config)
+    SSH_CONFIG_FILE="/etc/ssh/sshd_config"
+
+    # Verifique se o arquivo existe
+    if [ -f "$SSH_CONFIG_FILE" ]; then
+      # Crie um backup do arquivo de configuração
+      cp "$SSH_CONFIG_FILE" "$SSH_CONFIG_FILE.bak"
+      echo "Backup da configuração SSH criado: $SSH_CONFIG_FILE.bak"
+
+      # Remova as MACs fracas usando sed
+      sed -i '/^MACs/s/umac-64-etm@openssh.com,//g' "$SSH_CONFIG_FILE"
+      sed -i '/^MACs/s/umac-64@openssh.com,//g' "$SSH_CONFIG_FILE"
+
+      # Garanta que a linha MACs exista e não esteja vazia
+      if grep -q "^MACs" "$SSH_CONFIG_FILE"; then
+        # Remova a linha inteira se não houver MACs restantes
+        MAC_LINE=$(grep "^MACs" "$SSH_CONFIG_FILE")
+        MAC_VALUES=$(echo "$MAC_LINE" | awk '{print $2}')
+
+        if [ -z "$MAC_VALUES" ]; then
+          sed -i '/^MACs/d' "$SSH_CONFIG_FILE"
+          echo "Removida a linha MACs pois não contém valores."
+        fi
+      else
+        echo "Linha MACs não encontrada no arquivo de configuração SSH."
+      fi
+
+      echo "Algoritmos MAC fracos removidos da configuração SSH."
+      
+      # Reinicie o serviço SSH para aplicar as alterações
+      if systemctl is-active --quiet sshd.service; then
+        systemctl restart sshd.service
+        echo "Serviço SSH reiniciado."
+      else
+        echo "Serviço SSH não está ativo ou systemctl não está disponível. Reinicie o serviço manualmente."
+      fi
+    else
+      echo "Arquivo de configuração SSH não encontrado: $SSH_CONFIG_FILE"
+    fi
+}
+
+#Chamar a função para remover algoritmos MAC fracos
+remover_algoritmos_mac_fracos
+
+# Vulnerabilidade 62
+desabilitar_icmp() {
+    echo "Desabilitando respostas ICMP Timestamp..."
+    # Desabilitar ICMP Timestamp Reply no Windows
+    netsh advfirewall firewall add rule name="Bloquear ICMP Timestamp Request" protocol=icmpv4:13,0 dir=in action=block
+    echo "Respostas ICMP Timestamp desabilitadas (regra de firewall adicionada)."
+}
+
+desabilitar_icmp
+
+# Informa ao usuário sobre a necessidade de reiniciar, se houver atualizações pendentes
+if [ "$atualizacoes_pendentes" -gt 0 ]; then
+  echo "Atualizações do Python foram instaladas. Recomenda-se reiniciar o sistema para que as alterações tenham efeito."
+fi
+```

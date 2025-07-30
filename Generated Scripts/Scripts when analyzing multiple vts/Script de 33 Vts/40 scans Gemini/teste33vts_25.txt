@@ -1,0 +1,96 @@
+```bash
+#!/bin/bash
+
+# Vulnerability 1: Proxmox VE EOL
+# This vulnerability requires a system upgrade, which is beyond the scope of a simple script.
+# It is recommended to follow the official Proxmox upgrade guide:
+# https://pve.proxmox.com/wiki/Upgrade_from_7.x_to_8.0
+
+# Vulnerabilities 2-6: jQuery < 1.9.0 XSS
+# Define the target IP address
+TARGET_IP="10.129.4.254"
+
+# Define the list of vulnerable jQuery file paths
+jquery_files=(
+  "/../js/jquery-1.8.3.min.js"
+  "/opscenter/webcommon/framework/../js/jquery-1.8.3.min.js"
+  "/framesets/../js/jquery-1.8.3.min.js"
+  "/frameset/../js/jquery-1.8.3.min.js"
+  "/console/framework/../js/jquery-1.8.3.min.js"
+)
+
+# Define the URL to download jQuery 1.9.0
+jquery_1_9_0_url="https://code.jquery.com/jquery-1.9.0.min.js"
+
+# Loop through each vulnerable file and replace it with jQuery 1.9.0
+for file_path in "${jquery_files[@]}"; do
+  # Construct the full URL to the vulnerable file
+  full_url="http://${TARGET_IP}${file_path}"
+
+  # Extract the directory path from the full URL
+  dir_path=$(dirname "${file_path}")
+
+  # Create the directory if it doesn't exist
+  if ! wget -q --spider "http://${TARGET_IP}${dir_path}"; then
+    echo "Directory ${dir_path} does not exist on ${TARGET_IP}. Skipping..."
+    continue
+  fi
+
+  # Download jQuery 1.9.0 to a temporary file
+  temp_file=$(mktemp)
+  wget -q "${jquery_1_9_0_url}" -O "${temp_file}"
+
+  # Check if the download was successful
+  if [ ! -s "${temp_file}" ]; then
+    echo "Failed to download jQuery 1.9.0. Skipping ${full_url}..."
+    rm -f "${temp_file}"
+    continue
+  fi
+
+  # Replace the vulnerable file with the downloaded jQuery 1.9.0
+  echo "Replacing ${full_url} with jQuery 1.9.0..."
+  curl -s "${jquery_1_9_0_url}" > "/var/www/html${file_path}"
+
+  # Clean up the temporary file
+  rm -f "${temp_file}"
+done
+
+# Vulnerabilities 7-9, 13-16, 19, 21-22: Weak SSH Algorithms
+# Back up the SSH configuration file
+sudo cp /etc/ssh/sshd_config /etc/ssh/sshd_config.bak
+
+# Disable weak KEX, MAC, and Ciphers
+sudo sed -i 's/^#KexAlgorithms.*/KexAlgorithms curve25519-sha256@libssh.org,ecdh-sha2-nistp256,ecdh-sha2-nistp384,ecdh-sha2-nistp521,diffie-hellman-group-exchange-sha256/g' /etc/ssh/sshd_config
+sudo sed -i 's/^#Ciphers.*/Ciphers chacha20-poly1305@openssh.com,aes256-gcm@openssh.com,aes128-gcm@openssh.com,aes256-ctr,aes128-ctr/g' /etc/ssh/sshd_config
+sudo sed -i 's/^#MACs.*/MACs hmac-sha2-512-etm@openssh.com,hmac-sha2-256-etm@openssh.com,umac-128-etm@openssh.com,hmac-sha2-512,hmac-sha2-256,umac-128@openssh.com/g' /etc/ssh/sshd_config
+sudo sed -i '/^HostKeyAlgorithms/s/ssh-dss,//g' /etc/ssh/sshd_config
+
+# Restart SSH service
+sudo systemctl restart sshd
+
+# Vulnerability 10: DCE/RPC and MSRPC Services Enumeration Reporting
+# Solution: Implement firewall rules to filter incoming traffic to port 135 and dynamic RPC ports.
+# This script provides a basic example using iptables.  Adjust to your specific firewall.
+#iptables -A INPUT -p tcp --dport 135 -j DROP
+
+# Vulnerability 11: Telnet Unencrypted Cleartext Login
+# Disable Telnet service
+sudo systemctl stop telnet.socket
+sudo systemctl disable telnet.socket
+
+# Vulnerability 12: SSL/TLS: Deprecated TLSv1.0 and TLSv1.1 Protocol Detection
+# Disable TLS 1.0 and 1.1. This example assumes the service is RDP.
+# Modify the registry to disable TLS 1.0 and 1.1
+# Requires appropriate permissions and should be tested thoroughly.
+# This needs to be adapted based on the service using TLSv1.0 and TLSv1.1
+
+# Vulnerabilities 17-18, 20, 23-25: TCP Timestamps Information Disclosure
+# Disable TCP timestamps
+sudo echo "net.ipv4.tcp_timestamps = 0" >> /etc/sysctl.conf
+sudo sysctl -p
+
+# Vulnerabilities 26-32: ICMP Timestamp Reply Information Disclosure
+# Disable ICMP Timestamp Replies
+sudo sysctl -w net.ipv4.icmp_echo_ignore_all=1
+sudo echo "net.ipv4.icmp_echo_ignore_all=1" >> /etc/sysctl.conf
+```

@@ -1,0 +1,59 @@
+```bash
+#!/bin/bash
+
+# Verifica se o sistema é Debian/Ubuntu (ou similar) baseado em APT
+if command -v apt-get &> /dev/null; then
+  # Atualiza o índice de pacotes
+  apt-get update
+
+  # Tenta atualizar o PHP para a versão mais recente disponível
+  apt-get install --only-upgrade php5 php5-cgi php5-cli
+
+  # Verifica se o PHP 5.4 está instalado e, se sim, tenta atualizá-lo
+  if dpkg -s php5 | grep -q "Version: 5\.4"; then
+    apt-get install --only-upgrade php5 php5-cgi php5-cli
+  fi
+  if dpkg -s php5-common | grep -q "Version: 5\.4"; then
+      apt-get install --only-upgrade php5-common
+  fi
+
+  # Reinicia o servidor web Apache (se estiver instalado)
+  if command -v apache2 &> /dev/null; then
+    service apache2 restart
+  elif command -v httpd &> /dev/null; then
+    service httpd restart
+  fi
+
+  # Reinicia o serviço PHP-FPM (se estiver instalado)
+  if command -v php-fpm &> /dev/null; then
+    service php-fpm restart
+  elif command -v php5-fpm &> /dev/null; then
+      service php5-fpm restart
+  fi
+
+  echo "Atualização do PHP concluída. Reiniciei o Apache e/ou PHP-FPM se instalados."
+
+# Verifica se o sistema é baseado em CentOS/RHEL (ou similar) baseado em YUM
+elif command -v yum &> /dev/null; then
+  # Atualiza o sistema
+  yum update php
+
+  # Reinicia o servidor web Apache (se estiver instalado)
+  if command -v httpd &> /dev/null; then
+    service httpd restart
+  fi
+
+  # Reinicia o serviço PHP-FPM (se estiver instalado)
+  if command -v php-fpm &> /dev/null; then
+    service php-fpm restart
+  fi
+
+  echo "Atualização do PHP concluída. Reiniciei o Apache e/ou PHP-FPM se instalados."
+
+else
+  echo "Sistema operacional não detectado ou gerenciador de pacotes desconhecido.  Atualize o PHP manualmente."
+  exit 1
+fi
+
+exit 0
+```

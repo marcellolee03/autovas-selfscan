@@ -1,0 +1,83 @@
+```bash
+#!/bin/bash
+
+# Verifica se o sistema é baseado em Debian/Ubuntu (usa apt)
+if command -v apt-get &> /dev/null; then
+  # Atualiza o índice de pacotes
+  apt-get update
+
+  # Tenta atualizar o PHP para a versão mais recente disponível
+  apt-get install --only-upgrade php5 php5-cgi php5-cli
+
+  # Verifica se o PHP foi atualizado para uma versão >= 5.3.13 ou 5.4.3 (aproximação)
+  php_version=$(php -v | head -n 1 | awk '{print $2}')
+
+  if [[ $(printf '%s\n' "$php_version" "5.3.13" | sort -V | head -n 1) == "5.3.13" ]] || [[ $(printf '%s\n' "$php_version" "5.4.3" | sort -V | head -n 1) == "5.4.3" ]]; then
+    echo "PHP atualizado para uma versão >= 5.3.13 ou >= 5.4.3. Reiniciando o servidor web."
+    # Reinicia o servidor web Apache (se instalado)
+    if command -v apache2ctl &> /dev/null; then
+      apache2ctl restart
+    elif command -v service &> /dev/null; then
+      service apache2 restart
+    elif command -v systemctl &> /dev/null; then
+      systemctl restart apache2
+    else
+      echo "Servidor web Apache não encontrado ou não pôde ser reiniciado."
+    fi
+
+    # Reinicia o servidor web Nginx (se instalado)
+    if command -v service &> /dev/null; then
+        service nginx restart
+    elif command -v systemctl &> /dev/null; then
+        systemctl restart nginx
+    else
+        echo "Servidor web Nginx não encontrado ou não pôde ser reiniciado."
+    fi
+
+  else
+    echo "A atualização do PHP pode não ter sido bem-sucedida. Verifique a versão do PHP após a execução deste script."
+  fi
+
+# Verifica se o sistema é baseado em RedHat/CentOS (usa yum)
+elif command -v yum &> /dev/null; then
+  # Atualiza o índice de pacotes
+  yum update
+
+  # Tenta atualizar o PHP para a versão mais recente disponível
+  yum update php
+
+  # Verifica se o PHP foi atualizado para uma versão >= 5.3.13 ou 5.4.3 (aproximação)
+  php_version=$(php -v | head -n 1 | awk '{print $2}')
+
+  if [[ $(printf '%s\n' "$php_version" "5.3.13" | sort -V | head -n 1) == "5.3.13" ]] || [[ $(printf '%s\n' "$php_version" "5.4.3" | sort -V | head -n 1) == "5.4.3" ]]; then
+    echo "PHP atualizado para uma versão >= 5.3.13 ou >= 5.4.3. Reiniciando o servidor web."
+    # Reinicia o servidor web Apache (se instalado)
+    if command -v apachectl &> /dev/null; then
+      apachectl restart
+    elif command -v service &> /dev/null; then
+      service httpd restart
+    elif command -v systemctl &> /dev/null; then
+        systemctl restart httpd
+    else
+      echo "Servidor web Apache não encontrado ou não pôde ser reiniciado."
+    fi
+
+    # Reinicia o servidor web Nginx (se instalado)
+    if command -v service &> /dev/null; then
+        service nginx restart
+    elif command -v systemctl &> /dev/null; then
+        systemctl restart nginx
+    else
+        echo "Servidor web Nginx não encontrado ou não pôde ser reiniciado."
+    fi
+
+  else
+    echo "A atualização do PHP pode não ter sido bem-sucedida. Verifique a versão do PHP após a execução deste script."
+  fi
+
+else
+  echo "Sistema operacional não suportado para atualização automática.  Atualize o PHP manualmente para a versão 5.3.13, 5.4.3 ou superior."
+fi
+
+exit 0
+```

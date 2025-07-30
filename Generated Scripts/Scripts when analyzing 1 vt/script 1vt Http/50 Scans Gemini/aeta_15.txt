@@ -1,0 +1,61 @@
+#!/bin/bash
+
+# Script para mitigar a vulnerabilidade de transmissão de informações sensíveis em texto claro via HTTP.
+# Este script configura o redirecionamento de HTTP para HTTPS e desabilita o HTTP.
+
+# Variáveis
+HTTP_PORT=80
+HTTPS_PORT=443
+APACHE_CONFIG_FILE="/etc/apache2/sites-available/000-default.conf" # Caminho padrão para a configuração do Apache
+APACHE_DEFAULT_SSL_CONFIG="/etc/apache2/sites-available/default-ssl.conf"
+# Verifica se o Apache está instalado
+if ! command -v apache2ctl &> /dev/null; then
+  echo "Apache não está instalado. Por favor, instale o Apache para executar este script."
+  exit 1
+fi
+
+# 1. Habilita o módulo rewrite do Apache
+sudo a2enmod rewrite
+
+# 2. Cria um arquivo de configuração virtual host para redirecionar HTTP para HTTPS
+REDIRECT_CONFIG="/etc/apache2/sites-available/redirect.conf"
+
+cat > "$REDIRECT_CONFIG" <<EOL
+<VirtualHost *:80>
+    ServerName \$(hostname)
+    Redirect permanent / https://\${SERVER_NAME}\${REQUEST_URI}
+</VirtualHost>
+EOL
+
+# 3. Habilita o site de redirecionamento
+sudo a2ensite redirect.conf
+
+# 4. Configura o Virtual Host SSL para apontar para o diretório correto.
+# Adaptação para sistemas que podem usar /var/www/html ou um diretório diferente.
+if [ -f "$APACHE_DEFAULT_SSL_CONFIG" ]; then
+  # Detecta o DocumentRoot atual da configuração padrão.
+  DOCUMENT_ROOT=$(grep "^DocumentRoot" "$APACHE_CONFIG_FILE" | awk '{print $2}')
+
+  # Se DocumentRoot não estiver definido, usa o padrão /var/www/html
+  if [ -z "$DOCUMENT_ROOT" ]; then
+    DOCUMENT_ROOT="/var/www/html"
+  fi
+  
+  # Modifica o arquivo default-ssl.conf para usar o DocumentRoot correto.
+  sudo sed -i "s|DocumentRoot /var/www/html|DocumentRoot $DOCUMENT_ROOT|g" "$APACHE_DEFAULT_SSL_CONFIG"
+fi
+# 5. Força HTTPS usando .htaccess (se aplicável e se o DocumentRoot existir)
+if [ -d "$DOCUMENT_ROOT" ]; then
+  cat > "$DOCUMENT_ROOT/.htaccess" <<EOL
+RewriteEngine On
+RewriteCond %{HTTPS} off
+RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+EOL
+fi
+
+# 6. Reinicia o Apache para aplicar as mudanças
+sudo systemctl restart apache2
+
+echo "Redirecionamento de HTTP para HTTPS configurado.  Verifique a configuração do seu certificado SSL/TLS."
+echo "Certifique-se de que o HTTPS esteja corretamente configurado e acessível."
+exit 0

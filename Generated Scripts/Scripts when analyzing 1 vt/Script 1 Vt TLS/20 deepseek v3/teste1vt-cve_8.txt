@@ -1,0 +1,20 @@
+#!/bin/bash
+BACKUP_FILE="/etc/ssl/openssl.cnf.backup"
+openssl_conf="/etc/ssl/openssl.cnf"
+
+# Backup the original configuration file
+cp "$openssl_conf" "$BACKUP_FILE"
+
+# Update the configuration to disable TLSv1.0 and TLSv1.1
+sed -i '/^MinProtocol =/d' "$openssl_conf"
+sed -i '/^CipherString =/d' "$openssl_conf"
+
+echo -e "\n# Disable TLSv1.0 and TLSv1.1\nMinProtocol = TLSv1.2\nCipherString = DEFAULT@SECLEVEL=2" >> "$openssl_conf"
+
+# Restart services that use SSL/TLS
+services=$(systemctl list-units --type=service --state=running | grep -E '(nginx|apache2|httpd|postgresql)' | awk '{print $1}')
+for service in $services; do
+  systemctl restart "$service"
+done
+
+echo "TLSv1.0 and TLSv1.1 have been disabled, and affected services have been restarted."

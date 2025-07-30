@@ -1,0 +1,41 @@
+#!/bin/bash
+
+# Script para mitigar a vulnerabilidade CVE-2012-0053 no Apache HTTP Server.
+# Atualiza o Apache HTTP Server para uma versão >= 2.2.22.
+
+# 1. Detecta o sistema operacional.
+if command -v apt-get &> /dev/null; then
+  OS="debian"
+elif command -v yum &> /dev/null; then
+  OS="redhat"
+else
+  echo "Sistema operacional não suportado. Abortando."
+  exit 1
+fi
+
+# 2. Atualiza o gerenciador de pacotes e o Apache.
+echo "Atualizando o sistema e o Apache HTTP Server..."
+
+if [[ "$OS" == "debian" ]]; then
+  apt-get update
+  apt-get -y upgrade apache2
+elif [[ "$OS" == "redhat" ]]; then
+  yum update -y httpd
+fi
+
+# 3. Verifica a versão do Apache após a atualização.
+APACHE_VERSION=$(apachectl -v 2>&1 | grep "Server version:" | awk '{print $3}')
+
+echo "Versão do Apache após a atualização: $APACHE_VERSION"
+
+# 4. Reinicia o Apache para aplicar as atualizações.
+echo "Reiniciando o Apache HTTP Server..."
+if [[ "$OS" == "debian" ]]; then
+  systemctl restart apache2
+elif [[ "$OS" == "redhat" ]]; then
+  systemctl restart httpd
+fi
+
+echo "Atualização e reinicialização do Apache HTTP Server concluídas."
+
+exit 0

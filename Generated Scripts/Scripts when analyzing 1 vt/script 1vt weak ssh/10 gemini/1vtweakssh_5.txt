@@ -1,0 +1,29 @@
+```sh
+#!/bin/bash
+
+# Remova o algoritmo ssh-dss do arquivo de configuração do SSH.
+# Este script assume que o arquivo de configuração principal do SSH é /etc/ssh/sshd_config.
+# Adapte o caminho se a sua configuração estiver em um local diferente.
+
+SSH_CONFIG="/etc/ssh/sshd_config"
+
+# Cria um backup do arquivo de configuração.
+sudo cp "$SSH_CONFIG" "$SSH_CONFIG.bak"
+
+# Remove a linha "HostKeyAlgorithms" se ela existir e contiver "ssh-dss".
+sudo sed -i '/HostKeyAlgorithms.*ssh-dss/d' "$SSH_CONFIG"
+
+# Adiciona a linha "HostKeyAlgorithms" com algoritmos seguros, caso não exista ou precise ser atualizada.
+# Se a linha já existir e não contiver "ssh-dss", ela será mantida.
+if ! grep -q "^HostKeyAlgorithms" "$SSH_CONFIG"; then
+  echo "Adicionando HostKeyAlgorithms..."
+  sudo echo "HostKeyAlgorithms ecdsa-sha2-nistp256-cert-v01@openssh.com,ecdsa-sha2-nistp384-cert-v01@openssh.com,ecdsa-sha2-nistp521-cert-v01@openssh.com,ssh-rsa-cert-v01@openssh.com,ssh-ed25519-cert-v01@openssh.com,rsa-sha2-512,rsa-sha2-256,ecdsa-sha2-nistp256,ecdsa-sha2-nistp384,ecdsa-sha2-nistp521,ssh-rsa,ssh-ed25519" | sudo tee -a "$SSH_CONFIG"
+else
+  echo "Linha HostKeyAlgorithms já existe. Verifique se 'ssh-dss' foi removido manualmente se necessário."
+fi
+
+# Reinicia o serviço SSH para aplicar as alterações.
+sudo systemctl restart sshd
+
+echo "Vulnerabilidade corrigida. O serviço SSH foi reiniciado."
+```

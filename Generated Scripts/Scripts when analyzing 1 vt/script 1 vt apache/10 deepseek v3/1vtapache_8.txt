@@ -1,0 +1,11 @@
+#!/bin/bash
+apt-get update
+apt-get install -y apache2
+current_version=$(apache2 -v | grep 'Server version' | awk '{print $3}' | cut -d'/' -f2)
+required_version="2.2.22"
+if [[ $(echo -e "$current_version\n$required_version" | sort -V | head -n1) == $required_version ]]; then
+    echo "Apache HTTP Server is already up to date."
+else
+    apt-get install -y apache2=2.2.22*
+    systemctl restart apache2
+fi

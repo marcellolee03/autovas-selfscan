@@ -1,0 +1,73 @@
+#!/bin/bash
+
+# Configurar Apache (se instalado)
+if command -v apache2 &> /dev/null; then
+    apache_conf="/etc/apache2/apache2.conf"
+    sites_available="/etc/apache2/sites-available"
+    
+    # Vulnerabilidade 1: HTTP -> HTTPS
+    sed -i 's/^\([^#]\)/\0# CVE Mitigation: /' "${sites_available}"/*.conf
+    for conf in ${sites_available}/*.conf; do
+        grep -q "RewriteEngine" "$conf" || \
+        echo -e "<VirtualHost *:80>\n\tRewriteEngine On\n\tRewriteCond %{HTTPS} off\n\tRewriteRule (.*) https://%{HTTP_HOST}%{REQUEST_URI}\n</VirtualHost>" >> "$conf"
+    done
+    
+    # Vulnerabilidades 4,5,6: TLS e cifras
+    tls_conf="/etc/apache2/mods-available/ssl.conf"
+    [ -f "$tls_conf" ] && {
+        sed -i 's/SSLProtocol.*/SSLProtocol -all +TLSv1.2 +TLSv1.3/' "$tls_conf"
+        sed -i 's/SSLInsecureRenegotiation.*/SSLInsecureRenegotiation off/' "$tls_conf"
+        sed -i 's/SSLCipherSuite.*/SSLCipherSuite HIGH:!aNULL:!MD5:!RC4:!DES:!3DES/' "$tls_conf"
+    }
+    systemctl restart apache2
+fi
+
+# Configurar Nginx (se instalado)
+if command -v nginx &> /dev/null; then
+    nginx_conf="/etc/nginx/nginx.conf"
+    
+    # Vulnerabilidade 1: HTTP -> HTTPS
+    for conf in /etc/nginx/sites-enabled/*; do
+        if grep -q "listen 80" "$conf"; then
+            sed -i '/listen 80;/a \ \ \ \ return 301 https://$host$request_uri;' "$conf"
+        fi
+    done
+    
+    # Vulnerabilidades 4,5,6: TLS e cifras
+    if [ -f "$nginx_conf" ]; then
+        sed -i 's/ssl_protocols.*/ssl_protocols TLSv1.2 TLSv1.3;/' "$nginx_conf"
+        sed -i 's/ssl_ciphers.*/ssl_ciphers HIGH:!aNULL:!MD5:!RC4:!DES:!3DES;/' "$nginx_conf"
+        sed -i 's/ssl_prefer_server_ciphers.*/ssl_prefer_server_ciphers on;/' "$nginx_conf"
+    fi
+    systemctl restart nginx
+fi
+
+# Vulnerabilidade 2: Configurar BIND (DNS)
+if command -v named &> /dev/null; then
+    bind_conf="/etc/bind/named.conf.options"
+    [ -f "$bind_conf" ] && {
+        sed -i '/options {/a \\tallow-recursion { none; };' "$bind_conf"
+        sed -i '/options {/a \\trecursion no;' "$bind_conf"
+        systemctl restart bind9
+    }
+fi
+
+# Vulnerabilidade 3: Bloquear ICMP timestamp
+iptables -A INPUT -p icmp --icmp-type timestamp-request -j DROP
+iptables -A OUTPUT -p icmp --icmp-type timestamp-reply -j DROP
+ip6tables -A INPUT -p icmpv6 --icmpv6-type time-exceeded -j DROP
+ip6tables -A OUTPUT -p icmpv6 --icmpv6-type time-exceeded -j DROP
+echo "net.ipv4.icmp_echo_ignore_all=1" >> /etc/sysctl.d/99-sysctl.conf
+sysctl -p /etc/sysctl.d/99-sysctl.conf >/dev/null
+
+# Vulnerabilidade 7: Desativar TCP timestamps
+echo "net.ipv4.tcp_timestamps=0" >> /etc/sysctl.d/99-sysctl.conf
+sysctl -p /etc/sysctl.d/99-sysctl.conf >/dev/null
+
+# Backup e persistência de iptables
+if command -v iptables-save &> /dev/null; then
+    iptables-save > /etc/iptables.rules
+    ip6tables-save > /etc/ip6tables.rules
+    echo -e "#!/bin/sh\n/sbin/iptables-restore < /etc/iptables.rules\n/sbin/ip6tables-restore < /etc/ip6tables.rules" > /etc/network/if-pre-up.d/iptables
+    chmod +x /etc/network/if-pre-up.d/iptables
+fi

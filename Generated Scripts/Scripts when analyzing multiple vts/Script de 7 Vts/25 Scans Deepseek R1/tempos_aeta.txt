@@ -1,0 +1,27 @@
+Request 1: 38.9746 segundos
+Request 2: 53.4015 segundos
+Request 3: 24.8797 segundos
+Request 4: 63.7964 segundos
+Request 5: 75.6665 segundos
+Request 6: 42.4458 segundos
+Request 7: 37.5237 segundos
+Request 8: 136.9731 segundos
+Request 9: 78.3829 segundos
+Request 10: 186.0549 segundos
+Request 11: 35.6852 segundos
+Request 12: 53.6910 segundos
+Request 13: 211.1768 segundos
+Request 14: 161.2689 segundos
+Request 15: 111.4441 segundos
+Request 16: 69.4341 segundos
+Request 17: 163.5328 segundos
+Request 18: 790.2742 segundos
+Request 19: 80.1768 segundos
+Request 20: 32.3121 segundos
+Request 21: 34.2785 segundos
+Request 22: 112.8682 segundos
+Script 23 salvo em: generatedscripts/aeta_23.txt (Tempo: 50.90 segundos)
+Script 24 salvo em: generatedscripts/aeta_24.txt (Tempo: 150.70 segundos)
+Script 25 salvo em: generatedscripts/aeta_25.txt (Tempo: 131.78 segundos)
+
+media = 2959.5499 ÷ 25 = 118.38 segundos

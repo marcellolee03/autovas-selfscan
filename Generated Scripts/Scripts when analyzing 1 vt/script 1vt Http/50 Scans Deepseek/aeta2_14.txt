@@ -1,0 +1,40 @@
+#!/bin/bash
+# Ensure Apache is installed
+if ! command -v apache2 &> /dev/null; then
+    sudo apt-get update
+    sudo apt-get install -y apache2
+fi
+
+# Enable SSL module if not already enabled
+sudo a2enmod ssl
+
+# Ensure default-ssl site is enabled
+sudo a2ensite default-ssl
+
+# Redirect HTTP to HTTPS
+if ! grep -q "Redirect permanent / https://" /etc/apache2/sites-available/000-default.conf; then
+    sudo sed -i '/<\/VirtualHost>/i Redirect permanent / https://localhost/' /etc/apache2/sites-available/000-default.conf
+fi
+
+# Restart Apache to apply changes
+sudo systemctl restart apache2
+
+# Ensure UFW firewall is installed and enabled
+if ! command -v ufw &> /dev/null; then
+    sudo apt-get update
+    sudo apt-get install -y ufw
+fi
+
+# Allow HTTPS through the firewall
+sudo ufw allow 'Apache Full'
+
+# Enable UFW if not already enabled
+sudo ufw --force enable
+
+# Ensure HTTPS is enforced
+if ! grep -q "Redirect permanent / https://" /etc/apache2/sites-available/default-ssl.conf; then
+    sudo sed -i '/<\/VirtualHost>/i Redirect permanent / https://localhost/' /etc/apache2/sites-available/default-ssl.conf
+fi
+
+# Restart Apache to apply changes
+sudo systemctl restart apache2

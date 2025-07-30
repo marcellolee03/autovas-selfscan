@@ -1,0 +1,30 @@
+#!/bin/bash
+# Fix vulnerability 1: Enforce SSL/TLS for sensitive data transmission
+sed -i 's/^#ServerName www.example.com:80/ServerName www.example.com:443/' /etc/apache2/sites-available/000-default.conf
+sed -i 's/^<VirtualHost \*:80>/<VirtualHost *:443>/' /etc/apache2/sites-available/000-default.conf
+a2enmod ssl
+systemctl restart apache2
+
+# Fix vulnerability 2: Disable DNS recursion
+sed -i 's/recursion yes;/recursion no;/' /etc/bind/named.conf.options
+systemctl restart bind9
+
+# Fix vulnerability 3: Disable ICMP timestamp replies
+echo "net.ipv4.icmp_echo_ignore_all=1" | tee -a /etc/sysctl.conf
+sysctl -p
+
+# Fix vulnerability 4: Disable deprecated TLS protocols
+sed -i 's/^SSLProtocol all -SSLv3/SSLProtocol -all +TLSv1.2 +TLSv1.3/' /etc/apache2/mods-enabled/ssl.conf
+systemctl restart apache2
+
+# Fix vulnerability 5: Disable SSL/TLS renegotiation
+echo "SSLInsecureRenegotiation off" | tee -a /etc/apache2/mods-enabled/ssl.conf
+systemctl restart apache2
+
+# Fix vulnerability 6: Disable weak SSL/TLS cipher suites
+sed -i 's/^SSLCipherSuite HIGH:!aNULL/SSLCipherSuite HIGH:!aNULL:!MD5:!RC4:!DES/' /etc/apache2/mods-enabled/ssl.conf
+systemctl restart apache2
+
+# Fix vulnerability 7: Disable TCP timestamps
+echo "net.ipv4.tcp_timestamps=0" | tee -a /etc/sysctl.conf
+sysctl -p

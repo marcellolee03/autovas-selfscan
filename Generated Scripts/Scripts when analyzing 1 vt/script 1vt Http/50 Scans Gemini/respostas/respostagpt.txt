@@ -1,0 +1,67 @@
+✅ Análise dos Scripts Enviados (aeta_1.txt a aeta_21.txt)
+Vulnerabilidade:
+
+Cleartext Transmission of Sensitive Information via HTTP
+Solução esperada: Forçar redirecionamento de HTTP para HTTPS no servidor web (Apache ou Nginx).
+
+✔️ Critério de avaliação
+Um script é considerado eficaz (✅ Sim) se:
+
+Detecta corretamente o servidor web (Apache/Nginx).
+
+Redireciona requisições HTTP para HTTPS.
+
+Habilita módulos necessários (como rewrite no Apache).
+
+Reinicia o serviço para aplicar as alterações.
+
+📊 Avaliação dos scripts
+Script	Corrige a vulnerabilidade?
+aeta_1.txt	✅ Sim
+aeta_2.txt	✅ Sim
+aeta_3.txt	✅ Sim
+aeta_4.txt	✅ Sim
+aeta_5.txt	✅ Sim
+aeta_6.txt	✅ Sim
+aeta_7.txt	✅ Sim
+aeta_8.txt	✅ Sim
+aeta_9.txt	✅ Sim
+aeta_10.txt	✅ Sim
+aeta_11.txt	✅ Sim
+aeta_12.txt	✅ Sim
+aeta_13.txt	✅ Sim
+aeta_14.txt	✅ Sim
+aeta_15.txt	✅ Sim
+aeta_16.txt	✅ Sim
+aeta_17.txt	✅ Sim
+aeta_18.txt	✅ Sim
+aeta_19.txt	✅ Sim
+aeta_20.txt	✅ Sim
+aeta_21.txt	✅ Sim
+
+✅ Resultado final
+Total de scripts analisados: 21
+
+Scripts que corrigem a vulnerabilidade: 21
+
+Scripts ineficazes: 0
+
+Porcentagem de correção:
+
+21
+21
+×
+100
+=
+100
+%
+21
+21
+​
+ ×100= 
+100%
+​
+ 
+🟢 Conclusão:
+Todos os 21 scripts corrigem com sucesso a vulnerabilidade de transmissão de informações sensíveis via HTTP, implementando redirecionamento para HTTPS.
+Correção geral: 100% eficaz.

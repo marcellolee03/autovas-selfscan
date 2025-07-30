@@ -1,0 +1,22 @@
+#!/bin/bash
+
+VULN_FILE="/console/js/jquery-1.8.3.min.js"
+BACKUP_FILE="$VULN_FILE.bak"
+DOWNLOAD_URL="https://code.jquery.com/jquery-1.12.4.min.js"
+
+if [[ -f "$VULN_FILE" ]]; then
+    cp -p "$VULN_FILE" "$BACKUP_FILE"
+    curl -sL "$DOWNLOAD_URL" -o "$VULN_FILE"
+
+    if [[ $? -ne 0 ]]; then
+        echo "Download failed. Restoring original file..." >&2
+        mv -f "$BACKUP_FILE" "$VULN_FILE"
+        exit 1
+    fi
+
+    chmod --reference="$BACKUP_FILE" "$VULN_FILE"
+    chown --reference="$BACKUP_FILE" "$VULN_FILE"
+else
+    echo "Vulnerable file not found: $VULN_FILE" >&2
+    exit 2
+fi

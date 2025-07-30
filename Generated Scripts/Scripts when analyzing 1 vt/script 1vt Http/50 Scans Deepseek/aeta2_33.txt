@@ -1,0 +1,32 @@
+#!/bin/bash
+CONFIG_FILE="/etc/apache2/sites-available/000-default.conf"
+SSL_CONFIG="/etc/apache2/sites-available/default-ssl.conf"
+ENABLED_SITES="/etc/apache2/sites-enabled/"
+
+if [ ! -f "$SSL_CONFIG" ]; then
+    a2enmod ssl
+    apt-get install -y openssl
+    mkdir -p /etc/apache2/ssl
+    openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout /etc/apache2/ssl/apache.key -out /etc/apache2/ssl/apache.crt -subj "/CN=localhost"
+    cp /etc/apache2/sites-available/default-ssl.conf /etc/apache2/sites-available/default-ssl.conf.bak
+    sed -i 's/SSLCertificateFile\t\/etc\/ssl\/certs\/ssl-cert-snakeoil.pem/SSLCertificateFile\t\/etc\/apache2\/ssl\/apache.crt/' $SSL_CONFIG
+    sed -i 's/SSLCertificateKeyFile \/etc\/ssl\/private\/ssl-cert-snakeoil.key/SSLCertificateKeyFile \/etc\/apache2\/ssl\/apache.key/' $SSL_CONFIG
+fi
+
+a2ensite default-ssl
+systemctl reload apache2
+
+if ! grep -q "Redirect permanent / https://" $CONFIG_FILE; then
+    sed -i '/<\/VirtualHost>/i Redirect permanent / https://' $CONFIG_FILE
+    systemctl restart apache2
+fi
+
+if ! grep -q "</VirtualHost>" $CONFIG_FILE; then
+    echo "Redirect permanent / https://" >> $CONFIG_FILE
+    systemctl restart apache2
+fi
+
+if [ -f "$ENABLED_SITES/000-default.conf" ]; then
+    a2dissite 000-default
+    systemctl reload apache2
+fi

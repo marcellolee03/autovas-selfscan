@@ -1,0 +1,61 @@
+#!/bin/bash
+
+# Script para mitigar a vulnerabilidade de transmissão de informações sensíveis em texto plano via HTTP.
+# Este script configura um redirecionamento automático de HTTP para HTTPS e desabilita o HTTP.
+# Assume-se que um servidor web (Apache ou Nginx) já esteja instalado e configurado para servir HTTPS.
+
+# Variáveis
+WEB_SERVER=""
+
+# Detecta o servidor web em uso (Apache ou Nginx)
+if command -v apache2ctl &> /dev/null; then
+  WEB_SERVER="apache"
+elif [ -f /etc/nginx/nginx.conf ]; then
+  WEB_SERVER="nginx"
+else
+  echo "Servidor web não detectado. Por favor, instale e configure o Apache ou Nginx para HTTPS antes de executar este script."
+  exit 1
+fi
+
+# Configuração para Apache
+if [ "$WEB_SERVER" = "apache" ]; then
+  # Cria um arquivo de configuração virtual host para redirecionamento HTTP para HTTPS
+  echo "<VirtualHost *:80>
+    ServerName \$(hostname)
+    Redirect permanent / https://\${SERVER_NAME}/
+  </VirtualHost>" > /etc/apache2/sites-available/http_redirect.conf
+
+  # Habilita o site de redirecionamento
+  a2ensite http_redirect.conf
+
+  # Desabilita o site padrão HTTP
+  a2dissite 000-default.conf
+
+  # Reinicia o Apache
+  systemctl restart apache2
+  echo "Redirecionamento HTTP para HTTPS configurado para Apache. Site HTTP padrão desabilitado."
+fi
+
+# Configuração para Nginx
+if [ "$WEB_SERVER" = "nginx" ]; then
+  # Cria um arquivo de configuração para redirecionamento HTTP para HTTPS
+  echo "server {
+    listen 80;
+    server_name \$(hostname);
+    return 301 https://\$host\$request_uri;
+  }" > /etc/nginx/sites-available/http_redirect
+
+  # Cria um link simbólico para habilitar o site
+  ln -s /etc/nginx/sites-available/http_redirect /etc/nginx/sites-enabled/
+
+  # Remove a configuração padrão
+  rm /etc/nginx/sites-enabled/default
+
+  # Reinicia o Nginx
+  systemctl restart nginx
+  echo "Redirecionamento HTTP para HTTPS configurado para Nginx. Configuração HTTP padrão removida."
+fi
+
+echo "Script de correção concluído.  Verifique se o redirecionamento HTTP para HTTPS está funcionando corretamente."
+
+exit 0

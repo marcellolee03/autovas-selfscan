@@ -1,0 +1,29 @@
+#!/bin/bash
+
+# Vulnerabilidade 1: Enforce SSL/TLS
+sed -i 's/^\(#\)\?\(listen 80;\)/#\2\n\tlisten 443 ssl;\n\tssl_certificate \/etc\/ssl\/certs\/ssl-cert-snakeoil.pem;\n\tssl_certificate_key \/etc\/ssl\/private\/ssl-cert-snakeoil.key;\n\tssl_protocols TLSv1.2 TLSv1.3;\n\tssl_ciphers HIGH:!aNULL:!MD5;/' /etc/nginx/sites-available/default
+nginx -t && systemctl restart nginx
+
+# Vulnerabilidade 2: Disable DNS Recursion
+sed -i 's/^\(#\)\?\(recursion yes;\)/#\2\n\trecursion no;/' /etc/bind/named.conf.options
+systemctl restart bind9
+
+# Vulnerabilidade 3: Disable ICMP Timestamp
+echo "net.ipv4.tcp_timestamps = 0" >> /etc/sysctl.conf
+sysctl -p
+
+# Vulnerabilidade 4: Disable TLSv1.0 and TLSv1.1
+sed -i 's/^\(#\)\?\(SSLProtocol.*\)/\1\2 -TLSv1 -TLSv1.1/' /etc/apache2/mods-available/ssl.conf
+systemctl restart apache2
+
+# Vulnerabilidade 5: Disable SSL Renegotiation
+sed -i 's/^\(#\)\?\(SSLHonorCipherOrder.*\)/\1\2\n\tSSLInsecureRenegotiation off/' /etc/apache2/mods-available/ssl.conf
+systemctl restart apache2
+
+# Vulnerabilidade 6: Disable Weak Cipher Suites
+sed -i 's/^\(#\)\?\(SSLCipherSuite.*\)/\1\2:!aNULL:!eNULL:!EXPORT:!DES:!RC4:!3DES:!MD5:!PSK/' /etc/apache2/mods-available/ssl.conf
+systemctl restart apache2
+
+# Vulnerabilidade 7: Disable TCP Timestamps
+echo "net.ipv4.tcp_timestamps = 0" >> /etc/sysctl.conf
+sysctl -p

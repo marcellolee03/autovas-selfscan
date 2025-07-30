@@ -1,0 +1,118 @@
+```bash
+#!/bin/bash
+
+# Vulnerability 1: Proxmox VE EOL
+# Since upgrading Proxmox is a complex process, this script only reminds the user to upgrade.
+echo "WARNING: Proxmox VE is EOL.  Please upgrade to a supported version."
+
+# Vulnerabilities 2-6: jQuery < 1.9.0 XSS Vulnerability
+# Define the target IP address and the paths to the vulnerable jQuery files.
+IP="10.129.4.254"
+JQUERY_PATHS=(
+    "/../js/jquery-1.8.3.min.js"
+    "/opscenter/webcommon/framework/../js/jquery-1.8.3.min.js"
+    "/framesets/../js/jquery-1.8.3.min.js"
+    "/frameset/../js/jquery-1.8.3.min.js"
+    "/console/framework/../js/jquery-1.8.3.min.js"
+)
+
+# Function to download the fixed jQuery version
+download_jquery() {
+    echo "Downloading jQuery 1.9.0..."
+    wget -q https://code.jquery.com/jquery-1.9.0.min.js -O /tmp/jquery-1.9.0.min.js
+    if [ $? -ne 0 ]; then
+        echo "Error downloading jQuery 1.9.0. Please check your internet connection."
+        exit 1
+    fi
+}
+
+# Function to replace the vulnerable jQuery files
+replace_jquery() {
+    for path in "${JQUERY_PATHS[@]}"; do
+        full_url="http://$IP${path}"
+        # Extract directory path from URL
+        directory=$(dirname "${path}")
+        filename=$(basename "${path}")
+
+        # Remove "../" to get actual path
+        actual_dir=$(echo "$directory" | sed 's/\/\.\.\///g')
+
+        # Ensure directory exists
+        if [ ! -d "$actual_dir" ]; then
+            echo "Directory $actual_dir does not exist. Skipping $full_url."
+            continue
+        fi
+        echo "Replacing $full_url with jQuery 1.9.0..."
+        cp /tmp/jquery-1.9.0.min.js "$actual_dir/${filename}"
+        if [ $? -ne 0 ]; then
+            echo "Error replacing $full_url. Check permissions or file existence."
+        else
+            echo "Successfully replaced $full_url."
+        fi
+    done
+}
+
+# Perform jQuery update
+download_jquery
+replace_jquery
+rm -f /tmp/jquery-1.9.0.min.js
+echo "jQuery vulnerabilities addressed."
+
+# Vulnerabilities 7, 8, 9, 13, 14, 15, 16, 19, 21, 22: SSH Weak Algorithms
+# Edit the SSH configuration file
+SSH_CONFIG="/etc/ssh/sshd_config"
+
+# Backup the original sshd_config file
+cp "$SSH_CONFIG" "$SSH_CONFIG.bak"
+
+# Disable weak KEX algorithms, weak MAC algorithms and weak Ciphers
+sed -i 's/^#KexAlgorithms .*/KexAlgorithms curve25519-sha256@libssh.org,ecdh-sha2-nistp256,ecdh-sha2-nistp384,ecdh-sha2-nistp521,diffie-hellman-group-exchange-sha256/g' "$SSH_CONFIG"
+sed -i 's/^#Ciphers .*/Ciphers chacha20-poly1305@openssh.com,aes256-gcm@openssh.com,aes128-gcm@openssh.com,aes256-ctr,aes128-ctr/g' "$SSH_CONFIG"
+sed -i 's/^#MACs .*/MACs hmac-sha2-512-etm@openssh.com,hmac-sha2-256-etm@openssh.com,umac-128-etm@openssh.com,hmac-sha2-512,hmac-sha2-256,umac-128@openssh.com/g' "$SSH_CONFIG"
+
+# Remove potentially problematic lines (if they exist)
+sed -i '/KexAlgorithms diffie-hellman-group1-sha1/d' "$SSH_CONFIG"
+sed -i '/umac-64-etm@openssh.com/d' "$SSH_CONFIG"
+sed -i '/umac-64@openssh.com/d' "$SSH_CONFIG"
+sed -i '/hmac-md5/d' "$SSH_CONFIG"
+sed -i '/hmac-sha1-96/d' "$SSH_CONFIG"
+sed -i '/3des-cbc/d' "$SSH_CONFIG"
+sed -i '/aes128-cbc/d' "$SSH_CONFIG"
+sed -i '/aes256-cbc/d' "$SSH_CONFIG"
+sed -i '/twofish-cbc/d' "$SSH_CONFIG"
+sed -i '/twofish128-cbc/d' "$SSH_CONFIG"
+sed -i '/twofish256-cbc/d' "$SSH_CONFIG"
+sed -i '/ssh-dss/d' "$SSH_CONFIG"
+
+# Restart SSH service
+service ssh restart
+echo "SSH configuration updated to disable weak algorithms. SSH service restarted."
+
+# Vulnerability 10: DCE/RPC and MSRPC Services Enumeration Reporting
+# Mitigation: Filter incoming traffic to port 135 and dynamic RPC ports.
+echo "Please configure your firewall to block incoming traffic to TCP port 135 and the dynamic RPC ports (typically above 49152)."
+
+# Vulnerability 11: Telnet Unencrypted Cleartext Login
+# Remove Telnet server
+apt-get remove --purge -y telnetd
+echo "Telnet server removed. Consider using SSH instead."
+
+# Vulnerability 12: SSL/TLS: Deprecated TLSv1.0 and TLSv1.1 Protocol Detection
+# Disable TLS 1.0 and 1.1
+# This is a general recommendation, specific configuration depends on the service (e.g., Apache, Nginx)
+echo "Please disable TLSv1.0 and TLSv1.1 in your server configurations (e.g., Apache, Nginx) in favor of TLSv1.2+."
+
+# Vulnerabilities 17, 18, 20, 23, 24, 25: TCP Timestamps Information Disclosure
+# Disable TCP timestamps
+echo "Disabling TCP timestamps..."
+echo "net.ipv4.tcp_timestamps = 0" >> /etc/sysctl.conf
+sysctl -p
+echo "TCP timestamps disabled. Reboot may be required."
+
+# Vulnerabilities 26, 27, 28, 29, 30, 31, 32: ICMP Timestamp Reply Information Disclosure
+# Disable ICMP timestamp replies
+echo "Disabling ICMP timestamp replies..."
+echo "net.ipv4.icmp_echo_ignore_all = 1" >> /etc/sysctl.conf
+sysctl -p
+echo "ICMP timestamp replies disabled. Reboot may be required."
+```

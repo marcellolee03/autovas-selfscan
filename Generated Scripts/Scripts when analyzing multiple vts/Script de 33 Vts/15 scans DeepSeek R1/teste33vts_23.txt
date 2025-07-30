@@ -1,0 +1,77 @@
+```bash
+#!/bin/bash
+
+# Vulnerabilities 2,3,4,5,6: Update jQuery files
+jquery_files=(
+    "/js/jquery-1.8.3.min.js"
+    "/opscenter/webcommon/js/jquery-1.8.3.min.js"
+    "/framesets/../js/jquery-1.8.3.min.js"
+    "/frameset/../js/jquery-1.8.3.min.js"
+    "/console/framework/js/jquery-1.8.3.min.js"
+    "/opscenter/webcommon/framework/../js/jquery-1.8.3.min.js"
+    "/console/framework/../js/jquery-1.8.3.min.js"
+)
+for file in "${jquery_files[@]}"; do
+    dir="$(dirname "$file")"
+    if [ -d "$dir" ]; then
+        wget -qO "${file}" "https://code.jquery.com/jquery-1.12.4.min.js" && \
+        echo "Updated ${file} to jQuery 1.12.4"
+    fi
+done
+
+# Vulnerabilities 7,8,9,13,14,15,16,19,21,22: Configure SSH daemon
+sshd_config="/etc/ssh/sshd_config"
+if [ -f "$sshd_config" ]; then
+    # Backup original config
+    cp "$sshd_config" "${sshd_config}.bak"
+    
+    # Add security settings (ensuring only one instance of each directive)
+    sed -i '/^\s*KexAlgorithms\s/d' "$sshd_config"
+    sed -i '/^\s*HostKeyAlgorithms\s/d' "$sshd_config"
+    sed -i '/^\s*Ciphers\s/d' "$sshd_config"
+    sed -i '/^\s*MACs\s/d' "$sshd_config"
+    
+    echo "KexAlgorithms curve25519-sha256@libssh.org,diffie-hellman-group-exchange-sha256" >> "$sshd_config"
+    echo "HostKeyAlgorithms ssh-ed25519,ssh-ed25519-cert-v01@openssh.com,rsa-sha2-512,rsa-sha2-512-cert-v01@openssh.com" >> "$sshd_config"
+    echo "Ciphers chacha20-poly1305@openssh.com,aes256-gcm@openssh.com,aes128-gcm@openssh.com" >> "$sshd_config"
+    echo "MACs hmac-sha2-256-etm@openssh.com,hmac-sha2-512-etm@openssh.com,umac-128-etm@openssh.com" >> "$sshd_config"
+    
+    systemctl reload sshd
+fi
+
+# Vulnerability 10: Block RPC ports
+for port in 135 39710 49664 49665 49666 49667 49668 49670 7832; do
+    iptables -A INPUT -p tcp --dport "$port" -j DROP
+done
+iptables-save > /etc/iptables/rules.v4
+
+# Vulnerability 11: Remove telnet
+systemctl stop telnet.socket 2>/dev/null
+systemctl disable telnet.socket 2>/dev/null
+apt-get remove --purge -y telnetd
+
+# Vulnerability 12: Secure RDP protocol (if xrdp installed)
+if dpkg -l | grep -q "xrdp"; then
+    config="/etc/xrdp/xrdp.ini"
+    if [ -f "$config" ]; then
+        sed -i 's/^\(ssl_protocol\)=.*/\1=TLSv1.2,SSLv3.0/' "$config"
+        sed -i 's/^\(tls_ciphers\)=.*/\1=HIGH/' "$config"
+        systemctl restart xrdp
+    fi
+fi
+
+# Vulnerabilities 17,18,20,23,24,25: Disable TCP timestamps
+echo "net.ipv4.tcp_timestamps=0" >> /etc/sysctl.conf
+sysctl -p
+
+# Vulnerabilities 26-32: Block ICMP timestamp requests
+iptables -A INPUT -p icmp --icmp-type timestamp-request -j DROP
+iptables-save > /etc/iptables/rules.v4
+
+# Vulnerabilidade 1: Upgrade Proxmox VE
+if grep -q "proxmox" /etc/apt/sources.list.d/* && [ "$(pveversion)" != "pve" ]; then
+    apt-get update &&\
+    DEBIAN_FRONTEND=noninteractive apt-get --only-upgrade -y install proxmox-ve &&\
+    systemctl restart pve-cluster
+fi
+```

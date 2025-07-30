@@ -1,0 +1,50 @@
+Com base na análise da vulnerabilidade de Cross-Site Scripting (XSS) no jQuery versão 1.8.3  e nos scripts de correção fornecidos, a avaliação de cada script é a seguinte:
+
+A vulnerabilidade exige a atualização da biblioteca jQuery para a versão 1.9.0 ou posterior para ser corrigida. O arquivo vulnerável está localizado no caminho /console/js/jquery-1.8.3.min.js.
+
+Análise Individual dos Scripts
+
+    Script 1 (1vtjquery_1.txt): Sim
+        Este script procura pelo arquivo vulnerável em todo o sistema usando o caminho */console/js/jquery-1.8.3.min.js. Ele faz o download de uma versão corrigida (1.12.4) , cria um backup e verifica a existência de ferramentas como wget ou curl.
+
+Script 2 (1vtjquery_2.txt): Sim
+
+    O script visa diretamente o arquivo /console/js/jquery-1.8.3.min.js e o substitui pela versão 1.12.4, que é superior à versão corrigida necessária.
+
+Script 3 (1vtjquery_3.txt): Sim
+
+    Este script localiza o arquivo vulnerável no caminho exato /console/js/jquery-1.8.3.min.js , realiza um backup e o atualiza para a versão 1.12.4 usando curl.
+
+Script 4 (1vtjquery_4.txt): Sim
+
+    O script identifica o arquivo em /console/js/jquery-1.8.3.min.js , cria um backup e baixa a versão 3.7.1 do jQuery, que corrige a vulnerabilidade.
+
+Script 5 (1vtjquery_5.txt): Sim
+
+    Utiliza o comando find para localizar qualquer arquivo que corresponda ao caminho */console/js/jquery-1.8.3.min.js no sistema. Em seguida, substitui o arquivo pela versão 1.12.4.
+
+Script 6 (1vtjquery_6.txt): Sim
+
+    O script tem como alvo o caminho exato /console/js/jquery-1.8.3.min.js. Ele faz o download da versão 1.9.1, que é uma versão corrigida adequada.
+
+Script 7 (1vtjquery_7.txt): Sim
+
+    Este script procura o arquivo vulnerável em uma série de diretórios web comuns e, se não o encontrar, executa uma busca mais ampla no sistema de arquivos. Ele atualiza o arquivo para a versão 1.12.4.
+
+Script 8 (1vtjquery_8.txt): Sim
+
+    O script primeiro verifica diretórios web comuns e depois usa o comando find para localizar o arquivo. Ele atualiza o jQuery para a versão 1.9.0, que é a primeira versão a corrigir a falha.
+
+Script 9 (1vtjquery_9.txt): Sim
+
+    Este script procura pelo arquivo vulnerável em uma lista predefinida de diretórios base. Se encontrado, ele o substitui pela versão 1.12.4 do jQuery.
+
+Script 10 (1vtjquery_10.txt): Sim
+
+    O script atua sobre o caminho de arquivo fixo /console/js/jquery-1.8.3.min.js , fazendo backup e baixando a versão 1.12.4 para a correção.
+
+Conclusão Geral
+
+Todos os 10 scripts fornecidos são capazes de corrigir a vulnerabilidade detalhada. Eles utilizam métodos eficazes para localizar o arquivo vulnerável e substituí-lo por uma versão do jQuery igual ou superior à 1.9.0.
+
+Média de porcentagem geral de correção: 100%

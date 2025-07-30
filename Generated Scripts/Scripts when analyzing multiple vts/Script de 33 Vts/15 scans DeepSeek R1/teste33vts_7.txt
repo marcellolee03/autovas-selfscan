@@ -1,0 +1,49 @@
+#!/bin/bash
+
+set -euo pipefail
+
+[ $(id -u) -ne 0 ] && { echo "Root required" >&2; exit 1; }
+
+if command -v pveversion &>/dev/null; then
+    major=$(pveversion | grep -oP 'pve-manager/\K\d+')
+    if [ "$major" -eq 7 ]; then
+        sed -i 's/bullseye/bookworm/g' /etc/apt/sources.list
+        sed -i 's/bullseye/bookworm/g' /etc/apt/sources.list.d/*.list 2>/dev/null || true
+        apt update
+        DEBIAN_FRONTEND=noninteractive apt -o Dpkg::Options::="--force-confold" full-upgrade -y
+    fi
+fi
+
+tmp_js=$(mktemp)
+curl -sSf -o "$tmp_js" https://code.jquery.com/jquery-3.7.1.min.js
+find /var/www /usr/share/nginx /usr/share/apache2 -name jquery-1.8.3.min.js 2>/dev/null | while read -r file; do
+    cp "$tmp_js" "$file"
+done
+rm -f "$tmp_js"
+
+cp /etc/ssh/sshd_config /etc/ssh/sshd_config.bak
+sed -i '/^HostKeyAlgorithms/d;/^KexAlgorithms/d;/^Ciphers/d;/^MACs/d' /etc/ssh/sshd_config
+echo -e "HostKeyAlgorithms ecdsa-sha2-nistp521,rsa-sha2-512,ssh-ed25519\nKexAlgorithms curve25519-sha256\nCiphers aes256-gcm@openssh.com\nMACs hmac-sha2-512" >> /etc/ssh/sshd_config
+systemctl restart ssh
+
+if dpkg -s telnetd &>/dev/null; then
+    systemctl disable --now telnet.socket 2>/dev/null || true
+    apt purge -y telnetd
+fi
+
+if command -v xrdp &>/dev/null && [ -f /etc/xrdp/xrdp.ini ]; then
+    sed -i 's/^tls_protocols=.*/tls_protocols=1.2/' /etc/xrdp/xrdp.ini
+    systemctl restart xrdp
+fi
+
+echo "net.ipv4.tcp_timestamps = 0" >> /etc/sysctl.d/60-hardening.conf
+sysctl -p /etc/sysctl.d/60-hardening.conf &>/dev/null
+
+iptables -A INPUT -p icmp --icmp-type timestamp-request -j DROP
+iptables -A INPUT -p icmp --icmp-type timestamp-reply -j DROP
+if command -v netfilter-persistent &>/dev/null; then
+    iptables-save > /etc/iptables/rules.v4
+    netfilter-persistent save
+elif command -v iptables-save &>/dev/null; then
+    iptables-save > /etc/iptables/rules.v4
+fi

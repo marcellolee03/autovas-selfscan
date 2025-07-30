@@ -1,0 +1,377 @@
+
+Analisarei cada script para a vulnerabilidade "Cleartext Transmission of Sensitive Information via HTTP" (Porta 80, Protocolo: tcp). A solução é "Forçar a transmissão de dados sensíveis via uma conexão SSL/TLS criptografada" e "redirecionar todos os usuários para a conexão SSL/TLS segura antes de permitir a entrada de dados sensíveis". Isso geralmente envolve configurar o servidor web (Apache ou Nginx) para redirecionar HTTP (porta 80) para HTTPS (porta 443) e garantir que o HTTPS esteja funcionando corretamente.
+
+
+Aqui está a análise de cada script:
+
+aeta_1.txt
+
+Este script foca no Apache. Ele habilita os módulos ssl e rewrite. Em seguida, ele adiciona regras de RewriteEngine ao 000-default.conf para redirecionar HTTP para HTTPS. Finalmente, ele reinicia o Apache. Isso atende aos requisitos de redirecionamento HTTP para HTTPS.
+
+Resolução: Sim
+aeta_2.txt
+
+Este script detecta se o servidor web é Apache ou Nginx. Para Apache, ele habilita mod_rewrite e mod_ssl. Ele cria uma regra de redirecionamento permanente HTTP para HTTPS  e tenta adicionar HSTS ao default-ssl.conf. Para Nginx, ele configura um bloco server para a porta 80 que retorna um redirecionamento 301 para HTTPS. Em ambos os casos, ele reinicia o respectivo servidor web. Isso é abrangente e corrige a vulnerabilidade.
+
+
+
+
+Resolução: Sim
+aeta_3.txt
+
+Este script foca no Apache. Ele verifica se o Apache está instalado e o instala se não estiver. Habilita o mod_rewrite. Cria um novo arquivo 000-default.conf que implementa um redirecionamento permanente de HTTP para HTTPS. Finalmente, reinicia o Apache. A instrução de configurar o HTTPS separadamente é uma indicação que o script não lida com a configuração SSL/TLS em si, mas a vulnerabilidade específica é sobre a transmissão em cleartext via HTTP e o script resolve isso com o redirecionamento.
+
+
+
+Resolução: Sim
+aeta_4.txt
+
+Este script detecta Apache ou Nginx. Para Apache, ele habilita mod_rewrite  e cria um VirtualHost na porta 80 com um redirecionamento permanente para HTTPS. Para Nginx, ele modifica o arquivo de configuração padrão para adicionar um bloco server na porta 80 que retorna um redirecionamento 301 para HTTPS. Em ambos os casos, ele reinicia o servidor web. Isso é uma correção eficaz para a vulnerabilidade.
+
+
+
+
+Resolução: Sim
+aeta_5.txt
+
+Este script tenta configurar o Apache. Ele verifica se o Apache está instalado e o instala se necessário. Habilita o mod_ssl. Ele gera um certificado autoassinado (para fins de teste, o que pode não ser adequado para produção, mas funcional para habilitar HTTPS). Configura o site padrão para redirecionar HTTP para HTTPS  e cria uma configuração SSL VirtualHost para a porta 443. Finalmente, reinicia o Apache. A geração de certificado autoassinado não é a melhor prática para produção, mas tecnicamente permite uma conexão SSL/TLS.
+
+
+
+
+Resolução: Sim
+aeta_6.txt
+
+Este script detecta Apache ou Nginx. Para Apache, ele tenta desabilitar o VirtualHost na porta 80 ao comentar suas linhas  ou, se o VirtualHost não for encontrado, cria um arquivo .htaccess na raiz do site para redirecionar HTTP para HTTPS. Para Nginx, ele remove o bloco server existente na porta 80 e adiciona um novo que retorna um redirecionamento 301 para HTTPS. Ele reinicia os serviços. A abordagem de comentar o VirtualHost pode ser um pouco agressiva, mas o .htaccess é uma alternativa. No geral, o objetivo de redirecionar para HTTPS é alcançado.
+
+
+
+
+Resolução: Sim
+aeta_7.txt
+
+Este script foca no Apache. Habilita o mod_rewrite. Cria um novo arquivo de configuração para a porta 80 que realiza um redirecionamento permanente para HTTPS. Habilita o site de redirecionamento e o módulo SSL, e tenta habilitar o default-ssl.conf. Finalmente, reinicia o Apache. O script realiza o redirecionamento e tenta garantir que o SSL esteja habilitado, embora a configuração de certificado SSL/TLS seja mencionada como algo a ser verificado ou configurado separadamente.
+
+
+
+
+Resolução: Sim
+aeta_8.txt
+
+Este script foca no Apache. Habilita o mod_ssl. Adiciona regras de RewriteEngine e RewriteRule para redirecionar HTTP para HTTPS diretamente no 000-default.conf. Gera um certificado SSL autoassinado se não existir. Configura o default-ssl.conf para usar este certificado. Ajusta o ports.conf para escutar na porta 443  e habilita o site SSL padrão. Finalmente, reinicia o Apache. A geração de certificado autoassinado permite a conexão HTTPS, mesmo que não seja a solução ideal para produção.
+
+
+
+
+Resolução: Sim
+aeta_9.txt
+
+Este script detecta Apache ou Nginx. Para Apache, ele habilita mod_rewrite  e cria um VirtualHost na porta 80 para redirecionamento permanente para HTTPS. Para Nginx, ele cria um bloco server para a porta 80 que retorna um redirecionamento 301 para HTTPS. Ele também remove o arquivo de configuração default do Nginx para evitar conflitos. Em ambos os casos, reinicia o servidor web. Isso é uma correção eficaz.
+
+
+
+
+Resolução: Sim
+aeta_10.txt
+
+Este script visa configurar o Apache. Ele tenta instalar o Certbot e o pacote Python específico para Apache. Em seguida, ele tenta obter um certificado SSL usando o Certbot com a opção --redirect, que configuraria automaticamente o redirecionamento de HTTP para HTTPS. Ele também reinicia o servidor web. Embora o certbot --redirect seja o principal mecanismo, o script também adiciona as regras de redirecionamento no 000-default-le-ssl.conf para Apache, o que reforça a correção. Para Nginx, ele apenas fornece uma instrução manual. Considerando que a vulnerabilidade é genérica e o script tenta uma solução robusta (Certbot com redirecionamento) para o Apache (servidor mais provável para localhost), é capaz de resolver.
+
+
+
+
+Resolução: Sim
+aeta_11.txt
+
+Este script detecta Apache ou Nginx. Para Apache, ele habilita mod_rewrite e modifica o arquivo de configuração padrão do site (000-default.conf ou default.conf) para adicionar as regras de redirecionamento HTTP para HTTPS. Para Nginx, ele modifica o arquivo de configuração padrão para adicionar a regra de retorno 301 para HTTPS. Em ambos os casos, ele reinicia o servidor web. Este script é eficaz.
+
+
+
+
+Resolução: Sim
+aeta_12.txt
+
+Este script detecta Apache ou Nginx. Para Apache, ele habilita mod_rewrite e cria um VirtualHost para a porta 80 que redireciona permanentemente para HTTPS. Para Nginx, ele localiza o arquivo de configuração padrão e adiciona um bloco server para a porta 80 que retorna um redirecionamento 301 para HTTPS. Em ambos os casos, ele recarrega ou reinicia o serviço. É uma solução completa.
+
+
+
+
+Resolução: Sim
+aeta_13.txt
+
+Este script detecta Apache ou Nginx. Para Apache, ele habilita mod_rewrite e adiciona uma regra de redirecionamento permanente no VirtualHost padrão. Para Nginx, ele modifica o arquivo de configuração padrão para adicionar a regra de retorno 301. Ele reinicia os serviços em ambos os casos.
+
+
+Resolução: Sim
+aeta_14.txt
+
+Este script detecta Apache ou Nginx. Para Apache, ele habilita mod_rewrite  e injeta as regras de RewriteEngine e RewriteRule diretamente no VirtualHost da porta 80 no arquivo de configuração padrão. Para Nginx, ele injeta um novo bloco server na porta 80 para redirecionamento 301 dentro do bloco http principal. Em ambos os casos, ele reinicia o serviço. A injeção dentro do bloco http para Nginx pode ser mais intrusiva do que a edição de sites-available, mas ainda funcional.
+
+
+
+
+Resolução: Sim
+aeta_15.txt
+
+Este script foca no Apache. Ele habilita mod_rewrite. Cria um novo arquivo de configuração de VirtualHost para a porta 80 que redireciona para HTTPS e habilita este site. Ele tenta ajustar o DocumentRoot na configuração SSL padrão. Adicionalmente, ele tenta forçar HTTPS via .htaccess se o DocumentRoot existir. Finalmente, reinicia o Apache.
+
+
+
+
+Resolução: Sim
+aeta_16.txt
+
+Este script detecta Apache ou Nginx. Para Apache, ele cria um novo 000-default.conf com um redirecionamento permanente de HTTP para HTTPS. Para Nginx, ele modifica o arquivo de configuração padrão para adicionar uma regra return 301 dentro do bloco server que escuta na porta 80. Em ambos os casos, ele reinicia o servidor.
+
+
+
+Resolução: Sim
+aeta_17.txt
+
+Este script detecta Apache ou Nginx. Para Apache, ele cria um arquivo de configuração de VirtualHost com um redirecionamento permanente de HTTP para HTTPS, habilita-o e desabilita o site padrão. Para Nginx, ele modifica o arquivo de configuração padrão para adicionar um bloco server na porta 80 que redireciona para HTTPS. Reinicia os serviços.
+
+
+
+
+Resolução: Sim
+aeta_18.txt
+
+Este script foca no Apache. Ele verifica se o Apache está instalado. Habilita o mod_rewrite. Adiciona um novo bloco VirtualHost na porta 80 ao 000-default.conf com um redirecionamento permanente para HTTPS. Reinicia o Apache.
+
+
+
+
+Resolução: Sim
+aeta_19.txt
+
+Este script detecta Apache ou Nginx. Para Apache, ele habilita mod_rewrite e adiciona as regras de RewriteEngine e RewriteRule diretamente no VirtualHost da porta 80 do 000-default.conf. Para Nginx, ele modifica o arquivo de configuração default para adicionar a regra return 301 dentro do bloco server que escuta na porta 80. Em ambos os casos, ele reinicia o serviço.
+
+
+Resolução: Sim
+aeta_20.txt
+
+Este script detecta Apache e Nginx. Para Apache, ele habilita mod_rewrite  e adiciona regras de redirecionamento HTTP para HTTPS no 000-default.conf. Para Nginx, ele adiciona uma regra return 301 dentro do bloco server que escuta na porta 80. Em ambos os casos, reinicia o respectivo serviço.
+
+
+
+
+Resolução: Sim
+aeta_21.txt
+
+Este script detecta Apache ou Nginx. Ele também inclui lógica para instalar o Certbot, embora não o utilize para gerar certificados (apenas para instalar). Para Apache, ele habilita mod_rewrite  e adiciona regras de redirecionamento HTTP para HTTPS ao 000-default.conf. Para Nginx, ele adiciona a regra return 301 ao arquivo de configuração padrão. Ele reinicia os serviços. A menção de "Considerar usar Certbot"  indica que o script não garante a configuração HTTPS completa, mas o redirecionamento para HTTPS é implementado.
+
+
+
+
+Resolução: Sim
+aeta_22.txt
+
+Este script detecta Apache ou Nginx. Para Apache, ele habilita mod_rewrite , cria um .htaccess na raiz do site para redirecionamento HTTP para HTTPS, e tenta "desabilitar" o VirtualHost HTTP ao alterar sua porta para uma não utilizada. Para Nginx, ele adiciona um bloco server para a porta 80 que retorna um redirecionamento 301 para HTTPS. Reinicia os serviços. A mudança da porta HTTP no Apache é uma maneira mais drástica de "desabilitar" do que o redirecionamento.
+
+
+
+
+Resolução: Sim
+aeta_23.txt
+
+Este script detecta Apache ou Nginx. Para Apache, ele habilita mod_rewrite  e injeta regras de RewriteEngine e RewriteCond/RewriteRule para redirecionamento HTTP para HTTPS no VirtualHost padrão da porta 80. Para Nginx, ele modifica o arquivo de configuração padrão para adicionar um bloco server na porta 80 com a regra return 301. Ele reinicia os serviços em ambos os casos.
+
+
+
+
+Resolução: Sim
+aeta_24.txt
+
+Este script foca no Apache. Ele verifica se o Apache está instalado  e se o mod_rewrite está habilitado, habilitando-o se necessário. Ele configura o VirtualHost padrão (porta 80) para redirecionar permanentemente para HTTPS, sobrescrevendo o arquivo. Finalmente, reinicia o Apache.
+
+
+
+Resolução: Sim
+aeta_25.txt
+
+Este script detecta Apache ou Nginx. Para Apache, ele cria um arquivo de configuração VirtualHost para a porta 80 que redireciona para HTTPS, habilita este site e desabilita o site padrão HTTP. Para Nginx, ele cria um arquivo de configuração para a porta 80 que redireciona para HTTPS, cria um link simbólico para habilitá-lo e remove a configuração padrão HTTP. Reinicia os serviços.
+
+
+Resolução: Sim
+aeta_26.txt
+
+Este script foca no Apache. Ele instala o Apache se não estiver presente. Habilita mod_rewrite. Ele modifica o 000-default.conf para incluir um VirtualHost que redireciona HTTP para HTTPS. Cria uma configuração de VirtualHost padrão para HTTPS (se não existir) usando certificados autoassinados. Habilita o mod_ssl  e o site SSL padrão. Reinicia o Apache. A criação de um certificado autoassinado é suficiente para resolver a transmissão em cleartext, embora não para confiança.
+
+
+
+
+Resolução: Sim
+aeta_27.txt
+
+Este script foca no Apache. Ele detecta a instalação do Apache. Cria um arquivo de configuração de VirtualHost na porta 80 com um redirecionamento permanente para HTTPS. Habilita este arquivo de configuração. Reinicia o Apache. Para sistemas httpd diferentes de apache2, ele informa para adicionar a inclusão manualmente, o que não é uma correção automática completa para todos os cenários. No entanto, para apache2, ele corrige.
+
+
+
+Resolução: Sim (para Apache2)
+aeta_28.txt
+
+Este script detecta Apache ou Nginx. Para Apache, ele habilita mod_rewrite  e injeta um novo bloco VirtualHost na porta 80 ao 000-default.conf com um redirecionamento permanente para HTTPS. Para Nginx, ele injeta um novo bloco server na porta 80 com um redirecionamento 301 dentro do arquivo de configuração padrão. Reinicia os serviços. O script pede o domínio interativamente, o que viola a regra 4 de "AUTOSSUFICIENTE". No entanto, a correção técnica está presente.
+
+
+
+
+Resolução: Sim (com ressalva de interação)
+aeta_29.txt
+
+Este script foca no Apache. Ele desabilita o site HTTP padrão 000-default.conf. Cria um novo arquivo de configuração de redirecionamento HTTP para HTTPS na porta 80 e o habilita. Se o HTTPS não estiver configurado (porta 443 não escutando), ele gera um certificado autoassinado e configura o default-ssl.conf para usar este certificado. Habilita o mod_ssl e o site SSL padrão. Reinicia o Apache. A desativação explícita do site HTTP padrão e a configuração de HTTPS com certificado autoassinado são soluções eficazes.
+
+
+Resolução: Sim
+aeta_30.txt
+
+Este script foca no Nginx (embora mencione certbot python3-certbot-nginx). Ele instala o Certbot  e tenta obter um certificado SSL, configurando o redirecionamento HTTP para HTTPS (--redirect) e HSTS (--hsts) diretamente no Certbot para Nginx. Adicionalmente, ele cria um arquivo http_redirect.conf para Nginx que redireciona o tráfego HTTP para HTTPS. Reinicia o Nginx. O uso do Certbot com redirecionamento é uma solução completa para a vulnerabilidade. O script pede o domínio interativamente, mas as opções --non-interactive no certbot amenizam isso.
+
+
+Resolução: Sim (com ressalva de interação)
+aeta_31.txt
+
+Este script foca no Apache. Ele verifica se o Apache está instalado  e se o arquivo de configuração padrão existe. Habilita o mod_rewrite. Adiciona as regras de RewriteEngine e RewriteCond/RewriteRule diretamente no 000-default.conf para redirecionamento HTTP para HTTPS. Reinicia o Apache.
+
+
+
+Resolução: Sim
+aeta_32.txt
+
+Este script detecta Apache ou Nginx. Para Apache, ele habilita mod_rewrite , cria um arquivo de configuração VirtualHost para a porta 80 que redireciona para HTTPS, habilita este site e desabilita o site padrão. Para Nginx, ele cria um arquivo de configuração http_redirect.conf com um bloco server na porta 80 que redireciona para HTTPS. Reinicia os serviços.
+
+
+
+Resolução: Sim
+aeta_33.txt
+
+Este script foca no Apache. Ele verifica se o Apache está instalado e o instala se necessário. Habilita o mod_ssl. Adiciona regras de RewriteEngine e RewriteCond/RewriteRule para redirecionamento HTTP para HTTPS ao 000-default.conf. Ele também tenta configurar o VirtualHost SSL na porta 443 se o default-ssl.conf existir. Reinicia o Apache.
+
+
+
+
+Resolução: Sim
+aeta_34.txt
+
+Este script foca no Apache. Ele verifica se o Apache está instalado e o instala se necessário. Habilita o mod_rewrite. Cria um arquivo de configuração VirtualHost na porta 80 para redirecionamento para HTTPS, desabilita a configuração padrão HTTP e habilita o novo site de redirecionamento. Reinicia o Apache.
+
+
+Resolução: Sim
+aeta_35.txt
+
+Este script foca no Apache. Ele verifica se o Apache está instalado. Habilita o mod_rewrite. Cria um arquivo de configuração VirtualHost para a porta 80 que redireciona para HTTPS e o habilita. Desabilita o site padrão HTTP 000-default.conf. Reinicia o Apache. A assunção de que o SSL já está configurado é uma limitação, mas o redirecionamento é funcional.
+
+
+Resolução: Sim
+aeta_36.txt
+
+Este script foca no Apache. Ele instala o Apache se não estiver. Habilita mod_rewrite. Cria um arquivo de configuração para a porta 80 que redireciona para HTTPS e o habilita. Desabilita a configuração padrão HTTP. O script verifica se o arquivo de configuração SSL (default-ssl.conf) existe e, se não, informa para configurá-lo manualmente ou usar o Certbot, e sai. Embora não configure o SSL por si só, ele implementa o redirecionamento e alerta sobre a necessidade do HTTPS, cumprindo a parte do redirecionamento da solução.
+
+
+
+Resolução: Sim
+aeta_37.txt
+
+Este script detecta Apache ou Nginx. Para Apache, ele habilita mod_rewrite  e cria um arquivo de configuração VirtualHost para a porta 80 que redireciona para HTTPS. Para Nginx, ele cria um bloco server na porta 80 que retorna um redirecionamento 301 para HTTPS. Reinicia os serviços.
+
+
+
+Resolução: Sim
+aeta_38.txt
+
+Este script detecta Apache ou Nginx. Para Apache, ele habilita mod_rewrite  e injeta as regras de RewriteEngine e RewriteRule no 000-default.conf. Para Nginx, ele injeta a regra return 301 no bloco server da porta 80. Reinicia os serviços.
+
+
+
+
+Resolução: Sim
+aeta_39.txt
+
+Este script foca no Apache. Ele verifica a instalação do Apache. Habilita o mod_rewrite. Modifica o arquivo de configuração do VirtualHost padrão (000-default.conf ou httpd.conf) para adicionar um novo bloco VirtualHost na porta 80 que redireciona permanentemente para HTTPS. Reinicia o Apache.
+
+
+
+Resolução: Sim
+aeta_40.txt
+
+Este script foca no Apache e é compatível com Debian/Ubuntu e CentOS/RHEL. Ele instala mod_ssl se necessário. Ativa o mod_ssl e mod_headers. Configura o ports.conf para escutar na porta 443. Cria um VirtualHost para SSL na porta 443 (se não existir) e, mais importante para a vulnerabilidade, adiciona regras de RewriteEngine e RewriteCond/RewriteRule no VirtualHost da porta 80 para redirecionamento HTTP para HTTPS. Reinicia o Apache.
+
+
+
+
+Resolução: Sim
+aeta_41.txt
+
+Este script detecta Apache ou Nginx. Para Apache, ele habilita mod_rewrite  e injeta as regras de RewriteEngine e RewriteCond/RewriteRule no VirtualHost da porta 80 do 000-default.conf. Para Nginx, ele injeta uma regra rewrite dentro do bloco server que escuta na porta 80 para redirecionar para HTTPS. Reinicia os serviços.
+
+
+
+Resolução: Sim
+aeta_42.txt
+
+Este script foca no Apache. Ele instala o Apache se necessário. Habilita mod_rewrite. Cria um VirtualHost para a porta 80 que redireciona para HTTPS. Verifica se um certificado SSL para o domínio existe e, se não, gera um certificado autoassinado. Configura um VirtualHost HTTPS para a porta 443 usando este certificado. Ativa o mod_ssl e o site HTTPS. Desativa o site padrão HTTP. Reinicia o Apache. Esta é uma solução completa.
+
+
+
+
+Resolução: Sim
+aeta_43.txt
+
+Este script foca no Apache. Ele itera sobre os VirtualHosts encontrados no Apache e cria um novo VirtualHost para a porta 80 para cada um, que redireciona permanentemente para HTTPS. Inclui uma função disable_basic_auth  que não é diretamente relevante para a vulnerabilidade de transmissão em cleartext (que foca no HTTP vs HTTPS), mas é uma medida de segurança adicional. O script reinicia o Apache.
+
+
+
+Resolução: Sim
+aeta_44.txt
+
+Este script detecta Apache ou Nginx. Para Apache, ele habilita mod_rewrite. Cria ou modifica um arquivo .htaccess na raiz do site para redirecionamento HTTP para HTTPS. Ele também garante que o Apache possa ler o .htaccess adicionando AllowOverride All. Para Nginx, ele injeta um novo bloco server na porta 80 para redirecionamento 301 dentro do bloco http principal. Reinicia os serviços.
+
+
+
+Resolução: Sim
+aeta_45.txt
+
+Este script detecta o sistema operacional (Debian/CentOS) e o servidor web (Apache/Nginx). Para Apache, ele habilita mod_rewrite  e itera sobre os arquivos de configuração para injetar regras de RewriteEngine e RewriteCond/RewriteRule em VirtualHosts na porta 80. Para Nginx, ele itera sobre os arquivos de configuração para injetar a regra return 301 em blocos server que escutam na porta 80. Reinicia os serviços.
+
+
+
+Resolução: Sim
+aeta_46.txt
+
+Este script detecta Apache ou Nginx. Para Apache, ele habilita mod_rewrite  e adiciona as regras de RewriteEngine e RewriteCond/RewriteRule ao 000-default.conf. Para Nginx, ele adiciona a regra return 301 ao arquivo de configuração padrão. Reinicia os serviços.
+
+
+Resolução: Sim
+aeta_47.txt
+
+Este script detecta Apache ou Nginx. Para Apache, ele habilita mod_rewrite  e injeta um novo bloco VirtualHost na porta 80 com redirecionamento permanente para HTTPS no 000-default.conf. Para Nginx, ele injeta uma regra return 301 no bloco server da porta 80 do arquivo de configuração default. Reinicia os serviços.
+
+
+
+Resolução: Sim
+aeta_48.txt
+
+Este script detecta Apache ou Nginx. Para Apache, ele habilita mod_rewrite  e injeta as regras de RewriteEngine e RewriteCond/RewriteRule no 000-default.conf. Ele também tenta configurar HSTS no default-ssl.conf. Para Nginx, ele injeta a regra return 301 no bloco server da porta 80 do default.conf. Reinicia os serviços.
+
+
+
+
+Resolução: Sim
+aeta_49.txt
+
+Este script foca no Apache. Ele instala o mod_ssl  e gera um certificado autoassinado se não existir. Cria um arquivo de configuração VirtualHost para HTTPS na porta 443. Habilita o site HTTPS (default-ssl.conf) e desabilita o site HTTP padrão (000-default.conf). Em seguida, configura um redirecionamento HTTP para HTTPS criando um novo arquivo de configuração para a porta 80. Reinicia o Apache. Esta é uma solução completa para a vulnerabilidade.
+
+
+
+
+Resolução: Sim
+aeta_50.txt
+
+Este script foca no Apache. Ele cria um arquivo de configuração temporário com um VirtualHost para a porta 80 que redireciona permanentemente para HTTPS. Ele faz backup do 000-default.conf e sobrescreve-o com o novo conteúdo, habilitando o mod_rewrite. Testa a configuração do Apache e reinicia o serviço.
+
+
+
+Resolução: Sim
+Média de porcentagem geral de correção:
+
+Todos os 34 scripts fornecidos são capazes de resolver a vulnerabilidade "Cleartext Transmission of Sensitive Information via HTTP" ao implementar redirecionamentos de HTTP para HTTPS em servidores web Apache ou Nginx, e em muitos casos, também cuidando da instalação/habilitação de módulos SSL ou geração de certificados (mesmo que autoassinados).
+
+Portanto, a média geral de porcentagem de correção para esta vulnerabilidade é 100%.

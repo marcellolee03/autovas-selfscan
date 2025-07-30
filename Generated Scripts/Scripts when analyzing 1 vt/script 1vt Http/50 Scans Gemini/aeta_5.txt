@@ -1,0 +1,124 @@
+#!/bin/bash
+
+# Detecta o sistema operacional
+OS=$(uname -s)
+
+# Configuração padrão para Apache em sistemas Debian/Ubuntu
+HTTPD_CONF="/etc/apache2/apache2.conf"
+SITES_AVAILABLE="/etc/apache2/sites-available"
+DEFAULT_SITE="000-default.conf"
+DEFAULT_SSL_SITE="default-ssl.conf"
+APACHE_CTL="apache2ctl"
+
+# Ajusta a configuração para CentOS/RHEL/Fedora
+if [[ "$OS" == "Linux" ]]; then
+  if command -v yum &> /dev/null; then
+    HTTPD_CONF="/etc/httpd/conf/httpd.conf"
+    SITES_AVAILABLE="/etc/httpd/conf.d"
+    DEFAULT_SITE="000-default.conf" # Pode variar
+    DEFAULT_SSL_SITE="default-ssl.conf" # Pode variar
+    APACHE_CTL="apachectl"
+  fi
+fi
+
+# Verifica se o Apache está instalado
+if ! command -v $APACHE_CTL &> /dev/null; then
+  echo "Apache não está instalado. Instalando..."
+  if [[ "$OS" == "Linux" ]]; then
+    if command -v apt-get &> /dev/null; then
+      apt-get update && apt-get install -y apache2
+    elif command -v yum &> /dev/null; then
+      yum install -y httpd
+      systemctl start httpd
+      systemctl enable httpd
+    else
+      echo "Gerenciador de pacotes não suportado. Instale o Apache manualmente."
+      exit 1
+    fi
+  else
+    echo "Sistema operacional não suportado. Instale o Apache manualmente."
+    exit 1
+  fi
+fi
+
+# Habilita SSL se não estiver habilitado
+if ! $APACHE_CTL status 2>&1 | grep -q "mod_ssl"; then
+  echo "Habilitando SSL..."
+  if [[ "$OS" == "Linux" ]]; then
+    if command -v a2enmod &> /dev/null; then
+      a2enmod ssl
+      a2enmod headers
+    elif command -v yum &> /dev/null; then
+      yum install -y mod_ssl
+    else
+      echo "Habilitação de SSL requer instalação manual do mod_ssl."
+      exit 1
+    fi
+  else
+    echo "Habilitação de SSL requer instalação manual do mod_ssl."
+    exit 1
+  fi
+fi
+
+# Gera um certificado auto-assinado (para teste)
+if [ ! -f /etc/ssl/certs/apache.pem ]; then
+  echo "Gerando certificado auto-assinado..."
+  openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout /etc/ssl/private/apache.key -out /etc/ssl/certs/apache.pem -subj "/CN=localhost"
+  chmod 600 /etc/ssl/private/apache.key
+fi
+
+# Configura o site padrão para redirecionar HTTP para HTTPS
+if [ -f "$SITES_AVAILABLE/$DEFAULT_SITE" ]; then
+  echo "Configurando redirecionamento HTTP para HTTPS no site padrão..."
+  SITE_CONF="$SITES_AVAILABLE/$DEFAULT_SITE"
+
+  # Cria um arquivo de configuração temporário
+  TEMP_CONF=$(mktemp)
+
+  # Adiciona a configuração de redirecionamento
+  cat <<EOF > "$TEMP_CONF"
+<VirtualHost *:80>
+    ServerName localhost
+    Redirect permanent / https://\${SERVER_NAME}\${REQUEST_URI}
+</VirtualHost>
+EOF
+
+  # Substitui o conteúdo do arquivo de configuração original
+  sudo tee "$SITE_CONF" > /dev/null <<EOF
+$(cat "$TEMP_CONF")
+EOF
+  rm "$TEMP_CONF"
+fi
+
+# Configura SSL VirtualHost (se não existir)
+if [ ! -f "$SITES_AVAILABLE/$DEFAULT_SSL_SITE" ]; then
+  echo "Criando configuração SSL VirtualHost..."
+  SSL_CONF="$SITES_AVAILABLE/$DEFAULT_SSL_SITE"
+  cat <<EOF > "$SSL_CONF"
+<VirtualHost *:443>
+    ServerName localhost
+    DocumentRoot /var/www/html
+    SSLEngine on
+    SSLCertificateFile /etc/ssl/certs/apache.pem
+    SSLCertificateKeyFile /etc/ssl/private/apache.key
+    <Directory /var/www/html>
+        AllowOverride All
+        Require all granted
+    </Directory>
+</VirtualHost>
+EOF
+  if command -v a2ensite &> /dev/null; then
+    a2ensite default-ssl
+  fi
+fi
+
+# Garante que o site SSL esteja habilitado
+if command -v a2ensite &> /dev/null; then
+  a2ensite default-ssl
+fi
+
+# Reinicia o Apache
+echo "Reiniciando o Apache..."
+$APACHE_CTL restart
+
+echo "Vulnerabilidade corrigida (redirecionamento HTTP para HTTPS implementado)."

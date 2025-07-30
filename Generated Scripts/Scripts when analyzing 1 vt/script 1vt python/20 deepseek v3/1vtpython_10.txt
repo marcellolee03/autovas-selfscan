@@ -1,0 +1,4 @@
+#!/bin/bash
+sudo apt-get update
+sudo apt-get install --only-upgrade python3.10 -y
+sudo systemctl restart $(sudo netstat -tulnp | grep ':5000' | awk '{print $7}' | cut -d'/' -f1)

@@ -1,0 +1,8 @@
+#!/bin/bash
+PY_VERSION=$(python3 --version | awk '{print $2}')
+if [[ $PY_VERSION < "3.10.15" ]]; then
+    sudo apt-get update &&
+    sudo apt-get install --only-upgrade python3 -y &&
+    sudo pip install --upgrade pip &&
+    sudo systemctl restart <nome_do_serviço_usando_python>
+fi

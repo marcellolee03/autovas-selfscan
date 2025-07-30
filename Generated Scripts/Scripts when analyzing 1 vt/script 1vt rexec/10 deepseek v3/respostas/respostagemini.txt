@@ -1,0 +1,23 @@
+ Com base na análise do problema e dos scripts fornecidos, aqui está a avaliação de cada script e a porcentagem geral de correção.
+
+A vulnerabilidade principal é o serviço rexec estar em execução na porta 512. A solução recomendada é desativar este serviço. Um script de correção eficaz deve, portanto, parar o serviço, impedi-lo de iniciar no futuro e, idealmente, bloquear a porta correspondente como uma camada extra de segurança.
+
+Análise Individual dos Scripts
+
+    1vtrexec_1.txt: Sim. Este script é muito completo. Ele para e desabilita os serviços e sockets do rexec via systemctl, remove as configurações de inetd e xinetd, e ainda adiciona regras de firewall com iptables para bloquear a porta 512.
+
+1vtrexec_2.txt: Sim. Este script resolve o problema de forma eficaz para sistemas modernos que usam systemd e ufw. Ele para, desabilita o serviço e bloqueia a porta com o firewall.
+1vtrexec_3.txt: Sim. Além de parar e desabilitar o serviço com systemctl e bloquear a porta com ufw, este script também lida com o caso do rexec ser iniciado pelo inetd, comentando a linha de configuração correspondente.
+1vtrexec_4.txt: Sim. Um script muito robusto que verifica se o serviço está ativo antes de pará-lo. Ele também lida com as configurações de inetd e xinetd e bloqueia a porta para IPv4 e IPv6 usando iptables.
+1vtrexec_5.txt: Sim. Este script utiliza uma abordagem muito segura. Além de parar e desabilitar o serviço, ele usa o comando mask para impedir que o serviço seja iniciado por outros processos. Também nega o acesso à porta via ufw.
+1vtrexec_6.txt: Sim. Este script é simples e eficaz para sistemas baseados em systemd e ufw. Ele para, desabilita o serviço e recarrega o firewall para aplicar a regra de bloqueio de porta.
+1vtrexec_7.txt: Sim. Este script é abrangente, cobrindo a desativação via systemctl, a remoção de configurações de inetd e xinetd , e o bloqueio da porta tanto com iptables quanto com ufw.
+1vtrexec_8.txt: Sim. Este script foca em desabilitar o serviço em seus arquivos de configuração (xinetd e inetd ) e pará-lo se estiver em execução. Embora não configure um firewall, ele desativa o serviço, o que corrige a vulnerabilidade.
+1vtrexec_9.txt: Sim. Este script utiliza múltiplos métodos para garantir a correção: desativa o serviço com systemctl, remove as configurações de inetd/xinetd, mata o processo à força e bloqueia a porta com iptables.
+1vtrexec_10.txt: Sim. Outro script muito completo que desativa o serviço via systemctl, remove as configurações de inetd e xinetd , remove a entrada do serviço de /etc/services e bloqueia a porta com iptables.
+
+Porcentagem de Correção
+
+Todos os 10 scripts enviados são capazes de corrigir a vulnerabilidade descrita, desativando o serviço rexec. Embora alguns sejam mais abrangentes que outros, todos cumprem a tarefa principal.
+
+Média de porcentagem geral de correção: 100%

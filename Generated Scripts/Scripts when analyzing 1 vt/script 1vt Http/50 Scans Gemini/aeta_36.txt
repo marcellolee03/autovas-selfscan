@@ -1,0 +1,55 @@
+#!/bin/bash
+
+# Este script corrige a vulnerabilidade de transmissão de informações sensíveis em texto claro via HTTP,
+# redirecionando todo o tráfego HTTP para HTTPS.
+
+# Variáveis
+HTTP_PORT=80
+HTTPS_PORT=443
+APACHE_CONFIG_FILE="/etc/apache2/sites-available/000-default.conf" # Caminho padrão para sistemas Debian/Ubuntu
+APACHE_SSL_CONFIG_FILE="/etc/apache2/sites-available/default-ssl.conf" # Caminho padrão para sistemas Debian/Ubuntu
+
+# Verifica se o Apache está instalado
+if ! command -v apache2ctl &> /dev/null; then
+  echo "Apache não está instalado. Instalando..."
+  apt update
+  apt install -y apache2
+fi
+
+# Habilita o módulo rewrite do Apache
+if ! a2enmod rewrite &> /dev/null; then
+  a2enmod rewrite
+fi
+
+# Cria um arquivo de configuração virtual para redirecionar HTTP para HTTPS
+REDIRECT_CONFIG="/etc/apache2/sites-available/http-redirect.conf"
+
+cat > "$REDIRECT_CONFIG" <<EOL
+<VirtualHost *:80>
+    ServerName \$(hostname)
+    Redirect permanent / https://\${SERVER_NAME}\${REQUEST_URI}
+</VirtualHost>
+EOL
+
+# Desabilita a configuração padrão do Apache (se existir)
+if [ -f "$APACHE_CONFIG_FILE" ]; then
+  a2dissite 000-default.conf
+fi
+
+# Habilita a configuração de redirecionamento
+a2ensite http-redirect.conf
+
+# Configura o SSL (se ainda não estiver configurado)
+if [ ! -f "$APACHE_SSL_CONFIG_FILE" ]; then
+  echo "Arquivo de configuração SSL não encontrado. Por favor, configure o SSL manualmente e rode este script novamente."
+  echo "Você pode usar Let's Encrypt (certbot) para configurar o SSL automaticamente."
+  echo "Instale o certbot com: apt install certbot python3-certbot-apache"
+  echo "E rode: certbot --apache"
+  exit 1
+fi
+
+# Reinicia o Apache para aplicar as mudanças
+systemctl restart apache2
+
+echo "Redirecionamento HTTP para HTTPS configurado. Verifique se o SSL está corretamente configurado e habilitado."
+exit 0

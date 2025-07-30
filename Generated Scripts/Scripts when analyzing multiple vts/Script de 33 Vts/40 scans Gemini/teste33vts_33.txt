@@ -1,0 +1,131 @@
+```bash
+#!/bin/bash
+
+# Vulnerability 1: Proxmox VE EOL
+# This script assumes you want to upgrade to the latest stable Proxmox VE release.
+# It's crucial to have a backup before proceeding with any upgrade.
+
+# Update package lists
+apt update
+
+# Perform the upgrade
+apt dist-upgrade -y
+
+# Clean up old packages
+apt autoremove -y
+
+# Update to the latest Proxmox VE release (replace with specific version if needed)
+apt install proxmox-ve postfix open-vm-tools -y
+
+# Reboot the system to apply the changes.
+reboot
+
+# Vulnerability 2-6: jQuery < 1.9.0 XSS Vulnerability
+# Update jQuery to 1.9.0 or later.
+# Because the vulnerability is located in files served by a web server on port 80, this script assumes a manual process for web applications
+
+# Define the paths where vulnerable jQuery files were found.
+jquery_paths=(
+    "/var/www/html/js/jquery-1.8.3.min.js"
+    "/var/www/html/opscenter/webcommon/framework/js/jquery-1.8.3.min.js"
+    "/var/www/html/framesets/js/jquery-1.8.3.min.js"
+    "/var/www/html/frameset/js/jquery-1.8.3.min.js"
+    "/var/www/html/console/framework/js/jquery-1.8.3.min.js"
+)
+
+new_jquery_version="jquery-3.7.0.min.js"
+download_url="https://code.jquery.com/$new_jquery_version"
+backup_dir="/opt/jquery_backups"
+
+# Create backup directory if it doesn't exist
+mkdir -p "$backup_dir"
+
+# Function to replace jQuery file
+replace_jquery() {
+    local file_path="$1"
+
+    # Check if the file exists
+    if [ -f "$file_path" ]; then
+        echo "Backing up $file_path to $backup_dir"
+        cp "$file_path" "$backup_dir/$(basename "$file_path")_$(date +%Y%m%d%H%M%S)"
+
+        echo "Downloading new jQuery version: $new_jquery_version"
+        wget -q "$download_url" -O "/tmp/$new_jquery_version"
+
+        echo "Replacing $file_path with new jQuery version"
+        cp "/tmp/$new_jquery_version" "$file_path"
+
+        echo "Successfully replaced $file_path"
+    else
+        echo "File not found: $file_path"
+    fi
+}
+
+# Update jQuery files
+for path in "${jquery_paths[@]}"; do
+    replace_jquery "$path"
+done
+
+# Clean up downloaded jQuery file
+rm -f "/tmp/$new_jquery_version"
+
+echo "jQuery files updated.  You may need to clear your browser cache to see the changes."
+
+# Vulnerability 7, 8, 9, 13, 14, 15, 16, 19, 21, 22: SSH Weak Algorithms
+# Disable weak SSH algorithms.
+# Edit /etc/ssh/sshd_config to remove weak algorithms
+# This requires manual intervention and testing
+
+# This is a placeholder, as directly editing the sshd_config file is not recommended in automated scripts without proper error checking and handling.
+# Consider using `sed` with caution or a configuration management tool.
+echo "Please manually edit /etc/ssh/sshd_config and apply these changes:"
+echo "Remove or comment out the following lines (if present):"
+echo "KexAlgorithms diffie-hellman-group1-sha1"
+echo "HostKeyAlgorithms ssh-dss"
+echo "Ciphers 3des-cbc,aes128-cbc,aes256-cbc,twofish-cbc,twofish128-cbc,twofish256-cbc"
+echo "MACs umac-64-etm@openssh.com,umac-64@openssh.com,hmac-md5,hmac-sha1-96"
+echo "Add these lines or ensure they exist (modify as needed for your security policy):"
+echo "KexAlgorithms curve25519-sha256,curve25519-sha256@libssh.org,ecdh-sha2-nistp256,ecdh-sha2-nistp384,ecdh-sha2-nistp521,diffie-hellman-group-exchange-sha256,diffie-hellman-group16-sha512,diffie-hellman-group18-sha512"
+echo "Ciphers chacha20-poly1305@openssh.com,aes256-gcm@openssh.com,aes128-gcm@openssh.com,aes256-ctr,aes128-ctr"
+echo "MACs hmac-sha2-256,hmac-sha2-512,hmac-ripemd160"
+echo "After editing, restart the SSH service: systemctl restart sshd"
+
+# Vulnerability 10: DCE/RPC and MSRPC Services Enumeration Reporting
+# This vulnerability requires firewall configuration to block access to specific ports.
+# Implementing this part requires specific firewall knowledge.
+
+echo "Please configure your firewall to block external access to ports related to DCE/RPC and MSRPC (e.g., 135, 49664, etc.)."
+echo "Refer to your firewall documentation for specific instructions."
+
+# Vulnerability 11: Telnet Unencrypted Cleartext Login
+# Remove Telnet and install SSH
+systemctl stop telnet.socket
+systemctl disable telnet.socket
+apt remove --purge inetd telnetd -y
+apt install openssh-server -y
+
+# Vulnerability 12: SSL/TLS: Deprecated TLSv1.0 and TLSv1.1 Protocol Detection
+# Disable TLS 1.0 and 1.1
+# This depends on the specific service using TLS. Example for Apache.
+# This requires adapting the script to the specific services running on the server and editing the appropriate configuration files.
+
+echo "Please manually disable TLSv1.0 and TLSv1.1 in the configuration of your services (e.g., Apache, Nginx, etc.)."
+echo "For Apache, edit /etc/apache2/mods-available/ssl.conf and set SSLProtocol to '-all +TLSv1.2 +TLSv1.3'."
+echo "For Nginx, edit /etc/nginx/nginx.conf and set ssl_protocols TLSv1.2 TLSv1.3."
+echo "Restart the services after making the changes (e.g., systemctl restart apache2)."
+
+# Vulnerability 17, 18, 20, 23, 24, 25: TCP Timestamps Information Disclosure
+# Disable TCP timestamps
+echo "Disabling TCP timestamps..."
+echo "net.ipv4.tcp_timestamps = 0" >> /etc/sysctl.conf
+sysctl -p
+echo "TCP timestamps disabled."
+
+# Vulnerability 26, 27, 28, 29, 30, 31, 32: ICMP Timestamp Reply Information Disclosure
+# Disable ICMP timestamp replies
+echo "Disabling ICMP timestamp replies..."
+echo "net.ipv4.icmp_echo_ignore_all = 1" >> /etc/sysctl.conf
+echo "net.ipv4.icmp_ignore_bogus_error_responses = 1" >> /etc/sysctl.conf
+sysctl -p
+echo "ICMP timestamp replies disabled."
+```

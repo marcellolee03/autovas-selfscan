@@ -1,0 +1,169 @@
+```bash
+#!/bin/bash
+
+# Vulnerability 1: Proxmox VE EOL
+# This vulnerability requires a system upgrade, which is beyond the scope of a simple script.
+# Manual intervention is required to upgrade Proxmox VE.
+echo "Vulnerability 1: Proxmox VE End of Life detected."
+echo "Please upgrade your Proxmox VE installation to a supported version manually."
+echo "This script cannot perform the upgrade automatically."
+
+# Vulnerability 2-6: jQuery < 1.9.0 XSS Vulnerability
+# Define the vulnerable file paths and the URL for the patched jQuery version.
+jquery_vulnerable_paths=(
+    "/var/www/html/js/jquery-1.8.3.min.js"
+    "/var/www/html/opscenter/webcommon/framework/js/jquery-1.8.3.min.js"
+    "/var/www/html/framesets/js/jquery-1.8.3.min.js"
+    "/var/www/html/frameset/js/jquery-1.8.3.min.js"
+    "/var/www/html/console/framework/js/jquery-1.8.3.min.js"
+)
+jquery_fixed_url="https://code.jquery.com/jquery-1.9.0.min.js"
+
+# Function to download and replace the vulnerable jQuery files.
+update_jquery() {
+  for path in "${jquery_vulnerable_paths[@]}"; do
+    if [ -f "$path" ]; then
+      echo "Updating jQuery file: $path"
+      # Create a backup of the old file
+      cp "$path" "${path}.bak"
+      # Download the patched jQuery version
+      wget -q "$jquery_fixed_url" -O "$path"
+      if [ $? -eq 0 ]; then
+        echo "Successfully updated $path"
+      else
+        echo "Failed to update $path. Restoring from backup."
+        mv "${path}.bak" "$path"
+      fi
+    else
+      echo "File not found: $path"
+    fi
+  done
+}
+
+update_jquery
+
+# Vulnerability 7, 8, 9, 13, 14, 15, 16, 19, 21, 22: Weak SSH Algorithms
+# Modify SSH configuration to disable weak algorithms.
+ssh_config="/etc/ssh/sshd_config"
+
+# Create a backup of the original sshd_config file.
+cp "$ssh_config" "$ssh_config.bak"
+
+# Define stronger algorithms
+strong_kex_algorithms="curve25519-sha256,curve25519-sha256@libssh.org,ecdh-sha2-nistp256,ecdh-sha2-nistp384,ecdh-sha2-nistp521,diffie-hellman-group-exchange-sha256"
+strong_cipher_algorithms="chacha20-poly1305@openssh.com,aes256-gcm@openssh.com,aes128-gcm@openssh.com,aes256-ctr,aes128-ctr"
+strong_mac_algorithms="hmac-sha2-256,hmac-sha2-512,hmac-ripemd160"
+strong_hostkey_algorithms="ecdsa-sha2-nistp256,ecdsa-sha2-nistp384,ecdsa-sha2-nistp521,ssh-ed25519"
+
+# Function to update SSH configuration.
+update_ssh_config() {
+
+  # Set KexAlgorithms
+  if grep -q "^KexAlgorithms" "$ssh_config"; then
+    sed -i "s/^KexAlgorithms.*/KexAlgorithms $strong_kex_algorithms/" "$ssh_config"
+  else
+    echo "KexAlgorithms $strong_kex_algorithms" >> "$ssh_config"
+  fi
+
+  # Set Ciphers
+  if grep -q "^Ciphers" "$ssh_config"; then
+    sed -i "s/^Ciphers.*/Ciphers $strong_cipher_algorithms/" "$ssh_config"
+  else
+    echo "Ciphers $strong_cipher_algorithms" >> "$ssh_config"
+  fi
+
+  # Set MACs
+  if grep -q "^MACs" "$ssh_config"; then
+    sed -i "s/^MACs.*/MACs $strong_mac_algorithms/" "$ssh_config"
+  else
+    echo "MACs $strong_mac_algorithms" >> "$ssh_config"
+  fi
+  
+    # Set HostKeyAlgorithms
+  if grep -q "^HostKeyAlgorithms" "$ssh_config"; then
+    sed -i "s/^HostKeyAlgorithms.*/HostKeyAlgorithms $strong_hostkey_algorithms/" "$ssh_config"
+  else
+    echo "HostKeyAlgorithms $strong_hostkey_algorithms" >> "$ssh_config"
+  fi
+  
+  #Disable PubkeyAuthentication for DSA
+  if grep -q "^PubkeyAuthentication" "$ssh_config"; then
+        echo "PubkeyAuthentication is already defined."
+    else
+        echo "PubkeyAuthentication yes" >> "$ssh_config"
+  fi
+    if grep -q "^HostbasedAuthentication" "$ssh_config"; then
+        echo "HostbasedAuthentication is already defined."
+    else
+        echo "HostbasedAuthentication no" >> "$ssh_config"
+  fi
+    if grep -q "^ChallengeResponseAuthentication" "$ssh_config"; then
+        echo "ChallengeResponseAuthentication is already defined."
+    else
+        echo "ChallengeResponseAuthentication no" >> "$ssh_config"
+  fi
+  
+  #Restart ssh service to apply the new configurations
+  systemctl restart sshd
+}
+
+update_ssh_config
+
+# Vulnerability 10: DCE/RPC and MSRPC Services Enumeration Reporting
+# This requires firewall configuration.  Assuming UFW is installed.
+# The script blocks incoming traffic to port 135.
+echo "Blocking incoming traffic to port 135 (DCE/RPC) using UFW."
+ufw allow out 135
+ufw deny in 135
+ufw reload
+
+# Vulnerability 11: Telnet Unencrypted Cleartext Login
+# Disable Telnet and suggest using SSH.
+echo "Disabling Telnet service."
+systemctl stop telnet.socket
+systemctl disable telnet.socket
+echo "Telnet has been disabled. Please use SSH for secure remote access."
+
+# Vulnerability 12: SSL/TLS: Deprecated TLSv1.0 and TLSv1.1 Protocol Detection
+# Disable TLS 1.0 and 1.1 in the OpenSSL configuration.
+# The path to the OpenSSL config file may vary depending on the system.
+# This script assumes /etc/ssl/openssl.cnf
+
+openssl_config="/etc/ssl/openssl.cnf"
+
+# Check if openssl config file exists.
+if [ -f "$openssl_config" ]; then
+    echo "Modifying $openssl_config to disable TLSv1.0 and TLSv1.1"
+
+    # Create backup of config file
+    cp "$openssl_config" "$openssl_config.bak"
+
+    # Add or modify the SSLProtocol line to only allow TLSv1.2 and higher
+    if grep -q "^ssl_conf = ssl_sect" "$openssl_config"; then
+        sed -i "s/^ssl_conf = ssl_sect/ssl_conf = ssl_sect\n\n[ssl_sect]\nsystem_default = system_default_sect\n\n[system_default_sect]\nMinProtocol = TLSv1.2/" "$openssl_config"
+    else
+        echo "ssl_conf = ssl_sect\n\n[ssl_sect]\nsystem_default = system_default_sect\n\n[system_default_sect]\nMinProtocol = TLSv1.2" >> "$openssl_config"
+    fi
+else
+    echo "OpenSSL configuration file not found at $openssl_config. Skipping TLS protocol disabling."
+fi
+
+#Restart services, it should be done manually
+echo "Please manually restart the services that use OpenSSL to apply the changes."
+
+# Vulnerability 17, 18, 20, 23, 24, 25: TCP Timestamps Information Disclosure
+# Disable TCP timestamps.
+echo "Disabling TCP timestamps."
+echo "net.ipv4.tcp_timestamps = 0" >> /etc/sysctl.conf
+sysctl -p
+echo "TCP timestamps have been disabled. Reboot may be required."
+
+# Vulnerability 26, 27, 28, 29, 30, 31, 32: ICMP Timestamp Reply Information Disclosure
+# Disable ICMP timestamp replies.
+echo "Disabling ICMP timestamp replies."
+echo "net.ipv4.icmp_echo_ignore_all = 1" >> /etc/sysctl.conf
+sysctl -p
+echo "ICMP timestamp replies have been disabled. Reboot may be required."
+
+echo "Script completed. Please review the output and reboot the system if necessary."
+```

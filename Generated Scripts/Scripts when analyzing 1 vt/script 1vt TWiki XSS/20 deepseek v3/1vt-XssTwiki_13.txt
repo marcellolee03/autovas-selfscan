@@ -1,0 +1,18 @@
+#!/bin/bash
+TWIKI_VERSION="4.2.4"
+TWIKI_INSTALL_DIR="/var/www/twiki"
+
+if [ -d "$TWIKI_INSTALL_DIR" ]; then
+    CURRENT_VERSION=$(grep -oP 'TWikiRelease\s+\K[0-9.]+' "$TWIKI_INSTALL_DIR/lib/TWiki.pm")
+    if [ "$CURRENT_VERSION" != "$TWIKI_VERSION" ]; then
+        wget -O /tmp/twiki.tar.gz "http://twiki.org/p/pub/TWiki/TWikiRelease${TWIKI_VERSION}/TWiki${TWIKI_VERSION}.tgz"
+        tar -xzf /tmp/twiki.tar.gz -C /tmp
+        cp -r /tmp/TWiki/lib/* "$TWIKI_INSTALL_DIR/lib/"
+        cp -r /tmp/TWiki/bin/* "$TWIKI_INSTALL_DIR/bin/"
+        cp -r /tmp/TWiki/templates/* "$TWIKI_INSTALL_DIR/templates/"
+        cp -r /tmp/TWiki/pub/* "$TWIKI_INSTALL_DIR/pub/"
+        rm -rf /tmp/twiki.tar.gz /tmp/TWiki
+        chown -R www-data:www-data "$TWIKI_INSTALL_DIR"
+        systemctl restart apache2
+    fi
+fi

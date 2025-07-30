@@ -1,0 +1,10 @@
+#!/bin/sh
+set -eux
+cp /etc/ssh/sshd_config /etc/ssh/sshd_config.bak
+rm -f /etc/ssh/ssh_host_dsa_key*
+echo "HostKeyAlgorithms -ssh-dss" >> /etc/ssh/sshd_config
+if command -v systemctl >/dev/null 2>&1; then
+    systemctl restart sshd >/dev/null 2>&1 || systemctl restart ssh >/dev/null 2>&1
+elif command -v service >/dev/null 2>&1; then
+    service sshd restart >/dev/null 2>&1 || service ssh restart >/dev/null 2>&1
+fi

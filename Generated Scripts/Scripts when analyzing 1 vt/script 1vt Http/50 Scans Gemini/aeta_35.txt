@@ -1,0 +1,41 @@
+```bash
+#!/bin/bash
+
+# Este script corrige a vulnerabilidade de transmissão de informações sensíveis em texto claro via HTTP,
+# implementando redirecionamento para HTTPS e desabilitando o acesso HTTP.
+
+# Variáveis
+HTTP_PORT=80
+HTTPS_PORT=443
+APACHE_CONFIG_FILE="/etc/apache2/sites-available/000-default.conf"  # Caminho padrão para o arquivo de configuração do Apache em Debian/Ubuntu
+APACHE_SSL_CONFIG_FILE="/etc/apache2/sites-available/default-ssl.conf" # Caminho padrão para o arquivo de configuração SSL do Apache em Debian/Ubuntu
+
+# 1. Verificar se o Apache está instalado
+if ! command -v apache2ctl &> /dev/null; then
+  echo "Apache não está instalado. Por favor, instale o Apache antes de executar este script."
+  exit 1
+fi
+
+# 2. Habilitar o módulo rewrite do Apache
+sudo a2enmod rewrite
+
+# 3. Configurar o redirecionamento HTTP para HTTPS
+echo "<VirtualHost *:${HTTP_PORT}>
+    ServerName \$(hostname)
+    Redirect permanent / https://\${SERVER_NAME}/
+</VirtualHost>" | sudo tee /etc/apache2/sites-available/http_redirect.conf
+
+sudo a2ensite http_redirect.conf
+
+# 4. Configurar o arquivo SSL (se necessário). Assumindo que já existe e está configurado.
+#    Se não estiver configurado, será necessário gerar um certificado SSL e configurar o arquivo default-ssl.conf
+
+# 5. Desabilitar o site padrão HTTP
+sudo a2dissite 000-default.conf
+
+# 6. Reiniciar o Apache para aplicar as mudanças
+sudo systemctl restart apache2
+
+echo "Redirecionamento HTTP para HTTPS configurado.  O acesso HTTP foi desabilitado."
+echo "Verifique se o site está acessível via HTTPS."
+```

@@ -1,0 +1,60 @@
+#!/bin/bash
+
+BACKUP_FILE="/etc/ssh/sshd_config.bak"
+CONFIG_FILE="/etc/ssh/sshd_config"
+TEMP_FILE=$(mktemp)
+
+cp -p "${CONFIG_FILE}" "${BACKUP_FILE}" || exit 1
+
+if grep -qE '^\s*HostKeyAlgorithms\s+' "${CONFIG_FILE}"; then
+    awk '
+    /^\s*HostKeyAlgorithms\s+/ {
+        split($0, parts, /[[:space:]]+/)
+        alg_field = $0
+        sub(/^\s*HostKeyAlgorithms\s+/, "", alg_field)
+        sub(/#.*/, "", alg_field)
+        n = split(alg_field, algs, ",")
+        new_algs = ""
+        for (i=1; i<=n; i++) {
+            if (algs[i] !~ /^ssh-dss$|ssh-dss,|,ssh-dss$/) {
+                if (new_algs != "") new_algs = new_algs ",";
+                new_algs = new_algs algs[i];
+            }
+        }
+        sub(/^,\*/, "", new_algs);
+        if (new_algs == "") {
+            print "#HostKeyAlgorithms REMOVED_ALL (ssh-dss was only option)";
+        } else {
+            print "HostKeyAlgorithms " new_algs;
+        }
+        next;
+    }
+    { print }
+    ' "${CONFIG_FILE}" > "${TEMP_FILE}" || exit 1
+
+    if grep -q '^\s*HostKeyAlgorithms\s' "${TEMP_FILE}"; then
+        mv "${TEMP_FILE}" "${CONFIG_FILE}" || exit 1
+    else
+        exit 1
+    fi
+else
+    echo "HostKeyAlgorithms ecdsa-sha2-nistp256,ecdsa-sha2-nistp384,ecdsa-sha2-nistp521,ssh-rsa,ssh-ed25519" | tee -a "${CONFIG_FILE}" >/dev/null || exit 1
+fi
+
+/usr/sbin/sshd -t || {
+    cp -p "${BACKUP_FILE}" "${CONFIG_FILE}" >/dev/null 2>&1
+    exit 1
+}
+
+if command -v systemctl >/dev/null; then
+    systemctl reload sshd >/dev/null 2>&1
+elif command -v service >/dev/null; then
+    service ssh reload >/dev/null 2>&1
+elif [ -x /etc/init.d/sshd ]; then
+    /etc/init.d/sshd reload >/dev/null 2>&1
+else
+    pkill -HUP -x sshd >/dev/null 2>&1
+fi
+
+rm -f "${TEMP_FILE}" >/dev/null 2>&1
+exit 0

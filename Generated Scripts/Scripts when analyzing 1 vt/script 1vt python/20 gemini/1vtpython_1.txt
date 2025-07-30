@@ -1,0 +1,69 @@
+```bash
+#!/bin/bash
+
+# Variáveis
+PYTHON_VERSION=$(python -V 2>&1 | awk '{print $2}' | cut -d'.' -f1,2)
+INSTALLED_VERSION=$(python -V 2>&1 | awk '{print $2}')
+REQUIRED_VERSION="3.10.15"
+
+# Função para verificar se o Python está instalado
+check_python() {
+  if ! command -v python &> /dev/null; then
+    echo "Python não está instalado. Por favor, instale o Python antes de executar este script."
+    exit 1
+  fi
+}
+
+# Função para verificar se o script está rodando como root
+check_root() {
+  if [[ $EUID -ne 0 ]]; then
+    echo "Este script precisa ser executado como root."
+    exit 1
+  fi
+}
+
+# Função para atualizar o Python
+update_python() {
+
+  # Verificar se o sistema é Windows
+  if [[ "$OSTYPE" == "msys" ]]; then
+    echo "Sistema Windows detectado. O script irá tentar atualizar o Python usando o Chocolatey."
+
+    # Verificar se o Chocolatey está instalado
+    if ! command -v choco &> /dev/null; then
+      echo "Chocolatey não está instalado. Instalando..."
+      Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; iex ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))
+    fi
+
+    # Atualizar o Python
+    choco upgrade python --yes
+    echo "Python atualizado com Chocolatey."
+    exit 0
+  else
+    echo "Sistema não Windows detectado. Este script destina-se apenas a sistemas Windows."
+    exit 1
+  fi
+
+}
+
+# Verificações iniciais
+check_python
+check_root
+
+# Verificar a versão atual do Python
+echo "Versão instalada do Python: $INSTALLED_VERSION"
+
+# Comparar versões e atualizar se necessário
+if [[ $(echo "$INSTALLED_VERSION < $REQUIRED_VERSION" | bc -l) -eq 1 ]]; then
+  echo "Uma versão vulnerável do Python foi detectada. Atualizando para a versão $REQUIRED_VERSION..."
+  update_python
+else
+  echo "A versão do Python é igual ou superior a $REQUIRED_VERSION. Nenhuma atualização necessária."
+fi
+
+# Verificar a versão após a atualização
+NEW_PYTHON_VERSION=$(python -V 2>&1 | awk '{print $2}')
+echo "Versão do Python após a atualização: $NEW_PYTHON_VERSION"
+
+echo "Script de correção concluído."
+```

@@ -1,0 +1,50 @@
+#!/bin/bash
+BACKUP_DIR="/var/backups/twiki_upgrade"
+TWIKI_FIXED_VERSION="4.2.4"
+DOWNLOAD_URL="http://sourceforge.net/projects/twiki/files/TWiki%20for%20All%20Platforms/TWiki%20${TWIKI_FIXED_VERSION}/TWiki-${TWIKI_FIXED_VERSION}.tgz"
+CANDIDATE_PATHS=("/var/www/twiki" "/var/www/html/twiki" "/usr/local/twiki" "/opt/twiki" 
+                 "/usr/local/apache/htdocs/twiki" "/home/twiki" "/srv/www/twiki")
+
+if ! TWIKI_HOME=$(find "${CANDIDATE_PATHS[@]}" -maxdepth 0 -exec sh -c '
+  for d do [ -d "$d/bin" ] && [ -d "$d/data" ] && [ -d "$d/pub" ] && echo "$d" && exit 0; done' sh {} + 2>/dev/null); then
+  echo "Falha: Nenhuma instalação do TWiki encontrada."
+  exit 1
+fi
+
+mkdir -p "$BACKUP_DIR" || exit 1
+TIMESTAMP=$(date +%Y%m%d%H%M%S)
+BACKUP_FILE="${BACKUP_DIR}/twiki_backup_${TIMESTAMP}.tar.gz"
+old_dir_owner=$(stat -c "%U:%G" "$TWIKI_HOME")
+if ! tar -czf "$BACKUP_FILE" -C "$(dirname "$TWIKI_HOME")" "$(basename "$TWIKI_HOME")" >/dev/null 2>&1; then
+  echo "Falha: Erro ao criar backup."
+  exit 1
+fi
+
+TMP_DIR=$(mktemp -d)
+wget -q -P "$TMP_DIR" "$DOWNLOAD_URL" || { echo "Falha: Download do TWiki ${TWIKI_FIXED_VERSION} mal-sucedido."; exit 1; }
+tar -xzf "$TMP_DIR/TWiki-${TWIKI_FIXED_VERSION}.tgz" -C "$TMP_DIR" >/dev/null 2>&1 || exit 1
+
+for dir in data pub; do
+  if ! cp -rpf "${TWIKI_HOME}/${dir}" "${TMP_DIR}/TWiki-${TWIKI_FIXED_VERSION}/"; then
+    echo "Falha: Falha ao copiar ${dir}."
+    exit 1
+  fi
+done
+
+if [ -f "${TWIKI_HOME}/lib/LocalSite.cfg" ]; then
+  cp -p "${TWIKI_HOME}/lib/LocalSite.cfg" "${TMP_DIR}/TWiki-${TWIKI_FIXED_VERSION}/lib/" || exit 1
+fi
+
+rm -rf "$TWIKI_HOME" || exit 1
+mv "${TMP_DIR}/TWiki-${TWIKI_FIXED_VERSION}" "$TWIKI_HOME" || exit 1
+chown -R "$old_dir_owner" "$TWIKI_HOME"
+
+if { systemctl is-active --quiet apache2 || systemctl is-active --quiet httpd; } 2>/dev/null; then
+  if command -v systemctl >/dev/null; then
+    { systemctl restart apache2 || systemctl restart httpd; } >/dev/null 2>&1
+  elif command -v service >/dev/null; then
+    { service apache2 restart || service httpd restart; } >/dev/null 2>&1
+  fi
+fi
+
+rm -rf "$TMP_DIR"

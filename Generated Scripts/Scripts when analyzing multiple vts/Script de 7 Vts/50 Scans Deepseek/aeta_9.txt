@@ -1,0 +1,42 @@
+#!/bin/bash
+# Corrigir Vulnerabilidade 1: Forçar uso de HTTPS
+sed -i 's/^#*Listen 80$/Listen 443/' /etc/apache2/ports.conf
+sed -i 's/^<VirtualHost \*:80>/<VirtualHost \*:443>/' /etc/apache2/sites-available/000-default.conf
+a2enmod ssl
+systemctl restart apache2
+
+# Corrigir Vulnerabilidade 2: Desabilitar recursão no DNS
+if [ -f /etc/bind/named.conf.options ]; then
+    sed -i 's/recursion yes;/recursion no;/' /etc/bind/named.conf.options
+    systemctl restart bind9
+fi
+
+# Corrigir Vulnerabilidade 3: Desabilitar ICMP Timestamp
+echo "net.ipv4.icmp_echo_ignore_broadcasts = 1" >> /etc/sysctl.conf
+echo "net.ipv4.icmp_ignore_bogus_error_responses = 1" >> /etc/sysctl.conf
+sysctl -p
+
+# Corrigir Vulnerabilidade 4: Desabilitar TLSv1.0 e TLSv1.1
+if [ -f /etc/ssl/openssl.cnf ]; then
+    sed -i 's/^MinProtocol = TLSv1.0$/MinProtocol = TLSv1.2/' /etc/ssl/openssl.cnf
+fi
+if [ -f /etc/apache2/mods-available/ssl.conf ]; then
+    sed -i 's/SSLProtocol all -SSLv3$/SSLProtocol all -SSLv3 -TLSv1 -TLSv1.1/' /etc/apache2/mods-available/ssl.conf
+    systemctl restart apache2
+fi
+
+# Corrigir Vulnerabilidade 5: Desabilitar renegociação SSL/TLS
+if [ -f /etc/apache2/mods-available/ssl.conf ]; then
+    echo "SSLInsecureRenegotiation off" >> /etc/apache2/mods-available/ssl.conf
+    systemctl restart apache2
+fi
+
+# Corrigir Vulnerabilidade 6: Remover cifras fracas
+if [ -f /etc/apache2/mods-available/ssl.conf ]; then
+    sed -i 's/^SSLCipherSuite.*$/SSLCipherSuite HIGH:!aNULL:!MD5:!RC4/' /etc/apache2/mods-available/ssl.conf
+    systemctl restart apache2
+fi
+
+# Corrigir Vulnerabilidade 7: Desabilitar timestamps TCP
+echo "net.ipv4.tcp_timestamps = 0" >> /etc/sysctl.conf
+sysctl -p

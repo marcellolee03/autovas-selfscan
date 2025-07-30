@@ -1,0 +1,13 @@
+#!/bin/bash
+BACKUP_DIR="/console/js/backup"
+TARGET_FILE="/console/js/jquery-1.8.3.min.js"
+VERSION="1.12.4"
+DEFAULT_OWNER="www-data:www-data"
+
+mkdir -p "$BACKUP_DIR"
+cp "$TARGET_FILE" "$BACKUP_DIR/jquery-1.8.3.min.js.bak-$(date +%s)"
+curl -sSL "https://code.jquery.com/jquery-$VERSION.min.js" -o "$TARGET_FILE.tmp" || wget -qO "$TARGET_FILE.tmp" "https://code.jquery.com/jquery-$VERSION.min.js"
+ORIG_OWNER=$(stat -c "%U:%G" "$TARGET_FILE" 2>/dev/null)
+chown "${ORIG_OWNER:-$DEFAULT_OWNER}" "$TARGET_FILE.tmp"
+chmod 644 "$TARGET_FILE.tmp"
+mv -f "$TARGET_FILE.tmp" "$TARGET_FILE"

@@ -1,0 +1,112 @@
+#!/bin/bash
+
+# Script para redirecionar HTTP para HTTPS e desabilitar HTTP (porta 80)
+
+# Detectar o sistema operacional
+if command -v systemctl &> /dev/null; then
+  OS="systemd"
+elif command -v service &> /dev/null; then
+  OS="sysvinit"
+else
+  echo "Sistema de init desconhecido. Saindo."
+  exit 1
+fi
+
+# Variáveis
+HTTP_PORT=80
+HTTPS_PORT=443
+DOMINIO="seu_dominio.com" # Substitua por seu domínio
+CONFIG_APACHE="/etc/apache2/sites-available/000-default.conf" # Caminho padrão, ajuste se necessário
+CONFIG_NGINX="/etc/nginx/sites-available/default" # Caminho padrão, ajuste se necessário
+
+# Função para Apache
+apache_redirect() {
+  if [ -f "$CONFIG_APACHE" ]; then
+    echo "Configurando redirecionamento HTTP para HTTPS no Apache..."
+
+    # Criar um arquivo de configuração virtualhost para redirecionamento
+    echo "<VirtualHost *:80>
+        ServerName $DOMINIO
+        Redirect permanent / https://$DOMINIO/
+    </VirtualHost>" > /tmp/redirect.conf
+
+    # Mover o arquivo para o diretório de sites disponíveis
+    mv /tmp/redirect.conf /etc/apache2/sites-available/redirect.conf
+
+    # Habilitar o site
+    a2ensite redirect.conf
+
+    # Desabilitar o site padrão (se necessário)
+    a2dissite 000-default.conf
+
+    # Reiniciar o Apache
+    if $OS == "systemd"; then
+      systemctl restart apache2
+    else
+      service apache2 restart
+    fi
+
+    echo "Redirecionamento HTTP para HTTPS no Apache configurado com sucesso."
+  else
+    echo "Arquivo de configuração do Apache não encontrado: $CONFIG_APACHE"
+  fi
+}
+
+# Função para Nginx
+nginx_redirect() {
+  if [ -f "$CONFIG_NGINX" ]; then
+    echo "Configurando redirecionamento HTTP para HTTPS no Nginx..."
+
+    # Fazer um backup do arquivo de configuração original
+    cp "$CONFIG_NGINX" "$CONFIG_NGINX.bak"
+
+    # Substituir a configuração padrão para redirecionar para HTTPS
+    sed -i "s/listen 80 default_server;/listen 80;/g" "$CONFIG_NGINX"
+    sed -i "s/listen \[::\]:80 default_server;/listen \[::\]:80;/g" "$CONFIG_NGINX"
+    echo "server {
+    listen 80;
+    listen [::]:80;
+    server_name $DOMINIO;
+    return 301 https://$DOMINIO\$request_uri;
+}" >> "$CONFIG_NGINX"
+
+
+    # Reiniciar o Nginx
+    if $OS == "systemd"; then
+      systemctl restart nginx
+    else
+      service nginx restart
+    fi
+
+    echo "Redirecionamento HTTP para HTTPS no Nginx configurado com sucesso."
+  else
+    echo "Arquivo de configuração do Nginx não encontrado: $CONFIG_NGINX"
+  fi
+}
+
+# Detectar qual servidor web está em uso (Apache ou Nginx)
+if command -v apache2 &> /dev/null; then
+  SERVER="apache"
+elif command -v nginx &> /dev/null; then
+  SERVER="nginx"
+else
+  echo "Servidor web não detectado (Apache ou Nginx). Saindo."
+  exit 1
+fi
+
+# Configurar o redirecionamento baseado no servidor web detectado
+case "$SERVER" in
+  "apache")
+    apache_redirect
+    ;;
+  "nginx")
+    nginx_redirect
+    ;;
+  *)
+    echo "Servidor web não suportado."
+    exit 1
+    ;;
+esac
+
+echo "Processo de redirecionamento HTTP para HTTPS concluído."
+exit 0

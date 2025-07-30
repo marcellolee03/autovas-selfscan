@@ -1,0 +1,45 @@
+```bash
+#!/bin/bash
+
+# Descrição: Desabilita TLSv1.0 e TLSv1.1 no PostgreSQL (porta 5432).
+# Adapte o caminho do arquivo de configuração conforme necessário.
+
+# Variáveis
+PG_CONFIG_FILE="/etc/postgresql/$(pg_lsclusters | awk '{print $1 "/" $2}' | head -n 1)/postgresql.conf"
+TEMP_FILE="/tmp/postgresql.conf.tmp"
+
+# Verifica se o arquivo de configuração existe
+if [ ! -f "$PG_CONFIG_FILE" ]; then
+  echo "Arquivo de configuração do PostgreSQL não encontrado: $PG_CONFIG_FILE"
+  exit 1
+fi
+
+# Cria um backup do arquivo de configuração
+cp "$PG_CONFIG_FILE" "$PG_CONFIG_FILE.bak"
+
+# Desabilita TLSv1.0 e TLSv1.1, habilitando apenas TLSv1.2 e superior
+grep -q "^ssl_min_protocol" "$PG_CONFIG_FILE"
+if [ $? -eq 0 ]; then
+  # A diretiva já existe, então vamos atualizá-la
+  sed -i "s/^ssl_min_protocol = .*/ssl_min_protocol = 'TLSv1.2'/g" "$PG_CONFIG_FILE"
+else
+  # A diretiva não existe, então vamos adicioná-la
+  echo "ssl_min_protocol = 'TLSv1.2'" >> "$PG_CONFIG_FILE"
+fi
+
+
+# Reinicia o serviço PostgreSQL para aplicar as alterações
+systemctl restart postgresql.service
+
+# Verifica se o serviço foi reiniciado com sucesso
+if [ $? -eq 0 ]; then
+  echo "PostgreSQL reiniciado com sucesso. TLSv1.0 e TLSv1.1 foram desabilitados."
+else
+  echo "Erro ao reiniciar o PostgreSQL. Verifique os logs do sistema."
+  echo "Restaure o arquivo de configuração original:"
+  cp "$PG_CONFIG_FILE.bak" "$PG_CONFIG_FILE"
+  exit 1
+fi
+
+exit 0
+```

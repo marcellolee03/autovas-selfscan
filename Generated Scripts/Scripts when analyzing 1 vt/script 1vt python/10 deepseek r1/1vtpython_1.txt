@@ -1,0 +1,35 @@
+$isElevated = ([Security.Principal.WindowsIdentity]::GetCurrent()).Groups -contains "S-1-5-32-544"
+if (-not $isElevated) {
+    Write-Output "Requisitos: Execute como Administrador."
+    exit 1
+}
+Function Get-PythonVersion {
+    $versions = @()
+    try {
+        $pyOutput = py -0 2>&1
+        $matches = [regex]::Matches($pyOutput, "-(\d+\.\d+(?:\.\d+)?)\s+")
+        foreach ($match in $matches) {
+            $versions += $match.Groups[1].Value
+        }
+    } catch {}
+    return $versions
+}
+$neededVersion = "3.10.15"
+$installerPath = "$env:TEMP\python-$neededVersion.exe"
+$arch = if ([Environment]::Is64BitOperatingSystem) { "amd64" } else { "" }
+$url = "https://www.python.org/ftp/python/$neededVersion/python-$neededVersion${arch}.exe"
+$allVersions = Get-PythonVersion
+if ($null -eq $allVersions -or $allVersions.Count -eq 0) {
+    Write-Output "Python nao detectado."
+    exit 0
+}
+foreach ($version in $allVersions) {
+    if ($version -eq $neededVersion) {
+        Write-Output "Versao $neededVersion ja instalada."
+        exit 0
+    }
+}
+Invoke-WebRequest -Uri $url -OutFile $installerPath
+Start-Process -FilePath $installerPath -ArgumentList "/passive", "InstallAllUsers=1", "PrependPath=1" -Wait
+Remove-Item -Path $installerPath -Force
+Write-Output "Atualizacao concluida. Reinicie os servicos dependentes de Python manualmente."

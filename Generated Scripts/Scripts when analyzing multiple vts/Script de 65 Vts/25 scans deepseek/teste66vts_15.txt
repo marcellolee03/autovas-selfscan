@@ -1,0 +1,35 @@
+#!/bin/bash
+
+# Atualizar Python para resolver as vulnerabilidades
+wget https://www.python.org/ftp/python/3.10.15/Python-3.10.15.tgz 
+tar -xzf Python-3.10.15.tgz
+cd Python-3.10.15
+./configure --enable-optimizations
+make -j$(nproc)
+sudo make altinstall
+cd ..
+rm -rf Python-3.10.15.tgz Python-3.10.15
+
+wget https://www.python.org/ftp/python/3.12.6/Python-3.12.6.tgz
+tar -xzf Python-3.12.6.tgz
+cd Python-3.12.6
+./configure --enable-optimizations
+make -j$(nproc)
+sudo make altinstall
+cd ..
+rm -rf Python-3.12.6.tgz Python-3.12.6
+
+# Substituir o certificado SSL/TLS
+sudo openssl req -x509 -nodes -days 3650 -newkey rsa:2048 -keyout /etc/ssl/private/localhost.key -out /etc/ssl/certs/localhost.crt -subj "/CN=localhost/O=Luminator/L=Caxias do Sul/ST=RS/C=BR"
+
+# Desabilitar TLSv1.0 e TLSv1.1
+sudo sed -i 's/^SSLProtocol.*/SSLProtocol -all +TLSv1.2 +TLSv1.3/' /etc/apache2/mods-enabled/ssl.conf
+sudo systemctl restart apache2
+
+# Desabilitar algoritmos MAC fracos no SSH
+sudo sed -i 's/^MACs.*/MACs hmac-sha2-256,hmac-sha2-512/' /etc/ssh/sshd_config
+sudo systemctl restart sshd
+
+# Desabilitar ICMP Timestamp Reply
+sudo iptables -A INPUT -p icmp --icmp-type timestamp-request -j DROP
+sudo iptables -A OUTPUT -p icmp --icmp-type timestamp-reply -j DROP

@@ -1,0 +1,120 @@
+```bash
+#!/bin/bash
+
+# Vulnerability 1: Proxmox VE EOL
+# The provided information is insufficient to automatically update Proxmox VE.
+# Manual intervention is required to update the Proxmox VE installation.
+# This script will only display a warning message.
+echo "WARNING: Proxmox VE version 7.3-3 has reached end of life."
+echo "Please update to a supported version manually."
+
+# Vulnerability 2, 3, 4, 5, 6: jQuery < 1.9.0 XSS Vulnerability
+# Define the target IP and vulnerable file paths
+TARGET_IP="10.129.4.254"
+JQUERY_FILES=(
+    "/../js/jquery-1.8.3.min.js"
+    "/opscenter/webcommon/framework/../js/jquery-1.8.3.min.js"
+    "/framesets/../js/jquery-1.8.3.min.js"
+    "/frameset/../js/jquery-1.8.3.min.js"
+    "/console/framework/../js/jquery-1.8.3.min.js"
+)
+
+# Download jQuery 1.9.0
+JQUERY_1_9_0_URL="https://code.jquery.com/jquery-1.9.0.min.js"
+NEW_JQUERY_FILE="jquery-1.9.0.min.js"
+
+wget -q "$JQUERY_1_9_0_URL" -O "$NEW_JQUERY_FILE"
+
+# Function to replace the vulnerable jQuery file
+replace_jquery() {
+  local file_path="$1"
+  local full_url="http://$TARGET_IP${file_path}"
+
+  # Extract directory path from the URL
+  directory=$(dirname "${file_path}")
+
+  # Create the directory if it doesn't exist
+  if [ ! -d "${directory}" ]; then
+    mkdir -p "${directory}"
+  fi
+
+  # Check if the vulnerable file exists
+  if wget -q --spider "$full_url"; then
+      # Replace the vulnerable file with the updated version
+      echo "Replacing $full_url with jQuery 1.9.0"
+      cp "$NEW_JQUERY_FILE" "${file_path}"
+  else
+      echo "Warning: Vulnerable file $full_url not found."
+  fi
+}
+
+# Replace each vulnerable jQuery file
+for file in "${JQUERY_FILES[@]}"; do
+    replace_jquery "$file"
+done
+
+# Vulnerability 7, 8, 9, 13, 14, 15, 16, 19, 21, 22: Weak SSH Algorithms
+# Disable weak SSH algorithms by modifying the SSH configuration file
+
+# Create a backup of the original sshd_config file
+sudo cp /etc/ssh/sshd_config /etc/ssh/sshd_config.bak
+
+# Modify the sshd_config file
+sudo sed -i 's/^#?KexAlgorithms .*/KexAlgorithms curve25519-sha256@libssh.org,ecdh-sha2-nistp256,ecdh-sha2-nistp384,ecdh-sha2-nistp521,diffie-hellman-group-exchange-sha256/' /etc/ssh/sshd_config
+sudo sed -i 's/^#?Ciphers .*/Ciphers chacha20-poly1305@openssh.com,aes256-gcm@openssh.com,aes128-gcm@openssh.com,aes256-ctr,aes192-ctr,aes128-ctr/' /etc/ssh/sshd_config
+sudo sed -i 's/^#?MACs .*/MACs hmac-sha2-256,hmac-sha2-512/' /etc/ssh/sshd_config
+sudo sed -i 's/^#?HostKeyAlgorithms .*/HostKeyAlgorithms ecdsa-sha2-nistp256-cert-v01@openssh.com,ecdsa-sha2-nistp384-cert-v01@openssh.com,ecdsa-sha2-nistp521-cert-v01@openssh.com,ecdsa-sha2-nistp256,ecdsa-sha2-nistp384,ecdsa-sha2-nistp521/' /etc/ssh/sshd_config
+
+# Remove potentially unsafe settings, if present
+sudo sed -i '/umac-64/d' /etc/ssh/sshd_config
+sudo sed -i '/hmac-md5/d' /etc/ssh/sshd_config
+sudo sed -i '/hmac-sha1-96/d' /etc/ssh/sshd_config
+sudo sed -i '/diffie-hellman-group1-sha1/d' /etc/ssh/sshd_config
+sudo sed -i '/3des-cbc/d' /etc/ssh/sshd_config
+sudo sed -i '/aes128-cbc/d' /etc/ssh/sshd_config
+sudo sed -i '/aes256-cbc/d' /etc/ssh/sshd_config
+sudo sed -i '/twofish-cbc/d' /etc/ssh/sshd_config
+sudo sed -i '/twofish128-cbc/d' /etc/ssh/sshd_config
+sudo sed -i '/twofish256-cbc/d' /etc/ssh/sshd_config
+sudo sed -i '/ssh-dss/d' /etc/ssh/sshd_config
+
+# Restart the SSH service
+sudo systemctl restart sshd
+
+# Vulnerability 10: DCE/RPC and MSRPC Services Enumeration Reporting
+# This vulnerability requires firewall configuration to filter incoming traffic.
+# This script will only display a warning message.
+echo "WARNING: DCE/RPC and MSRPC services are exposed."
+echo "Please configure your firewall to filter incoming traffic to ports 135, and the listed dynamic ports."
+
+# Vulnerability 11: Telnet Unencrypted Cleartext Login
+# Disable Telnet service
+sudo systemctl stop telnet.socket
+sudo systemctl disable telnet.socket
+
+# Vulnerability 12: SSL/TLS: Deprecated TLSv1.0 and TLSv1.1 Protocol Detection
+# This vulnerability requires disabling TLSv1.0 and TLSv1.1 in the service configuration.
+# Since the specific service is not identified, this script will only display a warning message.
+echo "WARNING: Deprecated TLSv1.0 and TLSv1.1 protocols are enabled."
+echo "Please disable TLSv1.0 and TLSv1.1 in the service configuration for port 3389."
+
+# Vulnerability 17, 18, 20, 23, 24, 25: TCP Timestamps Information Disclosure
+# Disable TCP timestamps
+echo "net.ipv4.tcp_timestamps = 0" | sudo tee -a /etc/sysctl.conf
+sudo sysctl -p
+
+# Vulnerability 26, 27, 28, 29, 30, 31, 32: ICMP Timestamp Reply Information Disclosure
+# Disable ICMP timestamp replies
+
+# Check OS for appropriate command
+if [ -f /etc/sysctl.conf ]; then
+    # Linux
+    echo "net.ipv4.icmp_echo_ignore_all = 1" | sudo tee -a /etc/sysctl.conf
+    sudo sysctl -p
+elif [[ "$OSTYPE" == "darwin"* ]]; then
+    # MacOS - requires disabling via firewall or other means
+    echo "WARNING: Disabling ICMP timestamps on MacOS requires firewall configuration."
+else
+    echo "WARNING: Unsupported operating system for disabling ICMP timestamps automatically. Manual configuration required."
+fi
+```

@@ -1,0 +1,78 @@
+#!/bin/bash
+# Correção para vulnerabilidades diversas
+
+# Vulnerabilidade 1: Forçar HTTPS em Apache
+if [ -d "/etc/apache2" ] && command -v apache2 >/dev/null; then
+    APACHE_CONF="/etc/apache2/sites-available/000-default.conf"
+    if [ -f "$APACHE_CONF" ]; then
+        sed -i 's/<VirtualHost \*:80>/<VirtualHost *:80>\n    Redirect permanent \/ https:\/\/$host\//' "$APACHE_CONF"
+        systemctl restart apache2
+    fi
+fi
+
+# Vulnerabilidades 4,5,6: Configuração TLS em Apache/Nginx
+## Apache
+if [ -d "/etc/apache2" ] && command -v apache2 >/dev/null; then
+    SSL_CONF="/etc/apache2/mods-available/ssl.conf"
+    [ -f "$SSL_CONF" ] && {
+        sed -i '/^SSLProtocol/ s/.*/SSLProtocol -all +TLSv1.2 +TLSv1.3/' "$SSL_CONF"
+        sed -i '/^SSLCipherSuite/ s/.*/SSLCipherSuite HIGH:!aNULL:!MD5:!RC4:!3DES:!CAMELLIA:!DES/' "$SSL_CONF"
+        echo "SSLUseStapling On" >> "$SSL_CONF"
+        echo "SSLStaplingCache shmcb:\/var\/run\/ocsp(128000)" >> "$SSL_CONF"
+        sed -i '/<\/IfModule>/ i SSLCompression off' "$SSL_CONF"
+        a2enmod ssl
+        systemctl restart apache2
+    }
+fi
+
+## Nginx
+if [ -d "/etc/nginx" ] && command -v nginx >/dev/null; then
+    NGINX_CONF="/etc/nginx/nginx.conf"
+    if [ -f "$NGINX_CONF" ]; then
+        sed -i '/ssl_protocols/ s/.*/    ssl_protocols TLSv1.2 TLSv1.3;/' "$NGINX_CONF"
+        sed -i '/ssl_ciphers/ s/.*/    ssl_ciphers HIGH:!aNULL:!MD5:!RC4:!3DES:!CAMELLIA:!DES;/' "$NGINX_CONF"
+        sed -i '/ssl_ciphers/a \    ssl_prefer_server_ciphers on;' "$NGINX_CONF"
+        sed -i '/ssl_ciphers/a \    ssl_ecdh_curve secp384r1;' "$NGINX_CONF"
+        sed -i '/ssl_ciphers/a \    ssl_session_cache shared:SSL:10m;' "$NGINX_CONF"
+        sed -i '/ssl_ciphers/a \    ssl_session_timeout 10m;' "$NGINX_CONF"
+        sed -i '/ssl_ciphers/a \    ssl_session_tickets off;' "$NGINX_CONF"
+        sed -i '/ssl_ciphers/a \    ssl_stapling on;' "$NGINX_CONF"
+        sed -i '/ssl_ciphers/a \    ssl_stapling_verify on;' "$NGINX_CONF"
+        systemctl restart nginx
+    fi
+fi
+
+# Vulnerabilidade 2: Desabilitar recursão DNS no BIND
+if [ -f "/etc/bind/named.conf.options" ]; then
+    if grep -q "recursion" /etc/bind/named.conf.options; then
+        sed -i 's/recursion .*/recursion no;/' /etc/bind/named.conf.options
+    else
+        echo "recursion no;" >> /etc/bind/named.conf.options
+    fi
+    systemctl restart bind9
+fi
+
+# Vulnerabilidades de rede via sysctl
+SYSCTL_TMP="/tmp/sysctl_tmp.conf"
+cat > "$SYSCTL_TMP" << EOF
+net.ipv4.tcp_timestamps = 0
+net.ipv4.icmp_echo_ignore_all = 1
+net.ipv4.icmp_ignore_bogus_error_responses = 1
+net.ipv4.icmp_echo_ignore_broadcasts = 1
+EOF
+sysctl -p "$SYSCTL_TMP" >/dev/null 2>&1
+sysctl -p 2>/dev/null
+
+# Aplicar permanentemente as configurações
+[ -f "/etc/sysctl.conf" ] && {
+    grep -q "net.ipv4.tcp_timestamps" /etc/sysctl.conf || echo "net.ipv4.tcp_timestamps = 0" >> /etc/sysctl.conf
+    grep -q "net.ipv4.icmp_echo_ignore_all" /etc/sysctl.conf || echo "net.ipv4.icmp_echo_ignore_all = 1" >> /etc/sysctl.conf
+    grep -q "net.ipv4.icmp_ignore_bogus_error_responses" /etc/sysctl.conf || echo "net.ipv4.icmp_ignore_bogus_error_responses = 1" >> /etc/sysctl.conf
+    grep -q "net.ipv4.icmp_echo_ignore_broadcasts" /etc/sysctl.conf || echo "net.ipv4.icmp_echo_ignore_broadcasts = 1" >> /etc/sysctl.conf
+}
+
+# Reinicializar serviços afetados
+[ -f "/etc/init.d/procps" ] && /etc/init.d/procps restart >/dev/null 2>&1
+
+# Cleanup
+rm -f "$SYSCTL_TMP"

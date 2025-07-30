@@ -1,0 +1,31 @@
+#!/bin/bash
+
+# Atualizar pacotes do sistema
+sudo apt update
+
+# Atualizar todas as informações de pacotes disponíveis
+sudo apt upgrade -y
+
+# Instalar versões patchadas do Python para cada versão vulnerável
+sudo apt install -y python3.10=3.10.16-1~22.04.1 python3.12=3.12.9-1~22.04.1 && \
+sudo apt-mark hold python3.10 python3.12
+
+# Configurar SSH
+sudo sed -i -E 's/^MACs .*$/MACs hmac-sha2-512-etm@openssh.com,hmac-sha2-256-etm@openssh.com,umac-128-etm@openssh.com,hmac-sha2-512,hmac-sha2-256,umac-128@openssh.com/' /etc/ssh/sshd_config
+sudo systemctl restart ssh
+
+# Desativar TLS 1.0/1.1
+sudo sed -i -E 's/^tls_protocols .*$/tls_protocols = TLSv1.2 TLSv1.3/' /etc/exim4/exim4.conf.template
+sudo update-exim4.conf
+sudo systemctl restart exim4
+
+# Configurações ICMP
+sudo sysctl -w net.ipv4.icmp_echo_ignore_all=1
+sudo sysctl -w net.ipv4.icmp_echo_ignore_broadcasts=1
+echo "net.ipv4.icmp_echo_ignore_all=1" | sudo tee -a /etc/sysctl.conf
+echo "net.ipv4.icmp_echo_ignore_broadcasts=1" | sudo tee -a /etc/sysctl.conf
+
+# Data/hora da aplicação do patch
+sudo mkdir -p /var/log/security_patches && \
+sudo chmod 700 /var/log/security_patches && \
+date > /var/log/security_patches/`date +%Y%m%d`.log

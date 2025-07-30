@@ -1,0 +1,34 @@
+#!/bin/bash
+
+# Script para mitigar a vulnerabilidade de transmissão de informações sensíveis em texto claro via HTTP.
+# Este script assume que o servidor web é Apache e tenta redirecionar todas as conexões HTTP para HTTPS.
+
+# Variável para armazenar o arquivo de configuração do Apache
+APACHE_CONFIG_FILE="/etc/apache2/sites-available/000-default.conf"
+
+# Verifica se o Apache está instalado
+if ! command -v apache2ctl &> /dev/null; then
+  echo "Apache não está instalado. Por favor, instale o Apache antes de executar este script."
+  exit 1
+fi
+
+# Verifica se o arquivo de configuração do Apache existe
+if [ ! -f "$APACHE_CONFIG_FILE" ]; then
+  echo "Arquivo de configuração do Apache não encontrado: $APACHE_CONFIG_FILE"
+  echo "Por favor, adapte a variável APACHE_CONFIG_FILE no script para o caminho correto do arquivo de configuração do seu Apache."
+  exit 1
+fi
+
+# Habilita o módulo rewrite do Apache
+sudo a2enmod rewrite
+
+# Adiciona a regra de redirecionamento para o arquivo de configuração do Apache
+sudo sed -i 's|</VirtualHost *:80>|<VirtualHost *:80>\n\tRewriteEngine On\n\tRewriteCond %{HTTPS} off\n\tRewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]|g' "$APACHE_CONFIG_FILE"
+
+# Reinicia o Apache para aplicar as mudanças
+sudo systemctl restart apache2
+
+echo "Redirecionamento de HTTP para HTTPS configurado. Por favor, verifique o funcionamento."
+echo "Certifique-se de que o HTTPS está devidamente configurado (certificado SSL/TLS instalado) para o seu site."
+
+exit 0

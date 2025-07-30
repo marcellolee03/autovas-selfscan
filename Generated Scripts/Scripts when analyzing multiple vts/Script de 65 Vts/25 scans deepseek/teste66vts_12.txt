@@ -1,0 +1,14 @@
+#!/bin/bash
+# Atualiza o Python para a versão segura em todos os portos mencionados
+sudo apt-get update
+sudo apt-get install -y python3.10=3.10.15-1~22.04
+sudo apt-get install -y python3.12=3.12.6-1~22.04
+# Desabilitar TLSv1.0 e TLSv1.1
+sudo sed -i 's/^TLSv1$/TLSv1.2/g' /etc/ssl/openssl.cnf
+sudo sed -i 's/^TLSv1.1$/TLSv1.2/g' /etc/ssl/openssl.cnf
+# Substituir o certificado SSL/TLS
+sudo cp /path/to/trusted/certificate.crt /etc/ssl/certs/localhost.crt
+sudo cp /path/to/trusted/private.key /etc/ssl/private/localhost.key
+# Reiniciar os serviços para aplicar as alterações
+sudo systemctl restart apache2
+sudo systemctl restart sshd

@@ -1,0 +1,70 @@
+```bash
+#!/bin/bash
+
+# Script para redirecionar tráfego HTTP para HTTPS e desabilitar HTTP
+
+# Variáveis
+HTTP_PORT=80
+HTTPS_PORT=443
+
+# 1. Detectar o servidor web em uso (Apache, Nginx)
+
+SERVER_TYPE=$(ps aux | awk '{print $11}' | grep -E 'apache2|nginx' | head -n 1)
+
+# 2. Configuração para Apache
+if [[ "$SERVER_TYPE" == "apache2" ]]; then
+  # 2.1 Criar um arquivo de configuração virtual host para redirecionamento HTTP para HTTPS
+  VHOST_FILE="/etc/apache2/sites-available/000-default.conf"
+
+  # 2.2 Verificar se o arquivo existe
+  if [ -f "$VHOST_FILE" ]; then
+    # 2.3 Fazer backup do arquivo original
+    cp "$VHOST_FILE" "$VHOST_FILE.bak"
+
+    # 2.4 Adicionar redirecionamento para HTTPS
+    echo "<VirtualHost *:80>" > "$VHOST_FILE"
+    echo "  ServerName \`hostname\`" >> "$VHOST_FILE"
+    echo "  Redirect permanent / https://\`hostname\`/" >> "$VHOST_FILE"
+    echo "</VirtualHost>" >> "$VHOST_FILE"
+
+    # 2.5 Reiniciar o Apache
+    systemctl restart apache2
+    echo "Apache configurado para redirecionar HTTP para HTTPS."
+  else
+    echo "Arquivo de configuração do Apache não encontrado: $VHOST_FILE"
+    exit 1
+  fi
+fi
+
+# 3. Configuração para Nginx
+if [[ "$SERVER_TYPE" == "nginx" ]]; then
+  # 3.1 Encontrar o arquivo de configuração padrão do Nginx
+  NGINX_CONF=$(find /etc/nginx/sites-enabled/ -type f -name "default")
+
+  # 3.2 Verificar se o arquivo foi encontrado
+  if [ -f "$NGINX_CONF" ]; then
+    # 3.3 Fazer backup do arquivo original
+    cp "$NGINX_CONF" "$NGINX_CONF.bak"
+
+    # 3.4 Adicionar redirecionamento para HTTPS
+    sed -i "s/listen 80;/listen 80;\n\treturn 301 https:\$host\$request_uri;/" "$NGINX_CONF"
+
+    # 3.5 Reiniciar o Nginx
+    systemctl restart nginx
+    echo "Nginx configurado para redirecionar HTTP para HTTPS."
+  else
+    echo "Arquivo de configuração do Nginx não encontrado: $NGINX_CONF"
+    exit 1
+  fi
+fi
+
+# 4. Verificar se o servidor web foi detectado
+if [[ -z "$SERVER_TYPE" ]]; then
+  echo "Servidor web (Apache ou Nginx) não detectado.  Por favor, configure o redirecionamento HTTP para HTTPS manualmente."
+  exit 1
+fi
+
+echo "Redirecionamento HTTP para HTTPS configurado."
+
+exit 0
+```

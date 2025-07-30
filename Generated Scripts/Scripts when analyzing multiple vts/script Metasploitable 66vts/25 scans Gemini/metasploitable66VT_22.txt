@@ -1,0 +1,613 @@
+```bash
+#!/bin/bash
+
+# Variáveis globais
+OS=$(uname -s)
+ARCH=$(uname -m)
+
+# Funções auxiliares
+log() {
+  echo "[$(date +'%Y-%m-%d %H:%M:%S')] $1"
+}
+
+error() {
+  log "ERROR: $1"
+  exit 1
+}
+
+# Define se o sistema é baseado em Debian
+is_debian() {
+    if [ -f /etc/debian_version ]; then
+        return 0
+    else
+        return 1
+    fi
+}
+
+# Vulnerabilidade 1: TWiki XSS and Command Execution Vulnerabilities (CVE-2008-5304, CVE-2008-5305)
+# Solução: Atualizar para a versão 4.2.4 ou mais recente (improvável que exista pacote, remover e instruir instalação manual)
+fix_twiki() {
+  log "Iniciando correção para TWiki (CVE-2008-5304, CVE-2008-5305)"
+  
+  if is_debian; then
+    apt-get remove --purge -y twiki
+  else
+    yum remove -y twiki
+  fi
+
+  log "TWiki removido. Recomenda-se instalar uma versão atualizada manualmente."
+}
+
+# Vulnerabilidade 2: Distributed Ruby (dRuby/DRb) Multiple RCE Vulnerabilities
+# Solução: Desabilitar o serviço DRb ou configurar controles de acesso
+fix_drb() {
+  log "Iniciando correção para Distributed Ruby (dRuby/DRb) RCE Vulnerabilities"
+  
+  # Tenta parar o serviço DRb
+  if systemctl is-active --quiet drb; then
+    log "Parando serviço drb via systemctl."
+    systemctl stop drb || log "Falha ao parar drb via systemctl. Tente parar manualmente."
+  elif /etc/init.d/drb status > /dev/null 2>&1; then
+    log "Parando serviço drb via init.d script."
+    /etc/init.d/drb stop || log "Falha ao parar drb via init.d. Tente parar manualmente."
+  else
+    log "Serviço drb não encontrado. Verifique se o serviço está ativo por outros meios."
+  fi
+
+  # Remove o script de inicialização (se existir) para prevenir que o serviço inicie novamente
+  if is_debian; then
+      update-rc.d -f drb remove
+  else
+      chkconfig --del drb
+  fi
+  log "Serviço DRb desabilitado. Considere implementar ACLs se precisar do serviço."
+}
+
+# Vulnerabilidade 3: rlogin Passwordless Login
+# Solução: Desabilitar o serviço rlogin
+fix_rlogin() {
+  log "Iniciando correção para rlogin Passwordless Login"
+  
+  if systemctl is-active --quiet rlogin; then
+    log "Parando serviço rlogin via systemctl."
+    systemctl stop rlogin
+    systemctl disable rlogin
+  elif /etc/init.d/rlogin status > /dev/null 2>&1; then
+      log "Parando serviço rlogin via init.d."
+      /etc/init.d/rlogin stop
+      update-rc.d -f rlogin remove
+  else
+    log "Serviço rlogin não encontrado. Verifique se o serviço está ativo por outros meios."
+  fi
+
+  log "Serviço rlogin desabilitado. Use SSH."
+}
+
+# Vulnerabilidade 4: Operating System (OS) End of Life (EOL) Detection
+# Solução: Atualizar o sistema operacional (Informação apenas, não automatizável)
+fix_eol() {
+  log "AVISO: O sistema operacional está em End of Life (EOL). A atualização é fortemente recomendada."
+  log "A correção desta vulnerabilidade requer uma atualização completa do sistema operacional, o que não pode ser automatizado de forma segura."
+}
+
+# Vulnerabilidade 5: The rexec service is running
+# Solução: Desabilitar o serviço rexec
+fix_rexec() {
+  log "Iniciando correção para rexec service"
+
+  if systemctl is-active --quiet rexec; then
+      log "Parando serviço rexec via systemctl."
+      systemctl stop rexec
+      systemctl disable rexec
+  elif /etc/init.d/rexec status > /dev/null 2>&1; then
+      log "Parando serviço rexec via init.d."
+      /etc/init.d/rexec stop
+      update-rc.d -f rexec remove
+  else
+      log "Serviço rexec não encontrado. Verifique se o serviço está ativo por outros meios."
+  fi
+
+  log "Serviço rexec desabilitado. Use SSH."
+}
+
+# Vulnerabilidade 6: Possible Backdoor: Ingreslock
+# Solução: Limpeza completa do sistema (Não automatizável)
+fix_ingreslock() {
+  log "AVISO: Possível backdoor Ingreslock detectado. Recomenda-se uma limpeza completa do sistema."
+  log "A correção desta vulnerabilidade requer uma análise e intervenção manual para remover o backdoor."
+}
+
+# Vulnerabilidade 7: Apache Tomcat AJP RCE Vulnerability (Ghostcat) (CVE-2020-1938)
+# Solução: Atualizar Apache Tomcat para versão 7.0.100, 8.5.51, 9.0.31 ou posterior. Ou desabilitar AJP.
+fix_tomcat_ajp() {
+  log "Iniciando correção para Apache Tomcat AJP RCE (Ghostcat) (CVE-2020-1938)"
+  
+  # Default AJP port is 8009. Check if it's open. If not, assume not in use.
+  if ! ss -ltn | grep -q ":8009"; then
+    log "AJP Connector (port 8009) não detectado. Nenhuma ação necessária."
+    return 0
+  fi
+  
+  TOMCAT_HOME=$(find /opt /usr/share /usr/local -name 'tomcat' -o -name 'apache-tomcat*' -print -quit 2>/dev/null)
+  if [ -z "$TOMCAT_HOME" ]; then
+      TOMCAT_HOME=$(find / -name 'tomcat' -o -name 'apache-tomcat*' -print -quit 2>/dev/null)
+      if [ -z "$TOMCAT_HOME" ]; then
+          log "Diretório de instalação do Tomcat não encontrado.  Será necessário desabilitar o AJP manualmente."
+          return 1
+      fi
+  fi
+  
+  SERVER_XML="$TOMCAT_HOME/conf/server.xml"
+  if [ ! -f "$SERVER_XML" ]; then
+    log "Arquivo server.xml não encontrado em $TOMCAT_HOME/conf. Será necessário desabilitar o AJP manualmente."
+    return 1
+  fi
+
+  # Desabilita AJP Connector comentando a linha
+  sed -i 's/<Connector port="8009"/<!-- <Connector port="8009"/g' "$SERVER_XML"
+  sed -i 's/<\/Connector>/<\/Connector> -->/g' "$SERVER_XML"
+
+  log "AJP Connector desabilitado em $SERVER_XML. Reinicie o Tomcat."
+}
+
+# Vulnerabilidade 8: MySQL / MariaDB Default Credentials (CVE-2015-4669, CVE-2001-0645, CVE-2002-1809, CVE-2004-1532, CVE-2004-2357, CVE-2006-1451, CVE-2007-2554, CVE-2007-6081, CVE-2009-0919, CVE-2014-3419, CVE-2016-6531, CVE-2018-15719, CVE-2024-22901)
+# Solução: Alterar a senha do usuário root
+fix_mysql_default_credentials() {
+  log "Iniciando correção para MySQL / MariaDB Default Credentials"
+
+  if command -v mysql > /dev/null 2>&1; then
+    MYSQL_CMD="mysql"
+  elif command -v mariadb > /dev/null 2>&1; then
+    MYSQL_CMD="mariadb"
+  else
+    log "MySQL ou MariaDB não encontrado.  A correção manual é necessária."
+    return 1
+  fi
+  
+  NEW_PASSWORD=$(openssl rand -base64 16)
+  
+  $MYSQL_CMD -u root -e "UPDATE mysql.user SET Password=PASSWORD('$NEW_PASSWORD') WHERE User='root';"
+  $MYSQL_CMD -u root -e "FLUSH PRIVILEGES;"
+
+  log "Senha do usuário root do MySQL/MariaDB alterada. Guarde a senha em local seguro: $NEW_PASSWORD"
+}
+
+# Vulnerabilidade 9: PHP < 5.6.30, 7.x < 7.0.15, 7.1.x < 7.1.1 Multiple Vulnerabilities (Jan 2017) - Linux
+# Solução: Atualizar para a versão 5.6.30, 7.0.15, 7.1.1 ou posterior
+fix_php_version() {
+  log "Iniciando correção para vulnerabilidades do PHP (CVE-2017-11147, CVE-2016-10158, CVE-2016-10159, CVE-2016-10160, CVE-2016-10161, CVE-2016-10167, CVE-2016-10168)"
+  
+  if is_debian; then
+    apt-get update
+    apt-get install --only-upgrade -y php5 php5-cli php5-cgi php5-common
+  else
+      yum update -y php php-cli php-fpm php-common
+  fi
+  
+  log "PHP atualizado (se possível).  Verifique a versão do PHP após a atualização."
+}
+
+# Vulnerabilidade 10: PHP < 5.3.13, 5.4.x < 5.4.3 Multiple Vulnerabilities - Active Check
+# Solução: Atualizar para a versão 5.3.13, 5.4.3 ou posterior
+# Mesmo script de atualização do php anterior
+#fix_php_version
+
+# Vulnerabilidade 11 & 12: vsftpd Compromised Source Packages Backdoor Vulnerability (CVE-2011-2523)
+# Solução: Atualizar o pacote vsftpd.
+fix_vsftpd_backdoor() {
+  log "Iniciando correção para vsftpd Compromised Source Packages Backdoor Vulnerability (CVE-2011-2523)"
+
+  if is_debian; then
+    apt-get update
+    apt-get install --only-upgrade -y vsftpd
+  else
+      yum update -y vsftpd
+  fi
+
+  log "vsftpd atualizado (se possível). Reinicie o serviço vsftpd."
+
+  if systemctl is-active --quiet vsftpd; then
+    systemctl restart vsftpd
+  elif /etc/init.d/vsftpd status > /dev/null 2>&1; then
+      /etc/init.d/vsftpd restart
+  fi
+}
+
+# Vulnerabilidade 13: DistCC RCE Vulnerability (CVE-2004-2687)
+# Solução: Remover o serviço distccd
+fix_distcc_rce() {
+  log "Iniciando correção para DistCC RCE Vulnerability (CVE-2004-2687)"
+
+  if systemctl is-active --quiet distccd; then
+      log "Parando serviço distccd via systemctl."
+      systemctl stop distccd
+      systemctl disable distccd
+  elif /etc/init.d/distccd status > /dev/null 2>&1; then
+      log "Parando serviço distccd via init.d."
+      /etc/init.d/distccd stop
+      update-rc.d -f distccd remove
+  else
+      log "Serviço distccd não encontrado. Verifique se o serviço está ativo por outros meios."
+      return 0
+  fi
+
+  if is_debian; then
+    apt-get remove --purge -y distcc
+  else
+      yum remove -y distcc
+  fi
+
+  log "Serviço distccd removido."
+}
+
+# Vulnerabilidade 14: PostgreSQL Default Credentials
+# Solução: Alterar a senha do usuário postgres
+fix_postgres_default_credentials() {
+  log "Iniciando correção para PostgreSQL Default Credentials"
+  
+  NEW_PASSWORD=$(openssl rand -base64 16)
+
+  # Verifica se o comando psql está disponível.
+  if ! command -v psql > /dev/null 2>&1; then
+    log "Comando psql não encontrado.  A correção manual é necessária."
+    return 1
+  fi
+
+  # Tenta alterar a senha do usuário postgres.
+  su - postgres -c "psql -c \"ALTER USER postgres WITH PASSWORD '$NEW_PASSWORD';\""
+
+  log "Senha do usuário postgres alterada. Guarde a senha em local seguro: $NEW_PASSWORD"
+}
+
+# Vulnerabilidade 15: VNC Brute Force Login
+# Solução: Alterar a senha do VNC
+fix_vnc_brute_force() {
+  log "AVISO: Vulnerabilidade de Brute Force Login no VNC detectada. Altere a senha do VNC manualmente."
+  log "A alteração da senha do VNC varia dependendo da implementação. Consulte a documentação do seu servidor VNC."
+}
+
+# Vulnerabilidade 16: Test HTTP dangerous methods
+# Solução: Desabilitar os métodos PUT e DELETE no servidor web
+fix_http_dangerous_methods() {
+  log "Iniciando correção para Test HTTP dangerous methods (PUT/DELETE)"
+  
+  APACHE_CONF=$(find /etc -name apache2.conf -o -name httpd.conf 2>/dev/null | head -n 1)
+
+  if [ -n "$APACHE_CONF" ]; then
+    log "Arquivo de configuração do Apache encontrado: $APACHE_CONF"
+    
+    # Desabilita o módulo dav_fs (se habilitado)
+    if a2dismod dav_fs 2>/dev/null; then
+      log "Módulo dav_fs desabilitado."
+    fi
+    
+    # Desabilita WebDAV comentando as seções relacionadas no arquivo de configuração
+    sed -i '/<Directory .*\/dav>/,/<\/Directory>/s/^/#/g' "$APACHE_CONF"
+    
+    log "Métodos PUT e DELETE desabilitados no Apache. Reinicie o Apache."
+    systemctl restart apache2 || systemctl restart httpd
+  else
+    log "Arquivo de configuração do Apache não encontrado. Verifique a configuração do servidor web para desabilitar os métodos PUT e DELETE manualmente."
+  fi
+}
+
+# Vulnerabilidade 17 & 18: FTP Brute Force Logins With Default Credentials Reporting
+# Solução: Alterar as senhas dos usuários FTP
+fix_ftp_default_credentials() {
+  log "AVISO: Vulnerabilidade de Brute Force Login no FTP detectada. Altere as senhas dos usuários FTP manualmente."
+  log "Usuários com credenciais fracas detectados: msfadmin, postgres, service, user. Altere as senhas o mais rápido possível."
+}
+
+# Vulnerabilidade 19: The rlogin service is running
+# Solução: Desabilitar o serviço rlogin
+# Mesma função que a vulnerabilidade 3
+#fix_rlogin
+
+# Vulnerabilidade 20: rsh Unencrypted Cleartext Login
+# Solução: Desabilitar o serviço rsh
+fix_rsh() {
+  log "Iniciando correção para rsh Unencrypted Cleartext Login"
+
+  if systemctl is-active --quiet rsh; then
+    log "Parando serviço rsh via systemctl."
+    systemctl stop rsh
+    systemctl disable rsh
+  elif /etc/init.d/rsh status > /dev/null 2>&1; then
+      log "Parando serviço rsh via init.d."
+      /etc/init.d/rsh stop
+      update-rc.d -f rsh remove
+  else
+    log "Serviço rsh não encontrado. Verifique se o serviço está ativo por outros meios."
+  fi
+
+  log "Serviço rsh desabilitado. Use SSH."
+}
+
+# Vulnerabilidade 21: SSL/TLS: OpenSSL CCS Man in the Middle Security Bypass Vulnerability (CVE-2014-0224)
+# Solução: Atualizar o OpenSSL
+fix_openssl_ccs() {
+  log "Iniciando correção para SSL/TLS: OpenSSL CCS Man in the Middle Security Bypass Vulnerability (CVE-2014-0224)"
+  
+  if is_debian; then
+    apt-get update
+    apt-get install --only-upgrade -y openssl libssl-dev
+  else
+      yum update -y openssl
+  fi
+
+  log "OpenSSL atualizado (se possível). Reinicie os serviços que dependem do OpenSSL."
+}
+
+# Vulnerabilidade 22: Multiple Vendors STARTTLS Implementation Plaintext Arbitrary Command Injection Vulnerability
+# Solução: Atualizar os serviços afetados (Postfix, Qmail, etc.)
+fix_starttls_injection() {
+  log "AVISO: Vulnerabilidade Multiple Vendors STARTTLS Implementation Plaintext Arbitrary Command Injection detectada. Atualize os serviços afetados (Postfix, Qmail, etc.) manualmente."
+  log "A correção desta vulnerabilidade requer a atualização dos serviços de email, o que não pode ser automatizado de forma segura."
+}
+
+# Vulnerabilidade 23, 26, 27: TWiki CSRF e XSS Vulnerabilities (CVE-2009-4898, CVE-2018-20212, CVE-2009-1339)
+# Solução: Atualizar TWiki (Mesmo problema da vulnerabilidade 1)
+#fix_twiki
+
+# Vulnerabilidade 24: Anonymous FTP Login Reporting
+# Solução: Desabilitar o login anônimo no FTP
+fix_anonymous_ftp() {
+  log "Iniciando correção para Anonymous FTP Login Reporting"
+  
+  FTP_CONFIG=$(find /etc -name vsftpd.conf 2>/dev/null | head -n 1)
+
+  if [ -n "$FTP_CONFIG" ]; then
+    log "Arquivo de configuração do FTP encontrado: $FTP_CONFIG"
+
+    # Desabilita o login anônimo
+    sed -i 's/^anonymous_enable=YES/anonymous_enable=NO/g' "$FTP_CONFIG"
+    
+    log "Login anônimo desabilitado no FTP. Reinicie o serviço vsftpd."
+    systemctl restart vsftpd || /etc/init.d/vsftpd restart
+  else
+    log "Arquivo de configuração do FTP não encontrado. Verifique a configuração do servidor FTP para desabilitar o login anônimo manualmente."
+  fi
+}
+
+# Vulnerabilidade 25 & 55: jQuery < 1.9.0 XSS Vulnerability (CVE-2012-6708) e jQuery < 1.6.3 XSS Vulnerability (CVE-2011-4969)
+# Solução: Atualizar a biblioteca jQuery
+fix_jquery_xss() {
+  log "AVISO: Vulnerabilidade XSS no jQuery detectada. Atualize a biblioteca jQuery manualmente no diretório /mutillidae/javascript/ddsmoothmenu/."
+  log "A atualização da biblioteca jQuery requer substituição manual do arquivo, o que não pode ser automatizado de forma segura."
+}
+
+# Vulnerabilidade 28 & 29: SSL/TLS: Deprecated SSLv2 and SSLv3 Protocol Detection (CVE-2016-0800, CVE-2014-3566)
+# Solução: Desabilitar SSLv2 e SSLv3
+fix_deprecated_ssl() {
+  log "Iniciando correção para SSL/TLS: Deprecated SSLv2 and SSLv3 Protocol Detection"
+  
+  # Procura por arquivos de configuração do OpenSSL
+  OPENSSL_CONF=$(find /etc -name openssl.cnf -o -name ssl.conf 2>/dev/null | head -n 1)
+  
+  if [ -n "$OPENSSL_CONF" ]; then
+    log "Arquivo de configuração do OpenSSL encontrado: $OPENSSL_CONF"
+    
+    # Desabilita SSLv3 adicionando "-SSLv3" à lista de protocolos
+    if grep -q "SSLProtocol" "$OPENSSL_CONF"; then
+      sed -i 's/SSLProtocol.*/SSLProtocol All -SSLv2 -SSLv3/g' "$OPENSSL_CONF"
+    else
+      echo "SSLProtocol All -SSLv2 -SSLv3" >> "$OPENSSL_CONF"
+    fi
+    
+    log "SSLv2 e SSLv3 desabilitados no OpenSSL. Reinicie os serviços que dependem do OpenSSL."
+  else
+    log "Arquivo de configuração do OpenSSL não encontrado. Desabilite SSLv2 e SSLv3 manualmente na configuração dos serviços."
+  fi
+}
+
+# Vulnerabilidade 30: SSL/TLS: Report Weak Cipher Suites (CVE-2013-2566, CVE-2015-2808, CVE-2015-4000)
+# Solução: Desabilitar cipher suites fracas
+fix_weak_cipher_suites() {
+  log "AVISO: Presença de Cipher Suites Fracas detectada. Desabilite-as manualmente na configuração dos serviços afetados (ex: Apache, Postfix, etc.)."
+  log "A desabilitação de cipher suites fracas requer modificação manual da configuração, o que não pode ser automatizado de forma segura."
+}
+
+# Vulnerabilidade 31: HTTP Debugging Methods (TRACE/TRACK) Enabled (CVE-2003-1567, CVE-2004-2320, CVE-2004-2763, CVE-2005-3398, CVE-2006-4683, CVE-2007-3008, CVE-2008-7253, CVE-2009-2823, CVE-2010-0386, CVE-2012-2223, CVE-2014-7883)
+# Solução: Desabilitar os métodos TRACE/TRACK
+fix_http_debugging_methods() {
+  log "Iniciando correção para HTTP Debugging Methods (TRACE/TRACK) Enabled"
+
+  APACHE_CONF=$(find /etc -name apache2.conf -o -name httpd.conf 2>/dev/null | head -n 1)
+
+  if [ -n "$APACHE_CONF" ]; then
+    log "Arquivo de configuração do Apache encontrado: $APACHE_CONF"
+
+    # Desabilita o TRACE adicionando "TraceEnable off" na configuração
+    if grep -q "TraceEnable" "$APACHE_CONF"; then
+      sed -i 's/TraceEnable.*/TraceEnable off/g' "$APACHE_CONF"
+    else
+      echo "TraceEnable off" >> "$APACHE_CONF"
+    fi
+    
+    log "Método TRACE desabilitado no Apache. Reinicie o Apache."
+    systemctl restart apache2 || systemctl restart httpd
+  else
+    log "Arquivo de configuração do Apache não encontrado. Verifique a configuração do servidor web para desabilitar o método TRACE manualmente."
+  fi
+}
+
+# Vulnerabilidade 32 & 33: SSL/TLS: Server Certificate / Certificate in Chain with RSA keys less than 2048 bits
+# Solução: Gerar um novo certificado com uma chave RSA de 2048 bits ou mais
+fix_weak_rsa_key() {
+  log "AVISO: O certificado SSL/TLS utiliza uma chave RSA inferior a 2048 bits. Gere um novo certificado com uma chave RSA de 2048 bits ou superior."
+  log "A geração de um novo certificado requer intervenção manual, o que não pode ser automatizado de forma segura."
+}
+
+# Vulnerabilidade 34: Weak Key Exchange (KEX) Algorithm(s) Supported (SSH)
+# Solução: Desabilitar algoritmos KEX fracos no SSH
+fix_weak_kex_algorithms() {
+  log "Iniciando correção para Weak Key Exchange (KEX) Algorithm(s) Supported (SSH)"
+  
+  SSH_CONFIG=$(find /etc -name sshd_config 2>/dev/null | head -n 1)
+
+  if [ -n "$SSH_CONFIG" ]; then
+    log "Arquivo de configuração do SSH encontrado: $SSH_CONFIG"
+
+    # Desabilita algoritmos KEX fracos
+    if grep -q "KexAlgorithms" "$SSH_CONFIG"; then
+      sed -i 's/KexAlgorithms.*/KexAlgorithms curve25519-sha256@libssh.org,ecdh-sha2-nistp256,ecdh-sha2-nistp384,ecdh-sha2-nistp521,diffie-hellman-group14-sha256/g' "$SSH_CONFIG"
+    else
+      echo "KexAlgorithms curve25519-sha256@libssh.org,ecdh-sha2-nistp256,ecdh-sha2-nistp384,ecdh-sha2-nistp521,diffie-hellman-group14-sha256" >> "$SSH_CONFIG"
+    fi
+
+    log "Algoritmos KEX fracos desabilitados no SSH. Reinicie o serviço SSH."
+    systemctl restart ssh || systemctl restart sshd
+  else
+    log "Arquivo de configuração do SSH não encontrado. Edite o arquivo manualmente para desabilitar algoritmos KEX fracos."
+  fi
+}
+
+# Vulnerabilidade 35: phpinfo() Output Reporting (HTTP) (CVE-2008-0149, CVE-2023-49282, CVE-2023-49283, CVE-2024-10486)
+# Solução: Remover os arquivos phpinfo()
+fix_phpinfo_disclosure() {
+  log "Iniciando correção para phpinfo() Output Reporting"
+  
+  PHPINFO_FILES=$(grep -rl "<title>phpinfo()</title>" /var/www/html /var/www/ 2>/dev/null)
+
+  if [ -n "$PHPINFO_FILES" ]; then
+    log "Arquivos phpinfo() encontrados: $PHPINFO_FILES"
+
+    for file in $PHPINFO_FILES; do
+      rm -f "$file"
+      log "Arquivo phpinfo() removido: $file"
+    done
+    
+    log "Arquivos phpinfo() removidos."
+  else
+    log "Nenhum arquivo phpinfo() encontrado."
+  fi
+}
+
+# Vulnerabilidade 36: Weak Host Key Algorithm(s) (SSH)
+# Solução: Desabilitar algoritmos de chave de host fracos no SSH
+fix_weak_host_key_algorithms() {
+  log "Iniciando correção para Weak Host Key Algorithm(s) (SSH)"
+
+  SSH_CONFIG=$(find /etc -name sshd_config 2>/dev/null | head -n 1)
+
+  if [ -n "$SSH_CONFIG" ]; then
+    log "Arquivo de configuração do SSH encontrado: $SSH_CONFIG"
+    
+    # Desabilita algoritmos de chave de host fracos
+    if grep -q "HostKeyAlgorithms" "$SSH_CONFIG"; then
+      sed -i 's/HostKeyAlgorithms.*/HostKeyAlgorithms ecdsa-sha2-nistp256,ecdsa-sha2-nistp384,ecdsa-sha2-nistp521,ssh-rsa/g' "$SSH_CONFIG"
+    else
+      echo "HostKeyAlgorithms ecdsa-sha2-nistp256,ecdsa-sha2-nistp384,ecdsa-sha2-nistp521,ssh-rsa" >> "$SSH_CONFIG"
+    fi
+
+    log "Algoritmos de chave de host fracos desabilitados no SSH. Reinicie o serviço SSH."
+    systemctl restart ssh || systemctl restart sshd
+  else
+    log "Arquivo de configuração do SSH não encontrado. Edite o arquivo manualmente para desabilitar algoritmos de chave de host fracos."
+  fi
+}
+
+# Vulnerabilidade 37: Check if Mailserver answer to VRFY and EXPN requests
+# Solução: Desabilitar VRFY e EXPN no servidor de email
+fix_mailserver_vrfy_expn() {
+  log "Iniciando correção para Check if Mailserver answer to VRFY and EXPN requests"
+  
+  # Postfix
+  if [ -f /etc/postfix/main.cf ]; then
+    log "Servidor Postfix detectado."
+    if grep -q "disable_vrfy_command" /etc/postfix/main.cf; then
+      sed -i 's/^#\(disable_vrfy_command\)/\1/g' /etc/postfix/main.cf
+    else
+      echo "disable_vrfy_command = yes" >> /etc/postfix/main.cf
+    fi
+    log "VRFY desabilitado no Postfix. Reinicie o Postfix."
+    systemctl restart postfix || /etc/init.d/postfix restart
+    
+  # Sendmail
+  elif [ -f /etc/mail/sendmail.cf ]; then
+    log "Servidor Sendmail detectado."
+    if grep -q "O PrivacyOptions=goaway" /etc/mail/sendmail.cf; then
+      : # Do nothing, already configured
+    else
+      sed -i 's/^O PrivacyOptions=/O PrivacyOptions=goaway,/g' /etc/mail/sendmail.cf
+    fi
+    log "VRFY/EXPN desabilitado no Sendmail. Reinicie o Sendmail."
+    systemctl restart sendmail || /etc/init.d/sendmail restart
+  else
+    log "Servidor de email não detectado ou não suportado. Configure VRFY e EXPN manualmente."
+  fi
+}
+
+# Vulnerabilidade 38 & 39: SSL/TLS: Renegotiation DoS Vulnerability (CVE-2011-1473, CVE-2011-5094)
+# Solução: Desabilitar a renegotiation ou limitar o número de renegotiations
+fix_ssl_renegotiation_dos() {
+  log "AVISO: Vulnerabilidade SSL/TLS Renegotiation DoS detectada. Desabilite ou limite a renegotiation nos serviços afetados (ex: Apache, Postfix, etc.)."
+  log "A correção desta vulnerabilidade requer modificação manual da configuração, o que não pode ser automatizado de forma segura."
+}
+
+# Vulnerabilidade 40 & 41: SSL/TLS: Certificate Expired
+# Solução: Substituir o certificado SSL/TLS por um novo
+fix_ssl_certificate_expired() {
+  log "AVISO: O certificado SSL/TLS expirou. Substitua o certificado por um novo."
+  log "A substituição do certificado requer intervenção manual, o que não pode ser automatizado de forma segura."
+}
+
+# Vulnerabilidade 42 & 43: QWikiwiki e awiki Multiple LFI Vulnerabilities
+# Solução: Remover ou desabilitar as aplicações vulneráveis
+fix_qwikiwiki_lfi() {
+  log "AVISO: Vulnerabilidades QWikiwiki e awiki Multiple LFI detectadas. Remova ou desabilite as aplicações vulneráveis."
+  log "A remoção ou desabilitação da aplicação requer intervenção manual, o que não pode ser automatizado de forma segura."
+}
+
+# Vulnerabilidade 44: /doc directory browsable
+# Solução: Restringir o acesso ao diretório /doc
+fix_doc_directory_browsable() {
+  log "Iniciando correção para /doc directory browsable"
+
+  APACHE_CONF=$(find /etc -name apache2.conf -o -name httpd.conf 2>/dev/null | head -n 1)
+
+  if [ -n "$APACHE_CONF" ]; then
+    log "Arquivo de configuração do Apache encontrado: $APACHE_CONF"
+
+    # Adiciona restrições de acesso ao diretório /usr/share/doc (comum em Debian/Ubuntu)
+    DOC_DIR="/usr/share/doc"
+    if [ -d "$DOC_DIR" ]; then
+      if grep -q "<Directory \"$DOC_DIR\">" "$APACHE_CONF"; then
+        sed -i "/<Directory \"$DOC_DIR\">/,/<\/Directory>/d" "$APACHE_CONF"
+      fi
+      echo "<Directory \"$DOC_DIR\">" >> "$APACHE_CONF"
+      echo "  Options -Indexes" >> "$APACHE_CONF"
+      echo "  <FilesMatch \"\.html?$\">" >> "$APACHE_CONF"
+      echo "    Require all denied" >> "$APACHE_CONF"
+      echo "  </FilesMatch>" >> "$APACHE_CONF"
+      echo "</Directory>" >> "$APACHE_CONF"
+      log "Restrições de acesso adicionadas ao diretório $DOC_DIR no Apache. Reinicie o Apache."
+      systemctl restart apache2 || systemctl restart httpd
+    else
+        DOC_DIR="/usr/doc"
+            if [ -d "$DOC_DIR" ]; then
+                if grep -q "<Directory \"$DOC_DIR\">" "$APACHE_CONF"; then
+                    sed -i "/<Directory \"$DOC_DIR\">/,/<\/Directory>/d" "$APACHE_CONF"
+                fi
+                echo "<Directory \"$DOC_DIR\">" >> "$APACHE_CONF"
+                echo "  Options -Indexes" >> "$APACHE_CONF"
+                echo "  <FilesMatch \"\.html?$\">" >> "$APACHE_CONF"
+                echo "    Require all denied" >> "$APACHE_CONF"
+                echo "  </FilesMatch>" >> "$APACHE_CONF"
+                echo "</Directory>" >> "$APACHE_CONF"
+                log "Restrições de acesso adicionadas ao diretório $DOC_DIR no Apache. Reinicie o Apache."
+                systemctl restart apache2 || systemctl restart httpd
+            else
+                log "Diretório /usr/doc não encontrado. Verifique a configuração do servidor web para restringir o acesso manualmente."
+            fi
+    fi
+
+  else
+    log "Arquivo de configuração do Apache não encontrado. Verifique a configuração do servidor web para restringir o acesso ao diretório /doc manualmente."
+  fi
+}
+
+# Vulnerabilidade 45: Telnet Unencrypted Cleartext Login
+# Solução: Desabilitar o serviço telnet
+fix_telnet() {
+  log "Iniciando correção para Telnet Unencrypted Cleartext

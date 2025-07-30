@@ -1,0 +1,44 @@
+#!/bin/bash
+TWIKI_DIR="/var/www/twiki"
+BACKUP_DIR="/var/www/twiki-backup-$(date +%Y%m%d%H%M%S)"
+DOWNLOAD_URL="https://sourceforge.net/projects/twiki/files/TWiki%20Core%20Distribution/TWiki%204.2.4/twiki-4.2.4.tgz"
+TAR_FILE="/tmp/twiki-4.2.4.tgz"
+TEMP_DIR="/tmp/twiki-upgrade"
+
+if [ ! -d "$TWIKI_DIR" ]; then
+  echo "Erro: Diretório do TWiki não encontrado em $TWIKI_DIR." >&2
+  exit 1
+fi
+
+if command -v systemctl >/dev/null; then
+  systemctl stop apache2
+elif command -v service >/dev/null; then
+  service apache2 stop
+else
+  /etc/init.d/apache2 stop
+fi
+
+mv "$TWIKI_DIR" "$BACKUP_DIR"
+wget -q -O "$TAR_FILE" "$DOWNLOAD_URL"
+mkdir -p "$TEMP_DIR"
+tar -xzf "$TAR_FILE" -C "$TEMP_DIR"
+mv "$TEMP_DIR/twiki" "$TWIKI_DIR"
+cp -r "$BACKUP_DIR/data" "$TWIKI_DIR/"
+cp -r "$BACKUP_DIR/pub" "$TWIKI_DIR/"
+if [ -f "$BACKUP_DIR/lib/local.cfg" ]; then
+  cp -p "$BACKUP_DIR/lib/local.cfg" "$TWIKI_DIR/lib/LocalSite.cfg"
+fi
+if [ -f "$BACKUP_DIR/lib/LocalSite.cfg" ]; then
+  cp -p "$BACKUP_DIR/lib/LocalSite.cfg" "$TWIKI_DIR/lib/"
+fi
+chown -R www-data:www-data "$TWIKI_DIR"
+find "$TWIKI_DIR" -type d -exec chmod 755 {} \;
+find "$TWIKI_DIR" -type f -exec chmod 644 {} \;
+
+if command -v systemctl >/dev/null; then
+  systemctl start apache2
+elif command -v service >/dev/null; then
+  service apache2 start
+else
+  /etc/init.d/apache2 start
+fi

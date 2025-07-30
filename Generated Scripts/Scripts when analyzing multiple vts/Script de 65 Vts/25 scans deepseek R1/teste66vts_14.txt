@@ -1,0 +1,92 @@
+```powershell
+# Set PowerShell to use TLS 1.2 for secure downloads
+[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+
+# Initialize variables
+$Python310Version = [version]"3.10.16"
+$Python312Version = [version]"3.12.9"
+$Python310Url = "https://www.python.org/ftp/python/$Python310Version/python-$Python310Version-amd64.exe"
+$Python312Url = "https://www.python.org/ftp/python/$Python312Version/python-$Python312Version-amd64.exe"
+
+# Function to install/update Python
+function Update-Python {
+    param(
+        [version]$RequiredVersion,
+        [string]$Url,
+        [string]$MajorMinor
+    )
+
+    $installPath = Get-ItemProperty -Path "HKLM:\SOFTWARE\Python\PythonCore\$MajorMinor\InstallPath" -ErrorAction SilentlyContinue | Select-Object -ExpandProperty "(default)"
+    if (-not $installPath) {
+        Write-Output "Python $MajorMinor not found in registry."
+        return
+    }
+
+    $currentVersion = & "$installPath\python.exe" --version 2>&1
+    if ($currentVersion -match "Python (\d+\.\d+\.\d+)") {
+        $currentVersion = [version]$Matches[1]
+    }
+    else {
+        Write-Output "Failed to get current Python $MajorMinor version."
+        return
+    }
+
+    if ($currentVersion -lt $RequiredVersion) {
+        Write-Output "Updating Python $MajorMinor from $currentVersion to $RequiredVersion..."
+        $installer = "$env:TEMP\python-$RequiredVersion.exe"
+        Invoke-WebRequest -Uri $Url -OutFile $installer
+        Start-Process -FilePath $installer -ArgumentList "/quiet", "PrependPath=1", "InstallLauncherAllUsers=1", "Include_launcher=0" -Wait
+        Remove-Item $installer -Force
+    }
+    else {
+        Write-Output "Python $MajorMinor is already at $RequiredVersion."
+    }
+}
+
+# Update Python installations
+Update-Python -RequiredVersion $Python310Version -Url $Python310Url -MajorMinor "3.10"
+Update-Python -RequiredVersion $Python312Version -Url $Python312Url -MajorMinor "3.12"
+
+# Update OpenSSH configuration
+$sshdConfig = "$env:ProgramData\ssh\sshd_config"
+if (Test-Path $sshdConfig) {
+    $configContent = Get-Content $sshdConfig -Raw
+    $newConfig = $configContent -replace '(?mi)^\s*MACs\s+.*$', "MACs hmac-sha2-256,hmac-sha2-512"
+    if ($newConfig -ne $configContent) {
+        $newConfig | Set-Content $sshdConfig -NoNewline
+        $service = Get-Service -Name "sshd" -ErrorAction SilentlyContinue
+        if ($service -and $service.Status -eq "Running") {
+            Restart-Service -Name "sshd" -Force
+        }
+    }
+}
+
+# Disable TLS 1.0/1.1
+$tlsVersions = "TLS 1.0", "TLS 1.1"
+foreach ($tls in $tlsVersions) {
+    $serverPath = "HKLM:\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Protocols\$tls\Server"
+    $clientPath = "HKLM:\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Protocols\$tls\Client"
+    [void](New-Item -Path $serverPath -Force)
+    [void](New-Item -Path $clientPath -Force)
+    New-ItemProperty -Path $serverPath -Name "Enabled" -Value 0 -PropertyType DWORD -Force | Out-Null
+    New-ItemProperty -Path $serverPath -Name "DisabledByDefault" -Value 1 -PropertyType DWORD -Force | Out-Null
+    New-ItemProperty -Path $clientPath -Name "Enabled" -Value 0 -PropertyType DWORD -Force | Out-Null
+    New-ItemProperty -Path $clientPath -Name "DisabledByDefault" -Value 1 -PropertyType DWORD -Force | Out-Null
+}
+
+# Block ICMP Timestamp requests
+$ruleNames = @(
+    "Block ICMP Timestamp Request",
+    "Block ICMP Timestamp Request (IPv6)"
+)
+foreach ($rule in $ruleNames) {
+    if (-not (Get-NetFirewallRule -DisplayName $rule -ErrorAction SilentlyContinue)) {
+        $icmpType = if ($rule -match "IPv6") { "13" } else { "Timestamp" }
+        $protocol = if ($rule -match "IPv6") { "ICMPv6" } else { "ICMPv4" }
+        New-NetFirewallRule -DisplayName $rule -Direction Inbound -Protocol $protocol -IcmpType $icmpType -Action Block | Out-Null
+    }
+}
+
+# Post-installation
+Write-Output "Python updates and security configurations applied. Reboot required for full effect."
+```

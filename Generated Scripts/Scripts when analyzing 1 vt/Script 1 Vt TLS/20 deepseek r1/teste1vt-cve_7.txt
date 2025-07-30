@@ -1,0 +1,44 @@
+#!/bin/bash
+
+if [ "$(id -u)" -ne 0 ]; then
+    echo "Erro: Este script requer privilégios de root." >&2
+    exit 1
+fi
+
+config_file=$(sudo -u postgres psql -c "SHOW config_file;" -t 2>/dev/null | tr -d '[:space:]')
+if [ -z "$config_file" ]; then
+    config_file=$(ls /etc/postgresql/*/main/postgresql.conf 2>/dev/null | head -n 1)
+fi
+
+if [ -z "$config_file" ]; then
+    echo "Erro: Arquivo de configuração do PostgreSQL não encontrado." >&2
+    exit 1
+fi
+
+backup_file="${config_file}.backup_$(date +%Y%m%d%H%M%S)"
+cp -p "$config_file" "$backup_file"
+
+version_str=$(sudo -u postgres psql -c "SHOW server_version_num;" -t | tr -d ' ' 2>/dev/null)
+if [ -z "$version_str" ]; then
+    echo "Erro: Falha ao obter a versão do PostgreSQL." >&2
+    exit 1
+fi
+
+if [ "$version_str" -ge 100000 ]; then
+    sed -i".bak" -E -e "s/^#?(ssl_min_protocol_version\s*=.*)/# \1/" "$config_file"
+    sed -i -E -e "s/^#?(ssl_max_protocol_version\s*=.*)/# \1/" "$config_file"
+    echo "ssl_min_protocol_version = 'TLSv1.2'" >> "$config_file"
+else
+    sed -i".bak" -E -e "s/^#?(ssl_protocols\s*=.*)/# \1/" "$config_file"
+    echo "ssl_protocols = 'TLSv1.2'" >> "$config_file"
+fi
+
+systemctl restart postgresql >/dev/null 2>&1
+sleep 5
+
+if ! systemctl is-active --quiet postgresql; then
+    cp -p "$backup_file" "$config_file"
+    systemctl restart postgresql >/dev/null 2>&1
+    echo "Erro: Configuração inválida. Backup restaurado." >&2
+    exit 1
+fi

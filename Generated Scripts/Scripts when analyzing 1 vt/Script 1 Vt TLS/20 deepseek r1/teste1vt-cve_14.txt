@@ -1,0 +1,44 @@
+#!/bin/bash
+# Identificar y configurar PostgreSQL
+config_file=""
+pid_line=$(ss -ltnp state LISTENING sport = :5432 | tail -1 | grep -oP 'pid=\K\d+')
+if [ -n "$pid_line" ]; then
+    pid=$(echo "$pid_line" | awk -F, '{print $1}')
+    ppid_path=$(realpath /proc/$pid/exe)
+    if [[ $ppid_path == *"postgres"* ]]; then
+        data_dir=$(ps -p $pid -o args= | grep -oP '\-D\s*\K[^\s]*')
+        if [ -n "$data_dir" ]; then
+            candidate_conf="$data_dir/postgresql.conf"
+            [ -f "$candidate_conf" ] && config_file="$candidate_conf"
+        fi
+    fi
+fi
+
+if [ -z "$config_file" ]; then
+    for path in /etc/postgresql/*/main/postgresql.conf /var/lib/pgsql/*/data/postgresql.conf /var/lib/postgresql/*/main/postgresql.conf; do
+        [ -f "$path" ] && config_file="$path" && break
+    done
+fi
+
+# Modificar configuración si existe
+if [ -f "$config_file" ]; then
+    # Crear backup
+    cp -p "$config_file" "${config_file}.bak_kbs_31821"
+
+    # Actualizar o añadir configuración TLS
+    if grep -qP '^\s*ssl_min_protocol_version\s*=' "$config_file"; then
+        sed -i -E 's/(^\s*ssl_min_protocol_version\s*=)\s*.*/\1 \x27TLSv1.2\x27/' "$config_file"
+    else
+        echo "ssl_min_protocol_version = 'TLSv1.2'" >> "$config_file"
+    fi
+
+    # Recargar PostgreSQL
+    if systemctl is-active --quiet postgresql; then
+        systemctl reload postgresql
+    elif service postgresql status >/dev/null 2>&1; then
+        service postgresql reload
+    else
+        pid_file=$(dirname "$config_file")/postmaster.pid
+        [ -f "$pid_file" ] && kill -HUP $(head -1 "$pid_file")
+    fi
+fi

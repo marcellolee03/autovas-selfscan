@@ -1,0 +1,54 @@
+```powershell
+# Fix Python 3.10 vulnerabilities
+$python310 = Get-ItemProperty HKLM:\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall\*, HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\* `
+    | Where-Object { $_.DisplayName -match "Python 3.10.12" }
+if ($python310) {
+    $uninstallString = $python310.UninstallString -replace "msiexec.exe", "" -replace "/I", "" -replace "/X", ""
+    $uninstallString = $uninstallString.Trim()
+    Start-Process "msiexec.exe" -ArgumentList "/X $uninstallString /qn" -Wait
+    Invoke-WebRequest "https://www.python.org/ftp/python/3.10.16/python-3.10.16-amd64.exe" -OutFile "$env:TEMP\python-3.10.16.exe"
+    Start-Process "$env:TEMP\python-3.10.16.exe" -ArgumentList "/quiet InstallAllUsers=1 PrependPath=1" -Wait
+    Remove-Item "$env:TEMP\python-3.10.16.exe"
+}
+
+# Fix Python 3.12 vulnerabilities
+$python312 = Get-ItemProperty HKLM:\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall\*, HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\* `
+    | Where-Object { $_.DisplayName -match "Python 3.12.0" }
+if ($python312) {
+    $uninstallString = $python312.UninstallString -replace "msiexec.exe", "" -replace "/I", "" -replace "/X", ""
+    $uninstallString = $uninstallString.Trim()
+    Start-Process "msiexec.exe" -ArgumentList "/X $uninstallString /qn" -Wait
+    Invoke-WebRequest "https://www.python.org/ftp/python/3.12.9/python-3.12.9-amd64.exe" -OutFile "$env:TEMP\python-3.12.9.exe"
+    Start-Process "$env:TEMP\python-3.12.9.exe" -ArgumentList "/quiet InstallAllUsers=1 PrependPath=1" -Wait
+    Remove-Item "$env:TEMP\python-3.12.9.exe"
+}
+
+# Fix RDP TLS protocols
+New-Item "HKLM:\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Protocols\TLS 1.0\Server" -Force | Out-Null
+Set-ItemProperty "HKLM:\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Protocols\TLS 1.0\Server" -Name "Enabled" -Value 0 -Type DWord
+Set-ItemProperty "HKLM:\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Protocols\TLS 1.0\Server" -Name "DisabledByDefault" -Value 1 -Type DWord
+New-Item "HKLM:\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Protocols\TLS 1.0\Client" -Force | Out-Null
+Set-ItemProperty "HKLM:\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Protocols\TLS 1.0\Client" -Name "Enabled" -Value 0 -Type DWord
+Set-ItemProperty "HKLM:\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Protocols\TLS 1.0\Client" -Name "DisabledByDefault" -Value 1 -Type DWord
+New-Item "HKLM:\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Protocols\TLS 1.1\Server" -Force | Out-Null
+Set-ItemProperty "HKLM:\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Protocols\TLS 1.1\Server" -Name "Enabled" -Value 0 -Type DWord
+Set-ItemProperty "HKLM:\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Protocols\TLS 1.1\Server" -Name "DisabledByDefault" -Value 1 -Type DWord
+New-Item "HKLM:\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Protocols\TLS 1.1\Client" -Force | Out-Null
+Set-ItemProperty "HKLM:\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Protocols\TLS 1.1\Client" -Name "Enabled" -Value 0 -Type DWord
+Set-ItemProperty "HKLM:\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Protocols\TLS 1.1\Client" -Name "DisabledByDefault" -Value 1 -Type DWord
+
+# Fix SSH weak MAC algorithms
+$sshdConfig = "C:\ProgramData\ssh\sshd_config"
+if (Test-Path $sshdConfig) {
+    (Get-Content $sshdConfig) | ForEach-Object {
+        if ($_ -match "^\s*MACs\s+") {
+            "MACs hmac-sha2-512-etm@openssh.com,hmac-sha2-256-etm@openssh.com,hmac-sha2-512,hmac-sha2-256"
+        }
+        else { $_ }
+    } | Set-Content $sshdConfig
+    Restart-Service sshd -Force
+}
+
+# Ensure successful execution
+exit 0
+```

@@ -1,0 +1,39 @@
+#!/bin/bash
+DOMAIN="example.com"
+CERT_DIR="/etc/letsencrypt/live/$DOMAIN"
+NGINX_CONF="/etc/nginx/sites-available/$DOMAIN"
+APT_UPDATE_DONE=0
+
+install_certbot() {
+    if ! command -v certbot &> /dev/null; then
+        if [ -f /etc/debian_version ]; then
+            sudo apt-get update
+            APT_UPDATE_DONE=1
+            sudo apt-get install -y certbot python3-certbot-nginx
+        else
+            echo "Unsupported OS for automatic Certbot installation."
+            exit 1
+        fi
+    fi
+}
+
+configure_ssl() {
+    if [ ! -d "$CERT_DIR" ]; then
+        sudo certbot --nginx -d "$DOMAIN" --non-interactive --agree-tos -m admin@example.com
+    fi
+}
+
+configure_nginx() {
+    if [ -f "$NGINX_CONF" ]; then
+        sudo sed -i '/listen 80;/a \    return 301 https://$host$request_uri;' "$NGINX_CONF"
+        sudo sed -i 's/listen 80;/# listen 80;/' "$NGINX_CONF"
+        sudo systemctl reload nginx
+    else
+        echo "Nginx configuration file not found."
+        exit 1
+    fi
+}
+
+install_certbot
+configure_ssl
+configure_nginx

@@ -1,0 +1,45 @@
+#!/bin/bash
+
+set -euo pipefail
+
+if systemctl is-active --quiet apache2 || systemctl is-active --quiet httpd; then
+    a2enmod rewrite > /dev/null
+    conf_file="/etc/apache2/sites-available/000-default.conf"
+    if [ ! -f "$conf_file" ]; then
+        echo "Erro: Apache config file not found" >&2
+        exit 1
+    fi
+    backup_file="${conf_file}.bak_$(date +%Y%m%d%H%M%S)"
+    cp "$conf_file" "$backup_file"
+    if grep -q "RewriteEngine On" "$conf_file" && grep -q "RewriteRule.*https://" "$conf_file"; then
+        exit 0
+    fi
+    sed -i '/<VirtualHost \*:80>/a \
+RewriteEngine On\
+RewriteCond %{HTTPS} off\
+RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [R=301,L]' "$conf_file"
+    systemctl reload apache2
+
+elif systemctl is-active --quiet nginx; then
+    conf_file="/etc/nginx/sites-available/default"
+    if [ ! -f "$conf_file" ]; then
+        echo "Erro: Nginx config file not found" >&2
+        exit 1
+    fi
+    backup_file="${conf_file}.bak_$(date +%Y%m%d%H%M%S)"
+    cp "$conf_file" "$backup_file"
+    if grep -q "return 301 https://" "$conf_file"; then
+        exit 0
+    fi
+    echo 'server {
+    listen 80 default_server;
+    listen [::]:80 default_server;
+    server_name _;
+    return 301 https://$host$request_uri;
+}' > "$conf_file"
+    systemctl reload nginx
+
+else
+    echo "No active webserver (Apache/Nginx) found" >&2
+    exit 1
+fi

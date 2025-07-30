@@ -1,0 +1,11 @@
+#!/bin/bash
+config_file="/etc/ssl/openssl.cnf"
+backup_file="/etc/ssl/openssl.cnf.bak"
+cp $config_file $backup_file
+sed -i '/^MinProtocol =/d' $config_file
+sed -i '/^CipherString =/d' $config_file
+echo "MinProtocol = TLSv1.2" >> $config_file
+echo "CipherString = DEFAULT@SECLEVEL=2" >> $config_file
+systemctl restart apache2
+systemctl restart postgresql
+systemctl restart nginx

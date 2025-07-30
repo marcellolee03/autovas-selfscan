@@ -1,0 +1,43 @@
+#!/bin/bash
+
+web_server=""
+if systemctl is-active --quiet apache2; then
+    web_server="apache"
+elif systemctl is-active --quiet nginx; then
+    web_server="nginx"
+fi
+
+if [ "$web_server" == "apache" ]; then
+    echo "Configuring Apache to redirect HTTP to HTTPS..."
+    if [ ! -f /etc/apache2/sites-available/000-redirect.conf ]; then
+        cat <<EOF > /etc/apache2/sites-available/000-redirect.conf
+<VirtualHost _default_:80>
+    ServerAdmin webmaster@localhost
+    RewriteEngine On
+    RewriteRule ^(.*)$ https://%{HTTP_HOST}\$1 [R=301,L]
+</VirtualHost>
+EOF
+        a2ensite 000-redirect.conf > /dev/null
+        a2dissite 000-default.conf > /dev/null 2>&1
+        systemctl reload apache2
+    fi
+
+elif [ "$web_server" == "nginx" ]; then
+    echo "Configuring Nginx to redirect HTTP to HTTPS..."
+    if ! grep -q "return 301 https://" /etc/nginx/sites-enabled/default; then
+        if [ -f /etc/nginx/sites-enabled/default ]; then
+            cp /etc/nginx/sites-enabled/default /etc/nginx/sites-enabled/default.bak
+        fi
+        cat <<EOF > /etc/nginx/sites-enabled/default
+server {
+    listen 80 default_server;
+    listen [::]:80 default_server;
+    return 301 https://\$host\$request_uri;
+}
+EOF
+        nginx -t -q && systemctl reload nginx
+    fi
+else
+    echo "No active supported web server detected." >&2
+    exit 1
+fi

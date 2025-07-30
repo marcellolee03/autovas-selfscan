@@ -1,0 +1,13 @@
+#!/bin/bash
+TWIKI_VERSION=$(curl -s http://localhost/bin/view/Main/WebHome | grep -oP 'TWiki-\K[0-9\.]+')
+if dpkg --compare-versions "$TWIKI_VERSION" lt "4.2.4"; then
+    wget -O /tmp/twiki-latest.zip https://sourceforge.net/projects/twiki/files/TWiki/TWiki-4.2.4/twiki-4.2.4.zip/download
+    unzip -o /tmp/twiki-latest.zip -d /tmp/
+    sudo rm -rf /var/www/html/twiki
+    sudo mv /tmp/twiki-4.2.4 /var/www/html/twiki
+    sudo chown -R www-data:www-data /var/www/html/twiki
+    sudo rm /tmp/twiki-latest.zip
+    echo "TWiki atualizado para a versão 4.2.4"
+else
+    echo "TWiki já está na versão 4.2.4 ou superior"
+fi

@@ -1,0 +1,57 @@
+```bash
+#!/bin/bash
+
+# Verifica se o sistema operacional é Windows
+if [[ "$OSTYPE" == "msys" || "$OSTYPE" == "cygwin" ]]; then
+  echo "Este script não é adequado para execução direta no Windows."
+  echo "Considere usar um gerenciador de pacotes como Chocolatey ou executar em um ambiente WSL."
+  exit 1
+fi
+
+# Detecta a versão atual do Python 3.10
+python3_version=$(python3.10 -c 'import sys; print(".".join(map(str, sys.version_info[:3])))' 2>/dev/null)
+
+# Verifica se o Python 3.10 está instalado e se a versão precisa ser atualizada
+if [[ -n "$python3_version" ]]; then
+  if dpkg --compare-versions "$python3_version" lt "3.10.15"; then
+    echo "Versão atual do Python 3.10: $python3_version"
+    echo "Atualizando Python 3.10 para a versão 3.10.15 ou mais recente..."
+
+    # Atualiza a lista de pacotes
+    sudo apt update
+
+    # Instala o pacote python3.10 e python3.10-venv para garantir que a versão mais recente seja instalada.
+    sudo apt install --only-upgrade python3.10 python3.10-venv -y
+
+    # Verifica se a atualização foi bem-sucedida
+    updated_python3_version=$(python3.10 -c 'import sys; print(".".join(map(str, sys.version_info[:3])))' 2>/dev/null)
+
+    if dpkg --compare-versions "$updated_python3_version" ge "3.10.15"; then
+      echo "Python 3.10 atualizado com sucesso para a versão $updated_python3_version."
+    else
+      echo "Falha ao atualizar Python 3.10.  Por favor, verifique se há erros e tente novamente."
+      exit 1
+    fi
+  else
+    echo "Python 3.10 já está na versão $python3_version ou mais recente. Nenhuma atualização necessária."
+  fi
+else
+  echo "Python 3.10 não está instalado ou não foi detectado."
+  echo "Instalando Python 3.10..."
+
+  # Instala o Python 3.10
+  sudo apt update
+  sudo apt install python3.10 python3.10-venv -y
+
+  # Verifica se a instalação foi bem-sucedida
+  python3_version=$(python3.10 -c 'import sys; print(".".join(map(str, sys.version_info[:3])))' 2>/dev/null)
+  if [[ -n "$python3_version" ]]; then
+     echo "Python 3.10 instalado com sucesso (versão: $python3_version)."
+  else
+     echo "Falha ao instalar Python 3.10. Por favor, verifique se há erros e tente novamente."
+     exit 1
+  fi
+fi
+
+exit 0
+```

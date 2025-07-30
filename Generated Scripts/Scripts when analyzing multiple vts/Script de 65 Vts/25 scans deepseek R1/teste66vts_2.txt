@@ -1,0 +1,32 @@
+```batch
+@echo off
+REM Update Python installations to non-vulnerable versions
+curl -L -o python-3.10.16.exe https://www.python.org/ftp/python/3.10.16/python-3.10.16-amd64.exe
+start /wait python-3.10.16.exe /quiet InstallLauncherAllUsers=1 PrependPath=1 Include_test=0
+curl -L -o python-3.12.9.exe https://www.python.org/ftp/python/3.12.9/python-3.12.9-amd64.exe
+start /wait python-3.12.9.exe /quiet InstallLauncherAllUsers=1 PrependPath=1 Include_test=0
+
+REM Disable legacy TLS protocols
+reg add "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Protocols\TLS 1.0\Client" /v DisabledByDefault /t REG_DWORD /d 1 /f
+reg add "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Protocols\TLS 1.0\Client" /v Enabled /t REG_DWORD /d 0 /f
+reg add "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Protocols\TLS 1.0\Server" /v DisabledByDefault /t REG_DWORD /d 1 /f
+reg add "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Protocols\TLS 1.0\Server" /v Enabled /t REG_DWORD /d 0 /f
+reg add "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Protocols\TLS 1.1\Client" /v DisabledByDefault /t REG_DWORD /d 1 /f
+reg add "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Protocols\TLS 1.1\Client" /v Enabled /t REG_DWORD /d 0 /f
+reg add "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Protocols\TLS 1.1\Server" /v DisabledByDefault /t REG_DWORD /d 1 /f
+reg add "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Protocols\TLS 1.1\Server" /v Enabled /t REG_DWORD /d 0 /f
+
+REM Configure secure SSH ciphers
+echo MACs hmac-sha2-512,hmac-sha2-256 > "%ProgramData%\ssh\sshd_config_new"
+findstr /v /c:"MACs" "%ProgramData%\ssh\sshd_config" >> "%ProgramData%\ssh\sshd_config_new"
+move /Y "%ProgramData%\ssh\sshd_config_new" "%ProgramData%\ssh\sshd_config"
+
+REM Restart SSH service
+sc query sshd >nul 2>&1 && (net stop sshd && net start sshd)
+
+REM Block ICMP timestamp requests
+netsh advfirewall firewall add rule name="Block ICMP Timestamp Request" protocol="icmpv4:13,any" dir=in action=block
+
+REM Schedule final reboot to activate new configurations
+shutdown /r /t 60 /c "System updates applied. Rebooting to complete changes."
+```

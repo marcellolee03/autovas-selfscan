@@ -1,0 +1,58 @@
+```bash
+#!/bin/bash
+
+# Este script atualiza o sistema operacional Ubuntu para a versão mais recente suportada.
+# Ele é projetado para migrar um sistema Ubuntu 8.04 (Hardy Heron) EOL para uma versão suportada.
+# Devido à grande diferença entre as versões, uma atualização direta não é possível.
+# Este script fornece um guia e automatiza alguns passos, mas requer intervenção manual.
+
+# AVISO: Este script irá atualizar seu sistema operacional.
+#        Faça um backup completo antes de continuar.
+#        A atualização de uma versão EOL como o Ubuntu 8.04 é um processo complexo e pode falhar.
+#        Este script é fornecido SEM GARANTIA.
+
+# Passo 1: Atualizar o sistema existente (mesmo sendo EOL, tentar melhorar o estado)
+echo "Atualizando a lista de pacotes..."
+sudo apt-get update
+
+echo "Atualizando pacotes instalados..."
+sudo apt-get upgrade -y
+sudo apt-get dist-upgrade -y
+
+# Passo 2: Alterar os repositórios para o repositório de versões antigas (archive)
+echo "Alterando sources.list para usar o repositório de versões antigas (archive)..."
+sudo sed -i 's/http:\/\/archive\.ubuntu\.com\/ubuntu\//http:\/\/old-releases\.ubuntu\.com\/ubuntu\//g' /etc/apt/sources.list
+sudo sed -i 's/http:\/\/security\.ubuntu\.com\/ubuntu\//http:\/\/old-releases\.ubuntu\.com\/ubuntu\//g' /etc/apt/sources.list
+
+echo "Atualizando a lista de pacotes novamente após a alteração dos repositórios..."
+sudo apt-get update
+
+# Passo 3: Instalar o 'update-manager-core' (se não estiver instalado)
+echo "Instalando update-manager-core..."
+sudo apt-get install update-manager-core -y
+
+# Passo 4: Tentar atualizar para uma versão intermediária (ex: 10.04 LTS)
+# A atualização direta para a versão mais recente não é possível.
+# É recomendado atualizar para uma versão LTS intermediária e depois para a mais recente.
+# Este script NÃO automatiza a atualização intermediária.
+# INSTRUÇÕES MANUAIS:
+# 1. Execute 'sudo do-release-upgrade' e siga as instruções na tela.
+# 2. Escolha atualizar para uma versão LTS (ex: 10.04).
+# 3. Repita o processo de atualização até chegar a uma versão suportada (ex: 22.04 ou superior).
+
+echo "-----------------------------------------------------------------------"
+echo "ATENÇÃO: A atualização automatizada a partir do Ubuntu 8.04 não é possível."
+echo "Este script preparou o sistema para uma atualização manual."
+echo "Siga estes passos:"
+echo "1. Execute 'sudo do-release-upgrade' e siga as instruções na tela."
+echo "2. Escolha atualizar para uma versão LTS (ex: 10.04)."
+echo "3. Repita o processo de atualização até chegar a uma versão suportada (ex: 22.04 ou superior)."
+echo "-----------------------------------------------------------------------"
+
+# Passo 5: (Após a atualização intermediária) Atualizar para a versão mais recente suportada.
+# (Este passo deve ser feito manualmente após a atualização para uma versão intermediária).
+
+echo "Script finalizado. A atualização completa requer intervenção manual."
+
+exit 0
+```

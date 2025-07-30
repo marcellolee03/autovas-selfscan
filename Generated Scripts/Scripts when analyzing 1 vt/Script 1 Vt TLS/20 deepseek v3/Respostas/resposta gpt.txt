@@ -1,0 +1,32 @@
+Analisando a vulnerabilidade descrita (Deprecated TLSv1.0 and TLSv1.1 Protocol Detection) e o objetivo de desabilitar esses protocolos em favor do TLSv1.2+, avaliei os 20 scripts enviados para verificar se cada um resolve completamente o problema. Aqui está o resultado:
+
+Script	Resolve completamente?
+teste1vt-cve_1.txt	Sim
+teste1vt-cve_2.txt	Sim
+teste1vt-cve_3.txt	Sim
+teste1vt-cve_4.txt	Sim
+teste1vt-cve_5.txt	Não (foca só no PostgreSQL, ignora OpenSSL, Apache, Nginx)
+teste1vt-cve_6.txt	Sim
+teste1vt-cve_7.txt	Sim
+teste1vt-cve_8.txt	Sim
+teste1vt-cve_9.txt	Sim
+teste1vt-cve_10.txt	Sim
+teste1vt-cve_11.txt	Sim
+teste1vt-cve_12.txt	Sim
+teste1vt-cve_13.txt	Sim
+teste1vt-cve_14.txt	Sim
+teste1vt-cve_15.txt	Sim
+teste1vt-cve_16.txt	Sim
+teste1vt-cve_17.txt	Sim
+teste1vt-cve_18.txt	Sim
+teste1vt-cve_19.txt	Sim
+teste1vt-cve_20.txt	Sim
+
+Resumo:
+Scripts eficazes: 19
+
+Scripts ineficazes: 1 (teste1vt-cve_5.txt)
+
+Porcentagem de correção geral: 19 / 20 = 95%
+
+✅ Conclusão: 95% dos scripts enviados resolvem completamente a vulnerabilidade detectada (desabilitando TLS 1.0 e 1.1 e forçando TLS 1.2+ em serviços como Apache, Nginx, PostgreSQL e OpenSSL).

@@ -1,0 +1,35 @@
+#!/bin/bash
+if [ "$(id -u)" -ne 0 ]; then
+    echo "Este script requer execução como root. Utilize sudo ou execute como root." >&2
+    exit 1
+fi
+
+if [ ! -f /etc/os-release ]; then
+    echo "Sistema operacional não identificado. Script compatível apenas com Ubuntu e Debian." >&2
+    exit 1
+fi
+
+source /etc/os-release
+if [[ "$ID" != "ubuntu" && "$ID" != "debian" ]]; then
+    echo "Sistema operacional não suportado. Este script é destinado a Ubuntu/Debian." >&2
+    exit 1
+fi
+
+export DEBIAN_FRONTEND=noninteractive
+apt-get update -q=2
+
+PHP_PACKAGES=$(dpkg -l | grep -E '^ii\s+(php[0-9]?.|libapache2-mod-php)' | awk '{print $2}' | tr '\n' ' ')
+if [ -z "$PHP_PACKAGES" ]; then
+    echo "Nenhum pacote PHP encontrado. Nenhuma ação necessária." >&2
+    exit 0
+fi
+
+apt-get install --only-upgrade -q=2 -y $PHP_PACKAGES
+
+if systemctl is-active --quiet apache2; then
+    systemctl restart apache2 >/dev/null 2>&1
+fi
+
+if command -v systemctl >/dev/null && systemctl list-unit-files | grep -q php; then
+    systemctl restart php\*.service >/dev/null 2>&1
+fi

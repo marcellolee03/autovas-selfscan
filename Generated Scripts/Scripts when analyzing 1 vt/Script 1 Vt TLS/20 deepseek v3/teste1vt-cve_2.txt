@@ -1,0 +1,20 @@
+#!/bin/bash
+if [ -f /etc/ssl/openssl.cnf ]; then
+    sed -i '/^MinProtocol =/d' /etc/ssl/openssl.cnf
+    sed -i '/^CipherString =/d' /etc/ssl/openssl.cnf
+    echo "MinProtocol = TLSv1.2" >> /etc/ssl/openssl.cnf
+    echo "CipherString = DEFAULT@SECLEVEL=2" >> /etc/ssl/openssl.cnf
+fi
+
+if [ -f /etc/apache2/mods-enabled/ssl.conf ]; then
+    sed -i '/^SSLProtocol /d' /etc/apache2/mods-enabled/ssl.conf
+    echo "SSLProtocol -all +TLSv1.2 +TLSv1.3" >> /etc/apache2/mods-enabled/ssl.conf
+fi
+
+if [ -f /etc/nginx/nginx.conf ]; then
+    sed -i '/ssl_protocols /d' /etc/nginx/nginx.conf
+    echo "ssl_protocols TLSv1.2 TLSv1.3;" >> /etc/nginx/nginx.conf
+fi
+
+systemctl restart apache2 > /dev/null 2>&1
+systemctl restart nginx > /dev/null 2>&1

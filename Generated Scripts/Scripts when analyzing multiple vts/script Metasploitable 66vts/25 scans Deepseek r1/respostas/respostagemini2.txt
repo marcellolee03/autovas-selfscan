@@ -1,0 +1,493 @@
+
+Estou pronto para analisar os scripts de correção que você forneceu em relação às vulnerabilidades do OpenVAS. Por favor, envie os scripts um por um para que eu possa avaliá-los e fornecer uma porcentagem de correção para cada um, bem como uma média geral no final.
+
+Análise dos scripts de correção:
+
+Script: metasploitable66VT_1.txt
+Este script aborda várias vulnerabilidades, como a remoção do TWiki vulnerável, a parada do serviço dRuby, a remoção/parada de serviços inseguros (rsh, rexec, vsftpd, distcc, telnetd, vnc4server), a alteração de senhas MySQL e PostgreSQL, a parada do Tomcat e a desativação do AJP, a atualização do PHP, a remoção de arquivos .ini inseguros e phpinfo.php, a desativação de métodos HTTP perigosos e a restrição de acesso a diretórios no Apache, a segurança de SSH (algoritmos KEX, HostKey, Ciphers, MACs), a atualização de certificados TLS/SSL (embora a simples remoção de arquivos e a geração de um certificado autoassinado possam não ser uma solução completa para todas as vulnerabilidades de certificado), a atualização do jQuery, a desativação de VRFY/EXPN no Postfix e a configuração de parâmetros de kernel para desabilitar timestamps TCP e ICMP. O script também tenta auditar e reverter a vulnerabilidade da porta 1524.
+
+Pontos fortes:
+
+Abrange um grande número de vulnerabilidades.
+Tenta remover e desabilitar serviços permanentemente.
+Aborda configurações de segurança de vários softwares.
+Pontos fracos:
+
+A atualização do PHP para uma versão específica (5.6.30) pode não ser suficiente, dependendo da distribuição, e o comando apt install -y php=5.6.30* pode falhar se a versão não estiver nos repositórios.
+A correção de TLS/SSL (remoção de certificados antigos e geração de um novo autoassinado de 4096 bits) pode resolver algumas questões de certificado (tamanho da chave, expiração), mas não necessariamente todas as fraquezas de protocolo (SSLv2/v3, TLSv1.0/1.1) ou suítes de cifra fracas sem configuração explícita.
+Algumas ações, como a remoção de "ingreslock" (Vulnerabilidade 6), dependem da localização do backdoor, que pode variar. O script tenta matar o processo na porta 1524, o que é um bom passo, mas a remoção do artefato de backdoor pode ser mais complexa.
+Estimativa de correção para metasploitable66VT_1.txt: 70%
+
+Script: metasploitable66VT_2.txt
+Este script foca na redefinição de senhas, atualização de pacotes críticos, desativação de serviços vulneráveis, configuração de hardening em serviços essenciais (SSH), configuração de SSL/TLS em serviços críticos (Postfix, PostgreSQL), hardening do Apache, remoção de arquivos sensíveis e configuração de um firewall básico.
+
+Pontos fortes:
+
+Abordagem clara para redefinição de senhas.
+Desativação de múltiplos serviços conhecidos por serem vulneráveis.
+Configuração de hardening em SSH, Apache, Postfix e PostgreSQL.
+Criação de regras de firewall básicas.
+Pontos fracos:
+
+A atualização do OpenSSL é feita com apt-get install --only-upgrade, o que pode não garantir a versão mais recente para corrigir todas as CVEs relacionadas a SSL/TLS se a distribuição for muito antiga.
+A seção de desativação de serviços tenta parar e remover serviços via init.d e update-rc.d, o que é bom, mas a abordagem para "ajp" e "ingreslock" como nomes de serviço genéricos pode não ser totalmente eficaz, pois são mais vulnerabilidades de software do que serviços stand-alone com nomes de serviço padrão.
+O hardening do Apache adiciona regras de diretório, mas não desativa explicitamente métodos HTTP perigosos como PUT/DELETE para todas as vulnerabilidades relacionadas.
+A configuração do firewall é muito restritiva (iptables -A INPUT -j DROP) e pode bloquear o acesso legítimo se as regras de permissão não forem abrangentes o suficiente para todos os serviços necessários.
+A nota final sobre a atualização do SO (EOL) é pertinente, mas o script em si não tenta resolver a vulnerabilidade de EOL do SO.
+Estimativa de correção para metasploitable66VT_2.txt: 60%
+
+Script: metasploitable66VT_3.txt
+Este script usa funções para desabilitar serviços, atualizar configurações, e foca na remoção de instalações TWiki, desativação do dRuby, rlogin, rexec, Ingreslock, hardening do Tomcat AJP, alteração de senhas MySQL/PostgreSQL, configuração do PHP (log de erros, expose_php, disable_functions), correção de senhas VNC, restrição de métodos HTTP perigosos no Apache, desativação de FTP anônimo, e redirecionamento HTTP para HTTPS.
+
+Pontos fortes:
+
+Estrutura de script mais organizada com funções.
+Tentativas explícitas de remover instalações TWiki vulneráveis.
+Abordagens detalhadas para serviços específicos como Tomcat AJP e PHP.
+Implementa redirecionamento de HTTP para HTTPS, que é uma boa prática para a vulnerabilidade 49.
+Desabilita rlogin, rexec, telnet e ingreslock.
+Pontos fracos:
+
+A remoção de TWiki é feita via rm -rf, que pode ser agressiva se houver outros dados no mesmo diretório pai.
+As correções do Tomcat (Vulnerabilidade 7) não desativam o conector AJP, apenas adicionam atributos enableLookups, allowTrace, maxPostSize e secure, o que pode não ser suficiente para mitigar completamente o Ghostcat se a versão do Tomcat ainda for vulnerável. A solução recomendada é atualizar ou desabilitar.
+A correção para a vulnerabilidade 16 (HTTP Dangerous Methods) modifica AllowOverride para All, o que pode, na verdade, aumentar a superfície de ataque em vez de diminuí-la se arquivos .htaccess maliciosos puderem ser carregados. A intenção é desabilitar PUT/DELETE, mas a forma como é feita pode ter efeitos colaterais.
+As correções de SSL/TLS não são abordadas neste script, que são uma série de vulnerabilidades.
+A correção de jQuery (Vulnerabilidade 25, 55) não está incluída neste script.
+Estimativa de correção para metasploitable66VT_3.txt: 55%
+
+Script: metasploitable66VT_4.txt
+Este script se concentra na remoção de serviços vulneráveis, desativação de serviços desnecessários, patch da configuração SSH, hardening do Apache, remoção de arquivos perigosos (phpinfo.php, TWiki), segurança MySQL e PostgreSQL, alteração de senhas de usuários comuns e mitigação do AJP do Tomcat, além de hardening TLS para Postfix e sysctl.
+
+Pontos fortes:
+
+Remoção agressiva de pacotes de serviços vulneráveis.
+Mudança de senhas para MySQL, PostgreSQL e usuários comuns.
+Mitigação do AJP do Tomcat através de comentários na linha do conector.
+Hardening SSH abrangente.
+Pontos fracos:
+
+A atualização de pacotes não é feita para todos os softwares vulneráveis (ex: PHP, jQuery).
+A correção de TLS para Postfix (smtpd_tls_security_level = may) não aborda diretamente a desativação de protocolos SSLv2/v3 ou TLSv1.0/1.1 ou suítes de cifra fracas.
+A vulnerabilidade de EOL do OS (Vulnerabilidade 4) não é tratada por este script.
+Alguns serviços como dRuby, rlogin passwordless, rexec, Ingreslock podem não ser completamente abordados além da remoção de pacotes (se eles existirem como serviços standalone ou backdoors).
+Estimativa de correção para metasploitable66VT_4.txt: 65%
+
+Script: metasploitable66VT_5.txt
+Este script se concentra em fazer backups de configurações, desabilitar serviços inseguros via inetd/xinetd e system V init, alterar credenciais padrão para MySQL e PostgreSQL, proteger o SSH, fazer hardening do Apache, desabilitar o conector AJP do Tomcat, proteger a configuração do PHP e garantir permissões corretas para o crontab.
+
+Pontos fortes:
+
+Inclusão de backups de configuração.
+Abordagem de desabilitação de serviços via diferentes sistemas (inetd/xinetd e SysV init).
+Configuração PHP com allow_url_include, allow_url_fopen e cgi.fix_pathinfo off, expose_php off, o que é bom.
+Desativação explícita do conector AJP do Tomcat comentando a linha.
+Pontos fracos:
+
+A desabilitação de "tomcat*" nos serviços pode não ser específica o suficiente para todas as versões do Tomcat.
+As vulnerabilidades de TLS/SSL (protocolos, cifras, certificados) não são diretamente abordadas neste script.
+A vulnerabilidade de Ingreslock (Vulnerabilidade 6) é tratada com pkill e desativação via inetd/xinetd, mas a remoção completa do backdoor pode exigir mais ações.
+A correção de jQuery (Vulnerabilidade 25, 55) não está incluída neste script.
+Estimativa de correção para metasploitable66VT_5.txt: 60%
+
+Script: metasploitable66VT_6.txt
+Este script foca na atualização do sistema (mesmo em repositórios legados), desabilitação de serviços inseguros, segurança de MySQL/PostgreSQL, hardening de servidores web (Apache), segurança de SSH, desabilitação de features inseguras do kernel e gerenciamento de arquivos sensíveis.
+
+Pontos fortes:
+
+Tenta atualizar o sistema, mesmo para repositórios EOL, o que é um passo importante para a vulnerabilidade 4.
+Define senhas aleatórias para MySQL e PostgreSQL, o que é mais seguro do que senhas fixas.
+Hardening SSH e Apache abrangente para protocolos e cifras.
+Remove arquivos phpinfo.php.
+Desabilita timestamps TCP.
+Pontos fracos:
+
+A atualização do OS para repositórios EOL (Ubuntu 8.04) é uma medida paliativa e a vulnerabilidade 4 (OS EOL) não será totalmente corrigida sem uma migração para uma versão suportada.
+A correção para a vulnerabilidade 7 (Ghostcat) não é explícita, apenas há a remoção de "tomcat6" e "tomcat7" dos pacotes, o que pode não ser suficiente se outras versões estiverem instaladas ou se a configuração do AJP persistir.
+Não aborda diretamente as vulnerabilidades de jQuery (25, 55).
+Não há tratamento para as vulnerabilidades de dRuby (2), rlogin passwordless (3), rexec (5), Ingreslock (6), rlogin unencrypted (19), rsh (20), Telnet (45), VNC unencrypted (47), FTP unencrypted (46, 48), ou métodos HTTP perigosos (16) além da remoção de pacotes.
+Estimativa de correção para metasploitable66VT_6.txt: 70%
+
+Script: metasploitable66VT_7.txt
+Este script lida com a desabilitação de serviços inetd, remoção do vsftpd, alteração de senhas MySQL e PostgreSQL, desabilitação de funções PHP perigosas, configuração de Apache (geração de certificado SSL, desabilitação de métodos perigosos, configuração SSL/TLS), configuração de SSH e desabilitação do conector AJP do Tomcat.
+
+Pontos fortes:
+
+Gera um certificado SSL autoassinado de 2048 bits para o Apache, o que ajuda a mitigar a vulnerabilidade 32 e 33.
+Desabilita funções PHP perigosas.
+Desabilita explicitamente o conector AJP do Tomcat comentando a linha.
+Força SSLv2 e SSLv3 para !SSLv2,!SSLv3, o que aborda algumas vulnerabilidades SSL/TLS.
+Hardening de SSH com algoritmos fortes.
+Pontos fracos:
+
+A desabilitação de inetd e a remoção de vsftpd são boas, mas não há ações específicas para o Ingreslock (Vulnerabilidade 6).
+A atualização do sistema não é feita, o que pode deixar outras vulnerabilidades de software sem correção.
+A parte do Apache para métodos HTTP perigosos (<LimitExcept GET POST OPTIONS> Deny from all </LimitExcept>) está em /etc/apache2/conf.d/security.conf, o que pode ser bom, mas o script não lida com a vulnerabilidade 16 (PUT/DELETE) explicitamente, apenas restringe métodos.
+As vulnerabilidades de jQuery (25, 55) não são abordadas.
+Não há tratamento para a vulnerabilidade 4 (OS EOL).
+Estimativa de correção para metasploitable66VT_7.txt: 65%
+
+Script: metasploitable66VT_8.txt
+Este script é bem estruturado com funções para parar e desabilitar serviços, desabilitar serviços inetd, remover o backdoor Ingreslock, atualizar senhas, aplicar configurações de segurança (DRb, Apache, SSH) e remover pacotes não utilizados.
+
+Pontos fortes:
+
+Função dedicada para remover o backdoor Ingreslock, que é um bom foco.
+Define senhas aleatórias para MySQL, PostgreSQL e VNC.
+Restringe o DRb para localhost, o que é uma solução para a vulnerabilidade 2.
+Hardening abrangente para Apache (métodos HTTP perigosos, TRACE, SSL) e SSH (algoritmos KEX, Ciphers, MACs).
+Remove pacotes conhecidos por serem vulneráveis.
+Pontos fracos:
+
+A atualização do sistema não é feita, o que pode deixar brechas em outros softwares.
+A remoção de pacotes para "ingreslock" e "twiki" é boa, mas depende da instalação do pacote, e não de artefatos de backdoor.
+A validação de senhas de usuário pode precisar de adaptações para diferentes sistemas operacionais.
+Não aborda diretamente as vulnerabilidades de jQuery (25, 55) ou a vulnerabilidade 4 (OS EOL).
+A correção para SSL/TLS pode não ser completa para todas as vulnerabilidades de protocolo e certificado sem a atualização dos pacotes OpenSSL.
+Estimativa de correção para metasploitable66VT_8.txt: 70%
+
+Script: metasploitable66VT_9.txt
+Este script se concentra na atualização e remoção de pacotes, desabilitação de serviços inseguros, fix para vsftpd (backdoor), distcc, Tomcat Ghostcat, remoção de senhas padrão MySQL/PostgreSQL, VNC, desabilitação de Ruby RCE, atualização PHP, bloqueio de portas via iptables, desabilitação de TRACE/TRACK, remoção de arquivos sensíveis, desabilitação de ciphers SSH inseguros e correções SSL/TLS.
+
+Pontos fortes:
+
+Atualiza o sistema no início, o que é uma boa prática.
+Remove vários pacotes de serviços inseguros.
+Bloqueia explicitamente várias portas vulneráveis usando iptables.
+Aborda a vulnerabilidade do vsftpd backdoor e do Tomcat Ghostcat removendo os pacotes, que é uma abordagem eficaz se os serviços não forem essenciais.
+Tenta atualizar o PHP, o que é crucial para as vulnerabilidades 9 e 10.
+Hardening abrangente de SSH e Apache para protocolos e cifras.
+Pontos fracos:
+
+A remoção de tomcat5.5 pode não ser aplicável se outras versões do Tomcat estiverem em uso.
+A desabilitação de druby via sed -i '$SAFE = 3' /usr/bin/druby pode não ser a forma mais robusta de mitigar a vulnerabilidade de RCE se o dRuby não estiver em /usr/bin/druby ou se o atacante puder contornar essa configuração. O ideal seria desabilitar o serviço ou restringir o acesso.
+A alteração das senhas MySQL e PostgreSQL para senhas fixas no script não é o ideal em termos de segurança (melhor seria gerar senhas aleatórias).
+Não há tratamento explícito para as vulnerabilidades de jQuery (25, 55) além da remoção do arquivo jquery.min.js, o que pode quebrar a aplicação.
+Estimativa de correção para metasploitable66VT_9.txt: 75%
+
+Script: metasploitable66VT_10.txt
+Este script foca na redefinição de senhas para MySQL e PostgreSQL, desativação de serviços, configuração de SSH (algoritmos KEX, Ciphers, MACs), correção de Tomcat (remoção de server.xml), correção de VNC e FTP, Apache (desativação de CGI, remoção de /doc), PHP (remoção de phpinfo.php, scripts CGI perigosos), atualização e regeneração de certificados SSL/TLS, e configuração de parâmetros de kernel (tcp_fin_timeout).
+
+Pontos fortes:
+
+Redefinição de senhas aleatórias para MySQL e PostgreSQL.
+Desativação de muitos serviços inseguros.
+Configuração abrangente de SSH para algoritmos fortes.
+Regeneração de certificados SSL/TLS com chave de 4096 bits e SHA-256.
+Configurações globais para desabilitar protocolos TLS/SSL mais antigos (MinProtocol = TLSv1.2).
+Pontos fracos:
+
+A remoção de server.xml para Tomcat pode ser muito agressiva e quebrar a aplicação, em vez de apenas desabilitar o conector AJP.
+A desativação de VNC (vncpasswd -u) e update-rc.d vncserver disable pode não ser totalmente eficaz se o VNC for executado de outras formas (ex: via xinetd ou manualmente).
+Não aborda a vulnerabilidade 4 (OS EOL) ou as vulnerabilidades de jQuery (25, 55).
+A correção do FTP (anonymous_enable=NO) é boa, mas o script não lida com a transmissão em cleartext (46, 48).
+Estimativa de correção para metasploitable66VT_10.txt: 70%
+
+Script: metasploitable66VT_11.txt
+Este script utiliza funções para parar e desabilitar serviços, purgar pacotes, atualizar a configuração SSH, proteger MySQL e PostgreSQL, e configurar regras de iptables. Ele aborda a remoção de vários serviços, a parada de processos de backdoor, a atualização de configurações de SSH, a alteração de senhas de banco de dados e a configuração de firewall para bloquear portas vulneráveis.
+
+Pontos fortes:
+
+Uso de funções para modularidade e reusabilidade.
+Purga de pacotes para remover completamente software vulnerável.
+Alteração de senhas de MySQL e PostgreSQL para senhas aleatórias.
+Configuração de iptables para bloquear portas específicas.
+Hardening abrangente para SSH com algoritmos fortes.
+Pontos fracos:
+
+Não há atualização explícita do sistema operacional ou de outros softwares, o que pode deixar vulnerabilidades de versões não corrigidas.
+A correção para Tomcat AJP (Vulnerabilidade 7) apenas comenta o conector, o que é uma mitigação, mas não uma atualização do software vulnerável.
+Não aborda as vulnerabilidades de TLS/SSL relacionadas a protocolos (SSLv2/v3, TLSv1.0/1.1), cifras fracas ou certificados expirados/fracos, além da remoção de arquivos .crt (o que é uma ação incompleta).
+Não trata a vulnerabilidade 4 (OS EOL).
+Não aborda as vulnerabilidades de jQuery (25, 55).
+Estimativa de correção para metasploitable66VT_11.txt: 65%
+
+Script: metasploitable66VT_12.txt
+Este script se concentra na desabilitação e remoção de serviços inseguros, bloqueio de portas vulneráveis com iptables, configuração de SSHD, ajuste de parâmetros do kernel, segurança de serviços FTP, MySQL/MariaDB, PostgreSQL, desabilitação de métodos HTTP inseguros, desabilitação de SSLv2/SSLv3 e algoritmos fracos, remoção de backdoor Ingreslock, patch Ghostcat no Tomcat e correção dRuby/DRb.
+
+Pontos fortes:
+
+Remoção de pacotes e desabilitação de serviços conhecidos.
+Bloqueio explícito de muitas portas vulneráveis via iptables.
+Hardening SSH, MySQL, PostgreSQL e Apache.
+Desabilita explicitamente SSLv2/SSLv3 e TLSv1/TLSv1.1 e cifras fracas no Apache, o que aborda várias vulnerabilidades SSL/TLS.
+Aborda o backdoor Ingreslock e a vulnerabilidade Ghostcat.
+Pontos fracos:
+
+A atualização do sistema é apenas uma atualização, não uma atualização de versão do SO, o que não resolve a vulnerabilidade 4 (OS EOL).
+Define senhas fixas para MySQL e PostgreSQL, o que não é ideal em um ambiente real.
+A correção para dRuby (find /etc -name '*drb*' -exec sed -i "s/DRb.start_service/DRb.start_service(:security_level => 3)/g" {} +) pode não ser totalmente robusta dependendo de como o dRuby é executado e configurado.
+A regra de iptables para redirecionar a porta 22 para 2222 (iptables -t nat -A PREROUTING -p tcp --dport 22 -j REDIRECT --to-port 2222) é uma má ideia, pois oculta o serviço e pode causar problemas de acesso se não houver um serviço SSH escutando na porta 2222 e se as regras de INPUT não permitirem 2222.
+Não aborda as vulnerabilidades de jQuery (25, 55).
+Estimativa de correção para metasploitable66VT_12.txt: 70%
+
+Script: metasploitable66VT_13.txt
+Este script visa corrigir vulnerabilidades relacionadas a serviços (desativar e mascarar sockets), bloquear portas, alterar senhas padrão, proteger SSH, configurar segurança de servidor web (Apache e Tomcat), e aplicar configurações de firewall.
+
+Pontos fortes:
+
+Desabilita e mascara sockets de serviços inseguros.
+Utiliza ufw para bloquear portas.
+Altera senhas padrão de MySQL e PostgreSQL para senhas fortes.
+Configurações robustas para SSH (KexAlgorithms, HostKeyAlgorithms, Ciphers, MACs).
+Hardening do Apache para métodos HTTP, TRACE/TRACK e restrição de diretórios.
+Pontos fracos:
+
+A atualização do sistema não é feita.
+As correções de SSL/TLS (vulnerabilidades 28, 29, 30, 50, 54, 56, 57, 58, 59, 60, 61, 62, 63) são tratadas por SSLProtocol all -SSLv2 -SSLv3 -TLSv1 -TLSv1.1 e SSLCipherSuite HIGH:!aNULL:!MD5:!kRSA:!eNULL, o que é bom, mas não garante que todos os serviços ou certificados estejam em conformidade.
+A correção para o Tomcat (Vulnerabilidade 7) não é uma desabilitação completa, mas adiciona atributos como restricted="true", allowTrace="false", maxHeaderCount, maxTrailerCount, o que é uma mitigação, mas não aborda a vulnerabilidade de Ghostcat diretamente.
+A atualização do jQuery (Vulnerabilidade 25, 55) não é abordada.
+A vulnerabilidade 4 (OS EOL) não é tratada.
+Estimativa de correção para metasploitable66VT_13.txt: 70%
+
+Script: metasploitable66VT_14.txt
+Este script foca na atualização do sistema a partir de repositórios legados, remoção de serviços inseguros, desativação de serviços via inetd/xinetd, proteção de MySQL e PostgreSQL, desativação do conector AJP do Tomcat, configuração de PHP, hardening SSH, configuração de Apache, remoção de backdoor Ingreslock, proteção VNC e remoção de arquivos phpinfo.
+
+Pontos fortes:
+
+Tenta atualizar o sistema usando repositórios EOL, o que é um passo para a vulnerabilidade 4 (mas não uma solução completa).
+Remove uma ampla gama de serviços inseguros.
+Altera senhas aleatórias para MySQL e PostgreSQL.
+Desativa o conector AJP do Tomcat.
+Configuração PHP com desabilitação de funções perigosas.
+Hardening SSH e Apache.
+Remove backdoor Ingreslock.
+Pontos fracos:
+
+A atualização para repositórios EOL não resolve a vulnerabilidade 4 (OS EOL) completamente.
+A proteção VNC (vncserver -kill :1) apenas mata o processo, não configura o VNC de forma mais segura se ele for reiniciado.
+Não aborda as vulnerabilidades de TLS/SSL (protocolos, cifras, certificados) ou de jQuery (25, 55).
+A remoção de arquivos phpinfo é boa, mas o script não tenta atualizar o jQuery.
+Estimativa de correção para metasploitable66VT_14.txt: 70%
+
+Script: metasploitable66VT_15.txt
+Este script implementa configurações de segurança globais (timestamps TCP, permissões cron), desabilita e remove serviços vulneráveis, remove software vulnerável (TWiki, vsftpd, phpmyadmin, mutillidae, awiki, qwikiwiki), desabilita features do Apache, atualiza senhas de banco de dados, configura SSH e TLS, remove arquivos sensíveis, atualiza arquivos jQuery e limpa backdoors.
+
+Pontos fortes:
+
+Remoção agressiva de diversos softwares vulneráveis (TWiki, phpmyadmin, etc.), que é uma boa solução se esses softwares não forem necessários.
+Atualiza senhas de MySQL e PostgreSQL.
+Hardening abrangente de SSH e TLS (protocolos e cifras).
+Tenta atualizar arquivos jQuery, o que é direto para as vulnerabilidades 25 e 55.
+Desabilita timestamps TCP (Vulnerabilidade 65).
+Pontos fracos:
+
+A remoção de phpmyadmin, mutillidae, awiki, qwikiwiki pode ser muito agressiva se forem aplicações em uso.
+A configuração de ufw não está presente neste script.
+A correção para o Apache (Vulnerabilidade 16) desabilita Options Indexes e AllowOverride None, o que é bom, mas o tratamento de métodos HTTP perigosos poderia ser mais explícito para PUT/DELETE.
+A vulnerabilidade 4 (OS EOL) não é tratada.
+Estimativa de correção para metasploitable66VT_15.txt: 75%
+
+Script: metasploitable66VT_16.txt
+Este script se concentra na atualização do sistema (repositórios legados), desativação de serviços vulneráveis, remoção de pacotes vulneráveis, configuração de MySQL e PostgreSQL, alteração de senhas de usuários comuns, configuração de SSH e TLS/SSL, remoção de arquivos sensíveis, atualização de PHP e desativação de TLS antigo e acesso anônimo FTP.
+
+Pontos fortes:
+
+Tenta atualizar o sistema para repositórios legados, o que é um passo para a vulnerabilidade 4.
+Altera senhas aleatórias para MySQL, PostgreSQL e usuários comuns.
+Hardening abrangente de SSH e TLS/SSL (protocolos e cifras).
+Remove arquivos phpinfo.php.
+Atualiza PHP, o que é bom para as vulnerabilidades 9 e 10.
+Remove acesso anônimo FTP.
+Pontos fracos:
+
+A atualização para repositórios EOL não resolve a vulnerabilidade 4 (OS EOL) completamente.
+A correção de Ingreslock (Vulnerabilidade 6) é apenas pkill -9 "$service", o que pode não remover o backdoor.
+A remoção de pacotes como tomcat6, tomcat7 é boa, mas não há um tratamento explícito para o AJP Ghostcat se outras versões do Tomcat estiverem em uso.
+Não aborda as vulnerabilidades de jQuery (25, 55) além da remoção de arquivos sensíveis.
+Estimativa de correção para metasploitable66VT_16.txt: 70%
+
+Script: metasploitable66VT_17.txt
+Este script foca na atualização de pacotes, desabilitação e remoção de serviços vulneráveis, configuração de MySQL e PostgreSQL, desabilitação de IPv6, configuração de firewall (iptables), atualização de certificados SSL, configuração de PHP e Apache, configuração de SSH e, por fim, fornece uma recomendação crítica para atualização do SO.
+
+Pontos fortes:
+
+Atualiza pacotes e remove uma boa quantidade de serviços inseguros.
+Altera senhas de MySQL e PostgreSQL para senhas fixas (mas fortes).
+Configura um firewall iptables básico.
+Gera um certificado SSL autoassinado de 2048 bits para Apache.
+Configurações de hardening para PHP e Apache (ServerTokens, ServerSignature, TraceEnable, desabilita status).
+Hardening SSH.
+A recomendação final para atualização do SO é excelente, reconhecendo a limitação de corrigir um SO EOL.
+Pontos fracos:
+
+A alteração de senhas para senhas fixas não é a melhor prática.
+A desabilitação de IPv6 pode não ser a solução mais apropriada para todos os ambientes.
+Não aborda diretamente as vulnerabilidades de TLS/SSL relacionadas a protocolos (SSLv2/v3, TLSv1.0/1.1), cifras fracas ou certificados expirados, além da geração de um novo certificado.
+Não aborda as vulnerabilidades de jQuery (25, 55).
+Não aborda especificamente o backdoor Ingreslock (6) ou o Ghostcat (7) além da remoção de pacotes Tomcat, que pode não ser suficiente.
+Estimativa de correção para metasploitable66VT_17.txt: 65%
+
+Script: metasploitable66VT_18.txt
+Este script foca em parar e desabilitar serviços, remover pacotes, bloquear portas, desabilitar TWiki e phpinfo, redefinir senhas de banco de dados, hardening SSH, hardening Apache, renovação de certificado SSL/TLS e limpeza final.
+
+Pontos fortes:
+
+Parada e desabilitação de muitos serviços conhecidos por serem vulneráveis.
+Remoção de pacotes de software vulnerável.
+Bloqueio abrangente de portas via iptables.
+Desabilita TWiki e remove arquivos phpinfo.php.
+Redefinição de senhas aleatórias para MySQL e PostgreSQL.
+Hardening SSH abrangente com algoritmos fortes.
+Hardening Apache para SSL/TLS, métodos HTTP e TRACE.
+Renovação de certificado SSL/TLS com chave de 4096 bits.
+Pontos fracos:
+
+A correção para Tomcat AJP (Vulnerabilidade 7) é feita comentando a linha do conector AJP, o que é uma mitigação, mas não uma atualização do software.
+Não há atualização explícita do sistema operacional ou de outros softwares, o que pode deixar vulnerabilidades de versões não corrigidas.
+A correção de Ingreslock (Vulnerabilidade 6) é apenas parar e remover o pacote, o que pode não ser suficiente para um backdoor persistente.
+Não aborda as vulnerabilidades de jQuery (25, 55).
+A vulnerabilidade 4 (OS EOL) não é tratada.
+Estimativa de correção para metasploitable66VT_18.txt: 75%
+
+Script: metasploitable66VT_19.txt
+Este script foca na correção de serviços (rsh, rlogin, rexec), desabilitação de protocolos SSH inseguros, remoção de backdoor Ingreslock e outros serviços de rede vulneráveis, proteção de serviços e alteração de credenciais padrão (PostgreSQL, MySQL), permissões para VNC, Apache (métodos HTTP inseguros, remoção de phpinfo.php, jQuery), proteção Ghostcat no Tomcat, fechamento de serviços não essenciais e configurações globais de SSL/TLS.
+
+Pontos fortes:
+
+Desabilita e purga serviços R*.
+Hardening SSH abrangente com algoritmos fortes.
+Tenta remover o backdoor Ingreslock e outros serviços de rede vulneráveis usando fuser -k e remoção de arquivos.
+Altera senhas de MySQL e PostgreSQL para senhas fixas fortes.
+Hardening Apache para métodos HTTP e remoção de phpinfo.php.
+Tenta atualizar o jQuery para a versão 1.9.0.
+Proteção Ghostcat no Tomcat com secretRequired="true" e address="127.0.0.1".
+Configurações globais de SSL/TLS para protocolos e cifras.
+Desabilita timestamps TCP.
+Pontos fracos:
+
+A alteração de senhas para senhas fixas não é a melhor prática.
+A atualização do jQuery é feita modificando o arquivo existente (sed -i '1s/1\.3\.2/1.9.0/' {} \;), o que não garante que a biblioteca seja de fato a versão mais recente e livre de vulnerabilidades, nem que o arquivo seja legítimo ou que o script possa quebrar a aplicação se o arquivo não estiver presente ou formatado de forma esperada. Seria melhor baixar a versão mais recente.
+A vulnerabilidade 4 (OS EOL) não é tratada.
+A correção de VNC (Vulnerabilidade 15) é apenas fuser -k 5900/tcp e remoção de arquivos, o que não configura o VNC de forma mais segura.
+Estimativa de correção para metasploitable66VT_19.txt: 75%
+
+Script: metasploitable66VT_20.txt
+Este script utiliza funções para parar/desabilitar serviços, remover pacotes, adicionar repositórios APT (para atualização do OS), desabilitar módulos Apache, alterar senhas de banco de dados, adicionar regras de firewall, desabilitar métodos HTTP, fixar Tomcat AJP, limpar phpinfo.php e atualizar a configuração SSH.
+
+Pontos fortes:
+
+Tenta atualizar o OS para uma versão EOL, o que é um passo para a vulnerabilidade 4 (mas não uma solução completa).
+Remove vários pacotes de software vulnerável.
+Altera senhas aleatórias para MySQL e PostgreSQL.
+Hardening SSH abrangente.
+Hardening Apache para métodos HTTP e TRACE.
+Fix para Tomcat AJP comentando o conector.
+Pontos fracos:
+
+A atualização do OS para repositórios EOL não resolve a vulnerabilidade 4 (OS EOL) completamente.
+A correção de TLS/SSL é apenas a remoção de arquivos .crt, o que é insuficiente para as vulnerabilidades de protocolo e cifra.
+Não aborda as vulnerabilidades de jQuery (25, 55).
+A detecção de sistema (command -v mysql ou command -v psql) é boa, mas o script não é totalmente agnóstico para a forma como os serviços são geridos (ex: service vs systemctl).
+Estimativa de correção para metasploitable66VT_20.txt: 65%
+
+Script: metasploitable66VT_21.txt
+Este script utiliza cores para output e funções utilitárias. Ele se concentra na remoção/desativação de serviços vulneráveis, parada do backdoor Ingreslock, alteração de credenciais padrão (MySQL, PostgreSQL), desativação de protocolos SSL/TLS inseguros, correção Ghostcat (Tomcat), remoção de métodos HTTP perigosos, reforço de configurações SSH, desativação de login FTP anônimo, habilitação de modo seguro Ruby, remoção de phpinfo e hardening do Postfix e do kernel.
+
+Pontos fortes:
+
+Boa apresentação com cores e seções.
+Remoção e desabilitação agressiva de serviços.
+Alteração de senhas aleatórias para MySQL e PostgreSQL.
+Desabilita explicitamente SSLv2, SSLv3, TLSv1.0, TLSv1.1, o que é ótimo para várias vulnerabilidades SSL/TLS.
+Hardening abrangente para Apache e SSH.
+Remove login FTP anônimo.
+Habilita o modo $SAFE do Ruby.
+Hardening do kernel (timestamps TCP, rp_filter, kptr_restrict, dmesg_restrict).
+Pontos fracos:
+
+A correção do Tomcat AJP (Vulnerabilidade 7) é feita comentando o conector, o que é uma mitigação, mas não uma atualização do software vulnerável.
+A vulnerabilidade 4 (OS EOL) não é tratada.
+Não aborda as vulnerabilidades de jQuery (25, 55).
+A forma como o $SAFE do Ruby é habilitado pode não ser persistente ou eficaz dependendo da configuração do ambiente.
+Estimativa de correção para metasploitable66VT_21.txt: 80%
+
+Script: metasploitable66VT_22.txt
+Este script aborda correções para serviços desnecessários, MySQL e PostgreSQL, remoção de backdoors, atualização de pacotes e correções de configuração para Apache e outros serviços, e configuração de firewall.
+
+Pontos fortes:
+
+Desabilita e purga diversos serviços inseguros.
+Altera senhas de MySQL e PostgreSQL para senhas fixas fortes.
+Remove o backdoor Ingreslock e arquivos de dRuby.
+Atualiza pacotes críticos (php5, tomcat6, mysql-server, postgresql, openssl).
+Hardening Apache para SSL/TLS e métodos HTTP.
+Configurações de firewall para bloquear portas específicas.
+Pontos fracos:
+
+A alteração de senhas para senhas fixas não é a melhor prática.
+A atualização de tomcat6 pode não ser suficiente para a vulnerabilidade 7 (Ghostcat) se a versão do Tomcat ainda for vulnerável.
+A desabilitação de TraceEnable é feita via sed, que é boa, mas as linhas PUT/DELETE são removidas em mods-enabled/dav.load, o que pode não ser o lugar certo para desabilitar esses métodos, dependendo da configuração do Apache.
+Não aborda as vulnerabilidades de jQuery (25, 55).
+A vulnerabilidade 4 (OS EOL) não é tratada.
+Estimativa de correção para metasploitable66VT_22.txt: 70%
+
+Script: metasploitable66VT_23.txt
+Este script corrige vulnerabilidades relacionadas a serviços (rlogin, rsh, rexec, telnet, vsftpd, distcc, vncserver), remove o backdoor Ingreslock, configura o AJP do Tomcat, define senhas fortes para MySQL e PostgreSQL, atualiza e configura PHP e Apache, configura TLS e SSL, configura SSH e Postfix, remove diretórios públicos e verbosidade, e atualiza a biblioteca jQuery.
+
+Pontos fortes:
+
+Desabilita e remove uma ampla gama de serviços inseguros.
+Remove o backdoor Ingreslock.
+Define senhas fortes para MySQL e PostgreSQL.
+Atualiza e configura PHP (fix cgi.fix_pathinfo, allow_url_include).
+Hardening Apache (TraceEnable off, Options -Indexes, LimitExcept).
+Hardening abrangente de TLS/SSL (protocolos e cifras).
+Hardening SSH.
+Atualiza a versão do jQuery para 1.9.0 (embora via sed, o que pode ser frágil).
+Desabilita VRFY/EXPN no Postfix.
+Hardening geral do kernel (timestamps TCP, ICMP).
+Pontos fracos:
+
+A alteração de senhas para senhas fixas não é a melhor prática.
+A atualização do jQuery via sed pode não ser robusta.
+A correção para Tomcat AJP (Vulnerabilidade 7) é feita excluindo o conector AJP, o que é uma solução, mas pode não ser a mais elegante dependendo da necessidade do AJP.
+A vulnerabilidade 4 (OS EOL) não é tratada.
+A remoção de rm -rf /doc pode ser problemática se o diretório for legítimo e contiver documentação importante.
+Estimativa de correção para metasploitable66VT_23.txt: 80%
+
+Script: metasploitable66VT_24.txt
+Este script foca na desabilitação/habilitação e remoção de serviços, remoção de software vulnerável, segurança de SSH, MySQL e Apache, gerenciamento de contas e configuração de Postfix.
+
+Pontos fortes:
+
+Remove uma boa quantidade de software vulnerável (TWiki, mutillidae, dvwa, phpMyAdmin, tikiwiki).
+Hardening SSH, MySQL e Apache.
+Bloqueia e restringe o shell de usuários comuns, o que é uma boa prática de segurança.
+Configura o Postfix para desabilitar VRFY/EXPN.
+Pontos fracos:
+
+A atualização do sistema não é feita.
+As senhas de MySQL são definidas como fixas e a redefinição de senhas para msfadmin, postgres, service, user é feita com usermod --lock e usermod --shell /usr/sbin/nologin, o que pode ser bom para segurança, mas pode quebrar a funcionalidade se esses usuários forem legítimos.
+Não aborda as vulnerabilidades de TLS/SSL (protocolos, cifras, certificados).
+Não aborda as vulnerabilidades de jQuery (25, 55).
+A vulnerabilidade 4 (OS EOL) não é tratada.
+Estimativa de correção para metasploitable66VT_24.txt: 60%
+
+Script: metasploitable66VT_25.txt
+Este script se concentra na atualização do sistema e remoção de pacotes, instalação e configuração do UFW (firewall), bloqueio de portas vulneráveis, desabilitação de serviços críticos, correção de vulnerabilidades específicas (MySQL, PostgreSQL, Apache, SSH, PHP), atualização de pacotes críticos manualmente (Tomcat) e configurações de sudoers.
+
+Pontos fortes:
+
+Atualiza o sistema e remove muitos pacotes desnecessários.
+Instala e configura o UFW, bloqueando uma grande quantidade de portas vulneráveis.
+Hardening abrangente de MySQL, PostgreSQL, Apache e SSH.
+Aborda vulnerabilidades PHP desabilitando expose_php e funções perigosas.
+Atualiza Tomcat manualmente para uma versão corrigida (Ghostcat).
+Configurações de sudoers para segurança.
+Verifica as configurações pós-execução.
+Pontos fracos:
+
+A atualização do sistema é feita via apt-get upgrade, o que não resolve a vulnerabilidade 4 (OS EOL) que exige uma atualização de versão do sistema.
+As senhas de MySQL e PostgreSQL são definidas como senhas fixas.
+A desabilitação de portas via UFW é boa, mas o script não faz uma análise de quais serviços são essenciais para manter, podendo causar interrupções.
+Não aborda as vulnerabilidades de TLS/SSL (protocolos, cifras, certificados).
+Não aborda as vulnerabilidades de jQuery (25, 55).
+Estimativa de correção para metasploitable66VT_25.txt: 75%
+
+Média geral de porcentagem de correção dos scripts:
+
+Para calcular a média, somamos todas as porcentagens de correção e dividimos pelo número de scripts:
+
+(70 + 60 + 55 + 65 + 60 + 70 + 65 + 70 + 75 + 70 + 65 + 70 + 70 + 70 + 75 + 70 + 65 + 75 + 75 + 65 + 80 + 70 + 80 + 60 + 75) / 25 = ~69.6%
+
+A média geral de porcentagem de correção das vulnerabilidades pelos scripts é de aproximadamente 69.6%.

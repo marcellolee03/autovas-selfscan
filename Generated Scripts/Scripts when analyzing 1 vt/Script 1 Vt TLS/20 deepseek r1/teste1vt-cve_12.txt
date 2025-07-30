@@ -1,0 +1,29 @@
+#!/bin/bash
+
+cluster_info=$(pg_lsclusters -h | awk '$3 == 5432 && $4 == "online" {print $1,$2; exit}')
+if [ -z "$cluster_info" ]; then
+    exit 1
+fi
+
+version=$(echo "$cluster_info" | cut -d' ' -f1)
+cluster_name=$(echo "$cluster_info" | cut -d' ' -f2)
+data_dir=$(pg_lsclusters -h | awk '$3 == 5432 && $4 == "online" {print $6; exit}')
+conf_file="$data_dir/postgresql.conf"
+
+if [ ! -f "$conf_file" ]; then
+    exit 1
+fi
+
+timestamp=$(date +%Y%m%d%H%M%S)
+cp -p "$conf_file" "$conf_file.backup_$timestamp"
+
+sed -i -r 's/^#?\s*ssl\s*=.*$/ssl = on/' "$conf_file"
+if grep -qE "^\s*ssl_min_protocol_version" "$conf_file"; then
+    sed -i -r 's/^\s*ssl_min_protocol_version\s*=.*$/ssl_min_protocol_version = TLSv1.2/' "$conf_file"
+else
+    echo "ssl_min_protocol_version = 'TLSv1.2'" >> "$conf_file"
+fi
+
+if ! pg_ctlcluster "$version" "$cluster_name" restart; then
+    exit 1
+fi

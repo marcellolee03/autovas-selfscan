@@ -1,0 +1,52 @@
+#!/bin/bash
+
+# Atualizar o Proxmox VE
+apt update
+apt -y full-upgrade
+
+# Substituir arquivos vulneráveis do jQuery
+JQUERY_URL="https://code.jquery.com/jquery-3.7.1.min.js"
+VULNERABLE_PATHS=(
+    "/var/www/html/js/jquery-1.8.3.min.js"
+    "/var/www/html/opscenter/webcommon/js/jquery-1.8.3.min.js"
+    "/var/www/html/console/js/jquery-1.8.3.min.js"
+)
+
+for path in "${VULNERABLE_PATHS[@]}"; do
+    if [[ -f "$path" ]]; then
+        wget -O "$path" "$JQUERY_URL"
+    fi
+done
+
+# Hardening SSH
+SSHD_CONFIG="/etc/ssh/sshd_config"
+cp "$SSHD_CONFIG" "$SSHD_CONFIG.bak"
+
+cat << EOF > "$SSHD_CONFIG"
+HostKeyAlgorithms ecdsa-sha2-nistp256,ecdsa-sha2-nistp384,ecdsa-sha2-nistp521,ssh-ed25519,rsa-sha2-512,rsa-sha2-256
+KexAlgorithms curve25519-sha256,curve25519-sha256@libssh.org,ecdh-sha2-nistp256,ecdh-sha2-nistp384,ecdh-sha2-nistp521,diffie-hellman-group16-sha512,diffie-hellman-group18-sha512
+Ciphers chacha20-poly1305@openssh.com,aes256-gcm@openssh.com,aes128-gcm@openssh.com,aes256-ctr,aes192-ctr,aes128-ctr
+MACs hmac-sha2-512-etm@openssh.com,hmac-sha2-256-etm@openssh.com,umac-128-etm@openssh.com
+EOF
+
+systemctl restart sshd
+
+# Desativar Telnet
+systemctl stop telnet.socket
+systemctl disable telnet.socket
+
+# Configurar TCP Timestamps
+echo "net.ipv4.tcp_timestamps=0" >> /etc/sysctl.conf
+sysctl -p
+
+# Bloquear ICMP Timestamp
+iptables -A INPUT -p icmp --icmp-type timestamp-request -j DROP
+iptables -A OUTPUT -p icmp --icmp-type timestamp-reply -j DROP
+iptables-save > /etc/iptables/rules.v4
+
+# Configurar TLS (caso seja xrdp)
+if command -v xrdp &>/dev/null; then
+    sed -i 's/^tls_protocols=.*/tls_protocols=TLSv1.2,TLSv1.3/' /etc/xrdp/xrdp.ini
+    sed -i 's/^tls_ciphers=.*/tls_ciphers=HIGH/' /etc/xrdp/xrdp.ini
+    systemctl restart xrdp
+fi
