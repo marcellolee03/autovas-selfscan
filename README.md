@@ -66,10 +66,6 @@ python src/main.py
 5. **Data Analysis**: Processes vulnerability data alongside system environment information
 6. **AI Patch Generation**: Creates customized remediation scripts using LLM APIs
 
-## Research Context & Examples
-
-This project is part of a scientific research paper on automated vulnerability assessment and AI-powered patch generation. 
-
 ### Generated Patch Examples
 
 The repository includes real examples of AI-generated remediation scripts in the `/Generated Scripts` directory. These samples demonstrate the quality and variety of patches produced by different LLMs when processing actual vulnerability scan results.
