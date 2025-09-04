@@ -13,6 +13,12 @@ AutoVAS provides end-to-end automation for vulnerability management, from vulner
 - **Environment-Aware**: Incorporates computational environment information for context-aware patching
 - **Complete Automation**: Streamlines the entire process from scan to solution
 
+### Generated Patch Examples
+
+The repository includes real examples of AI-generated remediation scripts in the `/Generated Scripts` directory. These samples demonstrate the quality and variety of patches produced by different LLMs when processing actual vulnerability scan results.
+
+**For research evaluators**: Please refer to the `/Generated Scripts` folder to examine the AI-generated code samples that showcase the system's capabilities in producing contextually appropriate security patches.
+
 ## Prerequisites
 
 - Docker Compose
@@ -65,9 +71,3 @@ python src/main.py
 4. **Report Processing**: Converts scan results to structured CSV format
 5. **Data Analysis**: Processes vulnerability data alongside system environment information
 6. **AI Patch Generation**: Creates customized remediation scripts using LLM APIs
-
-### Generated Patch Examples
-
-The repository includes real examples of AI-generated remediation scripts in the `/Generated Scripts` directory. These samples demonstrate the quality and variety of patches produced by different LLMs when processing actual vulnerability scan results.
-
-**For research evaluators**: Please refer to the `/Generated Scripts` folder to examine the AI-generated code samples that showcase the system's capabilities in producing contextually appropriate security patches.
